@@ -17,3 +17,4 @@
 | htmlparser2 | local | https://github.com/fb55/htmlparser2 | XML tokenizer with source positions |
 | fast-check | local | https://github.com/dubzzz/fast-check | Property-based round-trip tests |
 | gpt-tokenizer | local | https://github.com/niieani/gpt-tokenizer | Offline token counts for the benchmark |
+| oxc-parser | local | https://github.com/oxc-project/oxc | Parses JSX baselines in the benchmark checkers |

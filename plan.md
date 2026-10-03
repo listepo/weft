@@ -4,7 +4,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
-| T0 | in progress | P0 | 3 | 0% | Claude Code / sonnet-5.5 |
+| T0 | in progress | P0 | 3 | 80% | Claude Code / fable-5.1 |
 | T2 | in progress | P0 | 4 | 0% | Claude Code / opus-5.5 |
 | T4 | in progress | P1 | 4 | 0% | Claude Code / opus-5.5 |
 | T5 | todo | P2 | 4 | 0% | |
@@ -23,6 +23,8 @@ Plan:
 2. `corpus/tasks.json`: per screen, edit tasks and questions with machine-checkable expectations.
 3. `bench/src`: token counting (local tokenizer as a proxy; provider token counting when an API key is present), a provider interface for model runs, a report writer.
 4. Verify: `node bench/src/run.ts tokens` prints the table offline; tests cover the counters and the task checker.
+
+Remaining after the first merge: replace the hand-copied catalog in `bench/src/weft-catalog.ts` and the stand-in Weft parser with `@weft/catalog` and `@weft/core` once T2 lands; validate every `corpus/*/screen.weft` with the real validator.
 
 ### T2. Parser, serializer, validator
 
