@@ -1,0 +1,6 @@
+<!-- An extension element without role is an error in both modes. -->
+<screen id="s" label="Compat" weft="0.1">
+  <stack id="st">
+    <x-acme-chart id="chart" x-acme-kind="bar"/>
+  </stack>
+</screen>

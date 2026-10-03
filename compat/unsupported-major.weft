@@ -1,0 +1,6 @@
+<!-- A document of an unsupported major version is not readable. -->
+<screen id="s" label="Compat" weft="1.0">
+  <stack id="st">
+    <text id="t">Hello</text>
+  </stack>
+</screen>

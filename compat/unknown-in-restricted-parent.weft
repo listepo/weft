@@ -1,0 +1,9 @@
+<!-- An unknown element inside a parent whose allowedChildren lists only item. -->
+<screen id="s" label="Compat" weft="0.2">
+  <list id="l">
+    <item id="i1">One</item>
+    <badge id="b1" label="New">
+      <item id="i2">Two</item>
+    </badge>
+  </list>
+</screen>
