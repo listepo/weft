@@ -1,0 +1,12 @@
+<!-- Vendor extensions: elements with a fallback role, children and a slot, plus extension attributes. -->
+<screen id="s" label="Compat" weft="0.1" x-acme-theme="dark">
+  <stack id="st">
+    <x-acme-chart id="chart" label="Sales" role="img" x-acme-kind="bar" on-press="chart.open">
+      <text id="caption">Sales per month</text>
+      <slot name="legend">
+        <button id="legend-btn">Legend</button>
+      </slot>
+    </x-acme-chart>
+    <button id="go" x-acme-density="compact">Go</button>
+  </stack>
+</screen>

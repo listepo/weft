@@ -363,6 +363,8 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
       if (
         component?.allowedParents !== undefined &&
         owner.kind !== undefined &&
+        // An unknown or extension parent is opaque (SPEC §8): it may wrap a newer container.
+        own(components, owner.kind) !== undefined &&
         !component.allowedParents.includes(owner.kind)
       ) {
         report("W303", {

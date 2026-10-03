@@ -1,0 +1,8 @@
+<!-- A 0.2 document with an element this 0.1 reader does not know. -->
+<screen id="s" label="Compat" weft="0.2">
+  <stack id="st">
+    <text id="before">Before</text>
+    <hologram id="holo" intensity="3"/>
+    <text id="after">After</text>
+  </stack>
+</screen>
