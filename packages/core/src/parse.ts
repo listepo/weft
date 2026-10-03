@@ -34,6 +34,35 @@ export function parse(markup: string, options: ParseOptions = {}): ParseResult {
   return { document: built.document, diagnostics, source: built.source };
 }
 
+const FRAGMENT = "x-weft-fragment";
+
+/**
+ * Parses markup that has no `<screen>` root (several sibling elements, for patch `insert`) by
+ * wrapping it in a throwaway element, so the tokenizer, literal typing and slot handling stay the
+ * single implementation. Returns the wrapper: its `children` are the fragment. The wrapper is
+ * hidden from diagnostics: its path segment is dropped and line 1 columns are shifted back.
+ */
+export function parseFragment(
+  markup: string,
+  catalog: Catalog,
+): { wrapper?: Node | undefined; diagnostics: Diagnostic[] } {
+  const open = `<${FRAGMENT}>`;
+  const syntax = tokenize(`${open}${markup}</${FRAGMENT}>`);
+  const built =
+    syntax.root === undefined || hasErrors(syntax.diagnostics)
+      ? undefined
+      : build(syntax.root, catalog);
+  const raw = built === undefined ? syntax.diagnostics : built.diagnostics;
+  const diagnostics = raw.toSorted(byPosition).map((d): Diagnostic => {
+    const path = d.path.startsWith(`/${FRAGMENT}`) ? d.path.slice(FRAGMENT.length + 1) : d.path;
+    const shifted =
+      d.line === 1 && d.column !== undefined ? { column: d.column - open.length } : {};
+    return { ...d, ...shifted, path: path === "" ? "/" : path };
+  });
+  if (built === undefined || hasErrors(diagnostics)) return { diagnostics };
+  return { wrapper: built.document.root, diagnostics };
+}
+
 function propType(
   component: Catalog["components"][string] | undefined,
   name: string,

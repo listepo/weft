@@ -269,9 +269,9 @@ type Diagnostic = {
 };
 ```
 
-Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility. A code, once published, never changes meaning.
+Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility, `W5xx` patches. A code, once published, never changes meaning.
 
-`path` addresses the element from the root: one segment per element, `kind#id`, or `kind[index]` when the element has no valid id (the index counts the parent's list, text included). A named slot adds `slot[name]`, a text child `#text[index]`, an attribute `@name` (`@on-press` for events, `@weft` for the version). Syntax diagnostics name the open elements only. For JSON that does not have the shape of §3, the path is a JSON Pointer prefixed with `#`, e.g. `#/root/children/0/kind`.
+`path` addresses the element from the root: one segment per element, `kind#id`, or `kind[index]` when the element has no valid id (the index counts the parent's list, text included). A named slot adds `slot[name]`, a text child `#text[index]`, an attribute `@name` (`@on-press` for events, `@weft` for the version). Syntax diagnostics name the open elements only. For JSON that does not have the shape of §3, the path is a JSON Pointer prefixed with `#`, e.g. `#/root/children/0/kind`. A patch diagnostic (§7) about the patch itself points into the patch list the same way, e.g. `#/patches/2/parent`.
 
 ### 6.2 Codes
 
@@ -338,6 +338,15 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W402 | Unknown attribute (mode). |
 | W403 | Newer minor version of the format (mode). |
 | W404 | Unsupported major version. |
+| W501 | The patch list is not an array, or a patch does not have the shape of §7. |
+| W502 | A patch names an id (`id` or `parent`) that no element has. |
+| W503 | `set` names a prop a patch cannot change: `id`, the root's `weft`, a name that breaks the name grammar, or an `on-<event>` value that is not an action name. |
+| W504 | `slot` is not declared by the parent. |
+| W505 | `index` is greater than the length of the target list. |
+| W506 | `move` into the moved element itself or one of its descendants. |
+| W507 | `remove` or `move` of the root element. |
+| W508 | Inserted `markup` is empty, or holds text or `<slot>` beside its elements. |
+| W509 | Inserted `markup` uses an id that the document already has. |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
@@ -353,7 +362,16 @@ type Patch =
   | { op: "move"; id: string; parent: string; slot?: string; index?: number };
 ```
 
-A patch list applies atomically: the result is validated, and if it has errors nothing is applied.
+`applyPatches(document, patches, { catalog, mode?, tokens?, actions? })` takes the patch list as untrusted input (any JSON value), never throws and never changes `document`. It returns `{ document?, diagnostics }`.
+
+- **Atomic.** The patches apply in order to a copy, so a later patch sees the effects of earlier ones. The result is canonicalized and validated as in §6 with the given options. If any patch fails or the result has errors, nothing is applied: `document` is absent and `diagnostics` explain the first failing patch (or the validation errors). Otherwise `document` is the result and `diagnostics` holds its warnings. A patch list does not repair a document that was already invalid: its errors are reported.
+- **Shape.** A patch has exactly the members shown and nothing else; `index` is a non-negative integer. A list that is not an array, or a patch that breaks the shape, gives `W501`, one diagnostic per problem, each pointing at `#/patches/<n>/…`. An empty list is valid and changes nothing.
+- **Addressing.** `id`, `parent` name elements by id, including `<each>`. A name that no element has gives `W502` with the nearest id as the hint. `<slot>` has no id: it is addressed by `parent` and `slot`.
+- **`set`.** `value` is a Value of §3 and is stored as given, so it is typed JSON, not markup text: `7`, `true`, `{ "bind": "$.name" }`, `{ "token": "space.md" }`. Strings are always literals, so a string that starts with `{` needs no escape. `null` removes the prop; removing an absent prop does nothing. A prop name starting with `on-` binds or unbinds the event after it: the value is an action name, or `null` to remove the binding. `id` cannot be set (ids are stable; to rename, remove the element and insert it again), nor the root's `weft`. The prop name must follow the name grammar (§2). Whether the prop, event or value is allowed is left to validation (`W203`, `W204`, `W206`, …).
+- **`insert`.** `markup` is one or more sibling elements, parsed like a document (§2) but without a `<screen>` root; literals are typed by the catalog. It must hold elements only (`W508`), with ids that no element of the document has (`W509`; syntax errors keep their `W1xx` codes and point into `#/patches/<n>/markup`). They go into the default slot of `parent`, or into the slot named by `slot` (a name the parent's component declares, `W504`; `<each>` declares none, extension and unknown elements accept any name). `index` counts the entries of that list, text included, and defaults to the end; it must not exceed the length (`W505`).
+- **`remove`.** Deletes the element and everything inside it. The root cannot be removed (`W507`).
+- **`move`.** Takes the element out and puts it into `parent` as `insert` would, keeping its id and content. `index` counts the target list after the element has left it, so the final order is the one the index names, also when the target is the list it came from. The root cannot move (`W507`); an element cannot move into itself or its descendants (`W506`).
+- **Not expressible.** There is no patch for text content. To change text, `remove` the element and `insert` it again at the same `parent` and `index` with the same id.
 
 ## 8. Versioning and extensibility
 
