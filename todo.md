@@ -1,4 +1,2 @@
-- T4. React renderer
 - T5. Reverse mapping
-- T6. Agent interface
 - T8. Evaluation
