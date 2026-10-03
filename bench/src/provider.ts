@@ -8,7 +8,11 @@ export interface Provider {
   complete(prompt: string): Promise<Completion>;
 }
 
-export const DEFAULT_MODELS = ["claude-sonnet-5-5", "claude-opus-5-5"] as const;
+export const DEFAULT_MODELS = [
+  "claude-sonnet-5-5",
+  "claude-opus-5-5",
+  "claude-haiku-4-5-20251001",
+] as const;
 
 const API = "https://api.anthropic.com/v1";
 const VERSION = "2023-06-01";
