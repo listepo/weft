@@ -4,7 +4,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
-| T8 | in progress | P1 | 3 | 10% | Claude Code / claude-opus-5-5 |
+| T8 | in progress | P1 | 3 | 30% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
