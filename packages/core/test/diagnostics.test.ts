@@ -94,6 +94,7 @@ const cases: Record<DiagnosticCode, Case> = {
     ),
   },
   W312: { markup: screen('<screen id="inner" weft="0.1"/>') },
+  W313: { markup: screen('<button id="b" submit="true">Send</button>') },
   W401: { markup: screen('<fancy id="f"/>') },
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
   W403: { markup: screen("", "0.2") },
@@ -145,6 +146,13 @@ test("text comes from content or from the text attribute, never both", () => {
   const [d] = parse(screen('<text id="t" text="x">y</text>'), { catalog }).diagnostics;
   assert.equal(d?.code, "W310");
   assert.equal(d?.path, "/screen#s/text#t/@text");
+});
+
+test("a submit button is valid anywhere inside a form, slots and loops included", () => {
+  const markup = screen(
+    '<form id="f" on-submit="a.b"><stack id="st"><button id="b1" submit="true">A</button></stack><slot name="footer"><button id="b2" submit="true">B</button></slot></form>',
+  );
+  assert.deepEqual(parse(markup, { catalog, mode: "strict" }).diagnostics, []);
 });
 
 test("JSON shape errors point into the JSON", () => {

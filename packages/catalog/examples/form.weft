@@ -2,7 +2,7 @@
   <form id="login" state="idle" on-submit="auth.submit">
     <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
     <slot name="footer">
-      <button id="go" variant="primary" on-press="auth.submit">Sign in</button>
+      <button id="go" submit="true" variant="primary">Sign in</button>
     </slot>
   </form>
 </screen>

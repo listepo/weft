@@ -70,6 +70,7 @@ export const DIAGNOSTIC_CODES = {
   W310: { severity: "error", summary: "Text given both as content and as `text`." },
   W311: { severity: "error", summary: "Loop variable shadows an outer one." },
   W312: { severity: "error", summary: "`screen` below the root." },
+  W313: { severity: "error", summary: "Submit button outside a `form`." },
 
   W401: { severity: "mode", summary: "Unknown element." },
   W402: { severity: "mode", summary: "Unknown attribute." },

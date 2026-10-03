@@ -148,6 +148,12 @@
           "description": "Set to true to make the button non-interactive.",
           "type": "boolean"
         },
+        "submit": {
+          "description": "Set to true to make the button submit its enclosing form, firing the form's `submit` event; such a button needs no `on-press`.",
+          "type": "boolean",
+          "default": false,
+          "bindable": false
+        },
         "text": {
           "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
           "type": "string"

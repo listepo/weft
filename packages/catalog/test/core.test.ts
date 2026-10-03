@@ -123,6 +123,7 @@ const propTypes: Record<string, string> = {
   "grid.gap": "token",
   "heading.level": "number",
   "button.disabled": "boolean",
+  "button.submit": "boolean",
   "field.required": "boolean",
   "field.disabled": "boolean",
   "checkbox.checked": "boolean",
@@ -148,6 +149,7 @@ const writable = [
 const defaults: Record<string, string | boolean> = {
   "stack.direction": "column",
   "button.variant": "secondary",
+  "button.submit": false,
   "field.type": "text",
   "dialog.modal": true,
   "alert.tone": "info",

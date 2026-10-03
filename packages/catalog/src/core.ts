@@ -140,6 +140,10 @@ const components: Record<string, ComponentDef> = {
         { default: "secondary" },
       ),
       disabled: disabledProp("the button"),
+      submit: bool(
+        "Set to true to make the button submit its enclosing form, firing the form's `submit` event; such a button needs no `on-press`.",
+        { default: false, bindable: false },
+      ),
     },
     states: ["idle", "busy"],
     events: ["press"],

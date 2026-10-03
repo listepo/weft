@@ -68,6 +68,7 @@ export const catalog: Catalog = CatalogSchema.parse({
           default: "secondary",
         },
         disabled: { description: d, type: "boolean" },
+        submit: { description: d, type: "boolean", default: false, bindable: false },
       },
       states: ["idle", "busy"],
       events: ["press"],

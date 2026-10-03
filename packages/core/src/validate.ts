@@ -61,6 +61,8 @@ type Owner = {
   allowed?: readonly string[] | undefined;
   /** Named slots hold elements only. */
   slot?: boolean;
+  /** Some ancestor is a `form`, which a `submit` button needs (SPEC §5.1). */
+  inForm?: boolean;
 };
 
 type At = { path: string; pos?: Position | undefined };
@@ -575,6 +577,14 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
           hint: "remove the content or the text attribute",
         });
       }
+      if (props["submit"] === true && owner?.inForm !== true) {
+        report("W313", {
+          ...nodeAt(node, path, "submit"),
+          message: `<${kind}> submits a form but has no enclosing <form>.`,
+          expected: "an enclosing <form>",
+          hint: 'move it into a <form>, or remove submit="true" and give it on-press',
+        });
+      }
       const selected = props["selected"];
       // SPEC §6 layer 3: the catalog format has no id-reference type yet, so this rule is by kind.
       if (kind === "tabs" && typeof selected === "string")
@@ -659,6 +669,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
       }
     }
 
+    const inForm = owner?.inForm === true || kind === "form";
     const slots = node.slots ?? {};
     const slotSources = source?.get(node)?.slots;
     for (const [name, list] of Object.entries(slots)) {
@@ -687,6 +698,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
         content: "nodes",
         allowed: declared?.allowedChildren,
         slot: true,
+        inForm,
       };
       visitList(list, slotPath, slotOwner, innerScope, slotSources?.get(name)?.children);
     }
@@ -705,10 +717,10 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
     // `<each>` is transparent: its children answer to the list that holds the `<each>` (SPEC §4.3).
     const childOwner: Owner =
       category === "component" && component !== undefined
-        ? { kind, content: component.content, allowed: component.allowedChildren }
+        ? { kind, content: component.content, allowed: component.allowedChildren, inForm }
         : category === "each"
           ? (owner ?? { content: "mixed" })
-          : { kind, content: "mixed" };
+          : { kind, content: "mixed", inForm };
     visitList(node.children ?? [], path, childOwner, innerScope, source?.get(node)?.children);
   };
 

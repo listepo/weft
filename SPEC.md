@@ -39,7 +39,7 @@ The root element is `<screen>` and carries the format version. Every example in 
 <screen id="login" label="Sign in" weft="0.1">
   <form id="f1" state="idle" on-submit="auth.submit">
     <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
-    <button id="go" disabled="{!$.email}" variant="primary" on-press="auth.submit">Sign in</button>
+    <button id="go" disabled="{!$.email}" submit="true" variant="primary">Sign in</button>
     <slot name="footer">
       <link id="reset" on-press="nav.reset">Forgot password?</link>
     </slot>
@@ -210,7 +210,7 @@ Props are strings unless a type is given. `*` marks required props.
 | `text` | `none` | text | `tone` enum `default`/`muted`/`success`/`warning`/`danger` | — | — | — |
 | `image` | `img` | none | `src`*, `label`* | — | — | — |
 | `link` | `link` | text | `href` | — | — | `press` |
-| `button` | `button` | text | `variant` enum `primary`/`secondary`/`danger` (default `secondary`), `disabled` boolean | — | `idle`, `busy` | `press` |
+| `button` | `button` | text | `variant` enum `primary`/`secondary`/`danger` (default `secondary`), `disabled` boolean, `submit` boolean literal (default `false`) | — | `idle`, `busy` | `press` |
 | `form` | `form` | nodes | — | `footer` | `idle`, `submitting`, `invalid` | `submit` |
 | `field` | `textbox` | none | `label`*, `type` enum `text`/`email`/`password`/`number`/`search`/`multiline` (default `text`), `value` writable, `placeholder`, `required` boolean, `disabled` boolean, `error` | — | `valid`, `invalid` | `change` |
 | `checkbox` | `checkbox` | none | `label`*, `checked` boolean writable, `disabled` boolean | — | — | `change` |
@@ -239,6 +239,7 @@ Notes:
 - "needs `label`" and a starred `label`* in the Props column both mean the universal `label` attribute is required for that component (`requiresLabel` in the catalog); `label` is never declared in `props`.
 - `(…)` after a content model lists the only kinds allowed as direct children. `each` is transparent (§4.3), so it is allowed wherever its own children would be, whether listed or not.
 - A kind with a required parent context (`radio`, `option`, `item`, `column`, `row`, `cell`, `tab`, `menu-item`) declares it as `allowedParents`: `radio` in `radio-group`, `option` in `select`, `item` in `list`, `column` and `row` in `table`, `cell` in `row`, `tab` in `tabs`, `menu-item` in `menu`.
+- A `button` with `submit="true"` submits its nearest enclosing `form`: pressing it fires that form's `submit` event, so it needs no `on-press`. `submit` is a literal (`bindable: false`) because whether a button submits is structure, not data. A submit button outside a `form` is an error.
 - `field` has role `textbox`; a renderer MAY refine it from `type` (`number` → `spinbutton`, `search` → `searchbox`) as ARIA requires.
 - `column` is a direct child of `table` although ARIA places `columnheader` inside a `row`; the renderer emits the header row.
 - `heading.level` is an integer from 1 to 6; the catalog shape has no range, so the validator enforces it.
@@ -249,7 +250,7 @@ Validation has three layers, each reporting diagnostics rather than throwing:
 
 1. **Syntax** — §2. The document is well-formed restricted XML.
 2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, required props present, declared slots, states and events.
-3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
+3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, a `submit` button inside a `form`, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
 
 A document that does not have the JSON shape of §3 gets `W200` diagnostics only; the other checks need the shape.
 
@@ -334,6 +335,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W310 | Text given twice: a `text` or `mixed` component has both content and the `text` prop. |
 | W311 | Loop variable shadows an enclosing one. |
 | W312 | `screen` below the root. |
+| W313 | `button` with `submit="true"` outside a `form`. |
 | W401 | Unknown element (mode). |
 | W402 | Unknown attribute (mode). |
 | W403 | Newer minor version of the format (mode). |
