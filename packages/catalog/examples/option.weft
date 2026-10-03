@@ -1,0 +1,8 @@
+<screen id="root" weft="0.1" label="Sizes">
+  <select id="size" label="Size" value="{$.size}">
+    <each id="size-each" in="{$.sizes}" as="size">
+      <option id="size-option" value="{$size.code}">Size</option>
+    </each>
+    <option id="size-other" value="other">Other</option>
+  </select>
+</screen>

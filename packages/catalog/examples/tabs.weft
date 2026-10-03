@@ -1,0 +1,10 @@
+<screen id="root" weft="0.1" label="Account">
+  <tabs id="account-tabs" selected="{$.tab}" on-change="tabs.change">
+    <tab id="tab-profile" label="Profile">
+      <text id="profile-text">Your public details.</text>
+    </tab>
+    <tab id="tab-security" label="Security">
+      <text id="security-text">Password and sessions.</text>
+    </tab>
+  </tabs>
+</screen>

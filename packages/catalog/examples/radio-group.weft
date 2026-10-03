@@ -1,0 +1,6 @@
+<screen id="root" weft="0.1" label="Plan">
+  <radio-group id="plan" label="Plan" value="{$.plan}" on-change="plan.choose">
+    <radio id="plan-free" value="free">Free</radio>
+    <radio id="plan-pro" value="pro">Pro</radio>
+  </radio-group>
+</screen>

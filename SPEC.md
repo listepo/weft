@@ -222,7 +222,12 @@ Notes:
 
 - A `tab` element holds its panel content; a renderer emits `tab` and `tabpanel` from it.
 - `text` and `heading` take their text either as content or as `value` (for bindings), never both.
-- "needs `label`" means the universal `label` attribute is required for that component.
+- "needs `label`" and a starred `label`* in the Props column both mean the universal `label` attribute is required for that component (`requiresLabel` in the catalog); `label` is never declared in `props`.
+- `(…)` after a content model lists the only kinds allowed as direct children. `each` is transparent (§4.3), so it is allowed wherever its own children would be, whether listed or not.
+- A kind with a required parent context (`radio`, `option`, `item`, `column`, `row`, `cell`, `tab`, `menu-item`) declares it as `allowedParents`: `radio` in `radio-group`, `option` in `select`, `item` in `list`, `column` and `row` in `table`, `cell` in `row`, `tab` in `tabs`, `menu-item` in `menu`.
+- `field` has role `textbox`; a renderer MAY refine it from `type` (`number` → `spinbutton`, `search` → `searchbox`) as ARIA requires.
+- `column` is a direct child of `table` although ARIA places `columnheader` inside a `row`; the renderer emits the header row.
+- `heading.level` is an integer from 1 to 6; the catalog shape has no range, so the validator enforces it.
 
 ## 6. Validation
 

@@ -1,0 +1,3 @@
+<screen id="root" weft="0.1" label="Sign up">
+  <field id="email" type="email" label="Email" value="{$.email}" placeholder="you@example.com" required="true" disabled="false" error="{$.errors.email}" state="valid" on-change="form.edit"/>
+</screen>

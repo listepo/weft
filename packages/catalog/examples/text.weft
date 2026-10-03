@@ -1,0 +1,4 @@
+<screen id="root" weft="0.1" label="Status">
+  <text id="saved" tone="success">All changes saved.</text>
+  <text id="user" value="{$.user.name}"/>
+</screen>

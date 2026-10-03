@@ -1,0 +1,441 @@
+{
+  "weft": "0.1",
+  "name": "weft-core",
+  "version": "0.1.0",
+  "components": {
+    "screen": {
+      "description": "The root of every document: one full screen of UI, carrying the format version.",
+      "role": "main",
+      "content": "nodes",
+      "props": {
+        "weft": {
+          "description": "The Weft format version of the document, always the literal \"0.1\".",
+          "type": "string",
+          "required": true,
+          "bindable": false
+        }
+      },
+      "states": ["ready", "loading", "error"]
+    },
+    "stack": {
+      "description": "Lays its children out in one line, as a column or a row; use it for most vertical or horizontal grouping.",
+      "role": "none",
+      "content": "nodes",
+      "props": {
+        "direction": {
+          "description": "Whether children flow down a column or along a row.",
+          "type": "enum",
+          "values": ["column", "row"],
+          "default": "column"
+        },
+        "gap": {
+          "description": "Space between children, as a dimension token.",
+          "type": "token",
+          "tokenType": "dimension"
+        },
+        "align": {
+          "description": "How children are aligned across the main direction.",
+          "type": "enum",
+          "values": ["start", "center", "end", "stretch"]
+        },
+        "wrap": {
+          "description": "Set to true to let children wrap onto further lines when they do not fit.",
+          "type": "boolean"
+        }
+      }
+    },
+    "grid": {
+      "description": "Lays its children out in a fixed number of equal columns; use it for card galleries and dashboards.",
+      "role": "none",
+      "content": "nodes",
+      "props": {
+        "columns": {
+          "description": "Number of equal columns in the grid.",
+          "type": "number",
+          "required": true
+        },
+        "gap": {
+          "description": "Space between grid cells, as a dimension token.",
+          "type": "token",
+          "tokenType": "dimension"
+        }
+      }
+    },
+    "section": {
+      "description": "A named region of the screen that groups related content; use it to divide a screen into labelled parts.",
+      "role": "region",
+      "content": "nodes",
+      "requiresLabel": true,
+      "slots": {
+        "header": {
+          "description": "Optional header content shown above the section body, such as a heading."
+        }
+      }
+    },
+    "heading": {
+      "description": "A title for the content that follows it; the level orders headings from 1 (most important) to 6.",
+      "role": "heading",
+      "content": "text",
+      "props": {
+        "level": {
+          "description": "Heading level from 1 to 6; use 1 for the screen title.",
+          "type": "number",
+          "required": true
+        },
+        "value": {
+          "description": "The heading text, for when it comes from a binding; do not also give content.",
+          "type": "string"
+        }
+      }
+    },
+    "text": {
+      "description": "A run of plain text such as a paragraph, caption or message.",
+      "role": "none",
+      "content": "text",
+      "props": {
+        "value": {
+          "description": "The text to show, for when it comes from a binding; do not also give content.",
+          "type": "string"
+        },
+        "tone": {
+          "description": "Semantic colouring of the text; muted for secondary text, danger for errors.",
+          "type": "enum",
+          "values": ["default", "muted", "success", "warning", "danger"]
+        }
+      }
+    },
+    "image": {
+      "description": "A picture; always give a label that describes it for people who cannot see it.",
+      "role": "img",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "src": {
+          "description": "Where the image is loaded from, a URL or a binding to one.",
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "link": {
+      "description": "Navigates to another place; use a button instead for actions that change data.",
+      "role": "link",
+      "content": "text",
+      "props": {
+        "href": {
+          "description": "The destination URL; leave it out when navigation is handled by `on-press`.",
+          "type": "string"
+        }
+      },
+      "events": ["press"]
+    },
+    "button": {
+      "description": "Triggers an action when pressed; use it for submitting, confirming and other commands.",
+      "role": "button",
+      "content": "text",
+      "props": {
+        "variant": {
+          "description": "Visual emphasis: primary for the main action, danger for destructive ones.",
+          "type": "enum",
+          "values": ["primary", "secondary", "danger"],
+          "default": "secondary"
+        },
+        "disabled": {
+          "description": "Set to true to make the button non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "states": ["idle", "busy"],
+      "events": ["press"]
+    },
+    "form": {
+      "description": "Groups input controls that are submitted together; the `submit` event fires when the user submits it.",
+      "role": "form",
+      "content": "nodes",
+      "slots": {
+        "footer": {
+          "description": "Actions of the form, typically the submit and cancel buttons."
+        }
+      },
+      "states": ["idle", "submitting", "invalid"],
+      "events": ["submit"]
+    },
+    "field": {
+      "description": "A single-value text input such as an email, password, number or multi-line note.",
+      "role": "textbox",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "type": {
+          "description": "What kind of text is entered; it selects the keyboard and masking.",
+          "type": "enum",
+          "values": ["text", "email", "password", "number", "search", "multiline"],
+          "default": "text"
+        },
+        "value": {
+          "description": "The current text; bind it to a path to read and write the input.",
+          "type": "string",
+          "writable": true
+        },
+        "placeholder": {
+          "description": "Hint text shown while the field is empty; it does not replace the label.",
+          "type": "string"
+        },
+        "required": {
+          "description": "Set to true when the user must fill the field in.",
+          "type": "boolean"
+        },
+        "disabled": {
+          "description": "Set to true to make the field non-interactive.",
+          "type": "boolean"
+        },
+        "error": {
+          "description": "An error message to show for this field; set it when the value is invalid.",
+          "type": "string"
+        }
+      },
+      "states": ["valid", "invalid"],
+      "events": ["change"]
+    },
+    "checkbox": {
+      "description": "A box the user ticks or clears to turn one independent option on or off.",
+      "role": "checkbox",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "checked": {
+          "description": "Whether the control is on; bind it to a boolean to read and write it.",
+          "type": "boolean",
+          "writable": true
+        },
+        "disabled": {
+          "description": "Set to true to make the checkbox non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["change"]
+    },
+    "switch": {
+      "description": "A toggle that applies a setting immediately; prefer it over a checkbox for on/off settings.",
+      "role": "switch",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "checked": {
+          "description": "Whether the control is on; bind it to a boolean to read and write it.",
+          "type": "boolean",
+          "writable": true
+        },
+        "disabled": {
+          "description": "Set to true to make the switch non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["change"]
+    },
+    "radio-group": {
+      "description": "A set of radio options of which exactly one can be chosen.",
+      "role": "radiogroup",
+      "content": "nodes",
+      "allowedChildren": ["radio", "each"],
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The `value` of the selected radio; bind it to read and write the choice.",
+          "type": "string",
+          "writable": true
+        }
+      },
+      "events": ["change"]
+    },
+    "radio": {
+      "description": "One choice inside a radio group; its content is the visible label.",
+      "role": "radio",
+      "content": "text",
+      "allowedParents": ["radio-group"],
+      "props": {
+        "value": {
+          "description": "The value the group takes when this radio is selected.",
+          "type": "string",
+          "required": true
+        },
+        "disabled": {
+          "description": "Set to true to make this choice non-interactive.",
+          "type": "boolean"
+        }
+      }
+    },
+    "select": {
+      "description": "A drop-down that lets the user choose one option from a longer list.",
+      "role": "combobox",
+      "content": "nodes",
+      "allowedChildren": ["option", "each"],
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The `value` of the chosen option; bind it to read and write the choice.",
+          "type": "string",
+          "writable": true
+        },
+        "disabled": {
+          "description": "Set to true to make the select non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["change"]
+    },
+    "option": {
+      "description": "One choice inside a select; its content is the visible text.",
+      "role": "option",
+      "content": "text",
+      "allowedParents": ["select"],
+      "props": {
+        "value": {
+          "description": "The value the select takes when this option is chosen.",
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "list": {
+      "description": "A sequence of items; use it for feeds and collections, with `ordered` when the order matters.",
+      "role": "list",
+      "content": "nodes",
+      "allowedChildren": ["item", "each"],
+      "props": {
+        "ordered": {
+          "description": "Set to true when the order of the items is meaningful.",
+          "type": "boolean"
+        }
+      },
+      "states": ["ready", "loading", "empty"]
+    },
+    "item": {
+      "description": "One entry of a list; it can hold text and other components and may be pressed.",
+      "role": "listitem",
+      "content": "mixed",
+      "allowedParents": ["list"],
+      "events": ["press"]
+    },
+    "table": {
+      "description": "Tabular data with column headers and rows; always give it a label.",
+      "role": "table",
+      "content": "nodes",
+      "allowedChildren": ["column", "row", "each"],
+      "requiresLabel": true,
+      "states": ["ready", "loading", "empty"]
+    },
+    "column": {
+      "description": "A column header of a table; its content is the header text.",
+      "role": "columnheader",
+      "content": "text",
+      "allowedParents": ["table"],
+      "props": {
+        "sort": {
+          "description": "The sort direction currently applied to this column.",
+          "type": "enum",
+          "values": ["none", "ascending", "descending"]
+        }
+      },
+      "events": ["press"]
+    },
+    "row": {
+      "description": "One row of a table, made of cells in the order of the columns.",
+      "role": "row",
+      "content": "nodes",
+      "allowedChildren": ["cell"],
+      "allowedParents": ["table"],
+      "props": {
+        "selected": {
+          "description": "Set to true when the row is selected.",
+          "type": "boolean"
+        }
+      },
+      "events": ["press"]
+    },
+    "cell": {
+      "description": "One data cell of a table row; it can hold text and other components.",
+      "role": "cell",
+      "content": "mixed",
+      "allowedParents": ["row"]
+    },
+    "tabs": {
+      "description": "Switches between alternative panels, one visible at a time; each panel is a `tab` child.",
+      "role": "tablist",
+      "content": "nodes",
+      "allowedChildren": ["tab"],
+      "props": {
+        "selected": {
+          "description": "The `id` of the selected `tab`; bind it to read and write the active tab.",
+          "type": "string",
+          "writable": true
+        }
+      },
+      "events": ["change"]
+    },
+    "tab": {
+      "description": "One panel of a tabs component: its label becomes the tab title and its content the panel.",
+      "role": "tab",
+      "content": "nodes",
+      "allowedParents": ["tabs"],
+      "requiresLabel": true
+    },
+    "dialog": {
+      "description": "A window above the screen for confirmations and short tasks; put its buttons in `actions`.",
+      "role": "dialog",
+      "content": "nodes",
+      "requiresLabel": true,
+      "props": {
+        "modal": {
+          "description": "When true the rest of the screen is blocked while the dialog is open.",
+          "type": "boolean",
+          "default": true
+        },
+        "open": {
+          "description": "Whether the dialog is shown; bind it to read and write visibility.",
+          "type": "boolean",
+          "writable": true
+        }
+      },
+      "slots": {
+        "actions": {
+          "description": "The buttons that answer the dialog, such as Cancel and Confirm."
+        }
+      },
+      "events": ["close"]
+    },
+    "alert": {
+      "description": "A message that tells the user about a result or problem, announced to assistive technology.",
+      "role": "alert",
+      "content": "mixed",
+      "props": {
+        "tone": {
+          "description": "Severity of the message.",
+          "type": "enum",
+          "values": ["info", "success", "warning", "danger"],
+          "default": "info"
+        }
+      }
+    },
+    "menu": {
+      "description": "A list of commands the user can pick from, such as an actions or overflow menu.",
+      "role": "menu",
+      "content": "nodes",
+      "allowedChildren": ["menu-item", "each"],
+      "requiresLabel": true
+    },
+    "menu-item": {
+      "description": "One command inside a menu; its content is the visible text.",
+      "role": "menuitem",
+      "content": "text",
+      "allowedParents": ["menu"],
+      "props": {
+        "disabled": {
+          "description": "Set to true to make the command non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["press"]
+    }
+  }
+}

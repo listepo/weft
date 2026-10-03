@@ -1,0 +1,8 @@
+<screen id="root" weft="0.1" label="Account">
+  <section id="profile" label="Profile">
+    <text id="bio">Product designer based in Lisbon.</text>
+    <slot name="header">
+      <heading id="profile-title" level="2">Profile</heading>
+    </slot>
+  </section>
+</screen>

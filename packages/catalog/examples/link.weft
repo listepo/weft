@@ -1,0 +1,4 @@
+<screen id="root" weft="0.1" label="Help">
+  <link id="docs" href="https://example.com/help">Read the help center</link>
+  <link id="reset" on-press="nav.reset">Forgot password?</link>
+</screen>

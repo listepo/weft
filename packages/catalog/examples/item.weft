@@ -1,0 +1,8 @@
+<screen id="root" weft="0.1" label="Inbox">
+  <list id="inbox" ordered="true">
+    <item id="msg-1" on-press="inbox.open">
+      <text id="msg-1-from" tone="muted">Ana</text>
+      <text id="msg-1-subject">Welcome aboard</text>
+    </item>
+  </list>
+</screen>

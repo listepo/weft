@@ -1,0 +1,4 @@
+<screen id="root" weft="0.1" label="Settings">
+  <heading id="title" level="1">Settings</heading>
+  <heading id="subtitle" level="2" value="{$.section.title}"/>
+</screen>

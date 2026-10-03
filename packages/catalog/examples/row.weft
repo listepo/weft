@@ -1,0 +1,8 @@
+<screen id="root" weft="0.1" label="Users">
+  <table id="users" label="Users">
+    <column id="col-name">Name</column>
+    <row id="row-ana" selected="{$.anaSelected}" on-press="users.select">
+      <cell id="cell-ana">Ana</cell>
+    </row>
+  </table>
+</screen>

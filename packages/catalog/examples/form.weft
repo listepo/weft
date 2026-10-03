@@ -1,0 +1,8 @@
+<screen id="root" weft="0.1" label="Sign in">
+  <form id="login" state="idle" on-submit="auth.submit">
+    <field id="email" type="email" label="Email" value="{$.email}" required="true"/>
+    <slot name="footer">
+      <button id="go" variant="primary" on-press="auth.submit">Sign in</button>
+    </slot>
+  </form>
+</screen>

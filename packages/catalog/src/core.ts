@@ -1,0 +1,371 @@
+// The `weft-core` 0.1 catalog of SPEC §5.1 as data. `catalog.json` is generated from this object.
+import type { Catalog, ComponentDef, PropDef } from "@weft/core";
+
+const str = (description: string, extra: Partial<PropDef> = {}): PropDef => ({
+  description,
+  type: "string",
+  ...extra,
+});
+const bool = (description: string, extra: Partial<PropDef> = {}): PropDef => ({
+  description,
+  type: "boolean",
+  ...extra,
+});
+const num = (description: string, extra: Partial<PropDef> = {}): PropDef => ({
+  description,
+  type: "number",
+  ...extra,
+});
+const oneOf = (description: string, values: string[], extra: Partial<PropDef> = {}): PropDef => ({
+  description,
+  type: "enum",
+  values,
+  ...extra,
+});
+const dimension = (description: string): PropDef => ({
+  description,
+  type: "token",
+  tokenType: "dimension",
+});
+
+const checkedProp = bool("Whether the control is on; bind it to a boolean to read and write it.", {
+  writable: true,
+});
+const disabledProp = (what: string): PropDef =>
+  bool(`Set to true to make ${what} non-interactive.`);
+const tone = (values: string[], description: string, extra: Partial<PropDef> = {}) =>
+  oneOf(description, values, extra);
+
+const components: Record<string, ComponentDef> = {
+  screen: {
+    description: "The root of every document: one full screen of UI, carrying the format version.",
+    role: "main",
+    content: "nodes",
+    props: {
+      weft: str('The Weft format version of the document, always the literal "0.1".', {
+        required: true,
+        bindable: false,
+      }),
+    },
+    states: ["ready", "loading", "error"],
+  },
+  stack: {
+    description:
+      "Lays its children out in one line, as a column or a row; use it for most vertical or horizontal grouping.",
+    role: "none",
+    content: "nodes",
+    props: {
+      direction: oneOf("Whether children flow down a column or along a row.", ["column", "row"], {
+        default: "column",
+      }),
+      gap: dimension("Space between children, as a dimension token."),
+      align: oneOf("How children are aligned across the main direction.", [
+        "start",
+        "center",
+        "end",
+        "stretch",
+      ]),
+      wrap: bool("Set to true to let children wrap onto further lines when they do not fit."),
+    },
+  },
+  grid: {
+    description:
+      "Lays its children out in a fixed number of equal columns; use it for card galleries and dashboards.",
+    role: "none",
+    content: "nodes",
+    props: {
+      columns: num("Number of equal columns in the grid.", { required: true }),
+      gap: dimension("Space between grid cells, as a dimension token."),
+    },
+  },
+  section: {
+    description:
+      "A named region of the screen that groups related content; use it to divide a screen into labelled parts.",
+    role: "region",
+    content: "nodes",
+    requiresLabel: true,
+    slots: {
+      header: {
+        description: "Optional header content shown above the section body, such as a heading.",
+      },
+    },
+  },
+  heading: {
+    description:
+      "A title for the content that follows it; the level orders headings from 1 (most important) to 6.",
+    role: "heading",
+    content: "text",
+    props: {
+      level: num("Heading level from 1 to 6; use 1 for the screen title.", { required: true }),
+      value: str("The heading text, for when it comes from a binding; do not also give content."),
+    },
+  },
+  text: {
+    description: "A run of plain text such as a paragraph, caption or message.",
+    role: "none",
+    content: "text",
+    props: {
+      value: str("The text to show, for when it comes from a binding; do not also give content."),
+      tone: tone(
+        ["default", "muted", "success", "warning", "danger"],
+        "Semantic colouring of the text; muted for secondary text, danger for errors.",
+      ),
+    },
+  },
+  image: {
+    description: "A picture; always give a label that describes it for people who cannot see it.",
+    role: "img",
+    content: "none",
+    requiresLabel: true,
+    props: {
+      src: str("Where the image is loaded from, a URL or a binding to one.", { required: true }),
+    },
+  },
+  link: {
+    description: "Navigates to another place; use a button instead for actions that change data.",
+    role: "link",
+    content: "text",
+    props: {
+      href: str("The destination URL; leave it out when navigation is handled by `on-press`."),
+    },
+    events: ["press"],
+  },
+  button: {
+    description:
+      "Triggers an action when pressed; use it for submitting, confirming and other commands.",
+    role: "button",
+    content: "text",
+    props: {
+      variant: oneOf(
+        "Visual emphasis: primary for the main action, danger for destructive ones.",
+        ["primary", "secondary", "danger"],
+        { default: "secondary" },
+      ),
+      disabled: disabledProp("the button"),
+    },
+    states: ["idle", "busy"],
+    events: ["press"],
+  },
+  form: {
+    description:
+      "Groups input controls that are submitted together; the `submit` event fires when the user submits it.",
+    role: "form",
+    content: "nodes",
+    slots: {
+      footer: { description: "Actions of the form, typically the submit and cancel buttons." },
+    },
+    states: ["idle", "submitting", "invalid"],
+    events: ["submit"],
+  },
+  field: {
+    description: "A single-value text input such as an email, password, number or multi-line note.",
+    role: "textbox",
+    content: "none",
+    requiresLabel: true,
+    props: {
+      type: oneOf(
+        "What kind of text is entered; it selects the keyboard and masking.",
+        ["text", "email", "password", "number", "search", "multiline"],
+        { default: "text" },
+      ),
+      value: str("The current text; bind it to a path to read and write the input.", {
+        writable: true,
+      }),
+      placeholder: str("Hint text shown while the field is empty; it does not replace the label."),
+      required: bool("Set to true when the user must fill the field in."),
+      disabled: disabledProp("the field"),
+      error: str("An error message to show for this field; set it when the value is invalid."),
+    },
+    states: ["valid", "invalid"],
+    events: ["change"],
+  },
+  checkbox: {
+    description: "A box the user ticks or clears to turn one independent option on or off.",
+    role: "checkbox",
+    content: "none",
+    requiresLabel: true,
+    props: { checked: checkedProp, disabled: disabledProp("the checkbox") },
+    events: ["change"],
+  },
+  switch: {
+    description:
+      "A toggle that applies a setting immediately; prefer it over a checkbox for on/off settings.",
+    role: "switch",
+    content: "none",
+    requiresLabel: true,
+    props: { checked: checkedProp, disabled: disabledProp("the switch") },
+    events: ["change"],
+  },
+  "radio-group": {
+    description: "A set of radio options of which exactly one can be chosen.",
+    role: "radiogroup",
+    content: "nodes",
+    allowedChildren: ["radio", "each"],
+    requiresLabel: true,
+    props: {
+      value: str("The `value` of the selected radio; bind it to read and write the choice.", {
+        writable: true,
+      }),
+    },
+    events: ["change"],
+  },
+  radio: {
+    description: "One choice inside a radio group; its content is the visible label.",
+    role: "radio",
+    content: "text",
+    allowedParents: ["radio-group"],
+    props: {
+      value: str("The value the group takes when this radio is selected.", { required: true }),
+      disabled: disabledProp("this choice"),
+    },
+  },
+  select: {
+    description: "A drop-down that lets the user choose one option from a longer list.",
+    role: "combobox",
+    content: "nodes",
+    allowedChildren: ["option", "each"],
+    requiresLabel: true,
+    props: {
+      value: str("The `value` of the chosen option; bind it to read and write the choice.", {
+        writable: true,
+      }),
+      disabled: disabledProp("the select"),
+    },
+    events: ["change"],
+  },
+  option: {
+    description: "One choice inside a select; its content is the visible text.",
+    role: "option",
+    content: "text",
+    allowedParents: ["select"],
+    props: {
+      value: str("The value the select takes when this option is chosen.", { required: true }),
+    },
+  },
+  list: {
+    description:
+      "A sequence of items; use it for feeds and collections, with `ordered` when the order matters.",
+    role: "list",
+    content: "nodes",
+    allowedChildren: ["item", "each"],
+    props: { ordered: bool("Set to true when the order of the items is meaningful.") },
+    states: ["ready", "loading", "empty"],
+  },
+  item: {
+    description: "One entry of a list; it can hold text and other components and may be pressed.",
+    role: "listitem",
+    content: "mixed",
+    allowedParents: ["list"],
+    events: ["press"],
+  },
+  table: {
+    description: "Tabular data with column headers and rows; always give it a label.",
+    role: "table",
+    content: "nodes",
+    allowedChildren: ["column", "row", "each"],
+    requiresLabel: true,
+    states: ["ready", "loading", "empty"],
+  },
+  column: {
+    description: "A column header of a table; its content is the header text.",
+    role: "columnheader",
+    content: "text",
+    allowedParents: ["table"],
+    props: {
+      sort: oneOf("The sort direction currently applied to this column.", [
+        "none",
+        "ascending",
+        "descending",
+      ]),
+    },
+    events: ["press"],
+  },
+  row: {
+    description: "One row of a table, made of cells in the order of the columns.",
+    role: "row",
+    content: "nodes",
+    allowedChildren: ["cell"],
+    allowedParents: ["table"],
+    props: { selected: bool("Set to true when the row is selected.") },
+    events: ["press"],
+  },
+  cell: {
+    description: "One data cell of a table row; it can hold text and other components.",
+    role: "cell",
+    content: "mixed",
+    allowedParents: ["row"],
+  },
+  tabs: {
+    description:
+      "Switches between alternative panels, one visible at a time; each panel is a `tab` child.",
+    role: "tablist",
+    content: "nodes",
+    allowedChildren: ["tab"],
+    props: {
+      selected: str("The `id` of the selected `tab`; bind it to read and write the active tab.", {
+        writable: true,
+      }),
+    },
+    events: ["change"],
+  },
+  tab: {
+    description:
+      "One panel of a tabs component: its label becomes the tab title and its content the panel.",
+    role: "tab",
+    content: "nodes",
+    allowedParents: ["tabs"],
+    requiresLabel: true,
+  },
+  dialog: {
+    description:
+      "A window above the screen for confirmations and short tasks; put its buttons in `actions`.",
+    role: "dialog",
+    content: "nodes",
+    requiresLabel: true,
+    props: {
+      modal: bool("When true the rest of the screen is blocked while the dialog is open.", {
+        default: true,
+      }),
+      open: bool("Whether the dialog is shown; bind it to read and write visibility.", {
+        writable: true,
+      }),
+    },
+    slots: {
+      actions: { description: "The buttons that answer the dialog, such as Cancel and Confirm." },
+    },
+    events: ["close"],
+  },
+  alert: {
+    description:
+      "A message that tells the user about a result or problem, announced to assistive technology.",
+    role: "alert",
+    content: "mixed",
+    props: {
+      tone: tone(["info", "success", "warning", "danger"], "Severity of the message.", {
+        default: "info",
+      }),
+    },
+  },
+  menu: {
+    description: "A list of commands the user can pick from, such as an actions or overflow menu.",
+    role: "menu",
+    content: "nodes",
+    allowedChildren: ["menu-item", "each"],
+    requiresLabel: true,
+  },
+  "menu-item": {
+    description: "One command inside a menu; its content is the visible text.",
+    role: "menuitem",
+    content: "text",
+    allowedParents: ["menu"],
+    props: { disabled: disabledProp("the command") },
+    events: ["press"],
+  },
+};
+
+export const coreCatalog: Catalog = {
+  weft: "0.1",
+  name: "weft-core",
+  version: "0.1.0",
+  components,
+};

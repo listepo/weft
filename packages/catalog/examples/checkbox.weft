@@ -1,0 +1,3 @@
+<screen id="root" weft="0.1" label="Terms">
+  <checkbox id="terms" label="I accept the terms" checked="{$.acceptTerms}" disabled="false" on-change="form.edit"/>
+</screen>

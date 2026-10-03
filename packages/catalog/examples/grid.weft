@@ -1,0 +1,7 @@
+<screen id="root" weft="0.1" label="Gallery">
+  <grid id="cards" columns="3" gap="{token.space.lg}">
+    <text id="card-a">Revenue</text>
+    <text id="card-b">Orders</text>
+    <text id="card-c">Visitors</text>
+  </grid>
+</screen>

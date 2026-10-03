@@ -1,0 +1,3 @@
+<screen id="root" weft="0.1" label="Profile">
+  <image id="avatar" src="{$.user.avatar}" label="Profile photo of the user"/>
+</screen>
