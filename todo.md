@@ -1,1 +1,8 @@
 - T8. Evaluation
+- T19. mise toolchain and moon monorepo
+- T20. Rust core
+- T21. Rust catalog
+- T22. WebAssembly bindings
+- T23. Native Node and Bun addon
+- T24. Runtime matrix
+- T25. Benchmark rigor
