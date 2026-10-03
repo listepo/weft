@@ -82,8 +82,8 @@
           "type": "number",
           "required": true
         },
-        "value": {
-          "description": "The heading text, for when it comes from a binding; do not also give content.",
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
           "type": "string"
         }
       }
@@ -93,14 +93,14 @@
       "role": "none",
       "content": "text",
       "props": {
-        "value": {
-          "description": "The text to show, for when it comes from a binding; do not also give content.",
-          "type": "string"
-        },
         "tone": {
           "description": "Semantic colouring of the text; muted for secondary text, danger for errors.",
           "type": "enum",
           "values": ["default", "muted", "success", "warning", "danger"]
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
         }
       }
     },
@@ -125,6 +125,10 @@
         "href": {
           "description": "The destination URL; leave it out when navigation is handled by `on-press`.",
           "type": "string"
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
         }
       },
       "events": ["press"]
@@ -143,6 +147,10 @@
         "disabled": {
           "description": "Set to true to make the button non-interactive.",
           "type": "boolean"
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
         }
       },
       "states": ["idle", "busy"],
@@ -262,6 +270,10 @@
         "disabled": {
           "description": "Set to true to make this choice non-interactive.",
           "type": "boolean"
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
         }
       }
     },
@@ -294,6 +306,10 @@
           "description": "The value the select takes when this option is chosen.",
           "type": "string",
           "required": true
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
         }
       }
     },
@@ -315,7 +331,13 @@
       "role": "listitem",
       "content": "mixed",
       "allowedParents": ["list"],
-      "events": ["press"]
+      "events": ["press"],
+      "props": {
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
+        }
+      }
     },
     "table": {
       "description": "Tabular data with column headers and rows; always give it a label.",
@@ -335,6 +357,10 @@
           "description": "The sort direction currently applied to this column.",
           "type": "enum",
           "values": ["none", "ascending", "descending"]
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
         }
       },
       "events": ["press"]
@@ -357,7 +383,13 @@
       "description": "One data cell of a table row; it can hold text and other components.",
       "role": "cell",
       "content": "mixed",
-      "allowedParents": ["row"]
+      "allowedParents": ["row"],
+      "props": {
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
+        }
+      }
     },
     "tabs": {
       "description": "Switches between alternative panels, one visible at a time; each panel is a `tab` child.",
@@ -414,6 +446,10 @@
           "type": "enum",
           "values": ["info", "success", "warning", "danger"],
           "default": "info"
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
         }
       }
     },
@@ -433,6 +469,10 @@
         "disabled": {
           "description": "Set to true to make the command non-interactive.",
           "type": "boolean"
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
         }
       },
       "events": ["press"]

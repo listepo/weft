@@ -2,7 +2,7 @@
   <list id="todos" ordered="false" state="ready">
     <each id="todo-each" as="todo" in="{$.todos}">
       <item id="todo-item">
-        <text id="todo-title" value="{$todo.title}"/>
+        <text id="todo-title" text="{$todo.title}"/>
       </item>
     </each>
   </list>

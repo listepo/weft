@@ -97,7 +97,6 @@ const components: Record<string, ComponentDef> = {
     content: "text",
     props: {
       level: num("Heading level from 1 to 6; use 1 for the screen title.", { required: true }),
-      value: str("The heading text, for when it comes from a binding; do not also give content."),
     },
   },
   text: {
@@ -105,7 +104,6 @@ const components: Record<string, ComponentDef> = {
     role: "none",
     content: "text",
     props: {
-      value: str("The text to show, for when it comes from a binding; do not also give content."),
       tone: tone(
         ["default", "muted", "success", "warning", "danger"],
         "Semantic colouring of the text; muted for secondary text, danger for errors.",
@@ -362,6 +360,16 @@ const components: Record<string, ComponentDef> = {
     events: ["press"],
   },
 };
+
+// SPEC §5.1: the `text` prop follows from the content model, so it is added here once rather than
+// written into each definition, where a new text-bearing kind could forget it.
+const textProp = str(
+  "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+);
+for (const def of Object.values(components)) {
+  if (def.content === "text" || def.content === "mixed")
+    def.props = { ...def.props, text: textProp };
+}
 
 export const coreCatalog: Catalog = {
   weft: "0.1",

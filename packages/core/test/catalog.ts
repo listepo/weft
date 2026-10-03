@@ -33,7 +33,7 @@ export const catalog: Catalog = CatalogSchema.parse({
       content: "text",
       props: {
         level: { description: d, type: "number", required: true },
-        value: { description: d, type: "string" },
+        text: { description: d, type: "string" },
       },
     },
     text: {
@@ -41,7 +41,7 @@ export const catalog: Catalog = CatalogSchema.parse({
       role: "none",
       content: "text",
       props: {
-        value: { description: d, type: "string" },
+        text: { description: d, type: "string" },
         tone: {
           description: d,
           type: "enum",
@@ -53,7 +53,7 @@ export const catalog: Catalog = CatalogSchema.parse({
       description: d,
       role: "link",
       content: "text",
-      props: { href: { description: d, type: "string" } },
+      props: { href: { description: d, type: "string" }, text: { description: d, type: "string" } },
       events: ["press"],
     },
     button: {

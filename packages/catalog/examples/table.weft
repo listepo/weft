@@ -5,10 +5,10 @@
     <each id="order-each" as="order" in="{$.orders}">
       <row id="order-row" selected="false">
         <cell id="order-id">
-          <text id="order-id-text" value="{$order.id}"/>
+          <text id="order-id-text" text="{$order.id}"/>
         </cell>
         <cell id="order-total">
-          <text id="order-total-text" value="{$order.total}"/>
+          <text id="order-total-text" text="{$order.total}"/>
         </cell>
       </row>
     </each>

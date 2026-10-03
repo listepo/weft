@@ -61,7 +61,7 @@ An attribute value is exactly one of:
 - A value that starts with `{{` is a literal: the first `{` is dropped, so a literal that must start with `{` is written `{{`. Any other value that starts with `{` MUST be a whole reference, `{$…}`, `{!$…}` or `{token.…}`; anything else is an error. Values that do not start with `{` are literals.
 - These forms apply to prop values only. `id`, `on-*` and the slot `name` are always plain text.
 - Binding path grammar: `$` (`.` name)+ for the root data model, or `$` name (`.` name)* for a loop variable introduced by `<each>` (§4.3). `name` is `[A-Za-z_][A-Za-z0-9_]*` or a non-negative integer index.
-- Mixing text and bindings in one value (`"Hello {$.name}"`) is an error: a literal must not contain `{$`, `{!$` or `{token.` after its first character. Use `<text value="{$.name}"/>`.
+- Mixing text and bindings in one value (`"Hello {$.name}"`) is an error: a literal must not contain `{$`, `{!$` or `{token.` after its first character. Use `<text text="{$.name}"/>`.
 - Token path grammar: segments of `[A-Za-z0-9_-]+` joined by `.`.
 - Booleans are `true` / `false`. Numbers are JSON numbers.
 
@@ -147,7 +147,7 @@ Content placed directly inside an element is its default slot. The catalog says 
 <list id="todos">
   <each id="todo-each" as="todo" in="{$.todos}">
     <item id="todo-item">
-      <text id="todo-title" value="{$todo.title}"/>
+      <text id="todo-title" text="{$todo.title}"/>
     </item>
   </each>
 </list>
@@ -206,8 +206,8 @@ Props are strings unless a type is given. `*` marks required props.
 | `stack` | `none` | nodes | `direction` enum `column`/`row` (default `column`), `gap` token dimension, `align` enum `start`/`center`/`end`/`stretch`, `wrap` boolean | — | — | — |
 | `grid` | `none` | nodes | `columns`* number, `gap` token dimension | — | — | — |
 | `section` | `region` | nodes | — (needs `label`) | `header` | — | — |
-| `heading` | `heading` | text | `level`* number 1–6, `value` | — | — | — |
-| `text` | `none` | text | `value`, `tone` enum `default`/`muted`/`success`/`warning`/`danger` | — | — | — |
+| `heading` | `heading` | text | `level`* number 1–6 | — | — | — |
+| `text` | `none` | text | `tone` enum `default`/`muted`/`success`/`warning`/`danger` | — | — | — |
 | `image` | `img` | none | `src`*, `label`* | — | — | — |
 | `link` | `link` | text | `href` | — | — | `press` |
 | `button` | `button` | text | `variant` enum `primary`/`secondary`/`danger` (default `secondary`), `disabled` boolean | — | `idle`, `busy` | `press` |
@@ -235,7 +235,7 @@ Props are strings unless a type is given. `*` marks required props.
 Notes:
 
 - A `tab` element holds its panel content; a renderer emits `tab` and `tabpanel` from it.
-- `text` and `heading` take their text either as content or as `value` (for bindings), never both.
+- Every component whose content model is `text` or `mixed` also takes the prop `text` (string, bindable; declared in each such component's `props`, not repeated in the table). It takes its text either as content or as `text`, never both; `text` is how bound text is written, e.g. `<button id="b" text="{$.cta}"/>`. `value` is a data value (`field`, `radio`, `option`, `select`, `radio-group`), never displayed text.
 - "needs `label`" and a starred `label`* in the Props column both mean the universal `label` attribute is required for that component (`requiresLabel` in the catalog); `label` is never declared in `props`.
 - `(…)` after a content model lists the only kinds allowed as direct children. `each` is transparent (§4.3), so it is allowed wherever its own children would be, whether listed or not.
 - A kind with a required parent context (`radio`, `option`, `item`, `column`, `row`, `cell`, `tab`, `menu-item`) declares it as `allowedParents`: `radio` in `radio-group`, `option` in `select`, `item` in `list`, `column` and `row` in `table`, `cell` in `row`, `tab` in `tabs`, `menu-item` in `menu`.
@@ -249,7 +249,7 @@ Validation has three layers, each reporting diagnostics rather than throwing:
 
 1. **Syntax** — §2. The document is well-formed restricted XML.
 2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, required props present, declared slots, states and events.
-3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, and `text`/`heading` take their text from content or `value`, not both.
+3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
 
 A document that does not have the JSON shape of §3 gets `W200` diagnostics only; the other checks need the shape.
 
@@ -331,7 +331,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W307 | Token `$type` differs from the prop's `tokenType`. |
 | W308 | Action not in the supplied action list. |
 | W309 | Id reference points at no suitable element. |
-| W310 | `text` or `heading` has both content and `value`. |
+| W310 | Text given twice: a `text` or `mixed` component has both content and the `text` prop. |
 | W311 | Loop variable shadows an enclosing one. |
 | W312 | `screen` below the root. |
 | W401 | Unknown element (mode). |

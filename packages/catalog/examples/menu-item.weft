@@ -1,7 +1,7 @@
 <screen id="root" label="Document" weft="0.1">
   <menu id="actions" label="Document actions">
     <each id="action-each" as="action" in="{$.actions}">
-      <menu-item id="action-item" disabled="{!$action.enabled}" on-press="doc.run">Run</menu-item>
+      <menu-item id="action-item" disabled="{!$action.enabled}" text="{$action.label}" on-press="doc.run"/>
     </each>
   </menu>
 </screen>

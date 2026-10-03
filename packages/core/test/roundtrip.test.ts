@@ -78,11 +78,11 @@ test("a literal starting with { round-trips through {{", () => {
     root: {
       kind: "screen",
       id: "s",
-      children: [{ kind: "text", id: "t", props: { value: "{$.x}" } }],
+      children: [{ kind: "text", id: "t", props: { text: "{$.x}" } }],
     },
   };
   const markup = serialize(doc);
-  assert.match(markup, /value="\{\{\$\.x\}"/);
+  assert.match(markup, /text="\{\{\$\.x\}"/);
   assert.deepEqual(parse(markup, { catalog }).document, canonicalize(doc));
 });
 

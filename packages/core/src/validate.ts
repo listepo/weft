@@ -67,7 +67,6 @@ type At = { path: string; pos?: Position | undefined };
 
 const [CURRENT_MAJOR, CURRENT_MINOR] = WEFT_VERSION.split(".").map(Number);
 const BINDING_GRAMMAR = "$.name(.name)* or $loopVariable(.name)*";
-const TEXT_VALUE_KINDS = new Set(["text", "heading"]);
 
 export function validate(input: unknown, options: ValidateOptions): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -128,7 +127,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
           message: "A value is either text or one whole reference, never both.",
           got: value,
           expected: "plain text or one whole reference",
-          hint: 'bind the whole value, e.g. <text value="{$.greeting}"/>',
+          hint: 'bind the whole value, e.g. <text text="{$.greeting}"/>',
         });
       }
       if (NON_XML_CHAR.test(value))
@@ -564,16 +563,16 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
         });
       }
       if (
-        TEXT_VALUE_KINDS.has(kind) &&
-        Object.hasOwn(props, "value") &&
+        (component.content === "text" || component.content === "mixed") &&
+        Object.hasOwn(props, "text") &&
         (node.children?.length ?? 0) > 0
       ) {
-        // SPEC §5.1 note; the catalog format cannot express "content or value" yet.
+        // SPEC §5.1 note; the catalog format cannot express "content or the text prop".
         report("W310", {
-          ...at,
-          message: `<${kind}> takes its text from content or from value, not both.`,
-          expected: "content or value",
-          hint: "remove the content or the value attribute",
+          ...nodeAt(node, path, "text"),
+          message: `<${kind}> takes its text from content or from the text attribute, not both.`,
+          expected: "content or text, not both",
+          hint: "remove the content or the text attribute",
         });
       }
       const selected = props["selected"];

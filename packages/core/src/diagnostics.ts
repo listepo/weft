@@ -67,7 +67,7 @@ export const DIAGNOSTIC_CODES = {
   W307: { severity: "error", summary: "Design token has the wrong type." },
   W308: { severity: "error", summary: "Unknown action." },
   W309: { severity: "error", summary: "Id reference points at no suitable element." },
-  W310: { severity: "error", summary: "Text given both as content and as `value`." },
+  W310: { severity: "error", summary: "Text given both as content and as `text`." },
   W311: { severity: "error", summary: "Loop variable shadows an outer one." },
   W312: { severity: "error", summary: "`screen` below the root." },
 

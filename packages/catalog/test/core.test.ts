@@ -228,6 +228,16 @@ test("enum props have values, token props have tokenType, everything is describe
   }
 });
 
+test("exactly the text and mixed kinds declare the bindable string prop `text`", () => {
+  for (const [kind, def] of Object.entries(coreCatalog.components)) {
+    const text = def.props?.["text"];
+    if (def.content === "text" || def.content === "mixed") {
+      assert.equal(text?.type, "string", kind);
+      assert.notEqual(text?.bindable, false, kind);
+    } else assert.equal(text, undefined, kind);
+  }
+});
+
 test("every kind named by allowedChildren and allowedParents exists", () => {
   const known = new Set([...Object.keys(coreCatalog.components), "each"]);
   for (const def of Object.values(coreCatalog.components)) {
