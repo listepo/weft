@@ -5,10 +5,10 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T0 | in progress | P0 | 3 | 80% | Claude Code / opus-5.5 |
-| T4 | in progress | P1 | 4 | 0% | Claude Code / opus-5.5 |
+| T4 | in progress | P1 | 4 | 85% | Claude Code / opus-5.5 |
 | T5 | todo | P2 | 4 | 0% | |
 | T6 | in progress | P1 | 3 | 0% | Claude Code / sonnet-5.5 |
-| T7 | todo | P2 | 2 | 0% | |
+| T7 | in progress | P2 | 2 | 0% | Claude Code / sonnet-5.5 |
 | T8 | todo | P1 | 3 | 0% | |
 | T9 | in progress | P0 | 3 | 0% | Claude Code / opus-5.5 |
 
@@ -36,6 +36,8 @@ Plan:
 3. `expectedTree(document, data)`: the roles and names the document declares, in the shape of an accessibility snapshot.
 4. Verify: server-render tests per kind; Playwright accessibility snapshot of every catalog example equals `expectedTree`; corpus screens are wired in after T0 and T2 merge.
 
+Remaining after the first merge (browser check passes on 30 fixtures with 0 differences): follow the T9 spec revision (`text` prop, `button.submit`, `empty` slot) and run the browser check over the parsed corpus screens.
+
 ### T5. Reverse mapping
 
 Accessibility snapshot or DOM → Weft (lossy) and Weft → JSX source. Done when document → render → snapshot → document preserves structure, roles, states and ids, and the losses are listed in the spec.
@@ -52,6 +54,11 @@ Plan:
 ### T7. Versioning and extensibility tests
 
 Compatibility suite for SPEC §8. Done when a 0.2 document with unknown nodes is read by the 0.1 validator and renderer without failure, with warnings, and round-trips unchanged.
+
+Plan:
+1. `compat/` fixtures: documents declaring `weft="0.2"` with unknown elements, attributes, slots-in-unknown, and `x-vendor-` extensions.
+2. Tests: lenient parse yields only `W4xx` warnings, strict yields errors; `serialize(parse(x))` keeps unknown content; the renderer renders them with the fallback role; a catalog-diff helper classifies catalog changes as major or minor per SPEC §8.
+3. Verify: `pnpm run ci`.
 
 ### T8. Evaluation
 

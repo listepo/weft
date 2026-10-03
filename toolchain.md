@@ -18,3 +18,8 @@
 | fast-check | local | https://github.com/dubzzz/fast-check | Property-based round-trip tests |
 | gpt-tokenizer | local | https://github.com/niieani/gpt-tokenizer | Offline token counts for the benchmark |
 | oxc-parser | local | https://github.com/oxc-project/oxc | Parses JSX baselines in the benchmark checkers |
+| react | local | https://github.com/facebook/react | Reference renderer target |
+| react-dom | local | https://github.com/facebook/react | Server rendering for tests and static pages |
+| @types/react | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React type definitions |
+| @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
+| playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
