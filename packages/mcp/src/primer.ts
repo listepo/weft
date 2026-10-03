@@ -25,6 +25,7 @@ Patches (addressed by id, applied in order, all-or-nothing):
 - {"op":"insert","parent":"main","slot":"footer","index":0,"markup":"<button id=\\"b\\">Go</button>"}: markup is one or more elements with new ids. Without slot it goes into the default content; index defaults to the end and counts text too.
 - {"op":"remove","id":"go"}: removes the element and everything in it.
 - {"op":"move","id":"go","parent":"f","slot":"footer","index":0}: index counts the target list after the element left it.
-The root cannot be removed or moved. To change an element's text, remove it and insert it again with the same id at the same index.
+- {"op":"set","id":"go","prop":"text","value":"Save"}: changes an element's text. Text written as content stays content; a binding value moves it into the text attribute.
+The root cannot be removed or moved.
 
 Workflow: write or edit, call weft_validate (or let weft_patch validate), and fix every error using its hint before you answer. Limits: markup at most ${LIMITS.markupChars} characters, at most ${LIMITS.patches} patches per call.`;

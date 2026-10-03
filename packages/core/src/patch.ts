@@ -119,7 +119,7 @@ function applyOne(root: Node, patch: Patch, i: number, options: ApplyOptions): D
   if (patch.op === "set") {
     const hit = findOrFail(patch.id, "id");
     if (Array.isArray(hit)) return hit;
-    return setProp(hit.node, patch, hit.node === root, at("prop"));
+    return setProp(hit.node, patch, hit.node === root, at("prop"), options.catalog);
   }
 
   if (patch.op === "remove") {
@@ -178,6 +178,7 @@ function setProp(
   patch: Extract<Patch, { op: "set" }>,
   isRoot: boolean,
   path: string,
+  catalog: Catalog,
 ): Diagnostic[] {
   const { prop, value } = patch;
   const reject = (message: string, expected: string, hint?: string) => [
@@ -211,8 +212,28 @@ function setProp(
     node.on = update(node.on, event, value);
     return [];
   }
+  if (prop === "text" && holdsTextContent(node, catalog)) {
+    // SPEC §7: text has two spellings, and `set` writes the one already in use. Content can only
+    // hold a literal, so any other value (or null) replaces the content with the prop.
+    if (typeof value === "string") {
+      node.children = [value];
+      return [];
+    }
+    delete node.children;
+  }
   node.props = update(node.props, prop, value);
   return [];
+}
+
+/** A text-bearing component (SPEC §5.1) whose default content is text and nothing else. */
+function holdsTextContent(node: Node, catalog: Catalog): boolean {
+  const content = own(catalog.components, node.kind)?.content;
+  const children = node.children ?? [];
+  return (
+    (content === "text" || content === "mixed") &&
+    children.length > 0 &&
+    children.every((c) => typeof c === "string")
+  );
 }
 
 /** `null` removes the key; the keys were checked against the name grammar, so none is `__proto__`. */
