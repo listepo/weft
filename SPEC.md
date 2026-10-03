@@ -39,7 +39,7 @@ The root element is `<screen>` and carries the format version. Every example in 
 <screen id="login" label="Sign in" weft="0.1">
   <form id="f1" state="idle" on-submit="auth.submit">
     <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
-    <button id="go" disabled="{!$.email}" variant="primary" on-press="auth.submit">Sign in</button>
+    <button id="go" disabled="{!$.email}" submit="true" variant="primary">Sign in</button>
     <slot name="footer">
       <link id="reset" on-press="nav.reset">Forgot password?</link>
     </slot>
@@ -61,7 +61,7 @@ An attribute value is exactly one of:
 - A value that starts with `{{` is a literal: the first `{` is dropped, so a literal that must start with `{` is written `{{`. Any other value that starts with `{` MUST be a whole reference, `{$…}`, `{!$…}` or `{token.…}`; anything else is an error. Values that do not start with `{` are literals.
 - These forms apply to prop values only. `id`, `on-*` and the slot `name` are always plain text.
 - Binding path grammar: `$` (`.` name)+ for the root data model, or `$` name (`.` name)* for a loop variable introduced by `<each>` (§4.3). `name` is `[A-Za-z_][A-Za-z0-9_]*` or a non-negative integer index.
-- Mixing text and bindings in one value (`"Hello {$.name}"`) is an error: a literal must not contain `{$`, `{!$` or `{token.` after its first character. Use `<text value="{$.name}"/>`.
+- Mixing text and bindings in one value (`"Hello {$.name}"`) is an error: a literal must not contain `{$`, `{!$` or `{token.` after its first character. Use `<text text="{$.name}"/>`.
 - Token path grammar: segments of `[A-Za-z0-9_-]+` joined by `.`.
 - Booleans are `true` / `false`. Numbers are JSON numbers.
 
@@ -72,11 +72,13 @@ Allowed on every element:
 | Attribute | Type | Meaning |
 | --- | --- | --- |
 | `id` | string, required | Document-unique, matches `[A-Za-z][A-Za-z0-9_-]*`. Stable across edits. |
-| `label` | string | Accessible name when the element has no visible text. |
+| `label` | string | The element's accessible name (see below). |
 | `hidden` | boolean | Not rendered and not exposed to assistive technology. |
 | `state` | enum | One of the states the component declares (§5). |
 | `role` | ARIA role | Required on extension elements; an error on catalog components. |
 | `on-<event>` | action name | Binds an event the component declares to a named host action. |
+
+`label` is the element's accessible name, and it MAY be a binding. Components that present a caption (`field`, `checkbox`, `switch`, `radio-group`, `select`) show it visibly as that caption, and `tab` shows it as the tab title; on `image` it is the text alternative; on containers (`screen`, `section`, `table`, `dialog`, `menu`, `tabs`, `form`, `list`, `stack`, `grid`) it names the region without being shown. On a component whose text is its content or `text` prop, `label` replaces that text as the accessible name and SHOULD be left out.
 
 Action names match `[a-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*)*`. Actions take no arguments in the document; the host receives the action name, the element id, and for elements inside `<each>` the current loop item path.
 
@@ -140,6 +142,7 @@ Content placed directly inside an element is its default slot. The catalog says 
 
 - `<slot name="…">` MUST be a direct child of a component that declares that slot.
 - A slot name appears at most once per parent.
+- A named slot is a region whose placement the component decides, not document order: a form's `footer` sits below its fields, a dialog's `actions` in its button bar, a list's `empty` in place of its items. Where a `<slot>` stands among the default content therefore carries no meaning, which is why canonical markup writes named slots after the default content (§3).
 
 ### 4.3 Repetition
 
@@ -147,7 +150,7 @@ Content placed directly inside an element is its default slot. The catalog says 
 <list id="todos">
   <each id="todo-each" as="todo" in="{$.todos}">
     <item id="todo-item">
-      <text id="todo-title" value="{$todo.title}"/>
+      <text id="todo-title" text="{$todo.title}"/>
     </item>
   </each>
 </list>
@@ -155,6 +158,7 @@ Content placed directly inside an element is its default slot. The catalog says 
 
 - `in` MUST be a (non-negated) binding to an array. `as` names the loop variable, matching `[a-z][A-Za-z0-9]*`; it MUST NOT reuse the name of an enclosing loop variable.
 - Ids inside `<each>` are template ids: unique in the document, repeated per item at render time. A rendered instance is addressed as `id[index]`.
+- `<each>` holds one or more element children and no text; every child is repeated, in order, once per array item.
 - `<each>` is transparent for parent/child rules: its children are validated as children of its parent. `<each>` itself must be allowed by the parent's `allowedChildren` when that list is given.
 - Inside nested `<each>` elements the indexes are appended outermost first: `id[outer][inner]`. The loop item path a host receives with an action is the absolute data path of the innermost item, e.g. `$.todos.2`.
 
@@ -188,6 +192,9 @@ type PropDef = {
   type: "string" | "number" | "boolean" | "enum" | "token";
   values?: string[];                       // for enum
   tokenType?: string;                      // for token: DTCG $type, e.g. "dimension"
+  min?: number;                            // for number: smallest allowed value, inclusive
+  max?: number;                            // for number: largest allowed value, inclusive
+  integer?: boolean;                       // for number: true = whole numbers only
   required?: boolean;
   default?: string | number | boolean;
   bindable?: boolean;                      // default true; false = literal only
@@ -205,13 +212,13 @@ Props are strings unless a type is given. `*` marks required props.
 | --- | --- | --- | --- | --- | --- | --- |
 | `screen` | `main` | nodes | `weft`* | — | `ready`, `loading`, `error` | — |
 | `stack` | `none` | nodes | `direction` enum `column`/`row` (default `column`), `gap` token dimension, `align` enum `start`/`center`/`end`/`stretch`, `wrap` boolean | — | — | — |
-| `grid` | `none` | nodes | `columns`* number, `gap` token dimension | — | — | — |
+| `grid` | `none` | nodes | `columns`* integer ≥ 1, `gap` token dimension | — | — | — |
 | `section` | `region` | nodes | — (needs `label`) | `header` | — | — |
-| `heading` | `heading` | text | `level`* number 1–6, `value` | — | — | — |
-| `text` | `none` | text | `value`, `tone` enum `default`/`muted`/`success`/`warning`/`danger` | — | — | — |
+| `heading` | `heading` | text | `level`* integer 1–6 | — | — | — |
+| `text` | `none` | text | `tone` enum `default`/`muted`/`success`/`warning`/`danger` | — | — | — |
 | `image` | `img` | none | `src`*, `label`* | — | — | — |
 | `link` | `link` | text | `href` | — | — | `press` |
-| `button` | `button` | text | `variant` enum `primary`/`secondary`/`danger` (default `secondary`), `disabled` boolean | — | `idle`, `busy` | `press` |
+| `button` | `button` | text | `variant` enum `primary`/`secondary`/`danger` (default `secondary`), `disabled` boolean, `submit` boolean literal (default `false`) | — | `idle`, `busy` | `press` |
 | `form` | `form` | nodes | — | `footer` | `idle`, `submitting`, `invalid` | `submit` |
 | `field` | `textbox` | none | `label`*, `type` enum `text`/`email`/`password`/`number`/`search`/`multiline` (default `text`), `value` writable, `placeholder`, `required` boolean, `disabled` boolean, `error` | — | `valid`, `invalid` | `change` |
 | `checkbox` | `checkbox` | none | `label`*, `checked` boolean writable, `disabled` boolean | — | — | `change` |
@@ -220,9 +227,9 @@ Props are strings unless a type is given. `*` marks required props.
 | `radio` | `radio` | text | `value`*, `disabled` boolean | — | — | — |
 | `select` | `combobox` | nodes (`option`, `each`) | `label`*, `value` writable, `disabled` boolean | — | — | `change` |
 | `option` | `option` | text | `value`* | — | — | — |
-| `list` | `list` | nodes (`item`, `each`) | `ordered` boolean | — | `ready`, `loading`, `empty` | — |
+| `list` | `list` | nodes (`item`, `each`) | `ordered` boolean | `empty` | `ready`, `loading`, `empty` | — |
 | `item` | `listitem` | mixed | — | — | — | `press` |
-| `table` | `table` | nodes (`column`, `row`, `each`) | — (needs `label`) | — | `ready`, `loading`, `empty` | — |
+| `table` | `table` | nodes (`column`, `row`, `each`) | — (needs `label`) | `empty` | `ready`, `loading`, `empty` | — |
 | `column` | `columnheader` | text | `sort` enum `none`/`ascending`/`descending` | — | — | `press` |
 | `row` | `row` | nodes (`cell`) | `selected` boolean | — | — | `press` |
 | `cell` | `cell` | mixed | — | — | — | — |
@@ -235,26 +242,30 @@ Props are strings unless a type is given. `*` marks required props.
 
 Notes:
 
+- The `empty` slot of `list` and `table` is shown instead of the items or rows when there are none to show: every `<each>` in the component iterates an empty array and it has no static items or rows, or its `state` is `empty`. A table keeps its column headers.
 - A `tab` element holds its panel content; a renderer emits `tab` and `tabpanel` from it.
-- `text` and `heading` take their text either as content or as `value` (for bindings), never both.
+- Every component whose content model is `text` or `mixed` also takes the prop `text` (string, bindable; declared in each such component's `props`, not repeated in the table). It takes its text either as content or as `text`, never both; `text` is how bound text is written, e.g. `<button id="b" text="{$.cta}"/>`. `value` is a data value (`field`, `radio`, `option`, `select`, `radio-group`), never displayed text.
 - "needs `label`" and a starred `label`* in the Props column both mean the universal `label` attribute is required for that component (`requiresLabel` in the catalog); `label` is never declared in `props`.
 - `(…)` after a content model lists the only kinds allowed as direct children. `each` is transparent (§4.3), so it is allowed wherever its own children would be, whether listed or not.
 - A kind with a required parent context (`radio`, `option`, `item`, `column`, `row`, `cell`, `tab`, `menu-item`) declares it as `allowedParents`: `radio` in `radio-group`, `option` in `select`, `item` in `list`, `column` and `row` in `table`, `cell` in `row`, `tab` in `tabs`, `menu-item` in `menu`.
+- A `button` with `submit="true"` submits its nearest enclosing `form`: pressing it fires that form's `submit` event, so it needs no `on-press`. `submit` is a literal (`bindable: false`) because whether a button submits is structure, not data. A submit button outside a `form` is an error.
 - `field` has role `textbox`; a renderer MAY refine it from `type` (`number` → `spinbutton`, `search` → `searchbox`) as ARIA requires.
 - `column` is a direct child of `table` although ARIA places `columnheader` inside a `row`; the renderer emits the header row. On the web the header row sits in a header `rowgroup` and the rows in a body `rowgroup` (`<thead>`/`<tbody>`), and those groups are part of the declared tree.
 - `tabs.selected` names the selected `tab` by `id`; when it is absent or names no tab, the first tab is selected. Only the selected tab's panel is exposed.
 - `form` and `section` are landmarks only when they have a `label`: ARIA exposes `form` and `region` only with an accessible name, so an unlabelled `form` has no role of its own (its children are exposed directly).
 - A `dialog` is shown only while `open` is true; an absent `open` means closed, like every boolean prop without a default.
 - A `select` always has one option selected: the one whose `value` equals `select.value`, otherwise the first.
-- `heading.level` is an integer from 1 to 6; the catalog shape has no range, so the validator enforces it.
+- `column.sort` states the current sort only: the host updates it in its data model in response to the column's `press` action, because documents carry no behaviour.
+- `dialog.open` is likewise changed by the host in its data model in response to actions such as the dialog's `close` or a button's `press`; the document only binds it.
+- "integer 1–6" is a `number` prop with `integer: true`, `min: 1`, `max: 6`; "integer ≥ 1" has `integer: true`, `min: 1`. The bounds apply to literals; a bound value is the host's to keep in range.
 
 ## 6. Validation
 
 Validation has three layers, each reporting diagnostics rather than throwing:
 
 1. **Syntax** — §2. The document is well-formed restricted XML.
-2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, required props present, declared slots, states and events.
-3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, and `text`/`heading` take their text from content or `value`, not both.
+2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, numbers within their declared `min`, `max` and `integer`, required props present, declared slots, states and events.
+3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, a `submit` button inside a `form`, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
 
 A document that does not have the JSON shape of §3 gets `W200` diagnostics only; the other checks need the shape.
 
@@ -327,6 +338,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W221 | String holds a character XML cannot carry. |
 | W222 | `<each>` without a binding `in` or a valid `as`. |
 | W223 | Kind, prop, event or slot name invalid or reserved (`slot` as a kind, `id` or `on-*` in `props`). |
+| W224 | Number below `min`, above `max`, or not whole where the prop is `integer`. |
 | W301 | Duplicate id. |
 | W302 | Child kind not in the parent's (or slot's) `allowedChildren`. |
 | W303 | Parent kind not in the child's `allowedParents`. |
@@ -336,9 +348,11 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W307 | Token `$type` differs from the prop's `tokenType`. |
 | W308 | Action not in the supplied action list. |
 | W309 | Id reference points at no suitable element. |
-| W310 | `text` or `heading` has both content and `value`. |
+| W310 | Text given twice: a `text` or `mixed` component has both content and the `text` prop. |
 | W311 | Loop variable shadows an enclosing one. |
 | W312 | `screen` below the root. |
+| W313 | `button` with `submit="true"` outside a `form`. |
+| W314 | `<each>` without an element child. |
 | W401 | Unknown element (mode). |
 | W402 | Unknown attribute (mode). |
 | W403 | Newer minor version of the format (mode). |

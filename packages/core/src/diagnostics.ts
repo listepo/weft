@@ -57,6 +57,7 @@ export const DIAGNOSTIC_CODES = {
     severity: "error",
     summary: "Kind, attribute, event or slot name is invalid or reserved.",
   },
+  W224: { severity: "error", summary: "Number outside the declared range or not whole." },
 
   W301: { severity: "error", summary: "Duplicate id." },
   W302: { severity: "error", summary: "Child kind not allowed here." },
@@ -67,9 +68,11 @@ export const DIAGNOSTIC_CODES = {
   W307: { severity: "error", summary: "Design token has the wrong type." },
   W308: { severity: "error", summary: "Unknown action." },
   W309: { severity: "error", summary: "Id reference points at no suitable element." },
-  W310: { severity: "error", summary: "Text given both as content and as `value`." },
+  W310: { severity: "error", summary: "Text given both as content and as `text`." },
   W311: { severity: "error", summary: "Loop variable shadows an outer one." },
   W312: { severity: "error", summary: "`screen` below the root." },
+  W313: { severity: "error", summary: "Submit button outside a `form`." },
+  W314: { severity: "error", summary: "`<each>` without an element to repeat." },
 
   W401: { severity: "mode", summary: "Unknown element." },
   W402: { severity: "mode", summary: "Unknown attribute." },

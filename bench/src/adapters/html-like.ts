@@ -132,7 +132,7 @@ export function htmlLikeToNeutral(root: HEl): NNode {
       case "dialog":
         return "dialog";
       case "template":
-        return "each";
+        return el.attrs["data-empty"] !== undefined ? "empty" : "each";
       default:
         return null;
     }

@@ -1,7 +1,7 @@
-<screen id="profile" weft="0.1" label="Profile">
-  <image id="avatar" src="{$.user.avatar}" label="Profile photo"/>
-  <heading id="name" level="1" value="{$.user.name}"/>
-  <text id="bio" value="{$.user.bio}"/>
+<screen id="profile" label="Profile" weft="0.1">
+  <image id="avatar" label="Profile photo" src="{$.user.avatar}"/>
+  <heading id="name" level="1" text="{$.user.name}"/>
+  <text id="bio" text="{$.user.bio}"/>
   <heading id="links-title" level="2">Links</heading>
   <stack id="links" direction="row" gap="{token.space.md}">
     <link id="website" href="{$.user.website}">Website</link>

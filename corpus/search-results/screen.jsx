@@ -8,7 +8,7 @@ export default function Search({ data, actions }) {
           <button type="submit" data-variant="primary">Search</button>
         </div>
       </form>
-      {data.hasResults && (
+      {data.results.length > 0 ? (
         <ul>
           {data.results.map((result, resultIndex) => (
             <li key={resultIndex}>
@@ -18,8 +18,7 @@ export default function Search({ data, actions }) {
             </li>
           ))}
         </ul>
-      )}
-      {!data.hasResults && (
+      ) : (
         <p>No results found</p>
       )}
     </main>

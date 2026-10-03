@@ -1,4 +1,4 @@
-<screen id="root" weft="0.1" label="Inbox">
+<screen id="root" label="Inbox" weft="0.1">
   <list id="inbox" ordered="true">
     <item id="msg-1" on-press="inbox.open">
       <text id="msg-1-from" tone="muted">Ana</text>

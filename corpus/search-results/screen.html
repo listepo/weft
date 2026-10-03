@@ -6,7 +6,7 @@
       <button type="submit" data-variant="primary">Search</button>
     </div>
   </form>
-  <ul data-bind="hidden:!$.hasResults">
+  <ul>
     <template data-each="$.results" data-as="result">
       <li>
         <h3 data-bind="text:$result.title"></h3>
@@ -14,6 +14,8 @@
         <a href="#" data-action="press:results.open">Open</a>
       </li>
     </template>
+    <template data-empty>
+      <p>No results found</p>
+    </template>
   </ul>
-  <p data-bind="hidden:$.hasResults">No results found</p>
 </main>

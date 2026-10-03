@@ -1,5 +1,5 @@
 // The `weft-core` 0.1 catalog of SPEC §5.1 as data. `catalog.json` is generated from this object.
-import type { Catalog, ComponentDef, PropDef } from "@weft/core";
+import type { Catalog, ComponentDef, PropDef, SlotDef } from "@weft/core";
 
 const str = (description: string, extra: Partial<PropDef> = {}): PropDef => ({
   description,
@@ -33,6 +33,9 @@ const checkedProp = bool("Whether the control is on; bind it to a boolean to rea
 });
 const disabledProp = (what: string): PropDef =>
   bool(`Set to true to make ${what} non-interactive.`);
+const emptySlot = (what: string): SlotDef => ({
+  description: `Content shown instead of the ${what} when there are none, such as "No results found".`,
+});
 const tone = (values: string[], description: string, extra: Partial<PropDef> = {}) =>
   oneOf(description, values, extra);
 
@@ -74,7 +77,11 @@ const components: Record<string, ComponentDef> = {
     role: "none",
     content: "nodes",
     props: {
-      columns: num("Number of equal columns in the grid.", { required: true }),
+      columns: num("Number of equal columns in the grid, at least 1.", {
+        required: true,
+        integer: true,
+        min: 1,
+      }),
       gap: dimension("Space between grid cells, as a dimension token."),
     },
   },
@@ -96,8 +103,12 @@ const components: Record<string, ComponentDef> = {
     role: "heading",
     content: "text",
     props: {
-      level: num("Heading level from 1 to 6; use 1 for the screen title.", { required: true }),
-      value: str("The heading text, for when it comes from a binding; do not also give content."),
+      level: num("Heading level from 1 to 6; use 1 for the screen title.", {
+        required: true,
+        integer: true,
+        min: 1,
+        max: 6,
+      }),
     },
   },
   text: {
@@ -105,7 +116,6 @@ const components: Record<string, ComponentDef> = {
     role: "none",
     content: "text",
     props: {
-      value: str("The text to show, for when it comes from a binding; do not also give content."),
       tone: tone(
         ["default", "muted", "success", "warning", "danger"],
         "Semantic colouring of the text; muted for secondary text, danger for errors.",
@@ -142,6 +152,10 @@ const components: Record<string, ComponentDef> = {
         { default: "secondary" },
       ),
       disabled: disabledProp("the button"),
+      submit: bool(
+        "Set to true to make the button submit its enclosing form, firing the form's `submit` event; such a button needs no `on-press`.",
+        { default: false, bindable: false },
+      ),
     },
     states: ["idle", "busy"],
     events: ["press"],
@@ -249,6 +263,7 @@ const components: Record<string, ComponentDef> = {
     content: "nodes",
     allowedChildren: ["item", "each"],
     props: { ordered: bool("Set to true when the order of the items is meaningful.") },
+    slots: { empty: emptySlot("items") },
     states: ["ready", "loading", "empty"],
   },
   item: {
@@ -264,6 +279,7 @@ const components: Record<string, ComponentDef> = {
     content: "nodes",
     allowedChildren: ["column", "row", "each"],
     requiresLabel: true,
+    slots: { empty: emptySlot("rows") },
     states: ["ready", "loading", "empty"],
   },
   column: {
@@ -362,6 +378,16 @@ const components: Record<string, ComponentDef> = {
     events: ["press"],
   },
 };
+
+// SPEC §5.1: the `text` prop follows from the content model, so it is added here once rather than
+// written into each definition, where a new text-bearing kind could forget it.
+const textProp = str(
+  "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+);
+for (const def of Object.values(components)) {
+  if (def.content === "text" || def.content === "mixed")
+    def.props = { ...def.props, text: textProp };
+}
 
 export const coreCatalog: Catalog = {
   weft: "0.1",

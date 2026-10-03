@@ -4,7 +4,7 @@ Twelve reference screens, each written in four formats that describe the same co
 
 ```
 corpus/<screen>/
-  screen.weft        Weft 0.1 markup, written to SPEC.md
+  screen.weft        Weft 0.1 markup, written to SPEC.md, in canonical form
   screen.html        semantic HTML with ARIA and data-bind / data-action attributes
   screen.jsx         an idiomatic React function component: ({ data, actions }) => ...
   screen.a2ui.json   A2UI v0.9 messages (basic catalog)
@@ -16,19 +16,27 @@ Screens: login, signup, settings, data-table, tabs, confirm-dialog, wizard-step,
 
 ## How the files were produced
 
-`screen.weft` was written by hand. The other three formats were derived from it by a throwaway transpiler (not committed) so that content, order, bindings and actions cannot drift apart, then checked by `bench/test/corpus.test.ts`, which parses every file back and asserts that HTML and JSX yield exactly the Weft tree and that A2UI carries the same content stream. Each format follows its own idiom; none is minified or padded. Ids appear in HTML and JSX only where an idiom needs them (`label for`, tabs).
+`screen.weft` was written by hand. The first versions of the other three formats were derived from it by a throwaway transpiler that was never committed. Since then every file is edited by hand, and a change to a screen is made in all four formats in the same commit (the T9 revision, for example, rewrote the search results empty state in all four).
+
+Agreement is enforced by tests rather than by generation:
+
+- `bench/test/conformance.test.ts` parses every `screen.weft` with the reference parser and validates it in strict mode against the core catalog and the default tokens: zero diagnostics, and the file must equal its canonical serialization (`node packages/core/src/cli.ts fmt --write <file>`).
+- `bench/test/corpus.test.ts` parses every format into the neutral tree of `bench/src/neutral.ts` and asserts that HTML and JSX yield exactly the Weft tree and that A2UI carries the same stream of names, bindings and actions.
+
+Each format follows its own idiom; none is minified or padded. Ids appear in HTML and JSX only where an idiom needs them (`label for`, tabs).
 
 ## HTML conventions
 
 - `data-bind="prop:$.path; prop2:!$.path"` binds an element property to the data model. Properties: `value`, `checked`, `open`, `src`, `href`, `disabled`, `hidden`, `text` (element content). `!` negates.
 - `data-action="event:action.name"` names the host action an event fires. Events: `press`, `submit`, `change`, `close`.
 - Repetition: `<template data-each="$.items" data-as="item">`; inside it paths are `$item.field`.
+- Empty state: `<template data-empty>` inside a list or table holds the content shown instead of the items when there are none (Weft's `empty` slot).
 - `data-variant` carries button variants (`primary`, `danger`), `data-state` the Weft `state`, `data-tone` the alert tone. `class` names (`stack`, `row`, `gap-sm`, `gap-md`) carry layout and spacing intent only.
 - A `type="submit"` button inside a form fires the form's `submit` action.
 
 ## JSX conventions
 
-Values are read from `data.path`; controlled inputs write with `actions.set("path", value)` (inside a repetition `actions.set(\`todos.${index}.done\`, ...)`); named host actions are called as `actions.group.name()`; repetition is `data.items.map((item, index) => ...)`; visibility bindings are `cond && <El/>`. Corpus `.jsx` files are data and are never compiled.
+Values are read from `data.path`; controlled inputs write with `actions.set("path", value)` (inside a repetition `actions.set(\`todos.${index}.done\`, ...)`); named host actions are called as `actions.group.name()`; repetition is `data.items.map((item, index) => ...)`; visibility bindings are `cond && <El/>`; an empty state is `data.items.length > 0 ? <ul>…</ul> : <p>…</p>`. Corpus `.jsx` files are data and are never compiled.
 
 ## A2UI
 
@@ -38,7 +46,8 @@ Where A2UI's basic catalog cannot express something native to the screen, the cl
 
 | Screen need | A2UI stand-in or loss |
 | --- | --- |
-| form and its `submit` event | `Column`; the submit action sits on the Button |
+| form and its `submit` event, `submit` button | `Column`; the form's submit action sits on the Button |
+| list `empty` slot | a `Text` after the `List`, always shown: A2UI has no conditional rendering |
 | switch | `CheckBox` |
 | select, radio group | `ChoicePicker` (`mutuallyExclusive`; `filterable` for select); its value must be a string array, so a scalar path like `/plan` is bound as is |
 | table, columns, sort state | header `Row` of borderless Buttons or Text plus a templated `List` of `Row`s; sort state is lost |

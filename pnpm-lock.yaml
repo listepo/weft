@@ -124,6 +124,9 @@ importers:
 
   bench:
     dependencies:
+      '@weft/catalog':
+        specifier: workspace:*
+        version: link:../packages/catalog
       '@weft/core':
         specifier: workspace:*
         version: link:../packages/core

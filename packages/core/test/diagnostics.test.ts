@@ -37,10 +37,10 @@ const cases: Record<Exclude<DiagnosticCode, `W5${string}`>, Case> = {
   W110: { markup: '<screen id="s" weft="0.1"><form id="f">' },
   W111: { markup: `${screen("")}</form>` },
   W112: { markup: screen('<text id="t">a &nbsp; b</text>') },
-  W113: { markup: screen('<text id="t" value="a<b"/>') },
+  W113: { markup: screen('<text id="t" text="a<b"/>') },
   W114: { markup: `hello ${screen("")}` },
   W115: { markup: screen("<!-- a -- b -->") },
-  W116: { markup: screen('<text id="t" value="{oops}"/>') },
+  W116: { markup: screen('<text id="t" text="{oops}"/>') },
   W117: { markup: screen(`${'<stack id="x">'.repeat(300)}${"</stack>".repeat(300)}`) },
   W118: { markup: screen('<form id="f"><slot/></form>') },
   W119: {
@@ -61,8 +61,8 @@ const cases: Record<Exclude<DiagnosticCode, `W5${string}`>, Case> = {
   W210: { markup: screen('<x-acme-map id="m"/>') },
   W211: { markup: screen('<x-acme-map id="m" role="mapp"/>') },
   W212: { markup: screen('<text id="1t">x</text>') },
-  W213: { markup: screen('<text id="t" value="Hello {$.name}"/>') },
-  W214: { markup: screen('<text id="t" value="{$..a}"/>') },
+  W213: { markup: screen('<text id="t" text="Hello {$.name}"/>') },
+  W214: { markup: screen('<text id="t" text="{$..a}"/>') },
   W215: { markup: screen('<stack id="st" gap="{token.}"/>') },
   W216: { markup: screen('<button id="b" on-press="Bad Action">x</button>') },
   W217: { markup: screen('<x-acme-map id="m" role="{$.role}"/>') },
@@ -76,11 +76,12 @@ const cases: Record<Exclude<DiagnosticCode, `W5${string}`>, Case> = {
     ),
   },
   W223: { json: doc({ kind: "text", id: "t", props: { "on-press": "a.b" } }) },
+  W224: { markup: screen('<heading id="h" level="7">x</heading>') },
   W301: { markup: screen('<text id="t">a</text><text id="t">b</text>') },
   W302: { markup: screen('<list id="l"><text id="t">x</text></list>') },
   W303: { markup: screen('<item id="i">x</item>') },
   W304: { markup: screen('<button id="b"><text id="t">x</text></button>') },
-  W305: { markup: screen('<text id="t" value="{$todo.title}"/>') },
+  W305: { markup: screen('<text id="t" text="{$todo.title}"/>') },
   W306: { markup: screen('<stack id="st" gap="{token.space.xl}"/>'), options: { tokens } },
   W307: { markup: screen('<stack id="st" gap="{token.color.accent}"/>'), options: { tokens } },
   W308: {
@@ -88,13 +89,15 @@ const cases: Record<Exclude<DiagnosticCode, `W5${string}`>, Case> = {
     options: { actions: ["auth.submit"] },
   },
   W309: { markup: screen('<tabs id="tb" selected="nope"><tab id="a" label="A"/></tabs>') },
-  W310: { markup: screen('<text id="t" value="x">y</text>') },
+  W310: { markup: screen('<link id="l" text="{$.cta}" on-press="a.b">y</link>') },
   W311: {
     markup: screen(
       '<list id="l"><each id="e1" as="row" in="{$.rows}"><each id="e2" as="row" in="{$row.items}"><item id="i">x</item></each></each></list>',
     ),
   },
   W312: { markup: screen('<screen id="inner" weft="0.1"/>') },
+  W313: { markup: screen('<button id="b" submit="true">Send</button>') },
+  W314: { markup: screen('<list id="l"><each id="e" as="row" in="{$.rows}"/></list>') },
   W401: { markup: screen('<fancy id="f"/>') },
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
   W403: { markup: screen("", "0.2") },
@@ -143,6 +146,43 @@ test("diagnostics carry a precise location and a repair hint", () => {
     got: '"submiting"',
     hint: 'did you mean "submitting"?',
   });
+});
+
+test("text comes from content or from the text attribute, never both", () => {
+  const valid = screen('<text id="a" text="{$.x}"/><link id="b" on-press="a.b">Go</link>');
+  assert.deepEqual(parse(valid, { catalog, mode: "strict" }).diagnostics, []);
+  const [d] = parse(screen('<text id="t" text="x">y</text>'), { catalog }).diagnostics;
+  assert.equal(d?.code, "W310");
+  assert.equal(d?.path, "/screen#s/text#t/@text");
+});
+
+test("a submit button is valid anywhere inside a form, slots and loops included", () => {
+  const markup = screen(
+    '<form id="f" on-submit="a.b"><stack id="st"><button id="b1" submit="true">A</button></stack><slot name="footer"><button id="b2" submit="true">B</button></slot></form>',
+  );
+  assert.deepEqual(parse(markup, { catalog, mode: "strict" }).diagnostics, []);
+});
+
+test("numbers are checked against min, max and integer", () => {
+  const codes = (level: string) =>
+    parse(screen(`<heading id="h" level="${level}">x</heading>`), { catalog }).diagnostics.map(
+      (d) => [d.code, d.expected, d.hint],
+    );
+  assert.deepEqual(codes("1"), []);
+  assert.deepEqual(codes("6"), []);
+  assert.deepEqual(codes("0"), [["W224", "an integer from 1 to 6", "use 1"]]);
+  assert.deepEqual(codes("2.5"), [["W224", "an integer from 1 to 6", "use 3"]]);
+  assert.deepEqual(codes("9"), [["W224", "an integer from 1 to 6", "use 6"]]);
+});
+
+test("<each> repeats elements only, even inside a parent that takes text", () => {
+  const markup = screen(
+    '<list id="l"><item id="i"><each id="e" as="row" in="{$.rows}">Hi <text id="t" text="{$row.name}"/></each></item></list>',
+  );
+  assert.deepEqual(
+    parse(markup, { catalog }).diagnostics.map((d) => [d.code, d.path]),
+    [["W304", "/screen#s/list#l/item#i/each#e/#text[0]"]],
+  );
 });
 
 test("JSON shape errors point into the JSON", () => {

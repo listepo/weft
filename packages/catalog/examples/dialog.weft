@@ -1,4 +1,4 @@
-<screen id="root" weft="0.1" label="Files">
+<screen id="root" label="Files" weft="0.1">
   <dialog id="confirm" label="Delete file?" modal="true" open="{$.confirmOpen}" on-close="dialog.close">
     <text id="warn">This cannot be undone.</text>
     <slot name="actions">

@@ -22,6 +22,7 @@ const EVENTS: Record<string, string> = {
   onChange: "change",
   onClose: "close",
 };
+const COLLECTIONS = new Set(["ul", "ol", "table"]);
 const ATTR_ALIASES: Record<string, string> = { className: "class", htmlFor: "for" };
 
 const unwrap = (n: Ast): Ast =>
@@ -159,10 +160,32 @@ function toChildren(c: Ast, scope: string[]): HChild[] {
     }
   }
   if (x.type === "ConditionalExpression") {
-    return [x.consequent, x.alternate]
+    const branches: HEl[] = [x.consequent, x.alternate]
       .map(unwrap)
       .filter((b: Ast) => b.type === "JSXElement")
       .map((b: Ast) => toHEl(b, scope));
+    // `items.length > 0 ? <ul>…</ul> : <p>…</p>` is a collection with an empty state, written in
+    // HTML as `<template data-empty>` inside the list.
+    const test = unwrap(x.test);
+    const list = branches.find((b) => COLLECTIONS.has(b.tag));
+    const empty = branches.find((b) => b !== list);
+    if (
+      list &&
+      empty &&
+      test.type === "BinaryExpression" &&
+      unwrap(test.left)?.type === "MemberExpression" &&
+      unwrap(test.left).property.name === "length"
+    ) {
+      list.children.push({
+        tag: "template",
+        attrs: { "data-empty": "" },
+        bind: {},
+        on: {},
+        children: [empty],
+      });
+      return [list];
+    }
+    return branches;
   }
   return [];
 }

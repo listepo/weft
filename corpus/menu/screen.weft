@@ -1,5 +1,5 @@
-<screen id="account-menu" weft="0.1" label="Account menu">
-  <text id="signed-in" value="{$.user.email}"/>
+<screen id="account-menu" label="Account menu" weft="0.1">
+  <text id="signed-in" text="{$.user.email}"/>
   <menu id="menu" label="Account">
     <menu-item id="item-profile" on-press="nav.profile">Profile</menu-item>
     <menu-item id="item-settings" on-press="nav.settings">Settings</menu-item>

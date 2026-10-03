@@ -61,13 +61,16 @@ type Owner = {
   allowed?: readonly string[] | undefined;
   /** Named slots hold elements only. */
   slot?: boolean;
+  /** Some ancestor is a `form`, which a `submit` button needs (SPEC §5.1). */
+  inForm?: boolean;
+  /** The list is the body of an `<each>`, which repeats elements only (SPEC §4.3). */
+  each?: boolean;
 };
 
 type At = { path: string; pos?: Position | undefined };
 
 const [CURRENT_MAJOR, CURRENT_MINOR] = WEFT_VERSION.split(".").map(Number);
 const BINDING_GRAMMAR = "$.name(.name)* or $loopVariable(.name)*";
-const TEXT_VALUE_KINDS = new Set(["text", "heading"]);
 
 export function validate(input: unknown, options: ValidateOptions): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -128,7 +131,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
           message: "A value is either text or one whole reference, never both.",
           got: value,
           expected: "plain text or one whole reference",
-          hint: 'bind the whole value, e.g. <text value="{$.greeting}"/>',
+          hint: 'bind the whole value, e.g. <text text="{$.greeting}"/>',
         });
       }
       if (NON_XML_CHAR.test(value))
@@ -154,7 +157,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
       case "number":
         if (typeof value !== "number" || !Number.isFinite(value)) {
           report("W204", { ...at, message: "Expected a number.", expected: "a JSON number", got });
-        }
+        } else checkRange(value, def, at);
         break;
       case "boolean":
         if (typeof value !== "boolean")
@@ -188,6 +191,32 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
         });
         break;
     }
+  };
+
+  const checkRange = (value: number, def: PropDef, at: At) => {
+    const whole = def.integer === true;
+    const below = def.min !== undefined && value < def.min;
+    const above = def.max !== undefined && value > def.max;
+    if (!below && !above && (!whole || Number.isInteger(value))) return;
+    const range =
+      def.min !== undefined && def.max !== undefined
+        ? `from ${def.min} to ${def.max}`
+        : def.min !== undefined
+          ? `of at least ${def.min}`
+          : def.max !== undefined
+            ? `of at most ${def.max}`
+            : "";
+    const expected = `${whole ? "an integer" : "a number"}${range === "" ? "" : ` ${range}`}`;
+    let nearest = whole ? Math.round(value) : value;
+    if (def.min !== undefined) nearest = Math.max(nearest, whole ? Math.ceil(def.min) : def.min);
+    if (def.max !== undefined) nearest = Math.min(nearest, whole ? Math.floor(def.max) : def.max);
+    report("W224", {
+      ...at,
+      message: `${value} is not ${expected}.`,
+      expected,
+      got: String(value),
+      hint: `use ${nearest}`,
+    });
   };
 
   const checkBinding = (
@@ -315,15 +344,22 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
     positions: readonly (Position | undefined)[] | undefined,
   ) => {
     const where =
-      owner.slot === true
-        ? "This slot"
-        : owner.kind === undefined
-          ? "This list"
-          : `<${owner.kind}>`;
+      owner.each === true
+        ? "<each>"
+        : owner.slot === true
+          ? "This slot"
+          : owner.kind === undefined
+            ? "This list"
+            : `<${owner.kind}>`;
     list.forEach((child, index) => {
       if (typeof child === "string") {
         const at = { path: `${listPath}/#text[${index}]`, pos: positions?.[index] };
-        if (owner.slot === true || owner.content === "nodes" || owner.content === "none") {
+        if (
+          owner.slot === true ||
+          owner.each === true ||
+          owner.content === "nodes" ||
+          owner.content === "none"
+        ) {
           report("W304", {
             ...at,
             message: `${where} does not take text.`,
@@ -566,16 +602,24 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
         });
       }
       if (
-        TEXT_VALUE_KINDS.has(kind) &&
-        Object.hasOwn(props, "value") &&
+        (component.content === "text" || component.content === "mixed") &&
+        Object.hasOwn(props, "text") &&
         (node.children?.length ?? 0) > 0
       ) {
-        // SPEC §5.1 note; the catalog format cannot express "content or value" yet.
+        // SPEC §5.1 note; the catalog format cannot express "content or the text prop".
         report("W310", {
-          ...at,
-          message: `<${kind}> takes its text from content or from value, not both.`,
-          expected: "content or value",
-          hint: "remove the content or the value attribute",
+          ...nodeAt(node, path, "text"),
+          message: `<${kind}> takes its text from content or from the text attribute, not both.`,
+          expected: "content or text, not both",
+          hint: "remove the content or the text attribute",
+        });
+      }
+      if (props["submit"] === true && owner?.inForm !== true) {
+        report("W313", {
+          ...nodeAt(node, path, "submit"),
+          message: `<${kind}> submits a form but has no enclosing <form>.`,
+          expected: "an enclosing <form>",
+          hint: 'move it into a <form>, or remove submit="true" and give it on-press',
         });
       }
       const selected = props["selected"];
@@ -623,6 +667,14 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
       } else {
         innerScope = [...scope, variable];
       }
+      if (!(node.children ?? []).some((child) => typeof child !== "string")) {
+        report("W314", {
+          ...at,
+          message: "<each> has no element to repeat.",
+          expected: "one or more child elements",
+          hint: "put the element to repeat inside <each>, or remove it",
+        });
+      }
     }
 
     const events = category === "component" ? (component?.events ?? []) : [];
@@ -662,6 +714,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
       }
     }
 
+    const inForm = owner?.inForm === true || kind === "form";
     const slots = node.slots ?? {};
     const slotSources = source?.get(node)?.slots;
     for (const [name, list] of Object.entries(slots)) {
@@ -690,6 +743,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
         content: "nodes",
         allowed: declared?.allowedChildren,
         slot: true,
+        inForm,
       };
       visitList(list, slotPath, slotOwner, innerScope, slotSources?.get(name)?.children);
     }
@@ -708,10 +762,10 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
     // `<each>` is transparent: its children answer to the list that holds the `<each>` (SPEC §4.3).
     const childOwner: Owner =
       category === "component" && component !== undefined
-        ? { kind, content: component.content, allowed: component.allowedChildren }
+        ? { kind, content: component.content, allowed: component.allowedChildren, inForm }
         : category === "each"
-          ? (owner ?? { content: "mixed" })
-          : { kind, content: "mixed" };
+          ? { ...(owner ?? { content: "mixed" }), each: true }
+          : { kind, content: "mixed", inForm };
     visitList(node.children ?? [], path, childOwner, innerScope, source?.get(node)?.children);
   };
 

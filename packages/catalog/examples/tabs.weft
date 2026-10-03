@@ -1,4 +1,4 @@
-<screen id="root" weft="0.1" label="Account">
+<screen id="root" label="Account" weft="0.1">
   <tabs id="account-tabs" selected="{$.tab}" on-change="tabs.change">
     <tab id="tab-profile" label="Profile">
       <text id="profile-text">Your public details.</text>

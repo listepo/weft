@@ -84,6 +84,7 @@ const expected: Record<string, Row> = {
     role: "list",
     content: "nodes",
     children: ["item", "each"],
+    slots: ["empty"],
     states: ["ready", "loading", "empty"],
   },
   item: { role: "listitem", content: "mixed", parents: ["list"], events: ["press"] },
@@ -92,6 +93,7 @@ const expected: Record<string, Row> = {
     content: "nodes",
     children: ["column", "row", "each"],
     label: true,
+    slots: ["empty"],
     states: ["ready", "loading", "empty"],
   },
   column: {
@@ -123,6 +125,7 @@ const propTypes: Record<string, string> = {
   "grid.gap": "token",
   "heading.level": "number",
   "button.disabled": "boolean",
+  "button.submit": "boolean",
   "field.required": "boolean",
   "field.disabled": "boolean",
   "checkbox.checked": "boolean",
@@ -148,6 +151,7 @@ const writable = [
 const defaults: Record<string, string | boolean> = {
   "stack.direction": "column",
   "button.variant": "secondary",
+  "button.submit": false,
   "field.type": "text",
   "dialog.modal": true,
   "alert.tone": "info",
@@ -209,6 +213,15 @@ test("prop types, writable flags and defaults match SPEC §5.1", () => {
   }
 });
 
+test("numeric ranges match SPEC §5.1", () => {
+  const range = (kind: string, name: string) => {
+    const p = coreCatalog.components[kind]?.props?.[name];
+    return { integer: p?.integer, min: p?.min, max: p?.max };
+  };
+  assert.deepEqual(range("heading", "level"), { integer: true, min: 1, max: 6 });
+  assert.deepEqual(range("grid", "columns"), { integer: true, min: 1, max: undefined });
+});
+
 test("enum props have values, token props have tokenType, everything is described", () => {
   for (const [kind, def] of Object.entries(coreCatalog.components)) {
     assert.ok(def.description.endsWith("."), `${kind} description`);
@@ -217,6 +230,8 @@ test("enum props have values, token props have tokenType, everything is describe
       assert.ok(p.description.length > 0, `${at} description`);
       if (p.type === "enum") assert.ok(p.values && p.values.length > 0, `${at} values`);
       else assert.equal(p.values, undefined, `${at} stray values`);
+      if (p.type !== "number")
+        assert.ok(p.min === undefined && p.max === undefined && p.integer === undefined, at);
       if (p.type === "token") assert.ok(p.tokenType, `${at} tokenType`);
       else assert.equal(p.tokenType, undefined, `${at} stray tokenType`);
       if (p.default !== undefined && p.type === "enum")
@@ -225,6 +240,16 @@ test("enum props have values, token props have tokenType, everything is describe
     for (const [name, s] of Object.entries(def.slots ?? {})) {
       assert.ok(s.description.length > 0, `${kind} slot ${name}`);
     }
+  }
+});
+
+test("exactly the text and mixed kinds declare the bindable string prop `text`", () => {
+  for (const [kind, def] of Object.entries(coreCatalog.components)) {
+    const text = def.props?.["text"];
+    if (def.content === "text" || def.content === "mixed") {
+      assert.equal(text?.type, "string", kind);
+      assert.notEqual(text?.bindable, false, kind);
+    } else assert.equal(text, undefined, kind);
   }
 });
 

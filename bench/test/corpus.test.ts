@@ -1,11 +1,9 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { test } from "node:test";
-import { validateWeft } from "../src/adapters/weft.ts";
 import { CORPUS_DIR, SCREENS, loadTasks, readScreen } from "../src/corpus.ts";
 import { FILE_NAME, parsers } from "../src/formats.ts";
 import { FORMATS, evaluate, walk, type NNode } from "../src/neutral.ts";
-import { WEFT_KINDS } from "../src/weft-catalog.ts";
 
 const lift = (n: NNode, kinds: string[]): NNode[] => {
   const kids = n.children.flatMap((c) => lift(c, kinds));
@@ -17,19 +15,6 @@ test("every screen has all five files", () => {
     for (const f of [...FORMATS.map((x) => FILE_NAME[x]), "data.json"])
       assert.ok(existsSync(`${CORPUS_DIR}${screen}/${f}`), `${screen}/${f}`);
     JSON.parse(readFileSync(`${CORPUS_DIR}${screen}/data.json`, "utf8"));
-  }
-});
-
-test("every screen.weft is well-formed with unique ids and only SPEC 5.1 kinds", () => {
-  for (const screen of SCREENS) {
-    const src = readScreen(screen, "weft");
-    assert.deepEqual(validateWeft(src), [], screen);
-    const ids = [...src.matchAll(/<[a-z-]+ id="([^"]+)"/g)].map((m) => m[1]);
-    assert.equal(new Set(ids).size, ids.length, `${screen}: duplicate ids`);
-    const tags = new Set([...src.matchAll(/<([a-z][a-z0-9-]*)[\s/>]/g)].map((m) => m[1] as string));
-    for (const t of tags)
-      assert.ok(t in WEFT_KINDS || t === "slot" || t === "each", `${screen}: unknown <${t}>`);
-    assert.doesNotMatch(src, /\s[a-z-]+='/);
   }
 });
 

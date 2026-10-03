@@ -1,4 +1,4 @@
-<screen id="root" weft="0.1" label="Payment">
+<screen id="root" label="Payment" weft="0.1">
   <alert id="failed" tone="danger">
     <text id="failed-text">Your card was declined.</text>
     <link id="retry" on-press="payment.retry">Try again</link>

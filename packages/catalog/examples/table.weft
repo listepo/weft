@@ -1,12 +1,20 @@
-<screen id="root" weft="0.1" label="Orders">
+<screen id="root" label="Orders" weft="0.1">
   <table id="orders" label="Recent orders" state="ready">
     <column id="col-id">Order</column>
     <column id="col-total" sort="descending" on-press="orders.sort">Total</column>
-    <each id="order-each" in="{$.orders}" as="order">
+    <each id="order-each" as="order" in="{$.orders}">
       <row id="order-row" selected="false">
-        <cell id="order-id"><text id="order-id-text" value="{$order.id}"/></cell>
-        <cell id="order-total"><text id="order-total-text" value="{$order.total}"/></cell>
+        <cell id="order-id">
+          <text id="order-id-text" text="{$order.id}"/>
+        </cell>
+        <cell id="order-total">
+          <text id="order-total-text" text="{$order.total}"/>
+        </cell>
       </row>
     </each>
+    <slot name="empty">
+      <text id="orders-empty">No orders yet.</text>
+      <button id="orders-shop" on-press="nav.shop">Start shopping</button>
+    </slot>
   </table>
 </screen>

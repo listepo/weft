@@ -10,84 +10,84 @@ Tokens use gpt-tokenizer 4.0.0 (o200k_base), a proxy for Claude's tokenizer. Byt
 
 | Screen | weft | html | jsx | a2ui | weft/html | weft/jsx | weft/a2ui |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| login | 204 | 189 | 242 | 714 | 108% | 84% | 29% |
+| login | 203 | 189 | 242 | 714 | 107% | 84% | 28% |
 | signup | 264 | 277 | 371 | 887 | 95% | 71% | 30% |
-| settings | 261 | 273 | 344 | 765 | 96% | 76% | 34% |
-| data-table | 262 | 268 | 278 | 772 | 98% | 94% | 34% |
-| tabs | 228 | 339 | 342 | 629 | 67% | 67% | 36% |
+| settings | 258 | 273 | 344 | 765 | 95% | 75% | 34% |
+| data-table | 278 | 268 | 278 | 772 | 104% | 100% | 36% |
+| tabs | 232 | 339 | 342 | 629 | 68% | 68% | 37% |
 | confirm-dialog | 171 | 153 | 168 | 532 | 112% | 102% | 32% |
 | wizard-step | 190 | 224 | 294 | 540 | 85% | 65% | 35% |
-| search-results | 230 | 193 | 227 | 560 | 119% | 101% | 41% |
-| todo-list | 257 | 230 | 281 | 677 | 112% | 91% | 38% |
-| profile | 168 | 133 | 137 | 599 | 126% | 123% | 28% |
+| search-results | 223 | 185 | 225 | 560 | 121% | 99% | 40% |
+| todo-list | 254 | 230 | 281 | 677 | 110% | 90% | 38% |
+| profile | 169 | 133 | 137 | 599 | 127% | 123% | 28% |
 | menu | 148 | 149 | 164 | 615 | 99% | 90% | 24% |
 | error-state | 139 | 116 | 134 | 444 | 120% | 104% | 31% |
-| **total** | **2522** | **2544** | **2982** | **7734** | **99%** | **85%** | **33%** |
+| **total** | **2529** | **2536** | **2980** | **7734** | **100%** | **85%** | **33%** |
 
 Per-screen weft/baseline ratio (lower is better for Weft):
 
 | Baseline | min | median | max | total |
 | --- | ---: | ---: | ---: | ---: |
-| html | 67% | 104% | 126% | 99% |
-| jsx | 65% | 91% | 123% | 85% |
-| a2ui | 24% | 33% | 41% | 33% |
+| html | 68% | 106% | 127% | 100% |
+| jsx | 65% | 90% | 123% | 85% |
+| a2ui | 24% | 33% | 40% | 33% |
 
 ### Tokens with whitespace collapsed (indentation and newlines removed from every format)
 
 | Screen | weft | html | jsx | a2ui | weft/html | weft/jsx | weft/a2ui |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| login | 193 | 175 | 224 | 574 | 110% | 86% | 34% |
+| login | 192 | 175 | 224 | 574 | 110% | 86% | 33% |
 | signup | 251 | 256 | 346 | 712 | 98% | 73% | 35% |
-| settings | 246 | 247 | 314 | 623 | 100% | 78% | 39% |
-| data-table | 247 | 239 | 246 | 631 | 103% | 100% | 39% |
-| tabs | 210 | 314 | 314 | 510 | 67% | 67% | 41% |
+| settings | 243 | 247 | 314 | 623 | 98% | 77% | 39% |
+| data-table | 256 | 239 | 246 | 631 | 107% | 104% | 41% |
+| tabs | 213 | 314 | 314 | 510 | 68% | 68% | 42% |
 | confirm-dialog | 161 | 143 | 155 | 435 | 113% | 104% | 37% |
 | wizard-step | 181 | 203 | 269 | 435 | 89% | 67% | 42% |
-| search-results | 216 | 176 | 205 | 457 | 123% | 105% | 47% |
-| todo-list | 240 | 207 | 255 | 549 | 116% | 94% | 44% |
-| profile | 160 | 124 | 124 | 488 | 129% | 129% | 33% |
+| search-results | 207 | 166 | 203 | 457 | 125% | 102% | 45% |
+| todo-list | 238 | 207 | 255 | 549 | 115% | 93% | 43% |
+| profile | 161 | 124 | 124 | 488 | 130% | 130% | 33% |
 | menu | 141 | 142 | 153 | 503 | 99% | 92% | 28% |
 | error-state | 132 | 108 | 122 | 364 | 122% | 108% | 36% |
-| **total** | **2378** | **2334** | **2727** | **6281** | **102%** | **87%** | **38%** |
+| **total** | **2376** | **2324** | **2725** | **6281** | **102%** | **87%** | **38%** |
 
 Per-screen weft/baseline ratio (lower is better for Weft):
 
 | Baseline | min | median | max | total |
 | --- | ---: | ---: | ---: | ---: |
-| html | 67% | 107% | 129% | 102% |
-| jsx | 67% | 93% | 129% | 87% |
-| a2ui | 28% | 38% | 47% | 38% |
+| html | 68% | 108% | 130% | 102% |
+| jsx | 67% | 93% | 130% | 87% |
+| a2ui | 28% | 38% | 45% | 38% |
 
 ### Bytes
 
 | Screen | weft | html | jsx | a2ui | weft/html | weft/jsx | weft/a2ui |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| login | 701 | 671 | 956 | 3251 | 104% | 73% | 22% |
-| signup | 955 | 1039 | 1514 | 4157 | 92% | 63% | 23% |
+| login | 692 | 671 | 956 | 3251 | 103% | 72% | 21% |
+| signup | 946 | 1039 | 1514 | 4157 | 91% | 62% | 23% |
 | settings | 961 | 987 | 1395 | 3421 | 97% | 69% | 28% |
-| data-table | 875 | 969 | 1136 | 3220 | 90% | 77% | 27% |
-| tabs | 780 | 1223 | 1357 | 2704 | 64% | 57% | 29% |
-| confirm-dialog | 600 | 550 | 671 | 2267 | 109% | 89% | 26% |
-| wizard-step | 616 | 733 | 1098 | 2341 | 84% | 56% | 26% |
-| search-results | 766 | 657 | 900 | 2324 | 117% | 85% | 33% |
-| todo-list | 843 | 771 | 1070 | 2895 | 109% | 79% | 29% |
-| profile | 533 | 405 | 485 | 2541 | 132% | 110% | 21% |
-| menu | 495 | 531 | 646 | 2686 | 93% | 77% | 18% |
-| error-state | 477 | 389 | 505 | 1847 | 123% | 94% | 26% |
-| **total** | **8602** | **8925** | **11733** | **33654** | **96%** | **73%** | **26%** |
+| data-table | 952 | 969 | 1136 | 3220 | 98% | 84% | 30% |
+| tabs | 800 | 1223 | 1357 | 2704 | 65% | 59% | 30% |
+| confirm-dialog | 599 | 550 | 671 | 2267 | 109% | 89% | 26% |
+| wizard-step | 615 | 733 | 1098 | 2341 | 84% | 56% | 26% |
+| search-results | 747 | 638 | 881 | 2324 | 117% | 85% | 32% |
+| todo-list | 836 | 771 | 1070 | 2895 | 108% | 78% | 29% |
+| profile | 531 | 405 | 485 | 2541 | 131% | 109% | 21% |
+| menu | 494 | 531 | 646 | 2686 | 93% | 76% | 18% |
+| error-state | 476 | 389 | 505 | 1847 | 122% | 94% | 26% |
+| **total** | **8649** | **8906** | **11714** | **33654** | **97%** | **74%** | **26%** |
 
 Per-screen weft/baseline ratio (lower is better for Weft):
 
 | Baseline | min | median | max | total |
 | --- | ---: | ---: | ---: | ---: |
-| html | 64% | 101% | 132% | 96% |
-| jsx | 56% | 77% | 110% | 73% |
-| a2ui | 18% | 26% | 33% | 26% |
+| html | 65% | 101% | 131% | 97% |
+| jsx | 56% | 77% | 109% | 74% |
+| a2ui | 18% | 26% | 32% | 26% |
 
 Anthropic token counts: not measured (ANTHROPIC_API_KEY was not set).
 
-Stop-criterion check (as committed): Weft uses 67.4% fewer tokens than A2UI JSON in total; the criterion asks for at least 25% fewer.
-Stop-criterion check (whitespace collapsed): Weft uses 62.1% fewer tokens than A2UI JSON in total; the criterion asks for at least 25% fewer.
+Stop-criterion check (as committed): Weft uses 67.3% fewer tokens than A2UI JSON in total; the criterion asks for at least 25% fewer.
+Stop-criterion check (whitespace collapsed): Weft uses 62.2% fewer tokens than A2UI JSON in total; the criterion asks for at least 25% fewer.
 
 ## Prompt primers
 
@@ -95,7 +95,7 @@ Format primers used by the edit and read runs, in gpt-tokenizer 4.0.0 (o200k_bas
 
 | Format | Primer tokens |
 | --- | ---: |
-| weft | 450 |
+| weft | 499 |
 | html | 158 |
 | jsx | 111 |
 | a2ui | 480 |
