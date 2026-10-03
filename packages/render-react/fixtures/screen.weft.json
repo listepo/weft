@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Home", "state": "ready", "weft": "0.1" },
+    "props": { "label": "Home", "state": "ready" },
     "children": [
       { "kind": "heading", "id": "title", "props": { "level": 1 }, "children": ["Welcome back"] },
       { "kind": "text", "id": "intro", "children": ["Pick up where you left off."] }

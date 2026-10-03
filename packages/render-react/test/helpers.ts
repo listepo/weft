@@ -27,7 +27,7 @@ export function el(
 
 export const doc = (...children: Child[]): Document => ({
   weft: "0.1",
-  root: el("screen", "root", { weft: "0.1", label: "Test" }, children),
+  root: el("screen", "root", { label: "Test" }, children),
 });
 
 export type Options = Partial<RenderOptions>;

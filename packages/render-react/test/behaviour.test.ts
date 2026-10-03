@@ -10,9 +10,9 @@ import { b, doc, dom, el, html, nb, propsOf, tree } from "./helpers.ts";
 test("bindings resolve against data; missing ones render empty", () => {
   const v = dom(
     doc(
-      el("text", "a", { value: b("$.user.name") }),
-      el("text", "m", { value: b("$.nope.deep") }),
-      el("text", "n", { value: b("$.n") }),
+      el("text", "a", { text: b("$.user.name") }),
+      el("text", "m", { text: b("$.nope.deep") }),
+      el("text", "n", { text: b("$.n") }),
     ),
     {
       data: { user: { name: "Ana" }, n: 3 },
@@ -26,8 +26,8 @@ test("bindings resolve against data; missing ones render empty", () => {
 test("paths never reach inherited properties", () => {
   const v = dom(
     doc(
-      el("text", "a", { value: b("$.constructor.name") }),
-      el("text", "p", { value: b("$.__proto__") }),
+      el("text", "a", { text: b("$.constructor.name") }),
+      el("text", "p", { text: b("$.__proto__") }),
     ),
     { data: {} },
   );
@@ -47,9 +47,9 @@ test("each expands per item with instance ids and loop variables, nested too", (
     el("list", "l", {}, [
       el("each", "e", { in: b("$.groups"), as: "g" }, [
         el("item", "i", {}, [
-          el("text", "t", { value: b("$g.name") }),
+          el("text", "t", { text: b("$g.name") }),
           el("each", "e2", { in: b("$g.tags"), as: "tag" }, [
-            el("text", "tag", { value: b("$tag") }),
+            el("text", "tag", { text: b("$tag") }),
           ]),
         ]),
       ]),
@@ -114,6 +114,43 @@ test("press, submit and close dispatch the named action with id and loop item", 
     { id: "f", action: "auth.submit" },
   ]);
   assert.ok(prevented);
+});
+
+test("a submit button fires its own press and its nearest form's submit, once per press", () => {
+  const calls: ActionEvent[] = [];
+  const record = (e: ActionEvent) => calls.push(e);
+  const actions = { "f.submit": record, "inner.submit": record, "b.press": record };
+  const d = doc(
+    el("form", "outer", {}, [], {
+      on: { submit: "f.submit" },
+      slots: {
+        footer: [
+          el("list", "l", {}, [
+            el("each", "e", { in: b("$.rows"), as: "row" }, [
+              el("item", "i", {}, [
+                el("button", "s", { submit: true }, ["Save"], { on: { press: "b.press" } }),
+              ]),
+            ]),
+          ]),
+        ],
+      },
+    }),
+    el("form", "f2", {}, [el("button", "plain", { submit: true }, ["Go"])], {
+      on: { submit: "inner.submit" },
+    }),
+  );
+  const t = tree(d, { data: { rows: [1, 2] }, actions });
+  let prevented = 0;
+  const click = (id: string) =>
+    (propsOf(t, id)["onClick"] as (e: unknown) => void)({ preventDefault: () => prevented++ });
+  click("s[1]");
+  click("plain");
+  assert.deepEqual(calls, [
+    { id: "s[1]", action: "b.press", item: "$.rows.1" },
+    { id: "outer", action: "f.submit" },
+    { id: "f2", action: "inner.submit" },
+  ]);
+  assert.equal(prevented, 2, "the native submission is cancelled so the form does not fire again");
 });
 
 test("actions are looked up as own properties only", () => {
@@ -260,7 +297,7 @@ test("text is escaped, never injected as markup", () => {
   const out = html(
     doc(
       el("text", "t", {}, ["<script>alert(1)</script>"]),
-      el("heading", "h", { level: 1, value: b("$.x") }),
+      el("heading", "h", { level: 1, text: b("$.x") }),
     ),
     {
       data: { x: "<img src=x onerror=alert(1)>" },

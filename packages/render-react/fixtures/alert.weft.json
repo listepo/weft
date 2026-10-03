@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Payment", "weft": "0.1" },
+    "props": { "label": "Payment" },
     "children": [
       {
         "kind": "alert",

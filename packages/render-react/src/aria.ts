@@ -14,10 +14,10 @@ import {
   nodes,
   options,
   ordered,
-  ownText,
   radioChecked,
   selectedOption,
   selectedTab,
+  showsEmpty,
   text,
   type Inst,
   type InstChild,
@@ -86,13 +86,13 @@ function build(c: InstChild, ctx: Ctx): AriaNode[] {
     case "grid":
       return kids();
     case "text": {
-      const t = ownText(n);
-      return t.trim() === "" ? [] : [textNode(t)];
+      const t = contentText(n.children);
+      return t === "" ? [] : [textNode(t)];
     }
     case "section":
       return node(exposedRole("region", n), n, kids());
     case "heading": {
-      const t = ownText(n);
+      const t = contentText(n.children);
       return node("heading", n, t ? [textNode(t)] : [], {
         name: label(n) || t,
         states: { level: headingLevel(n) },
@@ -181,15 +181,18 @@ function build(c: InstChild, ctx: Ctx): AriaNode[] {
 // Mirrors the renderer: columns form the header row in one row group, everything else goes to
 // the body row group, and content that is not a row is wrapped in a row and cell (SPEC §5.1).
 function tableBody(table: Inst, ctx: Ctx): AriaNode[] {
-  const columns: InstChild[] = [];
+  const columns = table.children.filter((c) => typeof c !== "string" && c.kind === "column");
   const body: AriaNode[] = [];
-  for (const c of table.children) {
-    if (typeof c !== "string" && c.kind === "column") columns.push(c);
-    else if (typeof c !== "string" && c.kind === "row") {
-      body.push(
-        ...node("row", c, rowCells(c.children, ctx), { states: { selected: flag(c, "selected") } }),
-      );
-    } else body.push(...wrapRow([c], ctx));
+  // The empty content shares one row and one cell, like any other non-row content of a table.
+  if (showsEmpty(table)) body.push(...wrapRow(table.slots["empty"] ?? [], ctx));
+  else {
+    for (const c of table.children) {
+      if (typeof c !== "string" && c.kind === "column") continue;
+      if (typeof c !== "string" && c.kind === "row") {
+        const states = { selected: flag(c, "selected") };
+        body.push(...node("row", c, rowCells(c.children, ctx), { states }));
+      } else body.push(...wrapRow([c], ctx));
+    }
   }
   const groups: AriaNode[] = [];
   if (columns.length > 0) {
@@ -205,17 +208,20 @@ function rowOf(children: AriaNode[], name: string): AriaNode {
 }
 
 function wrapRow(list: InstChild[], ctx: Ctx): AriaNode[] {
-  return [rowOf(rowCells(list, ctx), contentText(list))];
+  return [rowOf([cellOf(list, ctx)], contentText(list))];
+}
+
+function cellOf(list: InstChild[], ctx: Ctx): AriaNode {
+  const inner = many(list, ctx);
+  const cell: AriaNode = { role: "cell", name: contentText(list) };
+  if (inner.length > 0) cell.children = inner;
+  return cell;
 }
 
 function rowCells(list: InstChild[], ctx: Ctx): AriaNode[] {
-  return list.flatMap((c) => {
-    if (typeof c !== "string" && c.kind === "cell") return build(c, ctx);
-    const inner = build(c, ctx);
-    const cell: AriaNode = { role: "cell", name: contentText([c]) };
-    if (inner.length > 0) cell.children = inner;
-    return [cell];
-  });
+  return list
+    .map((c) => (typeof c !== "string" && c.kind === "cell" ? build(c, ctx) : [cellOf([c], ctx)]))
+    .flat();
 }
 
 function tabsTree(n: Inst, ctx: Ctx): AriaNode[] {

@@ -57,7 +57,7 @@ test("expectedTree expands each, builds the table header row and the selected ta
       el("column", "c", {}, ["Order"]),
       el("each", "e", { in: b("$.rows"), as: "r" }, [
         el("row", "row", { selected: b("$r.sel") }, [
-          el("cell", "x", {}, [el("text", "tx", { value: b("$r.id") })]),
+          el("cell", "x", {}, [el("text", "tx", { text: b("$r.id") })]),
         ]),
       ]),
     ]),

@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Orders", "weft": "0.1" },
+    "props": { "label": "Orders" },
     "children": [
       {
         "kind": "table",
@@ -35,7 +35,7 @@
                       {
                         "kind": "text",
                         "id": "order-id-text",
-                        "props": { "value": { "bind": "$order.id" } }
+                        "props": { "text": { "bind": "$order.id" } }
                       }
                     ]
                   },
@@ -46,7 +46,7 @@
                       {
                         "kind": "text",
                         "id": "order-total-text",
-                        "props": { "value": { "bind": "$order.total" } }
+                        "props": { "text": { "bind": "$order.total" } }
                       }
                     ]
                   }

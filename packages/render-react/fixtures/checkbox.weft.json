@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Terms", "weft": "0.1" },
+    "props": { "label": "Terms" },
     "children": [
       {
         "kind": "checkbox",

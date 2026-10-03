@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Todos", "weft": "0.1" },
+    "props": { "label": "Todos" },
     "children": [
       {
         "kind": "list",
@@ -22,7 +22,7 @@
                   {
                     "kind": "text",
                     "id": "todo-title",
-                    "props": { "value": { "bind": "$todo.title" } }
+                    "props": { "text": { "bind": "$todo.title" } }
                   }
                 ]
               }

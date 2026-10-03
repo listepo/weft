@@ -1,0 +1,182 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Empty states"
+    },
+    "children": [
+      {
+        "kind": "list",
+        "id": "results",
+        "props": {
+          "label": "Results"
+        },
+        "slots": {
+          "empty": [
+            {
+              "kind": "text",
+              "id": "none",
+              "children": ["No results found"]
+            },
+            {
+              "kind": "button",
+              "id": "clear",
+              "on": {
+                "press": "search.clear"
+              },
+              "children": ["Clear filters"]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "each",
+            "id": "results-each",
+            "props": {
+              "as": "result",
+              "in": {
+                "bind": "$.results"
+              }
+            },
+            "children": [
+              {
+                "kind": "item",
+                "id": "result",
+                "props": {
+                  "text": {
+                    "bind": "$result"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "list",
+        "id": "stale",
+        "props": {
+          "state": "empty"
+        },
+        "slots": {
+          "empty": [
+            {
+              "kind": "text",
+              "id": "nothing",
+              "children": ["Nothing yet"]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "item",
+            "id": "stale-item",
+            "children": ["Stale"]
+          }
+        ]
+      },
+      {
+        "kind": "list",
+        "id": "full",
+        "slots": {
+          "empty": [
+            {
+              "kind": "text",
+              "id": "unused",
+              "children": ["Not shown"]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "each",
+            "id": "full-each",
+            "props": {
+              "as": "entry",
+              "in": {
+                "bind": "$.full"
+              }
+            },
+            "children": [
+              {
+                "kind": "item",
+                "id": "entry",
+                "props": {
+                  "text": {
+                    "bind": "$entry"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "id": "orders",
+        "props": {
+          "label": "Orders"
+        },
+        "slots": {
+          "empty": [
+            {
+              "kind": "text",
+              "id": "no-orders",
+              "children": ["No orders yet"]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "column",
+            "id": "col-order",
+            "children": ["Order"]
+          },
+          {
+            "kind": "column",
+            "id": "col-total",
+            "children": ["Total"]
+          },
+          {
+            "kind": "each",
+            "id": "orders-each",
+            "props": {
+              "as": "order",
+              "in": {
+                "bind": "$.orders"
+              }
+            },
+            "children": [
+              {
+                "kind": "row",
+                "id": "order",
+                "children": [
+                  {
+                    "kind": "cell",
+                    "id": "order-id",
+                    "props": {
+                      "text": {
+                        "bind": "$order.id"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "cell",
+                    "id": "order-total",
+                    "props": {
+                      "text": {
+                        "bind": "$order.total"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

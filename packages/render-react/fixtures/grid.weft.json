@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Gallery", "weft": "0.1" },
+    "props": { "label": "Gallery" },
     "children": [
       {
         "kind": "grid",

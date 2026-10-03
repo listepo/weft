@@ -22,11 +22,11 @@ import {
   label,
   nodes,
   options,
-  ordered,
-  ownText,
   prop,
   radioChecked,
+  regions,
   selectedTab,
+  showsEmpty,
   state,
   text,
   type Inst,
@@ -50,7 +50,8 @@ export type RenderOptions = {
   idPrefix?: string;
 };
 
-type Ctx = { o: RenderOptions; prefix: string; group: Inst | undefined };
+// `group` is the enclosing radio-group, `form` the nearest enclosing form.
+type Ctx = { o: RenderOptions; prefix: string; group: Inst | undefined; form: Inst | undefined };
 type Attrs = Record<string, unknown>;
 
 export function render(document: Document, options: RenderOptions): ReactElement {
@@ -59,7 +60,12 @@ export function render(document: Document, options: RenderOptions): ReactElement
     options.catalog,
     options.data,
   );
-  const ctx: Ctx = { o: options, prefix: options.idPrefix ?? "weft-", group: undefined };
+  const ctx: Ctx = {
+    o: options,
+    prefix: options.idPrefix ?? "weft-",
+    group: undefined,
+    form: undefined,
+  };
   return h(Fragment, null, root ? renderNode(root, ctx) : null);
 }
 
@@ -120,6 +126,20 @@ function pressable(ctx: Ctx, n: Inst): Attrs {
 const kids = (list: InstChild[], ctx: Ctx): ReactNode[] =>
   list.map((c) => (typeof c === "string" ? c : renderNode(c, ctx)));
 
+// A component's content in the places SPEC §4.2 gives its slots. Each named slot gets its own
+// box, so a host stylesheet can lay out a form footer or a dialog's button bar; the box is a
+// plain div and adds nothing to the accessibility tree.
+function content(n: Inst, ctx: Ctx): ReactNode[] {
+  return regions(n).map((r) =>
+    r.slot === undefined
+      ? h(Fragment, null, ...kids(r.list, ctx))
+      : h("div", { "data-weft-slot": r.slot }, ...kids(r.list, ctx)),
+  );
+}
+
+// The text a text-bearing kind shows; the `text` prop has already become content (expand.ts).
+const shown = (n: Inst): string => contentText(n.children);
+
 // ---- Layout ----
 
 const ALIGN: Record<string, string> = {
@@ -155,43 +175,35 @@ function renderNode(n: Inst, ctx: Ctx): ReactNode {
   if (!n.def) return fallback(n, ctx);
   switch (n.kind) {
     case "screen":
-      return h("main", base(n), ...kids(ordered(n), ctx));
+      return h("main", base(n), ...content(n, ctx));
     case "stack":
     case "grid":
-      return h("div", { ...base(n, false), style: layoutStyle(n, ctx) }, ...kids(ordered(n), ctx));
+      return h("div", { ...base(n, false), style: layoutStyle(n, ctx) }, ...content(n, ctx));
     case "section":
-      return h("section", base(n), ...kids(ordered(n), ctx));
+      return h("section", base(n), ...content(n, ctx));
     case "heading":
-      return h(`h${headingLevel(n)}`, base(n), ownText(n));
+      return h(`h${headingLevel(n)}`, base(n), shown(n));
     case "text":
-      return h("div", { ...base(n, false), "data-tone": text(n, "tone") || undefined }, ownText(n));
+      return h("div", { ...base(n, false), "data-tone": text(n, "tone") || undefined }, shown(n));
     case "image":
       return image(n);
     case "link":
       return link(n, ctx);
     case "button":
-      return h(
-        "button",
-        {
-          ...base(n),
-          type: "button",
-          disabled: flag(n, "disabled"),
-          "data-variant": text(n, "variant") || undefined,
-          onClick: () => fire(ctx, n, "press"),
-        },
-        contentText(n.children),
-      );
+      return button(n, ctx);
     case "form":
       return h(
         "form",
         {
           ...base(n),
+          // Reached only by implicit submission without a submit button; a submit button
+          // reports the submission itself (see `button`).
           onSubmit: (e: { preventDefault(): void }) => {
             e.preventDefault();
             fire(ctx, n, "submit");
           },
         },
-        ...kids(ordered(n), ctx),
+        ...content(n, { ...ctx, form: n }),
       );
     case "field":
       return field(n, ctx);
@@ -202,7 +214,8 @@ function renderNode(n: Inst, ctx: Ctx): ReactNode {
       return h(
         "div",
         { ...base(n), role: "radiogroup" },
-        ...kids(ordered(n), { ...ctx, group: n }),
+        caption(n),
+        ...content(n, { ...ctx, group: n }),
       );
     case "radio":
       return radio(n, ctx);
@@ -211,25 +224,38 @@ function renderNode(n: Inst, ctx: Ctx): ReactNode {
     case "option":
       return h("div", base(n, false), contentText(n.children));
     case "list":
-      return h(flag(n, "ordered") ? "ol" : "ul", base(n), ...kids(ordered(n), ctx));
+      return h(
+        flag(n, "ordered") ? "ol" : "ul",
+        base(n),
+        // A list may only hold list items, so the empty content stands in a presentational one.
+        ...(showsEmpty(n)
+          ? [
+              h(
+                "li",
+                { role: "none", "data-weft-slot": "empty" },
+                ...kids(n.slots["empty"] ?? [], ctx),
+              ),
+            ]
+          : content(n, ctx)),
+      );
     case "item":
-      return h("li", { ...base(n), ...pressable(ctx, n) }, ...kids(ordered(n), ctx));
+      return h("li", { ...base(n), ...pressable(ctx, n) }, ...content(n, ctx));
     case "table":
       return table(n, ctx);
     case "tabs":
       return tabs(n, ctx);
     case "tab":
-      return h("div", { ...base(n), role: "group" }, ...kids(ordered(n), ctx));
+      return h("div", { ...base(n), role: "group" }, ...content(n, ctx));
     case "dialog":
       return dialog(n, ctx);
     case "alert":
       return h(
         "div",
         { ...base(n), role: "alert", "data-tone": text(n, "tone") || undefined },
-        ...kids(ordered(n), ctx),
+        ...content(n, ctx),
       );
     case "menu":
-      return h("div", { ...base(n), role: "menu" }, ...kids(ordered(n), ctx));
+      return h("div", { ...base(n), role: "menu" }, ...content(n, ctx));
     case "menu-item":
       return h(
         "button",
@@ -259,8 +285,39 @@ function fallback(n: Inst, ctx: Ctx): ReactNode {
   return h(
     "div",
     { ...base(n, !transparent), role: transparent ? undefined : role },
-    ...kids(ordered(n), ctx),
+    ...content(n, ctx),
   );
+}
+
+function button(n: Inst, ctx: Ctx): ReactNode {
+  // `submit` is literal-only (SPEC §5.1), so a binding never turns a button into a submit button.
+  const raw = n.props["submit"];
+  const submits = raw === true || raw === "true";
+  const form = submits ? ctx.form : undefined;
+  return h(
+    "button",
+    {
+      ...base(n),
+      type: submits ? "submit" : "button",
+      disabled: flag(n, "disabled"),
+      "data-variant": text(n, "variant") || undefined,
+      onClick: (e: { preventDefault(): void }) => {
+        // The browser would submit the form after this click (also when Enter in a field clicks
+        // the default button); cancelling that and reporting here fires the action exactly once.
+        if (submits) e.preventDefault();
+        fire(ctx, n, "press");
+        if (form) fire(ctx, form, "submit");
+      },
+    },
+    shown(n),
+  );
+}
+
+// The visible caption of a control group; the name itself is `aria-label`, so the caption is
+// hidden from the tree rather than read twice.
+function caption(n: Inst): ReactNode {
+  const name = label(n);
+  return name === "" ? null : h("span", { "aria-hidden": "true" }, name);
 }
 
 function image(n: Inst): ReactNode {
@@ -328,9 +385,7 @@ function field(n: Inst, ctx: Ctx): ReactNode {
   return h(
     "div",
     { "data-weft-field": "" },
-    // The visible label repeats the accessible name, so it is hidden from the tree to avoid a
-    // duplicate text node.
-    h("label", null, h("span", { "aria-hidden": "true" }, name), control),
+    h("label", null, caption(n), control),
     error ? h("div", { id: errorId }, error) : null,
   );
 }
@@ -357,7 +412,7 @@ function toggle(n: Inst, ctx: Ctx): ReactNode {
       disabled: flag(n, "disabled"),
       ...checked,
     }),
-    h("span", { "aria-hidden": "true" }, name),
+    caption(n),
   );
 }
 
@@ -383,7 +438,8 @@ function radio(n: Inst, ctx: Ctx): ReactNode {
         fire(ctx, group, "change");
       },
     }),
-    h("span", { "aria-hidden": "true" }, name),
+    // The visible text is the content; a `label` only overrides the accessible name.
+    h("span", { "aria-hidden": "true" }, contentText(n.children) || name),
   );
 }
 
@@ -393,7 +449,7 @@ function select(n: Inst, ctx: Ctx): ReactNode {
   const value = isBinding(n.props["value"])
     ? { value: text(n, "value") }
     : { defaultValue: text(n, "value") };
-  return h(
+  const control = h(
     "select",
     {
       ...base(n, false),
@@ -410,30 +466,35 @@ function select(n: Inst, ctx: Ctx): ReactNode {
       h("option", { ...base(o), value: text(o, "value") }, contentText(o.children)),
     ),
   );
+  return h("label", null, caption(n), control);
 }
 
 // SPEC §5.1: `column` children form the header row; the renderer emits it in <thead>.
 // Content that is not a row is wrapped in a row and cell so the HTML parser keeps it in place.
 function table(n: Inst, ctx: Ctx): ReactNode {
   const columns = nodes(n.children).filter((c) => c.kind === "column");
-  const body = n.children.filter((c) => typeof c === "string" || c.kind !== "column");
+  const rows = showsEmpty(n)
+    ? [
+        h(
+          "tr",
+          { "data-weft-slot": "empty" },
+          h("td", { colSpan: Math.max(1, columns.length) }, ...kids(n.slots["empty"] ?? [], ctx)),
+        ),
+      ]
+    : n.children
+        .filter((c) => typeof c === "string" || c.kind !== "column")
+        .map((c) =>
+          typeof c !== "string" && c.kind === "row"
+            ? row(c, ctx)
+            : h("tr", null, h("td", null, ...kids([c], ctx))),
+        );
   return h(
     "table",
     base(n),
     columns.length > 0
       ? h("thead", null, h("tr", null, ...columns.map((c) => column(c, ctx))))
       : null,
-    body.length > 0
-      ? h(
-          "tbody",
-          null,
-          ...body.map((c) =>
-            typeof c !== "string" && c.kind === "row"
-              ? row(c, ctx)
-              : h("tr", null, h("td", null, ...kids([c], ctx))),
-          ),
-        )
-      : null,
+    rows.length > 0 ? h("tbody", null, ...rows) : null,
   );
 }
 
@@ -460,7 +521,7 @@ function row(n: Inst, ctx: Ctx): ReactNode {
     { ...base(n), "aria-selected": selected, ...pressable(ctx, n) },
     ...n.children.map((c) =>
       typeof c !== "string" && c.kind === "cell"
-        ? h("td", base(c), ...kids(ordered(c), ctx))
+        ? h("td", base(c), ...content(c, ctx))
         : h("td", null, ...kids([c], ctx)),
     ),
   );
@@ -524,7 +585,7 @@ function tabs(n: Inst, ctx: Ctx): ReactNode {
           hidden: i !== sel,
           tabIndex: 0,
         },
-        ...kids(ordered(t), ctx),
+        ...content(t, ctx),
       ),
     ),
   );
@@ -546,6 +607,6 @@ function dialog(n: Inst, ctx: Ctx): ReactNode {
         fire(ctx, n, "close");
       },
     },
-    ...kids(ordered(n), ctx),
+    ...content(n, ctx),
   );
 }
