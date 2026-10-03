@@ -1,0 +1,20 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Notifications", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "switch",
+        "id": "push",
+        "props": {
+          "checked": { "bind": "$.pushEnabled" },
+          "disabled": false,
+          "label": "Push notifications"
+        },
+        "on": { "change": "settings.update" }
+      }
+    ]
+  }
+}

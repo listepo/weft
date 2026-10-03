@@ -1,0 +1,47 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Sign in", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "form",
+        "id": "login",
+        "props": { "state": "idle" },
+        "on": { "submit": "auth.submit" },
+        "slots": {
+          "footer": [
+            {
+              "kind": "button",
+              "id": "go",
+              "props": { "variant": "primary" },
+              "on": { "press": "auth.submit" },
+              "children": ["Sign in"]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "field",
+            "id": "email",
+            "props": {
+              "label": "Email",
+              "required": true,
+              "type": "email",
+              "value": { "bind": "$.email" }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "form",
+        "id": "named",
+        "props": { "label": "Newsletter", "state": "submitting" },
+        "children": [
+          { "kind": "switch", "id": "news", "props": { "checked": true, "label": "Subscribe" } }
+        ]
+      }
+    ]
+  }
+}

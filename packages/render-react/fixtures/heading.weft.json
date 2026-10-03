@@ -1,0 +1,16 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Settings", "weft": "0.1" },
+    "children": [
+      { "kind": "heading", "id": "title", "props": { "level": 1 }, "children": ["Settings"] },
+      {
+        "kind": "heading",
+        "id": "subtitle",
+        "props": { "level": 2, "value": { "bind": "$.section.title" } }
+      }
+    ]
+  }
+}

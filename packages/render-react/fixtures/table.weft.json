@@ -1,0 +1,61 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Orders", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "table",
+        "id": "orders",
+        "props": { "label": "Recent orders", "state": "ready" },
+        "children": [
+          { "kind": "column", "id": "col-id", "children": ["Order"] },
+          {
+            "kind": "column",
+            "id": "col-total",
+            "props": { "sort": "descending" },
+            "on": { "press": "orders.sort" },
+            "children": ["Total"]
+          },
+          {
+            "kind": "each",
+            "id": "order-each",
+            "props": { "as": "order", "in": { "bind": "$.orders" } },
+            "children": [
+              {
+                "kind": "row",
+                "id": "order-row",
+                "props": { "selected": false },
+                "children": [
+                  {
+                    "kind": "cell",
+                    "id": "order-id",
+                    "children": [
+                      {
+                        "kind": "text",
+                        "id": "order-id-text",
+                        "props": { "value": { "bind": "$order.id" } }
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "cell",
+                    "id": "order-total",
+                    "children": [
+                      {
+                        "kind": "text",
+                        "id": "order-total-text",
+                        "props": { "value": { "bind": "$order.total" } }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

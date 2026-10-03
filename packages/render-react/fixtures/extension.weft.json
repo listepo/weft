@@ -1,0 +1,43 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Extensions", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "x-acme-rating",
+        "id": "rating",
+        "props": { "label": "Rating", "role": "group", "x-acme-stars": "4" },
+        "children": [
+          "Four stars",
+          { "kind": "button", "id": "rate", "on": { "press": "rating.rate" }, "children": ["Rate"] }
+        ]
+      },
+      {
+        "kind": "x-acme-note",
+        "id": "note",
+        "props": { "role": "note" },
+        "children": ["Saved locally."]
+      },
+      {
+        "kind": "x-acme-bad",
+        "id": "bad",
+        "props": { "role": "not-a-role" },
+        "children": ["Bad role"]
+      },
+      {
+        "kind": "carousel",
+        "id": "future",
+        "props": { "label": "Featured" },
+        "children": [{ "kind": "text", "id": "slide", "children": ["Slide one"] }]
+      },
+      {
+        "kind": "x-acme-spacer",
+        "id": "spacer",
+        "props": { "role": "none" },
+        "children": ["Spacer text"]
+      }
+    ]
+  }
+}
