@@ -4,26 +4,10 @@ An open, agent-friendly UI description format — strict markup for models, cano
 
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
-| T0 | in progress | P0 | 3 | 80% | Claude Code / opus-5.5 |
 | T4 | in progress | P1 | 4 | 85% | Claude Code / opus-5.5 |
-| T5 | todo | P2 | 4 | 0% | |
+| T5 | in progress | P2 | 4 | 0% | Claude Code / opus-5.5 |
 | T6 | in progress | P1 | 3 | 90% | Claude Code / sonnet-5.5 |
 | T8 | todo | P1 | 3 | 0% | |
-| T9 | in progress | P0 | 3 | 0% | Claude Code / opus-5.5 |
-
-### T0. Corpus and benchmark harness
-
-Reference screens in every compared format and a harness that measures them, so the format's benefit is a number and not a belief. Done when the benchmark runs with one command and reports token counts and task success for Weft and three baselines (HTML, JSX, A2UI JSON).
-
-Stop criterion for the whole direction: if Weft gives neither 25% fewer tokens nor 10 points more successful edits than A2UI JSON, the creator decides whether to continue.
-
-Plan:
-1. `corpus/<screen>/` × 12 screens (login, signup, settings, data table, tabs, confirm dialog, wizard step, search results, todo list, profile, menu, empty/error states), each with `screen.weft`, `screen.html`, `screen.jsx`, `screen.a2ui.json`, `data.json`.
-2. `corpus/tasks.json`: per screen, edit tasks and questions with machine-checkable expectations.
-3. `bench/src`: token counting (local tokenizer as a proxy; provider token counting when an API key is present), a provider interface for model runs, a report writer.
-4. Verify: `node bench/src/run.ts tokens` prints the table offline; tests cover the counters and the task checker.
-
-Remaining after the first merge: replace the hand-copied catalog in `bench/src/weft-catalog.ts` and the stand-in Weft parser with `@weft/catalog` and `@weft/core` once T2 lands; validate every `corpus/*/screen.weft` with the real validator.
 
 ### T4. React renderer
 
@@ -41,6 +25,12 @@ Remaining after the first merge (browser check passes on 30 fixtures with 0 diff
 
 Accessibility snapshot or DOM → Weft (lossy) and Weft → JSX source. Done when document → render → snapshot → document preserves structure, roles, states and ids, and the losses are listed in the spec.
 
+Plan:
+1. `packages/from-aria`: accessibility snapshot → Weft document, mapping roles back to catalog kinds through the catalog, with a list of what could not be recovered.
+2. `packages/to-jsx`: Weft document → React component source with `data` and `actions` props.
+3. SPEC §9 lists the lossy fields.
+4. Verify: for every corpus screen, document → render → snapshot → document keeps structure, roles, states and ids; generated JSX parses and matches the document tree; `pnpm run ci`.
+
 ### T6. Agent interface
 
 Patch operations of SPEC §7 and an MCP server exposing catalog, validate, patch and render. Done when an agent completes the corpus edit tasks through the tools alone and an invalid patch is rejected with diagnostics.
@@ -55,13 +45,3 @@ Remaining after the first merge: the `weft_render` tool, and SPEC §7 should poi
 ### T8. Evaluation
 
 Full benchmark run on two or three models against the baselines, and a report with a continue/stop recommendation. Done when first-try validity is at least 95%, validity after one repair cycle is at least 99%, and raw results are in the repository.
-
-### T9. Specification revision from corpus findings
-
-Writing the corpus exposed gaps in SPEC 0.1: text of buttons, links and menu items cannot be bound; a button cannot be marked as submitting its form; lists and tables have no empty-state content; `label` is under-specified; numeric props have no range. Done when the spec, model, catalog, validator and corpus agree on the fixes and the benchmark report is regenerated. Carried out together with the remainder of T0.
-
-Plan:
-1. SPEC and `model.ts`: `text` prop on every text-bearing component (replaces `value` on `text`/`heading`), `button.submit`, `empty` slot on `list`/`table`, `label` wording, slot placement rule, `each` child count, `min`/`max`/`integer` on `PropDef`.
-2. Catalog, examples and validator follow; new diagnostic codes are added, none reused.
-3. Corpus uses the new constructs in all four formats; `bench` uses `@weft/core` and `@weft/catalog` instead of its stand-ins; `bench/REPORT.md` regenerated.
-4. Verify: every corpus screen and example validates in strict mode in a test; `pnpm run ci`.

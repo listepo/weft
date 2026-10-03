@@ -1,6 +1,4 @@
-- T0. Corpus and benchmark harness
 - T4. React renderer
 - T5. Reverse mapping
 - T6. Agent interface
 - T8. Evaluation
-- T9. Specification revision from corpus findings
