@@ -5,7 +5,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
-| T19 | in progress | P0 | 2 | 0% | Claude Code / claude-opus-5-5 |
 | T20 | todo | P1 | 5 | 0% | |
 | T21 | todo | P1 | 3 | 0% | |
 | T22 | todo | P1 | 3 | 0% | |
@@ -29,18 +28,6 @@ Execution plan:
 6. Full edit and read runs on the three models; `run.ts tokens` again so the report has Anthropic token counts.
 7. `bench/EVALUATION.md`: results against the done criteria (Weft first-try validity at least 95%, after one repair at least 99%), comparison with the baselines, failure analysis, continue/stop recommendation.
 8. Verify with `pnpm run ci`.
-
-### T19. mise toolchain and moon monorepo
-
-Every program the project uses is installed by `mise install` (Node, pnpm, Rust with the `wasm32-unknown-unknown` target, moon, Deno, Bun, wasm-pack, wasm-bindgen, the napi-rs CLI). moon runs the workspace tasks: each package has its own `test` task, the root has `typecheck`, `lint` and `fmt`, and `moon ci` runs everything with caching. `pnpm run ci` keeps working and goes through moon. Done when a clean checkout passes `mise install && pnpm install && moon ci`, and `toolchain.md` lists every program.
-
-Execution plan:
-
-1. `mise.toml`: add the tools at their latest versions; existing pins stay.
-2. `.moon/workspace.yml`, `.moon/toolchains.yml`, shared JS task file, `moon.yml` per package and at the root (pattern from runa, which already runs moon 2.5).
-3. Root `package.json` scripts call moon; `.gitignore` gets `.moon/cache`.
-4. `AGENTS.md` commands, `README.md`, `toolchain.md`.
-5. Verify: `moon ci` and `pnpm run ci` pass; a second run is cached.
 
 ### T20. Rust core
 
