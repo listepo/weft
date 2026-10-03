@@ -213,6 +213,15 @@ test("prop types, writable flags and defaults match SPEC §5.1", () => {
   }
 });
 
+test("numeric ranges match SPEC §5.1", () => {
+  const range = (kind: string, name: string) => {
+    const p = coreCatalog.components[kind]?.props?.[name];
+    return { integer: p?.integer, min: p?.min, max: p?.max };
+  };
+  assert.deepEqual(range("heading", "level"), { integer: true, min: 1, max: 6 });
+  assert.deepEqual(range("grid", "columns"), { integer: true, min: 1, max: undefined });
+});
+
 test("enum props have values, token props have tokenType, everything is described", () => {
   for (const [kind, def] of Object.entries(coreCatalog.components)) {
     assert.ok(def.description.endsWith("."), `${kind} description`);
@@ -221,6 +230,8 @@ test("enum props have values, token props have tokenType, everything is describe
       assert.ok(p.description.length > 0, `${at} description`);
       if (p.type === "enum") assert.ok(p.values && p.values.length > 0, `${at} values`);
       else assert.equal(p.values, undefined, `${at} stray values`);
+      if (p.type !== "number")
+        assert.ok(p.min === undefined && p.max === undefined && p.integer === undefined, at);
       if (p.type === "token") assert.ok(p.tokenType, `${at} tokenType`);
       else assert.equal(p.tokenType, undefined, `${at} stray tokenType`);
       if (p.default !== undefined && p.type === "enum")

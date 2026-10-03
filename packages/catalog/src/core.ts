@@ -77,7 +77,11 @@ const components: Record<string, ComponentDef> = {
     role: "none",
     content: "nodes",
     props: {
-      columns: num("Number of equal columns in the grid.", { required: true }),
+      columns: num("Number of equal columns in the grid, at least 1.", {
+        required: true,
+        integer: true,
+        min: 1,
+      }),
       gap: dimension("Space between grid cells, as a dimension token."),
     },
   },
@@ -99,7 +103,12 @@ const components: Record<string, ComponentDef> = {
     role: "heading",
     content: "text",
     props: {
-      level: num("Heading level from 1 to 6; use 1 for the screen title.", { required: true }),
+      level: num("Heading level from 1 to 6; use 1 for the screen title.", {
+        required: true,
+        integer: true,
+        min: 1,
+        max: 6,
+      }),
     },
   },
   text: {

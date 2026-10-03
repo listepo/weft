@@ -50,9 +50,11 @@
       "content": "nodes",
       "props": {
         "columns": {
-          "description": "Number of equal columns in the grid.",
+          "description": "Number of equal columns in the grid, at least 1.",
           "type": "number",
-          "required": true
+          "required": true,
+          "integer": true,
+          "min": 1
         },
         "gap": {
           "description": "Space between grid cells, as a dimension token.",
@@ -80,7 +82,10 @@
         "level": {
           "description": "Heading level from 1 to 6; use 1 for the screen title.",
           "type": "number",
-          "required": true
+          "required": true,
+          "integer": true,
+          "min": 1,
+          "max": 6
         },
         "text": {
           "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",

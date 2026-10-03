@@ -75,6 +75,7 @@ const cases: Record<DiagnosticCode, Case> = {
     ),
   },
   W223: { json: doc({ kind: "text", id: "t", props: { "on-press": "a.b" } }) },
+  W224: { markup: screen('<heading id="h" level="7">x</heading>') },
   W301: { markup: screen('<text id="t">a</text><text id="t">b</text>') },
   W302: { markup: screen('<list id="l"><text id="t">x</text></list>') },
   W303: { markup: screen('<item id="i">x</item>') },
@@ -153,6 +154,18 @@ test("a submit button is valid anywhere inside a form, slots and loops included"
     '<form id="f" on-submit="a.b"><stack id="st"><button id="b1" submit="true">A</button></stack><slot name="footer"><button id="b2" submit="true">B</button></slot></form>',
   );
   assert.deepEqual(parse(markup, { catalog, mode: "strict" }).diagnostics, []);
+});
+
+test("numbers are checked against min, max and integer", () => {
+  const codes = (level: string) =>
+    parse(screen(`<heading id="h" level="${level}">x</heading>`), { catalog }).diagnostics.map(
+      (d) => [d.code, d.expected, d.hint],
+    );
+  assert.deepEqual(codes("1"), []);
+  assert.deepEqual(codes("6"), []);
+  assert.deepEqual(codes("0"), [["W224", "an integer from 1 to 6", "use 1"]]);
+  assert.deepEqual(codes("2.5"), [["W224", "an integer from 1 to 6", "use 3"]]);
+  assert.deepEqual(codes("9"), [["W224", "an integer from 1 to 6", "use 6"]]);
 });
 
 test("JSON shape errors point into the JSON", () => {

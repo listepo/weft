@@ -57,6 +57,7 @@ export const DIAGNOSTIC_CODES = {
     severity: "error",
     summary: "Kind, attribute, event or slot name is invalid or reserved.",
   },
+  W224: { severity: "error", summary: "Number outside the declared range or not whole." },
 
   W301: { severity: "error", summary: "Duplicate id." },
   W302: { severity: "error", summary: "Child kind not allowed here." },

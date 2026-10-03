@@ -187,6 +187,9 @@ type PropDef = {
   type: "string" | "number" | "boolean" | "enum" | "token";
   values?: string[];                       // for enum
   tokenType?: string;                      // for token: DTCG $type, e.g. "dimension"
+  min?: number;                            // for number: smallest allowed value, inclusive
+  max?: number;                            // for number: largest allowed value, inclusive
+  integer?: boolean;                       // for number: true = whole numbers only
   required?: boolean;
   default?: string | number | boolean;
   bindable?: boolean;                      // default true; false = literal only
@@ -204,9 +207,9 @@ Props are strings unless a type is given. `*` marks required props.
 | --- | --- | --- | --- | --- | --- | --- |
 | `screen` | `main` | nodes | `weft`* | — | `ready`, `loading`, `error` | — |
 | `stack` | `none` | nodes | `direction` enum `column`/`row` (default `column`), `gap` token dimension, `align` enum `start`/`center`/`end`/`stretch`, `wrap` boolean | — | — | — |
-| `grid` | `none` | nodes | `columns`* number, `gap` token dimension | — | — | — |
+| `grid` | `none` | nodes | `columns`* integer ≥ 1, `gap` token dimension | — | — | — |
 | `section` | `region` | nodes | — (needs `label`) | `header` | — | — |
-| `heading` | `heading` | text | `level`* number 1–6 | — | — | — |
+| `heading` | `heading` | text | `level`* integer 1–6 | — | — | — |
 | `text` | `none` | text | `tone` enum `default`/`muted`/`success`/`warning`/`danger` | — | — | — |
 | `image` | `img` | none | `src`*, `label`* | — | — | — |
 | `link` | `link` | text | `href` | — | — | `press` |
@@ -243,14 +246,14 @@ Notes:
 - A `button` with `submit="true"` submits its nearest enclosing `form`: pressing it fires that form's `submit` event, so it needs no `on-press`. `submit` is a literal (`bindable: false`) because whether a button submits is structure, not data. A submit button outside a `form` is an error.
 - `field` has role `textbox`; a renderer MAY refine it from `type` (`number` → `spinbutton`, `search` → `searchbox`) as ARIA requires.
 - `column` is a direct child of `table` although ARIA places `columnheader` inside a `row`; the renderer emits the header row.
-- `heading.level` is an integer from 1 to 6; the catalog shape has no range, so the validator enforces it.
+- "integer 1–6" is a `number` prop with `integer: true`, `min: 1`, `max: 6`; "integer ≥ 1" has `integer: true`, `min: 1`. The bounds apply to literals; a bound value is the host's to keep in range.
 
 ## 6. Validation
 
 Validation has three layers, each reporting diagnostics rather than throwing:
 
 1. **Syntax** — §2. The document is well-formed restricted XML.
-2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, required props present, declared slots, states and events.
+2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, numbers within their declared `min`, `max` and `integer`, required props present, declared slots, states and events.
 3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, a `submit` button inside a `form`, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
 
 A document that does not have the JSON shape of §3 gets `W200` diagnostics only; the other checks need the shape.
@@ -324,6 +327,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W221 | String holds a character XML cannot carry. |
 | W222 | `<each>` without a binding `in` or a valid `as`. |
 | W223 | Kind, prop, event or slot name invalid or reserved (`slot` as a kind, `id` or `on-*` in `props`). |
+| W224 | Number below `min`, above `max`, or not whole where the prop is `integer`. |
 | W301 | Duplicate id. |
 | W302 | Child kind not in the parent's (or slot's) `allowedChildren`. |
 | W303 | Parent kind not in the child's `allowedParents`. |

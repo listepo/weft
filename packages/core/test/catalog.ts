@@ -32,7 +32,7 @@ export const catalog: Catalog = CatalogSchema.parse({
       role: "heading",
       content: "text",
       props: {
-        level: { description: d, type: "number", required: true },
+        level: { description: d, type: "number", required: true, integer: true, min: 1, max: 6 },
         text: { description: d, type: "string" },
       },
     },

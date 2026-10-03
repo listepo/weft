@@ -155,7 +155,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
       case "number":
         if (typeof value !== "number" || !Number.isFinite(value)) {
           report("W204", { ...at, message: "Expected a number.", expected: "a JSON number", got });
-        }
+        } else checkRange(value, def, at);
         break;
       case "boolean":
         if (typeof value !== "boolean")
@@ -189,6 +189,32 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
         });
         break;
     }
+  };
+
+  const checkRange = (value: number, def: PropDef, at: At) => {
+    const whole = def.integer === true;
+    const below = def.min !== undefined && value < def.min;
+    const above = def.max !== undefined && value > def.max;
+    if (!below && !above && (!whole || Number.isInteger(value))) return;
+    const range =
+      def.min !== undefined && def.max !== undefined
+        ? `from ${def.min} to ${def.max}`
+        : def.min !== undefined
+          ? `of at least ${def.min}`
+          : def.max !== undefined
+            ? `of at most ${def.max}`
+            : "";
+    const expected = `${whole ? "an integer" : "a number"}${range === "" ? "" : ` ${range}`}`;
+    let nearest = whole ? Math.round(value) : value;
+    if (def.min !== undefined) nearest = Math.max(nearest, whole ? Math.ceil(def.min) : def.min);
+    if (def.max !== undefined) nearest = Math.min(nearest, whole ? Math.floor(def.max) : def.max);
+    report("W224", {
+      ...at,
+      message: `${value} is not ${expected}.`,
+      expected,
+      got: String(value),
+      hint: `use ${nearest}`,
+    });
   };
 
   const checkBinding = (
