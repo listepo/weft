@@ -23,3 +23,4 @@
 | @types/react | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React type definitions |
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
+| @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |

@@ -7,7 +7,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T0 | in progress | P0 | 3 | 80% | Claude Code / opus-5.5 |
 | T4 | in progress | P1 | 4 | 85% | Claude Code / opus-5.5 |
 | T5 | todo | P2 | 4 | 0% | |
-| T6 | in progress | P1 | 3 | 0% | Claude Code / sonnet-5.5 |
+| T6 | in progress | P1 | 3 | 90% | Claude Code / sonnet-5.5 |
 | T8 | todo | P1 | 3 | 0% | |
 | T9 | in progress | P0 | 3 | 0% | Claude Code / opus-5.5 |
 
@@ -49,6 +49,8 @@ Plan:
 1. `packages/core/src/patch.ts`: `applyPatches(document, patches, options)` — atomic, validated, returns the new document or diagnostics.
 2. `packages/mcp`: stdio MCP server with tools `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch`; `weft_render` is wired in after T4 merges.
 3. Verify: unit tests per patch op and failure mode; an in-memory MCP client test that completes corpus edit tasks through the tools.
+
+Remaining after the first merge: the `weft_render` tool, and SPEC §7 should point to `set text` for text edits once T9 lands.
 
 ### T8. Evaluation
 
