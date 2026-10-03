@@ -256,7 +256,7 @@ Notes:
 - A `dialog` is shown only while `open` is true; an absent `open` means closed, like every boolean prop without a default.
 - A `select` always has one option selected: the one whose `value` equals `select.value`, otherwise the first.
 - `column.sort` states the current sort only: the host updates it in its data model in response to the column's `press` action, because documents carry no behaviour.
-- `dialog.open` is likewise changed by the host in its data model in response to actions such as the dialog's `close` or a button's `press`; the document only binds it.
+- `dialog.open` is `writable`. Writable bindings are how a renderer reports user input to the host's data model; the document itself carries no behaviour. When the user dismisses an open dialog (Escape on the web), the renderer writes `false` to the path `open` is bound to and fires `close`. Every other change, such as opening the dialog or closing it from a button's `press`, is the host updating that path in response to the action. A literal or negated `open` cannot be written, so dismissing such a dialog only fires `close`.
 - "integer 1–6" is a `number` prop with `integer: true`, `min: 1`, `max: 6`; "integer ≥ 1" has `integer: true`, `min: 1`. Validation holds literals to the bounds; a renderer brings a bound value outside them into range, rounding it to a whole number where the prop is `integer` and then clamping it to `min` and `max`.
 
 ## 6. Validation

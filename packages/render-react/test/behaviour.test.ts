@@ -239,6 +239,24 @@ test("writable props are controlled and report writes through onChange", () => {
   assert.deepEqual(events, ["f", "g", "d"]);
 });
 
+test("dismissing a dialog whose open is not a plain binding only fires close", () => {
+  const writes: string[] = [];
+  const events: string[] = [];
+  const d = doc(
+    el("dialog", "lit", { label: "L", open: true }, [], { on: { close: "x.close" } }),
+    el("dialog", "neg", { label: "N", open: nb("$.shut") }, [], { on: { close: "x.close" } }),
+  );
+  const t = tree(d, {
+    data: { shut: false },
+    onChange: (path) => writes.push(path),
+    actions: { "x.close": (e: ActionEvent) => events.push(e.id) },
+  });
+  for (const id of ["lit", "neg"])
+    (propsOf(t, id)["onKeyDown"] as (e: unknown) => void)({ key: "Escape", preventDefault() {} });
+  assert.deepEqual(writes, []);
+  assert.deepEqual(events, ["lit", "neg"]);
+});
+
 test("literal values of writable props are uncontrolled defaults", () => {
   const t = tree(
     doc(
