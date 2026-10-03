@@ -330,6 +330,11 @@
           "type": "boolean"
         }
       },
+      "slots": {
+        "empty": {
+          "description": "Content shown instead of the items when there are none, such as \"No results found\"."
+        }
+      },
       "states": ["ready", "loading", "empty"]
     },
     "item": {
@@ -351,6 +356,11 @@
       "content": "nodes",
       "allowedChildren": ["column", "row", "each"],
       "requiresLabel": true,
+      "slots": {
+        "empty": {
+          "description": "Content shown instead of the rows when there are none, such as \"No results found\"."
+        }
+      },
       "states": ["ready", "loading", "empty"]
     },
     "column": {

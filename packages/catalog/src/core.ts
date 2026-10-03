@@ -1,5 +1,5 @@
 // The `weft-core` 0.1 catalog of SPEC §5.1 as data. `catalog.json` is generated from this object.
-import type { Catalog, ComponentDef, PropDef } from "@weft/core";
+import type { Catalog, ComponentDef, PropDef, SlotDef } from "@weft/core";
 
 const str = (description: string, extra: Partial<PropDef> = {}): PropDef => ({
   description,
@@ -33,6 +33,9 @@ const checkedProp = bool("Whether the control is on; bind it to a boolean to rea
 });
 const disabledProp = (what: string): PropDef =>
   bool(`Set to true to make ${what} non-interactive.`);
+const emptySlot = (what: string): SlotDef => ({
+  description: `Content shown instead of the ${what} when there are none, such as "No results found".`,
+});
 const tone = (values: string[], description: string, extra: Partial<PropDef> = {}) =>
   oneOf(description, values, extra);
 
@@ -251,6 +254,7 @@ const components: Record<string, ComponentDef> = {
     content: "nodes",
     allowedChildren: ["item", "each"],
     props: { ordered: bool("Set to true when the order of the items is meaningful.") },
+    slots: { empty: emptySlot("items") },
     states: ["ready", "loading", "empty"],
   },
   item: {
@@ -266,6 +270,7 @@ const components: Record<string, ComponentDef> = {
     content: "nodes",
     allowedChildren: ["column", "row", "each"],
     requiresLabel: true,
+    slots: { empty: emptySlot("rows") },
     states: ["ready", "loading", "empty"],
   },
   column: {

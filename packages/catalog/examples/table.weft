@@ -12,5 +12,9 @@
         </cell>
       </row>
     </each>
+    <slot name="empty">
+      <text id="orders-empty">No orders yet.</text>
+      <button id="orders-shop" on-press="nav.shop">Start shopping</button>
+    </slot>
   </table>
 </screen>

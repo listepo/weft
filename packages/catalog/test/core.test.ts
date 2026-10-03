@@ -84,6 +84,7 @@ const expected: Record<string, Row> = {
     role: "list",
     content: "nodes",
     children: ["item", "each"],
+    slots: ["empty"],
     states: ["ready", "loading", "empty"],
   },
   item: { role: "listitem", content: "mixed", parents: ["list"], events: ["press"] },
@@ -92,6 +93,7 @@ const expected: Record<string, Row> = {
     content: "nodes",
     children: ["column", "row", "each"],
     label: true,
+    slots: ["empty"],
     states: ["ready", "loading", "empty"],
   },
   column: {

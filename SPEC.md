@@ -219,9 +219,9 @@ Props are strings unless a type is given. `*` marks required props.
 | `radio` | `radio` | text | `value`*, `disabled` boolean | — | — | — |
 | `select` | `combobox` | nodes (`option`, `each`) | `label`*, `value` writable, `disabled` boolean | — | — | `change` |
 | `option` | `option` | text | `value`* | — | — | — |
-| `list` | `list` | nodes (`item`, `each`) | `ordered` boolean | — | `ready`, `loading`, `empty` | — |
+| `list` | `list` | nodes (`item`, `each`) | `ordered` boolean | `empty` | `ready`, `loading`, `empty` | — |
 | `item` | `listitem` | mixed | — | — | — | `press` |
-| `table` | `table` | nodes (`column`, `row`, `each`) | — (needs `label`) | — | `ready`, `loading`, `empty` | — |
+| `table` | `table` | nodes (`column`, `row`, `each`) | — (needs `label`) | `empty` | `ready`, `loading`, `empty` | — |
 | `column` | `columnheader` | text | `sort` enum `none`/`ascending`/`descending` | — | — | `press` |
 | `row` | `row` | nodes (`cell`) | `selected` boolean | — | — | `press` |
 | `cell` | `cell` | mixed | — | — | — | — |
@@ -234,6 +234,7 @@ Props are strings unless a type is given. `*` marks required props.
 
 Notes:
 
+- The `empty` slot of `list` and `table` is shown instead of the items or rows when there are none to show: every `<each>` in the component iterates an empty array and it has no static items or rows, or its `state` is `empty`. A table keeps its column headers.
 - A `tab` element holds its panel content; a renderer emits `tab` and `tabpanel` from it.
 - Every component whose content model is `text` or `mixed` also takes the prop `text` (string, bindable; declared in each such component's `props`, not repeated in the table). It takes its text either as content or as `text`, never both; `text` is how bound text is written, e.g. `<button id="b" text="{$.cta}"/>`. `value` is a data value (`field`, `radio`, `option`, `select`, `radio-group`), never displayed text.
 - "needs `label`" and a starred `label`* in the Props column both mean the universal `label` attribute is required for that component (`requiresLabel` in the catalog); `label` is never declared in `props`.
