@@ -8,7 +8,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T4 | in progress | P1 | 4 | 85% | Claude Code / opus-5.5 |
 | T5 | todo | P2 | 4 | 0% | |
 | T6 | in progress | P1 | 3 | 0% | Claude Code / sonnet-5.5 |
-| T7 | in progress | P2 | 2 | 0% | Claude Code / sonnet-5.5 |
 | T8 | todo | P1 | 3 | 0% | |
 | T9 | in progress | P0 | 3 | 0% | Claude Code / opus-5.5 |
 
@@ -50,15 +49,6 @@ Plan:
 1. `packages/core/src/patch.ts`: `applyPatches(document, patches, options)` — atomic, validated, returns the new document or diagnostics.
 2. `packages/mcp`: stdio MCP server with tools `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch`; `weft_render` is wired in after T4 merges.
 3. Verify: unit tests per patch op and failure mode; an in-memory MCP client test that completes corpus edit tasks through the tools.
-
-### T7. Versioning and extensibility tests
-
-Compatibility suite for SPEC §8. Done when a 0.2 document with unknown nodes is read by the 0.1 validator and renderer without failure, with warnings, and round-trips unchanged.
-
-Plan:
-1. `compat/` fixtures: documents declaring `weft="0.2"` with unknown elements, attributes, slots-in-unknown, and `x-vendor-` extensions.
-2. Tests: lenient parse yields only `W4xx` warnings, strict yields errors; `serialize(parse(x))` keeps unknown content; the renderer renders them with the fallback role; a catalog-diff helper classifies catalog changes as major or minor per SPEC §8.
-3. Verify: `pnpm run ci`.
 
 ### T8. Evaluation
 
