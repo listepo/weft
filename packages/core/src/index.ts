@@ -2,6 +2,7 @@ export * from "./model.ts";
 export { canonicalize, stringify } from "./canonical.ts";
 export {
   DIAGNOSTIC_CODES,
+  didYouMean,
   hasErrors,
   type DiagnosticCode,
   type Mode,
