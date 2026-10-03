@@ -4,7 +4,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
-| T5 | in progress | P2 | 4 | 0% | Claude Code / opus-5.5 |
+| T5 | in progress | P2 | 4 | 80% | Claude Code / opus-5.5 |
 | T8 | todo | P1 | 3 | 0% | |
 
 ### T5. Reverse mapping
@@ -16,6 +16,8 @@ Plan:
 2. `packages/to-jsx`: Weft document → React component source with `data` and `actions` props.
 3. SPEC §9 lists the lossy fields.
 4. Verify: for every corpus screen, document → render → snapshot → document keeps structure, roles, states and ids; generated JSX parses and matches the document tree; `pnpm run ci`.
+
+Remaining after the first merge: the importer and JSX generator were written against the renderer before its revision. On `main` 8 tests fail (select caption handling) and 14 equivalence cases are `todo`; all must pass with no `todo` left.
 
 ### T8. Evaluation
 
