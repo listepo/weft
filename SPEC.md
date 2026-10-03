@@ -285,13 +285,13 @@ type Diagnostic = {
 };
 ```
 
-Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility, `W5xx` patches. A code, once published, never changes meaning.
+Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility, `W5xx` patches, `W6xx` import (§9). A code, once published, never changes meaning.
 
 `path` addresses the element from the root: one segment per element, `kind#id`, or `kind[index]` when the element has no valid id (the index counts the parent's list, text included). A named slot adds `slot[name]`, a text child `#text[index]`, an attribute `@name` (`@on-press` for events, `@weft` for the version). Syntax diagnostics name the open elements only. For JSON that does not have the shape of §3, the path is a JSON Pointer prefixed with `#`, e.g. `#/root/children/0/kind`. A patch diagnostic (§7) about the patch itself points into the patch list the same way, e.g. `#/patches/2/parent`.
 
 ### 6.2 Codes
 
-`mode` severity is a warning in lenient mode and an error in strict mode (§8). Every other code is an error.
+`mode` severity is a warning in lenient mode and an error in strict mode (§8). `W602` is a warning. Every other code is an error.
 
 | Code | Meaning |
 | --- | --- |
@@ -366,6 +366,8 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W507 | `remove` or `move` of the root element. |
 | W508 | Inserted `markup` is empty, or holds text or `<slot>` beside its elements. |
 | W509 | Inserted `markup` uses an id that the document already has. |
+| W601 | Imported input cannot be read: a snapshot that is neither Playwright aria snapshot YAML nor an accessibility tree, HTML that is not a string, or a catalog the importer cannot map with. |
+| W602 | Imported input exceeds an import limit (length, element count or nesting depth); the rest is not imported. |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
@@ -412,4 +414,26 @@ type Patch =
 - **To code:** a renderer maps each kind to a platform component. The reference renderer targets React and MUST produce an accessibility tree whose roles and names equal those the document declares. Text that is not part of a name appears in that tree as text runs; `stack`, `grid`, `text` and other role-`none` elements add no node of their own.
 - **States:** a renderer maps a state to ARIA where an equivalent exists (`loading`, `busy`, `submitting` → `aria-busy`; field `invalid` or a non-empty `error` → `aria-invalid`) and exposes every state as `data-state` as well.
 - **Trust:** a renderer never interprets document strings as markup or code. URLs in `link.href` and `image.src` are used only when they are `http`, `https`, `mailto` or relative; any other value is dropped.
-- **From a running UI:** an accessibility snapshot maps back to Weft with losses (layout, tokens, bindings and actions are not recoverable). The lossy fields are listed by the importer.
+- **To JSX:** a document compiles to one self-contained React function component `({ data, actions, onChange })` with the accessible structure of the reference renderer. A binding becomes a read of `data` or of a loop variable that reads own properties only, `not` becomes `!`, `<each>` becomes `.map` with the item index as key and `id[index]` instance ids, an event calls `actions[name]` with `{ id, action, item }` when the host supplied that action, a writable prop becomes a controlled input that calls `onChange(path, value)` with the absolute data path, a token reference becomes `var(--weft-<path with . as ->)`, and named slots go where §5.1 places them. Document strings appear in the output only as escaped string literals or as JSX text made of inert characters, so a document cannot inject code.
+- **From a running UI:** an accessibility snapshot (Playwright aria snapshot YAML or the same tree as objects) or rendered HTML maps back to Weft with losses. The importer maps each role to the first catalog kind with that role, except for the refinements and inversions below; a role no kind has becomes the extension `x-aria-<role>` with `role` set. It returns `{ document, losses, diagnostics }`, where each loss is `{ kind, path, note }` and the document validates in lenient mode without errors.
+  - Refinements: `spinbutton` and `searchbox` are a `field` with `type` `number` or `search`, `paragraph` is `text`, an exposed `dialog` has `open` true. `generic`, `none`, `presentation` and `rowgroup` add no element; their children take their place.
+  - Inversions: a `tablist` and the `tabpanel`s after it become one `tabs` whose `tab`s hold their panels, and the selected tab becomes `tabs.selected`; a header row of `columnheader`s becomes the table's `column`s; a checked `radio` or selected `option` becomes the `value` of its group or select.
+  - HTML is read with the implicit roles of HTML-AAM (a `form` and a `section` always count as `form` and `region`) and a simplified accessible name: `aria-labelledby`, `aria-label`, an image's `alt`, a control's `<label>`, a button input's `value`, a table's `<caption>`, then `title`, else the text content. Elements carrying `data-weft-id` keep it as their id; a stack or grid is recognised from its `display` style.
+  - Ids are generated from the kind and the name (`button-save`, `list-1`) when the input has none, and `id[index]` instance ids become `id-index`.
+  - Input is untrusted: it is never evaluated, a literal that would read as a binding or token reference has its brace replaced, and length, element count and depth are bounded (`W602`).
+
+| Loss kind | Accessibility snapshot | HTML |
+| --- | --- | --- |
+| `ids` | Always: the tree has no ids; all are generated. | Elements without a valid, unique `data-weft-id` get a generated id. |
+| `bindings`, `actions` | Always: values are the ones shown; handlers are not in the tree. | Always, likewise. |
+| `tokens` | Always. | A token-backed `gap` is noted; token values are not recovered. |
+| `layout` | Always: `stack` and `grid` are not in the tree. | Only a `gap` that is not a token variable. |
+| `repetition` | Always: repeated content is static siblings, not `<each>`. | Each `id[index]` instance becomes a static sibling. |
+| `slots` | Always; content a kind does not take by default goes to the first slot that takes it. | Likewise. |
+| `hidden` | Always: hidden elements, closed dialogs and unselected tab panels are absent. | Hidden elements and closed dialogs; all tab panels are kept. |
+| `props` | Always: props and states without an ARIA equivalent (variant, tone, placeholder, required, sort, modal, `data-state`); also invalid values. | Invalid values only. |
+| `values` | A required prop missing from the input is filled with a stand-in. | Likewise. |
+| `names` | A required `label` missing from the input is set to `""`. | Likewise. |
+| `kinds` | A role without a kind becomes `x-aria-<role>`. | Likewise. |
+| `text` | Text with no place in the content model is dropped; a reference-like brace is replaced. | Likewise. |
+| `structure` | No single `main` landmark: a `screen` root is added. | Likewise. |

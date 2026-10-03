@@ -1,0 +1,20 @@
+{
+  "name": "@weft/from-aria",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@weft/core": "workspace:*",
+    "@weft/render-react": "workspace:*",
+    "htmlparser2": "12.0.0"
+  },
+  "devDependencies": {
+    "@weft/catalog": "workspace:*",
+    "fast-check": "4.10.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}

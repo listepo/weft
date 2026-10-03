@@ -23,8 +23,9 @@ type Case = {
   options?: Pick<ValidateOptions, "tokens" | "actions">;
 };
 
-// The W5xx patch codes need a patch list, not a document; patch.test.ts has their cases.
-const cases: Record<Exclude<DiagnosticCode, `W5${string}`>, Case> = {
+// The W5xx patch codes need a patch list, not a document; patch.test.ts has their cases. The
+// W6xx import codes need an importer; packages/from-aria tests them.
+const cases: Record<Exclude<DiagnosticCode, `W5${string}` | `W6${string}`>, Case> = {
   W101: { markup: screen('<text id="t" tone="muted"value="x"/>') },
   W102: { markup: `<?xml version="1.0"?>${screen("")}` },
   W103: { markup: `<!DOCTYPE screen>${screen("")}` },
@@ -113,7 +114,7 @@ test("every registered code has a case", () => {
   assert.deepEqual(
     Object.keys(cases).toSorted(),
     Object.keys(DIAGNOSTIC_CODES)
-      .filter((code) => !code.startsWith("W5"))
+      .filter((code) => !code.startsWith("W5") && !code.startsWith("W6"))
       .toSorted(),
   );
 });
