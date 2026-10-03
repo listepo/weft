@@ -367,6 +367,12 @@ A patch list applies atomically: the result is validated, and if it has errors n
 - **Unknown, non-extension** elements or attributes come from a newer minor version or another catalog. In *lenient* mode (default for readers) they produce a `W4xx` warning; an unknown element is treated as an extension with role `group`, an unknown attribute is kept in the model and ignored. In *strict* mode (default for writers and CI) they are errors. A newer minor `weft` version is reported the same way. Unknown and extension elements are opaque: parent/child rules skip them, but the parent's content model still applies. Undeclared events, slots, states and enum values of a known component are schema errors, not compatibility warnings.
 - A reader MUST NOT drop unknown content when it round-trips a document.
 - A catalog has its own semver. Removing a component, a prop, an enum value, a slot, a state or an event is a major change; adding one is minor.
+- The rule does not spell out every case, so the following are fixed. A change is **major** when a document valid against the previous catalog can become invalid or mean something else, **minor** when it only admits more documents, and **none** when no document is affected. The version bump of a catalog is the highest level among its changes.
+  - Major: a prop becomes required; a new prop or slot is required; a prop's `type` or `tokenType` changes; a prop's `default` changes, appears or disappears; a component's `role` changes; `requiresLabel` turns on; `bindable` turns off; `writable` turns off.
+  - Content narrowing is major and widening is minor. For `content`, `mixed` accepts everything `text` and `nodes` accept, and `none` accepts nothing; a change to a model that does not accept everything the old one did is narrowing. For `allowedChildren` and `allowedParents` (component or slot), an absent list means any: adding a list or removing a kind narrows, removing the list or adding a kind widens.
+  - Minor: a prop stops being required; a slot stops being required; `requiresLabel` turns off; `bindable` or `writable` turns on; a numeric range widens.
+  - A numeric range narrows when its lower bound rises, its upper bound falls, or a bound appears; the opposite is widening. A prop field the classifier does not know is major when it changes.
+  - A change to a `description` only is none.
 - A host advertises `{ weft, catalogs: [{ name, version }] }`; an agent writes only what the host advertises.
 
 ## 9. Mapping
