@@ -1,11 +1,11 @@
-<screen id="login" weft="0.1" label="Sign in">
-  <form id="form" on-submit="auth.submit" state="idle">
+<screen id="login" label="Sign in" weft="0.1">
+  <form id="form" state="idle" on-submit="auth.submit">
     <heading id="title" level="1">Sign in</heading>
     <stack id="fields" gap="{token.space.md}">
-      <field id="email" type="email" label="Email" value="{$.email}" required="true"/>
-      <field id="password" type="password" label="Password" value="{$.password}" required="true"/>
+      <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
+      <field id="password" label="Password" required="true" type="password" value="{$.password}"/>
     </stack>
-    <button id="submit" variant="primary" disabled="{!$.email}" on-press="auth.submit">Sign in</button>
+    <button id="submit" disabled="{!$.email}" variant="primary" on-press="auth.submit">Sign in</button>
     <slot name="footer">
       <link id="reset" on-press="nav.reset">Forgot password?</link>
       <link id="signup" on-press="nav.signup">Create an account</link>

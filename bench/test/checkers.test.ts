@@ -129,8 +129,8 @@ const solutions: Record<string, Partial<Record<Format, (src: string) => string>>
     weft: (s) =>
       replace(
         s,
-        '<cell id="cell-actions"><button',
-        '<cell id="cell-actions"><button id="edit" on-press="users.edit">Edit</button><button',
+        '          <button id="delete"',
+        '          <button id="edit" on-press="users.edit">Edit</button>\n          <button id="delete"',
       ),
     html: (s) =>
       replace(
