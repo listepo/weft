@@ -68,22 +68,31 @@ async function tasksCommand(
   const type = mode === "edit" ? "edit" : "question";
   const tasks = loadTasks().filter((t) => t.type === type && screens.includes(t.screen));
   const results: TaskResult[] = [];
-  for (const model of models) {
-    const provider = anthropicProvider({ apiKey, model });
-    for (const task of tasks) {
-      for (const format of formats) {
-        const r = await runTask(task, format, provider, model);
-        results.push(r);
-        console.error(`${model} ${task.id} ${format}: ${r.success ? "ok" : "FAIL"}`);
-      }
-    }
-  }
-  const summary = renderSummary(`${mode} run`, summarize(results));
   mkdirSync(RESULTS, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  writeFileSync(`${RESULTS}${mode}-${stamp}.json`, JSON.stringify(results, null, 2) + "\n");
-  writeFileSync(`${RESULTS}${mode}-${stamp}.md`, summary);
-  console.log(summary);
+  // Paid calls already made must not be lost when a later one fails (quota, outage).
+  const save = (title: string) => {
+    const summary = renderSummary(title, summarize(results));
+    writeFileSync(`${RESULTS}${mode}-${stamp}.json`, JSON.stringify(results, null, 2) + "\n");
+    writeFileSync(`${RESULTS}${mode}-${stamp}.md`, summary);
+    return summary;
+  };
+  try {
+    for (const model of models) {
+      const provider = anthropicProvider({ apiKey, model });
+      for (const task of tasks) {
+        for (const format of formats) {
+          const r = await runTask(task, format, provider, model);
+          results.push(r);
+          console.error(`${model} ${task.id} ${format}: ${r.success ? "ok" : "FAIL"}`);
+        }
+      }
+    }
+  } catch (e) {
+    console.log(save(`${mode} run (partial: stopped after ${results.length} results)`));
+    throw e;
+  }
+  console.log(save(`${mode} run`));
 }
 
 const { positionals, values } = parseArgs({

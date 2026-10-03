@@ -268,6 +268,7 @@ test("runTask scores a mocked model and summaries aggregate it", async () => {
   );
   assert.equal(q.success, true);
   assert.equal(q.repaired, false);
+  assert.equal(q.reply, "ANSWER: 2");
 });
 
 test("an invalid edit reply gets one repair prompt with the validator's diagnostics", async () => {

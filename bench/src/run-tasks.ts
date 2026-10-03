@@ -22,6 +22,8 @@ export interface TaskResult {
   validAfterRepair: boolean;
   /** First reply only, so formats compare on what the model writes unaided. */
   outputTokens: number;
+  /** The model's first reply verbatim, so failures can be audited from the raw results. */
+  reply: string;
   errors: string[];
   failed: string[];
 }
@@ -103,7 +105,15 @@ export async function runTask(
   const prompt = task.type === "edit" ? editPrompt(task, format) : readPrompt(task, format);
   const completion = await provider.complete(prompt);
   const outputTokens = completion.outputTokens ?? countProxy(completion.text);
-  const base = { id: task.id, screen: task.screen, format, model, type: task.type, outputTokens };
+  const base = {
+    id: task.id,
+    screen: task.screen,
+    format,
+    model,
+    type: task.type,
+    outputTokens,
+    reply: completion.text,
+  };
   if (task.type === "edit") {
     const first = checkEdit(task, format, completion.text);
     if (first.valid)
@@ -137,7 +147,7 @@ export async function runTask(
     successAfterRepair: ok,
     validAfterRepair: true,
     errors: [],
-    failed: ok ? [] : [`answer ${JSON.stringify(completion.text.slice(0, 200))}`],
+    failed: ok ? [] : ["wrong answer"],
   };
 }
 
