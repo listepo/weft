@@ -63,6 +63,8 @@ type Owner = {
   slot?: boolean;
   /** Some ancestor is a `form`, which a `submit` button needs (SPEC §5.1). */
   inForm?: boolean;
+  /** The list is the body of an `<each>`, which repeats elements only (SPEC §4.3). */
+  each?: boolean;
 };
 
 type At = { path: string; pos?: Position | undefined };
@@ -342,15 +344,22 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
     positions: readonly (Position | undefined)[] | undefined,
   ) => {
     const where =
-      owner.slot === true
-        ? "This slot"
-        : owner.kind === undefined
-          ? "This list"
-          : `<${owner.kind}>`;
+      owner.each === true
+        ? "<each>"
+        : owner.slot === true
+          ? "This slot"
+          : owner.kind === undefined
+            ? "This list"
+            : `<${owner.kind}>`;
     list.forEach((child, index) => {
       if (typeof child === "string") {
         const at = { path: `${listPath}/#text[${index}]`, pos: positions?.[index] };
-        if (owner.slot === true || owner.content === "nodes" || owner.content === "none") {
+        if (
+          owner.slot === true ||
+          owner.each === true ||
+          owner.content === "nodes" ||
+          owner.content === "none"
+        ) {
           report("W304", {
             ...at,
             message: `${where} does not take text.`,
@@ -656,6 +665,14 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
       } else {
         innerScope = [...scope, variable];
       }
+      if (!(node.children ?? []).some((child) => typeof child !== "string")) {
+        report("W314", {
+          ...at,
+          message: "<each> has no element to repeat.",
+          expected: "one or more child elements",
+          hint: "put the element to repeat inside <each>, or remove it",
+        });
+      }
     }
 
     const events = category === "component" ? (component?.events ?? []) : [];
@@ -745,7 +762,7 @@ export function validate(input: unknown, options: ValidateOptions): Diagnostic[]
       category === "component" && component !== undefined
         ? { kind, content: component.content, allowed: component.allowedChildren, inForm }
         : category === "each"
-          ? (owner ?? { content: "mixed" })
+          ? { ...(owner ?? { content: "mixed" }), each: true }
           : { kind, content: "mixed", inForm };
     visitList(node.children ?? [], path, childOwner, innerScope, source?.get(node)?.children);
   };

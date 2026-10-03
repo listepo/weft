@@ -96,6 +96,7 @@ const cases: Record<DiagnosticCode, Case> = {
   },
   W312: { markup: screen('<screen id="inner" weft="0.1"/>') },
   W313: { markup: screen('<button id="b" submit="true">Send</button>') },
+  W314: { markup: screen('<list id="l"><each id="e" as="row" in="{$.rows}"/></list>') },
   W401: { markup: screen('<fancy id="f"/>') },
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
   W403: { markup: screen("", "0.2") },
@@ -166,6 +167,16 @@ test("numbers are checked against min, max and integer", () => {
   assert.deepEqual(codes("0"), [["W224", "an integer from 1 to 6", "use 1"]]);
   assert.deepEqual(codes("2.5"), [["W224", "an integer from 1 to 6", "use 3"]]);
   assert.deepEqual(codes("9"), [["W224", "an integer from 1 to 6", "use 6"]]);
+});
+
+test("<each> repeats elements only, even inside a parent that takes text", () => {
+  const markup = screen(
+    '<list id="l"><item id="i"><each id="e" as="row" in="{$.rows}">Hi <text id="t" text="{$row.name}"/></each></item></list>',
+  );
+  assert.deepEqual(
+    parse(markup, { catalog }).diagnostics.map((d) => [d.code, d.path]),
+    [["W304", "/screen#s/list#l/item#i/each#e/#text[0]"]],
+  );
 });
 
 test("JSON shape errors point into the JSON", () => {

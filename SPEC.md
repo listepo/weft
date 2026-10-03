@@ -158,6 +158,7 @@ Content placed directly inside an element is its default slot. The catalog says 
 
 - `in` MUST be a (non-negated) binding to an array. `as` names the loop variable, matching `[a-z][A-Za-z0-9]*`; it MUST NOT reuse the name of an enclosing loop variable.
 - Ids inside `<each>` are template ids: unique in the document, repeated per item at render time. A rendered instance is addressed as `id[index]`.
+- `<each>` holds one or more element children and no text; every child is repeated, in order, once per array item.
 - `<each>` is transparent for parent/child rules: its children are validated as children of its parent. `<each>` itself must be allowed by the parent's `allowedChildren` when that list is given.
 
 ## 5. Catalog
@@ -346,6 +347,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W311 | Loop variable shadows an enclosing one. |
 | W312 | `screen` below the root. |
 | W313 | `button` with `submit="true"` outside a `form`. |
+| W314 | `<each>` without an element child. |
 | W401 | Unknown element (mode). |
 | W402 | Unknown attribute (mode). |
 | W403 | Newer minor version of the format (mode). |

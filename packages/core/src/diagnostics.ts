@@ -72,6 +72,7 @@ export const DIAGNOSTIC_CODES = {
   W311: { severity: "error", summary: "Loop variable shadows an outer one." },
   W312: { severity: "error", summary: "`screen` below the root." },
   W313: { severity: "error", summary: "Submit button outside a `form`." },
+  W314: { severity: "error", summary: "`<each>` without an element to repeat." },
 
   W401: { severity: "mode", summary: "Unknown element." },
   W402: { severity: "mode", summary: "Unknown attribute." },
