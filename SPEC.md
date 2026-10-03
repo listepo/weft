@@ -22,21 +22,24 @@ Key words MUST, SHOULD and MAY are used as in RFC 2119.
 
 A Weft document is a well-formed XML 1.0 document restricted as follows:
 
-- UTF-8. No XML declaration, DOCTYPE, processing instructions, CDATA sections or entity declarations.
+- UTF-8. No XML declaration, DOCTYPE, processing instructions, CDATA sections or entity declarations. A leading byte order mark is ignored; line ends are normalized to LF as in XML.
 - Only the five predefined entities (`&lt; &gt; &amp; &quot; &apos;`) and numeric character references.
 - Attribute values are always double-quoted. Bare attributes (`<x required>`) are an error.
 - Element and attribute names match `[a-z][a-z0-9]*(-[a-z0-9]+)*`. Extension elements and attributes start with `x-` (see §8).
 - Comments are allowed anywhere XML allows them and are not part of the model.
 - An element with no content MUST be written self-closing by the serializer; the parser accepts both forms.
-- Whitespace-only text between elements is insignificant. Other text is trimmed and inner runs of whitespace collapse to one space.
+- Whitespace-only text between elements is insignificant. Other text is trimmed and inner runs of whitespace collapse to one space. Whitespace means the XML whitespace characters (space, tab, CR, LF) only. Text on both sides of a comment is one run; two text runs that end up adjacent in one list (for example around a `<slot>`) join with one space.
+- In attribute values, literal tabs and line breaks read as spaces (XML attribute-value normalization); write `&#9;` or `&#10;` to keep them.
+- Elements nest at most 256 levels deep.
+- Diagnostic positions are 1-based; columns count UTF-16 code units.
 
-The root element is `<screen>` and carries the format version:
+The root element is `<screen>` and carries the format version. Every example in this document is in canonical form (§3):
 
 ```xml
-<screen id="login" weft="0.1" label="Sign in">
-  <form id="f1" on-submit="auth.submit" state="idle">
-    <field id="email" type="email" label="Email" value="{$.email}" required="true"/>
-    <button id="go" variant="primary" disabled="{!$.email}" on-press="auth.submit">Sign in</button>
+<screen id="login" label="Sign in" weft="0.1">
+  <form id="f1" state="idle" on-submit="auth.submit">
+    <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
+    <button id="go" disabled="{!$.email}" variant="primary" on-press="auth.submit">Sign in</button>
     <slot name="footer">
       <link id="reset" on-press="nav.reset">Forgot password?</link>
     </slot>
@@ -55,9 +58,11 @@ An attribute value is exactly one of:
 | Negated binding | `disabled="{!$.email}"` | Boolean negation of a binding. Read-only. |
 | Token reference | `gap="{token.space.md}"` | A DTCG token path. |
 
-- A value that starts with `{` and ends with `}` is a binding or token reference; anything else is a literal. A literal that must start with `{` is written `{{`.
+- A value that starts with `{{` is a literal: the first `{` is dropped, so a literal that must start with `{` is written `{{`. Any other value that starts with `{` MUST be a whole reference, `{$…}`, `{!$…}` or `{token.…}`; anything else is an error. Values that do not start with `{` are literals.
+- These forms apply to prop values only. `id`, `on-*` and the slot `name` are always plain text.
 - Binding path grammar: `$` (`.` name)+ for the root data model, or `$` name (`.` name)* for a loop variable introduced by `<each>` (§4.3). `name` is `[A-Za-z_][A-Za-z0-9_]*` or a non-negative integer index.
-- Mixing text and bindings in one value (`"Hello {$.name}"`) is an error. Use `<text value="{$.name}"/>`.
+- Mixing text and bindings in one value (`"Hello {$.name}"`) is an error: a literal must not contain `{$`, `{!$` or `{token.` after its first character. Use `<text value="{$.name}"/>`.
+- Token path grammar: segments of `[A-Za-z0-9_-]+` joined by `.`.
 - Booleans are `true` / `false`. Numbers are JSON numbers.
 
 ### 2.2 Universal attributes
@@ -75,12 +80,15 @@ Allowed on every element:
 
 Action names match `[a-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*)*`. Actions take no arguments in the document; the host receives the action name, the element id, and for elements inside `<each>` the current loop item path.
 
-`<slot>` and `<each>` are structural elements, not components; `<slot>` has no `id`.
+`<slot>` and `<each>` are structural elements, not components, and take none of the universal attributes except that `<each>` has an `id`:
+
+- `<slot name="…">` takes exactly one attribute, `name`, which follows the name grammar. A slot holds elements only, no text.
+- `<each id="…" in="{…}" as="…">` takes `id`, `in` and `as` (§4.3).
 
 ## 3. Canonical JSON
 
 ```ts
-type Document = { weft: "0.1"; root: Node };
+type Document = { weft: "0.1"; root: Node };  // `weft` is the root element's `weft` attribute
 
 type Node = {
   kind: string;                      // element name
@@ -101,10 +109,14 @@ type Value =
 
 Canonical form rules, so that equal documents are byte-equal:
 
-- Object keys in the order shown above; `props`, `on` and `slots` keys sorted lexicographically.
-- Empty `props`, `on`, `slots`, `children` are omitted.
+- Object keys in the order shown above; `props`, `on` and `slots` keys sorted lexicographically by UTF-16 code unit.
+- Empty `props`, `on`, `slots`, `children` and empty slot lists are omitted.
+- Text children are whitespace-normalized as in §2, and adjacent text children are joined with one space. `-0` is written `0`.
 - Props whose value equals the catalog default are kept as written (no default elision).
-- Markup serialization writes attributes as: `id`, then props sorted, then `on-*` sorted; two-space indentation; named slots after default-slot children, sorted by name.
+- The `weft` attribute of the root element is `Document.weft` and never appears in the root's `props`.
+- The JSON text is indented by two spaces and ends with a newline.
+- Markup serialization writes attributes as: `id`, then props sorted (the root's `weft` sorts with them), then `on-*` sorted; two-space indentation; named slots after default-slot children, sorted by name. An element with no content is self-closing; an element whose only content is one text child is written on one line; otherwise every child goes on its own line. The text ends with a newline.
+- Escaping: in attribute values `&`, `<`, `"`, tab, LF and CR are written as references; in text `&`, `<` and `>` are. No other references are written.
 
 Literal typing needs the catalog: `level="2"` is the number `2` only because `heading.level` is declared a number. For extension elements and unknown attributes, literals stay strings.
 
@@ -133,15 +145,17 @@ Content placed directly inside an element is its default slot. The catalog says 
 
 ```xml
 <list id="todos">
-  <each id="todo-each" in="{$.todos}" as="todo">
-    <item id="todo-item"><text id="todo-title" value="{$todo.title}"/></item>
+  <each id="todo-each" as="todo" in="{$.todos}">
+    <item id="todo-item">
+      <text id="todo-title" value="{$todo.title}"/>
+    </item>
   </each>
 </list>
 ```
 
-- `in` MUST be a binding to an array. `as` names the loop variable, matching `[a-z][A-Za-z0-9]*`.
+- `in` MUST be a (non-negated) binding to an array. `as` names the loop variable, matching `[a-z][A-Za-z0-9]*`; it MUST NOT reuse the name of an enclosing loop variable.
 - Ids inside `<each>` are template ids: unique in the document, repeated per item at render time. A rendered instance is addressed as `id[index]`.
-- `<each>` is transparent for parent/child rules: its children are validated as children of its parent.
+- `<each>` is transparent for parent/child rules: its children are validated as children of its parent. `<each>` itself must be allowed by the parent's `allowedChildren` when that list is given.
 
 ## 5. Catalog
 
@@ -230,7 +244,9 @@ Validation has three layers, each reporting diagnostics rather than throwing:
 
 1. **Syntax** — §2. The document is well-formed restricted XML.
 2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, required props present, declared slots, states and events.
-3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements.
+3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, and `text`/`heading` take their text from content or `value`, not both.
+
+A document that does not have the JSON shape of §3 gets `W200` diagnostics only; the other checks need the shape.
 
 ### 6.1 Diagnostics
 
@@ -249,6 +265,74 @@ type Diagnostic = {
 ```
 
 Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility. A code, once published, never changes meaning.
+
+`path` addresses the element from the root: one segment per element, `kind#id`, or `kind[index]` when the element has no valid id (the index counts the parent's list, text included). A named slot adds `slot[name]`, a text child `#text[index]`, an attribute `@name` (`@on-press` for events, `@weft` for the version). Syntax diagnostics name the open elements only. For JSON that does not have the shape of §3, the path is a JSON Pointer prefixed with `#`, e.g. `#/root/children/0/kind`.
+
+### 6.2 Codes
+
+`mode` severity is a warning in lenient mode and an error in strict mode (§8). Every other code is an error.
+
+| Code | Meaning |
+| --- | --- |
+| W101 | Malformed markup: a stray `<`, a broken tag, attributes not separated by whitespace. |
+| W102 | XML declaration or processing instruction. |
+| W103 | DOCTYPE or another markup declaration. |
+| W104 | CDATA section. |
+| W105 | Element or attribute name breaks the name grammar. |
+| W106 | Attribute value not in double quotes. |
+| W107 | Attribute without a value. |
+| W108 | Duplicate attribute. |
+| W109 | Closing tag does not match the open element. |
+| W110 | Element, start tag or attribute value never closed. |
+| W111 | Closing tag without an open element. |
+| W112 | Unknown entity, malformed or disallowed character reference, bare `&`. |
+| W113 | Character not allowed: outside the XML character range, `<` in an attribute value, `]]>` in text. |
+| W114 | Content outside the single root element, a second root, or no root. |
+| W115 | Unterminated comment, or `--` inside a comment. |
+| W116 | Value starts with `{` but is not a whole reference (§2.1). |
+| W117 | Nesting deeper than 256 levels. |
+| W118 | `<slot>` misplaced (root, inside `<each>` or another `<slot>`) or malformed (no valid `name`, other attributes). |
+| W119 | The same slot name twice under one parent. |
+| W200 | Document does not have the JSON shape of §3 (or nests too deep, or the root's `props` holds `weft`). |
+| W201 | Root element is not `screen`. |
+| W202 | Element without `id`. |
+| W203 | Value not one of the enum values or declared states. |
+| W204 | Value of the wrong type. |
+| W205 | Required prop, `label` or the root's `weft` missing. |
+| W206 | Event not declared by the component. |
+| W207 | Slot not declared by the component. |
+| W208 | Required slot missing. |
+| W209 | `role` on a catalog component. |
+| W210 | Extension element without `role`. |
+| W211 | `role` value is not a WAI-ARIA 1.2 role. |
+| W212 | Id breaks the id grammar. |
+| W213 | Text and a reference mixed in one value. |
+| W214 | Binding path breaks the binding grammar. |
+| W215 | Token path breaks the token grammar. |
+| W216 | Action name breaks the action grammar. |
+| W217 | Binding on a literal-only prop (`bindable: false`, `role`). |
+| W218 | Negated binding on a non-boolean or two-way prop. |
+| W219 | `weft` version is not `major.minor`. |
+| W220 | Extension name lacks the `x-<vendor>-` prefix. |
+| W221 | String holds a character XML cannot carry. |
+| W222 | `<each>` without a binding `in` or a valid `as`. |
+| W223 | Kind, prop, event or slot name invalid or reserved (`slot` as a kind, `id` or `on-*` in `props`). |
+| W301 | Duplicate id. |
+| W302 | Child kind not in the parent's (or slot's) `allowedChildren`. |
+| W303 | Parent kind not in the child's `allowedParents`. |
+| W304 | Content breaks the content model: text where only elements go, elements where only text goes, anything in `none`. |
+| W305 | Binding uses a loop variable that is not in scope. |
+| W306 | Token not in the supplied token set. |
+| W307 | Token `$type` differs from the prop's `tokenType`. |
+| W308 | Action not in the supplied action list. |
+| W309 | Id reference points at no suitable element. |
+| W310 | `text` or `heading` has both content and `value`. |
+| W311 | Loop variable shadows an enclosing one. |
+| W312 | `screen` below the root. |
+| W401 | Unknown element (mode). |
+| W402 | Unknown attribute (mode). |
+| W403 | Newer minor version of the format (mode). |
+| W404 | Unsupported major version. |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
@@ -269,8 +353,8 @@ A patch list applies atomically: the result is validated, and if it has errors n
 ## 8. Versioning and extensibility
 
 - `weft` on `<screen>` is `major.minor`. A minor version only adds; a reader of `0.x` MUST accept any `0.y` document under the rules below. A major version may break.
-- **Extensions** are elements or attributes whose name starts with `x-<vendor>-`. An extension element MUST carry `role` (its ARIA fallback) and follows `content: "mixed"`. A reader that does not know it renders its children inside a container with that role.
-- **Unknown, non-extension** elements or attributes come from a newer minor version or another catalog. In *lenient* mode (default for readers) they produce a `W4xx` warning; an unknown element is treated as an extension with role `group`, an unknown attribute is kept in the model and ignored. In *strict* mode (default for writers and CI) they are errors.
+- **Extensions** are elements or attributes whose name starts with `x-<vendor>-`. An extension element MUST carry `role` (its ARIA fallback) and follows `content: "mixed"`; it may have any attributes, slots and events, and its literals stay strings. A reader that does not know it renders its children inside a container with that role. Extension attributes are allowed on every element in both modes.
+- **Unknown, non-extension** elements or attributes come from a newer minor version or another catalog. In *lenient* mode (default for readers) they produce a `W4xx` warning; an unknown element is treated as an extension with role `group`, an unknown attribute is kept in the model and ignored. In *strict* mode (default for writers and CI) they are errors. A newer minor `weft` version is reported the same way. Unknown and extension elements are opaque: parent/child rules skip them, but the parent's content model still applies. Undeclared events, slots, states and enum values of a known component are schema errors, not compatibility warnings.
 - A reader MUST NOT drop unknown content when it round-trips a document.
 - A catalog has its own semver. Removing a component, a prop, an enum value, a slot, a state or an event is a major change; adding one is minor.
 - A host advertises `{ weft, catalogs: [{ name, version }] }`; an agent writes only what the host advertises.
