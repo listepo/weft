@@ -7,10 +7,10 @@ An open format for describing user interfaces that AI agents can read, write, va
 - **Borrowed semantics.** Roles and states from WAI-ARIA, component contracts modelled on Custom Elements Manifest, design values from Design Tokens (DTCG 2025.10).
 
 ```xml
-<screen id="login" weft="0.1" label="Sign in">
+<screen id="login" label="Sign in" weft="0.1">
   <form id="f1" on-submit="auth.submit">
-    <field id="email" type="email" label="Email" value="{$.email}" required="true"/>
-    <button id="go" variant="primary" on-press="auth.submit">Sign in</button>
+    <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
+    <button id="go" submit="true" variant="primary">Sign in</button>
   </form>
 </screen>
 ```
