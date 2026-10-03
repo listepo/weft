@@ -69,6 +69,17 @@ function rejected(patches: unknown, code: string, from: Document = base): Diagno
 }
 const text = (document: Document) => serialize(document);
 
+/** The element reached by following child indexes from `node`. */
+function child(node: Node, ...path: number[]): Node {
+  let current = node;
+  for (const index of path) {
+    const next = current.children?.[index];
+    assert.ok(typeof next === "object", `no element at ${index}`);
+    current = next;
+  }
+  return current;
+}
+
 // One patch list per patch code; the registry test below keeps this table complete.
 const failures: Record<string, [unknown, Document?]> = {
   W501: [[{ op: "explode" }]],
@@ -148,13 +159,13 @@ test("insert: appends by default and honours index", () => {
   );
 
   const first = ok([{ op: "insert", parent: "main", index: 0, markup: '<text id="t1">Hi</text>' }]);
-  const firstKids = (first.root.children?.[0] as Node).children as Node[];
+  const firstKids = child(first.root, 0).children as Node[];
   assert.equal(firstKids[0]?.id, "t1");
 
   const middle = ok([
     { op: "insert", parent: "main", index: 1, markup: '<text id="t1">Hi</text>' },
   ]);
-  const ids = ((middle.root.children?.[0] as Node).children as Node[]).map((n) => n.id);
+  const ids = (child(middle.root, 0).children as Node[]).map((n) => n.id);
   assert.deepEqual(ids.slice(0, 3), ["email", "t1", "pw"]);
 });
 
@@ -168,8 +179,8 @@ test("insert: several elements keep their order; literals are typed by the catal
         '<heading id="h" level="2">T</heading>\n<!-- gap -->\n<button id="b" disabled="true">B</button>',
     },
   ]);
-  const [stack] = out.root.children as Node[];
-  const [h, b] = stack?.children as Node[];
+  const stack = child(out.root, 0);
+  const [h, b] = stack.children as Node[];
   assert.deepEqual(h?.props, { level: 2 });
   assert.deepEqual(b?.props, { disabled: true });
 });
@@ -178,7 +189,7 @@ test("insert: into a named slot, an existing one or a declared empty one", () =>
   const footer = ok([
     { op: "insert", parent: "f", slot: "footer", index: 0, markup: '<link id="ln">L</link>' },
   ]);
-  const form = (footer.root.children?.[0] as Node).children?.[2] as Node;
+  const form = child(footer.root, 0, 2);
   assert.deepEqual(
     form.slots?.["footer"]?.map((n) => (n as Node).id),
     ["ln", "reset"],
@@ -297,7 +308,7 @@ test("remove: the root stays, and the result must still be valid", () => {
 
 test("move: to another parent, into a slot, and inside one list", () => {
   const moved = ok([{ op: "move", id: "go", parent: "f", slot: "footer", index: 0 }]);
-  const footer = ((moved.root.children?.[0] as Node).children?.[2] as Node).slots?.["footer"];
+  const footer = child(moved.root, 0, 2).slots?.["footer"];
   assert.deepEqual(
     footer?.map((n) => (n as Node).id),
     ["go", "reset"],
@@ -305,7 +316,7 @@ test("move: to another parent, into a slot, and inside one list", () => {
 
   // The index counts the list after the element left it.
   const reordered = ok([{ op: "move", id: "i1", parent: "l", index: 1 }]);
-  const list = (reordered.root.children?.[0] as Node).children?.[3] as Node;
+  const list = child(reordered.root, 0, 3);
   assert.deepEqual(
     list.children?.map((n) => (n as Node).id),
     ["i2", "i1", "e"],
