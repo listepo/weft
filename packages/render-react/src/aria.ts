@@ -427,3 +427,63 @@ function parseKey(key: string, value: string | undefined): AriaNode {
   if (value !== undefined) out.children = [textNode(value)];
   return out;
 }
+
+// ---- Playwright aria snapshot (YAML) writer ----
+
+// Prints a tree as the YAML `locator.ariaSnapshot()` would, so a tree declared by a document can
+// be read (and diffed) the same way as one taken from a running page. `parseAriaSnapshot` reads
+// the output back to the normalized tree.
+export function formatAriaSnapshot(tree: AriaNode): string {
+  const lines: string[] = [];
+  const root = normalizeAria(tree);
+  const top = root.role === "fragment" ? (root.children ?? []) : [root];
+  for (const n of top) writeNode(n, "", lines);
+  return lines.join("\n");
+}
+
+const STATE_ORDER = ["checked", "disabled", "expanded", "invalid", "level", "pressed", "selected"];
+
+function writeNode(n: AriaNode, indent: string, lines: string[]): void {
+  if (n.role === "text") {
+    lines.push(`${indent}- text: ${yamlValue(n.name)}`);
+    return;
+  }
+  let key = n.role;
+  if (n.name !== "") key += ` ${JSON.stringify(n.name)}`;
+  const states = (n.states ?? {}) as Record<string, unknown>;
+  for (const s of STATE_ORDER) {
+    const v = states[s];
+    if (v === true) key += ` [${s}]`;
+    else if (v !== undefined && v !== false) key += ` [${s}=${String(v)}]`;
+  }
+  const head = `${indent}- ${yamlKey(key)}`;
+  const children = n.children ?? [];
+  const only = children.length === 1 ? children[0] : undefined;
+  if (n.url === undefined && only?.role === "text") {
+    lines.push(`${head}: ${yamlValue(only.name)}`);
+    return;
+  }
+  if (n.url === undefined && children.length === 0) {
+    lines.push(head);
+    return;
+  }
+  lines.push(`${head}:`);
+  if (n.url !== undefined) lines.push(`${indent}  - /url: ${yamlValue(n.url)}`);
+  for (const c of children) writeNode(c, `${indent}  `, lines);
+}
+
+// A key that YAML would split at ": " or read as a comment is single-quoted, as Playwright does.
+function yamlKey(key: string): string {
+  return /: |:$| #/.test(key) ? `'${key.replaceAll("'", "''")}'` : key;
+}
+
+// Plain scalars that YAML would read as something other than the string are double-quoted.
+function yamlValue(value: string): string {
+  const plain =
+    value !== "" &&
+    value === value.trim() &&
+    !/^[-?:,[\]{}#&*!|>'"%@`]/.test(value) &&
+    !/: |:$| #|[\n\r\t]/.test(value) &&
+    !/^(?:true|false|null|~|[-+]?(?:\d[\d_]*(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)$/i.test(value);
+  return plain ? value : JSON.stringify(value);
+}

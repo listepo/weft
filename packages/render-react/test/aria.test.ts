@@ -6,6 +6,7 @@ import type { Document } from "@weft/core";
 import {
   diffAria,
   expectedTree,
+  formatAriaSnapshot,
   normalizeAria,
   parseAriaSnapshot,
   type AriaNode,
@@ -229,4 +230,42 @@ test("diffAria lists role, name, state, url and child differences with their pat
     'root > [0] main "M" > [0] button "Go": expected name "Go", got "Go!"',
     'root > [0] main "M" > [0] button "Go": expected states {"disabled":true}, got {}',
   ]);
+});
+
+test("formatAriaSnapshot prints the YAML parseAriaSnapshot reads back", () => {
+  const tree = parseAriaSnapshot(SNAPSHOT);
+  assert.deepEqual(parseAriaSnapshot(formatAriaSnapshot(tree)), normalizeAria(tree));
+  const tricky: AriaNode = {
+    role: "fragment",
+    name: "",
+    children: [
+      { role: "button", name: 'say "hi": now', states: { pressed: "mixed", disabled: true } },
+      { role: "text", name: "42" },
+      {
+        role: "link",
+        name: "x",
+        url: "https://x.test/#a b",
+        children: [{ role: "text", name: "y" }],
+      },
+      {
+        role: "heading",
+        name: "",
+        states: { level: 2 },
+        children: [{ role: "text", name: "- z" }],
+      },
+    ],
+  };
+  const yaml = formatAriaSnapshot(tricky);
+  assert.equal(
+    yaml,
+    [
+      `- 'button "say \\"hi\\": now" [disabled] [pressed=mixed]'`,
+      '- text: "42"',
+      '- link "x":',
+      "  - /url: https://x.test/#a b",
+      "  - text: y",
+      '- heading [level=2]: "- z"',
+    ].join("\n"),
+  );
+  assert.deepEqual(parseAriaSnapshot(yaml), normalizeAria(tricky));
 });
