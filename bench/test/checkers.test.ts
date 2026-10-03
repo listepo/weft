@@ -267,6 +267,44 @@ test("runTask scores a mocked model and summaries aggregate it", async () => {
     "m",
   );
   assert.equal(q.success, true);
+  assert.equal(q.repaired, false);
+});
+
+test("an invalid edit reply gets one repair prompt with the validator's diagnostics", async () => {
+  const t = task("login.e2");
+  const solve = (p: string) =>
+    wrap("weft", solutions["login.e2"]!.weft!(p.match(/```xml\n([\s\S]*?)```/)![1]!.trim()));
+  const prompts: string[] = [];
+  const r = await runTask(
+    t,
+    "weft",
+    mockProvider((p) => {
+      prompts.push(p);
+      return p.includes("Your previous reply") ? solve(p) : '```xml\n<screen id="login"\n```';
+    }),
+    "m",
+  );
+  assert.equal(prompts.length, 2);
+  assert.match(prompts[1]!, /It is not a valid document:\n- /);
+  assert.deepEqual(
+    [r.valid, r.success, r.repaired, r.validAfterRepair, r.successAfterRepair],
+    [false, false, true, true, true],
+  );
+  const [s] = summarize([r]);
+  assert.deepEqual([s?.validRate, s?.validAfterRepairRate], [0, 1]);
+
+  let calls = 0;
+  const once = await runTask(
+    t,
+    "weft",
+    mockProvider((p) => {
+      calls++;
+      return solve(p);
+    }),
+    "m",
+  );
+  assert.equal(calls, 1);
+  assert.equal(once.repaired, false);
 });
 
 test("tasks cover every screen", () => {

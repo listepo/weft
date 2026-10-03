@@ -15,6 +15,12 @@ export interface TaskResult {
   success: boolean;
   /** Edit output parsed and passed the format's own validity checks. */
   valid: boolean;
+  /** One repair prompt was sent because the first edit reply was invalid. */
+  repaired: boolean;
+  /** Equal to `success` and `valid` when no repair was needed. */
+  successAfterRepair: boolean;
+  validAfterRepair: boolean;
+  /** First reply only, so formats compare on what the model writes unaided. */
   outputTokens: number;
   errors: string[];
   failed: string[];
@@ -40,6 +46,25 @@ export function readPrompt(task: QuestionTask, format: Format): string {
     `Screen:\n\`\`\`${FENCE_LANG[format]}\n${readScreen(task.screen, format).trim()}\n\`\`\``,
     `Question: ${task.question}`,
     "Reply with one short line in the form `ANSWER: <answer>` and nothing else.",
+  ].join("\n\n");
+}
+
+/**
+ * A caller in production sees only the validator, not the task's hidden expectations, so the
+ * repair prompt carries the format's own diagnostics and nothing else.
+ */
+export function repairPrompt(
+  task: EditTask,
+  format: Format,
+  reply: string,
+  errors: string[],
+): string {
+  const diagnostics = errors.length ? errors : ["the document could not be parsed"];
+  return [
+    editPrompt(task, format),
+    `Your previous reply:\n\`\`\`${FENCE_LANG[format]}\n${extractDocument(reply)}\n\`\`\``,
+    `It is not a valid document:\n${diagnostics.map((e) => `- ${e}`).join("\n")}`,
+    "Fix these problems and apply the requested change. Reply with the complete corrected document in a single code block and nothing else.",
   ].join("\n\n");
 }
 
@@ -79,12 +104,38 @@ export async function runTask(
   const completion = await provider.complete(prompt);
   const outputTokens = completion.outputTokens ?? countProxy(completion.text);
   const base = { id: task.id, screen: task.screen, format, model, type: task.type, outputTokens };
-  if (task.type === "edit") return { ...base, ...checkEdit(task, format, completion.text) };
+  if (task.type === "edit") {
+    const first = checkEdit(task, format, completion.text);
+    if (first.valid)
+      return {
+        ...base,
+        ...first,
+        repaired: false,
+        successAfterRepair: first.success,
+        validAfterRepair: true,
+      };
+    const retry = await provider.complete(
+      repairPrompt(task, format, completion.text, first.errors),
+    );
+    const second = checkEdit(task, format, retry.text);
+    return {
+      ...base,
+      ...first,
+      repaired: true,
+      successAfterRepair: second.success,
+      validAfterRepair: second.valid,
+      failed: [...first.failed, ...second.failed.map((f) => `after repair: ${f}`)],
+      errors: [...first.errors, ...second.errors.map((e) => `after repair: ${e}`)],
+    };
+  }
   const ok = checkAnswer(task, completion.text);
   return {
     ...base,
     success: ok,
     valid: true,
+    repaired: false,
+    successAfterRepair: ok,
+    validAfterRepair: true,
     errors: [],
     failed: ok ? [] : [`answer ${JSON.stringify(completion.text.slice(0, 200))}`],
   };
@@ -95,7 +146,9 @@ export interface Summary {
   format: Format;
   tasks: number;
   successRate: number;
+  successAfterRepairRate: number;
   validRate: number;
+  validAfterRepairRate: number;
   meanOutputTokens: number;
 }
 
@@ -106,12 +159,15 @@ export function summarize(results: TaskResult[]): Summary[] {
       ...(groups.get(`${r.model}\u0000${r.format}`) ?? []),
       r,
     ]);
+  const rate = (g: TaskResult[], ok: (r: TaskResult) => boolean) => g.filter(ok).length / g.length;
   return [...groups.values()].map((g) => ({
     model: (g[0] as TaskResult).model,
     format: (g[0] as TaskResult).format,
     tasks: g.length,
-    successRate: g.filter((r) => r.success).length / g.length,
-    validRate: g.filter((r) => r.valid).length / g.length,
+    successRate: rate(g, (r) => r.success),
+    successAfterRepairRate: rate(g, (r) => r.successAfterRepair),
+    validRate: rate(g, (r) => r.valid),
+    validAfterRepairRate: rate(g, (r) => r.validAfterRepair),
     meanOutputTokens: g.reduce((s, r) => s + r.outputTokens, 0) / g.length,
   }));
 }
@@ -120,12 +176,13 @@ export function renderSummary(mode: string, summaries: Summary[]): string {
   const lines = [
     `## ${mode}`,
     "",
-    "| Model | Format | Tasks | Success | Valid | Mean output tokens |",
-    "| --- | --- | ---: | ---: | ---: | ---: |",
+    "| Model | Format | Tasks | Valid | Valid after repair | Success | Success after repair | Mean output tokens |",
+    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
   ];
+  const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
   for (const s of summaries)
     lines.push(
-      `| ${s.model} | ${s.format} | ${s.tasks} | ${(s.successRate * 100).toFixed(1)}% | ${(s.validRate * 100).toFixed(1)}% | ${s.meanOutputTokens.toFixed(0)} |`,
+      `| ${s.model} | ${s.format} | ${s.tasks} | ${pct(s.validRate)} | ${pct(s.validAfterRepairRate)} | ${pct(s.successRate)} | ${pct(s.successAfterRepairRate)} | ${s.meanOutputTokens.toFixed(0)} |`,
     );
   return lines.join("\n") + "\n";
 }
