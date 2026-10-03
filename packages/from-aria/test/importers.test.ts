@@ -150,7 +150,7 @@ test("DOM: implicit roles, labels and states", () => {
   const html = `<main aria-label="Form">
     <form aria-label="Sign in"><label for="e">Email</label><input id="e" type="email" required aria-invalid="true">
     <label><input type="checkbox" checked> Remember</label>
-    <select aria-label="Plan"><option value="a">A</option><option value="b" selected>B</option></select>
+    <label><span aria-hidden="true">Plan</span><select aria-label="Plan"><option value="a">A</option><option value="b" selected>B</option></select></label>
     <button type="submit">Go</button></form>
     <h3>Title</h3><a href="javascript:alert(1)">bad</a><img src="x.png" alt="">
     <div hidden><button>Hidden</button></div></main>`;
@@ -168,6 +168,11 @@ test("DOM: implicit roles, labels and states", () => {
     ["checkbox", "Remember", true],
   );
   assert.deepEqual([select?.kind, select?.props?.["value"]], ["select", "b"]);
+  // A wrapping label names the select; the option text inside it is still the options' own.
+  assert.deepEqual(
+    kids(select as N).map((o) => o.children),
+    [["A"], ["B"]],
+  );
   assert.deepEqual([button?.kind, button?.props?.["submit"]], ["button", true]);
   assert.equal(find(root(r), "heading")?.props?.["level"], 3);
   assert.equal(JSON.stringify(r.document).includes("Hidden"), false);

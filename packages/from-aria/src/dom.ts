@@ -333,7 +333,10 @@ function element(el: HNode, ctx: Ctx, depth: number, label: HNode | undefined): 
 
   if (tag !== "input" && tag !== "textarea" && tag !== "img") {
     if (tag === "form") ctx.forms++;
-    s.children = children(el, ctx, depth, tag === "label" ? el : label);
+    // What a control holds (a select's options) is its own content, not the name a wrapping
+    // label gives it.
+    const within = tag === "label" ? el : CONTROLS.has(tag) ? undefined : label;
+    s.children = children(el, ctx, depth, within);
     if (tag === "form") ctx.forms--;
   }
   return s;
