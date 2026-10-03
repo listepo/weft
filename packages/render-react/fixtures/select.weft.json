@@ -1,0 +1,29 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Locale", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "select",
+        "id": "country",
+        "props": { "disabled": false, "label": "Country", "value": { "bind": "$.country" } },
+        "on": { "change": "profile.update" },
+        "children": [
+          { "kind": "option", "id": "c-pt", "props": { "value": "pt" }, "children": ["Portugal"] },
+          { "kind": "option", "id": "c-es", "props": { "value": "es" }, "children": ["Spain"] }
+        ]
+      },
+      {
+        "kind": "select",
+        "id": "unset",
+        "props": { "disabled": true, "label": "Currency" },
+        "children": [
+          { "kind": "option", "id": "eur", "props": { "value": "eur" }, "children": ["Euro"] },
+          { "kind": "option", "id": "usd", "props": { "value": "usd" }, "children": ["Dollar"] }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Account", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "section",
+        "id": "profile",
+        "props": { "label": "Profile" },
+        "slots": {
+          "header": [
+            {
+              "kind": "heading",
+              "id": "profile-title",
+              "props": { "level": 2 },
+              "children": ["Profile"]
+            }
+          ]
+        },
+        "children": [
+          { "kind": "text", "id": "bio", "children": ["Product designer based in Lisbon."] }
+        ]
+      }
+    ]
+  }
+}

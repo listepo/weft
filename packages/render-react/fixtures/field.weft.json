@@ -1,0 +1,41 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Sign up", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "field",
+        "id": "email",
+        "props": {
+          "disabled": false,
+          "error": { "bind": "$.errors.email" },
+          "label": "Email",
+          "placeholder": "you@example.com",
+          "required": true,
+          "state": "valid",
+          "type": "email",
+          "value": { "bind": "$.email" }
+        },
+        "on": { "change": "form.edit" }
+      },
+      {
+        "kind": "field",
+        "id": "age",
+        "props": { "label": "Age", "type": "number", "value": { "bind": "$.age" } }
+      },
+      { "kind": "field", "id": "q", "props": { "label": "Search", "type": "search" } },
+      {
+        "kind": "field",
+        "id": "pw",
+        "props": { "disabled": true, "label": "Password", "type": "password" }
+      },
+      {
+        "kind": "field",
+        "id": "note",
+        "props": { "label": "Note", "type": "multiline", "value": "Hello" }
+      }
+    ]
+  }
+}

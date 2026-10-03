@@ -1,0 +1,12 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Home", "state": "ready", "weft": "0.1" },
+    "children": [
+      { "kind": "heading", "id": "title", "props": { "level": 1 }, "children": ["Welcome back"] },
+      { "kind": "text", "id": "intro", "children": ["Pick up where you left off."] }
+    ]
+  }
+}

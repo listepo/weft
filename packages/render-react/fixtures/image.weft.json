@@ -1,0 +1,20 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Profile", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "image",
+        "id": "avatar",
+        "props": { "label": "Profile photo of the user", "src": { "bind": "$.user.avatar" } }
+      },
+      {
+        "kind": "image",
+        "id": "evil",
+        "props": { "label": "Unsafe source", "src": "javascript:alert(1)" }
+      }
+    ]
+  }
+}

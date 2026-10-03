@@ -1,0 +1,25 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Plan", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "radio-group",
+        "id": "plan",
+        "props": { "label": "Plan", "value": { "bind": "$.plan" } },
+        "on": { "change": "plan.choose" },
+        "children": [
+          {
+            "kind": "radio",
+            "id": "plan-free",
+            "props": { "value": "free" },
+            "children": ["Free"]
+          },
+          { "kind": "radio", "id": "plan-pro", "props": { "value": "pro" }, "children": ["Pro"] }
+        ]
+      }
+    ]
+  }
+}

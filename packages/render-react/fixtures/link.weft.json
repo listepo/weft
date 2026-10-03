@@ -1,0 +1,29 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Help", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "link",
+        "id": "docs",
+        "props": { "href": "https://example.com/help" },
+        "children": ["Read the help center"]
+      },
+      {
+        "kind": "link",
+        "id": "reset",
+        "on": { "press": "nav.reset" },
+        "children": ["Forgot password?"]
+      },
+      {
+        "kind": "link",
+        "id": "evil",
+        "props": { "href": "javascript:alert(1)" },
+        "children": ["Unsafe"]
+      },
+      { "kind": "link", "id": "rel", "props": { "href": "/settings" }, "children": ["Settings"] }
+    ]
+  }
+}

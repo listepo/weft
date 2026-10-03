@@ -1,0 +1,20 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Gallery", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "grid",
+        "id": "cards",
+        "props": { "columns": 3, "gap": { "token": "space.lg" } },
+        "children": [
+          { "kind": "text", "id": "card-a", "children": ["Revenue"] },
+          { "kind": "text", "id": "card-b", "children": ["Orders"] },
+          { "kind": "text", "id": "card-c", "children": ["Visitors"] }
+        ]
+      }
+    ]
+  }
+}

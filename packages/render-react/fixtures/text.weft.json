@@ -1,0 +1,17 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Status", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "text",
+        "id": "saved",
+        "props": { "tone": "success" },
+        "children": ["All changes saved."]
+      },
+      { "kind": "text", "id": "user", "props": { "value": { "bind": "$.user.name" } } }
+    ]
+  }
+}

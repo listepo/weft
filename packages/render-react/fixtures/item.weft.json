@@ -1,0 +1,31 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Inbox", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "list",
+        "id": "inbox",
+        "props": { "ordered": true },
+        "children": [
+          {
+            "kind": "item",
+            "id": "msg-1",
+            "on": { "press": "inbox.open" },
+            "children": [
+              {
+                "kind": "text",
+                "id": "msg-1-from",
+                "props": { "tone": "muted" },
+                "children": ["Ana"]
+              },
+              { "kind": "text", "id": "msg-1-subject", "children": ["Welcome aboard"] }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Users", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "table",
+        "id": "users",
+        "props": { "label": "Users" },
+        "children": [
+          {
+            "kind": "column",
+            "id": "col-name",
+            "props": { "sort": "ascending" },
+            "on": { "press": "users.sortByName" },
+            "children": ["Name"]
+          },
+          { "kind": "column", "id": "col-role", "props": { "sort": "none" }, "children": ["Role"] }
+        ]
+      }
+    ]
+  }
+}

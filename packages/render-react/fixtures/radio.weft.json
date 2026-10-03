@@ -1,0 +1,32 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": { "label": "Delivery", "weft": "0.1" },
+    "children": [
+      {
+        "kind": "radio-group",
+        "id": "speed",
+        "props": { "label": "Delivery speed", "value": { "bind": "$.speed" } },
+        "children": [
+          {
+            "kind": "radio",
+            "id": "speed-std",
+            "props": { "disabled": false, "value": "standard" },
+            "children": ["Standard"]
+          },
+          {
+            "kind": "radio",
+            "id": "speed-fast",
+            "props": {
+              "disabled": { "bind": "$.expressAvailable", "not": true },
+              "value": "express"
+            },
+            "children": ["Express"]
+          }
+        ]
+      }
+    ]
+  }
+}
