@@ -8,7 +8,7 @@
       <field id="confirm" label="Confirm password" required="true" type="password" value="{$.confirm}"/>
       <checkbox id="terms" checked="{$.acceptTerms}" label="I accept the terms of service"/>
     </stack>
-    <button id="submit" disabled="{!$.acceptTerms}" variant="primary" on-press="auth.signup">Create account</button>
+    <button id="submit" disabled="{!$.acceptTerms}" submit="true" variant="primary">Create account</button>
     <slot name="footer">
       <link id="signin" on-press="nav.signin">Already have an account? Sign in</link>
     </slot>

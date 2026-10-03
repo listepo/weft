@@ -3,7 +3,7 @@
   <form id="add-form" on-submit="todo.add">
     <stack id="add-row" direction="row" gap="{token.space.sm}">
       <field id="draft" label="New task" value="{$.draft}"/>
-      <button id="add" disabled="{!$.draft}" variant="primary" on-press="todo.add">Add</button>
+      <button id="add" disabled="{!$.draft}" submit="true" variant="primary">Add</button>
     </stack>
   </form>
   <list id="list">
