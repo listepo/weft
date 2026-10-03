@@ -19,6 +19,7 @@ Tools:
 - weft_validate: check markup. Diagnostics carry a code, a path, what was expected and often the fix in "hint".
 - weft_format: canonical markup, the one form that diffs and hashes.
 - weft_patch: edit existing markup without rewriting it. Send the current markup and a list of patches; the result is the new canonical markup, or diagnostics and nothing applied.
+- weft_render: see the screen as assistive technology or a browsing agent would: the accessibility tree (roles, names, states) for the markup and optional sample data.
 
 Patches (addressed by id, applied in order, all-or-nothing):
 - {"op":"set","id":"go","prop":"variant","value":"primary"}: value is typed JSON: "text", 7, true, {"bind":"$.busy"}, {"bind":"$.busy","not":true}, {"token":"space.md"}. null removes the prop. A prop named on-<event> sets the action name (null unbinds). An id cannot be set.

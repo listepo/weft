@@ -13,6 +13,7 @@
     "@modelcontextprotocol/sdk": "1.32.0",
     "@weft/catalog": "workspace:*",
     "@weft/core": "workspace:*",
+    "@weft/render-react": "workspace:*",
     "zod": "4.6.5"
   }
 }
