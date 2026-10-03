@@ -1,0 +1,26 @@
+{
+  "name": "@weft/render-react",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test:browser": "node --test test/browser.test.ts",
+    "page": "node src/write-page.ts"
+  },
+  "dependencies": {
+    "@weft/catalog": "workspace:*",
+    "@weft/core": "workspace:*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "fast-check": "4.10.2",
+    "htmlparser2": "12.0.0",
+    "playwright": "1.63.0"
+  }
+}
