@@ -1,0 +1,4 @@
+# Toolchain for weft. `mise install` then `pnpm install`.
+[tools]
+node = "26.7.0"
+"npm:pnpm" = "12.3.4"

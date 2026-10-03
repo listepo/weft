@@ -1,0 +1,22 @@
+{
+  "name": "weft",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "lint": "oxlint --deny-warnings . && oxfmt --check \"**/*.{ts,tsx,json}\"",
+    "fmt": "oxfmt \"**/*.{ts,tsx,json}\"",
+    "test": "node --test \"packages/*/test/**/*.test.ts\" \"bench/test/**/*.test.ts\"",
+    "ci": "pnpm run typecheck && pnpm run lint && pnpm run test"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "oxfmt": "0.71.0",
+    "oxlint": "1.86.0",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=26.7.0"
+  },
+  "packageManager": "pnpm@12.3.4"
+}

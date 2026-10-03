@@ -1,0 +1,19 @@
+{
+  "name": "@weft/core",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "weft": "./src/cli.ts"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "htmlparser2": "12.0.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "fast-check": "4.10.2"
+  }
+}
