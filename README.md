@@ -24,3 +24,7 @@ mise install
 pnpm install
 pnpm run ci
 ```
+
+## License
+
+Apache License 2.0 — see [LICENSE](LICENSE). Copyright 2026 Ivan Tugay.
