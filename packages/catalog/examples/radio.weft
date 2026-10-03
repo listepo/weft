@@ -1,6 +1,6 @@
-<screen id="root" weft="0.1" label="Delivery">
+<screen id="root" label="Delivery" weft="0.1">
   <radio-group id="speed" label="Delivery speed" value="{$.speed}">
-    <radio id="speed-std" value="standard" disabled="false">Standard</radio>
-    <radio id="speed-fast" value="express" disabled="{!$.expressAvailable}">Express</radio>
+    <radio id="speed-std" disabled="false" value="standard">Standard</radio>
+    <radio id="speed-fast" disabled="{!$.expressAvailable}" value="express">Express</radio>
   </radio-group>
 </screen>

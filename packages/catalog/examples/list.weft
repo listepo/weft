@@ -1,7 +1,9 @@
-<screen id="root" weft="0.1" label="Todos">
+<screen id="root" label="Todos" weft="0.1">
   <list id="todos" ordered="false" state="ready">
-    <each id="todo-each" in="{$.todos}" as="todo">
-      <item id="todo-item"><text id="todo-title" value="{$todo.title}"/></item>
+    <each id="todo-each" as="todo" in="{$.todos}">
+      <item id="todo-item">
+        <text id="todo-title" value="{$todo.title}"/>
+      </item>
     </each>
   </list>
 </screen>

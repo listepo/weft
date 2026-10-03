@@ -1,4 +1,4 @@
-<screen id="root" weft="0.1" label="Users">
+<screen id="root" label="Users" weft="0.1">
   <table id="users" label="Users">
     <column id="col-name" sort="ascending" on-press="users.sortByName">Name</column>
     <column id="col-role" sort="none">Role</column>

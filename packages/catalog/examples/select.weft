@@ -1,5 +1,5 @@
-<screen id="root" weft="0.1" label="Locale">
-  <select id="country" label="Country" value="{$.country}" disabled="false" on-change="profile.update">
+<screen id="root" label="Locale" weft="0.1">
+  <select id="country" disabled="false" label="Country" value="{$.country}" on-change="profile.update">
     <option id="c-pt" value="pt">Portugal</option>
     <option id="c-es" value="es">Spain</option>
   </select>

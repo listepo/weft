@@ -1,3 +1,3 @@
-<screen id="root" weft="0.1" label="Notifications">
-  <switch id="push" label="Push notifications" checked="{$.pushEnabled}" disabled="false" on-change="settings.update"/>
+<screen id="root" label="Notifications" weft="0.1">
+  <switch id="push" checked="{$.pushEnabled}" disabled="false" label="Push notifications" on-change="settings.update"/>
 </screen>

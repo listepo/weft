@@ -1,4 +1,4 @@
-<screen id="root" weft="0.1" label="Gallery">
+<screen id="root" label="Gallery" weft="0.1">
   <grid id="cards" columns="3" gap="{token.space.lg}">
     <text id="card-a">Revenue</text>
     <text id="card-b">Orders</text>

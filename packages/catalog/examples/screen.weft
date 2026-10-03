@@ -1,4 +1,4 @@
-<screen id="root" weft="0.1" label="Home" state="ready">
+<screen id="root" label="Home" state="ready" weft="0.1">
   <heading id="title" level="1">Welcome back</heading>
   <text id="intro">Pick up where you left off.</text>
 </screen>

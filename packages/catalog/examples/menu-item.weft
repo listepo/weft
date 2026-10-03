@@ -1,6 +1,6 @@
-<screen id="root" weft="0.1" label="Document">
+<screen id="root" label="Document" weft="0.1">
   <menu id="actions" label="Document actions">
-    <each id="action-each" in="{$.actions}" as="action">
+    <each id="action-each" as="action" in="{$.actions}">
       <menu-item id="action-item" disabled="{!$action.enabled}" on-press="doc.run">Run</menu-item>
     </each>
   </menu>
