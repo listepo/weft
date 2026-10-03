@@ -1,7 +1,7 @@
 - T0. Corpus and benchmark harness
-- T2. Parser, serializer, validator
 - T4. React renderer
 - T5. Reverse mapping
 - T6. Agent interface
 - T7. Versioning and extensibility tests
 - T8. Evaluation
+- T9. Specification revision from corpus findings

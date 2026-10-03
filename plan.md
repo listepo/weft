@@ -4,13 +4,13 @@ An open, agent-friendly UI description format — strict markup for models, cano
 
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
-| T0 | in progress | P0 | 3 | 80% | Claude Code / fable-5.1 |
-| T2 | in progress | P0 | 4 | 0% | Claude Code / opus-5.5 |
+| T0 | in progress | P0 | 3 | 80% | Claude Code / opus-5.5 |
 | T4 | in progress | P1 | 4 | 0% | Claude Code / opus-5.5 |
 | T5 | todo | P2 | 4 | 0% | |
-| T6 | todo | P1 | 3 | 0% | |
+| T6 | in progress | P1 | 3 | 0% | Claude Code / sonnet-5.5 |
 | T7 | todo | P2 | 2 | 0% | |
 | T8 | todo | P1 | 3 | 0% | |
+| T9 | in progress | P0 | 3 | 0% | Claude Code / opus-5.5 |
 
 ### T0. Corpus and benchmark harness
 
@@ -25,17 +25,6 @@ Plan:
 4. Verify: `node bench/src/run.ts tokens` prints the table offline; tests cover the counters and the task checker.
 
 Remaining after the first merge: replace the hand-copied catalog in `bench/src/weft-catalog.ts` and the stand-in Weft parser with `@weft/catalog` and `@weft/core` once T2 lands; validate every `corpus/*/screen.weft` with the real validator.
-
-### T2. Parser, serializer, validator
-
-Markup ↔ canonical JSON and the three validation layers of SPEC §6 with repair-oriented diagnostics. Done when `parse(serialize(x))` equals `x` on 10 000 generated trees and every diagnostic carries code, path and expectation.
-
-Plan:
-1. `packages/core/src/syntax.ts`: strict tokenizer checks on top of the XML parser, positions for every node and attribute.
-2. `parse.ts`, `serialize.ts`, `canonical.ts`: typed literals by catalog, canonical ordering.
-3. `validate.ts`: schema and semantic layers, lenient and strict modes, `diagnostics.ts` with the code registry.
-4. `cli.ts`: `weft validate <file>` and `weft fmt <file>`.
-5. Verify: unit tests per diagnostic code, fast-check round-trip property, `pnpm run ci`.
 
 ### T4. React renderer
 
@@ -55,6 +44,11 @@ Accessibility snapshot or DOM → Weft (lossy) and Weft → JSX source. Done whe
 
 Patch operations of SPEC §7 and an MCP server exposing catalog, validate, patch and render. Done when an agent completes the corpus edit tasks through the tools alone and an invalid patch is rejected with diagnostics.
 
+Plan:
+1. `packages/core/src/patch.ts`: `applyPatches(document, patches, options)` — atomic, validated, returns the new document or diagnostics.
+2. `packages/mcp`: stdio MCP server with tools `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch`; `weft_render` is wired in after T4 merges.
+3. Verify: unit tests per patch op and failure mode; an in-memory MCP client test that completes corpus edit tasks through the tools.
+
 ### T7. Versioning and extensibility tests
 
 Compatibility suite for SPEC §8. Done when a 0.2 document with unknown nodes is read by the 0.1 validator and renderer without failure, with warnings, and round-trips unchanged.
@@ -62,3 +56,13 @@ Compatibility suite for SPEC §8. Done when a 0.2 document with unknown nodes is
 ### T8. Evaluation
 
 Full benchmark run on two or three models against the baselines, and a report with a continue/stop recommendation. Done when first-try validity is at least 95%, validity after one repair cycle is at least 99%, and raw results are in the repository.
+
+### T9. Specification revision from corpus findings
+
+Writing the corpus exposed gaps in SPEC 0.1: text of buttons, links and menu items cannot be bound; a button cannot be marked as submitting its form; lists and tables have no empty-state content; `label` is under-specified; numeric props have no range. Done when the spec, model, catalog, validator and corpus agree on the fixes and the benchmark report is regenerated. Carried out together with the remainder of T0.
+
+Plan:
+1. SPEC and `model.ts`: `text` prop on every text-bearing component (replaces `value` on `text`/`heading`), `button.submit`, `empty` slot on `list`/`table`, `label` wording, slot placement rule, `each` child count, `min`/`max`/`integer` on `PropDef`.
+2. Catalog, examples and validator follow; new diagnostic codes are added, none reused.
+3. Corpus uses the new constructs in all four formats; `bench` uses `@weft/core` and `@weft/catalog` instead of its stand-ins; `bench/REPORT.md` regenerated.
+4. Verify: every corpus screen and example validates in strict mode in a test; `pnpm run ci`.
