@@ -1,6 +1,5 @@
 - T0. Corpus and benchmark harness
 - T2. Parser, serializer, validator
-- T3. Core catalog and tokens
 - T4. React renderer
 - T5. Reverse mapping
 - T6. Agent interface

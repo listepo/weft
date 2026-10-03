@@ -6,8 +6,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | --- | --- | --- | --- | --- | --- |
 | T0 | in progress | P0 | 3 | 0% | Claude Code / sonnet-5.5 |
 | T2 | in progress | P0 | 4 | 0% | Claude Code / opus-5.5 |
-| T3 | in progress | P1 | 3 | 0% | Claude Code / sonnet-5.5 |
-| T4 | todo | P1 | 4 | 0% | |
+| T4 | in progress | P1 | 4 | 0% | Claude Code / opus-5.5 |
 | T5 | todo | P2 | 4 | 0% | |
 | T6 | todo | P1 | 3 | 0% | |
 | T7 | todo | P2 | 2 | 0% | |
@@ -36,19 +35,15 @@ Plan:
 4. `cli.ts`: `weft validate <file>` and `weft fmt <file>`.
 5. Verify: unit tests per diagnostic code, fast-check round-trip property, `pnpm run ci`.
 
-### T3. Core catalog and tokens
-
-The `weft-core` 0.1 catalog of SPEC §5.1 as data, and Design Tokens resolution. Done when every component has prop schemas, slots, states and one example, and an unknown token is a validation error.
-
-Plan:
-1. `packages/catalog/src/core.ts`: the catalog, checked against `CatalogSchema`; exported JSON and generated JSON Schema.
-2. `tokens.ts`: load a DTCG 2025.10 file, resolve aliases, list token paths by `$type`; `tokens/default.tokens.json`.
-3. `examples/<kind>.weft` for every component.
-4. Verify: tests that the catalog matches SPEC §5.1, alias cycles are reported, examples list is complete.
-
 ### T4. React renderer
 
 Document → React with correct ARIA, proven by comparing the accessibility snapshot of the rendered page with the roles and names the document declares. Done when every corpus screen renders and matches 100%.
+
+Plan:
+1. `packages/render-react`: `render(document, { catalog, data, actions })` → React element; one mapping per catalog kind, bindings resolved against `data`, `each` expanded, events dispatched to named actions.
+2. Unknown and extension elements render as a container with their fallback role (SPEC §8).
+3. `expectedTree(document, data)`: the roles and names the document declares, in the shape of an accessibility snapshot.
+4. Verify: server-render tests per kind; Playwright accessibility snapshot of every catalog example equals `expectedTree`; corpus screens are wired in after T0 and T2 merge.
 
 ### T5. Reverse mapping
 
