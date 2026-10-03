@@ -1,0 +1,8 @@
+{
+  "query": "weft",
+  "hasResults": true,
+  "results": [
+    { "title": "Weft specification", "snippet": "An open format for describing UI." },
+    { "title": "Weft benchmark", "snippet": "Token counts and edit success." }
+  ]
+}

@@ -1,0 +1,23 @@
+<main aria-label="Create account">
+  <form data-state="idle" data-action="submit:auth.signup">
+    <h1>Create your account</h1>
+    <div class="stack gap-md">
+      <label for="name">Full name</label>
+      <input id="name" type="text" required data-bind="value:$.name">
+      <label for="email">Email</label>
+      <input id="email" type="email" required data-bind="value:$.email">
+      <label for="password">Password</label>
+      <input id="password" type="password" required data-bind="value:$.password">
+      <label for="confirm">Confirm password</label>
+      <input id="confirm" type="password" required data-bind="value:$.confirm">
+      <label>
+        <input type="checkbox" data-bind="checked:$.acceptTerms">
+        <span>I accept the terms of service</span>
+      </label>
+    </div>
+    <button type="submit" data-variant="primary" data-bind="disabled:!$.acceptTerms">Create account</button>
+    <footer>
+      <a href="#" data-action="press:nav.signin">Already have an account? Sign in</a>
+    </footer>
+  </form>
+</main>

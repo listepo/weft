@@ -1,0 +1,121 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "account",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "account",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["title", "tabs"]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Account",
+          "variant": "h1"
+        },
+        {
+          "id": "tabs",
+          "component": "Tabs",
+          "tabs": [
+            {
+              "title": "Overview",
+              "child": "tab-overview"
+            },
+            {
+              "title": "Billing",
+              "child": "tab-billing"
+            },
+            {
+              "title": "Team",
+              "child": "tab-team"
+            }
+          ],
+          "accessibility": {
+            "label": "Account sections"
+          }
+        },
+        {
+          "id": "account-name",
+          "component": "Text",
+          "text": {
+            "path": "/account/name"
+          }
+        },
+        {
+          "id": "account-email",
+          "component": "Text",
+          "text": {
+            "path": "/account/email"
+          }
+        },
+        {
+          "id": "tab-overview",
+          "component": "Column",
+          "children": ["account-name", "account-email"]
+        },
+        {
+          "id": "plan",
+          "component": "Text",
+          "text": {
+            "path": "/billing/plan"
+          }
+        },
+        {
+          "id": "change-plan",
+          "component": "Button",
+          "child": "change-plan-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "billing.change"
+            }
+          }
+        },
+        {
+          "id": "change-plan-label",
+          "component": "Text",
+          "text": "Change plan"
+        },
+        {
+          "id": "tab-billing",
+          "component": "Column",
+          "children": ["plan", "change-plan"]
+        },
+        {
+          "id": "members",
+          "component": "List",
+          "children": {
+            "componentId": "member",
+            "path": "/team"
+          }
+        },
+        {
+          "id": "member",
+          "component": "Column",
+          "children": ["member-name"]
+        },
+        {
+          "id": "member-name",
+          "component": "Text",
+          "text": {
+            "path": "name"
+          }
+        },
+        {
+          "id": "tab-team",
+          "component": "Column",
+          "children": ["members"]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,143 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "settings",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "settings",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["title", "notifications", "appearance", "save"]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Settings",
+          "variant": "h1"
+        },
+        {
+          "id": "notifications",
+          "component": "Card",
+          "child": "notifications-body",
+          "accessibility": {
+            "label": "Notifications"
+          }
+        },
+        {
+          "id": "notifications-body",
+          "component": "Column",
+          "children": ["notifications-title", "email-alerts", "push-alerts"]
+        },
+        {
+          "id": "notifications-title",
+          "component": "Text",
+          "text": "Notifications",
+          "variant": "h2"
+        },
+        {
+          "id": "email-alerts",
+          "component": "CheckBox",
+          "label": "Email alerts",
+          "value": {
+            "path": "/emailAlerts"
+          }
+        },
+        {
+          "id": "push-alerts",
+          "component": "CheckBox",
+          "label": "Push notifications",
+          "value": {
+            "path": "/pushAlerts"
+          }
+        },
+        {
+          "id": "appearance",
+          "component": "Card",
+          "child": "appearance-body",
+          "accessibility": {
+            "label": "Appearance"
+          }
+        },
+        {
+          "id": "appearance-body",
+          "component": "Column",
+          "children": ["appearance-title", "language", "dark-mode"]
+        },
+        {
+          "id": "appearance-title",
+          "component": "Text",
+          "text": "Appearance",
+          "variant": "h2"
+        },
+        {
+          "id": "language",
+          "component": "ChoicePicker",
+          "label": "Language",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "English",
+              "value": "en"
+            },
+            {
+              "label": "Deutsch",
+              "value": "de"
+            },
+            {
+              "label": "Français",
+              "value": "fr"
+            }
+          ],
+          "value": {
+            "path": "/language"
+          },
+          "filterable": true
+        },
+        {
+          "id": "dark-mode",
+          "component": "CheckBox",
+          "label": "Dark mode",
+          "value": {
+            "path": "/darkMode"
+          }
+        },
+        {
+          "id": "save",
+          "component": "Button",
+          "child": "save-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "settings.save"
+            }
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/dirty"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ]
+        },
+        {
+          "id": "save-label",
+          "component": "Text",
+          "text": "Save changes"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,25 @@
+<main aria-label="Tasks">
+  <h1>Tasks</h1>
+  <form data-action="submit:todo.add">
+    <div class="row gap-sm">
+      <label for="draft">New task</label>
+      <input id="draft" type="text" data-bind="value:$.draft">
+      <button type="submit" data-variant="primary" data-bind="disabled:!$.draft">Add</button>
+    </div>
+  </form>
+  <ul>
+    <template data-each="$.todos" data-as="todo">
+      <li>
+        <label>
+          <input type="checkbox" data-bind="checked:$todo.done">
+          <span data-bind="text:$todo.title"></span>
+        </label>
+        <button type="button" data-action="press:todo.remove">Remove</button>
+      </li>
+    </template>
+  </ul>
+  <div class="row gap-xs">
+    <p data-bind="text:$.remaining"></p>
+    <p>items left</p>
+  </div>
+</main>

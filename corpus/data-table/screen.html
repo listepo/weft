@@ -1,0 +1,31 @@
+<main aria-label="Users">
+  <h1>Users</h1>
+  <table aria-label="Users">
+    <thead>
+      <tr>
+        <th aria-sort="ascending"><button type="button" data-action="press:users.sort">Name</button></th>
+        <th aria-sort="none"><button type="button" data-action="press:users.sort">Email</button></th>
+        <th aria-sort="none"><button type="button" data-action="press:users.sort">Role</button></th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <template data-each="$.users" data-as="user">
+        <tr>
+          <td>
+            <p data-bind="text:$user.name"></p>
+          </td>
+          <td>
+            <p data-bind="text:$user.email"></p>
+          </td>
+          <td>
+            <p data-bind="text:$user.role"></p>
+          </td>
+          <td>
+            <button type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
+          </td>
+        </tr>
+      </template>
+    </tbody>
+  </table>
+</main>

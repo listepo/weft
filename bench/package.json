@@ -5,6 +5,8 @@
   "type": "module",
   "dependencies": {
     "@weft/core": "workspace:*",
-    "gpt-tokenizer": "4.0.0"
+    "gpt-tokenizer": "4.0.0",
+    "htmlparser2": "12.0.0",
+    "oxc-parser": "0.152.0"
   }
 }

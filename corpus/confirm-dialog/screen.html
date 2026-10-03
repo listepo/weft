@@ -1,0 +1,12 @@
+<main aria-label="File">
+  <h1>Quarterly report</h1>
+  <button type="button" data-variant="danger" data-action="press:dialog.open">Delete file</button>
+  <dialog aria-label="Delete file?" data-bind="open:$.confirmOpen" data-action="close:dialog.close">
+    <p>This cannot be undone.</p>
+    <p data-bind="text:$.file.name"></p>
+    <footer>
+      <button type="button" data-action="press:dialog.close">Cancel</button>
+      <button type="button" data-variant="danger" data-action="press:file.delete">Delete</button>
+    </footer>
+  </dialog>
+</main>

@@ -1,0 +1,5 @@
+{
+  "account": { "name": "Ada Lovelace", "email": "ada@example.com" },
+  "billing": { "plan": "Pro", "nextInvoice": "2026-11-01" },
+  "team": [{ "name": "Alan Turing" }, { "name": "Grace Hopper" }]
+}

@@ -1,0 +1,107 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "wizard",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "wizard",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["title", "progress", "plan", "nav"]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Choose a plan",
+          "variant": "h1"
+        },
+        {
+          "id": "progress",
+          "component": "Text",
+          "text": {
+            "path": "/progress"
+          }
+        },
+        {
+          "id": "plan",
+          "component": "ChoicePicker",
+          "label": "Plan",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Free",
+              "value": "free"
+            },
+            {
+              "label": "Pro",
+              "value": "pro"
+            },
+            {
+              "label": "Team",
+              "value": "team"
+            }
+          ],
+          "value": {
+            "path": "/plan"
+          }
+        },
+        {
+          "id": "nav",
+          "component": "Row",
+          "children": ["back", "next"]
+        },
+        {
+          "id": "back",
+          "component": "Button",
+          "child": "back-label",
+          "action": {
+            "event": {
+              "name": "wizard.back"
+            }
+          }
+        },
+        {
+          "id": "back-label",
+          "component": "Text",
+          "text": "Back"
+        },
+        {
+          "id": "next",
+          "component": "Button",
+          "child": "next-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "wizard.next"
+            }
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/plan"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ]
+        },
+        {
+          "id": "next-label",
+          "component": "Text",
+          "text": "Next"
+        }
+      ]
+    }
+  }
+]
