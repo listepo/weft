@@ -23,7 +23,8 @@ type Case = {
   options?: Pick<ValidateOptions, "tokens" | "actions">;
 };
 
-const cases: Record<DiagnosticCode, Case> = {
+// The W5xx patch codes need a patch list, not a document; patch.test.ts has their cases.
+const cases: Record<Exclude<DiagnosticCode, `W5${string}`>, Case> = {
   W101: { markup: screen('<text id="t" tone="muted"value="x"/>') },
   W102: { markup: `<?xml version="1.0"?>${screen("")}` },
   W103: { markup: `<!DOCTYPE screen>${screen("")}` },
@@ -106,7 +107,12 @@ function run(c: Case, mode: "lenient" | "strict" = "lenient"): Diagnostic[] {
 }
 
 test("every registered code has a case", () => {
-  assert.deepEqual(Object.keys(cases).toSorted(), Object.keys(DIAGNOSTIC_CODES).toSorted());
+  assert.deepEqual(
+    Object.keys(cases).toSorted(),
+    Object.keys(DIAGNOSTIC_CODES)
+      .filter((code) => !code.startsWith("W5"))
+      .toSorted(),
+  );
 });
 
 for (const [code, c] of Object.entries(cases)) {

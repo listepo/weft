@@ -75,6 +75,16 @@ export const DIAGNOSTIC_CODES = {
   W402: { severity: "mode", summary: "Unknown attribute." },
   W403: { severity: "mode", summary: "Newer minor version of the format." },
   W404: { severity: "error", summary: "Unsupported major version of the format." },
+
+  W501: { severity: "error", summary: "Patch list or patch has the wrong shape." },
+  W502: { severity: "error", summary: "Patch names an id that no element has." },
+  W503: { severity: "error", summary: "Prop cannot be set by a patch." },
+  W504: { severity: "error", summary: "Patch names a slot the parent does not declare." },
+  W505: { severity: "error", summary: "Patch index is outside the target list." },
+  W506: { severity: "error", summary: "Element moved into its own subtree." },
+  W507: { severity: "error", summary: "The root element cannot be removed or moved." },
+  W508: { severity: "error", summary: "Inserted markup is not a list of elements." },
+  W509: { severity: "error", summary: "Inserted markup reuses an id of the document." },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;
