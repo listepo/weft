@@ -23,7 +23,11 @@ If an `AGENTS.md` or `CLAUDE.md` exists higher in the tree, follow it too; on co
 ## Commands
 
 ```bash
+mise install       # every program, at the pinned versions
 pnpm install
-pnpm run ci        # typecheck, lint, test
-pnpm run fmt       # format
+moon ci            # typecheck, lint, every package's tests (cached); `pnpm run ci` does the same
+moon run core:test # one package
+moon run root:fmt  # format
 ```
+
+Tasks live in `moon.yml` (root checks) and `.moon/tasks/all.yml` (the `test` task every package inherits). A task's `inputs` must list every file it reads, or moon serves a stale cached result.

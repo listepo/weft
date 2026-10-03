@@ -1,0 +1,14 @@
+# moon runs the workspace tasks with caching; pnpm still owns dependencies and mise owns tools.
+projects:
+  - 'packages/*'
+  - 'bench'
+  - 'moon.yml'
+
+# Matches the moon pin in mise.toml.
+versionConstraint: '>=2.5.6'
+
+telemetry: false
+
+vcs:
+  client: 'git'
+  defaultBranch: 'main'

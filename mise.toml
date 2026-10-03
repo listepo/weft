@@ -1,4 +1,15 @@
-# Toolchain for weft. `mise install` then `pnpm install`.
+# Toolchain for weft. `mise install` then `pnpm install`; `moon ci` runs every check.
 [tools]
 node = "26.7.0"
-"npm:pnpm" = "12.3.4"
+# The registry backend (aqua) ships the native binary; `npm:pnpm` 12 leaves a placeholder script.
+pnpm = "12.3.4"
+# wasm32: the WebAssembly build of the core for browsers, Deno, Bun and Node.
+rust = { version = "1.99.0", components = "rustfmt,clippy", targets = "wasm32-unknown-unknown" }
+# No core mise plugin for moon; aqua installs the prebuilt release.
+"aqua:moonrepo/moon" = "2.5.6"
+deno = "2.9.7"
+bun = "1.4.2"
+"aqua:rustwasm/wasm-pack" = "0.15.0"
+# Must equal the wasm-bindgen crate version, or the generated glue does not load.
+"github:wasm-bindgen/wasm-bindgen" = "0.2.129"
+"npm:@napi-rs/cli" = "3.10.6"

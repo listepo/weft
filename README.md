@@ -22,7 +22,7 @@ Status: prototype. The format is specified in [SPEC.md](SPEC.md); the reasoning 
 ```bash
 mise install
 pnpm install
-pnpm run ci
+moon ci
 ```
 
 ## License

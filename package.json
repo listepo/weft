@@ -4,11 +4,11 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit -p .",
-    "lint": "oxlint --deny-warnings . && oxfmt --check \"**/*.{ts,tsx,json}\"",
-    "fmt": "oxfmt \"**/*.{ts,tsx,json}\"",
-    "test": "node --test \"packages/*/test/**/*.test.ts\" \"bench/test/**/*.test.ts\"",
-    "ci": "pnpm run typecheck && pnpm run lint && pnpm run test"
+    "typecheck": "moon run root:typecheck",
+    "lint": "moon run root:lint",
+    "fmt": "moon run root:fmt",
+    "test": "moon run :test",
+    "ci": "moon run :test root:typecheck root:lint"
   },
   "devDependencies": {
     "@types/node": "26.6.4",

@@ -1,0 +1,9 @@
+# No versions here: node and pnpm come from mise, so moon uses them from PATH instead of installing its own.
+javascript:
+  packageManager: 'pnpm'
+  # package.json scripts are not tasks; tasks live in moon.yml and .moon/tasks.
+  inferTasksFromScripts: false
+  # Workspace links are declared by hand in package.json; moon must not rewrite them.
+  syncProjectWorkspaceDependencies: false
+node: {}
+pnpm: {}

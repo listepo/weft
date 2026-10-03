@@ -1,0 +1,20 @@
+# The workspace root: checks that cover every package at once.
+id: 'root'
+language: 'typescript'
+
+workspace:
+  inheritedTasks:
+    exclude: ['test']
+
+tasks:
+  typecheck:
+    command: 'tsc --noEmit -p .'
+    inputs: ['/packages/**/*', '/bench/**/*', '/tsconfig.json']
+  lint:
+    script: 'oxlint --deny-warnings . && oxfmt --check "**/*.{ts,tsx,json}"'
+    inputs: ['/packages/**/*', '/bench/**/*', '/compat/**/*', '/*.json']
+  fmt:
+    command: 'oxfmt "**/*.{ts,tsx,json}"'
+    options:
+      cache: false
+      runInCI: false

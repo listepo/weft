@@ -1,0 +1,12 @@
+# Inherited by every project; the root opts out in its moon.yml. Tests read sibling packages, the corpus and the compat fixtures,
+# so those are inputs too: a change there must invalidate the cached result.
+tasks:
+  test:
+    description: 'node:test suite of this package'
+    command: 'node --test "test/**/*.test.ts"'
+    inputs:
+      - '**/*'
+      - '/packages/**/*'
+      - '/corpus/**/*'
+      - '/compat/**/*'
+      - '/SPEC.md'
