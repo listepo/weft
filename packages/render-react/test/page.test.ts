@@ -1,7 +1,7 @@
 // The static page helper and the CLI that writes it.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,4 +37,17 @@ test("write-page renders a fixture with its data and tokens to a file", () => {
   ]);
   const html = readFileSync(out, "utf8");
   assert.match(html, /data-weft-id="cards" style="gap:24px;display:grid/);
+});
+
+test("gallery writes one page per corpus screen and an index", () => {
+  const out = mkdtempSync(join(tmpdir(), "weft-gallery-"));
+  execFileSync(process.execPath, [
+    fileURLToPath(new URL("../src/gallery.ts", import.meta.url)),
+    out,
+  ]);
+  const files = readdirSync(out).sort();
+  assert.equal(files.length, 13);
+  assert.ok(files.includes("index.html") && files.includes("login.html"));
+  assert.match(readFileSync(join(out, "index.html"), "utf8"), /<a href="login.html">login<\/a>/);
+  assert.match(readFileSync(join(out, "login.html"), "utf8"), /<title>Weft corpus: login<\/title>/);
 });

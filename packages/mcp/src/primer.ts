@@ -19,12 +19,14 @@ Tools:
 - weft_validate: check markup. Diagnostics carry a code, a path, what was expected and often the fix in "hint".
 - weft_format: canonical markup, the one form that diffs and hashes.
 - weft_patch: edit existing markup without rewriting it. Send the current markup and a list of patches; the result is the new canonical markup, or diagnostics and nothing applied.
+- weft_render: see the screen as assistive technology or a browsing agent would: the accessibility tree (roles, names, states) for the markup and optional sample data.
 
 Patches (addressed by id, applied in order, all-or-nothing):
 - {"op":"set","id":"go","prop":"variant","value":"primary"}: value is typed JSON: "text", 7, true, {"bind":"$.busy"}, {"bind":"$.busy","not":true}, {"token":"space.md"}. null removes the prop. A prop named on-<event> sets the action name (null unbinds). An id cannot be set.
 - {"op":"insert","parent":"main","slot":"footer","index":0,"markup":"<button id=\\"b\\">Go</button>"}: markup is one or more elements with new ids. Without slot it goes into the default content; index defaults to the end and counts text too.
 - {"op":"remove","id":"go"}: removes the element and everything in it.
 - {"op":"move","id":"go","parent":"f","slot":"footer","index":0}: index counts the target list after the element left it.
-The root cannot be removed or moved. To change an element's text, remove it and insert it again with the same id at the same index.
+- {"op":"set","id":"go","prop":"text","value":"Save"}: changes an element's text. Text written as content stays content; a binding value moves it into the text attribute.
+The root cannot be removed or moved.
 
 Workflow: write or edit, call weft_validate (or let weft_patch validate), and fix every error using its hint before you answer. Limits: markup at most ${LIMITS.markupChars} characters, at most ${LIMITS.patches} patches per call.`;

@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test:browser": "node --test test/browser.test.ts",
-    "page": "node src/write-page.ts"
+    "page": "node src/write-page.ts",
+    "gallery": "node src/gallery.ts"
   },
   "dependencies": {
     "@weft/catalog": "workspace:*",

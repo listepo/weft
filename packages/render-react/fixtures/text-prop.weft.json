@@ -1,0 +1,144 @@
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Text"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": {
+            "bind": "$.level"
+          },
+          "text": {
+            "bind": "$.title"
+          }
+        }
+      },
+      {
+        "kind": "button",
+        "id": "cta",
+        "props": {
+          "text": {
+            "bind": "$.cta"
+          }
+        }
+      },
+      {
+        "kind": "button",
+        "id": "close",
+        "props": {
+          "label": "Close dialog"
+        },
+        "children": ["×"]
+      },
+      {
+        "kind": "link",
+        "id": "more",
+        "props": {
+          "href": "/more",
+          "text": {
+            "bind": "$.more"
+          }
+        }
+      },
+      {
+        "kind": "alert",
+        "id": "notice",
+        "props": {
+          "text": {
+            "bind": "$.notice"
+          }
+        }
+      },
+      {
+        "kind": "list",
+        "id": "list",
+        "children": [
+          {
+            "kind": "item",
+            "id": "entry",
+            "props": {
+              "text": {
+                "bind": "$.entry"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "radio-group",
+        "id": "size",
+        "props": {
+          "label": {
+            "bind": "$.sizeLabel"
+          },
+          "value": "m"
+        },
+        "children": [
+          {
+            "kind": "radio",
+            "id": "size-s",
+            "props": {
+              "text": {
+                "bind": "$.small"
+              },
+              "value": "s"
+            }
+          },
+          {
+            "kind": "radio",
+            "id": "size-m",
+            "props": {
+              "label": "Medium size",
+              "value": "m"
+            },
+            "children": ["M"]
+          }
+        ]
+      },
+      {
+        "kind": "select",
+        "id": "color",
+        "props": {
+          "label": "Color",
+          "value": "red"
+        },
+        "children": [
+          {
+            "kind": "option",
+            "id": "red",
+            "props": {
+              "text": {
+                "bind": "$.red"
+              },
+              "value": "red"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "menu",
+        "id": "actions",
+        "props": {
+          "label": "Actions"
+        },
+        "children": [
+          {
+            "kind": "menu-item",
+            "id": "rename",
+            "props": {
+              "text": {
+                "bind": "$.rename"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

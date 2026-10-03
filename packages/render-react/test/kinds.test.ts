@@ -41,7 +41,7 @@ test("every catalog kind is covered by this file", () => {
 
 test("screen is a named main landmark with its state", () => {
   const d = doc();
-  d.root.props = { weft: "0.1", label: "Home", state: "loading" };
+  d.root.props = { label: "Home", state: "loading" };
   const main = dom(d).byId("root");
   assert.equal(main.name, "main");
   assert.equal(main.attribs["aria-label"], "Home");
@@ -87,23 +87,27 @@ test("section is a region only when labelled, with its header slot first", () =>
   const out = html(d);
   assert.match(
     out,
-    /<section data-weft-id="s" aria-label="Profile"><h2 data-weft-id="h">Title<\/h2><div data-weft-id="body">Body<\/div><\/section>/,
+    /<section data-weft-id="s" aria-label="Profile"><div data-weft-slot="header"><h2 data-weft-id="h">Title<\/h2><\/div><div data-weft-id="body">Body<\/div><\/section>/,
   );
 });
 
-test("heading maps level to h1-h6 and takes text from content or value", () => {
+test("heading maps level to h1-h6 and takes text from content or the text prop", () => {
   const v = dom(
     doc(
       el("heading", "a", { level: 1 }, ["One"]),
-      el("heading", "c", { level: 3, value: b("$.t") }),
-      el("heading", "bad", { level: 9 }, ["x"]),
+      el("heading", "c", { level: 3, text: b("$.t") }),
+      el("heading", "bad", { level: "x" }, ["x"]),
+      el("heading", "high", { level: b("$.high") }, ["x"]),
+      el("heading", "low", { level: b("$.low") }, ["x"]),
     ),
-    { data: { t: "Three" } },
+    { data: { t: "Three", high: 9, low: 0.2 } },
   );
   assert.equal(v.byId("a").name, "h1");
   assert.equal(v.byId("c").name, "h3");
   assert.equal(v.text(v.byId("c")), "Three");
-  assert.equal(v.byId("bad").name, "h2");
+  assert.equal(v.byId("bad").name, "h2", "a level that is no number falls back to ARIA's 2");
+  assert.equal(v.byId("high").name, "h6", "bound numbers are clamped to the declared range");
+  assert.equal(v.byId("low").name, "h1");
 });
 
 test("text is a generic run of text with its tone", () => {
@@ -132,7 +136,7 @@ test("link keeps a safe href; without one it keeps the link role and focus", () 
   assert.equal(v.byId("b").attribs["tabindex"], "0");
 });
 
-test("button is a native button with disabled and busy state", () => {
+test("button is a native button with disabled and busy state; submit buttons submit", () => {
   const btn = dom(
     doc(el("button", "go", { variant: "primary", disabled: true, state: "busy" }, ["Go"])),
   ).byId("go");
@@ -141,6 +145,17 @@ test("button is a native button with disabled and busy state", () => {
   assert.equal(btn.attribs["disabled"], "");
   assert.equal(btn.attribs["aria-busy"], "true");
   assert.equal(btn.attribs["data-variant"], "primary");
+  const v = dom(
+    doc(
+      el("form", "f", {}, [
+        el("button", "s", { submit: true }, ["Send"]),
+        el("button", "bound", { submit: b("$.yes") }, ["Bound"]),
+      ]),
+    ),
+    { data: { yes: true } },
+  );
+  assert.equal(v.byId("s").attribs["type"], "submit");
+  assert.equal(v.byId("bound").attribs["type"], "button", "submit is literal-only");
 });
 
 test("form is named by label, footer after the body, submitting is busy", () => {
@@ -153,7 +168,7 @@ test("form is named by label, footer after the body, submitting is busy", () => 
   );
   assert.match(
     out,
-    /<form data-weft-id="f" data-state="submitting" aria-busy="true" aria-label="Login"><div data-weft-id="t">Body<\/div><button/,
+    /<form data-weft-id="f" data-state="submitting" aria-busy="true" aria-label="Login"><div data-weft-id="t">Body<\/div><div data-weft-slot="footer"><button/,
   );
 });
 
@@ -214,6 +229,8 @@ test("radio-group is a radiogroup whose value checks one radio", () => {
   );
   assert.equal(v.byId("g").attribs["role"], "radiogroup");
   assert.equal(v.byId("g").attribs["aria-label"], "Plan");
+  const caption = v.find((e) => e.attribs["aria-hidden"] === "true");
+  assert.ok(caption && v.text(caption) === "Plan", "the label is also the visible caption");
   const [r1, r2] = [v.byId("r1"), v.byId("r2")];
   assert.equal(r1.attribs["type"], "radio");
   assert.equal(r1.attribs["aria-label"], "Free");
@@ -235,6 +252,8 @@ test("select is a combobox of options with the bound value selected", () => {
   );
   assert.equal(v.byId("s").name, "select");
   assert.equal(v.byId("s").attribs["aria-label"], "Country");
+  const caption = v.find((e) => e.attribs["aria-hidden"] === "true");
+  assert.ok(caption && v.text(caption) === "Country", "the label is also the visible caption");
   assert.equal(v.byId("pt").name, "option");
   assert.equal(v.byId("pt").attribs["selected"], undefined);
   assert.equal(v.byId("es").attribs["selected"], "");
@@ -340,4 +359,74 @@ test("menu and menu-item are a named menu of menuitem buttons", () => {
   assert.equal(v.byId("x").name, "button");
   assert.equal(v.byId("x").attribs["role"], "menuitem");
   assert.equal(v.byId("x").attribs["disabled"], "");
+});
+
+test("list and table show their empty slot in place of items and rows", () => {
+  const items = [
+    el("each", "e", { in: b("$.items"), as: "it" }, [el("item", "i", { text: b("$it") })]),
+  ];
+  const empty = { slots: { empty: [el("text", "none", {}, ["Nothing"])] } };
+  const list = (data: unknown, props = {}) =>
+    dom(doc(el("list", "l", props, items, empty)), { data });
+  assert.equal(list({ items: [] }).has("none"), true);
+  assert.equal(list({}).has("none"), true, "a missing array iterates nothing");
+  assert.equal(list({ items: ["a"] }).has("none"), false);
+  assert.equal(list({ items: ["a"] }, { state: "empty" }).has("i[0]"), false);
+  assert.match(
+    html(doc(el("list", "l", {}, items, empty)), { data: { items: [] } }),
+    /<ul data-weft-id="l"><li role="none" data-weft-slot="empty"><div data-weft-id="none">Nothing<\/div><\/li><\/ul>/,
+  );
+  // A static item counts even when hidden: the rule reads the document, not what is visible.
+  assert.equal(
+    dom(doc(el("list", "l", {}, [el("item", "h", { hidden: true }, ["x"])], empty))).has("none"),
+    false,
+  );
+  const table = html(
+    doc(
+      el(
+        "table",
+        "t",
+        { label: "T" },
+        [
+          el("column", "c1", {}, ["A"]),
+          el("column", "c2", {}, ["B"]),
+          ...items.map((e) => ({ ...e, children: [el("row", "r")] })),
+        ],
+        empty,
+      ),
+    ),
+    { data: { items: [] } },
+  );
+  assert.match(
+    table,
+    /<\/thead><tbody><tr data-weft-slot="empty"><td colSpan="2"><div data-weft-id="none">Nothing<\/div><\/td><\/tr><\/tbody>/,
+  );
+});
+
+test("dialog actions sit in their own bar after the body", () => {
+  const out = html(
+    doc(
+      el("dialog", "d", { label: "Sure?", open: true }, [el("text", "t", {}, ["Body"])], {
+        slots: { actions: [el("button", "ok", {}, ["OK"])] },
+      }),
+    ),
+  );
+  assert.match(out, /Body<\/div><div data-weft-slot="actions"><button data-weft-id="ok"/);
+});
+
+test("text-bearing kinds take bound text from the text prop; label overrides the name", () => {
+  const v = dom(
+    doc(
+      el("button", "b", { text: b("$.cta") }),
+      el("button", "x", { label: "Close" }, ["×"]),
+      el("list", "l", {}, [el("item", "i", { text: b("$.cta") })]),
+      el("text", "both", { text: "prop" }, ["content"]),
+    ),
+    { data: { cta: "Buy" } },
+  );
+  assert.equal(v.text(v.byId("b")), "Buy");
+  assert.equal(v.text(v.byId("i")), "Buy");
+  assert.equal(v.byId("x").attribs["aria-label"], "Close");
+  assert.equal(v.text(v.byId("x")), "×");
+  assert.equal(v.text(v.byId("both")), "content", "content wins when a lenient reader gets both");
 });

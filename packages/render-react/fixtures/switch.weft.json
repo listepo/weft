@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Notifications", "weft": "0.1" },
+    "props": { "label": "Notifications" },
     "children": [
       {
         "kind": "switch",

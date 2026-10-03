@@ -16,6 +16,8 @@ export type Context = {
 export const LIMITS = {
   /** UTF-16 code units of one markup argument. */
   markupChars: 200_000,
+  /** UTF-16 code units of the JSON text of the `data` argument of `weft_render`. */
+  dataChars: 200_000,
   /** Patches in one `weft_patch` call. */
   patches: 100,
   /** UTF-16 code units of the JSON text of the whole patch list. */

@@ -10,7 +10,7 @@ export function createServer(overrides: Partial<Context> = {}): McpServer {
     {
       maxToolInputElements: LIMITS.inputElements,
       instructions:
-        "Weft is a UI description format. Call weft_primer first, then use weft_catalog, weft_validate, weft_format and weft_patch. The server only works on markup you pass in; it reads no files.",
+        "Weft is a UI description format. Call weft_primer first, then use weft_catalog, weft_validate, weft_format, weft_patch and weft_render. The server only works on markup you pass in; it reads no files.",
     },
   );
   for (const register of TOOLS) register(server, context);

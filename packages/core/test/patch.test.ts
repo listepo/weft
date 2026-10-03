@@ -112,6 +112,45 @@ test("set: literal, binding, token and removal", () => {
   assert.match(s, /<field id="email" label="Email" type="email"\/>/);
 });
 
+test("set text: content-form text is replaced in place; prop-form text is set", () => {
+  const swapped = text(ok([{ op: "set", id: "go", prop: "text", value: "Log in" }]));
+  assert.match(
+    swapped,
+    /<button id="go" variant="primary" on-press="auth.submit">Log in<\/button>/,
+  );
+  const bound = text(ok([{ op: "set", id: "i1", prop: "text", value: { bind: "$.first" } }]));
+  assert.match(bound, /<item id="i1" text="\{\$\.first\}"\/>/);
+  const cleared = text(ok([{ op: "set", id: "reset", prop: "text", value: null }]));
+  assert.match(cleared, /<link id="reset" on-press="nav.reset"\/>/);
+  // Once the text is a prop, a literal stays a prop: set writes the spelling already in use.
+  const relit = text(
+    ok([
+      { op: "set", id: "i1", prop: "text", value: { bind: "$.first" } },
+      { op: "set", id: "i1", prop: "text", value: "One again" },
+    ]),
+  );
+  assert.match(relit, /<item id="i1" text="One again"\/>/);
+  // An element without text takes it as the prop, like any other prop.
+  assert.match(
+    text(
+      ok([{ op: "set", id: "ok", prop: "text", value: "Fine" }], load(BASE.replace(">OK<", "><"))),
+    ),
+    /<button id="ok" text="Fine"\/>/,
+  );
+});
+
+test("set text: a mixed component with element content keeps it, so both texts are W310", () => {
+  const withChild = load(
+    BASE.replace('<item id="i2">Two</item>', '<item id="i2"><text id="t2">Two</text></item>'),
+  );
+  rejected([{ op: "set", id: "i2", prop: "text", value: "Two" }], "W310", withChild);
+  // On a kind that holds no text, text is an unknown attribute.
+  const strict = { ...options, mode: "strict" as const };
+  const unknown = applyPatches(base, [{ op: "set", id: "main", prop: "text", value: "x" }], strict);
+  assert.equal(unknown.document, undefined);
+  assert.equal(unknown.diagnostics[0]?.code, "W402");
+});
+
 test("set: removing an absent prop is a no-op", () => {
   assert.equal(text(ok([{ op: "set", id: "go", prop: "disabled", value: null }])), text(base));
 });

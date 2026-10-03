@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Profile", "weft": "0.1" },
+    "props": { "label": "Profile" },
     "children": [
       {
         "kind": "image",

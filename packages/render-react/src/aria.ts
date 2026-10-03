@@ -14,10 +14,10 @@ import {
   nodes,
   options,
   ordered,
-  ownText,
   radioChecked,
   selectedOption,
   selectedTab,
+  showsEmpty,
   text,
   type Inst,
   type InstChild,
@@ -86,13 +86,13 @@ function build(c: InstChild, ctx: Ctx): AriaNode[] {
     case "grid":
       return kids();
     case "text": {
-      const t = ownText(n);
-      return t.trim() === "" ? [] : [textNode(t)];
+      const t = contentText(n.children);
+      return t === "" ? [] : [textNode(t)];
     }
     case "section":
       return node(exposedRole("region", n), n, kids());
     case "heading": {
-      const t = ownText(n);
+      const t = contentText(n.children);
       return node("heading", n, t ? [textNode(t)] : [], {
         name: label(n) || t,
         states: { level: headingLevel(n) },
@@ -181,15 +181,18 @@ function build(c: InstChild, ctx: Ctx): AriaNode[] {
 // Mirrors the renderer: columns form the header row in one row group, everything else goes to
 // the body row group, and content that is not a row is wrapped in a row and cell (SPEC §5.1).
 function tableBody(table: Inst, ctx: Ctx): AriaNode[] {
-  const columns: InstChild[] = [];
+  const columns = table.children.filter((c) => typeof c !== "string" && c.kind === "column");
   const body: AriaNode[] = [];
-  for (const c of table.children) {
-    if (typeof c !== "string" && c.kind === "column") columns.push(c);
-    else if (typeof c !== "string" && c.kind === "row") {
-      body.push(
-        ...node("row", c, rowCells(c.children, ctx), { states: { selected: flag(c, "selected") } }),
-      );
-    } else body.push(...wrapRow([c], ctx));
+  // The empty content shares one row and one cell, like any other non-row content of a table.
+  if (showsEmpty(table)) body.push(...wrapRow(table.slots["empty"] ?? [], ctx));
+  else {
+    for (const c of table.children) {
+      if (typeof c !== "string" && c.kind === "column") continue;
+      if (typeof c !== "string" && c.kind === "row") {
+        const states = { selected: flag(c, "selected") };
+        body.push(...node("row", c, rowCells(c.children, ctx), { states }));
+      } else body.push(...wrapRow([c], ctx));
+    }
   }
   const groups: AriaNode[] = [];
   if (columns.length > 0) {
@@ -205,17 +208,20 @@ function rowOf(children: AriaNode[], name: string): AriaNode {
 }
 
 function wrapRow(list: InstChild[], ctx: Ctx): AriaNode[] {
-  return [rowOf(rowCells(list, ctx), contentText(list))];
+  return [rowOf([cellOf(list, ctx)], contentText(list))];
+}
+
+function cellOf(list: InstChild[], ctx: Ctx): AriaNode {
+  const inner = many(list, ctx);
+  const cell: AriaNode = { role: "cell", name: contentText(list) };
+  if (inner.length > 0) cell.children = inner;
+  return cell;
 }
 
 function rowCells(list: InstChild[], ctx: Ctx): AriaNode[] {
-  return list.flatMap((c) => {
-    if (typeof c !== "string" && c.kind === "cell") return build(c, ctx);
-    const inner = build(c, ctx);
-    const cell: AriaNode = { role: "cell", name: contentText([c]) };
-    if (inner.length > 0) cell.children = inner;
-    return [cell];
-  });
+  return list
+    .map((c) => (typeof c !== "string" && c.kind === "cell" ? build(c, ctx) : [cellOf([c], ctx)]))
+    .flat();
 }
 
 function tabsTree(n: Inst, ctx: Ctx): AriaNode[] {
@@ -420,4 +426,64 @@ function parseKey(key: string, value: string | undefined): AriaNode {
   if (Object.keys(states).length > 0) out.states = states as AriaStates;
   if (value !== undefined) out.children = [textNode(value)];
   return out;
+}
+
+// ---- Playwright aria snapshot (YAML) writer ----
+
+// Prints a tree as the YAML `locator.ariaSnapshot()` would, so a tree declared by a document can
+// be read (and diffed) the same way as one taken from a running page. `parseAriaSnapshot` reads
+// the output back to the normalized tree.
+export function formatAriaSnapshot(tree: AriaNode): string {
+  const lines: string[] = [];
+  const root = normalizeAria(tree);
+  const top = root.role === "fragment" ? (root.children ?? []) : [root];
+  for (const n of top) writeNode(n, "", lines);
+  return lines.join("\n");
+}
+
+const STATE_ORDER = ["checked", "disabled", "expanded", "invalid", "level", "pressed", "selected"];
+
+function writeNode(n: AriaNode, indent: string, lines: string[]): void {
+  if (n.role === "text") {
+    lines.push(`${indent}- text: ${yamlValue(n.name)}`);
+    return;
+  }
+  let key = n.role;
+  if (n.name !== "") key += ` ${JSON.stringify(n.name)}`;
+  const states = (n.states ?? {}) as Record<string, unknown>;
+  for (const s of STATE_ORDER) {
+    const v = states[s];
+    if (v === true) key += ` [${s}]`;
+    else if (v !== undefined && v !== false) key += ` [${s}=${String(v)}]`;
+  }
+  const head = `${indent}- ${yamlKey(key)}`;
+  const children = n.children ?? [];
+  const only = children.length === 1 ? children[0] : undefined;
+  if (n.url === undefined && only?.role === "text") {
+    lines.push(`${head}: ${yamlValue(only.name)}`);
+    return;
+  }
+  if (n.url === undefined && children.length === 0) {
+    lines.push(head);
+    return;
+  }
+  lines.push(`${head}:`);
+  if (n.url !== undefined) lines.push(`${indent}  - /url: ${yamlValue(n.url)}`);
+  for (const c of children) writeNode(c, `${indent}  `, lines);
+}
+
+// A key that YAML would split at ": " or read as a comment is single-quoted, as Playwright does.
+function yamlKey(key: string): string {
+  return /: |:$| #/.test(key) ? `'${key.replaceAll("'", "''")}'` : key;
+}
+
+// Plain scalars that YAML would read as something other than the string are double-quoted.
+function yamlValue(value: string): string {
+  const plain =
+    value !== "" &&
+    value === value.trim() &&
+    !/^[-?:,[\]{}#&*!|>'"%@`]/.test(value) &&
+    !/: |:$| #|[\n\r\t]/.test(value) &&
+    !/^(?:true|false|null|~|[-+]?(?:\d[\d_]*(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)$/i.test(value);
+  return plain ? value : JSON.stringify(value);
 }

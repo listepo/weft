@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { coreCatalog } from "@weft/catalog";
 import { parse } from "@weft/core";
+import { parseAriaSnapshot } from "@weft/render-react";
 import { LIMITS, PRIMER } from "../src/index.ts";
 import { call, connect } from "./connect.ts";
 
@@ -13,7 +14,7 @@ const GOOD = `<screen id="s" label="Demo" weft="0.1">
 type Diagnostics = { valid?: boolean; diagnostics: { code: string; hint?: string }[] };
 const json = (text: string | undefined) => JSON.parse(text ?? "null") as Diagnostics;
 
-test("lists exactly the five tools, each written for a model", async () => {
+test("lists exactly the six tools, each written for a model", async () => {
   const { client, close } = await connect();
   const { tools } = await client.listTools();
   assert.deepEqual(tools.map((t) => t.name).toSorted(), [
@@ -21,6 +22,7 @@ test("lists exactly the five tools, each written for a model", async () => {
     "weft_format",
     "weft_patch",
     "weft_primer",
+    "weft_render",
     "weft_validate",
   ]);
   for (const tool of tools) {
@@ -39,7 +41,7 @@ test("weft_primer returns the primer and mentions every tool", async () => {
   const result = await call(client, "weft_primer", {});
   assert.equal(result.isError, false);
   assert.equal(result.blocks[0], PRIMER);
-  for (const name of ["weft_catalog", "weft_validate", "weft_format", "weft_patch"])
+  for (const name of ["weft_catalog", "weft_validate", "weft_format", "weft_patch", "weft_render"])
     assert.ok(PRIMER.includes(name), name);
   await close();
 });
@@ -185,6 +187,83 @@ test("weft_patch: failures return diagnostics and apply nothing", async () => {
   await close();
 });
 
+const SCREEN = `<screen id="s" label="Inbox" weft="0.1">
+  <heading id="h" level="1" text="{$.title}"/>
+  <list id="l" label="Messages">
+    <each id="e" as="m" in="{$.messages}">
+      <item id="m" text="{$m.subject}"/>
+    </each>
+    <slot name="empty">
+      <text id="none">No messages</text>
+    </slot>
+  </list>
+  <form id="f" on-submit="mail.send">
+    <field id="to" label="To" type="email" value="{$.to}"/>
+    <button id="send" disabled="{!$.to}" submit="true" variant="primary">Send</button>
+  </form>
+</screen>
+`;
+
+test("weft_render: the accessibility tree as aria-snapshot YAML, with data", async () => {
+  const { client, close } = await connect();
+  const full = await call(client, "weft_render", {
+    markup: SCREEN,
+    data: { title: "Inbox", messages: [{ subject: "Hi" }, { subject: "Lunch?" }], to: "" },
+  });
+  assert.equal(full.isError, false);
+  assert.equal(full.blocks.length, 1);
+  assert.equal(
+    full.blocks[0],
+    [
+      '- main "Inbox":',
+      '  - heading "Inbox" [level=1]',
+      '  - list "Messages":',
+      "    - listitem: Hi",
+      "    - listitem: Lunch?",
+      '  - textbox "To"',
+      '  - button "Send" [disabled]',
+    ].join("\n"),
+  );
+  // The parser of the browser test reads the output back, so it is the same YAML Playwright prints.
+  assert.equal(parseAriaSnapshot(full.blocks[0] ?? "").children?.[0]?.role, "main");
+
+  const empty = await call(client, "weft_render", { markup: SCREEN });
+  assert.match(empty.blocks[0] ?? "", /- list "Messages": No messages/);
+  await close();
+});
+
+test("weft_render: html on request, strict validation, errors as results", async () => {
+  const { client, close } = await connect();
+  const withHtml = await call(client, "weft_render", { markup: GOOD, html: true });
+  assert.equal(withHtml.isError, false);
+  assert.equal(withHtml.blocks[0], '- main "Demo":\n  - button "Go"');
+  assert.match(withHtml.blocks[1] ?? "", /^<!doctype html>\n<html lang="en">/);
+  assert.match(withHtml.blocks[1] ?? "", /<button data-weft-id="go" type="button">Go<\/button>/);
+
+  const unknown = await call(client, "weft_render", {
+    markup: GOOD.replace("</screen>", '<fancy id="f"/></screen>'),
+  });
+  assert.equal(unknown.isError, true, "rendering is for valid markup, so it is strict");
+  assert.equal(json(unknown.blocks[0]).diagnostics[0]?.code, "W401");
+
+  const broken = await call(client, "weft_render", { markup: "<screen" });
+  assert.equal(broken.isError, true);
+
+  const hidden = await call(client, "weft_render", {
+    markup: '<screen id="s" hidden="true" weft="0.1"/>',
+  });
+  assert.equal(hidden.isError, false);
+  assert.match(hidden.blocks[0] ?? "", /nothing is exposed/);
+
+  // Data is untrusted: a hostile shape renders as missing values, never throws.
+  const hostile = await call(client, "weft_render", {
+    markup: SCREEN,
+    data: { title: { toString: 1 }, messages: "not a list", constructor: "x" },
+  });
+  assert.equal(hostile.isError, false);
+  await close();
+});
+
 test("tool inputs are schema-validated and size-limited; nothing throws", async () => {
   const { client, close } = await connect();
   const cases: [string, Record<string, unknown>][] = [
@@ -208,6 +287,8 @@ test("tool inputs are schema-validated and size-limited; nothing throws", async 
         patches: [{ op: "insert", parent: "s", markup: "<text id='a'/>".repeat(20_000) }],
       },
     ],
+    ["weft_render", { markup: GOOD, html: "yes" }],
+    ["weft_render", { markup: GOOD, data: { big: "x".repeat(LIMITS.dataChars) } }],
     ["weft_catalog", { kind: 7 }],
     ["weft_catalog", { kind: "x".repeat(101) }],
     ["weft_nonexistent", {}],

@@ -34,6 +34,7 @@ For Claude Code: `claude mcp add weft -- node /path/to/weft/packages/mcp/src/ser
 | `weft_validate` | `markup`, `strict?` | `{"valid":boolean,"diagnostics":[…]}`. `strict` rejects unknown elements and attributes. |
 | `weft_format` | `markup` | The canonical markup, plus a second block with warnings if there are any. Diagnostics and `isError` if the markup has errors. |
 | `weft_patch` | `markup`, `patches` | The new canonical markup (SPEC section 7), or diagnostics and `isError` with nothing applied. The result is validated strictly. |
+| `weft_render` | `markup`, `data?`, `html?` | The accessibility tree the reference renderer (`@weft/render-react`) produces, as YAML in the style of a Playwright aria snapshot: what a user of assistive technology or a browsing agent gets, without a browser. `data` is the sample data model the bindings read. With `html: true`, a second block holds the static HTML page. Diagnostics and `isError` if the markup is not strictly valid. |
 
 Diagnostics are the objects of SPEC section 6.1. A patch problem has a `W5xx` code and a path into the patch list such as `#/patches/2/parent`.
 
@@ -43,6 +44,7 @@ Tool inputs are untrusted. They are checked against their schema before a tool r
 
 - `markup`: at most 200,000 characters.
 - `patches`: at most 100 patches and 200,000 characters of JSON per call.
+- `data` (`weft_render`): at most 200,000 characters of JSON.
 - Arguments: at most 20,000 JSON values.
 - Results list at most 40 diagnostics and report how many were left out.
 - `kind`: at most 100 characters.
@@ -55,4 +57,4 @@ The numbers live in `LIMITS` in `src/context.ts`.
 
 ## Adding a tool
 
-A tool is one function `(server, context) => void` in `src/tools/`, listed in `src/tools/index.ts`. A `weft_render` tool would be one more file and one more entry, with the renderer passed in through `Context`.
+A tool is one function `(server, context) => void` in `src/tools/`, listed in `src/tools/index.ts`. `weft_render` is such a file; it renders with the host's catalog from `Context`.

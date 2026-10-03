@@ -2,7 +2,7 @@
 // and `expectedTree` read: `each` expanded with instance ids, `hidden` nodes removed, and every
 // node paired with the scope its bindings resolve in. Both consumers share it so the renderer
 // and the oracle it is tested against can never disagree about what is on screen.
-import type { Catalog, ComponentDef } from "@weft/core";
+import type { Catalog, ComponentDef, PropDef } from "@weft/core";
 import { isRecord, resolveValue, toText, truthy, type Resolved, type Scope } from "./values.ts";
 
 export type Inst = {
@@ -16,6 +16,8 @@ export type Inst = {
   children: InstChild[];
   slots: Record<string, InstChild[]>;
   scope: Scope;
+  // Whether the default slot has something other than empty loops to show (SPEC §5.1 `empty`).
+  filled: boolean;
 };
 export type InstChild = Inst | string;
 
@@ -100,37 +102,93 @@ function expandNode(
       slots[name] = expandChildren(node["slots"][name], scope, catalog, depth + 1);
     }
   }
+  const def = Object.hasOwn(catalog.components, kind) ? catalog.components[kind] : undefined;
+  let children = expandChildren(node["children"], scope, catalog, depth + 1);
+  // SPEC §5.1: every text-bearing kind takes its text from content or from the `text` prop. Turning
+  // the prop into content here lets every later reading treat both spellings alike; content wins
+  // when a lenient reader is given both.
+  if ((def?.content === "text" || def?.content === "mixed") && children.length === 0) {
+    const own = toText(resolveValue(props["text"], scope).value);
+    if (own.trim() !== "") children = [own];
+  }
   return {
     kind,
     docId,
     id: docId === "" ? "" : docId + scope.suffix,
-    def: Object.hasOwn(catalog.components, kind) ? catalog.components[kind] : undefined,
+    def,
     props,
     on,
-    children: expandChildren(node["children"], scope, catalog, depth + 1),
+    children,
     slots,
     scope,
+    filled: Array.isArray(node["children"]) && node["children"].some((c) => shows(c, scope)),
   };
+}
+
+// SPEC §5.1 `empty`: a static element counts even when hidden, a loop only when its array has
+// items. Table columns are the header, not rows, so they never count.
+function shows(child: unknown, scope: Scope): boolean {
+  if (!isRecord(child) || typeof child["kind"] !== "string" || child["kind"] === "column")
+    return false;
+  if (child["kind"] !== "each") return true;
+  const source = isRecord(child["props"]) ? resolveValue(child["props"]["in"], scope).value : [];
+  return Array.isArray(source) && source.length > 0;
 }
 
 // ---- Shared readings of props; the renderer and `expectedTree` must agree on each of these. ----
 
-export const prop = (n: Inst, name: string): Resolved => resolveValue(n.props[name], n.scope);
+export function prop(n: Inst, name: string): Resolved {
+  const resolved = resolveValue(n.props[name], n.scope);
+  const def = n.def?.props && Object.hasOwn(n.def.props, name) ? n.def.props[name] : undefined;
+  if (def?.type !== "number" || typeof resolved.value !== "number") return resolved;
+  return { ...resolved, value: clamp(resolved.value, def) };
+}
+
+// SPEC §5.1: validation keeps literals in range, so this only ever moves bound data, which the
+// renderer brings into the declared range rather than rendering something the catalog forbids.
+function clamp(value: number, def: PropDef): number | undefined {
+  if (!Number.isFinite(value)) return undefined;
+  let v = def.integer === true ? Math.round(value) : value;
+  if (typeof def.min === "number") v = Math.max(v, def.min);
+  if (typeof def.max === "number") v = Math.min(v, def.max);
+  return v;
+}
+
 export const text = (n: Inst, name: string): string => toText(prop(n, name).value);
 export const flag = (n: Inst, name: string): boolean => truthy(prop(n, name).value);
 export const label = (n: Inst): string => text(n, "label").trim();
 export const state = (n: Inst): string => text(n, "state");
 
-// Content of a named slot rendered before the default slot; every other slot follows it.
-const LEADING_SLOTS = new Set(["header"]);
+const declaresSlot = (n: Inst, name: string): boolean =>
+  n.def?.slots !== undefined && Object.hasOwn(n.def.slots, name);
 
-export function ordered(n: Inst): InstChild[] {
-  const before: InstChild[] = [];
-  const after: InstChild[] = [];
-  for (const [name, list] of Object.entries(n.slots))
-    (LEADING_SLOTS.has(name) ? before : after).push(...list);
-  return [...before, ...n.children, ...after];
+// SPEC §5.1: a declared `empty` slot replaces the items when there are none to show or the
+// state says so.
+export function showsEmpty(n: Inst): boolean {
+  if (!declaresSlot(n, "empty") || n.slots["empty"] === undefined) return false;
+  return state(n) === "empty" || !n.filled;
 }
+
+// A run of content in display order; `slot` names the slot it came from, absent for the default
+// content.
+export type Region = { slot?: string; list: InstChild[] };
+
+// SPEC §4.2: slot placement is the component's. `header` leads, a declared `empty` stands in for
+// the default content when it is shown and is left out otherwise, and every other slot follows.
+export function regions(n: Inst): Region[] {
+  const before: Region[] = [];
+  const after: Region[] = [];
+  for (const [slot, list] of Object.entries(n.slots)) {
+    if (slot === "empty" && declaresSlot(n, slot)) continue;
+    (slot === "header" ? before : after).push({ slot, list });
+  }
+  const body: Region = showsEmpty(n)
+    ? { slot: "empty", list: n.slots["empty"] ?? [] }
+    : { list: n.children };
+  return [...before, body, ...after];
+}
+
+export const ordered = (n: Inst): InstChild[] => regions(n).flatMap((r) => r.list);
 
 export const nodes = (list: InstChild[]): Inst[] =>
   list.filter((c): c is Inst => typeof c !== "string");
@@ -140,13 +198,6 @@ export function headingLevel(n: Inst): number {
   const level = prop(n, "level").value;
   const num = typeof level === "string" ? Number(level) : level;
   return typeof num === "number" && Number.isInteger(num) && num >= 1 && num <= 6 ? num : 2;
-}
-
-// `text` and `heading` take their text from `value` when it is given (SPEC §5.1 notes).
-export function ownText(n: Inst): string {
-  return n.props["value"] !== undefined && (n.kind === "text" || n.kind === "heading")
-    ? text(n, "value")
-    : contentText(n.children);
 }
 
 // The text a subtree contributes to an accessible name computed from content (accname 2F),
@@ -171,7 +222,6 @@ function contribution(n: Inst): string {
   if (own !== "" && n.kind !== "text" && n.kind !== "stack" && n.kind !== "grid") return own;
   if (n.def) {
     if (n.kind === "checkbox" || n.kind === "switch" || n.kind === "image") return "";
-    if (n.kind === "text" || n.kind === "heading") return ownText(n);
     if (n.kind === "tabs") {
       const tabs = nodes(n.children).filter((c) => c.kind === "tab");
       const sel = tabs[selectedTab(n, tabs)];

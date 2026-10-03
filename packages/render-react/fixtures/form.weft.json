@@ -3,7 +3,7 @@
   "root": {
     "kind": "screen",
     "id": "root",
-    "props": { "label": "Sign in", "weft": "0.1" },
+    "props": { "label": "Sign in" },
     "children": [
       {
         "kind": "form",
@@ -15,8 +15,7 @@
             {
               "kind": "button",
               "id": "go",
-              "props": { "variant": "primary" },
-              "on": { "press": "auth.submit" },
+              "props": { "submit": true, "variant": "primary" },
               "children": ["Sign in"]
             }
           ]
