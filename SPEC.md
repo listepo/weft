@@ -72,11 +72,13 @@ Allowed on every element:
 | Attribute | Type | Meaning |
 | --- | --- | --- |
 | `id` | string, required | Document-unique, matches `[A-Za-z][A-Za-z0-9_-]*`. Stable across edits. |
-| `label` | string | Accessible name when the element has no visible text. |
+| `label` | string | The element's accessible name (see below). |
 | `hidden` | boolean | Not rendered and not exposed to assistive technology. |
 | `state` | enum | One of the states the component declares (§5). |
 | `role` | ARIA role | Required on extension elements; an error on catalog components. |
 | `on-<event>` | action name | Binds an event the component declares to a named host action. |
+
+`label` is the element's accessible name, and it MAY be a binding. Components that present a caption (`field`, `checkbox`, `switch`, `radio-group`, `select`) show it visibly as that caption, and `tab` shows it as the tab title; on `image` it is the text alternative; on containers (`screen`, `section`, `table`, `dialog`, `menu`, `tabs`, `form`, `list`, `stack`, `grid`) it names the region without being shown. On a component whose text is its content or `text` prop, `label` replaces that text as the accessible name and SHOULD be left out.
 
 Action names match `[a-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*)*`. Actions take no arguments in the document; the host receives the action name, the element id, and for elements inside `<each>` the current loop item path.
 
@@ -140,6 +142,7 @@ Content placed directly inside an element is its default slot. The catalog says 
 
 - `<slot name="…">` MUST be a direct child of a component that declares that slot.
 - A slot name appears at most once per parent.
+- A named slot is a region whose placement the component decides, not document order: a form's `footer` sits below its fields, a dialog's `actions` in its button bar, a list's `empty` in place of its items. Where a `<slot>` stands among the default content therefore carries no meaning, which is why canonical markup writes named slots after the default content (§3).
 
 ### 4.3 Repetition
 
@@ -246,6 +249,8 @@ Notes:
 - A `button` with `submit="true"` submits its nearest enclosing `form`: pressing it fires that form's `submit` event, so it needs no `on-press`. `submit` is a literal (`bindable: false`) because whether a button submits is structure, not data. A submit button outside a `form` is an error.
 - `field` has role `textbox`; a renderer MAY refine it from `type` (`number` → `spinbutton`, `search` → `searchbox`) as ARIA requires.
 - `column` is a direct child of `table` although ARIA places `columnheader` inside a `row`; the renderer emits the header row.
+- `column.sort` states the current sort only: the host updates it in its data model in response to the column's `press` action, because documents carry no behaviour.
+- `dialog.open` is likewise changed by the host in its data model in response to actions such as the dialog's `close` or a button's `press`; the document only binds it.
 - "integer 1–6" is a `number` prop with `integer: true`, `min: 1`, `max: 6`; "integer ≥ 1" has `integer: true`, `min: 1`. The bounds apply to literals; a bound value is the host's to keep in range.
 
 ## 6. Validation
