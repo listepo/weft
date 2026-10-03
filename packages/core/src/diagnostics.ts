@@ -88,6 +88,9 @@ export const DIAGNOSTIC_CODES = {
   W507: { severity: "error", summary: "The root element cannot be removed or moved." },
   W508: { severity: "error", summary: "Inserted markup is not a list of elements." },
   W509: { severity: "error", summary: "Inserted markup reuses an id of the document." },
+
+  W601: { severity: "error", summary: "Imported input cannot be read." },
+  W602: { severity: "warning", summary: "Imported input exceeds an import limit." },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;
