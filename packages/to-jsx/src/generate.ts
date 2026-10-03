@@ -15,6 +15,7 @@ import {
   type Catalog,
   type ComponentDef,
   type Document,
+  type PropDef,
 } from "@weft/core";
 import { RUNTIME } from "./runtime.ts";
 
@@ -65,7 +66,8 @@ function jsLiteral(v: unknown): string {
 const lit = (v: unknown): E => ({ js: jsLiteral(v), lit: { v } });
 const dyn = (js: string, bool = false): E => (bool ? { js, bool } : { js });
 
-// Compile-time twins of the `_text` and `_on` helpers (runtime.ts), used to fold literals.
+// Compile-time twins of the `_text`, `_on` and `_num` helpers (runtime.ts), used to fold
+// literals.
 function toText(v: unknown): string {
   if (typeof v === "string") return v;
   if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
@@ -73,6 +75,14 @@ function toText(v: unknown): string {
   return "";
 }
 const truthy = (v: unknown): boolean => (v === "false" ? false : Boolean(v));
+function clampNumber(v: unknown, def: PropDef): unknown {
+  if (typeof v !== "number") return v;
+  if (!Number.isFinite(v)) return undefined;
+  let out = def.integer === true ? Math.round(v) : v;
+  if (typeof def.min === "number") out = Math.max(out, def.min);
+  if (typeof def.max === "number") out = Math.min(out, def.max);
+  return out;
+}
 
 // Element tree printed as JSX.
 type Code = (indent: string) => string;
@@ -191,7 +201,8 @@ type N = {
   depth: number;
 };
 
-type Ctx = { group: N | undefined };
+// `group` is the enclosing radio-group, `form` the nearest enclosing form.
+type Ctx = { group: N | undefined; form: N | undefined };
 
 class Gen {
   readonly used = new Set<string>();
@@ -247,7 +258,17 @@ class Gen {
     return e.bool ? e : dyn(`${this.use("_on")}(${e.js})`, true);
   }
 
-  prop = (n: N, name: string) => this.resolve(n.props[name], n.scope);
+  // A number prop is brought into its declared range as the renderer's `prop` does (SPEC §5.1).
+  prop(n: N, name: string): { e: E; path?: Str } {
+    const resolved = this.resolve(n.props[name], n.scope);
+    const def = n.def?.props && Object.hasOwn(n.def.props, name) ? n.def.props[name] : undefined;
+    if (def?.type !== "number") return resolved;
+    const { e } = resolved;
+    if (e.lit) return { ...resolved, e: lit(clampNumber(e.lit.v, def)) };
+    const bounds = [def.integer === true, def.min, def.max].map(jsLiteral).join(", ");
+    return { ...resolved, e: dyn(`${this.use("_num")}(${e.js}, ${bounds})`) };
+  }
+
   textOf = (n: N, name: string): E => this.text(this.prop(n, name).e);
   flagOf = (n: N, name: string): E => this.flag(this.prop(n, name).e);
 
@@ -256,10 +277,48 @@ class Gen {
     return t.lit ? lit(String(t.lit.v).trim()) : dyn(`${t.js}.trim()`);
   }
 
-  // The visible text of a `text`-content kind: its `text` prop, else its content (SPEC §5.1).
+  // SPEC §5.1: a text-bearing kind takes its text from content or from the `text` prop. As in
+  // render-react's expansion, the prop counts only when the content renders nothing (content wins
+  // when a lenient reader is given both) and its text is not blank.
+  textPropShown(n: N): { text: E; when: E } {
+    const text = this.textOf(n, "text");
+    if (n.props["text"] === undefined) return { text, when: lit(false) };
+    const content = this.anyShown(this.pieces(n.children, n.scope, n.depth + 1));
+    const blank = text.lit
+      ? lit(toText(text.lit.v).trim() === "")
+      : dyn(`${text.js}.trim() === ""`);
+    if (content.lit?.v === true || blank.lit?.v === true) return { text, when: lit(false) };
+    const parts = [content, blank].filter((e) => !e.lit).map((e) => e.js);
+    return { text, when: parts.length === 0 ? lit(true) : dyn(`!(${parts.join(" || ")})`, true) };
+  }
+
+  // The visible text of a `text`-content kind, joined and squashed as `contentText` does.
   ownText(n: N): E {
-    if (n.props["text"] !== undefined) return this.textOf(n, "text");
-    return lit(contentText(n.children));
+    const content = lit(contentText(n.children));
+    const { text, when } = this.textPropShown(n);
+    if (when.lit) return when.lit.v === true ? this.squash(text) : content;
+    return dyn(`${when.js} ? ${this.squash(text).js} : ${content.js}`);
+  }
+
+  squash(e: E): E {
+    if (e.lit) return lit(toText(e.lit.v).trim().replace(/\s+/g, " "));
+    return dyn(`${this.use("_squash")}(${e.js})`);
+  }
+
+  // Whether any of these pieces renders, i.e. whether the renderer's expanded list is non-empty.
+  anyShown(list: Piece[]): E {
+    const parts: string[] = [];
+    for (const p of list) {
+      if (p.t === "text" || (p.t === "node" && p.hidden === undefined)) return lit(true);
+      if (p.t === "node") {
+        parts.push(`!${p.hidden}`);
+        continue;
+      }
+      const inner = this.anyShown(p.inner);
+      if (inner.lit?.v === false) continue;
+      parts.push(`${p.src}.some((${p.ident}, ${p.index}) => ${inner.js})`);
+    }
+    return parts.length === 0 ? lit(false) : dyn(parts.join(" || "), true);
   }
 
   // ---- Pieces: `each` and `hidden` as the renderer's expansion reads them ----
@@ -339,15 +398,56 @@ class Gen {
     };
   }
 
-  // Header slot first, then the default content, then every other slot by name (as `ordered`).
-  ordered(n: N): Piece[] {
-    const names = Object.keys(n.slots).sort();
-    const slot = (name: string) => this.pieces(n.slots[name], n.scope, n.depth + 1);
-    return [
-      ...names.filter((s) => s === "header").flatMap(slot),
-      ...this.pieces(n.children, n.scope, n.depth + 1),
-      ...names.filter((s) => s !== "header").flatMap(slot),
+  declaresSlot = (n: N, name: string): boolean =>
+    n.def?.slots !== undefined && Object.hasOwn(n.def.slots, name);
+
+  // A component's content as render.ts `content` places it (SPEC §4.2): the header slot first,
+  // then the default content, then every other slot by name, each named slot in its own box. A
+  // declared `empty` slot is left to the kind that shows it.
+  content(n: N, ctx: Ctx): C[] {
+    const before: C[] = [];
+    const after: C[] = [];
+    for (const name of Object.keys(n.slots).sort()) {
+      if (name === "empty" && this.declaresSlot(n, name)) continue;
+      const box: J = {
+        tag: "div",
+        attrs: [["data-weft-slot", { s: name }]],
+        kids: this.kids(this.pieces(n.slots[name], n.scope, n.depth + 1), ctx),
+      };
+      (name === "header" ? before : after).push(box);
+    }
+    const own = n.def?.content === "text" || n.def?.content === "mixed" ? this.textProp(n) : [];
+    const body = this.kids(this.pieces(n.children, n.scope, n.depth + 1), ctx);
+    return [...before, ...own, ...body, ...after];
+  }
+
+  // Whether the default slot has something to show besides empty loops, as render-react's
+  // `shows` decides it (SPEC §5.1 `empty`): a static element counts even when hidden, a loop
+  // only when its array has items, and table columns never count.
+  filled(n: N): E {
+    const loops: string[] = [];
+    for (const c of Array.isArray(n.children) ? n.children : []) {
+      if (!isRecord(c) || typeof c["kind"] !== "string" || c["kind"] === "column") continue;
+      if (c["kind"] !== "each") return lit(true);
+      const source = this.resolve(isRecord(c["props"]) ? c["props"]["in"] : undefined, n.scope).e;
+      if (!source.lit) loops.push(`${this.use("_list")}(${source.js}).length > 0`);
+      else if (Array.isArray(source.lit.v) && source.lit.v.length > 0) return lit(true);
+    }
+    return loops.length === 0 ? lit(false) : dyn(loops.join(" || "), true);
+  }
+
+  // Whether a declared `empty` slot replaces the default content (render-react `showsEmpty`).
+  showsEmpty(n: N): E {
+    if (!this.declaresSlot(n, "empty") || n.slots["empty"] === undefined) return lit(false);
+    const state = this.textOf(n, "state");
+    const filled = this.filled(n);
+    if (state.lit?.v === "empty" || filled.lit?.v === false) return lit(true);
+    if (state.lit && filled.lit) return lit(false);
+    const parts = [
+      state.lit ? undefined : `${state.js} === "empty"`,
+      filled.lit ? undefined : `!(${filled.js})`,
     ];
+    return dyn(parts.filter(Boolean).join(" || "), true);
   }
 
   // Pieces as JSX children.
@@ -471,16 +571,16 @@ class Gen {
     const el = (tag: string, attrs: Attr[], kids: C[]): J => ({ tag, attrs, kids });
     switch (n.kind) {
       case "screen":
-        return el("main", this.base(n), this.kids(this.ordered(n), ctx));
+        return el("main", this.base(n), this.content(n, ctx));
       case "stack":
       case "grid":
         return el(
           "div",
           [...this.base(n, false), ["style", { js: this.layoutStyle(n) }]],
-          this.kids(this.ordered(n), ctx),
+          this.content(n, ctx),
         );
       case "section":
-        return el("section", this.base(n), this.kids(this.ordered(n), ctx));
+        return el("section", this.base(n), this.content(n, ctx));
       case "heading":
         return this.heading(n);
       case "text": {
@@ -497,11 +597,11 @@ class Gen {
       case "link":
         return this.link(n);
       case "button":
-        return this.button(n);
+        return this.button(n, ctx);
       case "form": {
         const a = this.base(n);
         a.push(["onSubmit", this.handler("(_e)", ["_e.preventDefault()", this.fire(n, "submit")])]);
-        return el("form", a, this.kids(this.ordered(n), ctx));
+        return el("form", a, this.content(n, { ...ctx, form: n }));
       }
       case "field":
         return this.field(n);
@@ -512,7 +612,7 @@ class Gen {
         return el(
           "div",
           [...this.base(n), ["role", { s: "radiogroup" }]],
-          this.kids(this.ordered(n), { ...ctx, group: n }),
+          [...this.caption(this.label(n)), ...this.content(n, { ...ctx, group: n })],
         );
       case "radio":
         return this.radio(n, ctx);
@@ -525,31 +625,23 @@ class Gen {
       case "item": {
         const a = this.base(n);
         this.pressable(n, a);
-        return el("li", a, [...this.textProp(n), ...this.kids(this.ordered(n), ctx)]);
+        return el("li", a, this.content(n, ctx));
       }
       case "table":
         return this.table(n, ctx);
       case "tabs":
         return this.tabs(n, ctx);
       case "tab":
-        return el(
-          "div",
-          [...this.base(n), ["role", { s: "group" }]],
-          this.kids(this.ordered(n), ctx),
-        );
+        return el("div", [...this.base(n), ["role", { s: "group" }]], this.content(n, ctx));
       case "dialog":
         return this.dialog(n, ctx);
       case "alert": {
         const a = [...this.base(n), ["role", { s: "alert" }] as Attr];
         this.attr(a, "data-tone", this.orUndefined(this.textOf(n, "tone")));
-        return el("div", a, [...this.textProp(n), ...this.kids(this.ordered(n), ctx)]);
+        return el("div", a, this.content(n, ctx));
       }
       case "menu":
-        return el(
-          "div",
-          [...this.base(n), ["role", { s: "menu" }]],
-          this.kids(this.ordered(n), ctx),
-        );
+        return el("div", [...this.base(n), ["role", { s: "menu" }]], this.content(n, ctx));
       case "menu-item": {
         const a: Attr[] = [...this.base(n), ["type", { s: "button" }], ["role", { s: "menuitem" }]];
         this.boolAttr(a, "disabled", this.flagOf(n, "disabled"));
@@ -567,16 +659,31 @@ class Gen {
     return [{ code: () => e.js }];
   }
 
-  // A `mixed` kind's `text` prop is shown before its content.
+  // The visible caption of a control (render.ts `caption`): the name itself is `aria-label`, so
+  // the caption is hidden from the tree rather than read twice, and absent when there is none.
+  caption(name: E): C[] {
+    const span: J = {
+      tag: "span",
+      attrs: [["aria-hidden", { s: "true" }]],
+      kids: this.textKids(name),
+    };
+    if (name.lit) return name.lit.v === "" ? [] : [span];
+    return [{ code: (i) => `${name.js} ? ${expr(span, i)} : null` }];
+  }
+
+  // The `text` prop as raw content, where a kind's content is rendered as child nodes (render.ts
+  // `kids`) rather than joined like `contentText`.
   textProp(n: N): C[] {
-    return n.props["text"] === undefined ? [] : this.textKids(this.textOf(n, "text"));
+    const { text, when } = this.textPropShown(n);
+    if (when.lit) return when.lit.v === true ? this.textKids(text) : [];
+    return [{ code: () => `${when.js} ? ${text.js} : null` }];
   }
 
   // Unknown kinds and extensions keep their children under their fallback role (SPEC §8).
   fallback(n: N, ctx: Ctx): C {
     const declared = n.def ? n.def.role : n.props["role"];
     const role = typeof declared === "string" && ARIA_ROLES.includes(declared) ? declared : "group";
-    const kids = this.kids(this.ordered(n), ctx);
+    const kids = this.content(n, ctx);
     if (role === "none" || role === "presentation" || role === "generic") {
       return { tag: "div", attrs: this.base(n, false), kids };
     }
@@ -666,14 +773,21 @@ class Gen {
     });
   }
 
-  button(n: N): C {
-    // `submit` is a literal (SPEC §5.1); a submit button lets the browser submit its form.
+  button(n: N, ctx: Ctx): C {
+    // `submit` is literal-only (SPEC §5.1), so a binding never turns a button into a submit button.
     const submit = n.props["submit"] === true || n.props["submit"] === "true";
     const a: Attr[] = [...this.base(n), ["type", { s: submit ? "submit" : "button" }]];
     this.boolAttr(a, "disabled", this.flagOf(n, "disabled"));
     this.attr(a, "data-variant", this.orUndefined(this.textOf(n, "variant")));
-    const fire = this.fire(n, "press");
-    if (fire) a.push(["onClick", { js: `() => ${fire}` }]);
+    // As in render.ts, the browser's own submission (also from Enter in a field) is cancelled and
+    // reported here, so press and the form's submit each fire exactly once, in that order.
+    const form = submit ? ctx.form : undefined;
+    const click = [
+      submit ? "_e.preventDefault()" : undefined,
+      this.fire(n, "press"),
+      form ? this.fire(form, "submit") : undefined,
+    ];
+    if (click.some(Boolean)) a.push(["onClick", this.handler("(_e)", click)]);
     return { tag: "button", attrs: a, kids: this.textKids(this.ownText(n)) };
   }
 
@@ -743,10 +857,7 @@ class Gen {
       {
         tag: "label",
         attrs: [],
-        kids: [
-          { tag: "span", attrs: [["aria-hidden", { s: "true" }]], kids: this.textKids(name) },
-          controlC,
-        ],
+        kids: [...this.caption(name), controlC],
       },
     ];
     if (error.lit) {
@@ -777,10 +888,7 @@ class Gen {
     return {
       tag: "label",
       attrs: [],
-      kids: [
-        { tag: "input", attrs: a, kids: [] },
-        { tag: "span", attrs: [["aria-hidden", { s: "true" }]], kids: this.textKids(name) },
-      ],
+      kids: [{ tag: "input", attrs: a, kids: [] }, ...this.caption(name)],
     };
   }
 
@@ -790,6 +898,8 @@ class Gen {
     const own = this.ownText(n);
     const name: E =
       label.lit && own.lit ? lit(label.lit.v || own.lit.v) : dyn(`${label.js} || ${own.js}`);
+    const shown: E =
+      label.lit && own.lit ? lit(own.lit.v || label.lit.v) : dyn(`${own.js} || ${label.js}`);
     const value = this.textOf(n, "value");
     const a = this.base(n, false);
     a.push(["type", { s: "radio" }]);
@@ -821,7 +931,8 @@ class Gen {
       attrs: [],
       kids: [
         { tag: "input", attrs: a, kids: [] },
-        { tag: "span", attrs: [["aria-hidden", { s: "true" }]], kids: this.textKids(name) },
+        // The visible text is the content; a `label` only overrides the accessible name.
+        { tag: "span", attrs: [["aria-hidden", { s: "true" }]], kids: this.textKids(shown) },
       ],
     };
   }
@@ -859,56 +970,39 @@ class Gen {
     } else if (controlled || statements[1])
       a.push(["onChange", this.handler("()", [statements[1]])]);
     const list = this.use("_keyed");
-    return block([(i) => `const _o = ${options(i)};`], {
+    const control = block([(i) => `const _o = ${options(i)};`], {
       tag: "select",
       attrs: a,
       kids: [{ code: () => `${list}(_o.map((_x) => _x.el))` }],
     });
+    return { tag: "label", attrs: [], kids: [...this.caption(this.label(n)), control] };
   }
 
   // SPEC §5.1: the `empty` slot is shown instead of the items when there are none, or when the
   // state says `empty`.
   list(n: N, ctx: Ctx): C {
     const ordered = this.flagOf(n, "ordered");
-    const a = this.base(n);
-    let kids: C[];
-    let lines: ((i: string) => string)[] = [];
-    if (n.slots["empty"] === undefined) kids = this.kids(this.ordered(n), ctx);
-    else {
-      const items = this.collect(this.pieces(n.children, n.scope, n.depth + 1), (p) => {
-        const c = p.t === "text" ? ({ text: p.s } as C) : this.render(p.n, ctx);
-        return c ? (i) => expr(c, i) : undefined;
-      });
+    const content = this.content(n, ctx);
+    const show = this.showsEmpty(n);
+    let kids = content;
+    if (show.lit?.v !== false) {
+      // A list may only hold list items, so the empty content stands in a presentational one.
       const empty: J = {
-        tag: "",
-        attrs: [],
+        tag: "li",
+        attrs: [
+          ["role", { s: "none" }],
+          ["data-weft-slot", { s: "empty" }],
+        ],
         kids: this.kids(this.pieces(n.slots["empty"], n.scope, n.depth + 1), ctx),
       };
-      const state = this.textOf(n, "state");
-      const keyed = this.use("_keyed");
-      lines = [(i) => `const _items = ${items(i)};`];
-      // Default content is in `_items`; the other slots follow it as `ordered` places them.
-      kids = [
-        {
-          code: (i) =>
-            `_items.length === 0 || ${state.js} === "empty" ? ${expr(empty, i)} : ${keyed}(_items)`,
-        },
-        ...this.kids(this.otherSlots(n, "empty"), ctx),
-      ];
+      const items: J = { tag: "", attrs: [], kids: content };
+      kids = show.lit
+        ? [empty]
+        : [{ code: (i) => `${show.js} ? ${expr(empty, i)} : ${expr(items, i)}` }];
     }
-    const j: J = { tag: "", attrs: a, kids };
-    const result: C = ordered.lit
-      ? { ...j, tag: ordered.lit.v ? "ol" : "ul" }
-      : { ...j, tag: "Tag" };
-    if (!ordered.lit) lines.unshift(() => `const Tag = ${ordered.js} ? "ol" : "ul";`);
-    return lines.length === 0 ? result : block(lines, result);
-  }
-
-  otherSlots(n: N, skip: string): Piece[] {
-    return Object.keys(n.slots)
-      .sort()
-      .filter((s) => s !== skip)
-      .flatMap((s) => this.pieces(n.slots[s], n.scope, n.depth + 1));
+    const j: J = { tag: "", attrs: this.base(n), kids };
+    if (ordered.lit) return { ...j, tag: ordered.lit.v ? "ol" : "ul" };
+    return this.withTag(`${ordered.js} ? "ol" : "ul"`, j);
   }
 
   // SPEC §5.1: `column` children form the header row in <thead>; other content goes to <tbody>,
@@ -938,32 +1032,36 @@ class Gen {
     };
     const body: J = { tag: "tbody", attrs: [], kids: [{ code: () => `${keyed}(_rows)` }] };
     const kids: C[] = [{ code: (i) => `_cols.length > 0 ? ${expr(head, i)} : null` }];
-    const emptySlot = n.slots["empty"];
-    if (emptySlot === undefined)
+    const show = this.showsEmpty(n);
+    if (show.lit?.v === false)
       kids.push({ code: (i) => `_rows.length > 0 ? ${expr(body, i)} : null` });
     else {
+      // A table keeps its column headers; the empty content spans them in one body row.
       const empty: J = {
         tag: "tbody",
         attrs: [],
         kids: [
           {
             tag: "tr",
-            attrs: [],
+            attrs: [["data-weft-slot", { s: "empty" }]],
             kids: [
               {
                 tag: "td",
-                attrs: [],
-                kids: this.kids(this.pieces(emptySlot, n.scope, n.depth + 1), ctx),
+                attrs: [["colSpan", { js: "Math.max(1, _cols.length)" }]],
+                kids: this.kids(this.pieces(n.slots["empty"], n.scope, n.depth + 1), ctx),
               },
             ],
           },
         ],
       };
-      const state = this.textOf(n, "state");
-      kids.push({
-        code: (i) =>
-          `_rows.length === 0 || ${state.js} === "empty" ? ${expr(empty, i)} : ${expr(body, i)}`,
-      });
+      kids.push(
+        show.lit
+          ? empty
+          : {
+              code: (i) =>
+                `${show.js} ? ${expr(empty, i)} : _rows.length > 0 ? ${expr(body, i)} : null`,
+            },
+      );
     }
     return block([(i) => `const _cols = ${columns(i)};`, (i) => `const _rows = ${rows(i)};`], {
       tag: "table",
@@ -1015,7 +1113,7 @@ class Gen {
     return {
       tag: "td",
       attrs: this.base(n),
-      kids: [...this.textProp(n), ...this.kids(this.ordered(n), ctx)],
+      kids: this.content(n, ctx),
     };
   }
 
@@ -1026,7 +1124,7 @@ class Gen {
     const tabs = this.collect(children, (p) => {
       if (p.t !== "node" || p.n.kind !== "tab") return undefined;
       const t = p.n;
-      const panel: J = { tag: "", attrs: [], kids: this.kids(this.ordered(t), ctx) };
+      const panel: J = { tag: "", attrs: [], kids: this.content(t, ctx) };
       const state = this.textOf(t, "state");
       return (i) =>
         `{ id: ${strJs(t.id)}, doc: ${JSON.stringify(t.docId)}, state: ${state.js}, label: ${this.label(t).js}, panel: ${expr(panel, i)} }`;
@@ -1110,7 +1208,7 @@ class Gen {
         this.fire(n, "close"),
       ]),
     ]);
-    const el: J = { tag: "dialog", attrs: a, kids: this.kids(this.ordered(n), ctx) };
+    const el: J = { tag: "dialog", attrs: a, kids: this.content(n, ctx) };
     return open.lit ? el : { code: (i) => `${open.js} && ${expr(el, i)}` };
   }
 }
@@ -1159,7 +1257,7 @@ export function toJsx(document: Document | unknown, options: ToJsxOptions): stri
   const first = gen.pieces([root], scope, 0).find((p): p is NodePiece => p.t === "node");
   let body = "null";
   if (first) {
-    const c = gen.render(first.n, { group: undefined });
+    const c = gen.render(first.n, { group: undefined, form: undefined });
     if (c) {
       const hidden = first.hidden;
       body = hidden === undefined ? expr(c, "  ") : `${hidden} ? null : ${expr(c, "  ")}`;

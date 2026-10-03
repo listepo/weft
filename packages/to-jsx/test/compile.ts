@@ -36,3 +36,17 @@ export async function load(source: string): Promise<ComponentType<Props>> {
 
 export const markup = (component: ComponentType<Props>, props: Props): string =>
   renderToStaticMarkup(createElement(component, props));
+
+// Static markup with each tag's attributes sorted and React's separators between adjacent text
+// nodes removed: neither attribute order nor how a text run is split is part of the rendering.
+// Both inputs come from renderToStaticMarkup, which always quotes values and escapes quotes.
+export const normalizeMarkup = (html: string): string =>
+  html
+    .replace(/<!-- -->/g, "")
+    .replace(
+      /<([a-z][a-z0-9-]*)((?:\s+[^\s=/>]+(?:="[^"]*")?)*)\s*(\/?)>/g,
+      (_, tag, attrs, end) => {
+        const sorted = ((attrs as string).match(/[^\s=]+(?:="[^"]*")?/g) ?? []).sort();
+        return `<${tag as string}${sorted.map((a) => ` ${a}`).join("")}${end as string}>`;
+      },
+    );

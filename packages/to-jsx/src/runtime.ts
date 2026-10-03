@@ -1,7 +1,7 @@
 // Helpers the generated component carries with it, so that it needs nothing from Weft at run
 // time. Each one restates a reading of `@weft/render-react` (values.ts, expand.ts, render.ts):
 // the generated code must resolve, test and sanitize values exactly as the reference renderer
-// does, and test/runtime.test.ts checks them against it. Only the helpers a document uses are
+// does, and test/generate.test.ts checks them against it. Only the helpers a document uses are
 // emitted, in this order.
 export const RUNTIME: Readonly<Record<string, string>> = {
   _text: `function _text(v) {
@@ -20,6 +20,17 @@ export const RUNTIME: Readonly<Record<string, string>> = {
     else return undefined;
   }
   return value;
+}`,
+  _num: `function _num(v, integer, min, max) {
+  if (typeof v !== "number") return v;
+  if (!Number.isFinite(v)) return undefined;
+  if (integer) v = Math.round(v);
+  if (min !== undefined) v = Math.max(v, min);
+  if (max !== undefined) v = Math.min(v, max);
+  return v;
+}`,
+  _squash: `function _squash(v) {
+  return v.trim().replace(/\\s+/g, " ");
 }`,
   _list: `function _list(v) {
   return Array.isArray(v) ? v : [];

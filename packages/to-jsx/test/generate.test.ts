@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { coreCatalog } from "@weft/catalog";
 import type { Document } from "@weft/core";
-import { safeUrl } from "@weft/render-react";
+import { render, safeUrl } from "@weft/render-react";
 import fc from "fast-check";
 import { parseSync } from "oxc-parser";
+import { renderToStaticMarkup } from "react-dom/server";
 import { RUNTIME, toJsx } from "../src/index.ts";
-import { load, markup } from "./compile.ts";
+import { load, markup, normalizeMarkup } from "./compile.ts";
 
 type El = {
   kind: string;
@@ -210,6 +211,124 @@ test("SPEC behaviour the generator follows: text prop, submit buttons, empty slo
   assert.match(markup(component, { data: { title: "T", items: [] } }), /Nothing/);
 });
 
+// Readings the corpus does not reach, each rendered with data that takes every branch.
+test("edge cases render like the reference renderer", async () => {
+  const each = (src: string, children: El[]): El => ({
+    kind: "each",
+    id: `e-${src}`,
+    props: { in: { bind: `$.${src}` }, as: "it" },
+    children,
+  });
+  const d = doc(
+    { kind: "heading", id: "h1", props: { level: { bind: "$.level" } }, children: ["H"] },
+    { kind: "heading", id: "h2", props: { level: 9, text: "  a   b " } },
+    { kind: "grid", id: "g", props: { columns: { bind: "$.level" } } },
+    { kind: "button", id: "b", props: { text: { bind: "$.title" } }, children: ["Content wins"] },
+    { kind: "button", id: "b2", props: { text: { bind: "$.title" } } },
+    {
+      kind: "item-host",
+      id: "x",
+      props: { role: "group" },
+      slots: { b: [{ kind: "text", id: "xb", children: ["b"] }], header: [] },
+    },
+    {
+      kind: "list",
+      id: "l",
+      props: { state: { bind: "$.state" } },
+      children: [
+        each("items", [{ kind: "item", id: "i", props: { text: { bind: "$it" } } }]),
+        { kind: "item", id: "hid", props: { hidden: { bind: "$.hide" } }, children: ["h"] },
+      ],
+      slots: { empty: [{ kind: "text", id: "none", children: ["Nothing"] }] },
+    },
+    {
+      kind: "list",
+      id: "l2",
+      children: [each("items", [{ kind: "item", id: "i2", children: ["x"] }])],
+      slots: { empty: [{ kind: "text", id: "none2", children: ["Nothing"] }] },
+    },
+    {
+      kind: "table",
+      id: "t",
+      props: { label: "T" },
+      children: [
+        { kind: "column", id: "c1", children: ["A"] },
+        each("items", [{ kind: "column", id: "c", props: { text: { bind: "$it" } } }]),
+        each("items", [{ kind: "row", id: "r", children: [{ kind: "cell", id: "rc" }] }]),
+      ],
+      slots: { empty: [{ kind: "text", id: "none3", children: ["Empty"] }] },
+    },
+    {
+      kind: "radio-group",
+      id: "rg",
+      props: { label: { bind: "$.title" } },
+      children: [
+        { kind: "radio", id: "r1", props: { value: "a", label: "Name" }, children: ["Shown"] },
+      ],
+    },
+    { kind: "field", id: "f", props: { label: "" } },
+    {
+      kind: "section",
+      id: "s",
+      props: { label: "S" },
+      children: [{ kind: "text", id: "st", children: ["body"] }],
+      slots: { header: [{ kind: "heading", id: "sh", props: { level: 2 }, children: ["Head"] }] },
+    },
+  );
+  const component = await load(jsx(d));
+  for (const data of [
+    { level: 9.4, title: "T", items: ["p", "q"], state: "ready", hide: false },
+    { level: 0, title: "  ", items: [], state: "empty", hide: true },
+    { level: "3", items: "none", state: "", hide: false },
+    {},
+  ]) {
+    assert.equal(
+      normalizeMarkup(markup(component, { data })),
+      normalizeMarkup(renderToStaticMarkup(render(d, { catalog: coreCatalog, data }))),
+      JSON.stringify(data),
+    );
+  }
+});
+
+test("a submit button reports press, then its form's submit", async () => {
+  const source = jsx(
+    doc({
+      kind: "form",
+      id: "f",
+      on: { submit: "form.send" },
+      children: [
+        {
+          kind: "stack",
+          id: "st",
+          children: [
+            { kind: "button", id: "go", props: { submit: true }, on: { press: "go.press" } },
+          ],
+        },
+      ],
+    }),
+  );
+  const calls: string[] = [];
+  const component = (await load(source)) as (props: unknown) => unknown;
+  // Server rendering attaches no handlers, so the element tree is walked to reach them.
+  const tree = component({
+    actions: {
+      "go.press": () => calls.push("press"),
+      "form.send": () => calls.push("submit"),
+    },
+  });
+  const find = (n: unknown): ((e: unknown) => void) | undefined => {
+    if (Array.isArray(n)) return n.map(find).find(Boolean);
+    if (typeof n !== "object" || n === null) return undefined;
+    const props = (n as { props?: Record<string, unknown> }).props ?? {};
+    if (props["data-weft-id"] === "go") return props["onClick"] as (e: unknown) => void;
+    return find(props["children"]);
+  };
+  let prevented = false;
+  find(tree)?.({ preventDefault: () => (prevented = true) });
+  assert.deepEqual(calls, ["press", "submit"]);
+  assert.equal(prevented, true);
+});
+
 test("non-documents and an invalid component name", () => {
   for (const bad of [null, 1, "x", [], {}, { root: 5 }, { root: { kind: 1 } }]) {
     const source = jsx(bad);
@@ -327,12 +446,14 @@ test("runtime: _url matches the renderer's safeUrl", () => {
   );
 });
 
-test("runtime: _text, _on, _level, _float and _get", () => {
+test("runtime: _text, _on, _level, _num, _squash, _float and _get", () => {
   const text = helper<(v: unknown) => string>("_text");
   const on = helper<(v: unknown) => boolean>("_on");
   const level = helper<(v: unknown) => number>("_level");
   const float = helper<(v: string) => string>("_float");
   const get = helper<(v: unknown, p: string[]) => unknown>("_get");
+  const num = helper<(v: unknown, i: boolean, min?: number, max?: number) => unknown>("_num");
+  const squash = helper<(v: string) => string>("_squash");
   assert.deepEqual(
     [text("a"), text(1), text(Number.NaN), text(true), text(null), text({})],
     ["a", "1", "", "true", "", ""],
@@ -342,6 +463,17 @@ test("runtime: _text, _on, _level, _float and _get", () => {
     [false, false, true, false, true],
   );
   assert.deepEqual([level("3"), level(7), level(2.5), level(undefined)], [3, 2, 2, 2]);
+  assert.deepEqual(
+    [
+      num(9.4, true, 1, 6),
+      num(0.2, false, 1),
+      num(2.5, true),
+      num("7", true, 1, 6),
+      num(Infinity, false),
+    ],
+    [6, 1, 3, "7", undefined],
+  );
+  assert.equal(squash("  a \n b "), "a b");
   assert.deepEqual([float("1.5"), float("1e3"), float("x"), float("")], ["1.5", "1e3", "", ""]);
   assert.deepEqual(
     [get({ a: [{ b: 1 }] }, ["a", "0", "b"]), get({}, ["constructor"]), get("abc", ["length"])],
