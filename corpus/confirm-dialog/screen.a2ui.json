@@ -1,0 +1,99 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "files",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "files",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["title", "confirm"]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Quarterly report",
+          "variant": "h1"
+        },
+        {
+          "id": "delete-file",
+          "component": "Button",
+          "child": "delete-file-label",
+          "action": {
+            "event": {
+              "name": "dialog.open"
+            }
+          }
+        },
+        {
+          "id": "delete-file-label",
+          "component": "Text",
+          "text": "Delete file"
+        },
+        {
+          "id": "confirm",
+          "component": "Modal",
+          "trigger": "delete-file",
+          "content": "confirm-content",
+          "accessibility": {
+            "label": "Delete file?"
+          }
+        },
+        {
+          "id": "warning",
+          "component": "Text",
+          "text": "This cannot be undone."
+        },
+        {
+          "id": "filename",
+          "component": "Text",
+          "text": {
+            "path": "/file/name"
+          }
+        },
+        {
+          "id": "cancel",
+          "component": "Button",
+          "child": "cancel-label",
+          "action": {
+            "event": {
+              "name": "dialog.close"
+            }
+          }
+        },
+        {
+          "id": "cancel-label",
+          "component": "Text",
+          "text": "Cancel"
+        },
+        {
+          "id": "confirm-delete",
+          "component": "Button",
+          "child": "confirm-delete-label",
+          "action": {
+            "event": {
+              "name": "file.delete"
+            }
+          }
+        },
+        {
+          "id": "confirm-delete-label",
+          "component": "Text",
+          "text": "Delete"
+        },
+        {
+          "id": "confirm-content",
+          "component": "Column",
+          "children": ["warning", "filename", "cancel", "confirm-delete"]
+        }
+      ]
+    }
+  }
+]

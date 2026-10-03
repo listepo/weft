@@ -1,0 +1,9 @@
+{
+  "draft": "",
+  "remaining": 1,
+  "allDone": false,
+  "todos": [
+    { "title": "Write spec", "done": true, "locked": false },
+    { "title": "Build parser", "done": false, "locked": false }
+  ]
+}

@@ -1,0 +1,105 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "search",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "search",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["form", "results", "empty"]
+        },
+        {
+          "id": "form",
+          "component": "Column",
+          "children": ["bar"]
+        },
+        {
+          "id": "bar",
+          "component": "Row",
+          "children": ["query", "go"]
+        },
+        {
+          "id": "query",
+          "component": "TextField",
+          "label": "Search",
+          "value": {
+            "path": "/query"
+          }
+        },
+        {
+          "id": "go",
+          "component": "Button",
+          "child": "go-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "search.run"
+            }
+          }
+        },
+        {
+          "id": "go-label",
+          "component": "Text",
+          "text": "Search"
+        },
+        {
+          "id": "results",
+          "component": "List",
+          "children": {
+            "componentId": "result",
+            "path": "/results"
+          }
+        },
+        {
+          "id": "result",
+          "component": "Column",
+          "children": ["result-title", "result-snippet", "result-open"]
+        },
+        {
+          "id": "result-title",
+          "component": "Text",
+          "text": {
+            "path": "title"
+          },
+          "variant": "h3"
+        },
+        {
+          "id": "result-snippet",
+          "component": "Text",
+          "text": {
+            "path": "snippet"
+          }
+        },
+        {
+          "id": "result-open",
+          "component": "Button",
+          "child": "result-open-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "results.open"
+            }
+          }
+        },
+        {
+          "id": "result-open-label",
+          "component": "Text",
+          "text": "Open"
+        },
+        {
+          "id": "empty",
+          "component": "Text",
+          "text": "No results found"
+        }
+      ]
+    }
+  }
+]

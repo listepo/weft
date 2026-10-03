@@ -1,0 +1,130 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "todos",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "todos",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["title", "add-form", "list", "summary"]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Tasks",
+          "variant": "h1"
+        },
+        {
+          "id": "add-form",
+          "component": "Column",
+          "children": ["add-row"]
+        },
+        {
+          "id": "add-row",
+          "component": "Row",
+          "children": ["draft", "add"]
+        },
+        {
+          "id": "draft",
+          "component": "TextField",
+          "label": "New task",
+          "value": {
+            "path": "/draft"
+          }
+        },
+        {
+          "id": "add",
+          "component": "Button",
+          "child": "add-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "todo.add"
+            }
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/draft"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ]
+        },
+        {
+          "id": "add-label",
+          "component": "Text",
+          "text": "Add"
+        },
+        {
+          "id": "list",
+          "component": "List",
+          "children": {
+            "componentId": "todo",
+            "path": "/todos"
+          }
+        },
+        {
+          "id": "todo",
+          "component": "Column",
+          "children": ["todo-done", "todo-remove"]
+        },
+        {
+          "id": "todo-done",
+          "component": "CheckBox",
+          "label": {
+            "path": "title"
+          },
+          "value": {
+            "path": "done"
+          }
+        },
+        {
+          "id": "todo-remove",
+          "component": "Button",
+          "child": "todo-remove-label",
+          "action": {
+            "event": {
+              "name": "todo.remove"
+            }
+          }
+        },
+        {
+          "id": "todo-remove-label",
+          "component": "Text",
+          "text": "Remove"
+        },
+        {
+          "id": "summary",
+          "component": "Row",
+          "children": ["remaining", "remaining-label"]
+        },
+        {
+          "id": "remaining",
+          "component": "Text",
+          "text": {
+            "path": "/remaining"
+          }
+        },
+        {
+          "id": "remaining-label",
+          "component": "Text",
+          "text": "items left"
+        }
+      ]
+    }
+  }
+]

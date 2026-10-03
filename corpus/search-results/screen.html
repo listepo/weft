@@ -1,0 +1,19 @@
+<main aria-label="Search">
+  <form data-action="submit:search.run">
+    <div class="row gap-sm">
+      <label for="query">Search</label>
+      <input id="query" type="search" data-bind="value:$.query">
+      <button type="submit" data-variant="primary">Search</button>
+    </div>
+  </form>
+  <ul data-bind="hidden:!$.hasResults">
+    <template data-each="$.results" data-as="result">
+      <li>
+        <h3 data-bind="text:$result.title"></h3>
+        <p data-bind="text:$result.snippet"></p>
+        <a href="#" data-action="press:results.open">Open</a>
+      </li>
+    </template>
+  </ul>
+  <p data-bind="hidden:$.hasResults">No results found</p>
+</main>

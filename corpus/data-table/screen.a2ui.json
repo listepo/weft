@@ -1,0 +1,143 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "users",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "users",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["title", "table"]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Users",
+          "variant": "h1"
+        },
+        {
+          "id": "table",
+          "component": "Column",
+          "children": ["table-header", "table-rows"],
+          "accessibility": {
+            "label": "Users"
+          }
+        },
+        {
+          "id": "table-header",
+          "component": "Row",
+          "children": ["col-name", "col-email", "col-role", "col-actions"]
+        },
+        {
+          "id": "col-name",
+          "component": "Button",
+          "child": "col-name-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "users.sort"
+            }
+          }
+        },
+        {
+          "id": "col-name-label",
+          "component": "Text",
+          "text": "Name"
+        },
+        {
+          "id": "col-email",
+          "component": "Button",
+          "child": "col-email-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "users.sort"
+            }
+          }
+        },
+        {
+          "id": "col-email-label",
+          "component": "Text",
+          "text": "Email"
+        },
+        {
+          "id": "col-role",
+          "component": "Button",
+          "child": "col-role-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "users.sort"
+            }
+          }
+        },
+        {
+          "id": "col-role-label",
+          "component": "Text",
+          "text": "Role"
+        },
+        {
+          "id": "col-actions",
+          "component": "Text",
+          "text": "Actions"
+        },
+        {
+          "id": "table-rows",
+          "component": "List",
+          "children": {
+            "componentId": "row",
+            "path": "/users"
+          }
+        },
+        {
+          "id": "row",
+          "component": "Row",
+          "children": ["user-name", "user-email", "user-role", "delete"]
+        },
+        {
+          "id": "user-name",
+          "component": "Text",
+          "text": {
+            "path": "name"
+          }
+        },
+        {
+          "id": "user-email",
+          "component": "Text",
+          "text": {
+            "path": "email"
+          }
+        },
+        {
+          "id": "user-role",
+          "component": "Text",
+          "text": {
+            "path": "role"
+          }
+        },
+        {
+          "id": "delete",
+          "component": "Button",
+          "child": "delete-label",
+          "action": {
+            "event": {
+              "name": "users.delete"
+            }
+          }
+        },
+        {
+          "id": "delete-label",
+          "component": "Text",
+          "text": "Delete"
+        }
+      ]
+    }
+  }
+]

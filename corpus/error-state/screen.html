@@ -1,0 +1,10 @@
+<main aria-label="Load error" data-state="error">
+  <div role="alert" data-tone="danger">
+    <h2>Could not load your data</h2>
+    <p data-bind="text:$.error.message"></p>
+  </div>
+  <div class="row gap-sm">
+    <button type="button" data-variant="primary" data-action="press:load.retry">Retry</button>
+    <a href="#" data-action="press:nav.support">Contact support</a>
+  </div>
+</main>

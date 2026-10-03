@@ -1,0 +1,6 @@
+{
+  "users": [
+    { "name": "Ada Lovelace", "email": "ada@example.com", "role": "Admin" },
+    { "name": "Alan Turing", "email": "alan@example.com", "role": "Editor" }
+  ]
+}

@@ -1,0 +1,23 @@
+<main aria-label="Setup wizard">
+  <h1>Choose a plan</h1>
+  <p data-bind="text:$.progress"></p>
+  <fieldset role="radiogroup" data-bind="value:$.plan">
+    <legend>Plan</legend>
+    <label>
+      <input type="radio" name="plan" value="free">
+      <span>Free</span>
+    </label>
+    <label>
+      <input type="radio" name="plan" value="pro">
+      <span>Pro</span>
+    </label>
+    <label>
+      <input type="radio" name="plan" value="team">
+      <span>Team</span>
+    </label>
+  </fieldset>
+  <div class="row gap-sm">
+    <button type="button" data-action="press:wizard.back">Back</button>
+    <button type="button" data-variant="primary" data-bind="disabled:!$.plan" data-action="press:wizard.next">Next</button>
+  </div>
+</main>

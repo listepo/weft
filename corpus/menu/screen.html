@@ -1,0 +1,9 @@
+<main aria-label="Account menu">
+  <p data-bind="text:$.user.email"></p>
+  <div role="menu" aria-label="Account">
+    <button role="menuitem" type="button" data-action="press:nav.profile">Profile</button>
+    <button role="menuitem" type="button" data-action="press:nav.settings">Settings</button>
+    <button role="menuitem" type="button" data-bind="disabled:!$.isOwner" data-action="press:nav.billing">Billing</button>
+    <button role="menuitem" type="button" data-action="press:auth.signout">Sign out</button>
+  </div>
+</main>

@@ -1,0 +1,142 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "login",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "login",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["form"]
+        },
+        {
+          "id": "form",
+          "component": "Column",
+          "children": ["title", "fields", "submit", "reset", "signup"]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Sign in",
+          "variant": "h1"
+        },
+        {
+          "id": "fields",
+          "component": "Column",
+          "children": ["email", "password"]
+        },
+        {
+          "id": "email",
+          "component": "TextField",
+          "label": "Email",
+          "value": {
+            "path": "/email"
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/email"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ]
+        },
+        {
+          "id": "password",
+          "component": "TextField",
+          "label": "Password",
+          "value": {
+            "path": "/password"
+          },
+          "variant": "obscured",
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/password"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ]
+        },
+        {
+          "id": "submit",
+          "component": "Button",
+          "child": "submit-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "auth.submit"
+            }
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/email"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ]
+        },
+        {
+          "id": "submit-label",
+          "component": "Text",
+          "text": "Sign in"
+        },
+        {
+          "id": "reset",
+          "component": "Button",
+          "child": "reset-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "nav.reset"
+            }
+          }
+        },
+        {
+          "id": "reset-label",
+          "component": "Text",
+          "text": "Forgot password?"
+        },
+        {
+          "id": "signup",
+          "component": "Button",
+          "child": "signup-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "nav.signup"
+            }
+          }
+        },
+        {
+          "id": "signup-label",
+          "component": "Text",
+          "text": "Create an account"
+        }
+      ]
+    }
+  }
+]

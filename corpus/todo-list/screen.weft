@@ -1,0 +1,21 @@
+<screen id="todos" weft="0.1" label="Tasks">
+  <heading id="title" level="1">Tasks</heading>
+  <form id="add-form" on-submit="todo.add">
+    <stack id="add-row" direction="row" gap="{token.space.sm}">
+      <field id="draft" label="New task" value="{$.draft}"/>
+      <button id="add" variant="primary" disabled="{!$.draft}" on-press="todo.add">Add</button>
+    </stack>
+  </form>
+  <list id="list">
+    <each id="todo-each" in="{$.todos}" as="todo">
+      <item id="todo">
+        <checkbox id="todo-done" label="{$todo.title}" checked="{$todo.done}"/>
+        <button id="todo-remove" on-press="todo.remove">Remove</button>
+      </item>
+    </each>
+  </list>
+  <stack id="summary" direction="row" gap="{token.space.xs}">
+    <text id="remaining" value="{$.remaining}"/>
+    <text id="remaining-label">items left</text>
+  </stack>
+</screen>

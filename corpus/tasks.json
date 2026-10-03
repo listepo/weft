@@ -1,0 +1,877 @@
+[
+  {
+    "id": "login.e1",
+    "screen": "login",
+    "type": "edit",
+    "instruction": "Add a 'Remember me' checkbox bound to $.remember below the password field and above the Sign in button.",
+    "expect": [
+      {
+        "has": {
+          "kind": "checkbox",
+          "name": "Remember me",
+          "bind": "$.remember"
+        },
+        "after": {
+          "kind": "field",
+          "name": "Password"
+        },
+        "before": {
+          "kind": "button",
+          "name": "Sign in"
+        }
+      }
+    ]
+  },
+  {
+    "id": "login.e2",
+    "screen": "login",
+    "type": "edit",
+    "instruction": "Make the Sign in button disabled while $.busy is true, instead of its current condition.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Sign in",
+          "disabled": "$.busy"
+        }
+      }
+    ]
+  },
+  {
+    "id": "login.e3",
+    "screen": "login",
+    "type": "edit",
+    "instruction": "Add a link 'Use single sign-on' that triggers the action nav.sso, placed after the 'Forgot password?' link.",
+    "expect": [
+      {
+        "has": {
+          "kind": "link",
+          "name": "Use single sign-on",
+          "on": {
+            "press": "nav.sso"
+          }
+        },
+        "after": {
+          "kind": "link",
+          "name": "Forgot password?"
+        }
+      }
+    ]
+  },
+  {
+    "id": "login.q1",
+    "screen": "login",
+    "type": "question",
+    "question": "Which action does the 'Forgot password?' link trigger?",
+    "answer": ["nav.reset"]
+  },
+  {
+    "id": "login.q2",
+    "screen": "login",
+    "type": "question",
+    "question": "How many text input fields does the screen contain?",
+    "answer": ["2"]
+  },
+  {
+    "id": "signup.e1",
+    "screen": "signup",
+    "type": "edit",
+    "instruction": "Add a field labelled 'Phone number' bound to $.phone between the Email and Password fields.",
+    "expect": [
+      {
+        "has": {
+          "kind": "field",
+          "name": "Phone number",
+          "bind": "$.phone"
+        },
+        "after": {
+          "kind": "field",
+          "name": "Email"
+        },
+        "before": {
+          "kind": "field",
+          "name": "Password"
+        }
+      }
+    ]
+  },
+  {
+    "id": "signup.e2",
+    "screen": "signup",
+    "type": "edit",
+    "instruction": "Make the 'Full name' field optional.",
+    "expect": [
+      {
+        "has": {
+          "kind": "field",
+          "name": "Full name",
+          "required": false
+        }
+      }
+    ]
+  },
+  {
+    "id": "signup.e3",
+    "screen": "signup",
+    "type": "edit",
+    "instruction": "Add a level 2 heading 'Your details' above the Full name field.",
+    "expect": [
+      {
+        "has": {
+          "kind": "heading",
+          "name": "Your details",
+          "level": 2
+        },
+        "before": {
+          "kind": "field",
+          "name": "Full name"
+        }
+      }
+    ]
+  },
+  {
+    "id": "signup.q1",
+    "screen": "signup",
+    "type": "question",
+    "question": "Which action does the 'Already have an account? Sign in' link trigger?",
+    "answer": ["nav.signin"]
+  },
+  {
+    "id": "signup.q2",
+    "screen": "signup",
+    "type": "question",
+    "question": "How many password fields are there?",
+    "answer": ["2"]
+  },
+  {
+    "id": "settings.e1",
+    "screen": "settings",
+    "type": "edit",
+    "instruction": "Add a switch labelled 'Auto-save' bound to $.autoSave inside the Appearance section.",
+    "expect": [
+      {
+        "has": {
+          "kind": "switch",
+          "name": "Auto-save",
+          "bind": "$.autoSave"
+        },
+        "inside": {
+          "kind": "section",
+          "name": "Appearance"
+        }
+      }
+    ]
+  },
+  {
+    "id": "settings.e2",
+    "screen": "settings",
+    "type": "edit",
+    "instruction": "Move the 'Dark mode' switch from the Appearance section into the Notifications section.",
+    "expect": [
+      {
+        "has": {
+          "kind": "switch",
+          "name": "Dark mode",
+          "bind": "$.darkMode"
+        },
+        "inside": {
+          "kind": "section",
+          "name": "Notifications"
+        },
+        "not_inside": {
+          "kind": "section",
+          "name": "Appearance"
+        }
+      }
+    ]
+  },
+  {
+    "id": "settings.e3",
+    "screen": "settings",
+    "type": "edit",
+    "instruction": "Make the 'Save changes' button disabled while $.saving is true, instead of its current condition.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Save changes",
+          "disabled": "$.saving"
+        }
+      }
+    ]
+  },
+  {
+    "id": "settings.q1",
+    "screen": "settings",
+    "type": "question",
+    "question": "Which action does the 'Save changes' button trigger?",
+    "answer": ["settings.save"]
+  },
+  {
+    "id": "settings.q2",
+    "screen": "settings",
+    "type": "question",
+    "question": "How many switches does the screen contain?",
+    "answer": ["3"]
+  },
+  {
+    "id": "data-table.e1",
+    "screen": "data-table",
+    "type": "edit",
+    "instruction": "Add an 'Edit' button triggering users.edit to every row, before the Delete button.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Edit",
+          "on": {
+            "press": "users.edit"
+          },
+          "each": "$.users"
+        },
+        "before": {
+          "kind": "button",
+          "name": "Delete"
+        }
+      }
+    ]
+  },
+  {
+    "id": "data-table.e2",
+    "screen": "data-table",
+    "type": "edit",
+    "instruction": "Add a 'Status' column showing each user's status ($user.status) after the Role column.",
+    "expect": [
+      {
+        "has": {
+          "name": "Status"
+        },
+        "after": {
+          "name": "Role"
+        }
+      },
+      {
+        "has": {
+          "nameBind": "$*.status",
+          "each": "$.users"
+        }
+      }
+    ]
+  },
+  {
+    "id": "data-table.e3",
+    "screen": "data-table",
+    "type": "edit",
+    "instruction": "Change the action of the Delete button to users.remove.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Delete",
+          "on": {
+            "press": "users.remove"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "data-table.q1",
+    "screen": "data-table",
+    "type": "question",
+    "question": "Which action is triggered when a sortable column header is pressed?",
+    "answer": ["users.sort"]
+  },
+  {
+    "id": "data-table.q2",
+    "screen": "data-table",
+    "type": "question",
+    "question": "How many column headers does the table have?",
+    "answer": ["4"]
+  },
+  {
+    "id": "tabs.e1",
+    "screen": "tabs",
+    "type": "edit",
+    "instruction": "Add a 'Security' tab after the Team tab containing a button 'Enable 2FA' that triggers security.enable.",
+    "expect": [
+      {
+        "has": {
+          "kind": "tab",
+          "name": "Security"
+        },
+        "after": {
+          "kind": "tab",
+          "name": "Team"
+        }
+      },
+      {
+        "has": {
+          "kind": "button",
+          "name": "Enable 2FA",
+          "on": {
+            "press": "security.enable"
+          }
+        },
+        "inside": {
+          "kind": "tab",
+          "name": "Security"
+        }
+      }
+    ]
+  },
+  {
+    "id": "tabs.e2",
+    "screen": "tabs",
+    "type": "edit",
+    "instruction": "In the Billing tab, add text bound to $.billing.nextInvoice right after the plan text.",
+    "expect": [
+      {
+        "has": {
+          "kind": "text",
+          "nameBind": "$.billing.nextInvoice"
+        },
+        "inside": {
+          "kind": "tab",
+          "name": "Billing"
+        },
+        "after": {
+          "kind": "text",
+          "nameBind": "$.billing.plan"
+        }
+      }
+    ]
+  },
+  {
+    "id": "tabs.e3",
+    "screen": "tabs",
+    "type": "edit",
+    "instruction": "Rename the 'Team' tab to 'People'.",
+    "expect": [
+      {
+        "has": {
+          "kind": "tab",
+          "name": "People"
+        }
+      },
+      {
+        "absent": {
+          "kind": "tab",
+          "name": "Team"
+        }
+      }
+    ],
+    "remove": [
+      {
+        "kind": "tab",
+        "name": "Team"
+      }
+    ]
+  },
+  {
+    "id": "tabs.q1",
+    "screen": "tabs",
+    "type": "question",
+    "question": "In which tab is the 'Change plan' button?",
+    "answer": ["billing"]
+  },
+  {
+    "id": "tabs.q2",
+    "screen": "tabs",
+    "type": "question",
+    "question": "Which action does the 'Change plan' button trigger?",
+    "answer": ["billing.change"]
+  },
+  {
+    "id": "confirm-dialog.e1",
+    "screen": "confirm-dialog",
+    "type": "edit",
+    "instruction": "Make the Cancel button primary.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Cancel",
+          "variant": "primary"
+        }
+      }
+    ]
+  },
+  {
+    "id": "confirm-dialog.e2",
+    "screen": "confirm-dialog",
+    "type": "edit",
+    "instruction": "Inside the dialog, add the text 'Deleted files can be restored for 30 days.' right after the warning text.",
+    "expect": [
+      {
+        "has": {
+          "kind": "text",
+          "name": "Deleted files can be restored for 30 days."
+        },
+        "inside": {
+          "kind": "dialog"
+        },
+        "after": {
+          "kind": "text",
+          "name": "This cannot be undone."
+        }
+      }
+    ]
+  },
+  {
+    "id": "confirm-dialog.e3",
+    "screen": "confirm-dialog",
+    "type": "edit",
+    "instruction": "Make the 'Delete file' button (the one outside the dialog) disabled while $.busy is true.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Delete file",
+          "disabled": "$.busy"
+        }
+      }
+    ]
+  },
+  {
+    "id": "confirm-dialog.q1",
+    "screen": "confirm-dialog",
+    "type": "question",
+    "question": "Which action does the Delete button inside the dialog trigger?",
+    "answer": ["file.delete"]
+  },
+  {
+    "id": "confirm-dialog.q2",
+    "screen": "confirm-dialog",
+    "type": "question",
+    "question": "What is the accessible label of the dialog?",
+    "answer": ["Delete file?"]
+  },
+  {
+    "id": "wizard-step.e1",
+    "screen": "wizard-step",
+    "type": "edit",
+    "instruction": "Add a radio option 'Enterprise' with value enterprise after the Team option.",
+    "expect": [
+      {
+        "has": {
+          "kind": "radio",
+          "name": "Enterprise",
+          "value": "enterprise"
+        },
+        "after": {
+          "kind": "radio",
+          "name": "Team"
+        }
+      }
+    ]
+  },
+  {
+    "id": "wizard-step.e2",
+    "screen": "wizard-step",
+    "type": "edit",
+    "instruction": "Make the Back button disabled while $.saving is true.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Back",
+          "disabled": "$.saving"
+        }
+      }
+    ]
+  },
+  {
+    "id": "wizard-step.e3",
+    "screen": "wizard-step",
+    "type": "edit",
+    "instruction": "Add the text 'You can change this later.' between the plan radio group and the Back button.",
+    "expect": [
+      {
+        "has": {
+          "kind": "text",
+          "name": "You can change this later."
+        },
+        "after": {
+          "kind": "radio-group",
+          "name": "Plan"
+        },
+        "before": {
+          "kind": "button",
+          "name": "Back"
+        }
+      }
+    ]
+  },
+  {
+    "id": "wizard-step.q1",
+    "screen": "wizard-step",
+    "type": "question",
+    "question": "Which action does the Next button trigger?",
+    "answer": ["wizard.next"]
+  },
+  {
+    "id": "wizard-step.q2",
+    "screen": "wizard-step",
+    "type": "question",
+    "question": "How many plan options does the radio group offer?",
+    "answer": ["3"]
+  },
+  {
+    "id": "search-results.e1",
+    "screen": "search-results",
+    "type": "edit",
+    "instruction": "Add a 'Clear' button that triggers search.clear right after the Search button.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Clear",
+          "on": {
+            "press": "search.clear"
+          }
+        },
+        "after": {
+          "kind": "button",
+          "name": "Search"
+        }
+      }
+    ]
+  },
+  {
+    "id": "search-results.e2",
+    "screen": "search-results",
+    "type": "edit",
+    "instruction": "Add the text 'Try a different search term.' right after the 'No results found' text.",
+    "expect": [
+      {
+        "has": {
+          "kind": "text",
+          "name": "Try a different search term."
+        },
+        "after": {
+          "kind": "text",
+          "name": "No results found"
+        }
+      }
+    ]
+  },
+  {
+    "id": "search-results.e3",
+    "screen": "search-results",
+    "type": "edit",
+    "instruction": "Add a link 'Report a problem' that triggers nav.report after the results list.",
+    "expect": [
+      {
+        "has": {
+          "kind": "link",
+          "name": "Report a problem",
+          "on": {
+            "press": "nav.report"
+          }
+        },
+        "after": {
+          "kind": "list"
+        },
+        "not_inside": {
+          "kind": "list"
+        }
+      }
+    ]
+  },
+  {
+    "id": "search-results.q1",
+    "screen": "search-results",
+    "type": "question",
+    "question": "Which action does the Search button trigger?",
+    "answer": ["search.run"]
+  },
+  {
+    "id": "search-results.q2",
+    "screen": "search-results",
+    "type": "question",
+    "question": "What text is shown when there are no results?",
+    "answer": ["No results found"]
+  },
+  {
+    "id": "todo-list.e1",
+    "screen": "todo-list",
+    "type": "edit",
+    "instruction": "Add a button 'Clear completed' that triggers todo.clearDone after the list.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Clear completed",
+          "on": {
+            "press": "todo.clearDone"
+          }
+        },
+        "after": {
+          "kind": "list"
+        },
+        "not_inside": {
+          "kind": "list"
+        }
+      }
+    ]
+  },
+  {
+    "id": "todo-list.e2",
+    "screen": "todo-list",
+    "type": "edit",
+    "instruction": "Disable each Remove button while the todo's own $todo.locked is true.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Remove",
+          "disabled": "$*.locked",
+          "each": "$.todos"
+        }
+      }
+    ]
+  },
+  {
+    "id": "todo-list.e3",
+    "screen": "todo-list",
+    "type": "edit",
+    "instruction": "Add a checkbox 'Mark all as done' bound to $.allDone before the list.",
+    "expect": [
+      {
+        "has": {
+          "kind": "checkbox",
+          "name": "Mark all as done",
+          "bind": "$.allDone"
+        },
+        "before": {
+          "kind": "list"
+        },
+        "not_inside": {
+          "kind": "list"
+        }
+      }
+    ]
+  },
+  {
+    "id": "todo-list.q1",
+    "screen": "todo-list",
+    "type": "question",
+    "question": "Which action does the Add button trigger?",
+    "answer": ["todo.add"]
+  },
+  {
+    "id": "todo-list.q2",
+    "screen": "todo-list",
+    "type": "question",
+    "question": "Which action does the Remove button trigger?",
+    "answer": ["todo.remove"]
+  },
+  {
+    "id": "profile.e1",
+    "screen": "profile",
+    "type": "edit",
+    "instruction": "Add a link 'Twitter' whose target is bound to $.user.twitter after the GitHub link.",
+    "expect": [
+      {
+        "has": {
+          "kind": "link",
+          "name": "Twitter",
+          "bind": "$.user.twitter"
+        },
+        "after": {
+          "kind": "link",
+          "name": "GitHub"
+        }
+      }
+    ]
+  },
+  {
+    "id": "profile.e2",
+    "screen": "profile",
+    "type": "edit",
+    "instruction": "Add a level 2 heading 'About' above the bio text.",
+    "expect": [
+      {
+        "has": {
+          "kind": "heading",
+          "name": "About",
+          "level": 2
+        },
+        "before": {
+          "kind": "text",
+          "nameBind": "$.user.bio"
+        }
+      }
+    ]
+  },
+  {
+    "id": "profile.e3",
+    "screen": "profile",
+    "type": "edit",
+    "instruction": "Make the 'Edit profile' button primary and disabled while $.saving is true.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Edit profile",
+          "variant": "primary",
+          "disabled": "$.saving"
+        }
+      }
+    ]
+  },
+  {
+    "id": "profile.q1",
+    "screen": "profile",
+    "type": "question",
+    "question": "How many links does the screen contain?",
+    "answer": ["2"]
+  },
+  {
+    "id": "profile.q2",
+    "screen": "profile",
+    "type": "question",
+    "question": "Which action does the 'Edit profile' button trigger?",
+    "answer": ["profile.edit"]
+  },
+  {
+    "id": "menu.e1",
+    "screen": "menu",
+    "type": "edit",
+    "instruction": "Add a 'Help' menu item that triggers nav.help before 'Sign out'.",
+    "expect": [
+      {
+        "has": {
+          "kind": "menu-item",
+          "name": "Help",
+          "on": {
+            "press": "nav.help"
+          }
+        },
+        "inside": {
+          "kind": "menu"
+        },
+        "before": {
+          "kind": "menu-item",
+          "name": "Sign out"
+        }
+      }
+    ]
+  },
+  {
+    "id": "menu.e2",
+    "screen": "menu",
+    "type": "edit",
+    "instruction": "Make the 'Sign out' item disabled while $.signingOut is true.",
+    "expect": [
+      {
+        "has": {
+          "kind": "menu-item",
+          "name": "Sign out",
+          "disabled": "$.signingOut"
+        }
+      }
+    ]
+  },
+  {
+    "id": "menu.e3",
+    "screen": "menu",
+    "type": "edit",
+    "instruction": "Move the 'Settings' item to the end of the menu, after 'Sign out'.",
+    "expect": [
+      {
+        "has": {
+          "kind": "menu-item",
+          "name": "Settings"
+        },
+        "after": {
+          "kind": "menu-item",
+          "name": "Sign out"
+        }
+      }
+    ]
+  },
+  {
+    "id": "menu.q1",
+    "screen": "menu",
+    "type": "question",
+    "question": "Which menu item is disabled when the user is not the owner?",
+    "answer": ["Billing"]
+  },
+  {
+    "id": "menu.q2",
+    "screen": "menu",
+    "type": "question",
+    "question": "How many items does the menu have?",
+    "answer": ["4"]
+  },
+  {
+    "id": "error-state.e1",
+    "screen": "error-state",
+    "type": "edit",
+    "instruction": "Add a button 'Reload page' that triggers page.reload right after the Retry button.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Reload page",
+          "on": {
+            "press": "page.reload"
+          }
+        },
+        "after": {
+          "kind": "button",
+          "name": "Retry"
+        }
+      }
+    ]
+  },
+  {
+    "id": "error-state.e2",
+    "screen": "error-state",
+    "type": "edit",
+    "instruction": "Make the Retry button disabled while $.offline is true.",
+    "expect": [
+      {
+        "has": {
+          "kind": "button",
+          "name": "Retry",
+          "disabled": "$.offline"
+        }
+      }
+    ]
+  },
+  {
+    "id": "error-state.e3",
+    "screen": "error-state",
+    "type": "edit",
+    "instruction": "Add text bound to $.error.code right after the error message text.",
+    "expect": [
+      {
+        "has": {
+          "kind": "text",
+          "nameBind": "$.error.code"
+        },
+        "after": {
+          "kind": "text",
+          "nameBind": "$.error.message"
+        }
+      }
+    ]
+  },
+  {
+    "id": "error-state.q1",
+    "screen": "error-state",
+    "type": "question",
+    "question": "Which action does the Retry button trigger?",
+    "answer": ["load.retry"]
+  },
+  {
+    "id": "error-state.q2",
+    "screen": "error-state",
+    "type": "question",
+    "question": "What is the heading shown in the error message?",
+    "answer": ["Could not load your data"]
+  }
+]

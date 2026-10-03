@@ -1,0 +1,18 @@
+<screen id="search" weft="0.1" label="Search">
+  <form id="form" on-submit="search.run">
+    <stack id="bar" direction="row" gap="{token.space.sm}">
+      <field id="query" type="search" label="Search" value="{$.query}"/>
+      <button id="go" variant="primary" on-press="search.run">Search</button>
+    </stack>
+  </form>
+  <list id="results" hidden="{!$.hasResults}">
+    <each id="results-each" in="{$.results}" as="result">
+      <item id="result">
+        <heading id="result-title" level="3" value="{$result.title}"/>
+        <text id="result-snippet" value="{$result.snippet}"/>
+        <link id="result-open" on-press="results.open">Open</link>
+      </item>
+    </each>
+  </list>
+  <text id="empty" hidden="{$.hasResults}">No results found</text>
+</screen>

@@ -1,0 +1,113 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "profile",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "profile",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": ["avatar", "name", "bio", "links-title", "links", "edit"]
+        },
+        {
+          "id": "avatar",
+          "component": "Image",
+          "url": {
+            "path": "/user/avatar"
+          },
+          "description": "Profile photo"
+        },
+        {
+          "id": "name",
+          "component": "Text",
+          "text": {
+            "path": "/user/name"
+          },
+          "variant": "h1"
+        },
+        {
+          "id": "bio",
+          "component": "Text",
+          "text": {
+            "path": "/user/bio"
+          }
+        },
+        {
+          "id": "links-title",
+          "component": "Text",
+          "text": "Links",
+          "variant": "h2"
+        },
+        {
+          "id": "links",
+          "component": "Row",
+          "children": ["website", "github"]
+        },
+        {
+          "id": "website",
+          "component": "Button",
+          "child": "website-label",
+          "variant": "borderless",
+          "action": {
+            "functionCall": {
+              "call": "openUrl",
+              "args": {
+                "url": {
+                  "path": "/user/website"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "website-label",
+          "component": "Text",
+          "text": "Website"
+        },
+        {
+          "id": "github",
+          "component": "Button",
+          "child": "github-label",
+          "variant": "borderless",
+          "action": {
+            "functionCall": {
+              "call": "openUrl",
+              "args": {
+                "url": {
+                  "path": "/user/github"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "github-label",
+          "component": "Text",
+          "text": "GitHub"
+        },
+        {
+          "id": "edit",
+          "component": "Button",
+          "child": "edit-label",
+          "action": {
+            "event": {
+              "name": "profile.edit"
+            }
+          }
+        },
+        {
+          "id": "edit-label",
+          "component": "Text",
+          "text": "Edit profile"
+        }
+      ]
+    }
+  }
+]

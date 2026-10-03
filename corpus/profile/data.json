@@ -1,0 +1,11 @@
+{
+  "saving": false,
+  "user": {
+    "name": "Ada Lovelace",
+    "bio": "Mathematician and first programmer.",
+    "avatar": "https://example.com/ada.png",
+    "website": "https://example.com",
+    "github": "https://github.com/ada",
+    "twitter": "https://twitter.com/ada"
+  }
+}
