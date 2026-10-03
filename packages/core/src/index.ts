@@ -19,6 +19,7 @@ export {
   BINDING,
   EMBEDDED_REFERENCE,
   ID,
+  LOOP_VARIABLE,
   NON_XML_CHAR,
   TOKEN,
 } from "./rules.ts";
