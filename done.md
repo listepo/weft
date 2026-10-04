@@ -193,7 +193,7 @@ Result: `crates/weft-swiftui` holds the generator, which is pure Rust and builds
 
 ### T38. Open Design plugin
 
-A plugin for Open Design (https://open-design.ai, https://github.com/attentiondotnet/open-design), the open-source, local-first design platform that runs on top of a coding agent and has had plugins since 0.8.0. It brings Weft into Open Design:
+A plugin for Open Design (https://open-design.ai, https://github.com/nexu-io/open-design), the open-source, local-first design platform that runs on top of a coding agent and has had plugins since 0.8.0. It brings Weft into Open Design:
 - author screens as `.weft` with the authoring guide and the weft MCP server;
 - import HTML to `.weft`;
 - export to React (and the other targets once T34 and T35 land);
