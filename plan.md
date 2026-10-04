@@ -5,7 +5,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
-| T21 | todo | P1 | 3 | 0% | |
 | T22 | todo | P1 | 3 | 0% | |
 | T23 | todo | P2 | 3 | 0% | |
 | T24 | todo | P2 | 2 | 0% | |
@@ -28,10 +27,6 @@ Execution plan:
 6. Full edit and read runs on the three models; `run.ts tokens` again so the report has Anthropic token counts.
 7. `bench/EVALUATION.md`: results against the done criteria (Weft first-try validity at least 95%, after one repair at least 99%), comparison with the baselines, failure analysis, continue/stop recommendation.
 8. Verify with `pnpm run ci`.
-
-### T21. Rust catalog
-
-Port `packages/catalog` (core catalog and design tokens) to a Cargo crate used by the Rust core. Done when the catalog tests pass against it.
 
 ### T22. WebAssembly bindings
 

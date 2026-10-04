@@ -1,5 +1,4 @@
 - T8. Evaluation
-- T21. Rust catalog
 - T22. WebAssembly bindings
 - T23. Native Node and Bun addon
 - T24. Runtime matrix

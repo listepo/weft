@@ -1,4 +1,4 @@
 {
   "endOfLine": "lf",
-  "ignorePatterns": ["crates/weft-core/tests/fixtures/**", "bench/results/**"]
+  "ignorePatterns": ["crates/*/tests/fixtures/**", "bench/results/**"]
 }

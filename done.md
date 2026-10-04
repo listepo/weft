@@ -90,3 +90,19 @@ Execution plan:
 3. Tests: the TypeScript core suite's cases ported to `cargo test` (every diagnostic code, round-trips, patches, CLI); a differential check runs the TypeScript and Rust cores over the corpus, the examples and the compat fixtures and compares documents and diagnostics.
 4. moon tasks for `cargo test`, `cargo clippy -D warnings` and `cargo fmt --check` in `moon ci`; `toolchain.md` and the shared `rust.md` list the crates.
 5. The TypeScript suite running against the Rust core waits for the bindings of T22; this task ends with the Rust crate and CLI matching the TypeScript ones.
+
+### T21. Rust catalog
+
+Port `packages/catalog` (core catalog and design tokens) to a Cargo crate used by the Rust core. Done when the catalog tests pass against it.
+
+Result: `crates/weft-catalog` with `core_catalog()` (the embedded `catalog.json`), `load_tokens`, `token_types` and `diff_catalogs`. A differential fixture written by the TypeScript package holds 305 token inputs (the default tokens, non-objects and seeded fast-check trees covering T001–T006) and 110 catalog pairs diffed both ways (the `diff.test.ts` table and seeded edits of the core catalog); the Rust crate reproduces all of them. Its tests also validate every example in strict mode with the default tokens, and resolve a 200 000-token alias chain without recursion. The TypeScript catalog tests themselves run against the Rust crate once the bindings of T22 exist.
+
+Execution plan:
+
+1. `crates/weft-catalog` (library, no I/O; depends on weft-core, serde_json, indexmap):
+   - `CORE_CATALOG_JSON` embeds `packages/catalog/catalog.json`, which `catalog-json.test.ts` already keeps equal to `core.ts`; `core_catalog()` deserializes it into `weft_core::Catalog`.
+   - `load_tokens(&Json)` ports `tokens.ts` (DTCG subset, T001–T006, alias chains and cycles, JavaScript key order); `token_types` gives the path → type map the core's `tokens` option takes.
+   - `diff_catalogs(&Json, &Json)` ports `diff.ts` (SPEC §8 levels). It takes JSON, not the typed `Catalog`, because a field the model does not know is itself a breaking change and the typed model rejects it.
+   - weft-core exports `order_keys` and `to_compact`, which the port needs for key order and `JSON.stringify` messages.
+2. Tests: unit tests per module, plus a differential fixture `crates/weft-catalog/tests/fixtures/differential.json` written by `packages/catalog/test/differential.test.ts`: the default tokens, bad inputs and seeded fast-check token trees for `loadTokens`; the `diff.test.ts` rows (moved into a shared table) in both directions plus the core catalog for `diffCatalogs`. The Rust test reproduces every case, checks `core_catalog()` against the embedded JSON, and validates every example in strict mode.
+3. moon: the catalog `test` task gets the fixture as an input; `rust-test` already covers the crate. `toolchain.md` needs no new rows.
