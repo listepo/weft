@@ -6,6 +6,8 @@
 mod api;
 mod boundary;
 mod sources;
+#[cfg(feature = "web")]
+mod web;
 
 use wasm_bindgen::prelude::*;
 
@@ -55,6 +57,20 @@ impl Catalog {
             &self.0,
             options,
         )?)
+    }
+
+    /// `fromDom` of `@weft/from-aria`.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = fromDom)]
+    pub fn from_dom(&self, html: &str) -> Result<String, JsError> {
+        Ok(web::from_dom(html, &self.0)?)
+    }
+
+    /// The role tree builder behind `fromAriaSnapshot`.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = buildDocument)]
+    pub fn build_document(&self, sems: &str, reserved: &str) -> Result<String, JsError> {
+        Ok(web::build(sems, reserved, &self.0)?)
     }
 
     #[wasm_bindgen(js_name = checkData)]
@@ -132,4 +148,26 @@ pub fn read_value(raw: &str) -> Result<String, JsError> {
 #[wasm_bindgen(js_name = formatValue)]
 pub fn format_value(value: Option<String>) -> Result<String, JsError> {
     Ok(api::format_attribute_value(value.as_deref())?)
+}
+
+#[cfg(feature = "web")]
+#[wasm_bindgen(js_name = importFailure)]
+pub fn import_failure(
+    message: &str,
+    expected: &str,
+    got: Option<String>,
+) -> Result<String, JsError> {
+    Ok(web::import_failure(message, expected, got.as_deref())?)
+}
+
+#[cfg(feature = "web")]
+#[wasm_bindgen(js_name = instanceId)]
+pub fn instance_id(raw: &str) -> Option<String> {
+    weft_web::instance_id(raw)
+}
+
+#[cfg(feature = "web")]
+#[wasm_bindgen(js_name = webTables)]
+pub fn web_tables() -> Result<String, JsError> {
+    Ok(web::tables()?)
 }

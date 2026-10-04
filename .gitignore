@@ -8,3 +8,4 @@ dist/
 .moon/docker/
 target/
 packages/core/wasm/
+packages/core/wasm-web/

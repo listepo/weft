@@ -14,9 +14,11 @@ tasks:
     # (cargo registry sources, the toolchain and this workspace appear in its panic messages), so
     # the same sources build to the same bytes on any machine. A script, not a command, for the
     # shell variables; the remap is passed to rustc by this task only, not by a global cargo config.
-    script: 'RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(pwd -P)=/weft" wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft'
+    # Two modules: the core alone (`@weft/core`), and the core with the web importers and
+    # generators (`@weft/core/web`), so core-only pages do not download the HTML and JSX parsers.
+    script: 'export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(pwd -P)=/weft" && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm-web --out-name weft -- --features web'
     inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json']
-    outputs: ['/packages/core/wasm/**/*']
+    outputs: ['/packages/core/wasm/**/*', '/packages/core/wasm-web/**/*']
   typecheck:
     command: 'tsc --noEmit -p .'
     deps: ['root:wasm']
@@ -32,10 +34,10 @@ tasks:
   # The Rust core and CLI. The differential fixtures, written by the former TypeScript core, pin
   # their results; the TypeScript suites check that the WebAssembly build still reproduces them.
   rust-test:
-    command: 'cargo nextest run --workspace'
+    command: 'cargo nextest run --workspace --all-features'
     # weft-catalog embeds catalog.json and its tests read the examples and default tokens; the
     # CLI tests read the example project; the schema test checks schemas/weft.schema.json.
     inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json', '/packages/catalog/examples/**/*', '/packages/catalog/tokens/**/*', '/examples/**/*', '/schemas/**/*']
   rust-lint:
-    script: 'cargo clippy --workspace --all-targets -- -D warnings && cargo fmt --all --check'
+    script: 'cargo clippy --workspace --all-targets --all-features -- -D warnings && cargo fmt --all --check'
     inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/clippy.toml']

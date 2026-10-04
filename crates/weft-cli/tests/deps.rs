@@ -59,7 +59,10 @@ fn only_the_wasm_bindings_add_wasm_bindgen_to_the_pure_crates() {
             "thiserror",
             "wasm-bindgen",
             "weft-catalog",
-            "weft-core"
+            "weft-core",
+            // Optional: only the `web` build of the module carries the web importers.
+            "weft-import",
+            "weft-web"
         ]
     );
 }
@@ -97,6 +100,12 @@ fn the_web_crate_adds_only_its_parsers() {
     deps.sort();
     assert_eq!(
         deps,
-        ["html5ever", "serde", "serde_json", "weft-core", "weft-import"]
+        [
+            "html5ever",
+            "serde",
+            "serde_json",
+            "weft-core",
+            "weft-import"
+        ]
     );
 }

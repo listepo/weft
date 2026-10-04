@@ -9,7 +9,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./wasm": "./src/wasm.ts"
+    "./wasm": "./src/wasm.ts",
+    "./web": "./src/web.ts"
   },
   "dependencies": {
     "zod": "4.6.5"

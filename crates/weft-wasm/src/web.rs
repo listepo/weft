@@ -1,0 +1,117 @@
+//! The web importers and generators of `weft-web`, in the `web` build of the module only
+//! (`@weft/core/web` loads it): core-only consumers do not carry the HTML and JSX parsers.
+
+use indexmap::IndexMap;
+use serde::Serialize;
+use weft_core::{Catalog, Code, Diagnostic};
+use weft_import::{
+    BuildOptions, DISSOLVED_ROLES, ROLE_REFINEMENTS, Sem, build_document, empty_result,
+};
+
+use crate::boundary::{BindingError, Result, read_list, write};
+
+/// `fromDom` of `@weft/from-aria`.
+pub fn from_dom(html: &str, catalog: &Catalog) -> Result<String> {
+    write(&weft_web::from_dom(html, catalog))
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Built<'a> {
+    #[serde(flatten)]
+    result: &'a weft_import::ImportResult,
+    root_path: &'a str,
+}
+
+/// The role tree builder behind `fromAriaSnapshot`: `{document, losses, diagnostics, rootPath}`.
+pub fn build(sems: &str, reserved: &str, catalog: &Catalog) -> Result<String> {
+    let sems: Vec<Sem> = serde_json::from_str(sems).map_err(|source| BindingError::Wire {
+        what: "role tree",
+        source,
+    })?;
+    let built = build_document(
+        &sems,
+        BuildOptions {
+            catalog,
+            reserved: read_list(reserved, "reserved ids")?,
+            diagnostics: Vec::new(),
+        },
+    );
+    write(&Built {
+        result: &built.result,
+        root_path: &built.root_path,
+    })
+}
+
+/// The result of an import that could not start (W601): input of the wrong type, or a catalog
+/// the importer cannot use.
+pub fn import_failure(message: &str, expected: &str, got: Option<&str>) -> Result<String> {
+    let diagnostic =
+        Diagnostic::new(Code::W601, "#", message, expected).got_opt(got.map(str::to_owned));
+    write(&empty_result(vec![diagnostic]))
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Tables {
+    implicit_roles: IndexMap<&'static str, &'static str>,
+    input_roles: IndexMap<&'static str, &'static str>,
+    max_html_length: usize,
+    dissolved_roles: &'static [&'static str],
+    role_refinements: IndexMap<&'static str, Refined>,
+}
+
+#[derive(Serialize)]
+struct Refined {
+    kind: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    props: Option<IndexMap<&'static str, &'static str>>,
+}
+
+/// The constants `@weft/from-aria` exports, read from the importer instead of copied.
+pub fn tables() -> Result<String> {
+    write(&Tables {
+        implicit_roles: weft_web::IMPLICIT_ROLES.iter().copied().collect(),
+        input_roles: weft_web::INPUT_ROLES.iter().copied().collect(),
+        max_html_length: weft_web::MAX_HTML_LENGTH,
+        dissolved_roles: DISSOLVED_ROLES,
+        role_refinements: ROLE_REFINEMENTS
+            .iter()
+            .map(|r| {
+                let props = (!r.props.is_empty()).then(|| r.props.iter().copied().collect());
+                (
+                    r.role,
+                    Refined {
+                        kind: r.kind,
+                        props,
+                    },
+                )
+            })
+            .collect(),
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn built_results_carry_the_root_path() {
+        let catalog = weft_catalog::core_catalog().unwrap();
+        let out = build(
+            r#"[{"role":"button","name":"Go","states":{},"props":{},"children":[]}]"#,
+            "[]",
+            &catalog,
+        )
+        .unwrap();
+        let value: serde_json::Value = serde_json::from_str(&out).unwrap();
+        assert_eq!(value["rootPath"], "/screen#screen");
+        assert!(value["document"]["root"]["children"].is_array());
+    }
+
+    #[test]
+    fn a_failed_import_is_an_empty_screen_with_w601() {
+        let out = import_failure("m", "e", Some("g")).unwrap();
+        assert!(out.contains("\"W601\"") && out.contains("nothing could be imported"));
+    }
+}
