@@ -3,7 +3,7 @@
 // both sides by `skeleton`, one documented loss at a time, instead of loosening assertions.
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
-import { test } from "node:test";
+import { beforeAll, describe, test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
 import { parse, validate, type Document } from "@weft/core";
 import {
@@ -151,32 +151,40 @@ function assertValid(result: ImportResult): void {
 }
 
 for (const s of screens()) {
-  test(`round trip from DOM: ${s.name}`, async (t) => {
-    const result = fromDom(renderPage(s.document, { catalog, data: s.data }), { catalog });
-    await t.test("valid", () => assertValid(result));
-    await t.test("structure, roles, states and ids", () => {
+  // Vitest has no subtests: each check is a test of its own under the screen's name, and the import runs once per block in
+  // `beforeAll` so a failing import fails its own tests instead of the whole file.
+  describe(`round trip from DOM: ${s.name}`, () => {
+    let result!: ImportResult;
+    beforeAll(() => {
+      result = fromDom(renderPage(s.document, { catalog, data: s.data }), { catalog });
+    });
+    test("valid", () => assertValid(result));
+    test("structure, roles, states and ids", () => {
       assert.deepEqual(
         skeletonOf(result.document, {}, "dom"),
         skeletonOf(s.document, s.data, "dom"),
       );
     });
-    await t.test("same accessibility tree", () => {
+    test("same accessibility tree", () => {
       const expected = expectedTree(s.document, { catalog, data: s.data });
       assert.deepEqual(diffAria(expected, expectedTree(result.document, { catalog })), []);
     });
   });
 
-  test(`round trip from an accessibility snapshot: ${s.name}`, async (t) => {
+  describe(`round trip from an accessibility snapshot: ${s.name}`, () => {
     const tree = expectedTree(s.document, { catalog, data: s.data });
-    const result = fromAriaSnapshot(tree, { catalog });
-    await t.test("valid", () => assertValid(result));
-    await t.test("structure, roles and states", () => {
+    let result!: ImportResult;
+    beforeAll(() => {
+      result = fromAriaSnapshot(tree, { catalog });
+    });
+    test("valid", () => assertValid(result));
+    test("structure, roles and states", () => {
       assert.deepEqual(
         skeletonOf(result.document, {}, "aria"),
         skeletonOf(s.document, s.data, "aria"),
       );
     });
-    await t.test("same accessibility tree", () => {
+    test("same accessibility tree", () => {
       assert.deepEqual(diffAria(tree, expectedTree(result.document, { catalog })), []);
     });
   });

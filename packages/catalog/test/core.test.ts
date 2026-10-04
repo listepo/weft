@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { CatalogSchema, type PropDef } from "@weft/core";
 import { coreCatalog } from "../src/core.ts";
 

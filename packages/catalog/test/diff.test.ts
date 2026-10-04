@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog, diffCatalogs } from "../src/index.ts";
 import { base, edit, rows } from "./diff-cases.ts";
 

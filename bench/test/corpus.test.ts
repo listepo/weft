@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { CORPUS_DIR, SCREENS, loadTasks, readScreen } from "../src/corpus.ts";
 import { FILE_NAME, parsers } from "../src/formats.ts";
 import { FORMATS, evaluate, walk, type NNode } from "../src/neutral.ts";
