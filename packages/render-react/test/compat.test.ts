@@ -1,7 +1,7 @@
 // SPEC §8 on the render side: documents from the future and from other vendors still render.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
 import { hasErrors, parse } from "@weft/core";
 import { expectedTree } from "../src/index.ts";

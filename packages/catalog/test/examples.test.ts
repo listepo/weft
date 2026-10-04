@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { parse, type Child } from "@weft/core";
 import { coreCatalog } from "../src/core.ts";
 

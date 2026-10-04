@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog, loadTokens, tokenTypes } from "@weft/catalog";
 import { parse, serialize } from "@weft/core";
 import { CORPUS_DIR, SCREENS } from "../src/corpus.ts";

@@ -2,8 +2,8 @@
 # so those are inputs too: a change there must invalidate the cached result.
 tasks:
   test:
-    description: 'node:test suite of this package'
-    command: 'node --test "test/**/*.test.ts"'
+    description: 'Vitest suite of this package'
+    command: 'vitest run --config $workspaceRoot/vitest.config.ts'
     # Every package reaches @weft/core, which loads the generated WebAssembly module.
     deps: ['root:wasm']
     inputs:
@@ -13,4 +13,5 @@ tasks:
       - '/compat/**/*'
       - '/SPEC.md'
       - '/AGENT-SPEC.md'
+      - '/vitest.config.ts'
       - '/crates/*/tests/fixtures/**/*'

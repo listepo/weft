@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog, loadTokens, tokenTypes } from "@weft/catalog";
 import { applyPatches, DIAGNOSTIC_CODES, parse, serialize } from "@weft/core";
 

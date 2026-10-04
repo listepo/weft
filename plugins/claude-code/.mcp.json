@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "weft": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/node_modules/@weft/mcp/src/server.ts"]
+    }
+  }
+}

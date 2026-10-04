@@ -11,6 +11,7 @@
 | napi (`@napi-rs/cli`) | mise | Builds the native Node and Bun addon | https://github.com/napi-rs/napi-rs |
 | deno | mise | Runtime the bindings are tested on | https://github.com/denoland/deno |
 | bun | mise | Runtime the bindings are tested on | https://github.com/oven-sh/bun |
+| claude (Claude Code) | https://code.claude.com/docs/en/setup | Hosts the plugin (`plugins/claude-code`); `claude plugin validate` checks its manifests | https://github.com/anthropics/claude-code |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 
 ## mise
@@ -58,6 +59,8 @@
 | react-dom | local | https://github.com/facebook/react | Server rendering for tests and static pages |
 | @types/react | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React type definitions |
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
+| vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
+| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests |
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |

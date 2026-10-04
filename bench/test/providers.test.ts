@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { loadTasks, type EditTask } from "../src/corpus.ts";
 import { anthropicBatch, batchingProvider, openAiProvider } from "../src/provider.ts";
 import { planJobs, runJobs } from "../src/run-tasks.ts";

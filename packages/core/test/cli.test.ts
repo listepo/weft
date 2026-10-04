@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { after, test } from "node:test";
+import { afterAll, test } from "vitest";
 import { main } from "../src/cli.ts";
 import { catalogJsonSchema, documentJsonSchema, stringify, parse } from "../src/index.ts";
 import { catalog } from "./catalog.ts";
 
 const dir = mkdtempSync(join(tmpdir(), "weft-cli-"));
-after(() => rmSync(dir, { recursive: true, force: true }));
+afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
 const catalogPath = join(dir, "catalog.json");
 writeFileSync(catalogPath, JSON.stringify(catalog));

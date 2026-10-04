@@ -8,7 +8,7 @@
 // structure a host styles.
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
-import { test } from "node:test";
+import { beforeAll, describe, test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
 import { parse, type Document } from "@weft/core";
 import { fromDom } from "@weft/from-aria";
@@ -49,22 +49,29 @@ function read(url: URL): Document {
 }
 
 for (const c of cases()) {
-  test(`equivalence: ${c.name}`, async (t) => {
-    const source = toJsx(c.document, { catalog: coreCatalog });
-    const parsed = parseSync("screen.jsx", source);
-    assert.deepEqual(parsed.errors, [], "the output parses without errors");
-    const component = await load(source);
-    const reference = renderToStaticMarkup(
-      render(c.document, { catalog: coreCatalog, data: c.data }),
-    );
-    const generated = markup(component, { data: c.data });
-    const expected = fromDom(reference, { catalog: coreCatalog });
-    const actual = fromDom(generated, { catalog: coreCatalog });
-    await t.test("same accessible structure", () => {
+  // Vitest has no subtests: the checks are tests of one block, sharing what the first renders.
+  describe(`equivalence: ${c.name}`, () => {
+    let source: string;
+    let reference: string;
+    let generated: string;
+    let expected: ReturnType<typeof fromDom>;
+    let actual: ReturnType<typeof fromDom>;
+    beforeAll(async () => {
+      source = toJsx(c.document, { catalog: coreCatalog });
+      const component = await load(source);
+      reference = renderToStaticMarkup(render(c.document, { catalog: coreCatalog, data: c.data }));
+      generated = markup(component, { data: c.data });
+      expected = fromDom(reference, { catalog: coreCatalog });
+      actual = fromDom(generated, { catalog: coreCatalog });
+    });
+    test("the output parses without errors", () => {
+      assert.deepEqual(parseSync("screen.jsx", source).errors, []);
+    });
+    test("same accessible structure", () => {
       assert.deepEqual(actual.document, expected.document);
       assert.deepEqual(actual.losses, expected.losses);
     });
-    await t.test("same markup", () => {
+    test("same markup", () => {
       assert.equal(normalizeMarkup(generated), normalizeMarkup(reference));
     });
   });

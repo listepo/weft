@@ -1,6 +1,8 @@
 - T8. Evaluation
 - T23. Native Node and Bun addon
 - T24. Runtime matrix
-- T26. Vitest for the TypeScript tests
 - T28. Binding readback against inverted conditions
 - T29. Rust core test suite
+- T14. Figma round trip and plugin
+- T31. Project file and shared resources
+- T32. Claude Code plugin from GitHub

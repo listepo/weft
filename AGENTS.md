@@ -19,8 +19,8 @@ If an `AGENTS.md` or `CLAUDE.md` exists higher in the tree, follow it too; on co
 - **Documents are untrusted input.** Parsers and validators never throw on bad input; they return diagnostics. No `eval`, no dynamic code, no network access from a document.
 - **Diagnostics are an API.** A published code never changes meaning. Every diagnostic carries path, expectation and, where one exists, a hint.
 - **TypeScript has no build step.** Node runs the TypeScript sources directly (type stripping), so only erasable syntax: no `enum`, no `namespace`, no parameter properties. Import with the `.ts` extension.
-- **`@weft/core` and `@weft/catalog` run on the Rust core.** Their checks live in `crates/weft-core` and `crates/weft-catalog`; `crates/weft-wasm` binds them, and `moon run root:wasm` (wasm-pack) generates `packages/core/wasm/`, which is gitignored. Every `test` task and `root:typecheck` depend on it, so `moon` rebuilds the module when a crate changes; plain `node --test` needs it built first. A behaviour change goes into the Rust crates, never into a TypeScript copy.
-- **Tests** use `node:test` and `node:assert/strict`; property tests use `fast-check`. Test files live in `<package>/test/*.test.ts`.
+- **`@weft/core` and `@weft/catalog` run on the Rust core.** Their checks live in `crates/weft-core` and `crates/weft-catalog`; `crates/weft-wasm` binds them, and `moon run root:wasm` (wasm-pack) generates `packages/core/wasm/`, which is gitignored. Every `test` task and `root:typecheck` depend on it, so `moon` rebuilds the module when a crate changes; running Vitest directly needs it built first. A behaviour change goes into the Rust crates, never into a TypeScript copy.
+- **Tests** run with Vitest (`describe`, `test`, hooks from `vitest`) and assert with `node:assert/strict`; property tests use `fast-check`. Vitest has no subtests: one `describe` per case with a `test` per check. One `vitest.config.ts` at the root serves every package. Test files live in `<package>/test/*.test.ts`.
 - **Measurement history.** Every benchmark run that is kept, full or partial, adds one row to the History table in `test.md` in the same commit as its raw results in `bench/results/`: date, commit the run used, provider and model, run, samples, headline rates, results file, notes. Rows are never edited or removed; a re-score or a rerun adds a new row. A change to the method (tasks, checks, prompt, criteria) updates the method sections of `test.md` in the same commit.
 - **Layout.** `crates/` (the Rust core, catalog, CLI and `weft-wasm` bindings), `packages/core` (model types, the WebAssembly wrappers, CLI), `packages/catalog` (core catalog and tokens), `corpus/` (reference screens in every compared format), `bench/` (benchmark harness).
 
@@ -31,6 +31,7 @@ mise install       # every program, at the pinned versions
 pnpm install
 moon ci            # typecheck, lint, every package's tests (cached); `pnpm run ci` does the same
 moon run core:test # one package
+# one file, from the package folder: pnpm exec vitest run --config ../../vitest.config.ts test/<file>.test.ts
 moon run root:fmt  # format
 ```
 
