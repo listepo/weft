@@ -1,16 +1,21 @@
-//! `weft validate`, `weft fmt` and `weft explain`. The catalog comes from `--catalog`; without
-//! one, only the syntax layer runs. Exit codes: 0 ok, 1 diagnostics with errors, 2 usage or I/O
-//! failure.
+//! `weft validate`, `weft fmt` and `weft explain`. The project file (`weft.json`, SPEC §10) found
+//! above the document, or given with `--project`, supplies the catalog, tokens, actions and data
+//! schema, and the settings of §10.6 (`validate.mode`, `format.write`); a flag overrides the
+//! project, which overrides the default. `--catalog` replaces the project's catalog. Without
+//! either, `validate` checks only the syntax layer. Exit codes: 0 ok, 1 diagnostics with errors,
+//! 2 usage or I/O failure.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use anyhow::{Context, Result, bail};
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
+use weft_catalog::{PROJECT_FILE, Project, ProjectOptions, load_project_text, token_types};
 use weft_core::{
-    Catalog, Diagnostic, Document, Mode, ParseOptions, ValidateOptions, explain, explain_changes,
-    has_errors, parse, parse_json, serialize, validate,
+    Catalog, DataCheckOptions, Diagnostic, Document, Mode, ParseOptions, ValidateOptions,
+    check_data, check_data_json, explain, explain_changes, has_errors, parse, parse_json,
+    serialize, validate,
 };
 
 #[derive(Parser)]
@@ -24,24 +29,47 @@ struct Cli {
     command: Command,
 }
 
+/// Which project file applies (SPEC §10.1).
+#[derive(Args)]
+struct ProjectArgs {
+    /// Project file; without it, the nearest `weft.json` above the document is used.
+    #[arg(long, conflicts_with = "no_project")]
+    project: Option<PathBuf>,
+    /// Ignore any project file.
+    #[arg(long)]
+    no_project: bool,
+}
+
 #[derive(Subcommand)]
 enum Command {
     /// Check a document: markup, or canonical JSON when the file name ends in `.json`.
     Validate {
         file: PathBuf,
-        /// Catalog JSON; without it only the syntax layer is checked.
+        /// Catalog JSON; replaces the project's catalog.
         #[arg(long)]
         catalog: Option<PathBuf>,
-        /// Report unknown content as errors instead of warnings.
-        #[arg(long)]
+        #[command(flatten)]
+        project: ProjectArgs,
+        /// Report unknown content as errors instead of warnings (default: the project's
+        /// `validate.mode`, else lenient).
+        #[arg(long, conflicts_with = "lenient")]
         strict: bool,
+        /// Report unknown content as warnings, whatever the project says.
+        #[arg(long)]
+        lenient: bool,
     },
     /// Print the canonical markup of a document.
     Fmt {
         file: PathBuf,
-        /// Rewrite the file instead of printing; untouched when already canonical.
-        #[arg(long)]
+        /// Rewrite the file instead of printing; untouched when already canonical (default: the
+        /// project's `format.write`, else print).
+        #[arg(long, conflicts_with = "print")]
         write: bool,
+        /// Print, whatever the project says.
+        #[arg(long)]
+        print: bool,
+        #[command(flatten)]
+        project: ProjectArgs,
     },
     /// Read back what each binding, token, event and loop of a markup document means, one per
     /// line, so the meaning can be compared with the instruction behind an edit.
@@ -50,9 +78,12 @@ enum Command {
         /// An older version of the document: print only what was added, removed or changed.
         #[arg(long)]
         against: Option<PathBuf>,
-        /// Catalog JSON; without it, boolean and writable props read as plain reads.
+        /// Catalog JSON; replaces the project's catalog. Without either, boolean and writable
+        /// props read as plain reads.
         #[arg(long)]
         catalog: Option<PathBuf>,
+        #[command(flatten)]
+        project: ProjectArgs,
     },
 }
 
@@ -80,6 +111,60 @@ fn read(file: &Path) -> Result<String> {
     std::fs::read_to_string(file).with_context(|| format!("cannot read {}", file.display()))
 }
 
+/// SPEC §10.1: the first `weft.json` in the document's directory or one above it.
+fn find_project(document: &Path) -> Option<PathBuf> {
+    let absolute = std::path::absolute(document).ok()?;
+    absolute
+        .ancestors()
+        .skip(1)
+        .map(|dir| dir.join(PROJECT_FILE))
+        .find(|candidate| candidate.is_file())
+}
+
+/// The project that applies to `document`, if any, after printing its diagnostics to `out`.
+/// Returns whether those diagnostics hold an error too.
+fn project_for(
+    document: &Path,
+    args: ProjectArgs,
+    mode: Mode,
+    out: &mut dyn Write,
+) -> Result<(Option<Project>, bool)> {
+    let file = if args.no_project {
+        None
+    } else {
+        args.project.or_else(|| find_project(document))
+    };
+    let Some(file) = file else {
+        return Ok((None, false));
+    };
+    let (project, diagnostics) = load_project(&file, mode)?;
+    print(&file, &diagnostics, out)?;
+    Ok((Some(project), has_errors(&diagnostics)))
+}
+
+/// A setting of the project's §10.6 sections, when there is a project and it sets one.
+fn setting<'a>(project: Option<&'a Project>, path: &[&str]) -> Option<&'a serde_json::Value> {
+    project.and_then(|p| p.setting(path))
+}
+
+/// The project and its diagnostics. Files it names are read relative to its directory; the
+/// loader has already refused names that leave it.
+fn load_project(file: &Path, mode: Mode) -> Result<(Project, Vec<Diagnostic>)> {
+    let text = read(file)?;
+    let dir = file.parent().unwrap_or(Path::new("."));
+    let read_member = |name: &str| std::fs::read_to_string(dir.join(name)).ok();
+    let loaded = load_project_text(
+        &text,
+        &ProjectOptions {
+            read: Some(&read_member),
+            mode,
+            ..Default::default()
+        },
+    )
+    .context("the embedded core catalog is broken")?;
+    Ok((loaded.project, loaded.diagnostics))
+}
+
 fn load_catalog(file: &Path) -> Result<Catalog> {
     let text = read(file)?;
     let json =
@@ -91,7 +176,19 @@ fn load_catalog(file: &Path) -> Result<Catalog> {
 /// I/O and usage failures are errors; documents with diagnostics are an exit code.
 fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
     match command {
-        Command::Fmt { file, write } => {
+        Command::Fmt {
+            file,
+            write,
+            print: print_only,
+            project,
+        } => {
+            // Project problems go to stderr: stdout carries the formatted document.
+            let (project, _) = project_for(&file, project, Mode::Lenient, &mut std::io::stderr())?;
+            let write = write
+                || (!print_only
+                    && setting(project.as_ref(), &["format", "write"])
+                        .and_then(serde_json::Value::as_bool)
+                        .unwrap_or(false));
             let text = read(&file)?;
             let result = parse(&text, &ParseOptions::default());
             let Some(document) = result.document else {
@@ -110,14 +207,39 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
         Command::Validate {
             file,
             catalog,
+            project,
             strict,
+            lenient,
         } => {
             let text = read(&file)?;
-            let catalog = catalog.as_deref().map(load_catalog).transpose()?;
+            let flag = if strict {
+                Some(Mode::Strict)
+            } else if lenient {
+                Some(Mode::Lenient)
+            } else {
+                None
+            };
+            let (project, project_failed) =
+                project_for(&file, project, flag.unwrap_or_default(), out)?;
+            let mode = flag.unwrap_or(
+                match setting(project.as_ref(), &["validate", "mode"])
+                    .and_then(serde_json::Value::as_str)
+                {
+                    Some("strict") => Mode::Strict,
+                    _ => Mode::Lenient,
+                },
+            );
+            let explicit = catalog.as_deref().map(load_catalog).transpose()?;
+            let catalog = explicit.or_else(|| project.as_ref().map(|p| p.catalog.clone()));
             if catalog.is_none() {
-                eprintln!("weft: no --catalog given; only the syntax layer was checked");
+                eprintln!("weft: no --catalog and no project; only the syntax layer was checked");
             }
-            let mode = if strict { Mode::Strict } else { Mode::Lenient };
+            let tokens = project
+                .as_ref()
+                .and_then(|p| p.tokens.as_ref())
+                .map(token_types);
+            let actions = project.as_ref().and_then(|p| p.actions.as_deref());
+            let data = project.as_ref().and_then(|p| p.data.as_ref());
             let diagnostics = if file.extension().is_some_and(|e| e == "json") {
                 let json = match parse_json(&text) {
                     Ok(json) => json,
@@ -128,28 +250,45 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 };
                 match &catalog {
                     None => vec![],
-                    Some(catalog) => validate(
-                        &json,
-                        &ValidateOptions {
-                            catalog: Some(catalog),
-                            mode,
-                            ..Default::default()
-                        },
-                    ),
+                    Some(catalog) => {
+                        let mut found = validate(
+                            &json,
+                            &ValidateOptions {
+                                catalog: Some(catalog),
+                                mode,
+                                tokens: tokens.as_ref(),
+                                actions,
+                            },
+                        );
+                        if let Some(data) = data {
+                            found.extend(check_data_json(
+                                &json,
+                                &DataCheckOptions { catalog, data },
+                            ));
+                        }
+                        found
+                    }
                 }
             } else {
-                parse(
+                let result = parse(
                     &text,
                     &ParseOptions {
                         catalog: catalog.as_ref(),
                         mode,
-                        ..Default::default()
+                        tokens: tokens.as_ref(),
+                        actions,
                     },
-                )
-                .diagnostics
+                );
+                let mut found = result.diagnostics;
+                if let (Some(document), Some(catalog), Some(data)) =
+                    (&result.document, &catalog, data)
+                {
+                    found.extend(check_data(document, &DataCheckOptions { catalog, data }));
+                }
+                found
             };
             print(&file, &diagnostics, out)?;
-            Ok(if has_errors(&diagnostics) {
+            Ok(if has_errors(&diagnostics) || project_failed {
                 DIAGNOSTICS
             } else {
                 0
@@ -159,11 +298,15 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             file,
             against,
             catalog,
+            project,
         } => {
-            let catalog = catalog.as_deref().map(load_catalog).transpose()?;
+            // Project problems go to stderr: stdout carries the read-back.
+            let (project, _) = project_for(&file, project, Mode::Lenient, &mut std::io::stderr())?;
+            let explicit = catalog.as_deref().map(load_catalog).transpose()?;
+            let catalog = explicit.or_else(|| project.map(|p| p.catalog));
             if catalog.is_none() {
                 eprintln!(
-                    "weft: no --catalog given; boolean and writable props read as plain reads"
+                    "weft: no --catalog and no project; boolean and writable props read as plain reads"
                 );
             }
             let catalog = catalog.as_ref();

@@ -9,7 +9,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T24 | todo | P2 | 2 | 0% | |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
-| T31 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
@@ -118,6 +118,28 @@ Several `.weft` screens share one set of resources through a project file, `weft
 - **Tools:** the CLI, the MCP server, the renderer, the Claude Code plugin (T30) and the Figma work (T14) all read the project file, and an explicit argument still overrides it.
 
 Done when a corpus project of several screens with layered tokens, a catalog extension, an action list, a data schema and a shared fragment validates and renders through the CLI and the MCP server, the TypeScript and Rust results match, and a broken project file is reported with a diagnostic, never a crash.
+
+Execution plan (part A is built now; part B, fragments, is design only and waits for the creator):
+
+1. Spec first. `SPEC.md` gets a Project section: `weft.json` found by walking up from the screen (an explicit argument overrides it), its members (`tokens` list of DTCG files layered in order, `catalog` extension file, `actions` list, `data` schema file), paths relative to the project file and never leaving its directory, token layering (later token wins, aliases resolved after the merge, as the DTCG resolver module orders sets), the catalog extension rules (new kinds are added; an entry for a core kind merges into it; the merged catalog may only widen the core catalog by the version rules of §8, anything those rules call major is a conflict), the data schema (a JSON Schema 2020-12 subset), and new codes: `W315`/`W316` for binding paths and types against the data schema, `W7xx` for project problems. `AGENT-SPEC.md`, the MCP primer and tool descriptions follow. Sources go into `research.md`.
+2. Core, TypeScript and Rust (`packages/core/src/data.ts`, `crates/weft-core/src/data.rs`): `compileDataSchema` and `checkData(document, …)` as a separate pass, so `ValidateOptions` and `ParseOptions` keep their fields (T22 and T29 construct them); new codes in both registries.
+3. Catalog, TypeScript and Rust (`packages/catalog/src/project.ts`, `crates/weft-catalog/src/project.rs`): pure `resolveProject(content)` and `loadProject(text, read)` with an injected reader; token layering, catalog extension with conflict diagnostics, action list, data schema. Never throws or panics.
+4. File reading stays at the edges: `packages/catalog/src/node.ts` (walk up, read files) for Node tools; the Rust CLI walks up itself and gets `--project`; `render-react`'s `write-page` reads the project too. The MCP server reads no files: tools take an optional `project` argument with the contents, and `createServer` takes one from the host.
+5. Differential fixtures: data checks in the core fixture, project resolution in the catalog fixture; regenerate with `WEFT_UPDATE_FIXTURES=1`.
+6. An example project (`examples/project/`, outside `corpus/` because corpus tests read every directory there as a screen) with several screens, layered tokens, a catalog extension, actions and a data schema; CLI and MCP tests on it and on broken project files.
+7. Part B: `docs/fragments-design.md`, a proposal for `<use>` fragments, for the creator to approve.
+8. Verify with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Scope extension (creator): everything that can be configured is configurable through `weft.json`. The file becomes a config with optional sections, each with documented defaults; an explicit CLI or tool argument overrides `weft.json`, which overrides the defaults.
+
+9. Spec: `SPEC.md` §10.6 lists the sections — `validate` (`mode`), `format` (`write`), `render` (`data`, `tokens`, `outDir`), `export.<target>` and `import.<target>` (`react` and `html` today, `outDir`), `mcp` (`limits`), `plugins` (free-form, one object per plugin) — their defaults, the precedence, and how a later task adds its section (T34 SwiftUI, T35 web targets, T14 Figma: `export.swiftui`, `export.html`, `export.solid`, `export.figma` with a rem base and a token strategy, `import.figma`, `import.penpot`). An unknown key is `W702`, now always a warning; a wrong type is `W701` and the default applies.
+10. `schemas/weft.schema.json` (JSON Schema 2020-12), referenced from `$schema`; a test keeps it and the loader in step.
+11. Loader (Rust, through weft-wasm for TypeScript): the sections parsed into `Project.settings`, never throwing.
+12. Tools: the Rust CLI (`validate.mode` with `--lenient` to override, `format.write` with `--print`, `explain` reads the project's catalog), `write-page` (`render.data`, `render.tokens`), the Claude Code plugin scripts (project resources plus `render`, `export.react`, `import.html`), the MCP server (`weft-mcp --project <file>` read once at start by the host: resources, `validate.mode` as the default of `strict`, `mcp.limits`; the `project` tool argument never changes limits).
+13. `AGENTS.md`: every new tool option gets a `weft.json` key in the same change.
+14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
+
+Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). Left: the fragments proposal in `docs/fragments-design.md` waits for the creator; once approved, fragments are built (format, both parsers, patches, fixtures) and the example project gains a shared fragment, which the done criteria ask for.
 
 ### T32. Claude Code plugin from GitHub
 

@@ -1,7 +1,7 @@
 // The static page helper and the CLI that writes it.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
+import { copyFileSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,6 +37,39 @@ test("write-page renders a fixture with its data and tokens to a file", () => {
   ]);
   const html = readFileSync(out, "utf8");
   assert.match(html, /data-weft-id="cards" style="gap:24px;display:grid/);
+});
+
+test("write-page takes data and tokens from render settings; flags override them", () => {
+  const dir = mkdtempSync(join(tmpdir(), "weft-page-project-"));
+  const path = (p: string) => fileURLToPath(new URL(p, import.meta.url));
+  copyFileSync(path("../fixtures/grid.weft.json"), join(dir, "grid.weft.json"));
+  copyFileSync(path("../fixtures/list.data.json"), join(dir, "sample.json"));
+  copyFileSync(path("../../catalog/tokens/default.tokens.json"), join(dir, "t.tokens.json"));
+  writeFileSync(
+    join(dir, "weft.json"),
+    JSON.stringify({ render: { data: "sample.json", tokens: ["t.tokens.json"] } }),
+  );
+  const run = (...args: string[]) => {
+    const out = join(dir, "page.html");
+    execFileSync(process.execPath, [
+      path("../src/write-page.ts"),
+      join(dir, "grid.weft.json"),
+      out,
+      ...args,
+    ]);
+    return readFileSync(out, "utf8");
+  };
+  const flags = [
+    "--data",
+    path("../fixtures/list.data.json"),
+    "--tokens",
+    path("../../catalog/tokens/default.tokens.json"),
+  ];
+  const fromSettings = run();
+  assert.match(fromSettings, /data-weft-id="cards" style="gap:24px;display:grid/);
+  assert.equal(fromSettings, run(...flags, "--no-project"));
+  // Without the project there are no tokens, so the gap is not resolved.
+  assert.doesNotMatch(run("--no-project"), /gap:24px/);
 });
 
 test("gallery writes one page per corpus screen and an index", () => {

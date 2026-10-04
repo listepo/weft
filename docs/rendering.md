@@ -82,7 +82,7 @@ The data is a JSON file shaped like the paths your bindings use: `{$.email}` rea
 
 ## Tokens
 
-A token reference such as `{token.space.md}` turns into a real value when the page is built. Without `--tokens`, the default set in `packages/catalog/tokens/default.tokens.json` applies, and a screen that names a token the set does not have is not rendered:
+A token reference such as `{token.space.md}` turns into a real value when the page is built. In a [project](projects.md), the project's tokens apply (or `render.tokens`), and `render.data` stands in for `--data`. Without `--tokens` or a project, the default set in `packages/catalog/tokens/default.tokens.json` applies, and a screen that names a token the set does not have is not rendered:
 
 ```console
 $ sed 's/space.md/space.huge/' weft-tour/login.weft > weft-tour/login-token.weft

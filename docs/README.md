@@ -21,6 +21,7 @@ This guide is for people who use Weft: developers who wire it into an app or an 
 | [Exporting to React](exporting-jsx.md) | Turn a screen into a React component. |
 | [Catalog and tokens](catalog-and-tokens.md) | Understand and extend the vocabulary and the design values. |
 | [Patches](patches.md) | Change a screen by element id, atomically. |
+| [Projects](projects.md) | Share tokens, components, actions, a data schema and tool settings across screens with `weft.json`. |
 | [Contributing](contributing.md) | Build, test and change Weft. |
 
 ## How to read the commands

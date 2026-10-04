@@ -56,6 +56,21 @@ impl Catalog {
             options,
         )?)
     }
+
+    #[wasm_bindgen(js_name = checkData)]
+    pub fn check_data(
+        &self,
+        input: Option<String>,
+        schema: Option<String>,
+        sources: Option<String>,
+    ) -> Result<String, JsError> {
+        Ok(api::check_data_input(
+            input.as_deref(),
+            &self.0,
+            schema.as_deref(),
+            sources.as_deref(),
+        )?)
+    }
 }
 
 /// `parse` without a catalog: the syntax layer only.
@@ -92,6 +107,21 @@ pub fn load_tokens(json: Option<String>) -> Result<String, JsError> {
 #[wasm_bindgen(js_name = diffCatalogs)]
 pub fn diff_catalogs(previous: Option<String>, next: Option<String>) -> Result<String, JsError> {
     Ok(api::diff_catalogs(previous.as_deref(), next.as_deref())?)
+}
+
+#[wasm_bindgen(js_name = compileDataSchema)]
+pub fn compile_data_schema(schema: Option<String>) -> Result<String, JsError> {
+    Ok(api::compile_data(schema.as_deref())?)
+}
+
+#[wasm_bindgen(js_name = projectFiles)]
+pub fn project_files(text: &str) -> Result<String, JsError> {
+    Ok(api::project_files(text)?)
+}
+
+#[wasm_bindgen(js_name = loadProject)]
+pub fn load_project(text: &str, files: Option<String>, options: &str) -> Result<String, JsError> {
+    Ok(api::load_project(text, files.as_deref(), options)?)
 }
 
 #[wasm_bindgen(js_name = readValue)]

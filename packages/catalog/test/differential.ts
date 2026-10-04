@@ -3,9 +3,17 @@
 // Rust crate must reproduce them. Random cases use a fixed seed, so the fixture only changes with
 // the code.
 import { readFileSync } from "node:fs";
+import { isDeepStrictEqual } from "node:util";
 import fc from "fast-check";
 import { coreCatalog, diffCatalogs, loadTokens } from "../src/index.ts";
 import { base, rows } from "./diff-cases.ts";
+import {
+  projectCases,
+  randomProjects,
+  runCase,
+  sharedFiles,
+  type ProjectCase,
+} from "./project-cases.ts";
 
 export const fixturePath = new URL(
   "../../../crates/weft-catalog/tests/fixtures/differential.json",
@@ -171,6 +179,27 @@ function tokensExpect(input: unknown) {
   return { tokens: [...tokens], problems };
 }
 
+/** What a project loads to, with the catalog reduced to the kinds that differ from the core. */
+function projectExpect(c: ProjectCase) {
+  const { project, diagnostics } = runCase(c);
+  const core = json(coreCatalog.components) as Record<string, unknown>;
+  const components = json(project.catalog.components) as Record<string, unknown>;
+  return {
+    catalog: {
+      name: project.catalog.name,
+      version: project.catalog.version,
+      changed: Object.entries(components).filter(
+        ([kind, def]) => !Object.hasOwn(core, kind) || !isDeepStrictEqual(core[kind], def),
+      ),
+    },
+    tokens: project.tokens === undefined ? null : [...project.tokens],
+    actions: project.actions ?? null,
+    data: project.data !== undefined,
+    settings: project.settings,
+    diagnostics,
+  };
+}
+
 /** The whole fixture, as the TypeScript code computes it. */
 export function differential() {
   const defaults: unknown = JSON.parse(
@@ -197,6 +226,10 @@ export function differential() {
       next: json(next),
       expect: diff(json(base), json(next)),
     })),
+    projectFiles: sharedFiles,
+    projects: [...Object.entries(projectCases), ...randomProjects(SEED + 2, RUNS)].map(
+      ([name, c]) => ({ name, ...c, expect: projectExpect(c) }),
+    ),
     edits: [["core against itself", [] as Edit[]] as const, ...catalogEdits()].map(
       ([name, edits]) => {
         const next = structuredClone(core);

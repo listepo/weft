@@ -112,6 +112,8 @@ An app started from the Dock or a launcher does not read your shell setup, so it
 
 **Any other MCP client** starts `node /path/to/weft/packages/mcp/src/server.ts` and talks to it over standard input and output.
 
+**With a project.** Add `--project /path/to/weft.json` to the arguments to serve one project ([Projects](projects.md)). Its catalog, tokens, actions and data schema become the server's, so token names, action names and bindings are checked too; its `validate.mode` becomes the default of `weft_validate`'s `strict`, and `mcp.limits` changes the bounds above. A project with errors stops the server before it starts, with the problems on standard error. A `project` argument in a tool call replaces the resources for that call only and never changes the limits.
+
 ## How an agent uses it
 
 The server's own instructions tell the agent to call `weft_primer` first. The loop that works is:
@@ -122,7 +124,7 @@ The server's own instructions tell the agent to call `weft_primer` first. The lo
 4. `weft_render` to check the result reads right, or `weft_patch` to apply an edit.
 5. Only then answer.
 
-[AGENT-SPEC.md](../AGENT-SPEC.md) is the full guide an agent follows, including what to do for each diagnostic code. The server does not check token names or action names, because it does not know your app's; a host that embeds the server in its own program can supply both lists (`createServer({ tokens, actions })`).
+[AGENT-SPEC.md](../AGENT-SPEC.md) is the full guide an agent follows, including what to do for each diagnostic code. Without a project the server does not check token names, action names or bindings, because it does not know your app's: start it with `--project`, pass `project` in a call, or, in a host that embeds the server, supply them to `createServer({ tokens, actions, data })`.
 
 ## Raw protocol
 

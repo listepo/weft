@@ -73,8 +73,12 @@ export function toSourceMap(root: Node, sources: readonly (WireSource | null)[])
   return map;
 }
 
-/** The positions `map` holds for the nodes of `root`, an untrusted value, in pre-order. */
-export function fromSourceMap(root: unknown, map: SourceMap): (WireSource | null)[] {
+/**
+ * The positions `map` holds for the nodes of `document`, an untrusted value, in pre-order from its
+ * root: the Rust side attaches them to `document.root`, and the map is keyed by those nodes.
+ */
+export function fromSourceMap(document: unknown, map: SourceMap): (WireSource | null)[] {
+  const root = isRecord(document) ? document["root"] : undefined;
   return preOrder(root).map((node): WireSource | null => {
     const s = map.get(node as Node);
     if (s === undefined) return null;

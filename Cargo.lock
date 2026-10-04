@@ -619,6 +619,7 @@ dependencies = [
  "anyhow",
  "clap",
  "serde_json",
+ "weft-catalog",
  "weft-core",
 ]
 
