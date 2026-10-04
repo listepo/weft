@@ -1,0 +1,156 @@
+# The `weft` command
+
+`weft` checks, formats and explains Weft files from a terminal. It is the Rust core as a program: it has no other dependencies, starts instantly and works the same on a laptop and in CI.
+
+## Get it
+
+There is no installer yet. Build it from the repository and put the folder on your `PATH`:
+
+```bash
+cargo build -p weft-cli
+export PATH="$PWD/target/debug:$PATH"
+```
+
+The examples assume you have also made the scratch folder from the [tour](tour.md). This block makes it again if you skipped that page:
+
+```console
+$ mkdir -p weft-tour
+$ cp corpus/login/screen.weft weft-tour/login.weft
+$ weft --help
+Validate, format and explain Weft documents
+
+Usage: weft <COMMAND>
+
+Commands:
+  validate  Check a document: markup, or canonical JSON when the file name ends in `.json`
+  fmt       Print the canonical markup of a document
+  explain   Read back what each binding, token, event and loop of a markup document means, one per line, so the meaning can be compared with the instruction behind an edit
+  help      Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+## `weft validate`
+
+```console
+$ weft validate weft-tour/login.weft; echo "exit $?"
+weft: no --catalog and no project; only the syntax layer was checked
+exit 0
+$ weft validate weft-tour/login.weft --catalog packages/catalog/catalog.json --strict; echo "exit $?"
+exit 0
+```
+
+Without `--catalog` or a project only the syntax layer runs (is it well-formed Weft markup?) and the program says so. The core catalog is at `packages/catalog/catalog.json`; with it, `validate` also checks every element, attribute, value, slot, state, event and parent-child rule. Pass your own catalog file to check against your own vocabulary ([Catalog and tokens](catalog-and-tokens.md)).
+
+**`--strict`** turns unknown elements and attributes from warnings into errors. Use it for anything you write and in CI. Without it, a file from a newer minor version of the format passes with warnings, which is what a reader wants. The lines look the same in both modes; the exit code is what changes:
+
+```console
+$ weft validate compat/unknown-element.weft --catalog packages/catalog/catalog.json; echo "exit $?"
+compat/unknown-element.weft:2:31 W403 Version 0.2 is newer than 0.1; unknown content is read as extensions.
+compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.1.0. — use a catalog component, or an extension named x-<vendor>-hologram
+exit 0
+$ weft validate compat/unknown-element.weft --catalog packages/catalog/catalog.json --strict; echo "exit $?"
+compat/unknown-element.weft:2:31 W403 Version 0.2 is newer than 0.1; unknown content is read as extensions.
+compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.1.0. — use a catalog component, or an extension named x-<vendor>-hologram
+exit 1
+```
+
+**Projects.** Every command first looks for a `weft.json` in the file's folder or above it and, when it finds one, checks against the project's catalog, tokens, actions and data schema, so token names, action names and bindings are checked too. `--project <file>` names another project file, `--no-project` ignores it, and `--catalog` replaces only the project's catalog. The project's `validate.mode` sets the default of `--strict` (`--lenient` overrides it), and its `format.write` the default of `fmt --write` (`--print` overrides it). Project problems are printed first, as `weft.json:#/pointer code message`. See [Projects](projects.md).
+
+**Output.** One line per diagnostic: `file:line:column code message`, then ` — hint` when there is one. [SPEC §6.2](../SPEC.md#62-codes) lists the codes; a code never changes meaning.
+
+**Exit codes.**
+
+| Code | Meaning |
+| --- | --- |
+| 0 | No errors. Warnings may have been printed. |
+| 1 | The file has errors. |
+| 2 | The command was used wrongly, or a file could not be read. |
+
+**JSON files.** A file whose name ends in `.json` is read as canonical JSON instead of markup (see [How it works](how-it-works.md#two-forms-of-one-document)). Diagnostics then show the location as a path in the document, since JSON has no lines of its own.
+
+**Check every reference screen** in one loop (the shell prints nothing when all are valid):
+
+```console
+$ for f in corpus/*/screen.weft; do weft validate "$f" --catalog packages/catalog/catalog.json --strict || echo "FAILED $f"; done
+```
+
+## `weft fmt`
+
+`fmt` prints the canonical form of a file: attributes in a fixed order, two-space indentation, one way to write empty elements, comments dropped. Two files that mean the same have the same canonical text, so formatting makes diffs show only real changes.
+
+```console
+$ cat > weft-tour/messy.weft <<'EOF'
+<screen weft="0.1"   label="Hello"   id="hello">
+  <!-- a comment -->
+  <button variant="primary" id="go"></button>
+</screen>
+EOF
+$ weft fmt weft-tour/messy.weft
+<screen id="hello" label="Hello" weft="0.1">
+  <button id="go" variant="primary"/>
+</screen>
+```
+
+`--write` rewrites the file instead of printing it, and leaves a file that is already canonical untouched:
+
+```console
+$ weft fmt weft-tour/messy.weft --write
+$ cat weft-tour/messy.weft
+<screen id="hello" label="Hello" weft="0.1">
+  <button id="go" variant="primary"/>
+</screen>
+```
+
+`fmt` is strict about syntax. A file that is not well-formed is not "fixed"; you get a diagnostic and exit code 1:
+
+```console
+$ printf '<screen id="s" weft="0.1"><button id="b" variant=primary/></screen>' > weft-tour/broken.weft
+$ weft fmt weft-tour/broken.weft; echo "exit $?"
+weft-tour/broken.weft:1:50 W106 Value of attribute "variant" must be in double quotes. — write variant="…"
+exit 1
+```
+
+## `weft explain`
+
+`explain` reads every binding, token reference, event and loop of a screen back as a plain sentence. Use it to compare what a file says with what you meant, which validation cannot do. Pass the catalog so that boolean and writable props read correctly:
+
+```console
+$ weft explain weft-tour/login.weft --catalog packages/catalog/catalog.json
+form#form on-submit: runs action auth.submit
+stack#fields gap: design token space.md
+field#email value: reads and writes $.email
+field#password value: reads and writes $.password
+button#submit disabled: true while $.email is falsy (NOT $.email)
+link#reset on-press: runs action nav.reset
+link#signup on-press: runs action nav.signup
+```
+
+With `--against <old-file>` it prints only what was added, removed or changed. This is how you check an edit, yours or a model's. Here a copy of the login screen has its condition turned around:
+
+```console
+$ sed 's/disabled="{!$.email}"/disabled="{$.email}"/' weft-tour/login.weft > weft-tour/login-flipped.weft
+$ weft explain weft-tour/login-flipped.weft --against weft-tour/login.weft --catalog packages/catalog/catalog.json
+button#submit disabled changed: was true while $.email is falsy (NOT $.email); now true while $.email is truthy
+```
+
+Sentences never hide a negation: a negated binding always contains `NOT`. If neither file changed anything, you get a message on stderr and no output. If either file has errors, `explain` prints the diagnostics as `validate` does and exits 1. It reads markup only, not `.json` files.
+
+## What `weft` does not do
+
+- It does not check token names, action names or bindings without a project: those checks need your app's tokens, actions and data schema, which a `weft.json` declares ([Projects](projects.md)).
+- It does not render, import or export. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
+- It does not apply patches. [Patches](patches.md) go through the MCP server or the library.
+
+## The Node version
+
+`packages/core/src/cli.ts` is an older front end with the same name that runs on Node through WebAssembly. It has `validate` and `fmt` with the same output, but no `explain` and no project support:
+
+```console
+$ node packages/core/src/cli.ts validate weft-tour/login.weft --catalog packages/catalog/catalog.json --strict; echo "exit $?"
+exit 0
+```
+
+Prefer the Rust program.

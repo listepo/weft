@@ -1,0 +1,9 @@
+{
+  "$schema": "../../schemas/weft.schema.json",
+  "tokens": ["tokens/base.tokens.json", "tokens/brand.tokens.json"],
+  "catalog": "catalog.json",
+  "actions": ["cart.checkout", "cart.remove", "nav.back"],
+  "data": "data.schema.json",
+  "validate": { "mode": "strict" },
+  "render": { "data": "sample.data.json" }
+}

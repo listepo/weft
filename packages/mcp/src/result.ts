@@ -1,6 +1,5 @@
 import type { Diagnostic } from "@weft/core";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { LIMITS } from "./context.ts";
 
 export const text = (value: string): CallToolResult => ({
   content: [{ type: "text", text: value }],
@@ -12,8 +11,8 @@ export const failure = (value: string): CallToolResult => ({
 });
 
 /** Diagnostics as compact JSON; a flood is cut so one bad call cannot fill the model's context. */
-export function diagnosticsText(diagnostics: readonly Diagnostic[]): string {
-  const shown = diagnostics.slice(0, LIMITS.diagnostics);
+export function diagnosticsText(diagnostics: readonly Diagnostic[], limit: number): string {
+  const shown = diagnostics.slice(0, limit);
   const omitted = diagnostics.length - shown.length;
   return JSON.stringify(omitted > 0 ? { diagnostics: shown, omitted } : { diagnostics: shown });
 }

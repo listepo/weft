@@ -1,6 +1,13 @@
 export * from "./model.ts";
 export { canonicalize, stringify } from "./canonical.ts";
 export {
+  checkData,
+  compileDataSchema,
+  type DataCheckOptions,
+  type DataSchema,
+  type DataSchemaProblem,
+} from "./data.ts";
+export {
   DIAGNOSTIC_CODES,
   diagnostic,
   didYouMean,
@@ -24,5 +31,6 @@ export {
   TOKEN,
 } from "./rules.ts";
 export { serialize } from "./serialize.ts";
+export { formatValue, readValue, type ReadValue } from "./values.ts";
 export type { ListSource, NodeSource, SourceMap } from "./source.ts";
 export { validate, type ValidateOptions } from "./validate.ts";

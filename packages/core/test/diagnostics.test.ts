@@ -20,7 +20,7 @@ test("every registered code has a case", () => {
   assert.deepEqual(
     Object.keys(cases).toSorted(),
     Object.keys(DIAGNOSTIC_CODES)
-      .filter((code) => !code.startsWith("W5") && !code.startsWith("W6"))
+      .filter((code) => !/^W[567]|^W31[56]$/.test(code))
       .toSorted(),
   );
 });
@@ -172,6 +172,11 @@ test("validate on JSON has no positions; on parsed markup it has them", () => {
   const [fromMarkup] = parse(screen('<text id="t" tone="loud"/>'), { catalog }).diagnostics;
   assert.equal(fromMarkup?.path, fromJson?.path);
   assert.equal(fromMarkup?.line, 1);
+  // A later pass over the parsed document keeps the positions too.
+  const parsed = parse(screen('<text id="t" tone="loud"/>'));
+  const [again] = validate(parsed.document, { catalog, source: parsed.source });
+  assert.equal(again?.path, fromJson?.path);
+  assert.equal(again?.line, 1);
 });
 
 test("parse without a catalog checks syntax only and keeps literals as strings", () => {

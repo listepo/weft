@@ -8,11 +8,15 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T23 | todo | P2 | 3 | 0% | |
 | T24 | todo | P2 | 2 | 0% | |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
-| T14 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
-| T31 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
+| T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
-| T33 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T34 | in progress | P1 | 5 | 5% | Claude Code / claude-opus-5-5 |
+| T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
+| T36 | todo | P1 | 4 | 0% | |
+| T38 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
+| T40 | in progress | P2 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -74,6 +78,35 @@ Convert Weft to Figma and back without loss, and ship a Figma plugin. Approved s
 
 Done when every corpus screen survives Weft to Figma to Weft byte-identical, a scripted set of designer edits comes back with the expected Weft diff, and the plugin, CLI command and MCP tools pass their tests in `moon ci`.
 
+Execution plan, stage 1 (library, both conversions, plugin; the CLI command, the MCP tools and style overrides are later stages):
+
+1. `packages/figma` (`@weft/figma`), pure TypeScript against a narrow interface of the Plugin API subset it uses. A type test checks that the official `@figma/plugin-typings` types satisfy that interface, so the real `figma` object and the in-memory fake (`test/fake-figma.ts`) are interchangeable.
+2. Library: one page with a component set per catalog kind (variants for its enum props and `state`, with an `(unset)` value where the prop has no default) and one variable collection holding the design tokens (dimensions as FLOAT in px, colors as COLOR). Kinds and tokens are recorded in plugin data, so a second run finds and reuses them.
+3. Weft to Figma: kinds whose content is `none` or `text` become library instances, the rest auto-layout frames (`stack` direction, gap bound to its token variable, align, wrap; `grid` columns); `<each>` and named slots become marked frames; text children become text layers. Each node keeps its Weft source (kind, id, props, events) in plugin data, and the root keeps the document version.
+4. Figma to Weft: a node is rebuilt from its stored source, and the Figma state is compared with the state that source would build. What is equal keeps the source as written (so an unedited screen is byte-identical); what differs is the designer's edit: text, label, child order, removed nodes, variant props, hidden, stack direction/align/wrap, and a gap that matches a token (bound variable or equal value). Copied nodes get fresh ids. New library instances become new nodes with generated ids and stand-ins for required props. Visual edits with no Weft prop or no matching token are reported as losses.
+5. Foreign layers (text, free or auto-layout frames, groups, images, vectors) convert lossily with a loss table in the shape of `@weft/from-aria`; reuse its id, literal and limit helpers.
+6. `plugins/figma`: `manifest.json`, a thin `code.ts` over `@weft/figma` (build from pasted or opened `.weft`, export the selected frame), `ui.html`; bundled into one file with Vite, with a test that the bundle builds.
+7. Tests (Vitest): every corpus screen round-trips byte-identical through the fake; a scripted set of designer edits yields the expected Weft; foreign layers yield the expected losses; library generation is idempotent.
+8. `packages/figma/README.md` with the Plugin API facts the code relies on, each with its official URL and the date checked. `docs/figma-style-overrides-design.md`: the style-override proposal for the creator (not built).
+9. Wire into pnpm, moon, `tsconfig.json`, `toolchain.md`; verify with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Progress (stage 1 done, on branch `t14-figma`):
+
+- Steps 1–9 are done. `@weft/figma` builds the library, both conversions, foreign layers and the plugin message handler. `plugins/figma` holds the manifest, a thin `code.ts`, `ui.html` and the Vite bundle. The bundle is tested by running it in a bare VM over the fake.
+- Tests:
+  - all 12 corpus screens round-trip byte-identical with no losses;
+  - 19 scripted designer edits match the expected Weft patches and loss kinds;
+  - building the library twice reuses it.
+- `from-aria` now exports `freshId`, `literal`, `fillRequired` and the limit helpers, which both importers share.
+- After T22 (WebAssembly core), the plugin is split. Figma's main thread has no WebAssembly, so it only builds and reads layers (`code.js`, with the core's loader stubbed). The UI iframe parses and serializes with the core inlined in `ui.html`. A harness runs both halves, the main thread without WebAssembly. The main thread interprets no values: the UI formats `text` and `label` for the build, and `finishRead` reads typed text with the core's `readValue` (a new `weft-wasm` export), so the value rules have one implementation.
+- `docs/figma-style-overrides-design.md` waits for the creator's approval.
+- Remaining:
+  - style overrides: after approval, the format extension in TS and Rust, then the Figma mapping for colors, radii and padding (only `gap` maps to a token today);
+  - CLI `weft figma pull` over the REST API;
+  - MCP / Claude Code tools (with T30);
+  - a check of the plugin in the real Figma app, including the inline module script and WebAssembly in its UI iframe;
+  - the open questions in the report: single components for kinds without variants, `state` as a variant axis, the manifest id, and plugin data on duplicate/detach.
+
 ### T31. Project file and shared resources
 
 Several `.weft` screens share one set of resources through a project file, `weft.json`, which tools find by walking up from the screen, like `tsconfig.json`. Screens themselves do not name what they use. Approved scope:
@@ -86,15 +119,33 @@ Several `.weft` screens share one set of resources through a project file, `weft
 
 Done when a corpus project of several screens with layered tokens, a catalog extension, an action list, a data schema and a shared fragment validates and renders through the CLI and the MCP server, the TypeScript and Rust results match, and a broken project file is reported with a diagnostic, never a crash.
 
+Execution plan (part A is built now; part B, fragments, is design only and waits for the creator):
+
+1. Spec first. `SPEC.md` gets a Project section: `weft.json` found by walking up from the screen (an explicit argument overrides it), its members (`tokens` list of DTCG files layered in order, `catalog` extension file, `actions` list, `data` schema file), paths relative to the project file and never leaving its directory, token layering (later token wins, aliases resolved after the merge, as the DTCG resolver module orders sets), the catalog extension rules (new kinds are added; an entry for a core kind merges into it; the merged catalog may only widen the core catalog by the version rules of §8, anything those rules call major is a conflict), the data schema (a JSON Schema 2020-12 subset), and new codes: `W315`/`W316` for binding paths and types against the data schema, `W7xx` for project problems. `AGENT-SPEC.md`, the MCP primer and tool descriptions follow. Sources go into `research.md`.
+2. Core, TypeScript and Rust (`packages/core/src/data.ts`, `crates/weft-core/src/data.rs`): `compileDataSchema` and `checkData(document, …)` as a separate pass, so `ValidateOptions` and `ParseOptions` keep their fields (T22 and T29 construct them); new codes in both registries.
+3. Catalog, TypeScript and Rust (`packages/catalog/src/project.ts`, `crates/weft-catalog/src/project.rs`): pure `resolveProject(content)` and `loadProject(text, read)` with an injected reader; token layering, catalog extension with conflict diagnostics, action list, data schema. Never throws or panics.
+4. File reading stays at the edges: `packages/catalog/src/node.ts` (walk up, read files) for Node tools; the Rust CLI walks up itself and gets `--project`; `render-react`'s `write-page` reads the project too. The MCP server reads no files: tools take an optional `project` argument with the contents, and `createServer` takes one from the host.
+5. Differential fixtures: data checks in the core fixture, project resolution in the catalog fixture; regenerate with `WEFT_UPDATE_FIXTURES=1`.
+6. An example project (`examples/project/`, outside `corpus/` because corpus tests read every directory there as a screen) with several screens, layered tokens, a catalog extension, actions and a data schema; CLI and MCP tests on it and on broken project files.
+7. Part B: `docs/fragments-design.md`, a proposal for `<use>` fragments, for the creator to approve.
+8. Verify with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Scope extension (creator): everything that can be configured is configurable through `weft.json`. The file becomes a config with optional sections, each with documented defaults; an explicit CLI or tool argument overrides `weft.json`, which overrides the defaults.
+
+9. Spec: `SPEC.md` §10.6 lists the sections — `validate` (`mode`), `format` (`write`), `render` (`data`, `tokens`, `outDir`), `export.<target>` and `import.<target>` (`react` and `html` today, `outDir`), `mcp` (`limits`), `plugins` (free-form, one object per plugin) — their defaults, the precedence, and how a later task adds its section (T34 SwiftUI, T35 web targets, T14 Figma: `export.swiftui`, `export.html`, `export.solid`, `export.figma` with a rem base and a token strategy, `import.figma`, `import.penpot`). An unknown key is `W702`, now always a warning; a wrong type is `W701` and the default applies.
+10. `schemas/weft.schema.json` (JSON Schema 2020-12), referenced from `$schema`; a test keeps it and the loader in step.
+11. Loader (Rust, through weft-wasm for TypeScript): the sections parsed into `Project.settings`, never throwing.
+12. Tools: the Rust CLI (`validate.mode` with `--lenient` to override, `format.write` with `--print`, `explain` reads the project's catalog), `write-page` (`render.data`, `render.tokens`), the Claude Code plugin scripts (project resources plus `render`, `export.react`, `import.html`), the MCP server (`weft-mcp --project <file>` read once at start by the host: resources, `validate.mode` as the default of `strict`, `mcp.limits`; the `project` tool argument never changes limits).
+13. `AGENTS.md`: every new tool option gets a `weft.json` key in the same change.
+14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
+
+Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). Left: the fragments proposal in `docs/fragments-design.md` waits for the creator; once approved, fragments are built (format, both parsers, patches, fixtures) and the example project gains a shared fragment, which the done criteria ask for.
+
 ### T32. Claude Code plugin from GitHub
 
 The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
 
 Progress: the bundle carries the WebAssembly core (T22 merged): `plugins/claude-code/build.ts` bundles the scripts and the MCP server with Vite 8 into the committed `dist/` and copies `weft_bg.wasm` to `dist/wasm/`, where `@weft/core` reads it relative to the shared chunk; `claude-code:build` depends on `root:wasm`. The plugin folder alone runs (tests copy only it to a temp folder and run every script and the server there; `claude --plugin-dir <copy> mcp list` shows `weft` connected; `claude plugin validate --strict` passes). The Desktop `node` requirement (24.2 or later on the PATH) is in the plugin README. `root:wasm` remaps build paths, so the `.wasm` is byte-reproducible and the up-to-date test compares it byte for byte. Remaining: `repository` in `plugin.json` once a remote exists, and the done criterion itself, `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` on a clean machine.
-
-### T33. Documentation for people
-
-The repository explains Weft to models (`AGENT-SPEC.md`) and to implementers (`SPEC.md`), but not to the people who use it. Write a `docs/` guide in plain English: what Weft is and why, a ten-minute tour of a screen, how the pieces fit (Rust core, WebAssembly, the TypeScript packages, CLI, MCP server, Claude Code plugin), and one page per tool with commands that were run and their real output. `README.md` links to it. Done when every command in the guide runs as written on main and a reader new to the project can validate, render, import and export a screen by following it.
 
 ### T34. SwiftUI generator and importer
 
@@ -109,3 +160,54 @@ Execution plan:
 5. **Tests.** Every corpus screen and catalog example: generate, import, serialize, byte-equal to the source; `xcrun --sdk iphonesimulator swiftc -typecheck -target arm64-apple-ios17.0-simulator` (and macOS 14) on the generated files, skipped with a message when `xcrun` is missing; a hand-written sample in `tests/fixtures` with its expected markup and loss table; a proptest that the importer never panics and always returns a document that validates; `deps.rs` pins the new crate's dependencies; CLI end-to-end cases. `moon` `rust-test` inputs gain `/corpus/**/*`.
 6. **WebAssembly.** Check `cargo build --target wasm32-unknown-unknown -p weft-swiftui --no-default-features` (generator) and with the importer; report, do not wire into `weft-wasm`.
 7. Docs: `toolchain.md` rows, `research.md` parser choice, `SPEC.md` §9 "To SwiftUI"/"From SwiftUI" lines (and `AGENT-SPEC.md` only if the MCP-facing surface changes, which it does not). Verify with `moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+### T35. Web targets both ways: HTML/CSS, React and SolidJS
+
+Generate static HTML with CSS, React (JSX/TSX) and SolidJS components from `.weft`, and read each of them back from source. Approved scope: one Rust crate next to the core (JSX and TSX parsed with oxc, HTML with html5ever, or better maintained options), exposed through the CLI and through WebAssembly. The TypeScript `@weft/to-jsx` and the HTML import of `@weft/from-aria` move into it, and their packages keep their API as wrappers, as T22 did for the core, so there is one implementation. Code that Weft generated comes back without loss; hand-written code imports with a loss table. Done when every corpus screen survives Weft → HTML/CSS, React and Solid → Weft byte-identical after formatting, the generated React and Solid components render with the same accessibility tree as today's renderer, and hand-written samples import with the expected losses.
+
+### T36. Examples, snapshots, screenshots and comparisons
+
+Many more tests, built on many more examples. Grow the corpus so every catalog kind, prop, slot, binding form and token type appears in at least one screen. For every screen and every target, record what each target produces as reviewed snapshots: insta in Rust, Vitest snapshots in TypeScript. Targets are canonical JSON, HTML/CSS, React, Solid, SwiftUI and Figma. Then take screenshots: rendered web targets in a real browser, through Vitest browser mode with Playwright, and generated SwiftUI in the iOS Simulator. Compare them in three ways: against the reviewed baselines, across targets for the same screen (React, Solid and static HTML must look the same within a tolerance and give the same accessibility tree), and across round trips (a screen and its round-tripped copy look identical). A failed comparison writes a visual diff image. Done when the suites run in `moon ci`, every baseline is reviewed, and a deliberate one-pixel layout change and a one-word text change are each caught.
+
+### T38. Open Design plugin
+
+A plugin for Open Design (https://open-design.ai, https://github.com/attentiondotnet/open-design), the open-source, local-first design platform that runs on top of a coding agent and has had plugins since 0.8.0. It brings Weft into Open Design:
+- author screens as `.weft` with the authoring guide and the weft MCP server;
+- import HTML to `.weft`;
+- export to React (and the other targets once T34 and T35 land);
+- render and preview pages;
+- map an Open Design `DESIGN.md` design system to Weft design tokens where the two line up, with a loss list where they do not.
+
+It reuses the scripts, the MCP server and the build in `plugins/shared` (T37), which write the same bundle into the Claude Code and Cursor plugins, instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
+
+### T39. Context in the document
+
+A `.weft` file carries the context that a person or an agent left for whoever works on it next, so the next agent or person can use it. Approved scope:
+- **Two levels:** a context block on the screen (purpose, decisions, constraints, open questions) and context entries on any element (why a button is disabled, where a label came from).
+- **Typed entries:** every entry has a kind (`intent`, `decision`, `constraint`, `question`, `todo`, `source`), an author (`human` or `agent`, with a name or model) and text. The validator checks their shape.
+- **Part of the document:** context is in canonical JSON and survives formatting, patches (new patch operations to add, change and resolve entries) and every conversion. Code generators write it as comments; Figma keeps it in plugin data; importers read it back from code that Weft generated.
+- **Untrusted by design:** context is data for the reader, never instructions. `AGENT-SPEC.md` tells models to treat it as information to weigh and to ignore commands inside it. Renderers never show it to end users.
+
+Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
+
+Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` changes):
+
+1. Read `SPEC.md`, `AGENT-SPEC.md`, `docs/figma-style-overrides-design.md`, the parser, model, canonical form and patches in `crates/weft-core`, plugin data in `packages/figma`, `packages/to-jsx` and the benchmark primers in `bench/`.
+2. Write `docs/context-design.md` in the shape of the style-overrides proposal: markup syntax with at least two alternatives and a recommendation, the entry model, canonical JSON and ordering, validation rules, new diagnostic codes and limits, patch operations, the effect on every target (renderers, code generators and importers, Figma, MCP, `weft explain`), the security rule and its `AGENT-SPEC.md` wording, the `weft.json` option (T31), versioning and migration, and open questions with recommendations. Worked examples use the corpus login screen in markup and canonical JSON.
+3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
+
+Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
+
+### T40. Penpot round trip and plugin
+
+The same as T14, for Penpot (https://penpot.app), the open-source design tool. Scope:
+- a Weft component library generated from the catalog and the tokens;
+- Weft to Penpot, with the Weft source kept in plugin data;
+- Penpot to Weft without loss for screens Weft built, including designer edits;
+- foreign layers with a loss table;
+- a Penpot plugin to build frames from `.weft` and export a selection;
+- tests on every corpus screen and a scripted set of designer edits.
+
+Penpot lays out boards with flex and grid layouts, which map to `stack` and `grid`. Check this and every other API fact against Penpot's official plugin docs, citing the URL and the date checked.
+
+The conversion logic that does not depend on the tool moves out of `@weft/figma` into a shared design-tool layer used by both, so Figma and Penpot keep one implementation of the mapping. Style overrides follow the design approved for T14. Starts after T14 stage 1 is on main. Done when every corpus screen survives Weft to Penpot to Weft byte-identical, the edit scenarios give the expected Weft diff, and the plugin and its tests pass in `moon ci`.

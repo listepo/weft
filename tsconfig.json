@@ -21,6 +21,7 @@
     "bench/test",
     "plugins/*/build.ts",
     "plugins/*/scripts",
+    "plugins/*/src",
     "plugins/*/test"
   ]
 }

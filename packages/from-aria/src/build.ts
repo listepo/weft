@@ -78,7 +78,11 @@ type Ctx = {
 
 type Placed = { node: Node; slot?: string | undefined };
 
-const lose = (ctx: Ctx, kind: LossKind, path: string, note: string) =>
+// What the shared helpers below need, so that other importers (`@weft/figma`) can reuse them.
+export type IdState = { used: Set<string>; counters: Map<string, number> };
+export type LossLog = { losses: Loss[] };
+
+const lose = (ctx: LossLog, kind: LossKind, path: string, note: string) =>
   ctx.losses.push({ kind, path, note });
 
 export function limitReached(diagnostics: Diagnostic[], path: string, what: string): void {
@@ -99,14 +103,14 @@ function truncate(ctx: Ctx, path: string): void {
 
 // A literal must not contain a reference after its first character (SPEC §2.1, W213); such text
 // is real content of the UI, so the brace is replaced by a look-alike instead of dropping it.
-function literal(ctx: Ctx, path: string, s: string): string {
+export function literal(ctx: LossLog, path: string, s: string): string {
   const out = clean(s);
   if (out.search(EMBEDDED_REFERENCE) <= 0) return out;
   lose(ctx, "text", path, "text that reads as a binding or token reference had its brace replaced");
   return out[0] + out.slice(1).replace(REFERENCE_START, "｛");
 }
 
-function freshId(ctx: Ctx, base: string, name: string): string {
+export function freshId(ctx: IdState, base: string, name: string): string {
   const s = slug(name);
   if (s !== "" && !ctx.used.has(`${base}-${s}`)) {
     ctx.used.add(`${base}-${s}`);
@@ -227,31 +231,36 @@ function setProp(
   props[name] = typeof value === "string" ? literal(ctx, at.path, value) : value;
 }
 
-function fillRequired(
-  ctx: Ctx,
+/**
+ * Stand-ins for required props the input has no value for. `name` is the element's text or name,
+ * used for string props; `parentDef` is the parent's component (absent at the root).
+ */
+export function fillRequired(
+  ctx: LossLog,
   props: Record<string, Value>,
   def: ComponentDef,
-  parent: Parent,
-  s: Sem,
+  parentDef: ComponentDef | undefined,
+  root: boolean,
+  name: string,
   path: string,
 ): void {
-  for (const [name, pd] of Object.entries(def.props ?? {})) {
-    if (pd.required !== true || Object.hasOwn(props, name)) continue;
+  for (const [prop, pd] of Object.entries(def.props ?? {})) {
+    if (pd.required !== true || Object.hasOwn(props, prop)) continue;
     // The root's `weft` is `Document.weft`, never a prop (SPEC §3).
-    if (name === "weft" && parent.kind === "") continue;
+    if (prop === "weft" && root) continue;
     // A value the parent selects by (radio and option `value`) must tell the children apart.
-    const selects = parent.def?.props?.[name]?.writable === true;
+    const selects = parentDef?.props?.[prop]?.writable === true;
     let value: Value;
     if (pd.type === "number") value = pd.default ?? pd.min ?? 0;
     else if (pd.type === "boolean") value = pd.default ?? false;
     else if (pd.type === "enum") value = pd.default ?? pd.values?.[0] ?? "";
-    else value = selects ? slug(textOf(s.children) || s.name) || name : "";
-    props[name] = value;
+    else value = selects ? slug(name) || prop : "";
+    props[prop] = value;
     lose(
       ctx,
       "values",
       path,
-      `required ${name} is not in the input; ${JSON.stringify(value)} stands in`,
+      `required ${prop} is not in the input; ${JSON.stringify(value)} stands in`,
     );
   }
 }
@@ -454,7 +463,7 @@ function componentNode(
     props["label"] = "";
     lose(ctx, "names", path, `<${kind}> needs an accessible name and the input gives none`);
   }
-  fillRequired(ctx, props, def, parent, s, path);
+  fillRequired(ctx, props, def, parent.def, parent.kind === "", textOf(s.children) || s.name, path);
   const node: Node = { kind, id, props };
   if (Object.keys(slots).length > 0) node.slots = slots;
   if (children.length > 0) node.children = children;

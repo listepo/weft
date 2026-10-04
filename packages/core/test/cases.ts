@@ -16,8 +16,13 @@ export type Case = {
 };
 
 // The W5xx patch codes need a patch list, not a document; patch.test.ts has their cases. The
-// W6xx import codes need an importer; packages/from-aria tests them.
-export const cases: Record<Exclude<DiagnosticCode, `W5${string}` | `W6${string}`>, Case> = {
+// W6xx import codes need an importer; packages/from-aria tests them. W315 and W316 need a data
+// schema (data.test.ts), and the W7xx project codes a project (packages/catalog project tests).
+export type DocumentCode = Exclude<
+  DiagnosticCode,
+  `W5${string}` | `W6${string}` | `W7${string}` | "W315" | "W316"
+>;
+export const cases: Record<DocumentCode, Case> = {
   W101: { markup: screen('<text id="t" tone="muted"value="x"/>') },
   W102: { markup: `<?xml version="1.0"?>${screen("")}` },
   W103: { markup: `<!DOCTYPE screen>${screen("")}` },

@@ -1,7 +1,8 @@
 node_modules/
 dist/
-# The Claude Code plugin ships its bundles, because Claude Code installs it from git.
+# The Claude Code and Cursor plugins ship their bundles, because both install from git.
 !plugins/claude-code/dist/
+!plugins/cursor/dist/
 .DS_Store
 .moon/cache/
 .moon/docker/
