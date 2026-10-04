@@ -313,6 +313,25 @@ importers:
         specifier: 3.0.1
         version: 3.0.1(ajv@8.20.0)
 
+  plugins/figma:
+    dependencies:
+      '@weft/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
+      '@weft/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@weft/figma':
+        specifier: workspace:*
+        version: link:../../packages/figma
+    devDependencies:
+      '@figma/plugin-typings':
+        specifier: 1.140.0
+        version: 1.140.0
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@26.6.4)
+
   plugins/shared:
     devDependencies:
       '@weft/catalog':
@@ -333,25 +352,6 @@ importers:
       '@weft/to-jsx':
         specifier: workspace:*
         version: link:../../packages/to-jsx
-
-  plugins/figma:
-    dependencies:
-      '@weft/catalog':
-        specifier: workspace:*
-        version: link:../../packages/catalog
-      '@weft/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@weft/figma':
-        specifier: workspace:*
-        version: link:../../packages/figma
-    devDependencies:
-      '@figma/plugin-typings':
-        specifier: 1.140.0
-        version: 1.140.0
-      vite:
-        specifier: 8.3.2
-        version: 8.3.2(@types/node@26.6.4)
 
 packages:
 
