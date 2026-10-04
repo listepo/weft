@@ -9,3 +9,4 @@
 - T34. SwiftUI generator and importer
 - T35. Web targets both ways: HTML/CSS, React and SolidJS
 - T36. Examples, snapshots, screenshots and comparisons
+- T37. Cursor plugin

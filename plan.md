@@ -15,6 +15,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
+| T37 | todo | P1 | 3 | 0% | |
 
 ### T8. Evaluation
 
@@ -109,3 +110,14 @@ Generate static HTML with CSS, React (JSX/TSX) and SolidJS components from `.wef
 ### T36. Examples, snapshots, screenshots and comparisons
 
 Many more tests, built on many more examples. Grow the corpus so every catalog kind, prop, slot, binding form and token type appears in at least one screen. For every screen and every target, record what each target produces as reviewed snapshots: insta in Rust, Vitest snapshots in TypeScript. Targets are canonical JSON, HTML/CSS, React, Solid, SwiftUI and Figma. Then take screenshots: rendered web targets in a real browser, through Vitest browser mode with Playwright, and generated SwiftUI in the iOS Simulator. Compare them in three ways: against the reviewed baselines, across targets for the same screen (React, Solid and static HTML must look the same within a tolerance and give the same accessibility tree), and across round trips (a screen and its round-tripped copy look identical). A failed comparison writes a visual diff image. Done when the suites run in `moon ci`, every baseline is reviewed, and a deliberate one-pixel layout change and a one-word text change are each caught.
+
+### T37. Cursor plugin
+
+The same features as the Claude Code plugin (T30, T32), packaged for Cursor:
+- import HTML to `.weft`, with the loss table;
+- export `.weft` to React;
+- render `.weft` to an HTML page and preview it in Cursor's built-in browser;
+- the weft MCP server;
+- the authoring guide from `AGENT-SPEC.md`, as rules or skills.
+
+It lives in this repository (`plugins/cursor`) and reuses the bundled scripts and MCP server of the Claude Code plugin rather than a second copy: shared files move to one place that both plugins use. Follow the plugin format from Cursor's official documentation, citing its URL and the date it was checked. Done when the plugin installs in Cursor from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
