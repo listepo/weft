@@ -249,6 +249,9 @@ struct Converted {
     chosen: Option<Node>,
 }
 
+// Kept out of line: inlined into each other, these share one large frame per nesting level, and
+// imports must fit the 1 MiB stack WebAssembly gets.
+#[inline(never)]
 fn convert_list<'c>(list: &[Sem], parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Converted {
     let mut items = ctx.flatten(list, parent.depth, &parent.path);
     let mut out = Converted {
@@ -322,6 +325,9 @@ fn place(out: &mut Converted, p: Placed) {
     }
 }
 
+// Kept out of line: inlined into each other, these share one large frame per nesting level, and
+// imports must fit the 1 MiB stack WebAssembly gets.
+#[inline(never)]
 fn flush<'c>(pending: &mut String, parent: &Parent<'c>, ctx: &mut Ctx<'c>, out: &mut Converted) {
     let text = squash(&clean(pending));
     pending.clear();
@@ -363,6 +369,9 @@ fn is_header_row(s: &Sem, parent: &Parent<'_>, ctx: &mut Ctx<'_>) -> bool {
             .all(|c| c.role == "columnheader" || (c.role == "text" && js_trim(&c.name).is_empty()))
 }
 
+// Kept out of line: inlined into each other, these share one large frame per nesting level, and
+// imports must fit the 1 MiB stack WebAssembly gets.
+#[inline(never)]
 fn convert_node<'c>(s: &Sem, parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Option<Placed> {
     ctx.nodes += 1;
     if ctx.nodes > MAX_NODES || parent.depth >= MAX_DEPTH {
@@ -395,6 +404,9 @@ fn convert_node<'c>(s: &Sem, parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Option<P
     }
 }
 
+// Kept out of line: inlined into each other, these share one large frame per nesting level, and
+// imports must fit the 1 MiB stack WebAssembly gets.
+#[inline(never)]
 fn extension<'c>(s: &Sem, parent: &Parent<'c>, ctx: &mut Ctx<'c>, why: Option<String>) -> Node {
     let role = if ARIA_ROLES.contains(&s.role.as_str()) && !dissolved(&s.role) {
         s.role.as_str()
@@ -443,6 +455,9 @@ fn quote(s: &str) -> String {
     format!("\"{s}\"")
 }
 
+// Kept out of line: inlined into each other, these share one large frame per nesting level, and
+// imports must fit the 1 MiB stack WebAssembly gets.
+#[inline(never)]
 fn component_node<'c>(
     s: &Sem,
     kind: &str,
@@ -597,6 +612,9 @@ fn component_node<'c>(
 
 /// SPEC §5.1: a renderer emits one tablist of tab buttons followed by tab panels; each panel goes
 /// back into the tab it belongs to.
+// Kept out of line: inlined into each other, these share one large frame per nesting level, and
+// imports must fit the 1 MiB stack WebAssembly gets.
+#[inline(never)]
 fn convert_tabs<'c>(
     list: &Sem,
     panels: &[&Sem],

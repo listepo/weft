@@ -20,4 +20,6 @@ pub use limits::{MAX_DEPTH, MAX_NODES, limit_reached};
 pub use loss::{ImportResult, Loss, LossKind, Losses, empty_result};
 pub use props::{Scalar, coerce, fill_required};
 pub use sem::{Note, Sem};
-pub use text::{clean, is_js_space, js_number_from, js_trim, literal, slug, squash};
+pub use text::{
+    clean, is_js_space, js_length, js_number_from, js_prefix, js_trim, literal, slug, squash,
+};

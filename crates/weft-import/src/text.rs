@@ -25,6 +25,24 @@ pub fn js_trim(s: &str) -> &str {
     s.trim_matches(is_js_space)
 }
 
+/// The first `units` UTF-16 code units, as `String.prototype.slice(0, units)` counts; a pair cut in
+/// half is left out, since a lone surrogate cannot be text.
+pub fn js_prefix(s: &str, units: usize) -> &str {
+    let mut used = 0;
+    for (i, c) in s.char_indices() {
+        used += c.len_utf16();
+        if used > units {
+            return &s[..i];
+        }
+    }
+    s
+}
+
+/// Length as JavaScript counts it, in UTF-16 code units.
+pub fn js_length(s: &str) -> usize {
+    s.chars().map(char::len_utf16).sum()
+}
+
 /// Runs of whitespace become one space, and the ends are trimmed.
 pub fn squash(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
@@ -174,6 +192,14 @@ mod tests {
         assert_eq!(squash("\u{FEFF}x\u{FEFF}"), "x");
         // U+0085 is whitespace to Rust but not to ECMAScript.
         assert_eq!(squash("a\u{85}b"), "a\u{85}b");
+    }
+
+    #[test]
+    fn prefixes_count_utf16_units() {
+        assert_eq!(js_prefix("abc", 2), "ab");
+        assert_eq!(js_prefix("a😀b", 2), "a");
+        assert_eq!(js_prefix("a😀b", 3), "a😀");
+        assert_eq!(js_length("a😀b"), 4);
     }
 
     #[test]
