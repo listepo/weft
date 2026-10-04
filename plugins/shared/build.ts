@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
+import { redirect } from "./redirect.ts";
 
 const SHARED = dirname(fileURLToPath(import.meta.url));
 const REPOSITORY = join(SHARED, "../..");
@@ -41,11 +42,15 @@ export const ENTRIES = {
 };
 
 /**
- * The WebAssembly core (`moon run root:wasm`). `@weft/core` reads it with
- * `new URL("../wasm/weft_bg.wasm", import.meta.url)` from the shared chunk, which is built into
- * `dist/chunks/`, so the copy lands in `dist/wasm/`. A bundler does not follow that URL.
+ * The web WebAssembly module (`moon run root:wasm`): the core plus the HTML and JSX importers and
+ * generators the scripts call. The core's own loader is redirected to the web one, a superset with
+ * the same exports, so the plugins ship one module. `@weft/core/web` reads it with
+ * `new URL("../wasm-web/weft_bg.wasm", import.meta.url)` from the shared chunk, which is built into
+ * `dist/chunks/`, so the copy lands in `dist/wasm-web/`. A bundler does not follow that URL.
  */
-export const WASM = join(REPOSITORY, "packages/core/wasm/weft_bg.wasm");
+export const WASM = join(REPOSITORY, "packages/core/wasm-web/weft_bg.wasm");
+const LOADER = join(REPOSITORY, "packages/core/src/wasm.ts");
+const WEB_LOADER = join(REPOSITORY, "packages/core/src/web.ts");
 
 /** Builds the bundles and the WebAssembly module into `outDir`. */
 export async function buildBundle(outDir: string): Promise<void> {
@@ -59,6 +64,7 @@ export async function buildBundle(outDir: string): Promise<void> {
     // every package, because the cache has no `node_modules`.
     ssr: { noExternal: true, target: "node" },
     define: { "process.env.NODE_ENV": JSON.stringify("production") },
+    plugins: [redirect(LOADER, WEB_LOADER)],
     build: {
       ssr: true,
       outDir,
@@ -80,8 +86,8 @@ export async function buildBundle(outDir: string): Promise<void> {
       },
     },
   });
-  mkdirSync(join(outDir, "wasm"), { recursive: true });
-  copyFileSync(WASM, join(outDir, "wasm/weft_bg.wasm"));
+  mkdirSync(join(outDir, "wasm-web"), { recursive: true });
+  copyFileSync(WASM, join(outDir, "wasm-web/weft_bg.wasm"));
 }
 
 /**

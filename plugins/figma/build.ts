@@ -10,26 +10,18 @@ import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build, type Plugin } from "vite";
+import { redirect } from "../shared/redirect.ts";
 
 const PLUGIN = dirname(fileURLToPath(import.meta.url));
 const REPOSITORY = join(PLUGIN, "../..");
 const LOADER = join(REPOSITORY, "packages/core/src/wasm.ts");
+// The web module (`@weft/core/web`) holds the HTML and JSX importers and generators, which the
+// plugin never calls; both halves get the stub, so neither carries nor fetches that module.
+const WEB_LOADER = join(REPOSITORY, "packages/core/src/web.ts");
+const NO_WASM = join(PLUGIN, "src/no-wasm.ts");
 const GLUE = join(REPOSITORY, "packages/core/wasm/weft.js");
 const MODULE = join(REPOSITORY, "packages/core/wasm/weft_bg.wasm");
 const TOKENS = join(REPOSITORY, "packages/catalog/tokens/default.tokens.json");
-
-/** Resolves `from` to `to` for every importer except `to` itself, which imports the original. */
-function redirect(from: string, to: string): Plugin {
-  return {
-    name: `weft-redirect-${from}`,
-    enforce: "pre",
-    async resolveId(source, importer, options) {
-      if (importer === to) return null;
-      const resolved = await this.resolve(source, importer, { ...options, skipSelf: true });
-      return resolved?.id === from ? to : null;
-    },
-  };
-}
 
 const WASM_URL = /new URL\((["'])[^"']*weft_bg\.wasm\1, import\.meta\.url\)/g;
 
@@ -60,7 +52,7 @@ const shared = {
 export async function buildPlugin(outDir: string): Promise<void> {
   await build({
     ...shared,
-    plugins: [redirect(LOADER, join(PLUGIN, "src/no-wasm.ts"))],
+    plugins: [redirect(LOADER, NO_WASM), redirect(WEB_LOADER, NO_WASM)],
     build: {
       ...shared.build,
       outDir,
@@ -77,7 +69,11 @@ export async function buildPlugin(outDir: string): Promise<void> {
   const ui = join(outDir, "ui");
   await build({
     ...shared,
-    plugins: [redirect(GLUE, join(PLUGIN, "src/wasm-inline.ts")), dropWasmUrls([LOADER, GLUE])],
+    plugins: [
+      redirect(GLUE, join(PLUGIN, "src/wasm-inline.ts")),
+      redirect(WEB_LOADER, NO_WASM),
+      dropWasmUrls([LOADER, GLUE]),
+    ],
     define: {
       WEFT_DEFAULT_TOKENS: readFileSync(TOKENS, "utf8"),
       WEFT_WASM_BASE64: JSON.stringify(readFileSync(MODULE).toString("base64")),

@@ -857,6 +857,8 @@ dependencies = [
  "wasm-bindgen",
  "weft-catalog",
  "weft-core",
+ "weft-import",
+ "weft-web",
 ]
 
 [[package]]
