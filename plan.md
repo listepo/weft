@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T14 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
-| T33 | in progress | P1 | 2 | 5% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -88,16 +87,3 @@ Done when a corpus project of several screens with layered tokens, a catalog ext
 ### T32. Claude Code plugin from GitHub
 
 The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
-
-### T33. Documentation for people
-
-The repository explains Weft to models (`AGENT-SPEC.md`) and to implementers (`SPEC.md`), but not to the people who use it. Write a `docs/` guide in plain English: what Weft is and why, a ten-minute tour of a screen, how the pieces fit (Rust core, WebAssembly, the TypeScript packages, CLI, MCP server, Claude Code plugin), and one page per tool with commands that were run and their real output. `README.md` links to it. Done when every command in the guide runs as written on main and a reader new to the project can validate, render, import and export a screen by following it.
-
-Execution plan:
-
-1. Build the WebAssembly core (`mise exec -- moon run root:wasm`) and the `weft` binary, so every command in the guide can be run on this branch.
-2. Pages in `docs/`, in plain English for people who use Weft: `README.md` (index and reading order), `what-is-weft.md`, `tour.md` (the `login` corpus screen: validate, fix a diagnostic, render, patch), `how-it-works.md` (mermaid diagram, data flow, differential tests), one page per tool (`cli.md`, `mcp.md`, `claude-code-plugin.md`, `rendering.md`, `importing.md`, `exporting-jsx.md`, `catalog-and-tokens.md`, `patches.md`) and `contributing.md` (links `AGENTS.md`, does not repeat it). Pages explain and link to `SPEC.md` sections instead of copying them. Work in progress (T14, T31, T32) gets one line under "Coming" at most.
-3. Every command is run as written on this branch and its output pasted unchanged (trimmed with `…` when long). A doc/code mismatch is not fixed here; it goes into the report.
-4. `README.md` gets a short link to `docs/`.
-5. Verify: format new markdown if the repo formats it, then `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
-6. Close: move T33 into `done.md` with a Result paragraph, drop it from `plan.md` and `todo.md`.
