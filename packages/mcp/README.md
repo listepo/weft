@@ -1,6 +1,6 @@
 # @weft/mcp
 
-An MCP server that lets an agent read, check and edit Weft documents (see `SPEC.md`). It speaks stdio and works only on markup passed in tool arguments: it reads no files and opens no network connections.
+An MCP server that lets an agent read, check and edit Weft documents (see `SPEC.md`). It speaks stdio and works only on markup passed in tool arguments: its tools read no files, and it opens no network connections. The only file it reads is the project file its host names at start.
 
 ## Run and register
 
@@ -24,6 +24,15 @@ Register it in an MCP client with an absolute path to the checkout:
 ```
 
 For Claude Code: `claude mcp add weft -- node /path/to/weft/packages/mcp/src/server.ts`. The package also declares a `weft-mcp` bin.
+
+### With a project
+
+`--project /path/to/weft.json` starts the server with a project file (SPEC section 10). Its catalog, tokens, actions and data schema become the server's, and two of its settings (SPEC section 10.6) apply:
+
+- `validate.mode`: the default of `weft_validate`'s `strict` (`"strict"` or `"lenient"`, default lenient). The argument still wins. `weft_patch` and `weft_render` always check strictly.
+- `mcp.limits`: any of `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`, each a whole number of at least 1. Unset limits keep the defaults below.
+
+Project problems go to stderr. A project with errors, or a file that cannot be read, stops the server before it serves (exit 1 or 2). The server never looks for a project file itself: it has no screen to look from.
 
 ## Tools
 
@@ -52,12 +61,14 @@ Tool inputs are untrusted. They are checked against their schema before a tool r
 - Results list at most 40 diagnostics and report how many were left out.
 - `kind`: at most 100 characters.
 
-The numbers live in `LIMITS` in `src/context.ts`.
+These are the defaults, in `LIMITS` in `src/context.ts`; the host changes them with `mcp.limits` (above) or `createServer`. A `project` tool argument never does: its settings are ignored, so a model cannot lift its own bounds.
 
 ## Host configuration
 
-`createServer({ catalog, tokens, actions, data })` takes the catalog (default `weft-core`), the known design tokens (a map of token path to DTCG `$type`), the known action names and a data schema from `compileDataSchema` of `@weft/core`. Token references, action names and bindings are checked only when the host supplies them; a `project` argument replaces all four. The stdio entry point supplies neither.
+`createServer({ catalog, tokens, actions, data })` takes the catalog (default `weft-core`), the known design tokens (a map of token path to DTCG `$type`), the known action names and a data schema from `compileDataSchema` of `@weft/core`. Token references, action names and bindings are checked only when the host supplies them; a `project` argument replaces all four. The stdio entry point supplies them only with `--project`.
+
+A second argument, `{ mode, limits }`, sets the server's own settings: the default of `weft_validate`'s `strict` and the limits to change. `hostOptions(project)` turns a loaded project into both arguments.
 
 ## Adding a tool
 
-A tool is one function `(server, context) => void` in `src/tools/`, listed in `src/tools/index.ts`. `weft_render` is such a file; it renders with the host's catalog from `Context`.
+A tool is one function `(server, context, settings) => void` in `src/tools/`, listed in `src/tools/index.ts`. `weft_render` is such a file; it renders with the host's catalog from `Context` and bounds its input with `settings.limits`. A new limit or option gets a key in `weft.json` in the same change (SPEC section 10.6).
