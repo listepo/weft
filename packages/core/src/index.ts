@@ -12,7 +12,6 @@ export {
   diagnostic,
   didYouMean,
   hasErrors,
-  oneOf,
   type DiagnosticCode,
   type Mode,
   type Position,
@@ -28,7 +27,6 @@ export {
   EMBEDDED_REFERENCE,
   ID,
   LOOP_VARIABLE,
-  NAME,
   NON_XML_CHAR,
   TOKEN,
 } from "./rules.ts";

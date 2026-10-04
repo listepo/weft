@@ -37,6 +37,9 @@ pub struct Project {
     pub actions: Option<Vec<String>>,
     /// Present when the project declares `data`.
     pub data: Option<DataSchema>,
+    /// The data schema as written, for callers that hand it on rather than check with it (the
+    /// WebAssembly boundary passes JSON, not compiled schemas).
+    pub data_source: Option<Json>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -457,6 +460,7 @@ fn empty_project() -> Result<Project, CatalogError> {
         tokens: None,
         actions: None,
         data: None,
+        data_source: None,
     })
 }
 
@@ -524,6 +528,7 @@ pub fn load_project(
     {
         let (schema, problems) = compile_data_schema(&found);
         project.data = Some(schema);
+        project.data_source = Some(found);
         for p in problems {
             let expected = if p.code == Code::W709 {
                 "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"

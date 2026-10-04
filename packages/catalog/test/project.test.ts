@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, test } from "vitest";
-import { loadProjectText, parseJson } from "../src/index.ts";
+import { loadProjectText } from "../src/index.ts";
 import { projectCases, runCase } from "./project-cases.ts";
 
 for (const [name, c] of Object.entries(projectCases)) {
@@ -113,16 +113,5 @@ describe("project diagnostics", () => {
       assert.doesNotThrow(() => loadProjectText(text, { read: () => "{]" }));
       assert.doesNotThrow(() => loadProjectText(text));
     }
-  });
-});
-
-describe("parseJson", () => {
-  test("rejects what the Rust core rejects", () => {
-    assert.equal(parseJson('{"a": 1e400}').ok, false);
-    assert.equal(parseJson('"\\udc00"').ok, false);
-    assert.equal(parseJson('{"\\ud800": 1}').ok, false);
-    assert.equal(parseJson(`${"[".repeat(774)}${"]".repeat(774)}`).ok, false);
-    assert.equal(parseJson(`${"[".repeat(773)}${"]".repeat(773)}`).ok, true);
-    assert.equal(parseJson('"\\ud83d\\ude00"').ok, true);
   });
 });

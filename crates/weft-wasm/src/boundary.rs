@@ -64,6 +64,38 @@ impl Options {
     }
 }
 
+/// The options of `load_project`.
+pub struct ProjectWire {
+    pub mode: Mode,
+    pub prefix: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WireProjectOptions {
+    #[serde(default)]
+    strict: bool,
+    prefix: Option<String>,
+}
+
+impl ProjectWire {
+    pub fn read(text: &str) -> Result<ProjectWire> {
+        let wire: WireProjectOptions =
+            serde_json::from_str(text).map_err(|source| BindingError::Wire {
+                what: "project options",
+                source,
+            })?;
+        Ok(ProjectWire {
+            mode: if wire.strict {
+                Mode::Strict
+            } else {
+                Mode::Lenient
+            },
+            prefix: wire.prefix.unwrap_or_else(|| "#".to_owned()),
+        })
+    }
+}
+
 /// A value nested one level past the depth limit: the core answers it the way it answers any
 /// input that deep, which is what the TypeScript core did for cyclic input.
 fn too_deep() -> Json {
