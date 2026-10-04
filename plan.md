@@ -14,7 +14,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
-| T38 | in progress | P2 | 3 | 5% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T40 | in progress | P2 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
@@ -158,27 +157,6 @@ Generate static HTML with CSS, React (JSX/TSX) and SolidJS components from `.wef
 ### T36. Examples, snapshots, screenshots and comparisons
 
 Many more tests, built on many more examples. Grow the corpus so every catalog kind, prop, slot, binding form and token type appears in at least one screen. For every screen and every target, record what each target produces as reviewed snapshots: insta in Rust, Vitest snapshots in TypeScript. Targets are canonical JSON, HTML/CSS, React, Solid, SwiftUI and Figma. Then take screenshots: rendered web targets in a real browser, through Vitest browser mode with Playwright, and generated SwiftUI in the iOS Simulator. Compare them in three ways: against the reviewed baselines, across targets for the same screen (React, Solid and static HTML must look the same within a tolerance and give the same accessibility tree), and across round trips (a screen and its round-tripped copy look identical). A failed comparison writes a visual diff image. Done when the suites run in `moon ci`, every baseline is reviewed, and a deliberate one-pixel layout change and a one-word text change are each caught.
-
-### T38. Open Design plugin
-
-A plugin for Open Design (https://open-design.ai, https://github.com/attentiondotnet/open-design), the open-source, local-first design platform that runs on top of a coding agent and has had plugins since 0.8.0. It brings Weft into Open Design:
-- author screens as `.weft` with the authoring guide and the weft MCP server;
-- import HTML to `.weft`;
-- export to React (and the other targets once T34 and T35 land);
-- render and preview pages;
-- map an Open Design `DESIGN.md` design system to Weft design tokens where the two line up, with a loss list where they do not.
-
-It reuses the scripts, the MCP server and the build in `plugins/shared` (T37), which write the same bundle into the Claude Code and Cursor plugins, instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
-
-Execution plan:
-
-1. **Formats first (README of the plugin cites URL, version or commit, date).** Findings so far: the canonical repository is `nexu-io/open-design` (the one `open-design.ai` links to; `attentiondotnet/open-design` is a one-star copy made 2026-07-07), Apache-2.0. A plugin is a folder with `SKILL.md` and an optional `open-design.json` sidecar (schema `docs/schemas/open-design.plugin.v1.json`); `od plugin install ./folder` copies the whole folder (no symlinks, 50 MiB cap) into the daemon's plugin registry, and the skill folder is staged read-only into the project at `.od-skills/<folder>/`, so scripts are reached by a path from the skill root, not by a host variable. A design system is a package (`manifest.json`, `DESIGN.md`, canonical `tokens.css`, derived `design-tokens.json`); `DESIGN.md` may carry the Google Labs `DESIGN.md` frontmatter (`colors`, `typography`, `rounded`, `spacing`, `components`).
-2. **One more output of the shared build.** `plugins/shared/build.ts` gets `open-design` in `PLUGINS` (its spec copy goes to `references/AGENT-SPEC.md`, the folder Open Design's spec names for long notes) and a fifth entry, `design-md`; `moon run shared:build` writes the same `dist/` into all three plugins. The shared tests loop over the plugin names, so freshness, no-outside-imports and run-from-a-copy cover the new plugin; the Node guard test lists the new entry.
-3. **`packages/design-md` (`@weft/design-md`, neutral name).** `fromDesignMd` (YAML frontmatter, `yaml` for parsing, untrusted input: size cap, no aliases) and `fromTokensCss` (Open Design's canonical `tokens.css`) return DTCG 2025.10 tokens plus a loss list. Mapping: `colors` to `color.*` (hex, `rgb()`, `hsl()`, `hwb()`, `lab()`, `lch()`, `oklab()`, `oklch()` become DTCG color objects; named colors and `color-mix()` are losses), `rounded` to `radius.*`, `spacing` to `space.*`, `typography` to `font.*` composites, `{path}` references renamed to the new paths; `components`, `fontFeature`, `fontVariation`, unitless spacing, shadows, easing and prose are listed as losses. Tests with fixtures from Open Design (`design-systems/minimal`) and from `google-labs-code/design.md` (`examples/`), both Apache-2.0 with their notices kept, plus hand-written edge cases.
-4. **Script `design-md` in `plugins/shared/scripts`** (`design-md <DESIGN.md | tokens.css | design-system folder> [out.tokens.json] [--force] [--project | --no-project]`): prints the loss table like `import`; the project's `plugins.open-design.tokensDir` (the extension point T31 left for plugin settings) says where the file goes; argument over project over default.
-5. **`plugins/open-design`**: root `SKILL.md` (authoring with the guide and the MCP tools, import, export, render, design-system mapping, paths relative to the skill root), `open-design.json` (checked against the vendored official schema, `test/schemas/NOTICE` keeps the license), `README.md` with the format notes and what could not be checked inside a running Open Design, and `moon.yml`. Open Design starts no MCP server from a plugin manifest in the code I read (spec section 5.3 says it should), and the manifest has no plugin-root variable, so the MCP server ships in `dist/server.js`, the README says how to register it in Open Design's MCP settings, and the skill falls back to the scripts (render validates strictly).
-6. **Tests (Vitest).** `plugins/open-design/test`: manifest against the vendored schema and the spec's cross-field rules, SKILL.md frontmatter, every path the skill names exists, the folder copied outside the repository runs every script and the MCP server, no symlinks, size under the cap. `packages/design-md/test`: mapping cases.
-7. **Docs and closing.** `docs/open-design-plugin.md`, `toolchain.md` (`yaml`), `AGENTS.md` and the plugin README mention; run `moon run shared:build`, commit the dists, then `pnpm install && moon run :test root:typecheck root:lint root:rust-test root:rust-lint`; close T38 into `done.md` when green.
 
 ### T39. Context in the document
 
