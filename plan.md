@@ -12,6 +12,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T24 | todo | P2 | 2 | 0% | |
 | T25 | todo | P1 | 3 | 0% | |
 | T26 | todo | P1 | 3 | 0% | |
+| T28 | todo | P2 | 3 | 0% | |
 
 ### T8. Evaluation
 
@@ -57,3 +58,14 @@ Fix the benchmark limitations found in T8: three samples per task with the sprea
 ### T26. Vitest for the TypeScript tests
 
 Run every TypeScript test suite with Vitest (on Vite) instead of `node:test`: the 28 test files in `packages/*/test` and `bench/test` move to Vitest's API, `fast-check` stays for property tests, and each package's moon `test` task calls `vitest run`. Vitest's browser mode then serves the browser leg of T24, and the same suites check the WASM build of T22. `AGENTS.md` changes its test rule from `node:test` to Vitest. Done when every existing test passes under Vitest with the same count, `moon ci` is green, and `node:test` is no longer used.
+
+### T28. Binding readback against inverted conditions
+
+In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in while `$.busy` is true. It changed `{!$.email}` to `{!$.busy}` and kept the `!`. The markup is valid, but the condition is inverted. The HTML and JSX baselines got it right. Validation cannot see intent. The model can, if the core tells it in plain words what a binding means. Depends on T20.
+
+1. `weft-core`: `explain(document)` reads every binding as a sentence, e.g. `button#submit disabled: while $.busy is false`. `explain_changes(before, after)` lists only the props, events and bindings that changed.
+2. CLI: `weft explain <file> [--against <old-file>]`.
+3. `AGENT-SPEC.md` repair loop: before answering, read back the changed bindings and compare them with the instruction.
+4. Benchmark: an optional readback turn after a valid edit, the same for every format. This is a method change, recorded in `test.md`. Rerun `login` on Bonsai with 3 samples.
+
+Done when the tests for `explain` pass, the CLI prints readbacks, and the rerun is in the `test.md` history.
