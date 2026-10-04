@@ -1,0 +1,17 @@
+{
+  "name": "@weft/design-md",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@weft/catalog": "workspace:*",
+    "fast-check": "4.10.2"
+  }
+}

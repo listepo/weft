@@ -1,8 +1,9 @@
 node_modules/
 dist/
-# The Claude Code and Cursor plugins ship their bundles, because both install from git.
+# The Claude Code, Cursor and Open Design plugins ship their bundles, because all three install from git.
 !plugins/claude-code/dist/
 !plugins/cursor/dist/
+!plugins/open-design/dist/
 .DS_Store
 .moon/cache/
 .moon/docker/

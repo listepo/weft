@@ -1,0 +1,2 @@
+# Its dist/ is built by `moon run shared:build`, together with the other plugins'.
+language: 'typescript'

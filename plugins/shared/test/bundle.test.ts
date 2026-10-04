@@ -116,7 +116,7 @@ describe.each(NAMES)("the committed bundle of the %s plugin", (name) => {
   });
 
   test("each program says so when Node is too old to tell it was started as one", () => {
-    for (const entry of ["import", "export", "render", "server"]) {
+    for (const entry of ["import", "export", "render", "design-md", "server"]) {
       const code = readFileSync(join(dist, `${entry}.js`), "utf8");
       assert.match(code, /Node 24\.2 or later is required/, entry);
     }

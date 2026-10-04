@@ -11,10 +11,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
-| T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T35 | in progress | P1 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
-| T38 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T40 | in progress | P2 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
@@ -147,10 +145,6 @@ The T30 plugin works only when its marketplace is added from a local clone: Clau
 
 Progress: the bundle carries the WebAssembly core (T22 merged): `plugins/claude-code/build.ts` bundles the scripts and the MCP server with Vite 8 into the committed `dist/` and copies `weft_bg.wasm` to `dist/wasm/`, where `@weft/core` reads it relative to the shared chunk; `claude-code:build` depends on `root:wasm`. The plugin folder alone runs (tests copy only it to a temp folder and run every script and the server there; `claude --plugin-dir <copy> mcp list` shows `weft` connected; `claude plugin validate --strict` passes). The Desktop `node` requirement (24.2 or later on the PATH) is in the plugin README. `root:wasm` remaps build paths, so the `.wasm` is byte-reproducible and the up-to-date test compares it byte for byte. Remaining: `repository` in `plugin.json` once a remote exists, and the done criterion itself, `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` on a clean machine.
 
-### T34. SwiftUI generator and importer
-
-Generate SwiftUI from `.weft` and read SwiftUI source back into `.weft`, in a Rust crate `weft-swiftui` next to the core, exposed through the CLI. Approved scope: the generated code targets iOS 17 and macOS 14 or later (the data model through `@Observable` and `@Bindable`); the importer parses Swift source (no running app needed). Code that Weft generated comes back without loss; other SwiftUI code imports with a loss table, like the HTML importer. Done when every corpus screen generates Swift that compiles for iOS 17, survives Weft → SwiftUI → Weft byte-identical after formatting, and a hand-written SwiftUI sample imports with the expected losses.
-
 ### T35. Web targets both ways: HTML/CSS, React and SolidJS
 
 Generate static HTML with CSS, React (JSX/TSX) and SolidJS components from `.weft`, and read each of them back from source. Approved scope: one Rust crate next to the core (JSX and TSX parsed with oxc, HTML with html5ever, or better maintained options), exposed through the CLI and through WebAssembly. The TypeScript `@weft/to-jsx` and the HTML import of `@weft/from-aria` move into it, and their packages keep their API as wrappers, as T22 did for the core, so there is one implementation. Code that Weft generated comes back without loss; hand-written code imports with a loss table. Done when every corpus screen survives Weft → HTML/CSS, React and Solid → Weft byte-identical after formatting, the generated React and Solid components render with the same accessibility tree as today's renderer, and hand-written samples import with the expected losses.
@@ -172,17 +166,6 @@ Execution plan (each stage is committed green):
 ### T36. Examples, snapshots, screenshots and comparisons
 
 Many more tests, built on many more examples. Grow the corpus so every catalog kind, prop, slot, binding form and token type appears in at least one screen. For every screen and every target, record what each target produces as reviewed snapshots: insta in Rust, Vitest snapshots in TypeScript. Targets are canonical JSON, HTML/CSS, React, Solid, SwiftUI and Figma. Then take screenshots: rendered web targets in a real browser, through Vitest browser mode with Playwright, and generated SwiftUI in the iOS Simulator. Compare them in three ways: against the reviewed baselines, across targets for the same screen (React, Solid and static HTML must look the same within a tolerance and give the same accessibility tree), and across round trips (a screen and its round-tripped copy look identical). A failed comparison writes a visual diff image. Done when the suites run in `moon ci`, every baseline is reviewed, and a deliberate one-pixel layout change and a one-word text change are each caught.
-
-### T38. Open Design plugin
-
-A plugin for Open Design (https://open-design.ai, https://github.com/attentiondotnet/open-design), the open-source, local-first design platform that runs on top of a coding agent and has had plugins since 0.8.0. It brings Weft into Open Design:
-- author screens as `.weft` with the authoring guide and the weft MCP server;
-- import HTML to `.weft`;
-- export to React (and the other targets once T34 and T35 land);
-- render and preview pages;
-- map an Open Design `DESIGN.md` design system to Weft design tokens where the two line up, with a loss list where they do not.
-
-It reuses the scripts, the MCP server and the build in `plugins/shared` (T37), which write the same bundle into the Claude Code and Cursor plugins, instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
 
 ### T39. Context in the document
 

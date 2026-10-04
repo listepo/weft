@@ -20,7 +20,7 @@ Each script works in the project of its input (SPEC section 10): the first `weft
 /plugin install weft@weft
 ```
 
-Claude Code copies only `plugins/claude-code` into its plugin cache, without the workspace packages or `node_modules`, so the folder carries everything it runs: the three scripts and the MCP server are bundled into `dist/` (`import.js`, `export.js`, `render.js`, `server.js`, and shared files in `dist/chunks/`) together with the WebAssembly core they load from `dist/wasm/weft_bg.wasm`, with `AGENT-SPEC.md` copied into `skills/spec/`. Only Node built-ins are imported at run time. Installing from a GitHub-hosted marketplace (`/plugin marketplace add <owner>/weft`) therefore needs nothing but the repository. It has not been tried yet, because the repository has no remote; `repository` goes into `plugin.json` once it has one.
+Claude Code copies only `plugins/claude-code` into its plugin cache, without the workspace packages or `node_modules`, so the folder carries everything it runs: the three scripts and the MCP server are bundled into `dist/` (`import.js`, `export.js`, `render.js`, `server.js`, and shared files in `dist/chunks/`) together with the WebAssembly core they load from `dist/wasm-web/weft_bg.wasm`, with `AGENT-SPEC.md` copied into `skills/spec/`. Only Node built-ins are imported at run time. Installing from a GitHub-hosted marketplace (`/plugin marketplace add <owner>/weft`) therefore needs nothing but the repository. It has not been tried yet, because the repository has no remote; `repository` goes into `plugin.json` once it has one.
 
 ### Node
 
@@ -28,7 +28,7 @@ Every script and the MCP server start with `node` from the `PATH`, so `node` 24.
 
 ### Rebuild
 
-`dist/` and `skills/spec/AGENT-SPEC.md` are generated and committed, because Claude Code installs from git. After a change to `plugins/shared/scripts/`, `@weft/*` or `AGENT-SPEC.md`, run `moon run shared:build` (one build writes `dist/` and the spec copy of this plugin and of `plugins/cursor`; it builds the WebAssembly core first with `root:wasm`, then `node build.ts`, Vite's rolldown bundler); a test rebuilds into a temporary folder and fails while the committed bundles differ. The `.wasm` is compared byte for byte too: `root:wasm` remaps the cargo, rustup and workspace paths (`/cargo`, `/rustup`, `/weft`), so the same sources build to the same bytes on any machine. Other tests copy only the plugin folder outside the repository and run the scripts and the MCP server from there.
+`dist/` and `skills/spec/AGENT-SPEC.md` are generated and committed, because Claude Code installs from git. After a change to `plugins/shared/scripts/`, `@weft/*` or `AGENT-SPEC.md`, run `moon run shared:build` (one build writes `dist/` and the spec copy of this plugin, of `plugins/cursor` and of `plugins/open-design`; it builds the WebAssembly core first with `root:wasm`, then `node build.ts`, Vite's rolldown bundler); a test rebuilds into a temporary folder and fails while the committed bundles differ. The `.wasm` is compared byte for byte too: `root:wasm` remaps the cargo, rustup and workspace paths (`/cargo`, `/rustup`, `/weft`), so the same sources build to the same bytes on any machine. Other tests copy only the plugin folder outside the repository and run the scripts and the MCP server from there.
 
 ## Format notes
 

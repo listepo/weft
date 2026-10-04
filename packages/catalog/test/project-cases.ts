@@ -291,7 +291,7 @@ export const projectCases: Record<string, ProjectCase> = {
   "unknown keys in tool sections only warn": {
     project: project({
       validate: { mod: "strict" },
-      export: { swiftui: { outDir: "ios" }, react: { outdir: "x" } },
+      export: { cobol: { outDir: "ios" }, react: { outdir: "x" } },
       import: { figma: {} },
       mcp: { limit: {} },
     }),

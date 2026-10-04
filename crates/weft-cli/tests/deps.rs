@@ -8,7 +8,8 @@ use std::process::Command;
 
 use serde_json::Value as Json;
 
-fn dependencies(package: &str) -> Vec<String> {
+/// The normal (not dev or build) dependencies of `package`, as `cargo metadata` lists them.
+fn entries(package: &str) -> Vec<Json> {
     let out = Command::new(env!("CARGO"))
         .args(["metadata", "--format-version", "1", "--no-deps"])
         .current_dir(env!("CARGO_MANIFEST_DIR"))
@@ -22,6 +23,13 @@ fn dependencies(package: &str) -> Vec<String> {
         .unwrap()
         .iter()
         .filter(|d| d["kind"].is_null())
+        .cloned()
+        .collect()
+}
+
+fn dependencies(package: &str) -> Vec<String> {
+    entries(package)
+        .iter()
         .map(|d| d["name"].as_str().unwrap().to_owned())
         .collect()
 }
@@ -109,4 +117,31 @@ fn the_web_crate_adds_only_its_parsers() {
             "weft-import"
         ]
     );
+}
+
+#[test]
+fn the_swiftui_generator_builds_without_the_importers_c_parser() {
+    let mut deps = dependencies("weft-swiftui");
+    deps.sort();
+    assert_eq!(
+        deps,
+        [
+            "indexmap",
+            "serde",
+            "serde_json",
+            "tree-sitter",
+            "tree-sitter-swift",
+            "weft-catalog",
+            "weft-core"
+        ]
+    );
+    // tree-sitter is C, which does not build for wasm32-unknown-unknown: only the `import`
+    // feature may pull it in, so the generator stays a pure crate.
+    let mut optional: Vec<String> = entries("weft-swiftui")
+        .iter()
+        .filter(|d| d["optional"] == true)
+        .map(|d| d["name"].as_str().unwrap().to_owned())
+        .collect();
+    optional.sort();
+    assert_eq!(optional, ["tree-sitter", "tree-sitter-swift"]);
 }

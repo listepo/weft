@@ -64,18 +64,29 @@ const OUT_DIR: &str = "Directory, relative to the project file, that output file
 
 const REACT: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
 const HTML: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
+const SWIFTUI: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
 
 /// Targets get a section each when their task lands (SPEC §10.6 lists the planned names).
-const EXPORT: &[Setting] = &[setting(
-    "react",
-    "React components (@weft/to-jsx).",
-    Kind::Section(REACT),
-)];
-const IMPORT: &[Setting] = &[setting(
-    "html",
-    "HTML pages (@weft/from-aria).",
-    Kind::Section(HTML),
-)];
+const EXPORT: &[Setting] = &[
+    setting(
+        "react",
+        "React components (@weft/to-jsx).",
+        Kind::Section(REACT),
+    ),
+    setting(
+        "swiftui",
+        "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`).",
+        Kind::Section(SWIFTUI),
+    ),
+];
+const IMPORT: &[Setting] = &[
+    setting("html", "HTML pages (@weft/from-aria).", Kind::Section(HTML)),
+    setting(
+        "swiftui",
+        "SwiftUI source files (`weft import-swiftui`).",
+        Kind::Section(SWIFTUI),
+    ),
+];
 
 const LIMITS: &[Setting] = &[
     with_default(

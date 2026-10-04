@@ -1,0 +1,63 @@
+<screen id="edge-cases" label="Edge cases" weft="0.1">
+  <heading id="title" level="{$.level}" hidden="{!$.ready}">Quotes " and \ and \(x) and ünïcode</heading>
+  <stack id="col" align="stretch" direction="column" label="Ignored" gap="{token.space.lg}">
+    <text id="kw" text="{$.user.default}"/>
+    <text id="empty-field" text="{$.user.isEmpty}" tone="default"/>
+    <text id="plain" text="verbatim {{ text"/>
+  </stack>
+  <grid id="g" columns="{$.columns}" gap="{token.space.xs}">
+    <text id="cell-a">A</text>
+  </grid>
+  <form id="f" state="idle" on-submit="form.send">
+    <field id="name" label="{$.nameLabel}" type="text" value="" required="true" error="{$.nameError}" placeholder="Name"/>
+    <field id="mail" label="Mail" type="email" value="{$.mail}" on-change="mail.changed"/>
+    <field id="notes" label="Notes" type="multiline" value="{$.notes}" disabled="{$.locked}"/>
+    <checkbox id="agree" label="Agree" checked="false"/>
+    <switch id="news" label="News" checked="true" on-change="news.toggle"/>
+    <select id="country" label="Country" value="{$.country}">
+      <each id="country-each" as="country" in="{$.countries}">
+        <option id="country-option" value="{$country.code}" text="{$country.name}"/>
+      </each>
+    </select>
+    <button id="cancel" submit="false" variant="secondary">Cancel</button>
+    <button id="send" submit="true" state="{$.sendState}" variant="primary">Send</button>
+    <slot name="footer">
+      <link id="help" href="{$.helpUrl}" on-press="help.open">Help</link>
+    </slot>
+  </form>
+  <list id="groups" state="empty">
+    <each id="group-each" as="model" in="{$.groups}">
+      <item id="group">
+        Group
+        <text id="group-name" text="{$model.name}"/>
+        <list id="members">
+          <each id="member-each" as="self" in="{$model.members}">
+            <item id="member" text="{$self.name}" on-press="member.open"/>
+          </each>
+        </list>
+      </item>
+    </each>
+    <slot name="empty">
+      <text id="none">None</text>
+    </slot>
+  </list>
+  <tabs id="t" selected="t1">
+    <tab id="t1" label="One">
+      <alert id="warn" tone="warning">Careful</alert>
+    </tab>
+    <tab id="t2" label="Two" hidden="true">
+      <section id="s" label="Sec">
+        <slot name="header">
+          <heading id="s-h" level="3">Header</heading>
+        </slot>
+        <image id="pic" label="Picture" src="https://example.com/a.png"/>
+      </section>
+    </tab>
+  </tabs>
+  <menu id="m" label="Actions">
+    <menu-item id="m1" disabled="{$.locked}" on-press="menu.one">One</menu-item>
+  </menu>
+  <dialog id="d" label="Sure?" modal="false" open="false">
+    <text id="d-text">Text</text>
+  </dialog>
+</screen>

@@ -124,7 +124,7 @@ describe("tool sections", () => {
         validate: { mode: "strict" },
         render: { data: "sample.json", tokens: ["a.json", "../b.json"], outDir: 5 },
         mcp: { limits: { patches: 3, diagnostics: 0 } },
-        export: { react: { outDir: "src" }, swiftui: { outDir: "ios" } },
+        export: { react: { outDir: "src" }, cobol: { outDir: "ios" } },
       }),
     );
     assert.deepEqual(project.settings, {
@@ -138,7 +138,7 @@ describe("tool sections", () => {
       [
         ["W703", "#/render/tokens/1", "error"],
         ["W701", "#/render/outDir", "error"],
-        ["W702", "#/export/swiftui", "warning"],
+        ["W702", "#/export/cobol", "warning"],
         ["W701", "#/mcp/limits/diagnostics", "error"],
       ],
     );

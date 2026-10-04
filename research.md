@@ -109,7 +109,7 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | --- | --- | --- |
 | Format versioning | Answered for 0.x: minor versions only add; lenient readers warn and keep unknown content; catalog changes are classified major, minor or none | SPEC §8, `compat/`, `diffCatalogs` |
 | Extensibility without breaking agents | Answered: `x-<vendor>-` extensions with an ARIA fallback role; unknown elements render as `group` | SPEC §8 |
-| Mapping to code and back | Partly: React renderer and JSX generator; importers from DOM and snapshots with a documented loss table. No other code targets, no import from existing code | SPEC §9, `roadmap.md` |
+| Mapping to code and back | Partly: React renderer and JSX generator; SwiftUI generator and importer (T34); importers from DOM and snapshots with a documented loss table | SPEC §9, `roadmap.md` |
 | Streaming and incremental generation | Open. Flat id lists in A2UI and json-render exist for progressive rendering; nested markup has to show it can do the same | `roadmap.md` |
 | Host capabilities | Specified (a host advertises its catalogs), not implemented | SPEC §8, `roadmap.md` |
 | Layout without becoming CSS | Open: only `stack` and `grid` | `roadmap.md` |
@@ -126,3 +126,13 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | Not JSON Type Definition | JTD (RFC 8927) is closed by default and simpler, but fewer tools and models know it | https://www.rfc-editor.org/rfc/rfc8927 (2026-10-05) |
 | An object schema with `properties` and no `additionalProperties` is closed | A deliberate deviation from JSON Schema, where objects are open: a misspelled binding path must be an error, not an allowed extra member (SPEC §10.5) | — |
 | Fragments (part B, proposal) | `docs/fragments-design.md`, with its own sources | — |
+
+## 11. SwiftUI (T34)
+
+| Decision | Basis | Source (checked) |
+| --- | --- | --- |
+| Swift source is parsed with tree-sitter 0.27.0 | The maintained Rust bindings of the incremental parser; the crate's latest release | https://crates.io/crates/tree-sitter, https://github.com/tree-sitter/tree-sitter (2026-10-05) |
+| The grammar is tree-sitter-swift 0.7.4 | Released 2026-10-04, repository active and not archived; the grammar the tree-sitter ecosystem uses for Swift | https://crates.io/crates/tree-sitter-swift, https://github.com/alex-pinkus/tree-sitter-swift (2026-10-05) |
+| Not oak-swift or devgen-tree-sitter-swift | oak-swift is at 0.0.11; devgen-tree-sitter-swift is a 2024 fork at 0.21.0 | https://crates.io/crates/oak-swift, https://crates.io/crates/devgen-tree-sitter-swift (2026-10-05) |
+| The importer is not in WebAssembly builds | The grammar is C; `cargo build --target wasm32-unknown-unknown` fails in its `parser.c` (`stdlib.h` not found), so the importer sits behind the crate's default `import` feature and the generator builds alone | Built in this repository (2026-10-05) |
+| The generated code targets iOS 17 and macOS 14 | `@Observable` is the model; `swiftc -typecheck` for iOS 16 rejects it ("'Observable()' is only available in iOS 17.0 or newer"), so there is no lower target to configure | https://developer.apple.com/documentation/observation/observable(), Xcode 27.0 / Swift 6.4 (2026-10-05) |

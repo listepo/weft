@@ -17,15 +17,17 @@ The examples assume you have also made the scratch folder from the [tour](tour.m
 $ mkdir -p weft-tour
 $ cp corpus/login/screen.weft weft-tour/login.weft
 $ weft --help
-Validate, format and explain Weft documents
+Validate, format and explain Weft documents, and convert them to and from SwiftUI
 
 Usage: weft <COMMAND>
 
 Commands:
-  validate  Check a document: markup, or canonical JSON when the file name ends in `.json`
-  fmt       Print the canonical markup of a document
-  explain   Read back what each binding, token, event and loop of a markup document means, one per line, so the meaning can be compared with the instruction behind an edit
-  help      Print this message or the help of the given subcommand(s)
+  validate        Check a document: markup, or canonical JSON when the file name ends in `.json`
+  fmt             Print the canonical markup of a document
+  explain         Read back what each binding, token, event and loop of a markup document means, one per line, so the meaning can be compared with the instruction behind an edit
+  swiftui         Generate a SwiftUI view (iOS 17, macOS 14) from a markup document
+  import-swiftui  Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses
+  help            Print this message or the help of the given subcommand(s)
 
 Options:
   -h, --help     Print help
@@ -138,10 +140,36 @@ button#submit disabled changed: was true while $.email is falsy (NOT $.email); n
 
 Sentences never hide a negation: a negated binding always contains `NOT`. If neither file changed anything, you get a message on stderr and no output. If either file has errors, `explain` prints the diagnostics as `validate` does and exits 1. It reads markup only, not `.json` files.
 
+## `weft swiftui` and `weft import-swiftui`
+
+`weft swiftui` prints a SwiftUI file for a screen. It contains an `@Observable` model, an action enum, a theme with the screen's tokens, and the view. `weft import-swiftui` reads Swift source back into markup. What the generator printed comes back unchanged:
+
+```console
+$ weft swiftui weft-tour/login.weft --out-dir weft-tour/ios
+$ weft import-swiftui weft-tour/ios/login.swift | diff - <(weft fmt weft-tour/login.weft) && echo same
+same
+```
+
+Hand-written SwiftUI imports too. Each part that Weft cannot hold is reported on stderr as a loss. The output is still printed, and the command exits 0:
+
+```console
+$ printf 'import SwiftUI\nstruct Hello: View {\n    var body: some View { Text("Hi").padding() }\n}\n' > weft-tour/Hello.swift
+$ weft import-swiftui weft-tour/Hello.swift
+weft-tour/Hello.swift:/screen#screen-1 loss ids: the view has no accessibilityIdentifier; the id is generated
+weft-tour/Hello.swift:/screen#screen-1 loss structure: the view's body is not one stack; a screen root is added around it
+weft-tour/Hello.swift:/screen#screen-1/text#text-hi loss ids: the view has no accessibilityIdentifier; the id is generated
+weft-tour/Hello.swift:/screen#screen-1/text#text-hi loss layout: `.padding` not kept
+<screen id="screen-1" weft="0.1">
+  <text id="text-hi">Hi</text>
+</screen>
+```
+
+Both commands use the project's catalog and tokens, or `--catalog` and `--tokens` when you give them. `--out-dir` writes `<name>.swift` or `<name>.weft` instead of printing. Without it, the project's `export.swiftui.outDir` or `import.swiftui.outDir` decides ([Projects](projects.md)). The mapping table and every loss are listed in `crates/weft-swiftui/README.md`.
+
 ## What `weft` does not do
 
 - It does not check token names, action names or bindings without a project: those checks need your app's tokens, actions and data schema, which a `weft.json` declares ([Projects](projects.md)).
-- It does not render, import or export. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
+- It does not render, and it does not import or export anything but SwiftUI. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
 - It does not apply patches. [Patches](patches.md) go through the MCP server or the library.
 
 ## The Node version
