@@ -1,3 +1,13 @@
 # The folder name `figma` is already the id of packages/figma.
 id: 'figma-plugin'
 language: 'typescript'
+
+tasks:
+  # Writes dist/code.js and dist/ui.html for loading the plugin in Figma. dist/ is not committed;
+  # the tests build into a temp folder. The UI inlines the WebAssembly core, so root:wasm comes first.
+  build:
+    command: 'node build.ts'
+    deps: ['root:wasm']
+    options:
+      cache: false
+      runInCI: false

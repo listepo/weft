@@ -22,7 +22,6 @@
     "plugins/*/build.ts",
     "plugins/*/scripts",
     "plugins/*/src",
-    "plugins/*/test",
-    "plugins/*/vite.config.ts"
+    "plugins/*/test"
   ]
 }
