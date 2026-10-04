@@ -4,3 +4,4 @@
 - T24. Runtime matrix
 - T26. Vitest for the TypeScript tests
 - T28. Binding readback against inverted conditions
+- T29. Rust core test suite

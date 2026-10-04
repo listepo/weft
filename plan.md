@@ -5,11 +5,12 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
-| T22 | todo | P1 | 3 | 0% | |
+| T22 | in progress | P1 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T23 | todo | P2 | 3 | 0% | |
 | T24 | todo | P2 | 2 | 0% | |
-| T26 | todo | P1 | 3 | 0% | |
-| T28 | todo | P2 | 3 | 0% | |
+| T26 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T28 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
+| T29 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -54,3 +55,8 @@ In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in
 4. Benchmark: an optional readback turn after a valid edit, the same for every format. This is a method change, recorded in `test.md`. Rerun `login` on Bonsai with 3 samples.
 
 Done when the tests for `explain` pass, the CLI prints readbacks, and the rerun is in the `test.md` history.
+
+### T29. Rust core test suite
+
+The Rust core (T20) and catalog (T21) are checked mostly by the differential fixtures, which prove agreement with TypeScript but not the claims themselves, and they cover only inputs the generators reach. This task gives `weft-core` and `weft-catalog` their own tests: unit tests named as claims for every public function, and property tests that no input panics, that parse → serialize → parse is stable, and that formatting is idempotent. Done when every public function has tests for its documented behaviour, the property tests run in `cargo nextest`, and `moon ci` is green.
+
