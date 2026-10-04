@@ -30,9 +30,6 @@ const list = (inner: string, as = "todo", source = "$.todos") =>
     `<list id="l"><each id="e" as="${as}" in="{${source}}"><item id="i">${inner}</item></each></list>`,
   );
 
-const nest = (depth: number): unknown =>
-  depth === 0 ? { type: "string" } : { type: "object", properties: { a: nest(depth - 1) } };
-
 export const dataCases: Record<string, DataCase> = {
   "declared paths of the right type": {
     schema: todos,
@@ -165,12 +162,6 @@ export const dataCases: Record<string, DataCase> = {
     schema: 5,
     markup: screen('<text id="t" text="{$.a}"/>'),
     codes: ["W709"],
-  },
-  "nesting deeper than the limit": {
-    schema: nest(300),
-    markup: screen('<text id="t" text="{$.a.a}"/>'),
-    // `$.a.a` is still an object, which text does not show.
-    codes: ["W709", "W316"],
   },
   "an unknown loop variable is left to the validator": {
     schema: todos,

@@ -51,6 +51,26 @@ describe("a data diagnostic", () => {
 });
 
 describe("compileDataSchema", () => {
+  // Not a shared case: the fixture stays shallow enough for serde_json's default recursion limit.
+  test("stops at 256 nested schemas", () => {
+    const nest = (depth: number): unknown =>
+      depth === 0 ? { type: "string" } : { type: "object", properties: { a: nest(depth - 1) } };
+    const { problems } = compileDataSchema(nest(300));
+    const pointer = "/properties/a".repeat(257);
+    assert.deepEqual(problems, [
+      {
+        code: "W709",
+        pointer,
+        message: `Schemas nest deeper than 256 levels at ${pointer}.`,
+      },
+    ]);
+    // `$.a.a` is still an object, which text does not show.
+    assert.deepEqual(
+      run(nest(300), screen('<text id="t" text="{$.a.a}"/>')).map((d) => d.code),
+      ["W709", "W316"],
+    );
+  });
+
   test("never throws on hostile input", () => {
     for (const bad of [null, 1, "x", [], { type: {} }, { properties: null }, { items: 7 }]) {
       assert.doesNotThrow(() => compileDataSchema(bad));

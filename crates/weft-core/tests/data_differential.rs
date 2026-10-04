@@ -71,3 +71,27 @@ fn data_checks_match_the_typescript_core() {
             .join("\n\n")
     );
 }
+
+/// Not a fixture case, so that the fixture stays within serde_json's default recursion limit;
+/// packages/core/test/data.test.ts makes the same claim.
+#[test]
+fn schemas_stop_at_256_levels() {
+    let mut schema = json!({ "type": "string" });
+    for _ in 0..300 {
+        schema = json!({ "type": "object", "properties": { "a": schema } });
+    }
+    let (_, problems) = compile_data_schema(&schema);
+    let pointer = "/properties/a".repeat(257);
+    let got: Vec<Json> = problems
+        .iter()
+        .map(|p| json!({ "code": p.code.as_str(), "pointer": p.pointer, "message": p.message }))
+        .collect();
+    assert_eq!(
+        got,
+        vec![json!({
+            "code": "W709",
+            "pointer": pointer,
+            "message": format!("Schemas nest deeper than 256 levels at {pointer}."),
+        })]
+    );
+}
