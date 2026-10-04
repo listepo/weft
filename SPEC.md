@@ -526,6 +526,8 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | `render.outDir` | file name | next to the screen | Where rendered pages go. |
 | `export.react.outDir` | file name | next to the screen | Where generated React components go. |
 | `import.html.outDir` | file name | next to the page | Where screens imported from HTML go. |
+| `export.swiftui.outDir` | file name | standard output | Where `weft swiftui` writes `<screen>.swift`. The target (iOS 17, macOS 14) is fixed: `@Observable` needs it. |
+| `import.swiftui.outDir` | file name | standard output | Where `weft import-swiftui` writes `<file>.weft`. |
 | `mcp.limits.markupChars`, `dataChars`, `patchesChars`, `projectChars` | whole number ≥ 1 | 200,000; 200,000; 200,000; 500,000 | Bounds, in UTF-16 code units, on the arguments of one MCP call. |
 | `mcp.limits.patches`, `diagnostics`, `inputElements` | whole number ≥ 1 | 100; 40; 20,000 | Patches per call, diagnostics listed per result, JSON values per call. |
 | `plugins.<name>` | object | — | Settings of a plugin or tool Weft does not know, under its own name. Weft checks only that each is an object. |
@@ -533,5 +535,5 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 - File names follow §10.2 and are relative to the project file; a directory name has no trailing `/`.
 - A setting of the wrong type is `W701` and the default applies; a bad file name is `W703`; an unknown key in a section is `W702`, a warning. Tools read only the settings that passed these checks.
 - `schemas/weft.schema.json` is the JSON Schema (2020-12) of the project file. It is generated from the same table the loader checks against, so the two cannot disagree; editors that follow `$schema` complete and check every key.
-- **Adding a setting.** A tool option that a user can set gets a key here in the same change: a row in this table, an entry in the loader's table (`crates/weft-catalog/src/settings.rs`), which regenerates the schema, and the tool reading it with the precedence above. A new export or import target adds its section under `export.<target>` or `import.<target>`. The names reserved for targets in progress are `export.html`, `export.solid` and `import.solid` (T35), `export.swiftui` and `import.swiftui` (T34), `export.figma` and `import.figma` (T14, where a rem base and the token strategy belong), and `export.penpot` and `import.penpot`. Until a target's section lands, its key is unknown and warns.
+- **Adding a setting.** A tool option that a user can set gets a key here in the same change: a row in this table, an entry in the loader's table (`crates/weft-catalog/src/settings.rs`), which regenerates the schema, and the tool reading it with the precedence above. A new export or import target adds its section under `export.<target>` or `import.<target>`. The names reserved for targets in progress are `export.html`, `export.solid` and `import.solid` (T35), `export.figma` and `import.figma` (T14, where a rem base and the token strategy belong), and `export.penpot` and `import.penpot`. Until a target's section lands, its key is unknown and warns.
 

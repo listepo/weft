@@ -95,6 +95,8 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `render.outDir` | next to the screen | Where rendered pages go (an output path overrides it). |
 | `export.react.outDir` | next to the screen | Where exported React components go. |
 | `import.html.outDir` | next to the page | Where screens imported from HTML go. |
+| `export.swiftui.outDir` | standard output | Where `weft swiftui` writes `<screen>.swift` (`--out-dir` overrides it). |
+| `import.swiftui.outDir` | standard output | Where `weft import-swiftui` writes `<file>.weft` (`--out-dir` overrides it). |
 | `mcp.limits.*` | see `packages/mcp/README.md` | The MCP server's bounds on one call: `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`. |
 | `plugins.<name>` | none | Settings of a plugin or tool Weft does not know. Weft only checks that each is an object. |
 

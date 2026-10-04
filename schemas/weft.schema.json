@@ -95,6 +95,17 @@
           },
           "additionalProperties": false,
           "description": "React components (@weft/to-jsx)."
+        },
+        "swiftui": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`)."
         }
       },
       "additionalProperties": false,
@@ -113,6 +124,17 @@
           },
           "additionalProperties": false,
           "description": "HTML pages (@weft/from-aria)."
+        },
+        "swiftui": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "SwiftUI source files (`weft import-swiftui`)."
         }
       },
       "additionalProperties": false,
