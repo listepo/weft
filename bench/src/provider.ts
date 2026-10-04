@@ -1,3 +1,5 @@
+import { Agent, fetch as undiciFetch } from "undici";
+
 export interface Completion {
   text: string;
   inputTokens?: number;
@@ -127,6 +129,14 @@ export function anthropicProvider(o: AnthropicOptions): Provider {
  */
 const stripThinking = (s: string): string => s.replace(/^\s*<think>[\s\S]*?<\/think>\s*/, "");
 
+/**
+ * A local server answers only when the whole reply is ready, which for a reasoning model under
+ * parallel load can take longer than the 300 s undici allows for headers by default.
+ */
+const patient = new Agent({ headersTimeout: 0, bodyTimeout: 0 });
+const patientFetch = ((url: string, init?: RequestInit) =>
+  undiciFetch(url, { ...(init as object), dispatcher: patient })) as unknown as typeof fetch;
+
 export function openAiProvider(o: OpenAiOptions): Provider {
   const headers: Record<string, string> = { "content-type": "application/json" };
   if (o.apiKey) headers.authorization = `Bearer ${o.apiKey}`;
@@ -141,7 +151,7 @@ export function openAiProvider(o: OpenAiOptions): Provider {
           max_tokens: o.maxTokens ?? 32768,
           messages: [{ role: "user", content: prompt }],
         },
-        o,
+        { ...o, fetch: o.fetch ?? patientFetch },
       )) as {
         choices?: { message?: { content?: string | null } }[];
         usage?: {

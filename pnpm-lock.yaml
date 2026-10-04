@@ -142,6 +142,9 @@ importers:
       p-limit:
         specifier: 7.3.3
         version: 7.3.3
+      undici:
+        specifier: 8.11.2
+        version: 8.11.2
 
   packages/catalog:
     dependencies:
@@ -1349,6 +1352,10 @@ packages:
   undici-types@8.9.0:
     resolution: {integrity: sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg==}
 
+  undici@8.11.2:
+    resolution: {integrity: sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==}
+    engines: {node: '>=22.19.0'}
+
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
     engines: {node: '>= 0.8'}
@@ -2238,6 +2245,8 @@ snapshots:
       '@typescript/typescript-win32-x64': 7.0.2
 
   undici-types@8.9.0: {}
+
+  undici@8.11.2: {}
 
   unpipe@1.0.0: {}
 
