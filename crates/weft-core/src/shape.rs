@@ -352,7 +352,8 @@ pub fn patch_issues(v: &Json) -> Vec<Issue> {
     issues
 }
 
-fn to_value(v: &Json) -> Value {
+/// A JSON value as a `Value`, read leniently like the props of `to_document`.
+pub fn to_value(v: &Json) -> Value {
     match v {
         Json::String(s) => Value::String(s.clone()),
         Json::Number(n) => Value::Number(n.as_f64().unwrap_or_default()),

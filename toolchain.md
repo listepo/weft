@@ -62,7 +62,7 @@
 | @types/react | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React type definitions |
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
-| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist` and `plugins/cursor/dist` |
+| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist` and `plugins/cursor/dist`, and the Figma plugin into `plugins/figma/dist` |
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
@@ -70,3 +70,5 @@
 | undici | local | https://github.com/nodejs/undici | Fetch without the header timeout, for slow local model servers |
 | ajv | local | https://github.com/ajv-validator/ajv | Validates the Cursor plugin manifests against Cursor's own JSON schemas |
 | ajv-formats | local | https://github.com/ajv-validator/ajv-formats | The `uri` and `email` formats those schemas use |
+
+| @figma/plugin-typings | local | https://github.com/figma/plugin-typings | Official Figma Plugin API types; the conversion is typed against them |
