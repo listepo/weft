@@ -162,3 +162,79 @@ fn an_unreadable_project_argument_is_a_usage_error() {
     ]);
     assert_eq!(r.code, 2);
 }
+
+/// The example project file with `settings` added (SPEC §10.6).
+fn with_settings(s: &Scratch, settings: serde_json::Value) -> PathBuf {
+    let mut project: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(s.path("weft.json")).unwrap()).unwrap();
+    for (key, value) in settings.as_object().unwrap() {
+        project[key] = value.clone();
+    }
+    s.write("weft.json", &project.to_string())
+}
+
+#[test]
+fn the_project_sets_the_mode_and_a_flag_overrides_it() {
+    let s = Scratch::new("mode");
+    with_settings(&s, serde_json::json!({ "validate": { "mode": "strict" } }));
+    let screen = s.write(
+        "screens/extra.weft",
+        r#"<screen id="s" weft="0.1"><button id="b" bogus="1">Go</button></screen>"#,
+    );
+    let strict = run(&[&"validate", &screen]);
+    assert_eq!(strict.code, 1, "{}", strict.stdout);
+    assert!(strict.stdout.contains("W402 "), "{}", strict.stdout);
+    let lenient = run(&[&"validate", &screen, &"--lenient"]);
+    assert_eq!(lenient.code, 0, "{}", lenient.stdout);
+    assert!(lenient.stdout.contains("W402 "), "{}", lenient.stdout);
+    let none = run(&[&"validate", &screen, &"--no-project", &"--strict"]);
+    assert_eq!(none.code, 0, "the syntax layer alone has no W402");
+}
+
+#[test]
+fn the_project_makes_fmt_write_and_print_overrides_it() {
+    let s = Scratch::new("fmt");
+    with_settings(&s, serde_json::json!({ "format": { "write": true } }));
+    let messy = "<screen weft=\"0.1\"   id=\"s\"><text id=\"t\">Hi</text></screen>";
+    let screen = s.write("screens/messy.weft", messy);
+    let printed = run(&[&"fmt", &screen, &"--print"]);
+    assert_eq!(printed.code, 0, "{}", printed.stderr);
+    assert!(printed.stdout.starts_with("<screen id=\"s\" weft=\"0.1\">"));
+    assert_eq!(std::fs::read_to_string(&screen).unwrap(), messy);
+    let written = run(&[&"fmt", &screen]);
+    assert_eq!((written.code, written.stdout.as_str()), (0, ""));
+    assert_eq!(std::fs::read_to_string(&screen).unwrap(), printed.stdout);
+}
+
+#[test]
+fn explain_reads_the_catalog_of_the_project() {
+    let s = Scratch::new("explain");
+    let screen = s.path("screens/review.weft");
+    let with = run(&[&"explain", &screen]);
+    assert_eq!(with.code, 0, "{}{}", with.stdout, with.stderr);
+    assert!(!with.stderr.contains("no project"), "{}", with.stderr);
+    let without = run(&[&"explain", &screen, &"--no-project"]);
+    assert!(without.stderr.contains("no project"), "{}", without.stderr);
+}
+
+#[test]
+fn bad_settings_are_reported_and_the_defaults_apply() {
+    let s = Scratch::new("settings");
+    let project = with_settings(
+        &s,
+        serde_json::json!({ "validate": { "mode": "loose" }, "render": { "outdir": "x" } }),
+    );
+    let r = run(&[&"validate", &s.path("screens/cart.weft")]);
+    let shown = project.display();
+    assert_eq!(r.code, 1, "{}", r.stdout);
+    assert!(
+        r.stdout.contains(&format!("{shown}:#/validate/mode W701 ")),
+        "{}",
+        r.stdout
+    );
+    assert!(
+        r.stdout.contains(&format!("{shown}:#/render/outdir W702 ")),
+        "{}",
+        r.stdout
+    );
+}
