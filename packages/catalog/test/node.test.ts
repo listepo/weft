@@ -6,7 +6,13 @@ import { fileURLToPath } from "node:url";
 import { checkData, parse } from "@weft/core";
 import { describe, test } from "vitest";
 import { tokenTypes } from "../src/index.ts";
-import { findProject, readProject } from "../src/node.ts";
+import {
+  chooseProject,
+  findProject,
+  projectPath,
+  readProject,
+  readTokenLayers,
+} from "../src/node.ts";
 
 const example = fileURLToPath(new URL("../../../examples/project/", import.meta.url));
 
@@ -41,6 +47,15 @@ describe("readProject", () => {
     assert.deepEqual(project.tokens?.get("color.star"), { type: "color", value: "#d97706" });
     assert.deepEqual(project.actions, ["cart.checkout", "cart.remove", "nav.back"]);
     assert.ok(project.data);
+    assert.deepEqual(project.settings, {
+      validate: { mode: "strict" },
+      render: { data: "sample.data.json" },
+    });
+  });
+
+  test("treats a member file over maxChars as unreadable", () => {
+    const { diagnostics } = readProject(join(example, "weft.json"), { maxChars: 600 });
+    assert.ok(diagnostics.some((d) => d.code === "W704" && d.path === "#/catalog"));
   });
 
   test("reports a missing member file instead of throwing", () => {
@@ -59,6 +74,38 @@ describe("readProject", () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe("project settings helpers", () => {
+  test("chooseProject: an explicit file wins, --no-project means none", () => {
+    const screen = join(example, "screens/cart.weft");
+    assert.equal(chooseProject(screen, {}), join(example, "weft.json"));
+    assert.equal(chooseProject(screen, { project: "other.json" }), "other.json");
+    assert.equal(chooseProject(screen, { project: "other.json", noProject: true }), undefined);
+  });
+
+  test("projectPath resolves a name against the project directory", () => {
+    assert.equal(
+      projectPath(join(example, "weft.json"), "sample.data.json"),
+      join(example, "sample.data.json"),
+    );
+  });
+
+  test("readTokenLayers layers files and points diagnostics at the setting", () => {
+    const file = join(example, "weft.json");
+    const layered = readTokenLayers(
+      file,
+      ["tokens/base.tokens.json", "tokens/brand.tokens.json"],
+      "#/render",
+    );
+    assert.deepEqual(layered.diagnostics, []);
+    assert.deepEqual(layered.tokens?.get("color.star"), { type: "color", value: "#d97706" });
+    const missing = readTokenLayers(file, ["tokens/none.json"], "#/render");
+    assert.deepEqual(
+      missing.diagnostics.map((d) => [d.code, d.path]),
+      [["W704", "#/render/tokens/0"]],
+    );
   });
 });
 

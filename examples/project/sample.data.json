@@ -1,0 +1,11 @@
+{
+  "cart": {
+    "items": [
+      { "name": "Linen shirt", "price": "$48", "score": 4 },
+      { "name": "Canvas tote", "price": "$22", "score": 5 }
+    ],
+    "total": "$70",
+    "empty": false
+  },
+  "busy": false
+}
