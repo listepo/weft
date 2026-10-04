@@ -6,3 +6,4 @@
 - T24. Runtime matrix
 - T25. Benchmark rigor
 - T26. Vitest for the TypeScript tests
+- T27. Agent specification
