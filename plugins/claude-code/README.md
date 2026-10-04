@@ -9,7 +9,7 @@ Works on `.weft` files from Claude Code, including Claude Code Desktop.
 | `/weft:render <screen.weft> [out.html] [--data data.json] [--tokens tokens.json]` | A Weft screen to a static HTML page through `renderPage` of `@weft/render-react`, then opened in the Desktop built-in browser. Without `--tokens` the catalog's default tokens apply. |
 | `weft:spec` | Teaches `AGENT-SPEC.md` (a generated copy) so Claude writes, patches and repairs valid markup. Claude loads it on its own. |
 
-The plugin also registers the `weft` MCP server (`@weft/mcp`: `weft_primer`, `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch`, `weft_render`). The server never touches files; reading and writing them belongs to the three skills' scripts (sources in `scripts/`, bundled into `dist/`). A script refuses to replace an existing file unless `--force` is given. Exit codes: 0 done, 1 the input has errors (printed as `file:line:col code message`), 2 usage or file problem.
+The plugin also registers the `weft` MCP server (`@weft/mcp`: `weft_primer`, `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch`, `weft_render`). The server never touches files; reading and writing them belongs to the three skills' scripts (sources in `plugins/shared/scripts/`, shared with the Cursor plugin and bundled into `dist/`). A script refuses to replace an existing file unless `--force` is given. Exit codes: 0 done, 1 the input has errors (printed as `file:line:col code message`), 2 usage or file problem.
 
 ## Install
 
@@ -26,7 +26,7 @@ Every script and the MCP server start with `node` from the `PATH`, so `node` 24.
 
 ### Rebuild
 
-`dist/` and `skills/spec/AGENT-SPEC.md` are generated and committed, because Claude Code installs from git. After a change to `scripts/`, `@weft/*` or `AGENT-SPEC.md`, run `moon run claude-code:build` (it builds the WebAssembly core first with `root:wasm`, then `node build.ts`, Vite's rolldown bundler); a test rebuilds into a temporary folder and fails while the committed bundles differ. The `.wasm` is compared byte for byte too: `root:wasm` remaps the cargo, rustup and workspace paths (`/cargo`, `/rustup`, `/weft`), so the same sources build to the same bytes on any machine. Other tests copy only the plugin folder outside the repository and run the scripts and the MCP server from there.
+`dist/` and `skills/spec/AGENT-SPEC.md` are generated and committed, because Claude Code installs from git. After a change to `plugins/shared/scripts/`, `@weft/*` or `AGENT-SPEC.md`, run `moon run shared:build` (one build writes `dist/` and the spec copy of this plugin and of `plugins/cursor`; it builds the WebAssembly core first with `root:wasm`, then `node build.ts`, Vite's rolldown bundler); a test rebuilds into a temporary folder and fails while the committed bundles differ. The `.wasm` is compared byte for byte too: `root:wasm` remaps the cargo, rustup and workspace paths (`/cargo`, `/rustup`, `/weft`), so the same sources build to the same bytes on any machine. Other tests copy only the plugin folder outside the repository and run the scripts and the MCP server from there.
 
 ## Format notes
 

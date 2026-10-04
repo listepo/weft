@@ -74,8 +74,8 @@ The **catalog** is the vocabulary. It is written as TypeScript data in `packages
 Markup is what a model reads and writes. JSON is what programs handle. They convert into each other without loss. From inside a workspace package (see the note in the [index](README.md)), a short script shows the JSON form of a tiny screen and checks it with the `weft` command:
 
 ```console
-$ mkdir -p weft-tour plugins/claude-code/scratch
-$ cat > plugins/claude-code/scratch/json.ts <<'EOF'
+$ mkdir -p weft-tour plugins/shared/scratch
+$ cat > plugins/shared/scratch/json.ts <<'EOF'
 import { writeFileSync } from "node:fs";
 import { coreCatalog } from "@weft/catalog";
 import { parse, stringify } from "@weft/core";
@@ -86,7 +86,7 @@ const markup = `<screen id="hello" label="Hello" weft="0.1">
 const { document } = parse(markup, { catalog: coreCatalog });
 writeFileSync("weft-tour/hello.weft.json", stringify(document));
 EOF
-$ node plugins/claude-code/scratch/json.ts
+$ node plugins/shared/scratch/json.ts
 $ cat weft-tour/hello.weft.json
 {
   "weft": "0.1",

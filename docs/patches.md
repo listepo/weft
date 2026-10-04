@@ -7,7 +7,7 @@ Patches suit agents, but a person or a program can send them just as well. The r
 The examples use the scratch folder from the [tour](tour.md); this block makes it again if you skipped that page.
 
 ```console
-$ mkdir -p weft-tour plugins/claude-code/scratch
+$ mkdir -p weft-tour plugins/shared/scratch
 $ cp corpus/login/screen.weft weft-tour/login.weft
 ```
 
@@ -113,7 +113,7 @@ The line ends with `is falsy (NOT $.busy)`, which is the opposite of "disabled w
 An application uses the same operation through the library, `applyPatches(document, patches, { catalog, mode, tokens, actions })`. It treats the patch list as untrusted input, never throws and never changes the document it is given. From a file inside a workspace package (see the note in the [index](README.md)):
 
 ```console
-$ cat > plugins/claude-code/scratch/patch.ts <<'EOF'
+$ cat > plugins/shared/scratch/patch.ts <<'EOF'
 import { readFileSync } from "node:fs";
 import { coreCatalog } from "@weft/catalog";
 import { applyPatches, parse, serialize } from "@weft/core";
@@ -128,7 +128,7 @@ if (result.document === undefined) {
   console.log(serialize(result.document).split("\n")[7]);
 }
 EOF
-$ node plugins/claude-code/scratch/patch.ts
+$ node plugins/shared/scratch/patch.ts
     <button id="submit" disabled="{!$.email}" submit="true" variant="danger">Sign in</button>
 ```
 

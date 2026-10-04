@@ -1,4 +1,4 @@
-// A minimal MCP client over stdio, enough to start a server as Claude Code does and call its tools.
+// A minimal MCP client over stdio, enough to start a server as an agent host does and call its tools.
 import { spawn } from "node:child_process";
 
 export type McpResult = { content: { type: string; text: string }[]; isError?: boolean };

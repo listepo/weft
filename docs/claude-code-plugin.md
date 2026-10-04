@@ -45,7 +45,7 @@ Installing from a GitHub address is not possible yet: Claude Code copies only th
 
 ## What the commands run
 
-Each command is a script in `plugins/claude-code/scripts/`, so you can run the same thing from a terminal. The tour already used two of them. The scripts print what they did, never replace a file unless you pass `--force`, and use these exit codes:
+Each command is a script in `plugins/shared/scripts/`, so you can run the same thing from a terminal. The tour already used two of them. The scripts print what they did, never replace a file unless you pass `--force`, and use these exit codes:
 
 | Code | Meaning |
 | --- | --- |
@@ -59,14 +59,14 @@ The examples use the scratch folder from the [tour](tour.md); this block makes i
 $ mkdir -p weft-tour
 $ cp corpus/login/screen.weft weft-tour/login.weft
 $ cp corpus/login/screen.html weft-tour/page.html
-$ node plugins/claude-code/scripts/render.ts weft-tour/login.weft weft-tour/plugin.html --data corpus/login/data.json; echo "exit $?"
+$ node plugins/shared/scripts/render.ts weft-tour/login.weft weft-tour/plugin.html --data corpus/login/data.json; echo "exit $?"
 Wrote weft-tour/plugin.html
 file:///path/to/weft/weft-tour/plugin.html
 exit 0
-$ node plugins/claude-code/scripts/render.ts weft-tour/login.weft weft-tour/plugin.html; echo "exit $?"
+$ node plugins/shared/scripts/render.ts weft-tour/login.weft weft-tour/plugin.html; echo "exit $?"
 weft: weft-tour/plugin.html already exists; pass --force to replace it
 exit 2
-$ node plugins/claude-code/scripts/render.ts weft-tour/login.weft weft-tour/plugin.html --force; echo "exit $?"
+$ node plugins/shared/scripts/render.ts weft-tour/login.weft weft-tour/plugin.html --force; echo "exit $?"
 Wrote weft-tour/plugin.html
 file:///path/to/weft/weft-tour/plugin.html
 exit 0
@@ -76,7 +76,7 @@ exit 0
 
 ```console
 $ sed 's/variant="primary"/variant="primry"/' weft-tour/login.weft > weft-tour/login-typo.weft
-$ node plugins/claude-code/scripts/render.ts weft-tour/login-typo.weft; echo "exit $?"
+$ node plugins/shared/scripts/render.ts weft-tour/login-typo.weft; echo "exit $?"
 weft-tour/login-typo.weft:8:61 W203 "primry" is not an allowed value. — did you mean "primary"?
 exit 1
 ```

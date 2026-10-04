@@ -30,7 +30,7 @@ $ cat > weft-tour/pricing.html <<'EOF'
   <a href="/docs">Read the docs</a>
 </main>
 EOF
-$ node plugins/claude-code/scripts/import.ts weft-tour/pricing.html
+$ node plugins/shared/scripts/import.ts weft-tour/pricing.html
 Wrote weft-tour/pricing.weft
 
 Import losses:
@@ -71,7 +71,7 @@ Look at what happened. The roles decided the components: `h1` became a `heading`
 The script refuses to overwrite an existing file; add `--force` to replace it. Exit code 0 means done, 1 means the input could not be imported (the diagnostics are printed), 2 means a usage or file problem.
 
 ```console
-$ node plugins/claude-code/scripts/import.ts weft-tour/pricing.html; echo "exit $?"
+$ node plugins/shared/scripts/import.ts weft-tour/pricing.html; echo "exit $?"
 weft: weft-tour/pricing.weft already exists; pass --force to replace it
 exit 2
 ```
@@ -109,7 +109,7 @@ $ cat > weft-tour/misc.html <<'EOF'
   <div hidden>Secret</div>
 </main>
 EOF
-$ node plugins/claude-code/scripts/import.ts weft-tour/misc.html | tail -n 2
+$ node plugins/shared/scripts/import.ts weft-tour/misc.html | tail -n 2
 | hidden | /screen#screen-misc | elements a renderer leaves out (hidden, closed dialogs) are not in the HTML |
 | kinds | /screen#screen-misc/x-aria-navigation#navigation-site | role navigation has no kind in the catalog |
 $ cat weft-tour/misc.weft
@@ -141,8 +141,8 @@ $ cat weft-tour/misc.weft
 The importer also reads an accessibility snapshot: the YAML a Playwright aria snapshot gives, or the same tree as objects. That is what `weft_render` prints too, so a screen can be imported from a live browser session. The plugin has no command for it; use the library from a file inside a workspace package (see the note in the [index](README.md)):
 
 ```console
-$ mkdir -p plugins/claude-code/scratch
-$ cat > plugins/claude-code/scratch/snapshot.ts <<'EOF'
+$ mkdir -p plugins/shared/scratch
+$ cat > plugins/shared/scratch/snapshot.ts <<'EOF'
 import { coreCatalog } from "@weft/catalog";
 import { serialize } from "@weft/core";
 import { fromAriaSnapshot } from "@weft/from-aria";
@@ -157,7 +157,7 @@ const { document, losses } = fromAriaSnapshot(snapshot, { catalog: coreCatalog }
 process.stdout.write(serialize(document));
 console.log(losses.map((l) => l.kind).join(", "));
 EOF
-$ node plugins/claude-code/scratch/snapshot.ts
+$ node plugins/shared/scratch/snapshot.ts
 <screen id="screen-sign-in" label="Sign in" weft="0.1">
   <heading id="heading-sign-in" level="1">Sign in</heading>
   <field id="field-email" label="Email"/>

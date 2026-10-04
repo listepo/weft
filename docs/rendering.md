@@ -20,7 +20,7 @@ $ cp corpus/login/screen.weft weft-tour/login.weft
 ## A page for the browser
 
 ```console
-$ node plugins/claude-code/scripts/render.ts weft-tour/login.weft weft-tour/rendered.html --data corpus/login/data.json
+$ node plugins/shared/scripts/render.ts weft-tour/login.weft weft-tour/rendered.html --data corpus/login/data.json
 Wrote weft-tour/rendered.html
 file:///path/to/weft/weft-tour/rendered.html
 ```
@@ -86,7 +86,7 @@ A token reference such as `{token.space.md}` turns into a real value when the pa
 
 ```console
 $ sed 's/space.md/space.huge/' weft-tour/login.weft > weft-tour/login-token.weft
-$ node plugins/claude-code/scripts/render.ts weft-tour/login-token.weft; echo "exit $?"
+$ node plugins/shared/scripts/render.ts weft-tour/login-token.weft; echo "exit $?"
 weft-tour/login-token.weft:4:24 W306 Token "space.huge" does not exist. — did you mean "space.lg"?
 exit 1
 ```
@@ -95,7 +95,7 @@ Give your own file in the same format (W3C Design Tokens, DTCG 2025.10) with `--
 
 ```console
 $ node -e 'const fs=require("fs");const t=JSON.parse(fs.readFileSync("packages/catalog/tokens/default.tokens.json","utf8"));t.space.md.$value={value:40,unit:"px"};fs.writeFileSync("weft-tour/wide.tokens.json",JSON.stringify(t,null,2))'
-$ node plugins/claude-code/scripts/render.ts weft-tour/login.weft weft-tour/wide.html --tokens weft-tour/wide.tokens.json
+$ node plugins/shared/scripts/render.ts weft-tour/login.weft weft-tour/wide.html --tokens weft-tour/wide.tokens.json
 Wrote weft-tour/wide.html
 file:///path/to/weft/weft-tour/wide.html
 $ grep -o 'gap:[0-9a-z]*' weft-tour/wide.html

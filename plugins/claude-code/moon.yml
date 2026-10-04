@@ -1,19 +1,8 @@
-# The plugin's tests read the marketplace manifest at the repository root.
+# The plugin's tests read the marketplace manifest at the repository root. Its dist/ is built by
+# `moon run shared:build`, together with the Cursor plugin's.
+language: 'typescript'
+
 tasks:
   test:
     inputs:
       - '/.claude-plugin/**/*'
-  # Regenerates the committed dist/ and skills/spec/AGENT-SPEC.md. dist/ carries the WebAssembly
-  # core, so it is built after root:wasm. Uncached: the outputs are committed files.
-  build:
-    command: 'node build.ts'
-    deps: ['root:wasm']
-    inputs:
-      - '/packages/*/src/**/*'
-      - 'scripts/**/*'
-      - 'build.ts'
-      - '/AGENT-SPEC.md'
-      - '/packages/catalog/tokens/**/*'
-    options:
-      cache: false
-      runInCI: false

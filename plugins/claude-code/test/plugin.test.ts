@@ -1,10 +1,20 @@
 // The plugin's declarations point at things that exist, and the MCP server it registers starts.
 import assert from "node:assert/strict";
-import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, test } from "vitest";
-import { startServer, WEFT_TOOLS } from "./mcp-stdio.ts";
+import { afterAll, describe, test } from "vitest";
+import { installCopy } from "../../shared/test/install.ts";
+import { startServer, WEFT_TOOLS } from "../../shared/test/mcp-stdio.ts";
 
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const PLUGIN = join(ROOT, "plugins/claude-code");
@@ -102,5 +112,24 @@ describe(".mcp.json", () => {
     } finally {
       session.close();
     }
+  });
+});
+
+describe("the plugin folder as Claude Code caches it", () => {
+  const scratch = mkdtempSync(join(tmpdir(), "weft-claude-code-"));
+  afterAll(() => rmSync(scratch, { recursive: true, force: true }));
+  const copy = installCopy("claude-code", join(scratch, "weft/0.1.0"));
+  const inCopy = (value: string) => value.replaceAll("${CLAUDE_PLUGIN_ROOT}", copy);
+
+  test("every skill and the MCP config point at a file of the copy", () => {
+    const references = [
+      ...["export", "import", "render"].flatMap((name) => {
+        const text = readFileSync(join(copy, "skills", name, "SKILL.md"), "utf8");
+        return [...text.matchAll(/\$\{CLAUDE_PLUGIN_ROOT\}\/[\w./-]+/g)].map((m) => m[0]);
+      }),
+      ...json(join(copy, ".mcp.json")).mcpServers.weft.args,
+    ];
+    assert.equal(references.length, 4);
+    for (const reference of references) assert.ok(existsSync(inCopy(reference)), reference);
   });
 });

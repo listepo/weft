@@ -29,7 +29,7 @@ Commands are written to be run from the repository root, in the order of the tou
 - The tour builds the tools and the scratch folder `weft-tour/` that the other pages reuse. Each page repeats the two lines that recreate the folder, so you can start anywhere after the setup.
 - Paths of your own clone appear as `/path/to/weft` in the output shown.
 - `weft` means the program built from `crates/weft-cli`; the tour shows how to put it on your `PATH`.
-- Some examples call the libraries (`@weft/core`, `@weft/catalog`, …). They are workspace packages with no build step, and Node finds them only from a file inside a package folder that depends on them. The guide puts such scripts in `plugins/claude-code/scratch/`, which is safe to delete.
+- Some examples call the libraries (`@weft/core`, `@weft/catalog`, …). They are workspace packages with no build step, and Node finds them only from a file inside a package folder that depends on them. The guide puts such scripts in `plugins/shared/scratch/`, which is safe to delete.
 - Slash commands (`/weft:import` and the others) and `/plugin` run inside Claude Code and cannot be shown here. The scripts they run are shown instead.
 
 ## Status

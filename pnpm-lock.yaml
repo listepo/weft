@@ -283,7 +283,9 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
 
-  plugins/claude-code:
+  plugins/claude-code: {}
+
+  plugins/shared:
     devDependencies:
       '@weft/catalog':
         specifier: workspace:*
