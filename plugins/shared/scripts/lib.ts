@@ -102,6 +102,14 @@ export function readScreen(
   return ok && document !== undefined ? document : EXIT.invalid;
 }
 
+/** A Markdown table, one row per loss, so the model can relay it to the user as it is. */
+export function lossTable(losses: readonly { kind: string; path: string; note: string }[]): string {
+  if (losses.length === 0) return "No losses.\n";
+  const cell = (value: string) => value.replaceAll("|", "\\|").replaceAll("\n", " ");
+  const rows = losses.map((l) => `| ${l.kind} | ${cell(l.path)} | ${cell(l.note)} |`);
+  return ["| Kind | Path | Note |", "| --- | --- | --- |", ...rows].join("\n") + "\n";
+}
+
 /** `dir/name.ext` for `dir/name.other`: generated files land next to their source. */
 export function siblingPath(input: string, extension: string): string {
   return join(dirname(input), basename(input, extname(input)) + extension);

@@ -3,6 +3,7 @@
   "ignorePatterns": [
     "crates/*/tests/fixtures/**",
     "bench/results/**",
+    "packages/design-md/test/fixtures/**",
     "plugins/*/dist/**",
     "schemas/**"
   ]

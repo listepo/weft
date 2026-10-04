@@ -1,0 +1,27 @@
+{
+  "$schema": "https://open-design.ai/schemas/plugin.v1.json",
+  "specVersion": "1.0.0",
+  "name": "weft",
+  "title": "Weft",
+  "version": "0.1.0",
+  "description": "Design screens as Weft UI markup: author and validate .weft files, import HTML, export React, preview pages and map a DESIGN.md or tokens.css design system to design tokens.",
+  "author": { "name": "Ivan Tugay" },
+  "license": "Apache-2.0",
+  "tags": ["weft", "ui", "html", "react", "design-tokens", "design-md"],
+  "compat": {
+    "agentSkills": [{ "path": "./SKILL.md" }]
+  },
+  "od": {
+    "kind": "skill",
+    "taskKind": "new-generation",
+    "mode": "utility",
+    "scenario": "design",
+    "useCase": {
+      "query": "Design the screens of this app as Weft (.weft) files with the weft skill, validate them in strict mode, and render a preview page for each."
+    },
+    "context": {
+      "skills": [{ "path": "./SKILL.md" }]
+    },
+    "capabilities": ["prompt:inject", "fs:read", "bash"]
+  }
+}

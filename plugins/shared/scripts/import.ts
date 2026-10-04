@@ -5,11 +5,12 @@
 // `import.html.outDir` (SPEC §10.6) where the screen goes.
 import { parseArgs } from "node:util";
 import { hasErrors, serialize, validate } from "@weft/core";
-import { fromDom, MAX_HTML_LENGTH, type Loss } from "@weft/from-aria";
+import { fromDom, MAX_HTML_LENGTH } from "@weft/from-aria";
 import {
   contextFor,
   defaultIo,
   EXIT,
+  lossTable,
   openProject,
   printDiagnostics,
   PROJECT_OPTIONS,
@@ -21,14 +22,6 @@ import {
 
 const USAGE =
   "usage: import <page.html> [out.weft] [--force] [--project weft.json | --no-project]\n";
-
-/** A Markdown table, one row per loss, so the model can relay it to the user as it is. */
-export function lossTable(losses: readonly Loss[]): string {
-  if (losses.length === 0) return "No losses.\n";
-  const cell = (value: string) => value.replaceAll("|", "\\|").replaceAll("\n", " ");
-  const rows = losses.map((l) => `| ${l.kind} | ${cell(l.path)} | ${cell(l.note)} |`);
-  return ["| Kind | Path | Note |", "| --- | --- | --- |", ...rows].join("\n") + "\n";
-}
 
 export function main(argv: readonly string[], io: Io = defaultIo): number {
   let parsed;

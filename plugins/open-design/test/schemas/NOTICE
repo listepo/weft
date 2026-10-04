@@ -1,0 +1,9 @@
+open-design.plugin.v1.json in this folder is a copy of docs/schemas/open-design.plugin.v1.json from
+https://github.com/nexu-io/open-design, taken at commit 53231d40b778d88eba23f35547bf99485d3ae9fc
+(2026-09-30, checked 2026-10-05). Only the whitespace differs (formatted with oxfmt); the JSON
+value is identical. It is test input only and is not shipped in the plugin folder's runtime files.
+
+That repository is licensed under the Apache License, Version 2.0
+(https://www.apache.org/licenses/LICENSE-2.0). Its LICENSE file names the copyright holder as
+"Open Design contributors": Copyright 2026 Open Design contributors. The license text is the one
+in the LICENSE file at the root of this repository, which is also Apache-2.0.

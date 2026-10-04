@@ -17,6 +17,9 @@ const REPOSITORY = join(SHARED, "../..");
 export const PLUGINS = {
   "claude-code": { skill: "skills/spec" },
   cursor: { skill: "skills/weft-spec" },
+  // An Open Design skill is the plugin folder itself (SKILL.md at its root), which the host stages
+  // read-only in the project, so the guide sits in a folder of its own beside it.
+  "open-design": { skill: "references" },
 } as const;
 
 export type PluginName = keyof typeof PLUGINS;
@@ -37,6 +40,7 @@ export const ENTRIES = {
   import: join(SHARED, "scripts/import.ts"),
   export: join(SHARED, "scripts/export.ts"),
   render: join(SHARED, "scripts/render.ts"),
+  "design-md": join(SHARED, "scripts/design-md.ts"),
   server: join(REPOSITORY, "packages/mcp/src/server.ts"),
 };
 
