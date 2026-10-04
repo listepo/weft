@@ -32,7 +32,7 @@ pub use model::{
 };
 pub use parse::{ParseOptions, ParseResult, parse};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};
-pub use rules::{ARIA_ROLES, MAX_DEPTH, is_action};
+pub use rules::{ARIA_ROLES, MAX_DEPTH, is_action, is_name};
 pub use serialize::serialize;
 pub use source::{ListSource, NodeSource};
 pub use validate::{ValidateOptions, validate, validate_document};

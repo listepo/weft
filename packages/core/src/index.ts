@@ -28,6 +28,7 @@ export {
   EMBEDDED_REFERENCE,
   ID,
   LOOP_VARIABLE,
+  NAME,
   NON_XML_CHAR,
   TOKEN,
 } from "./rules.ts";
