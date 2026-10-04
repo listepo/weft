@@ -80,6 +80,11 @@ fn typecheck(sdk: &str, target: &str) {
             target,
         ])
         .args(&files)
+        // The hand-written sample the import test reads must be real SwiftUI too.
+        .arg(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/fixtures/import/Settings.swift"
+        ))
         .output()
         .unwrap();
     assert!(

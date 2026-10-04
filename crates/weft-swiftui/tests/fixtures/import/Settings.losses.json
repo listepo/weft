@@ -1,0 +1,167 @@
+[
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "structure",
+    "path": "/screen#screen-1",
+    "note": "the view's body is not one stack; a screen root is added around it"
+  },
+  {
+    "kind": "layout",
+    "path": "/screen#screen-1",
+    "note": "`NavigationStack` is not kept; its content is"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-profile",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-profile/field#field-email",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-notifications",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-notifications/switch#switch-1",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "layout",
+    "path": "/screen#screen-1/form#form-1/section#section-notifications/switch#switch-1",
+    "note": "`.tint` not kept"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-notifications/select#select-1",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-notifications/select#select-1/option#option-free",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-notifications/select#select-1/option#option-pro",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-devices",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-devices/each#each-device",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-devices/each#each-device/stack#stack-1",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-devices/each#each-device/stack#stack-1/image#image-1",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "values",
+    "path": "/screen#screen-1/form#form-1/section#section-devices/each#each-device/stack#stack-1/image#image-1",
+    "note": "an asset or symbol name is kept as the image source"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-devices/each#each-device/stack#stack-1/text#text-1",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "repetition",
+    "path": "/screen#screen-1/form#form-1/section#section-devices",
+    "note": "a `ForEach` over data that is not a data path is imported once, as static content"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/section#section-devices/text#text-2",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "bindings",
+    "path": "/screen#screen-1/form#form-1/section#section-devices/text#text-2",
+    "note": "interpolated text is kept as its literal parts only"
+  },
+  {
+    "kind": "hidden",
+    "path": "/screen#screen-1/form#form-1",
+    "note": "an `if` condition that is not a data path is not kept; its first branch is imported as shown"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/text#text-you-have-many-devices",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/button#button-save",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "actions",
+    "path": "/screen#screen-1/form#form-1/button#button-save",
+    "note": "a statement, handler code in the `press` handler is not kept; Weft names an action only"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/form#form-1/button#button-help",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "actions",
+    "path": "/screen#screen-1/form#form-1/button#button-help",
+    "note": "a statement in the `press` handler is not kept; Weft names an action only"
+  },
+  {
+    "kind": "layout",
+    "path": "/screen#screen-1/form#form-1",
+    "note": "`.navigationTitle`, `.padding` not kept"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/dialog#dialog-1",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "ids",
+    "path": "/screen#screen-1/dialog#dialog-1/text#text-ask-support-for-help",
+    "note": "the view has no accessibilityIdentifier; the id is generated"
+  },
+  {
+    "kind": "kinds",
+    "path": "/screen#screen-1/dialog#dialog-1",
+    "note": "`Circle` has no Weft kind and is dropped"
+  },
+  {
+    "kind": "names",
+    "path": "/screen#screen-1/form#form-1/section#section-devices/each#each-device/stack#stack-1/image#image-1",
+    "note": "`image` needs a label; \"\" stands in"
+  },
+  {
+    "kind": "names",
+    "path": "/screen#screen-1/dialog#dialog-1",
+    "note": "`dialog` needs a label; \"\" stands in"
+  }
+]

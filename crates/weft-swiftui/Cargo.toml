@@ -31,3 +31,7 @@ workspace = true
 [[test]]
 name = "roundtrip"
 required-features = ["import"]
+
+[[test]]
+name = "import"
+required-features = ["import"]
