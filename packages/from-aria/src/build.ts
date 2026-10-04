@@ -78,7 +78,11 @@ type Ctx = {
 
 type Placed = { node: Node; slot?: string | undefined };
 
-const lose = (ctx: Ctx, kind: LossKind, path: string, note: string) =>
+// What the shared helpers below need, so that other importers (`@weft/figma`) can reuse them.
+export type IdState = { used: Set<string>; counters: Map<string, number> };
+export type LossLog = { losses: Loss[] };
+
+const lose = (ctx: LossLog, kind: LossKind, path: string, note: string) =>
   ctx.losses.push({ kind, path, note });
 
 export function limitReached(diagnostics: Diagnostic[], path: string, what: string): void {
@@ -99,14 +103,14 @@ function truncate(ctx: Ctx, path: string): void {
 
 // A literal must not contain a reference after its first character (SPEC §2.1, W213); such text
 // is real content of the UI, so the brace is replaced by a look-alike instead of dropping it.
-function literal(ctx: Ctx, path: string, s: string): string {
+export function literal(ctx: LossLog, path: string, s: string): string {
   const out = clean(s);
   if (out.search(EMBEDDED_REFERENCE) <= 0) return out;
   lose(ctx, "text", path, "text that reads as a binding or token reference had its brace replaced");
   return out[0] + out.slice(1).replace(REFERENCE_START, "｛");
 }
 
-function freshId(ctx: Ctx, base: string, name: string): string {
+export function freshId(ctx: IdState, base: string, name: string): string {
   const s = slug(name);
   if (s !== "" && !ctx.used.has(`${base}-${s}`)) {
     ctx.used.add(`${base}-${s}`);
