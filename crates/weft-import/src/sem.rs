@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use weft_core::Map;
+use weft_core::{Map, Value};
 
 use crate::loss::LossKind;
 use crate::props::Scalar;
@@ -38,6 +38,17 @@ pub struct Sem {
     pub labelled_by: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub notes: Vec<Note>,
+    /// Bindings and token references source code states, keyed by the Weft prop they feed
+    /// (`text` for bound content, `in` for a repetition). Only source readers set these, so they
+    /// are not part of the wire form.
+    #[serde(skip)]
+    pub values: Map<Value>,
+    /// Event name → action name, as source code wires them.
+    #[serde(skip)]
+    pub on: Map<String>,
+    /// The parent slot source code puts this node in (`footer` also finds a dialog's `actions`).
+    #[serde(skip)]
+    pub slot: Option<String>,
     #[serde(default)]
     pub children: Vec<Sem>,
 }

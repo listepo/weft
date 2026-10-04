@@ -48,6 +48,13 @@ impl Dom {
         }
     }
 
+    pub fn attrs(&self, i: usize) -> &[(String, String)] {
+        match self.nodes.get(i) {
+            Some(HNode::Element { attrs, .. }) => attrs,
+            _ => &[],
+        }
+    }
+
     pub fn children(&self, i: usize) -> &[usize] {
         match self.nodes.get(i) {
             Some(HNode::Element { children, .. }) => children,

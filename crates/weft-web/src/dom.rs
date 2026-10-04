@@ -4,11 +4,18 @@
 
 use std::collections::{HashMap, HashSet};
 
-use weft_core::{ARIA_ROLES, Catalog, Diagnostic, is_id};
-use weft_import::{
-    BuildOptions, ImportResult, LossKind, MAX_DEPTH, MAX_NODES, Note, Scalar, Sem, build_document,
-    is_js_space, js_length, js_number_from, js_prefix, js_trim, limit_reached, squash,
+use indexmap::IndexMap;
+use weft_catalog::Token;
+use weft_core::{
+    ARIA_ROLES, Catalog, Child, Diagnostic, Node, Value, is_action, is_id, read_value,
 };
+use weft_import::{
+    BuildOptions, Built, ImportResult, LossKind, MAX_DEPTH, MAX_NODES, Note, Scalar, Sem,
+    build_document, is_js_space, js_length, js_number_from, js_prefix, js_trim, limit_reached,
+    squash,
+};
+
+use crate::html::token_var;
 
 use crate::tree::{DOCUMENT, Dom, HNode, parse_html};
 
@@ -125,8 +132,48 @@ pub fn instance_id(raw: &str) -> Option<String> {
     Some(out)
 }
 
+/// What source code states and a rendered page does not: bindings (`data-bind`), actions
+/// (`data-action`), repetition (`<template data-each>`), slots (`data-weft-slot`, `<footer>`,
+/// `<template data-empty>`), token references, presentation states and hidden elements. These are
+/// the conventions of corpus/README.md, which the HTML generator writes too.
+pub(crate) struct Conventions {
+    /// `--weft-…` custom property → token path.
+    vars: HashMap<String, String>,
+    paths: HashSet<String>,
+}
+
+impl Conventions {
+    pub(crate) fn new(tokens: &IndexMap<String, Token>) -> Self {
+        Conventions {
+            vars: tokens
+                .keys()
+                .filter_map(|path| token_var(path).map(|var| (var, path.clone())))
+                .collect(),
+            paths: tokens.keys().cloned().collect(),
+        }
+    }
+}
+
+/// `prop:value; prop:value` lists of `data-bind` and `data-action`.
+fn entries(list: &str) -> impl Iterator<Item = (&str, &str)> {
+    list.split(';').filter_map(|entry| {
+        let (key, value) = entry.split_once(':')?;
+        let (key, value) = (js_trim(key), js_trim(value));
+        (!key.is_empty() && !value.is_empty()).then_some((key, value))
+    })
+}
+
+/// `$.path` or `!$.path` as a binding value.
+fn bind_value(raw: &str) -> Option<Value> {
+    match read_value(&format!("{{{raw}}}"), None) {
+        Ok(value @ Value::Bind { .. }) => Some(value),
+        _ => None,
+    }
+}
+
 struct Ctx<'d> {
     dom: &'d Dom,
+    conventions: Option<&'d Conventions>,
     by_html_id: HashMap<&'d str, usize>,
     label_for: HashMap<&'d str, usize>,
     ids: HashMap<usize, String>,
@@ -286,6 +333,9 @@ impl<'d> Ctx<'d> {
         let tag = dom.name(el)?.to_lowercase();
         let tag = tag.as_str();
         let attr = |key: &str| dom.attr(el, key);
+        if tag == "template" && self.conventions.is_some() && !self.consumed.contains(&el) {
+            return self.template(el, depth, label);
+        }
         if SKIPPED.contains(&tag)
             || self.consumed.contains(&el)
             || attr("aria-hidden") == Some("true")
@@ -299,10 +349,11 @@ impl<'d> Ctx<'d> {
             self.truncated = true;
             return None;
         }
-        let role = role_of(dom, el, tag);
+        let role = role_of(dom, el, tag, self.conventions.is_some());
         // Hidden content is not part of the UI, except inactive tab panels, which hold a tab's
         // content.
-        if attr("hidden").is_some() && role != "tabpanel" {
+        let hidden = attr("hidden").is_some() && role != "tabpanel";
+        if hidden && self.conventions.is_none() {
             return None;
         }
         if tag == "input" && attr("type").map(str::to_lowercase).as_deref() == Some("hidden") {
@@ -313,6 +364,9 @@ impl<'d> Ctx<'d> {
         }
 
         let mut s = Sem::new(role, self.acc_name(el, tag, role, label));
+        if hidden {
+            s.values.insert("hidden".into(), Value::Bool(true));
+        }
         let id = self.ids.get(&el).cloned();
         s.id.clone_from(&id);
         if let Some(notes) = self.notes.get(&el) {
@@ -430,12 +484,23 @@ impl<'d> Ctx<'d> {
             s.states.insert("invalid".into(), Scalar::Bool(true));
         }
 
-        if id.is_some()
+        if let Some(conventions) = self.conventions {
+            self.read_conventions(conventions, el, tag, role, label, &mut s);
+        }
+        let styled = self.conventions.is_some()
+            && (layout_class(attr("class")).is_some()
+                || matches!(
+                    parse_style(attr("style"))
+                        .get("display")
+                        .map(String::as_str),
+                    Some("flex" | "grid")
+                ));
+        if (id.is_some() || styled)
             && role == "generic"
             && attr("role").is_none()
             && matches!(tag, "div" | "span")
         {
-            layout(&mut s, dom, el);
+            layout(&mut s, dom, el, self.conventions);
         }
 
         if !matches!(tag, "input" | "textarea" | "img") {
@@ -455,8 +520,170 @@ impl<'d> Ctx<'d> {
             if tag == "form" {
                 self.forms -= 1;
             }
+            if self.conventions.is_some() {
+                lift_bound_text(&mut s);
+                if role == "columnheader" {
+                    lift_header_button(&mut s);
+                }
+                let slot = attr("data-weft-slot").or((tag == "footer").then_some("footer"));
+                if let Some(slot) = slot {
+                    s.role = "generic".into();
+                    for c in &mut s.children {
+                        c.slot = Some(slot.to_owned());
+                    }
+                }
+            }
         }
         Some(s)
+    }
+
+    /// `<template data-each>` repeats its content; `<template data-empty>` is the empty slot.
+    fn template(&mut self, el: usize, depth: usize, label: Option<usize>) -> Option<Sem> {
+        let dom = self.dom;
+        if depth > MAX_DEPTH || {
+            self.nodes += 1;
+            self.nodes > MAX_NODES
+        } {
+            self.truncated = true;
+            return None;
+        }
+        let mut s = Sem::new("generic", "");
+        if let Some(list) = dom.attr(el, "data-each") {
+            s.kind = Some("each".into());
+            s.id = self.ids.get(&el).cloned();
+            if let Some(notes) = self.notes.get(&el) {
+                s.notes = notes.clone();
+            }
+            if let Some(value) = bind_value(list) {
+                s.values.insert("in".into(), value);
+            }
+            if let Some(name) = dom.attr(el, "data-as") {
+                s.props.insert("as".into(), name.into());
+            }
+            s.children = self.children(el, depth, label);
+        } else if dom.attr(el, "data-empty").is_some() {
+            s.children = self.children(el, depth, label);
+            for c in &mut s.children {
+                c.slot = Some("empty".into());
+            }
+        } else {
+            return None;
+        }
+        Some(s)
+    }
+
+    fn read_conventions(
+        &mut self,
+        conventions: &Conventions,
+        el: usize,
+        tag: &str,
+        role: &str,
+        label: Option<usize>,
+        s: &mut Sem,
+    ) {
+        let dom = self.dom;
+        let attr = |key: &str| dom.attr(el, key);
+        // Values a page needs and source does not state: the `#` of a link without a literal
+        // href, the modal default of a dialog, and the tab a page shows first.
+        if s.props.get("href").is_some_and(|h| h == "#") {
+            s.props.shift_remove("href");
+        }
+        if s.props.get("modal").is_some_and(|m| m == "true") {
+            s.props.shift_remove("modal");
+        }
+        if role == "tab" {
+            s.states.shift_remove("selected");
+        }
+        for (prop, raw) in entries(attr("data-bind").unwrap_or("")) {
+            match bind_value(raw) {
+                Some(value) => {
+                    s.values.insert(prop.to_owned(), value);
+                }
+                None => s.notes.push(Note {
+                    kind: LossKind::Bindings,
+                    note: format!(
+                        "{prop} is bound to {}, which is not a data path",
+                        js_prefix(raw, 80)
+                    ),
+                }),
+            }
+        }
+        for (event, action) in entries(attr("data-action").unwrap_or("")) {
+            if is_action(action) {
+                s.on.insert(event.to_owned(), action.to_owned());
+            } else {
+                s.notes.push(Note {
+                    kind: LossKind::Actions,
+                    note: format!("{} is not an action name", js_prefix(action, 80)),
+                });
+            }
+        }
+        if let Some(kind) = attr("data-weft-kind") {
+            s.kind = Some(kind.to_owned());
+        }
+        for (key, value) in dom.attrs(el) {
+            let Some(prop) = key.strip_prefix("data-prop-") else {
+                continue;
+            };
+            match read_value(value, None) {
+                Ok(Value::Token(token)) if conventions.paths.contains(&token) => {
+                    s.values.insert(prop.to_owned(), Value::Token(token));
+                }
+                Ok(Value::String(text)) => {
+                    s.props.insert(prop.to_owned(), text);
+                }
+                _ => s.notes.push(Note {
+                    kind: LossKind::Props,
+                    note: format!("{key}=\"{}\" is not a value", js_prefix(value, 80)),
+                }),
+            }
+        }
+        if let Some(align) = attr("data-align") {
+            s.props.insert("align".into(), align.into());
+        }
+        if attr("data-wrap").is_some() {
+            s.props.insert("wrap".into(), "true".into());
+        }
+        if tag == "dialog" {
+            let open = if attr("open").is_some() {
+                "true"
+            } else {
+                "false"
+            };
+            s.props.insert("open".into(), open.into());
+        }
+        if tag == "fieldset"
+            && let Some(legend) = dom.elements(el).find(|&c| dom.name(c) == Some("legend"))
+        {
+            if s.name.is_empty() {
+                s.name = squash(&self.text_of(legend, false));
+            }
+            self.consumed.insert(legend);
+        }
+        // A control named by bound text in its label: the label is that binding.
+        if CONTROLS.contains(&tag) && s.name.is_empty() && !s.values.contains_key("label") {
+            let owner = attr("id")
+                .and_then(|id| self.label_for.get(id).copied())
+                .or(label);
+            if let Some(bound) = owner.and_then(|o| self.bound_text(o, 0)) {
+                s.values.insert("label".into(), bound);
+            }
+        }
+    }
+
+    /// The first `text` binding in a subtree.
+    fn bound_text(&self, el: usize, depth: usize) -> Option<Value> {
+        if depth > MAX_DEPTH {
+            return None;
+        }
+        let own = entries(self.attr(el, "data-bind").unwrap_or(""))
+            .find(|(prop, _)| *prop == "text")
+            .and_then(|(_, raw)| bind_value(raw));
+        own.or_else(|| {
+            self.dom
+                .elements(el)
+                .find_map(|c| self.bound_text(c, depth + 1))
+        })
     }
 
     fn children(&mut self, el: usize, depth: usize, label: Option<usize>) -> Vec<Sem> {
@@ -482,7 +709,7 @@ impl<'d> Ctx<'d> {
     }
 }
 
-fn role_of(dom: &Dom, el: usize, tag: &str) -> &'static str {
+fn role_of(dom: &Dom, el: usize, tag: &str, source: bool) -> &'static str {
     let attr = |key: &str| dom.attr(el, key);
     for r in split_ws(js_trim(attr("role").unwrap_or(""))) {
         if let Some(known) = ARIA_ROLES.iter().find(|k| **k == r) {
@@ -491,7 +718,10 @@ fn role_of(dom: &Dom, el: usize, tag: &str) -> &'static str {
     }
     match tag {
         "a" => {
-            if attr("href").is_some() {
+            // In source, a bound href is a link too.
+            let bound =
+                source && entries(attr("data-bind").unwrap_or("")).any(|(prop, _)| prop == "href");
+            if attr("href").is_some() || bound {
                 "link"
             } else {
                 "generic"
@@ -556,19 +786,65 @@ fn js_trim_start(s: &str) -> &str {
     s.trim_start_matches(is_js_space)
 }
 
+/// An element whose only content is one bound text run shows that binding itself.
+fn lift_bound_text(s: &mut Sem) {
+    if s.values.contains_key("text") {
+        return;
+    }
+    if let [only] = s.children.as_mut_slice()
+        && only.kind.is_none()
+        && only.role == "generic"
+        && only.children.is_empty()
+        && let Some(text) = only.values.shift_remove("text")
+    {
+        s.values.insert("text".into(), text);
+        s.children.clear();
+    }
+}
+
+/// A sortable column header holds a button; its press is the column's.
+fn lift_header_button(s: &mut Sem) {
+    if let [only] = s.children.as_mut_slice()
+        && only.role == "button"
+        && only.kind.is_none()
+    {
+        let button = std::mem::take(only);
+        s.on = button.on;
+        s.children = button.children;
+        if s.name == button.name {
+            s.name.clear();
+        }
+    }
+}
+
+/// The layout a class list names: the generator's `weft-stack`/`weft-row`/`weft-grid`, or the
+/// corpus's `stack`/`row`.
+fn layout_class(class: Option<&str>) -> Option<&'static str> {
+    split_ws(class.unwrap_or(""))
+        .into_iter()
+        .find_map(|c| match c {
+            "weft-grid" => Some("grid"),
+            "weft-row" | "row" => Some("row"),
+            "weft-stack" | "stack" => Some("stack"),
+            _ => None,
+        })
+}
+
 /// Weft renderer markup for the role-less layout and text kinds (SPEC §9: they add no node of
-/// their own), recognised only on elements that carry a Weft id.
-fn layout(s: &mut Sem, dom: &Dom, el: usize) {
+/// their own), recognised only on elements that carry a Weft id, or, in source, a layout class or
+/// style.
+fn layout(s: &mut Sem, dom: &Dom, el: usize, conventions: Option<&Conventions>) {
     let style = parse_style(dom.attr(el, "style"));
     let get = |key: &str| style.get(key).map(String::as_str);
     let has_elements = dom.elements(el).next().is_some();
-    if get("display") == Some("grid") {
+    let class = conventions.and_then(|_| layout_class(dom.attr(el, "class")));
+    if get("display") == Some("grid") || class == Some("grid") {
         s.kind = Some("grid".into());
         let columns = repeat_count(get("grid-template-columns").unwrap_or("")).unwrap_or("1");
         s.props.insert("columns".into(), columns.into());
-    } else if get("display") == Some("flex") || has_elements {
+    } else if get("display") == Some("flex") || has_elements || class.is_some() {
         s.kind = Some("stack".into());
-        if get("flex-direction") == Some("row") {
+        if get("flex-direction") == Some("row") || class == Some("row") {
             s.props.insert("direction".into(), "row".into());
         }
         if let Some(align) = get("align-items").and_then(|a| lookup(ALIGN, a)) {
@@ -580,7 +856,20 @@ fn layout(s: &mut Sem, dom: &Dom, el: usize) {
     } else {
         s.kind = Some("text".into());
     }
-    if let Some(gap) = get("gap") {
+    let gap_class = conventions.and_then(|c| {
+        split_ws(dom.attr(el, "class").unwrap_or(""))
+            .into_iter()
+            .filter_map(|class| class.strip_prefix("gap-"))
+            .map(|size| format!("space.{size}"))
+            .find(|path| c.paths.contains(path))
+    });
+    let gap_var = conventions.and_then(|c| {
+        let var = get("gap")?.strip_prefix("var(")?.strip_suffix(')')?;
+        c.vars.get(js_trim(var)).cloned()
+    });
+    if let Some(token) = gap_var.or(gap_class) {
+        s.values.insert("gap".into(), Value::Token(token));
+    } else if let Some(gap) = get("gap") {
         s.notes.push(Note {
             kind: if gap.starts_with("var(--weft-") {
                 LossKind::Tokens
@@ -619,7 +908,7 @@ const DOM_LOSSES: &[(LossKind, &str)] = &[
     ),
 ];
 
-fn find_body(dom: &Dom) -> Option<usize> {
+pub(crate) fn find_body(dom: &Dom) -> Option<usize> {
     let mut queue: Vec<usize> = dom.elements(DOCUMENT).collect();
     let mut i = 0;
     while i < queue.len() && i < 64 {
@@ -634,49 +923,24 @@ fn find_body(dom: &Dom) -> Option<usize> {
     None
 }
 
-/// Imports rendered HTML. Never fails: what cannot be read is reported in the result.
-pub fn from_dom(html: &str, catalog: &Catalog) -> ImportResult {
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    let mut text = html;
-    if js_length(text) > MAX_HTML_LENGTH {
-        text = js_prefix(text, MAX_HTML_LENGTH);
+/// The page text within the length limit, and the diagnostic when it was cut.
+pub(crate) fn bounded<'h>(html: &'h str, diagnostics: &mut Vec<Diagnostic>) -> &'h str {
+    if js_length(html) > MAX_HTML_LENGTH {
         limit_reached(
-            &mut diagnostics,
+            diagnostics,
             "#",
             &format!("is longer than {MAX_HTML_LENGTH} characters"),
         );
+        return js_prefix(html, MAX_HTML_LENGTH);
     }
-    let dom = parse_html(text);
-    let mut ctx = Ctx {
-        dom: &dom,
-        by_html_id: HashMap::new(),
-        label_for: HashMap::new(),
-        ids: HashMap::new(),
-        reserved: Vec::new(),
-        notes: HashMap::new(),
-        consumed: HashSet::new(),
-        forms: 0,
-        nodes: 0,
-        truncated: false,
-    };
-    ctx.prescan();
-    let body = find_body(&dom).unwrap_or(DOCUMENT);
-    let sems = ctx.children(body, 0, None);
-    if ctx.truncated {
-        limit_reached(
-            &mut diagnostics,
-            "#",
-            "is larger or deeper than the import limit",
-        );
-    }
-    let built = build_document(
-        &sems,
-        BuildOptions {
-            catalog,
-            reserved: ctx.reserved,
-            diagnostics,
-        },
-    );
+    html
+}
+
+/// Imports rendered HTML. Never fails: what cannot be read is reported in the result.
+pub fn from_dom(html: &str, catalog: &Catalog) -> ImportResult {
+    let mut diagnostics: Vec<Diagnostic> = Vec::new();
+    let dom = parse_html(bounded(html, &mut diagnostics));
+    let built = read_dom(&dom, catalog, None, diagnostics);
     let mut result = built.result;
     let mut losses: Vec<_> = DOM_LOSSES
         .iter()
@@ -689,6 +953,80 @@ pub fn from_dom(html: &str, catalog: &Catalog) -> ImportResult {
     losses.append(&mut result.losses);
     result.losses = losses;
     result
+}
+
+/// The document a parsed page describes, read as rendered HTML or, with `conventions`, as source.
+pub(crate) fn read_dom(
+    dom: &Dom,
+    catalog: &Catalog,
+    conventions: Option<&Conventions>,
+    mut diagnostics: Vec<Diagnostic>,
+) -> Built {
+    let mut ctx = Ctx {
+        dom,
+        conventions,
+        by_html_id: HashMap::new(),
+        label_for: HashMap::new(),
+        ids: HashMap::new(),
+        reserved: Vec::new(),
+        notes: HashMap::new(),
+        consumed: HashSet::new(),
+        forms: 0,
+        nodes: 0,
+        truncated: false,
+    };
+    ctx.prescan();
+    let body = find_body(dom).unwrap_or(DOCUMENT);
+    let sems = ctx.children(body, 0, None);
+    if ctx.truncated {
+        limit_reached(
+            &mut diagnostics,
+            "#",
+            "is larger or deeper than the import limit",
+        );
+    }
+    let source_ids: HashSet<String> = ctx.reserved.iter().cloned().collect();
+    let mut built = build_document(
+        &sems,
+        BuildOptions {
+            catalog,
+            reserved: ctx.reserved,
+            diagnostics,
+        },
+    );
+    if conventions.is_some() {
+        let generated = count_nodes(&built.result.document.root, |n| {
+            n.id.as_ref().is_none_or(|id| !source_ids.contains(id))
+        });
+        if generated > 0 {
+            built.result.losses.insert(
+                0,
+                weft_import::Loss {
+                    kind: LossKind::Ids,
+                    path: built.root_path.clone(),
+                    note: format!(
+                        "{generated} elements carry no data-weft-id; their ids are generated"
+                    ),
+                },
+            );
+        }
+    }
+    built
+}
+
+/// Nodes of a document that match, counted without recursion.
+pub(crate) fn count_nodes(root: &Node, matches: impl Fn(&Node) -> bool) -> usize {
+    let mut pending = vec![root];
+    let mut count = 0;
+    while let Some(n) = pending.pop() {
+        count += usize::from(matches(n));
+        for child in n.children.iter().chain(n.slots.values().flatten()) {
+            if let Child::Node(c) = child {
+                pending.push(c);
+            }
+        }
+    }
+    count
 }
 
 #[cfg(test)]

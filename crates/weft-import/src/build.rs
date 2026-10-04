@@ -5,8 +5,9 @@
 use std::collections::HashSet;
 
 use weft_core::{
-    ARIA_ROLES, Catalog, Child, ComponentDef, Content, Diagnostic, Document, Map, Node,
-    ValidateOptions, Value, WEFT_VERSION, canonicalize, is_id, validate_document,
+    ARIA_ROLES, Catalog, Child, ComponentDef, Content, Diagnostic, Document, Map, Node, PropType,
+    ValidateOptions, Value, WEFT_VERSION, canonicalize, is_binding, is_id, is_loop_variable,
+    validate_document,
 };
 
 use crate::ids::IdState;
@@ -18,6 +19,10 @@ use crate::sem::Sem;
 use crate::text::{clean, js_trim, literal, squash};
 
 const BUSY_STATES: &[&str] = &["busy", "loading", "submitting"];
+/// SPEC §2.2 attributes every element takes, besides `id`, `role` and `on-*`.
+const UNIVERSAL: &[&str] = &["label", "hidden", "state"];
+/// The repetition construct (SPEC §4); not a catalog kind.
+const EACH: &str = "each";
 
 pub struct BuildOptions<'a> {
     pub catalog: &'a Catalog,
@@ -76,6 +81,8 @@ struct Ctx<'c> {
 struct Placed {
     node: Node,
     slot: Option<String>,
+    /// The source put the node in this slot itself, so the placement is no loss.
+    hinted: bool,
 }
 
 impl<'c> Ctx<'c> {
@@ -243,9 +250,49 @@ fn set_prop(
     }
 }
 
+/// A bound or token value from source code. Bindings are kept on any prop the kind has (validation
+/// reports one that may not be bound); a token only where the prop takes one.
+fn set_value(
+    ctx: &mut Ctx<'_>,
+    props: &mut Map<Value>,
+    def: &ComponentDef,
+    kind: &str,
+    name: &str,
+    value: &Value,
+    path: &str,
+) {
+    let token_prop = def.prop(name).is_some_and(|p| p.kind == PropType::Token);
+    let fits = match value {
+        Value::Token(_) => token_prop,
+        Value::Bind { bind, .. } => {
+            is_binding(bind) && (def.prop(name).is_some() || UNIVERSAL.contains(&name))
+        }
+        Value::Bool(_) => {
+            name == "hidden" || def.prop(name).is_some_and(|p| p.kind == PropType::Boolean)
+        }
+        _ => def.prop(name).is_some() || UNIVERSAL.contains(&name),
+    };
+    if fits {
+        props.insert(name.into(), value.clone());
+        return;
+    }
+    let (loss, what) = match value {
+        Value::Token(_) => (LossKind::Tokens, "a design token"),
+        Value::Bind { .. } => (LossKind::Bindings, "a binding"),
+        _ => (LossKind::Props, "a value"),
+    };
+    ctx.lose(
+        loss,
+        path,
+        format!("<{kind}> takes no {what} for {name}; it is left out"),
+    );
+}
+
 struct Converted {
     children: Vec<Child>,
     slots: Map<Vec<Child>>,
+    /// Slots that received content the source did not put there itself.
+    moved: HashSet<String>,
     chosen: Option<Node>,
 }
 
@@ -257,6 +304,7 @@ fn convert_list<'c>(list: &[Sem], parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Con
     let mut out = Converted {
         children: Vec::new(),
         slots: Map::new(),
+        moved: HashSet::new(),
         chosen: None,
     };
     let mut pending = String::new();
@@ -317,11 +365,15 @@ fn convert_list<'c>(list: &[Sem], parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Con
 fn place(out: &mut Converted, p: Placed) {
     match p.slot {
         None => out.children.push(Child::Node(Box::new(p.node))),
-        Some(slot) => out
-            .slots
-            .entry(slot)
-            .or_default()
-            .push(Child::Node(Box::new(p.node))),
+        Some(slot) => {
+            if !p.hinted {
+                out.moved.insert(slot.clone());
+            }
+            out.slots
+                .entry(slot)
+                .or_default()
+                .push(Child::Node(Box::new(p.node)));
+        }
     }
 }
 
@@ -378,16 +430,48 @@ fn convert_node<'c>(s: &Sem, parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Option<P
         ctx.truncate(&parent.path);
         return None;
     }
+    if s.kind.as_deref() == Some(EACH) {
+        let slot = s.slot.as_deref().and_then(|h| hinted_slot(None, h, parent));
+        let hinted = slot.is_some();
+        return Some(Placed {
+            node: each_node(s, parent, slot.as_deref(), ctx),
+            slot,
+            hinted,
+        });
+    }
     let Some(target) = ctx.index.resolve(&s.role, s.kind.as_deref()) else {
         return Some(Placed {
             node: extension(s, parent, ctx, None),
             slot: None,
+            hinted: false,
         });
     };
-    match placement(&target.kind, target.def, parent) {
+    let hinted_to = s
+        .slot
+        .as_deref()
+        .and_then(|h| hinted_slot(Some(&target.kind), h, parent));
+    if let Some(hint) = &s.slot
+        && hinted_to.is_none()
+    {
+        ctx.lose(
+            LossKind::Slots,
+            &parent.path,
+            format!(
+                "<{}> has no {hint} slot for <{}>; it is placed as content",
+                parent.kind, target.kind
+            ),
+        );
+    }
+    let hinted = hinted_to.is_some();
+    let found = match hinted_to {
+        Some(slot) => Ok(Some(slot)),
+        None => placement(&target.kind, target.def, parent),
+    };
+    match found {
         Err(why) => Some(Placed {
             node: extension(s, parent, ctx, Some(why)),
             slot: None,
+            hinted: false,
         }),
         Ok(slot) => Some(Placed {
             node: component_node(
@@ -400,8 +484,110 @@ fn convert_node<'c>(s: &Sem, parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Option<P
                 ctx,
             ),
             slot,
+            hinted,
         }),
     }
+}
+
+/// The slot of `parent` a source names for a child: the name itself, or for `footer` the one
+/// trailing slot a dialog calls `actions`. `None` when the parent has no such slot or the slot does
+/// not admit `kind` (an `each` is admitted where any child is).
+fn hinted_slot(kind: Option<&str>, hint: &str, parent: &Parent<'_>) -> Option<String> {
+    let pdef = parent.def?;
+    let names: &[&str] = if hint == "footer" {
+        &["footer", "actions"]
+    } else {
+        &[hint]
+    };
+    names.iter().find_map(|name| {
+        let slot = pdef.slot(name)?;
+        let admits = match (kind, &slot.allowed_children) {
+            (Some(kind), Some(allowed)) => allowed.iter().any(|k| k == kind),
+            _ => true,
+        };
+        admits.then(|| (*name).to_owned())
+    })
+}
+
+/// SPEC §4 repetition: its children are checked against the parent it repeats them in.
+// Kept out of line: inlined into each other, these share one large frame per nesting level, and
+// imports must fit the 1 MiB stack WebAssembly gets.
+#[inline(never)]
+fn each_node<'c>(s: &Sem, parent: &Parent<'c>, slot: Option<&str>, ctx: &mut Ctx<'c>) -> Node {
+    let id = ctx.take_id(s, EACH, false);
+    let path = format!(
+        "{}{}/{EACH}#{id}",
+        parent.path,
+        slot.map_or(String::new(), |s| format!("/slot[{s}]"))
+    );
+    ctx.report(s, &path);
+    let mut node = Node::new(EACH);
+    node.id = Some(id);
+    match s.values.get("in") {
+        Some(Value::Bind { bind, not: false }) if is_binding(bind) => {
+            node.props.insert(
+                "in".into(),
+                Value::Bind {
+                    bind: bind.clone(),
+                    not: false,
+                },
+            );
+        }
+        _ => {
+            ctx.lose(
+                LossKind::Repetition,
+                &path,
+                "the repeated list is not a data path; an empty list stands in",
+            );
+            node.props.insert(
+                "in".into(),
+                Value::Bind {
+                    bind: "$.items".into(),
+                    not: false,
+                },
+            );
+        }
+    }
+    let name = s.props.get("as").filter(|a| is_loop_variable(a));
+    match name {
+        Some(name) => {
+            node.props.insert("as".into(), Value::String(name.clone()));
+        }
+        None => ctx.lose(
+            LossKind::Repetition,
+            &path,
+            "the loop variable is not a plain name; \"item\" stands in",
+        ),
+    }
+    if name.is_none() {
+        node.props.insert("as".into(), Value::String("item".into()));
+    }
+    let inner = convert_list(
+        &s.children,
+        &Parent {
+            kind: parent.kind.clone(),
+            def: parent.def,
+            path,
+            in_form: parent.in_form,
+            depth: parent.depth + 1,
+        },
+        ctx,
+    );
+    node.children = inner.children;
+    for (slot_name, list) in inner.slots {
+        if !list.is_empty() {
+            ctx.lose(
+                LossKind::Slots,
+                &format!(
+                    "{}/{EACH}#{}",
+                    parent.path,
+                    node.id.as_deref().unwrap_or_default()
+                ),
+                format!("{slot_name} slot content inside a repetition is left out"),
+            );
+        }
+    }
+    node
 }
 
 // Kept out of line: inlined into each other, these share one large frame per nesting level, and
@@ -485,6 +671,21 @@ fn component_node<'c>(
     for (name, raw) in &given {
         set_prop(ctx, &mut props, def, name, raw, &path, parent.in_form);
     }
+    for (name, value) in &s.values {
+        set_value(ctx, &mut props, def, kind, name, value, &path);
+    }
+    let mut on = Map::new();
+    for (event, action) in &s.on {
+        if def.events.iter().flatten().any(|e| e == event) {
+            on.insert(event.clone(), action.clone());
+        } else {
+            ctx.lose(
+                LossKind::Actions,
+                &path,
+                format!("<{kind}> has no {event} event; action {action} is left out"),
+            );
+        }
+    }
     for (name, raw) in &s.states {
         let boolean = def
             .prop(name)
@@ -531,7 +732,20 @@ fn component_node<'c>(
                 );
             }
         }
+        Content::Text if props.contains_key("text") => {}
         Content::Text => {
+            if s.children
+                .iter()
+                .any(|c| !c.on.is_empty() || !c.values.is_empty())
+            {
+                ctx.lose(
+                    LossKind::Structure,
+                    &path,
+                    format!(
+                        "<{kind}> shows text only; the bindings and actions inside it are left out"
+                    ),
+                );
+            }
             content = text_of(&s.children, 0);
             if content.is_empty() {
                 content = name.clone();
@@ -555,7 +769,7 @@ fn component_node<'c>(
             children = inner.children;
             slots = inner.slots;
             for (slot_name, list) in &slots {
-                if !list.is_empty() {
+                if !list.is_empty() && inner.moved.contains(slot_name) {
                     ctx.lose(
                         LossKind::Slots,
                         &format!("{path}/slot[{slot_name}]"),
@@ -605,6 +819,7 @@ fn component_node<'c>(
     let mut node = Node::new(kind);
     node.id = Some(id);
     node.props = props;
+    node.on = on;
     node.slots = slots;
     node.children = children;
     node
@@ -781,7 +996,11 @@ fn convert_tabs<'c>(
     node.id = Some(id);
     node.props = props;
     node.children = children;
-    let mut out = vec![Placed { node, slot }];
+    let mut out = vec![Placed {
+        node,
+        slot,
+        hinted: false,
+    }];
     for p in extra {
         if let Some(placed) = convert_node(p, parent, ctx) {
             out.push(placed);

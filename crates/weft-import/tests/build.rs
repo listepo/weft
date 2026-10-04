@@ -144,6 +144,7 @@ fn leaf() -> impl Strategy<Value = Sem> {
                     Vec::new()
                 },
                 children: Vec::new(),
+                ..Sem::default()
             },
         )
 }

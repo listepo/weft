@@ -412,11 +412,10 @@ impl Writer<'_> {
             }
             "link" => {
                 let mut b = self.base(n, &["href", "text"], true);
-                match literal_text(n.props.get("href")).and_then(|s| safe_url(&s)) {
-                    Some(href) => b.attrs.set("href", href),
-                    None if !n.props.contains_key("href") => b.attrs.set("href", "#"),
-                    None => {}
-                }
+                // A link needs an href to be a link; a bound or unsafe one stays in the page as
+                // `#` (the binding is in data-bind).
+                let href = literal_text(n.props.get("href")).and_then(|s| safe_url(&s));
+                b.attrs.set("href", href.unwrap_or_else(|| "#".into()));
                 let a = Self::finish(n, b);
                 self.inline(depth, "a", &a, &Self::shown(n));
             }

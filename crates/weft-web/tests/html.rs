@@ -7,8 +7,8 @@
 use std::path::Path;
 
 use weft_catalog::{DEFAULT_TOKENS_JSON, core_catalog, load_tokens};
-use weft_core::{Document, ParseOptions, parse, parse_json};
-use weft_web::{HNode, HtmlOptions, parse_html, to_html};
+use weft_core::{Document, ParseOptions, has_errors, parse, parse_json, serialize};
+use weft_web::{HNode, HtmlOptions, ImportOptions, import_html, parse_html, to_html};
 
 fn corpus() -> Vec<(String, Document)> {
     let catalog = core_catalog().unwrap();
@@ -60,5 +60,51 @@ fn every_corpus_screen_becomes_a_static_page() {
         }
         let root = document.root.id.as_deref().unwrap();
         assert!(html.contains(&format!("data-weft-id=\"{root}\"")), "{name}");
+    }
+}
+
+fn import_options<'a>(
+    catalog: &'a weft_core::Catalog,
+    tokens: &'a indexmap::IndexMap<String, weft_catalog::Token>,
+) -> ImportOptions<'a> {
+    ImportOptions { catalog, tokens }
+}
+
+#[test]
+fn generated_pages_come_back_exactly() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    for (name, document) in corpus() {
+        let options = HtmlOptions {
+            catalog: &catalog,
+            tokens: &tokens,
+            source: true,
+        };
+        let html = to_html(&document, &options).unwrap();
+        let back = import_html(&html, &import_options(&catalog, &tokens));
+        assert!(back.losses.is_empty(), "{name}: {:?}", back.losses);
+        assert_eq!(serialize(&back.document), serialize(&document), "{name}");
+    }
+}
+
+#[test]
+fn generated_pages_without_their_source_come_back_by_convention() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    for (name, document) in corpus() {
+        let options = HtmlOptions {
+            catalog: &catalog,
+            tokens: &tokens,
+            source: false,
+        };
+        let html = to_html(&document, &options).unwrap();
+        let back = import_html(&html, &import_options(&catalog, &tokens));
+        assert!(back.losses.is_empty(), "{name}: {:?}", back.losses);
+        assert_eq!(serialize(&back.document), serialize(&document), "{name}");
+        assert!(
+            !has_errors(&back.diagnostics),
+            "{name}: {:?}",
+            back.diagnostics
+        );
     }
 }
