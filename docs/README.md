@@ -15,6 +15,7 @@ This guide is for people who use Weft: developers who wire it into an app or an 
 | [The `weft` command](cli.md) | Validate, format and explain screens from a terminal. |
 | [The MCP server](mcp.md) | Give an AI agent tools to read, check, edit and preview screens. |
 | [The Claude Code plugin](claude-code-plugin.md) | Import, export and render from Claude Code, with the agent guide built in. |
+| [The Cursor plugin](cursor-plugin.md) | The same from Cursor: skills, a rule and the MCP server. |
 | [Rendering](rendering.md) | Turn a screen into an HTML page, an accessibility tree or a React tree. |
 | [Importing HTML](importing.md) | Start a screen from an existing page and see what the import lost. |
 | [Exporting to React](exporting-jsx.md) | Turn a screen into a React component. |
