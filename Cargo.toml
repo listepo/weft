@@ -14,6 +14,7 @@ publish = false
 weft-core = { path = "crates/weft-core" }
 weft-catalog = { path = "crates/weft-catalog" }
 weft-import = { path = "crates/weft-import" }
+weft-web = { path = "crates/weft-web" }
 # weft-core
 indexmap = { version = "2.14.2", features = ["serde"] }
 # JavaScript's number-to-string rules, so canonical JSON and messages match the TypeScript core.
@@ -25,6 +26,8 @@ serde_json = { version = "1.0.151", features = ["preserve_order", "float_roundtr
 thiserror = "2.0.21"
 # weft-import: the NFKD step of id slugs, as `String.prototype.normalize("NFKD")` does it.
 unicode-normalization = "0.1.25"
+# weft-web: the WHATWG HTML parser, so imported pages are read as a browser builds them.
+html5ever = "0.40.1"
 # tests: weft-core, weft-catalog
 proptest = "1.11.0"
 # weft-cli

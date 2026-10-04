@@ -90,3 +90,13 @@ fn the_importer_kit_depends_only_on_the_core_and_pure_crates() {
         ]
     );
 }
+
+#[test]
+fn the_web_crate_adds_only_its_parsers() {
+    let mut deps = dependencies("weft-web");
+    deps.sort();
+    assert_eq!(
+        deps,
+        ["html5ever", "serde", "serde_json", "weft-core", "weft-import"]
+    );
+}

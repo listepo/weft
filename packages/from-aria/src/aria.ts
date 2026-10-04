@@ -60,6 +60,15 @@ function toSem(node: unknown, depth: number, budget: Budget): Sem | undefined {
   return { role, name, states, props, children };
 }
 
+/** The role tree of a parsed snapshot, cut at the import limits. */
+export function snapshotSems(tree: Record<string, unknown>): { sems: Sem[]; truncated: boolean } {
+  const budget: Budget = { nodes: 0, truncated: false };
+  const top =
+    tree["role"] === "fragment" && Array.isArray(tree["children"]) ? tree["children"] : [tree];
+  const sems = top.flatMap((c) => toSem(c, 1, budget) ?? []);
+  return { sems, truncated: budget.truncated };
+}
+
 function readSnapshot(snapshot: unknown, diagnostics: Diagnostic[]): unknown {
   if (typeof snapshot !== "string") return snapshot;
   let text = snapshot;
@@ -101,12 +110,8 @@ export function fromAriaSnapshot(
     return emptyResult(diagnostics);
   }
   try {
-    const budget: Budget = { nodes: 0, truncated: false };
-    const top =
-      tree["role"] === "fragment" && Array.isArray(tree["children"]) ? tree["children"] : [tree];
-    const sems = top.flatMap((c) => toSem(c, 1, budget) ?? []);
-    if (budget.truncated)
-      limitReached(diagnostics, "#", "is larger or deeper than the import limit");
+    const { sems, truncated } = snapshotSems(tree);
+    if (truncated) limitReached(diagnostics, "#", "is larger or deeper than the import limit");
     const built = buildDocument(sems, { catalog: options.catalog, diagnostics });
     const losses: Loss[] = SNAPSHOT_LOSSES.map(([kind, note]) => ({
       kind,
