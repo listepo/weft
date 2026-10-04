@@ -56,11 +56,11 @@ fileprivate func weftURL(_ href: String) -> URL? {
     }
 }
 
-// Weft reads any value as text, a flag or a number (SPEC §4); these convert the model's types.
+// Weft reads any value as text, a flag or a number (SPEC §2.1); these convert the model's types.
 fileprivate func weftText(_ v: Int) -> String { String(v) }
 fileprivate func weftText(_ v: Bool) -> String { v ? "true" : "false" }
 fileprivate func weftText<T>(_ v: T) -> String { "" }
-fileprivate func weftOn<T>(_ v: [T]) -> Bool { !v.isEmpty }
+// An array or object is true even when empty (SPEC §2.1): only the model's scalars can be false.
 fileprivate func weftOn<T>(_ v: T) -> Bool { true }
 fileprivate func weftInt(_ v: String) -> Int { Int(v) ?? 0 }
 fileprivate func weftInt(_ v: Bool) -> Int { v ? 1 : 0 }
