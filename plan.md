@@ -91,10 +91,10 @@ Progress (stage 1 done, on branch `t14-figma`):
 - Steps 1–9 are done. `@weft/figma` builds the library, both conversions, foreign layers and the plugin message handler. `plugins/figma` holds the manifest, a thin `code.ts`, `ui.html` and the Vite bundle. The bundle is tested by running it in a bare VM over the fake.
 - Tests:
   - all 12 corpus screens round-trip byte-identical with no losses;
-  - 18 scripted designer edits match the expected Weft patches and loss kinds;
+  - 19 scripted designer edits match the expected Weft patches and loss kinds;
   - building the library twice reuses it.
 - `from-aria` now exports `freshId`, `literal`, `fillRequired` and the limit helpers, which both importers share.
-- After T22 (WebAssembly core), the plugin is split. Figma's main thread has no WebAssembly, so it only builds and reads layers (`code.js`, with the core's loader stubbed). The UI iframe parses and serializes with the core inlined in `ui.html`. A harness runs both halves, the main thread without WebAssembly.
+- After T22 (WebAssembly core), the plugin is split. Figma's main thread has no WebAssembly, so it only builds and reads layers (`code.js`, with the core's loader stubbed). The UI iframe parses and serializes with the core inlined in `ui.html`. A harness runs both halves, the main thread without WebAssembly. The main thread interprets no values: the UI formats `text` and `label` for the build, and `finishRead` reads typed text with the core's `readValue` (a new `weft-wasm` export), so the value rules have one implementation.
 - `docs/figma-style-overrides-design.md` waits for the creator's approval.
 - Remaining:
   - style overrides: after approval, the format extension in TS and Rust, then the Figma mapping for colors, radii and padding (only `gap` maps to a token today);

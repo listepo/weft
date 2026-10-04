@@ -12,9 +12,10 @@ import {
   FakeInstance,
   FakeOther,
   FakeRectangle,
-  type FakeFigma,
+  FakeFigma,
   type FakeText,
 } from "./fake-figma.ts";
+import { buildScreen, ensureLibrary, isRawText, readLayers } from "../src/index.ts";
 import { built, corpusMarkup, parseStrict, read, tokens } from "./helpers.ts";
 
 const login = corpusMarkup("login");
@@ -55,6 +56,13 @@ const cases: Edit[] = [
       text(f, frame, "button#submit").characters = "{$.cta}";
     },
     patches: [{ op: "set", id: "submit", prop: "text", value: { bind: "$.cta" } }],
+  },
+  {
+    name: "an escaped brace typed as text",
+    edit: (f, frame) => {
+      text(f, frame, "button#submit").characters = "{{cta}";
+    },
+    patches: [{ op: "set", id: "submit", prop: "text", value: "{cta}" }],
   },
   {
     name: "label of a field",
@@ -293,5 +301,36 @@ describe("a screen whose library was built twice", () => {
     assert.equal(figma.variables.all.length, variables);
     assert.equal(board.children.length, sets);
     assert.equal(figma.root.children.filter((p) => p.name === "Weft library").length, 1);
+  });
+});
+
+describe("text a designer typed, before the core reads it", () => {
+  test("stays raw in what the main thread returns", async () => {
+    const { figma, frame } = await built(login);
+    text(figma, frame, "button#submit").characters = "{$.cta}";
+    const { document } = await readLayers(figma, frame, { catalog: coreCatalog, tokens });
+    const form = document.root.children?.[0];
+    const submit =
+      typeof form === "object"
+        ? form.children?.find((c) => typeof c === "object" && c.id === "submit")
+        : undefined;
+    const typed = typeof submit === "object" ? submit.props?.["text"] : undefined;
+    assert.ok(isRawText(typed));
+    assert.equal(typed.raw, "{$.cta}");
+  });
+
+  test("is told apart from values", () => {
+    assert.ok(isRawText({ raw: "{$.a}", path: "/screen" }));
+    assert.ok(!isRawText({ bind: "$.a" }));
+    assert.ok(!isRawText("{$.a}"));
+  });
+});
+
+describe("a build without the display texts", () => {
+  test("fails instead of formatting a value itself", async () => {
+    const figma = new FakeFigma();
+    const library = await ensureLibrary(figma, coreCatalog, tokens);
+    const options = { catalog: coreCatalog, library, tokens, display: {} };
+    await assert.rejects(buildScreen(figma, parseStrict(login), options), /no display text/);
   });
 });

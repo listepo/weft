@@ -2,7 +2,7 @@
 import type { Token } from "@weft/catalog";
 import { parse, serialize, type Catalog, type Diagnostic } from "@weft/core";
 import type { Loss } from "@weft/from-aria";
-import { finishRead } from "./finish.ts";
+import { displayTexts, finishRead } from "./finish.ts";
 import { MAX_MARKUP, type PluginReply, type PluginRequest } from "./plugin.ts";
 
 export type UiOptions = { catalog: Catalog; tokens: ReadonlyMap<string, Token> };
@@ -17,7 +17,13 @@ export function buildRequest(
   const { document, diagnostics } = parse(markup, { catalog: options.catalog });
   if (document === undefined)
     return { diagnostics, message: "The markup has errors; nothing was built." };
-  return { request: { type: "build", document, tokens: [...options.tokens] }, diagnostics };
+  const request: PluginRequest = {
+    type: "build",
+    document,
+    display: displayTexts(document),
+    tokens: [...options.tokens],
+  };
+  return { request, diagnostics };
 }
 
 export function exportRequest(options: UiOptions): PluginRequest {

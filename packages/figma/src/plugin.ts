@@ -24,7 +24,12 @@ const TokensSchema = z
   .max(MAX_TOKENS);
 
 const RequestSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("build"), document: DocumentSchema, tokens: TokensSchema }),
+  z.object({
+    type: z.literal("build"),
+    document: DocumentSchema,
+    display: z.record(z.string(), z.string()),
+    tokens: TokensSchema,
+  }),
   z.object({ type: z.literal("export"), tokens: TokensSchema }),
 ]);
 
@@ -35,7 +40,7 @@ export type PluginReply =
   | { type: "built"; id: string }
   | {
       type: "exported";
-      /** As read from the layers: not yet canonical or validated (`finishExport` does that). */
+      /** As read from the layers: unfinished, typed text still raw (`finishExport` finishes it). */
       document: Document;
       losses: Loss[];
       diagnostics: Diagnostic[];
@@ -61,6 +66,7 @@ export async function handleRequest(
         catalog: options.catalog,
         library,
         tokens,
+        display: request.data.display,
       });
       return { type: "built", id: frame.id };
     }

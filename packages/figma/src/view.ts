@@ -5,7 +5,6 @@ import type { ComponentDef, Node, Value } from "@weft/core";
 import type { Token } from "@weft/catalog";
 import type { FLayout, FPaint } from "./api.ts";
 import { tokenPx } from "./tokens.ts";
-import { formatValue } from "./values.ts";
 
 /** The variant value of an enum prop or `state` that is not set and has no default. */
 export const UNSET = "(unset)";
@@ -63,16 +62,32 @@ export const CAPTION_KINDS: ReadonlySet<string> = new Set([
   "tab",
 ]);
 
-/** The text a leaf shows: a bound or literal `text` prop in attribute form, else its content. */
-export function textDisplay(node: Pick<Node, "props" | "children">): string {
+/**
+ * Values in attribute form (`{$.a}`, `{token.x}`), keyed by their JSON. The WebAssembly core writes
+ * them (`displayTexts`) where it runs, and the build, in Figma's main thread, only looks them up.
+ */
+export type Display = Readonly<Record<string, string>>;
+
+function shownAs(display: Display, value: Value): string {
+  const key = JSON.stringify(value);
+  const text = Object.hasOwn(display, key) ? display[key] : undefined;
+  if (text === undefined) throw new Error(`The build was given no display text for ${key}.`);
+  return text;
+}
+
+/** The text a leaf shows: its `text` prop in attribute form, else its text content. */
+export function textDisplay(node: Pick<Node, "props" | "children">, display: Display): string {
   const text = node.props?.["text"];
-  if (text !== undefined) return formatValue(text);
+  if (text !== undefined) return shownAs(display, text);
   return (node.children ?? []).filter((c) => typeof c === "string").join(" ");
 }
 
-export function labelDisplay(props: Readonly<Record<string, Value>> | undefined): string {
+export function labelDisplay(
+  props: Readonly<Record<string, Value>> | undefined,
+  display: Display,
+): string {
   const label = props?.["label"];
-  return label === undefined ? "" : formatValue(label);
+  return label === undefined ? "" : shownAs(display, label);
 }
 
 export type Mode = FLayout["layoutMode"];

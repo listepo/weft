@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { coreCatalog, loadTokens } from "@weft/catalog";
 import { parse, type Document } from "@weft/core";
-import { buildScreen, ensureLibrary, readScreen } from "../src/index.ts";
+import { buildScreen, displayTexts, ensureLibrary, readScreen } from "../src/index.ts";
 import { FakeFigma, type FakeFrame } from "./fake-figma.ts";
 
 export const tokens = loadTokens(
@@ -31,10 +31,12 @@ export function parseStrict(markup: string): Document {
 export async function built(markup: string): Promise<{ figma: FakeFigma; frame: FakeFrame }> {
   const figma = new FakeFigma();
   const library = await ensureLibrary(figma, coreCatalog, tokens);
-  const frame = (await buildScreen(figma, parseStrict(markup), {
+  const document = parseStrict(markup);
+  const frame = (await buildScreen(figma, document, {
     catalog: coreCatalog,
     library,
     tokens,
+    display: displayTexts(document),
   })) as FakeFrame;
   return { figma, frame };
 }

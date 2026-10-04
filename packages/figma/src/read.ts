@@ -29,15 +29,12 @@ import { findText } from "./build.ts";
 import { convertForeign } from "./foreign.ts";
 import { KEY, readMark, readSource, readVersion, type Source } from "./keys.ts";
 import { matchToken, tokenPathOf, tokenPx } from "./tokens.ts";
-import { readText } from "./values.ts";
 import {
   CAPTION_KINDS,
   isLeafKind,
-  labelDisplay,
   LAYOUT_KINDS,
   layoutView,
   styleKey,
-  textDisplay,
   UNSET,
   variantAxes,
   variantOf,
@@ -50,6 +47,26 @@ export type ReadOptions = {
 };
 
 export type ReadResult = { document: Document; losses: Loss[]; diagnostics: Diagnostic[] };
+
+/**
+ * Text a designer typed into a `text` or `label`, not yet read as a value: it may be a reference
+ * such as `{$.name}`. Reading it takes the core's value rules, so `readLayers` leaves this in the
+ * prop and `finishRead` replaces it. With `content`, a plain string becomes the element's content.
+ */
+export type RawText = { raw: string; path: string; content?: true };
+
+export function isRawText(value: unknown): value is RawText {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as Partial<RawText>).raw === "string" &&
+    typeof (value as Partial<RawText>).path === "string"
+  );
+}
+
+// Stands where a value goes until `finishRead`; the document type has no place for it.
+const rawText = (raw: string, path: string, content: boolean): Value =>
+  (content ? { raw, path, content: true } : { raw, path }) as unknown as Value;
 
 export type ReadCtx = ReadOptions & {
   api: FigmaApi;
@@ -81,8 +98,9 @@ export function component(catalog: Catalog, kind: string): ComponentDef | undefi
 
 /**
  * Reads a frame built by `buildScreen` (or any layer) back into a Weft document that is not yet
- * canonical or validated: `finishRead` does that with the WebAssembly core, which Figma's main
- * thread cannot run, so the plugin finishes in its UI. `readScreen` does both where the core runs.
+ * finished: typed text is still `RawText`, and nothing is canonical or validated. `finishRead`
+ * does that with the WebAssembly core, which Figma's main thread cannot run, so the plugin
+ * finishes in its UI. `readScreen` does both where the core runs.
  */
 export async function readLayers(
   api: FigmaApi,
@@ -257,11 +275,11 @@ async function fromSource(
     isLeafKind(def) &&
     !(isContainer(layer) && layer.children.some((c) => readSource(c) !== undefined))
   ) {
-    readLeafText(ctx, layer, source, node, def as ComponentDef, path);
+    readLeafText(layer, source, node, def as ComponentDef, path);
     if (layer.type === "INSTANCE")
       await readVariants(ctx, layer, source, def as ComponentDef, props, path);
     if (CAPTION_KINDS.has(source.kind))
-      readLabel(ctx, findText(layer, "label")?.characters, props, def, path);
+      readLabel(findText(layer, "label")?.characters, source, props, def, path);
     return node;
   }
 
@@ -280,7 +298,7 @@ async function fromSource(
     lose(ctx, "tokens", path, STYLE_NOTE);
   if (CAPTION_KINDS.has(source.kind)) {
     const label = layer.children.find((c) => readMark(c, KEY.label) !== undefined);
-    readLabel(ctx, label?.type === "TEXT" ? label.characters : undefined, props, def, path);
+    readLabel(label?.type === "TEXT" ? label.characters : undefined, source, props, def, path);
   }
   const owner: Parent = { kind: source.kind, def, path, mode: layer.layoutMode };
   const { children, slots } = await convertChildren(ctx, layer, owner, depth);
@@ -289,9 +307,8 @@ async function fromSource(
   return node;
 }
 
-/** A text edit: the leaf's text layer against what its source shows. */
+/** A text edit: the leaf's text layer against what it showed when built. */
 function readLeafText(
-  ctx: ReadCtx,
   layer: FNode,
   source: Source,
   node: Node,
@@ -301,35 +318,26 @@ function readLeafText(
   node.children = source.children;
   if (def.content !== "text") return;
   const shown = findText(layer, "text")?.characters;
-  if (shown === undefined || shown === textDisplay(source)) return;
+  if (shown === undefined || shown === (source.shown?.text ?? "")) return;
   const props = node.props as Record<string, Value>;
-  const value = typed(ctx, shown, path);
-  if (props["text"] !== undefined || typeof value !== "string") {
-    if (value === "") delete props["text"];
-    else props["text"] = value;
-    node.children = [];
-  } else {
-    node.children = value === "" ? [] : [value];
-  }
-}
-
-/** Text a designer typed, as a value: a whole `{$…}` or `{token.…}` is a reference, else text. */
-export function typed(ctx: ReadCtx, shown: string, path: string): Value {
-  const value = readText(shown) ?? shown;
-  return typeof value === "string" ? literal(ctx, path, value) : value;
+  // A `text` prop stays a prop; otherwise plain text is content and a reference becomes `text`.
+  const content = props["text"] === undefined;
+  if (shown === "") delete props["text"];
+  else props["text"] = rawText(shown, path, content);
+  node.children = [];
 }
 
 function readLabel(
-  ctx: ReadCtx,
   shown: string | undefined,
+  source: Source,
   props: Record<string, Value>,
   def: ComponentDef | undefined,
   path: string,
 ): void {
-  if (shown === undefined || shown === labelDisplay(props)) return;
-  const value = typed(ctx, shown, path);
-  if (value === "" && def?.requiresLabel !== true) delete props["label"];
-  else props["label"] = value;
+  if (shown === undefined || shown === (source.shown?.label ?? "")) return;
+  if (shown !== "") props["label"] = rawText(shown, path, false);
+  else if (def?.requiresLabel === true) props["label"] = "";
+  else delete props["label"];
 }
 
 async function readVariants(
@@ -462,12 +470,8 @@ async function fromNewInstance(
   const id = freshId(ctx, kind, shown || label);
   const path = `${parent.path}/${kind}#${id}`;
   const node: Node = { kind, id, props };
-  if (label !== "") props["label"] = typed(ctx, label, path);
-  if (shown !== "") {
-    const value = typed(ctx, shown, path);
-    if (typeof value === "string") node.children = [value];
-    else props["text"] = value;
-  }
+  if (label !== "") props["label"] = rawText(label, path, false);
+  if (shown !== "") props["text"] = rawText(shown, path, true);
   if (def.requiresLabel === true && props["label"] === undefined) {
     props["label"] = "";
     lose(ctx, "names", path, 'the layer has no label; "" stands in');

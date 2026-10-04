@@ -5,7 +5,7 @@ import type { Token } from "@weft/catalog";
 import type { Catalog, Child, Document, Node } from "@weft/core";
 import type { FFrame, FigmaApi, FInstance, FLayout, FNode, FText } from "./api.ts";
 import { isContainer } from "./api.ts";
-import { KEY, sourceOf, writeJson } from "./keys.ts";
+import { KEY, sourceOf, writeJson, type Shown } from "./keys.ts";
 import {
   autoLayout,
   bindNumber,
@@ -25,6 +25,7 @@ import {
   textDisplay,
   variantName,
   variantOf,
+  type Display,
   type Mode,
 } from "./view.ts";
 
@@ -32,6 +33,8 @@ export type BuildOptions = {
   catalog: Catalog;
   library: Library;
   tokens?: ReadonlyMap<string, Token> | undefined;
+  /** The document's `text` and `label` values in attribute form, from `displayTexts`. */
+  display: Display;
 };
 
 type Ctx = BuildOptions & { api: FigmaApi };
@@ -68,9 +71,9 @@ export async function buildScreen(
   return root;
 }
 
-function mark(layer: FNode, node: Node, leaf: boolean): void {
+function mark(layer: FNode, node: Node, leaf: boolean, shown: Shown): void {
   layer.name = node.id === undefined ? node.kind : `${node.kind}#${node.id}`;
-  writeJson(layer, KEY.source, sourceOf(node, leaf));
+  writeJson(layer, KEY.source, sourceOf(node, leaf, shown));
   layer.setPluginData(KEY.origin, layer.id);
   if (node.props?.["hidden"] === true) layer.visible = false;
 }
@@ -86,10 +89,14 @@ async function buildNode(ctx: Ctx, node: Node, parentMode: Mode): Promise<FFrame
     const main = entry.variants.get(entry.axes.length === 0 ? "" : variantName(values, entry.axes));
     const instance = (main ?? entry.fallback).createInstance();
     if (main === undefined) instance.setProperties(values);
-    await setLayerText(ctx.api, instance, "text", textDisplay(node));
-    if (CAPTION_KINDS.has(node.kind))
-      await setLayerText(ctx.api, instance, "label", labelDisplay(node.props));
-    mark(instance, node, true);
+    const text = textDisplay(node, ctx.display);
+    const shown: Shown = { text };
+    await setLayerText(ctx.api, instance, "text", text);
+    if (CAPTION_KINDS.has(node.kind)) {
+      shown.label = labelDisplay(node.props, ctx.display);
+      await setLayerText(ctx.api, instance, "label", shown.label);
+    }
+    mark(instance, node, true, shown);
     return instance;
   }
 
@@ -114,8 +121,10 @@ async function buildNode(ctx: Ctx, node: Node, parentMode: Mode): Promise<FFrame
     frame.counterAxisAlignItems = view.align;
     bindNumber(frame, ["itemSpacing"], ctx.library, view.gap.token, view.gap.px);
   }
+  const shown: Shown = {};
   if (CAPTION_KINDS.has(node.kind)) {
-    const label = makeText(ctx.api, "label", labelDisplay(node.props), FONT.bold, 14);
+    shown.label = labelDisplay(node.props, ctx.display);
+    const label = makeText(ctx.api, "label", shown.label, FONT.bold, 14);
     label.setPluginData(KEY.label, "1");
     frame.appendChild(label);
   }
@@ -130,7 +139,7 @@ async function buildNode(ctx: Ctx, node: Node, parentMode: Mode): Promise<FFrame
     await appendChildren(ctx, slot, list, slotView.mode);
     frame.appendChild(slot);
   }
-  mark(frame, node, false);
+  mark(frame, node, false, shown);
   frame.setPluginData(KEY.style, styleKey(frame, !LAYOUT_KINDS.has(node.kind)));
   return frame;
 }

@@ -7,8 +7,8 @@ Converts Weft screens (see `SPEC.md`) to Figma and back. The conversion is pure 
 | Step | Function | Result |
 | --- | --- | --- |
 | Library | `ensureLibrary(api, catalog, tokens)` | A `Weft library` page holding one component set per catalog kind, plus a `Weft tokens` variable collection. Enum props and `state` are the variant axes. Each token becomes a variable: dimensions and numbers as `FLOAT` in px, colors as `COLOR`. Calling it again reuses what is already there. |
-| Weft → Figma | `buildScreen(api, document, options)` | Text-only kinds (`content` `none` or `text`) become instances of their variant. Every other kind becomes an auto-layout frame. Each layer carries its Weft source in plugin data: kind, id, props, `on` handlers, and the text content of leaves. A `gap` token is bound to its variable. |
-| Figma → Weft | `readScreen(api, layer, options)` | Returns `{ document, losses, diagnostics }` (see "Reading a frame back" below). It is `readLayers`, which only reads layers, followed by `finishRead`, which canonicalizes and validates with the core. |
+| Weft → Figma | `buildScreen(api, document, options)` | Text-only kinds (`content` `none` or `text`) become instances of their variant. Every other kind becomes an auto-layout frame. Each layer carries its Weft source in plugin data: kind, id, props, `on` handlers, the text content of leaves, and the text and label it showed. `options.display` gives the `text` and `label` values in attribute form; `displayTexts(document)` computes it with the core. A `gap` token is bound to its variable. |
+| Figma → Weft | `readScreen(api, layer, options)` | Returns `{ document, losses, diagnostics }` (see "Reading a frame back" below). It is `readLayers`, which only reads layers, followed by `finishRead`, which reads typed text as values, canonicalizes and validates with the core. |
 | Plugin, main thread | `handleRequest(api, selection, message, options)` | Validates a message from the plugin UI, then builds a parsed screen or reads the selected frame. |
 | Plugin, UI | `buildRequest`, `exportRequest`, `finishExport` | Parse pasted markup into a build request, and turn a read into `.weft` markup. |
 
@@ -21,15 +21,14 @@ The Weft core (`@weft/core`, `@weft/catalog`) is the Rust core compiled to WebAs
 
 So the work is split:
 
-- **Main thread:** `buildScreen`, `readLayers`, `ensureLibrary` and `handleRequest` never call the core. They need a canonical document as input, and they return an unfinished one.
-- **UI:** parsing, canonicalizing, validating, serializing and token loading run here.
-- **Value forms:** reading `{$…}` and `{token.…}` in text a designer types (`values.ts`) is a small TypeScript copy of the core's rule. `test/values.test.ts` runs every case through both, so the copy cannot drift.
+- **Main thread:** `buildScreen`, `readLayers`, `ensureLibrary` and `handleRequest` never call the core and never interpret a value. They need a canonical document and its display texts as input, and they return an unfinished document.
+- **UI:** parsing, canonicalizing, validating, serializing and token loading run here, and so do the value forms. `displayTexts` writes `text` and `label` values in attribute form (`{$.name}`, `{token.…}`) for the build. Text a designer typed is left by `readLayers` as a `RawText` (`{ raw, path }`) in the prop, and `finishRead` reads it with the core's `readValue`. There is one implementation of the value rules: the core's.
 
 **Unverified:** the main thread runs in QuickJS compiled to WebAssembly, which would explain why WebAssembly is missing there. This comes from a Figma co-founder's post of 2019-10-02 (https://madebyevan.com/figma/an-update-on-plugin-security/), not from Figma's docs. A community forum answer from 2023-11-26 also says WebAssembly is not supported in the main thread (https://forum.figma.com/ask-the-community-7/does-the-plugin-environment-support-webassembly-31158). The plugin does not depend on either: it works whether or not the main thread has WebAssembly.
 
 ### Reading a frame back
 
-`readLayers` recomputes what each layer looked like when it was built (`src/view.ts`) and compares that with what the layer shows now:
+`readLayers` recomputes what each layer looked like when it was built (`src/view.ts`; the text and label it showed are stored with the source) and compares that with what the layer shows now:
 
 - **Unedited layers:** the stored source is kept as written, so an unedited screen comes back byte-identical after `serialize`.
 - **Designer edits come back as Weft changes:**

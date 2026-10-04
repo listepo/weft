@@ -29,6 +29,7 @@ pub use parse::{ParseOptions, ParseResult, parse};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};
 pub use rules::{ARIA_ROLES, MAX_DEPTH};
 pub use serialize::serialize;
-pub use shape::to_document;
+pub use shape::{to_document, to_value};
 pub use source::{ListSource, NodeSource};
 pub use validate::{ValidateOptions, validate, validate_document};
+pub use values::{BadValue, format_value, read_value};

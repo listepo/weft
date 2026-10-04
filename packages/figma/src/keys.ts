@@ -38,7 +38,11 @@ export type Source = {
   props?: Record<string, Value> | undefined;
   on?: Record<string, string> | undefined;
   children?: string[] | undefined;
+  /** The text and label the layer showed when built, to tell a designer's edit from the build. */
+  shown?: Shown | undefined;
 };
+
+export type Shown = { text?: string | undefined; label?: string | undefined };
 
 // Figma allows 100 kB per entry; a larger value cannot be ours.
 const MAX_ENTRY = 100_000;
@@ -49,15 +53,17 @@ const SourceSchema = z.strictObject({
   props: z.record(z.string(), ValueSchema).optional(),
   on: z.record(z.string(), z.string()).optional(),
   children: z.array(z.string()).optional(),
+  shown: z.strictObject({ text: z.string().optional(), label: z.string().optional() }).optional(),
 });
 
-export function sourceOf(node: Node, leaf: boolean): Source {
+export function sourceOf(node: Node, leaf: boolean, shown: Shown): Source {
   const source: Source = { kind: node.kind };
   if (node.id !== undefined) source.id = node.id;
   if (node.props !== undefined) source.props = node.props;
   if (node.on !== undefined) source.on = node.on;
   if (leaf && node.children !== undefined)
     source.children = node.children.filter((c) => typeof c === "string");
+  if (shown.text !== undefined || shown.label !== undefined) source.shown = shown;
   return source;
 }
 
@@ -74,13 +80,14 @@ function readJson(layer: FPluginData, key: string): unknown {
 export function readSource(layer: FPluginData): Source | undefined {
   const parsed = SourceSchema.safeParse(readJson(layer, KEY.source));
   if (!parsed.success) return undefined;
-  const { kind, id, props, on, children } = parsed.data;
+  const { kind, id, props, on, children, shown } = parsed.data;
   // Rebuilt with own properties only, so a key such as `__proto__` stays data.
   const source: Source = { kind };
   if (id !== undefined) source.id = id;
   if (props !== undefined) source.props = Object.fromEntries(Object.entries(props));
   if (on !== undefined) source.on = Object.fromEntries(Object.entries(on));
   if (children !== undefined) source.children = children;
+  if (shown !== undefined) source.shown = { text: shown.text, label: shown.label };
   return source;
 }
 
