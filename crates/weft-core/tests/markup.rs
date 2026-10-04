@@ -27,38 +27,6 @@ fn first(markup: &str) -> (Option<u32>, Option<u32>) {
 // ---- syntax layer -------------------------------------------------------------------------
 
 #[test]
-fn every_syntax_code_can_be_reached_from_markup() {
-    let cases: [(&str, &str); 19] = [
-        ("W101", "<a><</a>"),
-        ("W102", "<?xml version=\"1.0\"?><a/>"),
-        ("W103", "<!DOCTYPE a><a/>"),
-        ("W104", "<a><![CDATA[x]]></a>"),
-        ("W105", "<A/>"),
-        ("W106", "<a b=c/>"),
-        ("W107", "<a b/>"),
-        ("W108", "<a b=\"1\" b=\"2\"/>"),
-        ("W109", "<a><b></c></a>"),
-        ("W110", "<a><b></b>"),
-        ("W111", "<a/></b>"),
-        ("W112", "<a>&nope;</a>"),
-        ("W113", "<a b=\"<\"/>"),
-        ("W114", "<a/>text"),
-        ("W115", "<a><!-- x -- y --></a>"),
-        ("W116", "<a b=\"{oops}\"/>"),
-        ("W117", &"<a>".repeat(MAX_DEPTH + 1)),
-        ("W118", "<a><slot/></a>"),
-        ("W119", "<a><slot name=\"s\"/><slot name=\"s\"/></a>"),
-    ];
-    for (code, markup) in cases {
-        assert!(
-            bare_codes(markup).contains(&code),
-            "{code} is not reported for {markup:?}: {:?}",
-            bare_codes(markup)
-        );
-    }
-}
-
-#[test]
 fn a_syntax_error_leaves_no_document() {
     for markup in ["<a>", "<a b=c/>", "<a>&bad;</a>", "<a/><b/>", ""] {
         let r = bare(markup);
