@@ -13,6 +13,7 @@
 | bun | mise | Runtime the bindings are tested on | https://github.com/oven-sh/bun |
 | claude (Claude Code) | https://code.claude.com/docs/en/setup | Hosts the plugin (`plugins/claude-code`); `claude plugin validate` checks its manifests | https://github.com/anthropics/claude-code |
 | Cursor | https://cursor.com/download | Hosts the plugin (`plugins/cursor`); no test needs it | https://cursor.com |
+| Open Design | https://open-design.ai | Hosts the plugin (`plugins/open-design`); no test needs it | https://github.com/nexu-io/open-design |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 
 ## mise
@@ -63,7 +64,7 @@
 | @types/react | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React type definitions |
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
-| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist` and `plugins/cursor/dist`, and the Figma plugin into `plugins/figma/dist` |
+| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist`, `plugins/cursor/dist` and `plugins/open-design/dist`, and the Figma plugin into `plugins/figma/dist` |
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |

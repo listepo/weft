@@ -71,6 +71,20 @@ describe("open-design.json", () => {
     // manifest does not register the MCP server (see the README).
     assert.deepEqual(manifest.od.capabilities.toSorted(), ["bash", "fs:read", "prompt:inject"]);
     assert.equal("mcp" in manifest.od.context, false);
+    // The v1 vocabulary of Open Design's doctor (packages/plugin-runtime/src/validate.ts); an unknown
+    // capability is only a warning there, but a typo should not ship.
+    const known = [
+      "prompt:inject",
+      "fs:read",
+      "fs:write",
+      "mcp",
+      "subprocess",
+      "bash",
+      "network",
+      "connector",
+    ];
+    for (const capability of manifest.od.capabilities)
+      assert.ok(known.includes(capability), capability);
   });
 
   test("points its skill paths at files that exist", () => {
@@ -109,6 +123,15 @@ describe("SKILL.md", () => {
     assert.ok(String(fields?.["name"]).length <= 64);
     const description = String(fields?.["description"]);
     assert.ok(description.length > 20 && description.length <= 1024, `${description.length}`);
+  });
+
+  test("keeps its frontmatter in the subset Open Design's own parser reads: flat keys and one nested mapping", () => {
+    // Open Design reads SKILL.md with a small hand-written parser, not a YAML library: no anchors,
+    // no flow mappings, no folded scalars. Run once against the real parser (see the README).
+    const block = /^---\n([\s\S]*?)\n---\n/.exec(source)?.[1] ?? "";
+    for (const line of block.split("\n"))
+      assert.match(line, /^( {2})?[a-z]+: \S.*$|^metadata:$/, line);
+    assert.equal(typeof fields?.["metadata"], "object");
   });
 
   test("names only scripts that exist, by a path from the Skill root, and uses no host variable", () => {

@@ -97,6 +97,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `import.html.outDir` | next to the page | Where screens imported from HTML go. |
 | `mcp.limits.*` | see `packages/mcp/README.md` | The MCP server's bounds on one call: `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`. |
 | `plugins.<name>` | none | Settings of a plugin or tool Weft does not know. Weft only checks that each is an object. |
+| `plugins.open-design.tokensDir` | next to the design system | Where the Open Design plugin's `design-md` script writes the tokens it maps from a `DESIGN.md` or `tokens.css`. The script checks it: a folder name inside the project. |
 
 Directories are file names too: relative to `weft.json`, no trailing `/`. A missing directory is created.
 
