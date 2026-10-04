@@ -10,3 +10,4 @@ tasks:
       - '/corpus/**/*'
       - '/compat/**/*'
       - '/SPEC.md'
+      - '/crates/weft-core/tests/fixtures/**/*'
