@@ -1,10 +1,10 @@
 // The plugin's declarations point at things that exist, and the MCP server it registers starts.
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, test } from "vitest";
+import { startServer, WEFT_TOOLS } from "./mcp-stdio.ts";
 
 const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const PLUGIN = join(ROOT, "plugins/claude-code");
@@ -64,7 +64,7 @@ describe("skills", () => {
     });
 
     test("runs only scripts that exist", () => {
-      const scripts = [...text.matchAll(/\$\{CLAUDE_PLUGIN_ROOT\}\/(scripts\/[\w.-]+)/g)].map(
+      const scripts = [...text.matchAll(/\$\{CLAUDE_PLUGIN_ROOT\}\/(dist\/[\w.-]+)/g)].map(
         (match) => match[1] as string,
       );
       for (const script of scripts) assert.ok(existsSync(join(PLUGIN, script)), script);
@@ -72,9 +72,10 @@ describe("skills", () => {
     });
   });
 
-  test("spec reads the repository's AGENT-SPEC.md through a link, not a copy", () => {
-    const link = join(PLUGIN, "skills/spec/AGENT-SPEC.md");
-    assert.equal(realpathSync(link), realpathSync(join(ROOT, "AGENT-SPEC.md")));
+  test("spec carries a real copy of the repository's AGENT-SPEC.md, since a link out of the folder does not survive the plugin cache", () => {
+    const copy = join(PLUGIN, "skills/spec/AGENT-SPEC.md");
+    assert.equal(lstatSync(copy).isSymbolicLink(), false);
+    assert.equal(readFileSync(copy, "utf8"), readFileSync(join(ROOT, "AGENT-SPEC.md"), "utf8"));
   });
 
   test("render tells Claude to open the page in the Desktop browser", () => {
@@ -95,48 +96,11 @@ describe(".mcp.json", () => {
   });
 
   test("the server starts and serves the weft tools over stdio", async () => {
-    const server = config.mcpServers.weft;
-    const child = spawn(process.execPath, server.args.map(substitute), {
-      cwd: dirname(PLUGIN),
-      stdio: ["pipe", "pipe", "inherit"],
-    });
+    const session = await startServer(config.mcpServers.weft.args.map(substitute), dirname(PLUGIN));
     try {
-      const names = await new Promise<string[]>((resolveNames, reject) => {
-        let buffer = "";
-        child.on("error", reject);
-        child.on("exit", () => reject(new Error("the server exited before it answered")));
-        child.stdout.on("data", (chunk: Buffer) => {
-          buffer += chunk;
-          for (const line of buffer.split("\n")) {
-            const message = line.trim() === "" ? undefined : JSON.parse(line);
-            if (message?.id === 2)
-              resolveNames(message.result.tools.map((t: { name: string }) => t.name));
-          }
-        });
-        const send = (message: object) => child.stdin.write(`${JSON.stringify(message)}\n`);
-        send({
-          jsonrpc: "2.0",
-          id: 1,
-          method: "initialize",
-          params: {
-            protocolVersion: "2025-06-18",
-            capabilities: {},
-            clientInfo: { name: "plugin-test", version: "0" },
-          },
-        });
-        send({ jsonrpc: "2.0", method: "notifications/initialized" });
-        send({ jsonrpc: "2.0", id: 2, method: "tools/list" });
-      });
-      assert.deepEqual(names.toSorted(), [
-        "weft_catalog",
-        "weft_format",
-        "weft_patch",
-        "weft_primer",
-        "weft_render",
-        "weft_validate",
-      ]);
+      assert.deepEqual((await session.tools()).toSorted(), WEFT_TOOLS);
     } finally {
-      child.kill();
+      session.close();
     }
   });
 });

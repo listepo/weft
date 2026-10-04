@@ -61,7 +61,7 @@
 | @types/react | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React type definitions |
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
-| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests |
+| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the Claude Code plugin into `plugins/claude-code/dist` |
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |

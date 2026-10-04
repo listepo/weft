@@ -10,7 +10,11 @@ tasks:
   # The Rust core compiled to WebAssembly for @weft/core and @weft/catalog. Generated and
   # gitignored: the module must always match the crates it came from.
   wasm:
-    command: 'wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft'
+    # The remaps keep the builder's home directory, user name and checkout path out of the module
+    # (cargo registry sources, the toolchain and this workspace appear in its panic messages), so
+    # the same sources build to the same bytes on any machine. A script, not a command, for the
+    # shell variables; the remap is passed to rustc by this task only, not by a global cargo config.
+    script: 'RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(pwd -P)=/weft" wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft'
     inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json']
     outputs: ['/packages/core/wasm/**/*']
   typecheck:
@@ -18,7 +22,7 @@ tasks:
     deps: ['root:wasm']
     inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/tsconfig.json']
   lint:
-    script: 'oxlint --deny-warnings . && oxfmt --check "**/*.{ts,tsx,json}"'
+    script: "oxlint --deny-warnings --ignore-pattern 'plugins/*/dist/**' . && oxfmt --check '**/*.{ts,tsx,json}'"
     inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/compat/**/*', '/*.json', '/.claude-plugin/*.json']
   fmt:
     command: 'oxfmt "**/*.{ts,tsx,json}"'

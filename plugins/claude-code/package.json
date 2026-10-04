@@ -4,7 +4,10 @@
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
-  "dependencies": {
+  "scripts": {
+    "build": "node build.ts"
+  },
+  "devDependencies": {
     "@weft/catalog": "workspace:*",
     "@weft/core": "workspace:*",
     "@weft/from-aria": "workspace:*",

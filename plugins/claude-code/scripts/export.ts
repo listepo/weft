@@ -7,7 +7,7 @@ import { LIMITS } from "@weft/mcp";
 import { toJsx } from "@weft/to-jsx";
 import { defaultIo, EXIT, readScreen, siblingPath, writeOutput, type Io } from "./lib.ts";
 
-const USAGE = "usage: export.ts <screen.weft> [out.jsx] [--name Component] [--force]\n";
+const USAGE = "usage: export <screen.weft> [out.jsx] [--name Component] [--force]\n";
 
 export function main(argv: readonly string[], io: Io = defaultIo): number {
   let parsed;

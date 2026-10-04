@@ -15,7 +15,7 @@ import {
   type Io,
 } from "./lib.ts";
 
-const USAGE = "usage: import.ts <page.html> [out.weft] [--force]\n";
+const USAGE = "usage: import <page.html> [out.weft] [--force]\n";
 
 /** A Markdown table, one row per loss, so the model can relay it to the user as it is. */
 export function lossTable(losses: readonly Loss[]): string {

@@ -3,20 +3,17 @@
 //   node render.ts <screen.weft> [out.html] [--data data.json] [--tokens tokens.json] [--force]
 // Without `--tokens` the catalog's default tokens apply, as in the corpus gallery.
 import { basename, extname, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { coreCatalog, loadTokens, tokenTypes } from "@weft/catalog";
 import { LIMITS } from "@weft/mcp";
 import { renderPage } from "@weft/render-react";
+// A JSON module, not a path under the repository, so the bundle needs no file beside it.
+import defaultTokens from "../../../packages/catalog/tokens/default.tokens.json" with { type: "json" };
 import { defaultIo, EXIT, readJson, readScreen, siblingPath, writeOutput, type Io } from "./lib.ts";
 
 const USAGE =
-  "usage: render.ts <screen.weft> [out.html] [--data data.json] [--tokens tokens.json] [--force]\n";
-
-const DEFAULT_TOKENS = new URL(
-  "../../../packages/catalog/tokens/default.tokens.json",
-  import.meta.url,
-);
+  "usage: render <screen.weft> [out.html] [--data data.json] [--tokens tokens.json] [--force]\n";
 
 export function main(argv: readonly string[], io: Io = defaultIo): number {
   let parsed;
@@ -36,13 +33,12 @@ export function main(argv: readonly string[], io: Io = defaultIo): number {
     return EXIT.failure;
   }
 
-  const tokensRead = readJson(
-    parsed.values.tokens ?? fileURLToPath(DEFAULT_TOKENS),
-    LIMITS.markupChars,
-    io,
-  );
-  if (tokensRead === undefined) return EXIT.failure;
-  const tokensJson = tokensRead.value;
+  let tokensJson: unknown = defaultTokens;
+  if (parsed.values.tokens !== undefined) {
+    const read = readJson(parsed.values.tokens, LIMITS.markupChars, io);
+    if (read === undefined) return EXIT.failure;
+    tokensJson = read.value;
+  }
   const { tokens, problems } = loadTokens(tokensJson);
   for (const p of problems) io.stderr(`${p.code} ${p.path}: ${p.message}\n`);
 
