@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  cpSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -242,6 +243,118 @@ describe("failures", () => {
     writeFileSync(html, "\u0000<<<>>> not html at all");
     const result = run(importMain, html, join(dir, "garbage.weft"));
     assert.ok(result.code === 0 || result.code === 1, result.stderr);
+  });
+});
+
+describe("project settings (SPEC §10.6)", () => {
+  // A copy of the example project, so generated files stay out of the repository.
+  const copy = (settings: Record<string, unknown> = {}) => {
+    const root = mkdtempSync(join(dir, "project-"));
+    cpSync(here("../../../examples/project"), root, { recursive: true });
+    const file = join(root, "weft.json");
+    writeFileSync(file, JSON.stringify({ ...JSON.parse(readFileSync(file, "utf8")), ...settings }));
+    return { root, cart: join(root, "screens", "cart.weft") };
+  };
+
+  // A token layer that sets space.sm, which the cart screen's rows use as their gap.
+  const spacing = (root: string, name: string, px: number) =>
+    writeFileSync(
+      join(root, "tokens", name),
+      JSON.stringify({ space: { sm: { $type: "dimension", $value: { value: px, unit: "px" } } } }),
+    );
+
+  test("render takes the project's catalog, tokens and render.data", () => {
+    const { root, cart } = copy({
+      tokens: ["tokens/base.tokens.json", "tokens/brand.tokens.json", "tokens/wide.tokens.json"],
+    });
+    spacing(root, "wide.tokens.json", 29);
+    const result = run(renderMain, cart);
+    assert.equal(result.code, 0, result.stderr);
+    const html = readFileSync(join(root, "screens", "cart.html"), "utf8");
+    assert.ok(html.includes("Linen shirt"), "render.data feeds the bindings");
+    assert.ok(html.includes("gap:29px"), "the project's token layers apply");
+  });
+
+  test("arguments override the settings", () => {
+    const { root, cart } = copy();
+    const data = join(root, "other.json");
+    writeFileSync(data, JSON.stringify({ cart: { items: [{ name: "Wool scarf" }] } }));
+    const out = join(root, "explicit.html");
+    assert.equal(run(renderMain, cart, out, "--data", data).code, 0);
+    const html = readFileSync(out, "utf8");
+    assert.ok(html.includes("Wool scarf") && !html.includes("Linen shirt"));
+  });
+
+  test("render.tokens replaces the project's tokens", () => {
+    const { root, cart } = copy({
+      render: {
+        data: "sample.data.json",
+        tokens: ["tokens/base.tokens.json", "tokens/wide.tokens.json"],
+      },
+    });
+    spacing(root, "wide.tokens.json", 31);
+    const result = run(renderMain, cart);
+    assert.equal(result.code, 0, result.stderr);
+    const html = readFileSync(join(root, "screens", "cart.html"), "utf8");
+    assert.ok(html.includes("gap:31px"));
+  });
+
+  test("a render.tokens file that is missing stops the render", () => {
+    const { root, cart } = copy({ render: { tokens: ["tokens/none.json"] } });
+    const result = run(renderMain, cart);
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /weft\.json:#\/render\/tokens\/0 W704/);
+    assert.equal(existsSync(join(root, "screens", "cart.html")), false);
+  });
+
+  test("outDir settings place each command's output", () => {
+    const { root, cart } = copy({
+      render: { outDir: "out/pages" },
+      export: { react: { outDir: "out/react" } },
+      import: { html: { outDir: "out/screens" } },
+    });
+    assert.equal(run(renderMain, cart).code, 0);
+    assert.equal(run(exportMain, cart).code, 0);
+    const page = join(root, "out", "pages", "cart.html");
+    assert.ok(existsSync(page));
+    assert.ok(existsSync(join(root, "out", "react", "cart.jsx")));
+    const imported = run(importMain, page);
+    assert.equal(imported.code, 0, imported.stderr);
+    assert.ok(existsSync(join(root, "out", "screens", "cart.weft")));
+  });
+
+  test("--no-project and --project choose the project", () => {
+    const { root, cart } = copy();
+    // The screen uses the project's own component, unknown to the core catalog.
+    const bare = run(exportMain, cart, join(root, "bare.jsx"), "--no-project");
+    assert.equal(bare.code, 1);
+    assert.match(bare.stderr, /W401/);
+    const elsewhere = join(dir, "elsewhere.weft");
+    writeFileSync(elsewhere, readFileSync(cart));
+    const named = run(
+      exportMain,
+      elsewhere,
+      join(root, "named.jsx"),
+      "--project",
+      join(root, "weft.json"),
+    );
+    assert.equal(named.code, 0, named.stderr);
+  });
+
+  test("a project with errors stops every script and writes nothing", () => {
+    const { root, cart } = copy({ catalog: "missing.json" });
+    for (const main of [renderMain, exportMain]) {
+      const result = run(main, cart, join(root, "never.out"));
+      assert.equal(result.code, 1);
+      assert.match(result.stderr, /weft\.json:#\/catalog W704/);
+    }
+    const page = join(root, "page.html");
+    writeFileSync(page, "<main><h1>Hi</h1></main>");
+    assert.equal(run(importMain, page, join(root, "never.weft")).code, 1);
+    assert.equal(
+      existsSync(join(root, "never.out")) || existsSync(join(root, "never.weft")),
+      false,
+    );
   });
 });
 

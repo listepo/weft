@@ -13,6 +13,8 @@ Import an HTML file into Weft with the plugin's script. Arguments: `$ARGUMENTS`
 
    Without an output path the screen is written next to the page as `<name>.weft`. The script refuses to replace an existing file; add `--force` only when the user said to replace it.
 
+   If a `weft.json` sits in the page's folder or above it, the page is mapped onto that project's catalog, and its `import.html.outDir` setting places the screen when no output path is given. `--project <weft.json>` names another project file; `--no-project` ignores it. A project with errors stops the script with exit code 1 and its problems printed as `weft.json:#/pointer code message`.
+
 2. Exit code 0: tell the user where the file is and show the loss table the script printed. Do not shorten it: the table lists what an HTML page cannot carry (bindings, actions, tokens, slots, hidden elements), and the user needs it to know what to add back.
 3. Exit code 1: the diagnostics on stderr say what is wrong with the import. Report them; do not edit the generated markup by hand to hide them.
 4. Exit code 2: a usage or file problem (missing file, file too large, output exists). Report the message.

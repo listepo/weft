@@ -1,9 +1,11 @@
 // File plumbing shared by the plugin's scripts. The MCP server is file-free by design, so reading
 // and writing files lives here, and every file is bounded by the same limits the server applies.
-import { readFileSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join } from "node:path";
-import { coreCatalog } from "@weft/catalog";
-import { hasErrors, parse, type Diagnostic, type Document, type Mode } from "@weft/core";
+import { coreCatalog, type Project } from "@weft/catalog";
+import { chooseProject, projectPath, readProject } from "@weft/catalog/node";
+import { hasErrors, type Diagnostic, type Document, type Mode } from "@weft/core";
+import { contextOf, LIMITS, readMarkup, type Context } from "@weft/mcp";
 
 export type Io = { stdout: (text: string) => void; stderr: (text: string) => void };
 
@@ -48,27 +50,88 @@ export function printDiagnostics(file: string, diagnostics: readonly Diagnostic[
   }
 }
 
+/** `--project` and `--no-project`, the same in every script (SPEC §10.1). */
+export const PROJECT_OPTIONS = {
+  project: { type: "string" },
+  "no-project": { type: "boolean" },
+} as const;
+
+/** The project a script works in, and the file it came from; both absent without one. */
+export type Workspace = { file?: string | undefined; project?: Project | undefined };
+
+/**
+ * The project for `input`: the one `--project` names, none with `--no-project`, else the
+ * `weft.json` above the input. Its diagnostics are printed; a project with errors, or one that
+ * cannot be read, stops the script, because its output would follow the wrong catalog.
+ */
+export function openProject(
+  input: string,
+  values: { project?: string | undefined; "no-project"?: boolean | undefined },
+  io: Io,
+): Workspace | number {
+  const file = chooseProject(input, { project: values.project, noProject: values["no-project"] });
+  if (file === undefined) return {};
+  let loaded;
+  try {
+    loaded = readProject(file, { maxChars: LIMITS.projectChars });
+  } catch (error) {
+    io.stderr(`weft: cannot read ${file}: ${(error as Error).message}\n`);
+    return EXIT.failure;
+  }
+  printDiagnostics(file, loaded.diagnostics, io);
+  return hasErrors(loaded.diagnostics) ? EXIT.invalid : { file, project: loaded.project };
+}
+
+/** What a screen is checked against: the project's catalog and resources, or the core catalog. */
+export function contextFor(workspace: Workspace): Context {
+  return workspace.project === undefined ? { catalog: coreCatalog } : contextOf(workspace.project);
+}
+
 /** Reads and parses a `.weft` screen. Returns the exit code instead when it cannot (already reported). */
 export function readScreen(
   file: string,
   limit: number,
   io: Io,
-  options: { mode?: Mode; tokens?: ReadonlyMap<string, string> } = {},
+  options: { mode?: Mode; context?: Context } = {},
 ): Document | number {
   const markup = readText(file, limit, io);
   if (markup === undefined) return EXIT.failure;
-  const { document, diagnostics } = parse(markup, {
-    catalog: coreCatalog,
-    mode: options.mode ?? "strict",
-    ...(options.tokens ? { tokens: options.tokens } : {}),
-  });
+  const context = options.context ?? { catalog: coreCatalog };
+  const { document, diagnostics, ok } = readMarkup(markup, context, options.mode ?? "strict");
   printDiagnostics(file, diagnostics, io);
-  return document !== undefined && !hasErrors(diagnostics) ? document : EXIT.invalid;
+  return ok && document !== undefined ? document : EXIT.invalid;
 }
 
 /** `dir/name.ext` for `dir/name.other`: generated files land next to their source. */
 export function siblingPath(input: string, extension: string): string {
   return join(dirname(input), basename(input, extname(input)) + extension);
+}
+
+/**
+ * Where a generated file goes: the path given on the command line, else the project's `outDir`
+ * setting for this command (created when missing), else next to its source. `undefined` when the
+ * directory cannot be made (already reported).
+ */
+export function targetPath(
+  input: string,
+  extension: string,
+  explicit: string | undefined,
+  workspace: Workspace,
+  outDir: string | undefined,
+  io: Io,
+): string | undefined {
+  if (explicit !== undefined) return explicit;
+  const sibling = siblingPath(input, extension);
+  if (outDir === undefined || workspace.file === undefined) return sibling;
+  // The loader has already refused an outDir that leaves the project directory.
+  const dir = projectPath(workspace.file, outDir);
+  try {
+    mkdirSync(dir, { recursive: true });
+  } catch (error) {
+    io.stderr(`weft: cannot create ${dir}: ${(error as Error).message}\n`);
+    return undefined;
+  }
+  return join(dir, basename(sibling));
 }
 
 /** Writes a new file. An existing one is replaced only with `force`, so a command never loses work silently. */
