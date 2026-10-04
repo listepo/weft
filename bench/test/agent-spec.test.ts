@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "vitest";
-import { coreCatalog, loadTokens, tokenTypes } from "@weft/catalog";
+import { coreCatalog, loadProject, loadTokens, tokenTypes } from "@weft/catalog";
 import { applyPatches, DIAGNOSTIC_CODES, parse, serialize } from "@weft/core";
 
 // Lives in bench because it reads the root document, the catalog and the core together. These
@@ -39,14 +39,25 @@ test("every markup example is valid in strict mode and canonical", () => {
   }
 });
 
+// A JSON example is a patch list (an array) or a project argument (an object, SPEC §10.1).
+const json = blocks("json").map((text) => JSON.parse(text) as unknown);
+
 test("every patch example applies to the first markup example", () => {
   const screen = parse(blocks("xml")[0] ?? "", options).document;
   assert.ok(screen);
-  const lists = blocks("json");
+  const lists = json.filter(Array.isArray);
   assert.ok(lists.length > 0);
   for (const list of lists) {
-    const result = applyPatches(screen, JSON.parse(list), options);
+    const result = applyPatches(screen, list, options);
     assert.deepEqual(result.diagnostics, []);
     assert.ok(result.document);
+  }
+});
+
+test("every project example loads without problems", () => {
+  const projects = json.filter((value) => !Array.isArray(value));
+  assert.ok(projects.length > 0);
+  for (const project of projects) {
+    assert.deepEqual(loadProject(project, { mode: "strict" }).diagnostics, []);
   }
 });
