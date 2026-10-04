@@ -1,0 +1,19 @@
+{
+  "name": "@weft/figma",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@weft/catalog": "workspace:*",
+    "@weft/core": "workspace:*",
+    "@weft/from-aria": "workspace:*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "1.140.0"
+  }
+}

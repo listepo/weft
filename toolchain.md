@@ -64,3 +64,4 @@
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
 | p-limit | local | https://github.com/sindresorhus/p-limit | Concurrency limit for benchmark requests |
 | undici | local | https://github.com/nodejs/undici | Fetch without the header timeout, for slow local model servers |
+| @figma/plugin-typings | local | https://github.com/figma/plugin-typings | Official Figma Plugin API types; the conversion is typed against them |
