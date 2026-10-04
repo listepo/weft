@@ -4,5 +4,4 @@
 - T22. WebAssembly bindings
 - T23. Native Node and Bun addon
 - T24. Runtime matrix
-- T25. Benchmark rigor
 - T26. Vitest for the TypeScript tests
