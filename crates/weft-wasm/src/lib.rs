@@ -93,3 +93,13 @@ pub fn load_tokens(json: Option<String>) -> Result<String, JsError> {
 pub fn diff_catalogs(previous: Option<String>, next: Option<String>) -> Result<String, JsError> {
     Ok(api::diff_catalogs(previous.as_deref(), next.as_deref())?)
 }
+
+#[wasm_bindgen(js_name = readValue)]
+pub fn read_value(raw: &str) -> Result<String, JsError> {
+    Ok(api::read_attribute_value(raw)?)
+}
+
+#[wasm_bindgen(js_name = formatValue)]
+pub fn format_value(value: Option<String>) -> Result<String, JsError> {
+    Ok(api::format_attribute_value(value.as_deref())?)
+}
