@@ -1,0 +1,28 @@
+[package]
+name = "weft-wasm"
+description = "WebAssembly bindings of the Weft core and catalog behind @weft/core and @weft/catalog"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+# cdylib is the WebAssembly module; rlib lets the native tests link the plain functions.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+indexmap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+wasm-bindgen = { workspace = true }
+weft-catalog = { workspace = true }
+weft-core = { workspace = true }
+
+# wasm-pack would download binaryen for wasm-opt; mise does not pin it, so the build stays offline.
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[lints]
+workspace = true
