@@ -11,6 +11,7 @@
 | napi (`@napi-rs/cli`) | mise | Builds the native Node and Bun addon | https://github.com/napi-rs/napi-rs |
 | deno | mise | Runtime the bindings are tested on | https://github.com/denoland/deno |
 | bun | mise | Runtime the bindings are tested on | https://github.com/oven-sh/bun |
+| claude (Claude Code) | https://code.claude.com/docs/en/setup | Hosts the plugin (`plugins/claude-code`); `claude plugin validate` checks its manifests | https://github.com/anthropics/claude-code |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 
 ## mise

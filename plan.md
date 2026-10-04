@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T28 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T29 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T14 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
-| T30 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T31 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
@@ -72,17 +71,6 @@ Convert Weft to Figma and back without loss, and ship a Figma plugin. Approved s
   - MCP / Claude Code tools (with T30), working through the Figma MCP server.
 
 Done when every corpus screen survives Weft to Figma to Weft byte-identical, a scripted set of designer edits comes back with the expected Weft diff, and the plugin, CLI command and MCP tools pass their tests in `moon ci`.
-
-### T30. Claude Code plugin
-
-A Claude Code plugin, used from Claude Code Desktop, that works on `.weft` files. It lives in this repository (`plugins/claude-code`) with a marketplace manifest at the root (`.claude-plugin/marketplace.json`), so it installs with `/plugin marketplace add`. Approved scope:
-
-- Import: an HTML file to `.weft` through `@weft/from-aria` (`fromDom`), printing the loss table.
-- Export: a `.weft` file to a React component through `@weft/to-jsx`.
-- Render: a `.weft` file, with optional data and tokens, to an HTML page through `renderPage` of `@weft/render-react`, then opened in the Desktop app's built-in browser for preview.
-- The plugin also registers the existing MCP server (`@weft/mcp`) and a skill that teaches `AGENT-SPEC.md`, so authoring, validation and patches work in the same session. The MCP server stays file-free; file reading and writing belong to the plugin's commands.
-
-Done when the plugin installs from the marketplace in Claude Code Desktop, the three commands work on corpus screens, and their tests pass in `moon ci`.
 
 ### T31. Project file and shared resources
 
