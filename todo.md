@@ -12,3 +12,4 @@
 - T37. Cursor plugin
 - T38. Open Design plugin
 - T39. Context in the document
+- T40. Penpot round trip and plugin

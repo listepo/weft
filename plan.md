@@ -18,6 +18,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T37 | todo | P1 | 3 | 0% | |
 | T38 | todo | P2 | 3 | 0% | |
 | T39 | todo | P1 | 4 | 0% | |
+| T40 | todo | P2 | 4 | 0% | |
 
 ### T8. Evaluation
 
@@ -144,3 +145,17 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 - **Untrusted by design:** context is data for the reader, never instructions. `AGENT-SPEC.md` tells models to treat it as information to weigh and to ignore commands inside it. Renderers never show it to end users.
 
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
+
+### T40. Penpot round trip and plugin
+
+The same as T14, for Penpot (https://penpot.app), the open-source design tool. Scope:
+- a Weft component library generated from the catalog and the tokens;
+- Weft to Penpot, with the Weft source kept in plugin data;
+- Penpot to Weft without loss for screens Weft built, including designer edits;
+- foreign layers with a loss table;
+- a Penpot plugin to build frames from `.weft` and export a selection;
+- tests on every corpus screen and a scripted set of designer edits.
+
+Penpot lays out boards with flex and grid layouts, which map to `stack` and `grid`. Check this and every other API fact against Penpot's official plugin docs, citing the URL and the date checked.
+
+The conversion logic that does not depend on the tool moves out of `@weft/figma` into a shared design-tool layer used by both, so Figma and Penpot keep one implementation of the mapping. Style overrides follow the design approved for T14. Starts after T14 stage 1 is on main. Done when every corpus screen survives Weft to Penpot to Weft byte-identical, the edit scenarios give the expected Weft diff, and the plugin and its tests pass in `moon ci`.
