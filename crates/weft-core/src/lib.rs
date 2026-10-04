@@ -5,6 +5,7 @@
 mod canonical;
 mod data;
 mod diagnostics;
+mod explain;
 mod json;
 mod model;
 mod parse;
@@ -25,7 +26,8 @@ pub use data::{
 pub use diagnostics::{
     Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors, one_of,
 };
-pub use json::{JsonError, order_keys, parse_json, to_compact};
+pub use explain::{Change, ChangeKind, Readback, explain, explain_changes};
+pub use json::{JSON_DEPTH_LIMIT, JsonError, order_keys, parse_json, to_compact};
 pub use model::{
     Catalog, Child, ComponentDef, Content, Document, Map, Node, PropDef, PropDefault, PropType,
     SlotDef, Value, WEFT_VERSION,
@@ -34,5 +36,6 @@ pub use parse::{ParseOptions, ParseResult, parse};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};
 pub use rules::{ARIA_ROLES, MAX_DEPTH, is_action, is_name};
 pub use serialize::serialize;
+pub use shape::to_document;
 pub use source::{ListSource, NodeSource};
 pub use validate::{ValidateOptions, validate, validate_document};

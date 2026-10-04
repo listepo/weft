@@ -1,6 +1,7 @@
 # moon runs the workspace tasks with caching; pnpm still owns dependencies and mise owns tools.
 projects:
   - 'packages/*'
+  - 'plugins/*'
   - 'bench'
   - 'moon.yml'
 

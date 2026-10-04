@@ -1,6 +1,9 @@
 node_modules/
 dist/
+# The Claude Code plugin ships its bundles, because Claude Code installs it from git.
+!plugins/claude-code/dist/
 .DS_Store
 .moon/cache/
 .moon/docker/
 target/
+packages/core/wasm/

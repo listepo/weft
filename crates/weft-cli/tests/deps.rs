@@ -47,6 +47,24 @@ fn the_catalog_depends_only_on_the_core_and_pure_crates() {
 }
 
 #[test]
+fn only_the_wasm_bindings_add_wasm_bindgen_to_the_pure_crates() {
+    let mut deps = dependencies("weft-wasm");
+    deps.sort();
+    assert_eq!(
+        deps,
+        [
+            "indexmap",
+            "serde",
+            "serde_json",
+            "thiserror",
+            "wasm-bindgen",
+            "weft-catalog",
+            "weft-core"
+        ]
+    );
+}
+
+#[test]
 fn only_the_cli_depends_on_clap_and_anyhow() {
     let cli = dependencies("weft-cli");
     assert!(cli.iter().any(|d| d == "clap") && cli.iter().any(|d| d == "anyhow"));

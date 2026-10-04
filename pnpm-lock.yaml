@@ -283,6 +283,27 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
 
+  plugins/claude-code:
+    devDependencies:
+      '@weft/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
+      '@weft/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@weft/from-aria':
+        specifier: workspace:*
+        version: link:../../packages/from-aria
+      '@weft/mcp':
+        specifier: workspace:*
+        version: link:../../packages/mcp
+      '@weft/render-react':
+        specifier: workspace:*
+        version: link:../../packages/render-react
+      '@weft/to-jsx':
+        specifier: workspace:*
+        version: link:../../packages/to-jsx
+
 packages:
 
   '@hono/node-server@2.1.3':

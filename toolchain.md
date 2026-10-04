@@ -6,11 +6,12 @@
 | pnpm | mise | Workspace package manager | https://github.com/pnpm/pnpm |
 | moon | mise | Workspace tasks with caching (`moon ci`) | https://github.com/moonrepo/moon |
 | rust | mise | Compiles the core to native code and to `wasm32-unknown-unknown` | https://github.com/rust-lang/rust |
-| wasm-pack | mise | Builds the WebAssembly packages | https://github.com/rustwasm/wasm-pack |
+| wasm-pack | mise | Builds `packages/core/wasm/` from `crates/weft-wasm` (`moon run root:wasm`) | https://github.com/rustwasm/wasm-pack |
 | wasm-bindgen | mise | JS glue for the WebAssembly build | https://github.com/wasm-bindgen/wasm-bindgen |
 | napi (`@napi-rs/cli`) | mise | Builds the native Node and Bun addon | https://github.com/napi-rs/napi-rs |
 | deno | mise | Runtime the bindings are tested on | https://github.com/denoland/deno |
 | bun | mise | Runtime the bindings are tested on | https://github.com/oven-sh/bun |
+| claude (Claude Code) | https://code.claude.com/docs/en/setup | Hosts the plugin (`plugins/claude-code`); `claude plugin validate` checks its manifests | https://github.com/anthropics/claude-code |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 
 ## mise
@@ -39,6 +40,8 @@
 | thiserror | local | https://github.com/dtolnay/thiserror | Typed errors in weft-core |
 | anyhow | local | https://github.com/dtolnay/anyhow | Errors in the `weft` binary |
 | clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
+| proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core and weft-catalog: no panics, round trips, idempotent formatting |
+| wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
 
 ## npm
 
@@ -58,7 +61,7 @@
 | @types/react | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React type definitions |
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
-| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests |
+| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the Claude Code plugin into `plugins/claude-code/dist` |
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
