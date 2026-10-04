@@ -1,5 +1,4 @@
 - T8. Evaluation
-- T20. Rust core
 - T21. Rust catalog
 - T22. WebAssembly bindings
 - T23. Native Node and Bun addon
