@@ -11,3 +11,4 @@
 - T36. Examples, snapshots, screenshots and comparisons
 - T37. Cursor plugin
 - T38. Open Design plugin
+- T39. Context in the document

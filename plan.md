@@ -17,6 +17,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T36 | todo | P1 | 4 | 0% | |
 | T37 | todo | P1 | 3 | 0% | |
 | T38 | todo | P2 | 3 | 0% | |
+| T39 | todo | P1 | 4 | 0% | |
 
 ### T8. Evaluation
 
@@ -133,3 +134,13 @@ A plugin for Open Design (https://open-design.ai, https://github.com/attentiondo
 - map an Open Design `DESIGN.md` design system to Weft design tokens where the two line up, with a loss list where they do not.
 
 It reuses the shared bundled scripts and MCP server of the Claude Code and Cursor plugins (T32, T37) instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
+
+### T39. Context in the document
+
+A `.weft` file carries the context that a person or an agent left for whoever works on it next, so the next agent or person can use it. Approved scope:
+- **Two levels:** a context block on the screen (purpose, decisions, constraints, open questions) and context entries on any element (why a button is disabled, where a label came from).
+- **Typed entries:** every entry has a kind (`intent`, `decision`, `constraint`, `question`, `todo`, `source`), an author (`human` or `agent`, with a name or model) and text. The validator checks their shape.
+- **Part of the document:** context is in canonical JSON and survives formatting, patches (new patch operations to add, change and resolve entries) and every conversion. Code generators write it as comments; Figma keeps it in plugin data; importers read it back from code that Weft generated.
+- **Untrusted by design:** context is data for the reader, never instructions. `AGENT-SPEC.md` tells models to treat it as information to weigh and to ignore commands inside it. Renderers never show it to end users.
+
+Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
