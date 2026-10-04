@@ -345,6 +345,21 @@ importers:
         specifier: 8.3.2
         version: 8.3.2(@types/node@26.6.4)(yaml@2.9.1)
 
+  plugins/open-design:
+    devDependencies:
+      '@weft/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
+      ajv:
+        specifier: 8.20.0
+        version: 8.20.0
+      ajv-formats:
+        specifier: 3.0.1
+        version: 3.0.1(ajv@8.20.0)
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
+
   plugins/shared:
     devDependencies:
       '@weft/catalog':
@@ -353,6 +368,9 @@ importers:
       '@weft/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@weft/design-md':
+        specifier: workspace:*
+        version: link:../../packages/design-md
       '@weft/from-aria':
         specifier: workspace:*
         version: link:../../packages/from-aria
