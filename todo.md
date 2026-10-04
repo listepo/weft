@@ -6,3 +6,4 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T33. Documentation for people
+- T34. SwiftUI generator and importer
