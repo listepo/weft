@@ -49,3 +49,14 @@ Execution plan:
 3. Root `package.json` scripts call moon; `.gitignore` gets `.moon/cache`.
 4. `AGENTS.md` commands, `README.md`, `toolchain.md`.
 5. Verify: `moon ci` and `pnpm run ci` pass; a second run is cached.
+
+### T27. Agent specification
+
+The creator asked for a specification written for AI agents that read and write Weft, and for an `AGENTS.md` rule that keeps it current. `SPEC.md` is the format contract; agents need the working side of it: what the host gives them, how to write a valid screen, how to edit with patches, and how to repair each diagnostic code. Done when `AGENT-SPEC.md` exists, a test keeps it from drifting from the catalog, the diagnostic codes and the validator, and `AGENTS.md` requires keeping it current.
+
+Execution plan:
+
+1. `AGENT-SPEC.md` at the root: host inputs, writing rules (syntax, ids, values, text, events, structure, the core catalog, extensions), patches, the repair loop with one fix per diagnostic code, reading a screen, a checklist.
+2. `bench/test/agent-spec.test.ts`: every catalog kind and every diagnostic code is in the guide; every `xml` example is valid in strict mode and canonical; every `json` patch list applies to the first example.
+3. `.moon/tasks/all.yml` lists `/AGENT-SPEC.md` as a test input; `README.md` links the guide; `AGENTS.md` gets the rule.
+4. Verify with `moon ci`.
