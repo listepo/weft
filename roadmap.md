@@ -39,3 +39,14 @@ Load several catalogs at once with namespaced kinds, and define how an extension
 - `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
 - Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
 - Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.
+
+### T30. Claude Code plugin
+
+A Claude Code plugin, used from Claude Code Desktop, that works on `.weft` files. It lives in this repository (`plugins/claude-code`) with a marketplace manifest at the root (`.claude-plugin/marketplace.json`), so it installs with `/plugin marketplace add`. Approved scope:
+
+- Import: an HTML file to `.weft` through `@weft/from-aria` (`fromDom`), printing the loss table.
+- Export: a `.weft` file to a React component through `@weft/to-jsx`.
+- Render: a `.weft` file, with optional data and tokens, to an HTML page through `renderPage` of `@weft/render-react`, then opened in the Desktop app's built-in browser for preview.
+- The plugin also registers the existing MCP server (`@weft/mcp`) and a skill that teaches `AGENT-SPEC.md`, so authoring, validation and patches work in the same session. The MCP server stays file-free; file reading and writing belong to the plugin's commands.
+
+Done when the plugin installs from the marketplace in Claude Code Desktop, the three commands work on corpus screens, and their tests pass in `moon ci`.
