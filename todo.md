@@ -5,7 +5,6 @@
 - T14. Figma round trip and plugin
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
-- T34. SwiftUI generator and importer
 - T35. Web targets both ways: HTML/CSS, React and SolidJS
 - T36. Examples, snapshots, screenshots and comparisons
 - T38. Open Design plugin
