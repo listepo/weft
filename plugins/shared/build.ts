@@ -16,6 +16,7 @@ const REPOSITORY = join(SHARED, "../..");
 /** Where each plugin keeps its copy of the bundle and of the authoring guide its spec skill reads. */
 export const PLUGINS = {
   "claude-code": { skill: "skills/spec" },
+  cursor: { skill: "skills/weft-spec" },
 } as const;
 
 export type PluginName = keyof typeof PLUGINS;

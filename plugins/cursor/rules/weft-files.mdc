@@ -1,0 +1,13 @@
+---
+description: Weft UI markup in .weft files: write, validate and patch it with the weft MCP tools, never from memory
+globs: "**/*.weft"
+alwaysApply: false
+---
+
+Weft describes UI as strict markup with a closed vocabulary. Before you create or change a `.weft` file, read the full agent guide, `AGENT-SPEC.md` in the plugin's `weft-spec` skill, and follow it for patches and for every diagnostic code.
+
+- Call `weft_primer` first and `weft_catalog` for the components, props and variants: nothing outside the catalog exists.
+- The weft MCP tools never touch files: read the `.weft` file yourself, pass its text as `markup`, and write the result back.
+- Validate in strict mode (`weft_validate`) and fix every error using its hint before you answer.
+- Change an existing screen with `weft_patch` instead of rewriting it, and keep the canonical form from `weft_format`.
+- To see a screen use the `weft-render` skill, to bring in an HTML page `weft-import`, to get React code `weft-export`.
