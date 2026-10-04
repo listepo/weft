@@ -481,8 +481,8 @@ Screens that belong together share their resources through a project file named 
 
 - Every member is optional. Without `catalog` the project's catalog is the core catalog.
 - A file name is relative to the directory of the project file, uses `/` as separator and stays inside that directory: it is non-empty and has no empty or `..` segment, no leading `/`, no `\`, no `:` and no NUL. Any other name is `W703` and the file is not read.
-- Loading never stops at a problem. Each problem is a diagnostic and the rest of the project still applies: a project file that is not JSON or not an object is `W701` and the project is empty; a member of the wrong type is `W701` and is ignored; an unknown member is `W702`; an action name that breaks the action grammar (§2.2) is `W708` and is left out; a file that cannot be read or is not JSON is `W704` and is left out.
-- Project diagnostics point into the project file with a JSON Pointer prefixed with `#`, e.g. `#/tokens/1`; for project content passed as a tool argument the pointer starts at that argument (`#/project/tokens/1`). Diagnostics of a screen keep the paths of §6.1.
+- Loading never stops at a problem. Each problem is a diagnostic and the rest of the project still applies: a project file that is not JSON or not an object is `W701` and the project is empty; a member of the wrong type is `W701` and is ignored, and so is an entry of `tokens` or `actions` of the wrong type; an unknown member is `W702`; an action name that breaks the action grammar (§2.2) is `W708` and is left out; a file that cannot be read or is not JSON is `W704` and is left out.
+- Project diagnostics point into the project file with a JSON Pointer prefixed with `#`, e.g. `#/tokens/1`; for project content passed as a tool argument the pointer starts at that argument (`#/project/tokens/1`). A pointer continues into a named file as if its content stood in the project file: `#/catalog/components/rating`, `#/data/properties/user/type`. A problem of the merged token tree points at `#/tokens`. Diagnostics of a screen keep the paths of §6.1.
 
 ### 10.3 Token layers
 
@@ -494,7 +494,7 @@ Screens that belong together share their resources through a project file named 
 
 The `catalog` file is a catalog (§5): `weft`, `name`, `version` and `components`. The project's catalog is the core catalog with the extension's components merged in, under the extension's `name` and `version`.
 
-- A kind the core catalog does not have is a new component and needs a whole definition (`description`, `role`, `content`, …). Its name follows the name grammar and does not start with `x-`, because `x-` elements are opaque to every catalog (§8).
+- A kind the core catalog does not have is a new component and needs a whole definition (`description`, `role`, `content`, …). Its name follows the name grammar, is not `each` or `slot`, and does not start with `x-`, because `x-` elements are opaque to every catalog (§8).
 - A kind the core catalog has is extended. The entry may leave out `description`, `role` and `content` to keep the core's. `props` and `slots` merge by name, an entry replacing the core definition of that name (to add a variant, restate the prop with the longer `values` list). `states`, `events`, `allowedChildren` and `allowedParents` are joined: the core's values, then the new ones. Every other field replaces the core's.
 - An extension may only widen the core catalog. The merged catalog is compared with the core catalog by the rules of §8: a kind whose merged definition makes a change those rules call major (a changed role or type, a new required prop, a narrowed content model, …) is `W707`, and that kind keeps its core definition.
 - An extension that is not a catalog is `W706` and is ignored; an entry that is not a valid definition, or names a kind that breaks the rules above, is `W706` and only that entry is ignored.
