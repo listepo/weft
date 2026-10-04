@@ -5,7 +5,7 @@ Two things decide what a Weft screen is allowed to say. The **catalog** is the v
 The examples use the scratch folder from the [tour](tour.md); this block makes it again if you skipped that page.
 
 ```console
-$ mkdir -p weft-tour plugins/claude-code/scratch
+$ mkdir -p weft-tour plugins/shared/scratch
 $ cp corpus/login/screen.weft weft-tour/login.weft
 ```
 
@@ -62,7 +62,7 @@ An agent that is told which catalog the host uses (`weft_catalog` reports it) wr
 A catalog has its own version. Adding something is a minor change; removing or tightening something is a major change, because a screen that was valid could stop being valid. `diffCatalogs` classifies a change by the rule in [SPEC §8](../SPEC.md#8-versioning-and-extensibility). From a file inside a workspace package (see the note in the [index](README.md)):
 
 ```console
-$ cat > plugins/claude-code/scratch/diff.ts <<'EOF'
+$ cat > plugins/shared/scratch/diff.ts <<'EOF'
 import { readFileSync } from "node:fs";
 import { coreCatalog, diffCatalogs } from "@weft/catalog";
 
@@ -71,7 +71,7 @@ const { level, changes } = diffCatalogs(coreCatalog, acme);
 console.log(level);
 for (const c of changes) console.log(`${c.level} ${c.path}: ${c.message}`);
 EOF
-$ node plugins/claude-code/scratch/diff.ts
+$ node plugins/shared/scratch/diff.ts
 minor
 minor components.button.props.variant.values: Enum value "ghost" was added.
 ```
@@ -85,7 +85,7 @@ Tokens are a file in the W3C Design Tokens format (DTCG 2025.10), the format des
 The `weft` command and the MCP server do not know your tokens, so they accept any well-formed reference. To check names, give the validator the token map. It does the same for the list of action names your app has. This script checks the login screen four ways:
 
 ```console
-$ cat > plugins/claude-code/scratch/tokens.ts <<'EOF'
+$ cat > plugins/shared/scratch/tokens.ts <<'EOF'
 import { readFileSync } from "node:fs";
 import { coreCatalog, loadTokens, tokenTypes } from "@weft/catalog";
 import { parse } from "@weft/core";
@@ -112,7 +112,7 @@ check("unknown token", login.replace("space.md", "space.huge"));
 check("wrong token type", login.replace("space.md", "color.ink"));
 check("unknown action", login, ["auth.submit", "nav.signup"]);
 EOF
-$ node plugins/claude-code/scratch/tokens.ts
+$ node plugins/shared/scratch/tokens.ts
 18 tokens, 0 problems
 { type: 'dimension', value: { value: 16, unit: 'px' } }
 as written: 0 diagnostics

@@ -15,6 +15,7 @@ This guide is for people who use Weft: developers who wire it into an app or an 
 | [The `weft` command](cli.md) | Validate, format and explain screens from a terminal. |
 | [The MCP server](mcp.md) | Give an AI agent tools to read, check, edit and preview screens. |
 | [The Claude Code plugin](claude-code-plugin.md) | Import, export and render from Claude Code, with the agent guide built in. |
+| [The Cursor plugin](cursor-plugin.md) | The same from Cursor: skills, a rule and the MCP server. |
 | [Rendering](rendering.md) | Turn a screen into an HTML page, an accessibility tree or a React tree. |
 | [Importing HTML](importing.md) | Start a screen from an existing page and see what the import lost. |
 | [Exporting to React](exporting-jsx.md) | Turn a screen into a React component. |
@@ -29,7 +30,7 @@ Commands are written to be run from the repository root, in the order of the tou
 - The tour builds the tools and the scratch folder `weft-tour/` that the other pages reuse. Each page repeats the two lines that recreate the folder, so you can start anywhere after the setup.
 - Paths of your own clone appear as `/path/to/weft` in the output shown.
 - `weft` means the program built from `crates/weft-cli`; the tour shows how to put it on your `PATH`.
-- Some examples call the libraries (`@weft/core`, `@weft/catalog`, …). They are workspace packages with no build step, and Node finds them only from a file inside a package folder that depends on them. The guide puts such scripts in `plugins/claude-code/scratch/`, which is safe to delete.
+- Some examples call the libraries (`@weft/core`, `@weft/catalog`, …). They are workspace packages with no build step, and Node finds them only from a file inside a package folder that depends on them. The guide puts such scripts in `plugins/shared/scratch/`, which is safe to delete.
 - Slash commands (`/weft:import` and the others) and `/plugin` run inside Claude Code and cannot be shown here. The scripts they run are shown instead.
 
 ## Status

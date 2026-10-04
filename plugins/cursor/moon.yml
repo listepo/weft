@@ -1,8 +1,8 @@
 # The plugin's tests read the marketplace manifest at the repository root. Its dist/ is built by
-# `moon run shared:build`, together with the Cursor plugin's.
+# `moon run shared:build`, together with the Claude Code plugin's.
 language: 'typescript'
 
 tasks:
   test:
     inputs:
-      - '/.claude-plugin/**/*'
+      - '/.cursor-plugin/**/*'

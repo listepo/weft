@@ -48,7 +48,7 @@ moon run :test root:typecheck root:lint root:rust-test root:rust-lint
 To work on one piece:
 
 ```bash
-moon run core:test                       # one package (core, catalog, from-aria, mcp, render-react, to-jsx, claude-code, bench)
+moon run core:test                       # one package (core, catalog, from-aria, mcp, render-react, to-jsx, shared, claude-code, cursor, bench)
 cargo nextest run -p weft-core           # one crate
 cd packages/core && pnpm exec vitest run --config ../../vitest.config.ts test/cli.test.ts   # one test file
 ```
@@ -64,7 +64,8 @@ cd packages/core && pnpm exec vitest run --config ../../vitest.config.ts test/cl
 | `crates/weft-wasm` | The WebAssembly binding of the two crates. |
 | `packages/core`, `packages/catalog` | TypeScript types and loaders over the Rust build; the catalog as data and the default tokens. |
 | `packages/render-react`, `from-aria`, `to-jsx`, `mcp` | Renderer, importer, React generator, MCP server. |
-| `plugins/claude-code` | The Claude Code plugin and its marketplace entry (`.claude-plugin/` at the root). |
+| `plugins/claude-code`, `plugins/cursor` | The Claude Code and Cursor plugins and their marketplace entries (`.claude-plugin/` and `.cursor-plugin/` at the root). |
+| `plugins/shared` | The scripts and the build that put one bundle into both plugins. |
 | `corpus/` | Twelve reference screens, each in four formats, with data and tasks. |
 | `compat/` | Fixtures for the versioning rules. |
 | `bench/` | The benchmark harness; method and history in [test.md](../test.md). |
