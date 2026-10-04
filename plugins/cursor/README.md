@@ -33,7 +33,7 @@ Once the repository has a GitHub remote, Cursor's **Import from Repo** (Dashboar
 
 Cursor extracts only the marketplace entry's `source` folder into `~/.cursor/plugins/cache/<marketplace>/<plugin>/<version>/` (checked 2026-10-05 against the cache of Cursor 3.23.12: a plugin from `third_party/outlook` of `cursor/plugins` holds only that folder's files). Nothing outside `plugins/cursor` is there at run time, so a link or a path into `plugins/claude-code` cannot work, and the folder must carry its own `dist/` and `AGENT-SPEC.md` copy, exactly as the Claude Code plugin does.
 
-The sources exist once, in `plugins/shared` (the scripts, the build, the shared tests). `moon run shared:build` bundles them once and writes the identical `dist/` and the `AGENT-SPEC.md` copy into `plugins/claude-code` and `plugins/cursor`. `plugins/shared/test/bundle.test.ts` rebuilds into a temporary folder and fails while either plugin's `dist/` or spec copy differs, and runs every script and the MCP server from a copy of each plugin folder placed outside the repository. Never edit `dist/` by hand.
+The sources exist once, in `plugins/shared` (the scripts, the build, the shared tests). `moon run shared:build` bundles them once and writes the identical `dist/` and the `AGENT-SPEC.md` copy into `plugins/claude-code`, `plugins/cursor` and `plugins/open-design`. `plugins/shared/test/bundle.test.ts` rebuilds into a temporary folder and fails while either plugin's `dist/` or spec copy differs, and runs every script and the MCP server from a copy of each plugin folder placed outside the repository. Never edit `dist/` by hand.
 
 ## Format notes
 

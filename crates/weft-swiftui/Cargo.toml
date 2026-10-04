@@ -1,0 +1,37 @@
+[package]
+name = "weft-swiftui"
+description = "SwiftUI code generator and Swift source importer for Weft documents"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["import"]
+# The importer parses Swift with tree-sitter, whose C sources do not build for
+# wasm32-unknown-unknown; without this feature the crate is the pure-Rust generator only.
+import = ["dep:tree-sitter", "dep:tree-sitter-swift"]
+
+[dependencies]
+indexmap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tree-sitter = { workspace = true, optional = true }
+tree-sitter-swift = { workspace = true, optional = true }
+weft-catalog = { workspace = true }
+weft-core = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+
+[lints]
+workspace = true
+
+[[test]]
+name = "roundtrip"
+required-features = ["import"]
+
+[[test]]
+name = "import"
+required-features = ["import"]

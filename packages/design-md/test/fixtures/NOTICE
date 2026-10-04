@@ -1,0 +1,15 @@
+The fixtures in this folder are unmodified copies of files from two repositories, both under the
+Apache License, Version 2.0 (https://www.apache.org/licenses/LICENSE-2.0). They are test input
+only; nothing here is shipped.
+
+open-design/minimal/DESIGN.md and open-design/minimal/tokens.css
+  Source: https://github.com/nexu-io/open-design, design-systems/minimal/
+  Commit: 53231d40b778d88eba23f35547bf99485d3ae9fc (2026-09-30), checked 2026-10-05
+  Copyright 2026 Open Design contributors (the LICENSE file of that repository)
+
+google-labs/*/DESIGN.md and google-labs/paws-and-paths/design_tokens.json
+  Source: https://github.com/google-labs-code/design.md, examples/<name>/
+  Commit: 9bf8eae67128b6cc55ad9bf86665767deb4c11cd (2026-07-27), checked 2026-10-05
+  License: its LICENSE file is the Apache-2.0 text with the copyright line left as the unfilled
+  template, so no copyright holder is named; no package.json or README of that repository states a
+  license of its own.

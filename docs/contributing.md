@@ -64,7 +64,7 @@ cd packages/core && pnpm exec vitest run --config ../../vitest.config.ts test/cl
 | `crates/weft-wasm` | The WebAssembly binding of the two crates. |
 | `packages/core`, `packages/catalog` | TypeScript types and loaders over the Rust build; the catalog as data and the default tokens. |
 | `packages/render-react`, `from-aria`, `to-jsx`, `mcp` | Renderer, importer, React generator, MCP server. |
-| `plugins/claude-code`, `plugins/cursor` | The Claude Code and Cursor plugins and their marketplace entries (`.claude-plugin/` and `.cursor-plugin/` at the root). |
+| `plugins/claude-code`, `plugins/cursor`, `plugins/open-design` | The Claude Code, Cursor and Open Design plugins and the marketplace entries of the first two (`.claude-plugin/` and `.cursor-plugin/` at the root). |
 | `plugins/shared` | The scripts and the build that put one bundle into both plugins. |
 | `corpus/` | Twelve reference screens, each in four formats, with data and tasks. |
 | `compat/` | Fixtures for the versioning rules. |

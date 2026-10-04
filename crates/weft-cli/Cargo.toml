@@ -14,9 +14,11 @@ path = "src/main.rs"
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true }
+indexmap = { workspace = true }
 serde_json = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
+weft-swiftui = { workspace = true }
 
 [lints]
 workspace = true

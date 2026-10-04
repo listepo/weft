@@ -1,5 +1,5 @@
-//! `weft validate` with a project file (SPEC §10): discovery, explicit arguments and what the
-//! project adds to the checks.
+//! `weft validate`, `weft swiftui` and `weft import-swiftui` with a project file (SPEC §10):
+//! discovery, explicit arguments and what the project adds to the checks and the output.
 
 // A test crate: a failed unwrap or panic is a failed test, which is the point.
 #![allow(clippy::unwrap_used, clippy::panic)]
@@ -237,4 +237,117 @@ fn bad_settings_are_reported_and_the_defaults_apply() {
         "{}",
         r.stdout
     );
+}
+
+const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.1">
+  <stack id="row" direction="row" gap="{token.space.sm}">
+    <button id="back" on-press="nav.back">Back</button>
+  </stack>
+</screen>
+"#;
+
+/// The example project with its own `space.sm` and both SwiftUI output directories set.
+fn swiftui_project(name: &str) -> Scratch {
+    let s = Scratch::new(name);
+    s.write(
+        "tokens/swift.tokens.json",
+        r#"{ "space": { "$type": "dimension", "sm": { "$value": { "value": 12, "unit": "px" } } } }"#,
+    );
+    s.write(
+        "weft.json",
+        r#"{
+  "tokens": ["tokens/base.tokens.json", "tokens/swift.tokens.json"],
+  "catalog": "catalog.json",
+  "export": { "swiftui": { "outDir": "ios" } },
+  "import": { "swiftui": { "outDir": "imported" } }
+}"#,
+    );
+    s
+}
+
+#[test]
+fn swiftui_writes_where_the_project_says_with_its_tokens_and_reads_back() {
+    let s = swiftui_project("swiftui");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let r = run(&[&"swiftui", &screen]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    let swift = std::fs::read_to_string(s.path("ios/plain.swift")).unwrap();
+    assert!(swift.contains("var sm: CGFloat = 12"), "{swift}");
+
+    let r = run(&[&"import-swiftui", &s.path("ios/plain.swift")]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    let imported = std::fs::read_to_string(s.path("imported/plain.weft")).unwrap();
+    assert_eq!(imported, PLAIN);
+}
+
+#[test]
+fn swiftui_arguments_override_the_project() {
+    let s = swiftui_project("swiftui-args");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let elsewhere = s.path("elsewhere");
+    let r = run(&[&"swiftui", &screen, &"--out-dir", &elsewhere]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(elsewhere.join("plain.swift").is_file());
+    assert!(!s.path("ios").exists());
+
+    // Without the project: printed, with the default tokens.
+    let r = run(&[&"swiftui", &screen, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.contains("var sm: CGFloat = 8"), "{}", r.stdout);
+
+    let r = run(&[
+        &"import-swiftui",
+        &elsewhere.join("plain.swift"),
+        &"--no-project",
+    ]);
+    assert_eq!(
+        (r.code, r.stdout.as_str(), r.stderr.as_str()),
+        (0, PLAIN, "")
+    );
+}
+
+#[test]
+fn swiftui_refuses_what_it_cannot_generate_and_exits_1() {
+    let s = Scratch::new("swiftui-refused");
+    // `rating` comes from the project's catalog extension; SwiftUI has only the core kinds.
+    let screen = s.path("screens/cart.weft");
+    let r = run(&[&"swiftui", &screen]);
+    assert_eq!(r.code, 1);
+    assert_eq!(r.stdout, "");
+    assert!(
+        r.stderr
+            .contains("rating#line-score: `rating` is not a kind of the core catalog"),
+        "{}",
+        r.stderr
+    );
+
+    let broken = s.write(
+        "screens/broken.weft",
+        "<screen id=\"x\" label=\"X\" weft=\"0.1\">",
+    );
+    let r = run(&[&"swiftui", &broken]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(
+        r.stderr.starts_with(&broken.display().to_string()),
+        "{}",
+        r.stderr
+    );
+}
+
+#[test]
+fn import_swiftui_lists_losses_on_stderr() {
+    let s = Scratch::new("swiftui-losses");
+    let source = s.write(
+        "Hello.swift",
+        "import SwiftUI\nstruct Hello: View {\n    var body: some View {\n        Text(\"Hi\").padding()\n    }\n}\n",
+    );
+    let r = run(&[&"import-swiftui", &source, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.starts_with("<screen "), "{}", r.stdout);
+    assert!(r.stderr.contains(" loss layout: "), "{}", r.stderr);
+
+    let none = s.write("None.swift", "let x = 1\n");
+    let r = run(&[&"import-swiftui", &none, &"--no-project"]);
+    assert_eq!(r.code, 1, "{}", r.stderr);
+    assert!(r.stderr.contains("W601"), "{}", r.stderr);
 }
