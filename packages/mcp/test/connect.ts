@@ -1,9 +1,13 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { createServer, type Context } from "../src/index.ts";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { createServer, type Context, type ServerOptions } from "../src/index.ts";
 
-export async function connect(overrides: Partial<Context> = {}) {
-  const server = createServer(overrides);
+export async function connect(overrides: Partial<Context> = {}, options: ServerOptions = {}) {
+  return connectTo(createServer(overrides, options));
+}
+
+export async function connectTo(server: McpServer) {
   const [serverSide, clientSide] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "test", version: "0.0.0" });
   await Promise.all([server.connect(serverSide), client.connect(clientSide)]);

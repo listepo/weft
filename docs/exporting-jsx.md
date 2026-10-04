@@ -13,9 +13,9 @@ The examples use the scratch folder from the [tour](tour.md); this block makes i
 ```console
 $ mkdir -p weft-tour
 $ cp corpus/login/screen.weft weft-tour/login.weft
-$ node plugins/claude-code/scripts/export.ts weft-tour/login.weft weft-tour/LoginScreen.jsx --name LoginScreen
+$ node plugins/shared/scripts/export.ts weft-tour/login.weft weft-tour/LoginScreen.jsx --name LoginScreen
 weft: weft-tour/LoginScreen.jsx already exists; pass --force to replace it
-$ node plugins/claude-code/scripts/export.ts weft-tour/login.weft weft-tour/Default.jsx
+$ node plugins/shared/scripts/export.ts weft-tour/login.weft weft-tour/Default.jsx
 Wrote weft-tour/Default.jsx
 $ grep -n "export default" weft-tour/LoginScreen.jsx weft-tour/Default.jsx
 weft-tour/LoginScreen.jsx:28:export default function LoginScreen({ data, actions, onChange }) {
@@ -25,7 +25,7 @@ weft-tour/Default.jsx:28:export default function WeftScreen({ data, actions, onC
 The script does not replace an existing file without `--force`, and it does not write anything for a screen that has errors. Exit code 0 means done, 1 that the screen has errors (printed as `file:line:column code message`), 2 a usage or file problem such as a component name that is not a valid name:
 
 ```console
-$ node plugins/claude-code/scripts/export.ts weft-tour/login.weft weft-tour/Bad.jsx --name login; echo "exit $?"
+$ node plugins/shared/scripts/export.ts weft-tour/login.weft weft-tour/Bad.jsx --name login; echo "exit $?"
 weft: componentName must match /^[A-Z][A-Za-z0-9]*$/
 exit 2
 ```

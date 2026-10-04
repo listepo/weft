@@ -2,15 +2,21 @@
 //! them; `lib.rs` only adapts them to wasm-bindgen. Each mirrors one TypeScript function of
 //! `@weft/core` or `@weft/catalog` and returns what that function returned, as JSON text.
 
+use std::cell::RefCell;
+
 use serde::Serialize;
-use weft_catalog::{Token, TokenProblem};
+use serde_json::Value as Json;
+use weft_catalog::{ProjectOptions, Token, TokenProblem, load_project_text};
 use weft_core::{
-    ApplyOptions, Catalog, Diagnostic, Document, ParseOptions, ValidateOptions, apply_patches,
-    canonicalize, did_you_mean, format_value, parse, read_value, serialize, stringify, to_document,
-    to_value, validate, validate_document,
+    ApplyOptions, Catalog, DataCheckOptions, Diagnostic, Document, ParseOptions, ValidateOptions,
+    apply_patches, canonicalize, check_data, check_data_json, compile_data_schema, did_you_mean,
+    format_value, parse, read_value, serialize, stringify, to_document, to_value, validate,
+    validate_document,
 };
 
-use crate::boundary::{Options, Result, read_document, read_input, read_list, write};
+use crate::boundary::{
+    BindingError, Options, ProjectWire, Result, read_document, read_input, read_list, write,
+};
 use crate::sources::{Src, attach, collect};
 
 #[derive(Serialize)]
@@ -159,6 +165,129 @@ pub fn diff_catalogs(previous: Option<&str>, next: Option<&str>) -> Result<Strin
         &read_input(previous)?,
         &read_input(next)?,
     ))
+}
+
+#[derive(Serialize)]
+struct SchemaProblem<'a> {
+    code: &'a str,
+    pointer: &'a str,
+    message: &'a str,
+}
+
+/// `compileDataSchema`: the problems; the TypeScript side keeps the schema as JSON text.
+pub fn compile_data(schema: Option<&str>) -> Result<String> {
+    let (_, problems) = compile_data_schema(&read_input(schema)?);
+    let problems: Vec<SchemaProblem<'_>> = problems
+        .iter()
+        .map(|p| SchemaProblem {
+            code: p.code.as_str(),
+            pointer: &p.pointer,
+            message: &p.message,
+        })
+        .collect();
+    write(&problems)
+}
+
+/// `checkData`: the diagnostics, with line and column when `sources` comes from `parse_markup`.
+/// A document of the wrong shape gives none here, as `validate` already reports it.
+pub fn check_data_input(
+    input: Option<&str>,
+    catalog: &Catalog,
+    schema: Option<&str>,
+    sources: Option<&str>,
+) -> Result<String> {
+    let input = read_input(input)?;
+    let (data, _) = compile_data_schema(&read_input(schema)?);
+    let options = DataCheckOptions {
+        catalog,
+        data: &data,
+    };
+    let shape_ok = validate(&input, &ValidateOptions::default()).is_empty();
+    let diagnostics = match sources {
+        Some(text) if shape_ok => {
+            let mut document = to_document(&input);
+            let sources: Vec<Option<Src>> =
+                serde_json::from_str(text).map_err(|source| BindingError::Wire {
+                    what: "sources",
+                    source,
+                })?;
+            attach(&mut document.root, sources);
+            check_data(&document, &options)
+        }
+        _ => check_data_json(&input, &options),
+    };
+    write(&diagnostics)
+}
+
+/// The files a project file names, in the order the loader reads them; names that would leave
+/// the project directory are not among them. The TypeScript side reads these and calls
+/// `load_project` with their text, so no callback crosses the boundary.
+pub fn project_files(text: &str) -> Result<String> {
+    let names = RefCell::new(Vec::new());
+    let record = |name: &str| {
+        names.borrow_mut().push(name.to_owned());
+        None
+    };
+    load_project_text(
+        text,
+        &ProjectOptions {
+            read: Some(&record),
+            ..Default::default()
+        },
+    )
+    .map_err(|weft_catalog::CatalogError::Embedded(e)| BindingError::Catalog(e))?;
+    write(&names.into_inner())
+}
+
+#[derive(Serialize)]
+struct LoadedProject<'a> {
+    catalog: &'a Catalog,
+    tokens: Option<Vec<(&'a String, &'a Token)>>,
+    actions: Option<&'a [String]>,
+    /// The data schema as JSON text, which `checkData` takes.
+    data: Option<String>,
+    settings: &'a serde_json::Map<String, Json>,
+    diagnostics: &'a [Diagnostic],
+}
+
+/// `loadProjectText`: with `files` (name → text) members name files; without, they hold content.
+pub fn load_project(text: &str, files: Option<&str>, options: &str) -> Result<String> {
+    let wire = ProjectWire::read(options)?;
+    let files: Option<serde_json::Map<String, Json>> = files
+        .map(|f| {
+            serde_json::from_str(f).map_err(|source| BindingError::Wire {
+                what: "files",
+                source,
+            })
+        })
+        .transpose()?;
+    let read = |name: &str| {
+        files
+            .as_ref()
+            .and_then(|f| f.get(name))
+            .and_then(Json::as_str)
+            .map(str::to_owned)
+    };
+    let loaded = load_project_text(
+        text,
+        &ProjectOptions {
+            read: files
+                .as_ref()
+                .map(|_| &read as &dyn Fn(&str) -> Option<String>),
+            prefix: &wire.prefix,
+            mode: wire.mode,
+        },
+    )
+    .map_err(|weft_catalog::CatalogError::Embedded(e)| BindingError::Catalog(e))?;
+    let project = &loaded.project;
+    write(&LoadedProject {
+        catalog: &project.catalog,
+        tokens: project.tokens.as_ref().map(|t| t.iter().collect()),
+        actions: project.actions.as_deref(),
+        data: project.data_source.as_ref().map(Json::to_string),
+        settings: &project.settings,
+        diagnostics: &loaded.diagnostics,
+    })
 }
 
 /// `readValue`: one attribute value as written, read as a string prop reads it (SPEC §2.1):
@@ -333,5 +462,70 @@ mod tests {
         let text = weft_catalog::CORE_CATALOG_JSON;
         let out = json(&diff_catalogs(Some(text), Some(text)).unwrap());
         assert_eq!(out, json!({"level": "none", "changes": []}));
+    }
+
+    #[test]
+    fn data_check_reports_line_and_column_with_positions() {
+        let markup = "<screen id=\"s\" weft=\"0.1\">\n  <field id=\"f\" label=\"E\" value=\"{$.nme}\"/>\n</screen>";
+        let parsed = json(&parse_markup(markup, None, "{}").unwrap());
+        let document = parsed["document"].to_string();
+        let sources = parsed["sources"].to_string();
+        let schema = r#"{"type":"object","properties":{"name":{"type":"string"}}}"#;
+        let catalog = catalog();
+        let with = json(
+            &check_data_input(Some(&document), &catalog, Some(schema), Some(&sources)).unwrap(),
+        );
+        let without =
+            json(&check_data_input(Some(&document), &catalog, Some(schema), None).unwrap());
+        assert_eq!(with[0]["code"], "W315");
+        assert_eq!(
+            (&with[0]["line"], &without[0]["line"]),
+            (&json!(2), &Json::Null)
+        );
+        // A document of the wrong shape is `validate`'s to report.
+        let shape = check_data_input(Some("{}"), &catalog, Some(schema), Some("[]")).unwrap();
+        assert_eq!(shape, "[]");
+    }
+
+    #[test]
+    fn a_data_schema_reports_its_problems() {
+        let out = json(&compile_data(Some(r#"{"type":"thing"}"#)).unwrap());
+        assert_eq!(out[0]["code"], "W709");
+        assert_eq!(out[0]["pointer"], "/type");
+        let deep = json(&compile_data(None).unwrap());
+        assert!(!deep.as_array().unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_project_names_its_files_and_loads_with_their_text() {
+        let text = r#"{"tokens":["a.json","../out.json"],"actions":["go"],"data":"d.json"}"#;
+        let names = json(&project_files(text).unwrap());
+        assert_eq!(names, json!(["a.json", "d.json"]));
+        let files = json!({
+            "a.json": r##"{"color":{"$type":"color","brand":{"$value":"#000"}}}"##,
+            "d.json": r#"{"type":"object"}"#,
+        })
+        .to_string();
+        let out = json(&load_project(text, Some(&files), "{}").unwrap());
+        assert_eq!(out["tokens"][0][0], "color.brand");
+        assert_eq!(out["actions"], json!(["go"]));
+        assert_eq!(out["data"], r#"{"type":"object"}"#);
+        assert_eq!(out["catalog"]["name"], "weft-core");
+        assert_eq!(out["diagnostics"][0]["path"], "#/tokens/1");
+    }
+
+    #[test]
+    fn project_content_takes_the_pointer_prefix() {
+        let out = json(
+            &load_project(
+                r#"{"actions":[1]}"#,
+                None,
+                r##"{"strict":true,"prefix":"#/project"}"##,
+            )
+            .unwrap(),
+        );
+        assert_eq!(out["diagnostics"][0]["path"], "#/project/actions/0");
+        assert_eq!(out["data"], Json::Null);
+        assert!(load_project("{}", None, r#"{"bogus":1}"#).is_err());
     }
 }

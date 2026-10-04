@@ -5,6 +5,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import fc from "fast-check";
 import {
   applyPatches,
+  checkData,
+  compileDataSchema,
   parse,
   serialize,
   stringify,
@@ -15,6 +17,7 @@ import {
   type Mode,
 } from "../src/index.ts";
 import { cases } from "./cases.ts";
+import { dataCases } from "./data-cases.ts";
 import { catalog, tokens } from "./catalog.ts";
 import { BASE, failures } from "./patch-cases.ts";
 
@@ -38,6 +41,7 @@ type Options = {
 type MarkupCase = Options & { name: string; markup: string };
 type JsonCase = Options & { name: string; json: unknown };
 type PatchCase = { name: string; mode: Mode; patches: unknown };
+type DataCase = { name: string; catalog: "test" | "core"; schema: unknown; markup: string };
 
 const SEED = 20261004;
 const RUNS = 300;
@@ -298,6 +302,84 @@ function patchFuzz(): PatchCase[] {
     }));
 }
 
+/** A schema that describes `value` exactly, so corpus screens check against their own data. */
+function inferSchema(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.length === 0 ? { type: "array" } : { type: "array", items: inferSchema(value[0]) };
+  }
+  if (value === null) return { type: "null" };
+  if (typeof value === "object") {
+    const properties = Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, inferSchema(v)]),
+    );
+    return { type: "object", properties };
+  }
+  if (typeof value === "number") return { type: Number.isInteger(value) ? "integer" : "number" };
+  return { type: typeof value };
+}
+
+/** Random schemas over the names the corpus binds, so paths and types both pass and fail. */
+function dataFuzz(screens: [string, string][]): DataCase[] {
+  const name = fc.constantFrom("email", "todos", "title", "done", "user", "items", "0", "busy");
+  const type = fc.constantFrom("string", "number", "integer", "boolean", "object", "array", "null");
+  const { schema } = fc.letrec((tie) => ({
+    schema: fc.oneof(
+      { maxDepth: 4 },
+      fc.constantFrom(true, false, {}, { $ref: "#/x" }, { type: "nope" }, 3),
+      fc.record(
+        {
+          type: fc.oneof(type, fc.array(type, { maxLength: 2 })),
+          properties: fc.dictionary(name, tie("schema"), { maxKeys: 3 }),
+          additionalProperties: fc.oneof(fc.boolean(), tie("schema")),
+          items: tie("schema"),
+        },
+        { requiredKeys: [] },
+      ),
+    ),
+  }));
+  const pick = fc.record({ screen: fc.nat({ max: screens.length - 1 }), schema });
+  return fc.sample(pick, { seed: SEED + 3, numRuns: RUNS }).map((p, i) => {
+    const [screenName, markup] = screens[p.screen] ?? ["", ""];
+    return { name: `data fuzz ${i} of ${screenName}`, catalog: "core", schema: p.schema, markup };
+  });
+}
+
+function dataCasesAll(): DataCase[] {
+  const out: DataCase[] = Object.entries(dataCases).map(([name, c]) => ({
+    name,
+    catalog: "test",
+    schema: c.schema,
+    markup: c.markup,
+  }));
+  const screens: [string, string][] = [];
+  for (const entry of readdirSync(new URL("corpus/", root), { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const read = (f: string) => readFileSync(new URL(`corpus/${entry.name}/${f}`, root), "utf8");
+    const markup = read("screen.weft");
+    screens.push([entry.name, markup]);
+    out.push({
+      name: `corpus ${entry.name} against its data`,
+      catalog: "core",
+      schema: inferSchema(JSON.parse(read("data.json"))),
+      markup,
+    });
+  }
+  screens.sort(([a], [b]) => (a < b ? -1 : 1));
+  out.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  return [...out, ...dataFuzz(screens)];
+}
+
+function dataExpect(c: DataCase) {
+  const cat = catalogs[c.catalog] as Catalog;
+  const { schema, problems } = compileDataSchema(c.schema);
+  const { document, source } = parse(c.markup, { catalog: cat });
+  return {
+    problems,
+    diagnostics:
+      document === undefined ? [] : checkData(document, { catalog: cat, data: schema, source }),
+  };
+}
+
 function markupExpect(c: MarkupCase) {
   const result = parse(c.markup, {
     catalog: c.catalog === null ? undefined : catalogs[c.catalog],
@@ -382,6 +464,7 @@ export function differential() {
     catalogs,
     tokens: Object.fromEntries(tokens),
     patchBase: BASE,
+    data: dataCasesAll().map((c) => ({ ...c, expect: dataExpect(c) })),
     markup: markupCases.map((c) => ({ ...c, expect: markupExpect(c) })),
     json: jsonCases.map((c) => ({ ...c, expect: jsonExpect(c) })),
     patches: patchCases.map((c) => {

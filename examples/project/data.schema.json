@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "cart": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "price": { "type": "string" },
+              "score": { "type": "number" }
+            }
+          }
+        },
+        "total": { "type": "string" },
+        "empty": { "type": "boolean" }
+      }
+    },
+    "busy": { "type": "boolean" }
+  }
+}

@@ -1,4 +1,9 @@
 {
   "endOfLine": "lf",
-  "ignorePatterns": ["crates/*/tests/fixtures/**", "bench/results/**", "plugins/*/dist/**"]
+  "ignorePatterns": [
+    "crates/*/tests/fixtures/**",
+    "bench/results/**",
+    "plugins/*/dist/**",
+    "schemas/**"
+  ]
 }

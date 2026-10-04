@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Weft project file (weft.json)",
+  "description": "Shared resources and tool settings of a Weft project (SPEC §10). Every member is optional; an argument given to a tool overrides the file, and the file overrides the defaults.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "This schema, for editors. Ignored by Weft."
+    },
+    "tokens": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/fileName"
+      },
+      "description": "DTCG token files, in layer order: a later file overrides an earlier one (SPEC §10.3)."
+    },
+    "catalog": {
+      "$ref": "#/$defs/fileName",
+      "description": "A catalog that extends the core catalog with the project's kinds, props and variants (SPEC §10.4)."
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*)*$"
+      },
+      "description": "The host's action names; on-* values are checked against them."
+    },
+    "data": {
+      "$ref": "#/$defs/fileName",
+      "description": "A JSON Schema of the host data model; bindings are checked against it (SPEC §10.5)."
+    },
+    "validate": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "strict",
+            "lenient"
+          ],
+          "description": "\"strict\" reports unknown elements and attributes as errors, \"lenient\" as warnings (SPEC §8). Used by `weft validate` and as the default of weft_validate's strict argument.",
+          "default": "lenient"
+        }
+      },
+      "additionalProperties": false,
+      "description": "How screens are checked."
+    },
+    "format": {
+      "type": "object",
+      "properties": {
+        "write": {
+          "type": "boolean",
+          "description": "Rewrite the file in place instead of printing it.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "description": "How `weft fmt` writes the canonical form. The form itself has no options (SPEC §3)."
+    },
+    "render": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/fileName",
+          "description": "Sample data file the bindings read, relative to the project file. Default: no data."
+        },
+        "tokens": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/fileName"
+          },
+          "description": "DTCG token files to render with, in layer order; they replace the project's tokens. Default: the project's tokens."
+        },
+        "outDir": {
+          "$ref": "#/$defs/fileName",
+          "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Static HTML pages from screens (`write-page`, the Claude Code plugin's render)."
+    },
+    "export": {
+      "type": "object",
+      "properties": {
+        "react": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "React components (@weft/to-jsx)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Code generated from screens, one section per target."
+    },
+    "import": {
+      "type": "object",
+      "properties": {
+        "html": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "HTML pages (@weft/from-aria)."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Screens imported from other formats, one section per source."
+    },
+    "mcp": {
+      "type": "object",
+      "properties": {
+        "limits": {
+          "type": "object",
+          "properties": {
+            "markupChars": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1099511627776,
+              "description": "UTF-16 code units of one markup argument.",
+              "default": 200000
+            },
+            "dataChars": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1099511627776,
+              "description": "UTF-16 code units of the JSON of weft_render's data argument.",
+              "default": 200000
+            },
+            "patches": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1099511627776,
+              "description": "Patches in one weft_patch call.",
+              "default": 100
+            },
+            "patchesChars": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1099511627776,
+              "description": "UTF-16 code units of the JSON of one patch list.",
+              "default": 200000
+            },
+            "projectChars": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1099511627776,
+              "description": "UTF-16 code units of the JSON of a project argument.",
+              "default": 500000
+            },
+            "diagnostics": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1099511627776,
+              "description": "Diagnostics listed in one result; the rest are counted.",
+              "default": 40
+            },
+            "inputElements": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1099511627776,
+              "description": "JSON values in one call's arguments.",
+              "default": 20000
+            }
+          },
+          "additionalProperties": false,
+          "description": "Bounds on what one tool call may ask of the server."
+        }
+      },
+      "additionalProperties": false,
+      "description": "The MCP server, when the host starts it with this project file. A project passed as a tool argument never changes these."
+    },
+    "plugins": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "description": "Settings of plugins and other tools Weft does not know, one object per plugin name. Not checked."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "fileName": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*//)(?!.*/$)(?!(?:.*/)?\\.\\.(?:/|$))[^\\\\:\\u0000]+$",
+      "description": "Relative to the project file, separated by \"/\", inside the project directory."
+    }
+  }
+}

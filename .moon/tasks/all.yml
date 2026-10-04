@@ -1,4 +1,4 @@
-# Inherited by every project; the root opts out in its moon.yml. Tests read sibling packages, the corpus and the compat fixtures,
+# Inherited by every project; the root opts out in its moon.yml. Tests read sibling packages, the corpus, the examples and the compat fixtures,
 # so those are inputs too: a change there must invalidate the cached result.
 tasks:
   test:
@@ -10,6 +10,8 @@ tasks:
       - '**/*'
       - '/packages/**/*'
       - '/corpus/**/*'
+      - '/examples/**/*'
+      - '/schemas/**/*'
       - '/compat/**/*'
       - '/SPEC.md'
       - '/AGENT-SPEC.md'

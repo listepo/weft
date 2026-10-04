@@ -1,6 +1,13 @@
 export * from "./model.ts";
 export { canonicalize, stringify } from "./canonical.ts";
 export {
+  checkData,
+  compileDataSchema,
+  type DataCheckOptions,
+  type DataSchema,
+  type DataSchemaProblem,
+} from "./data.ts";
+export {
   DIAGNOSTIC_CODES,
   diagnostic,
   didYouMean,

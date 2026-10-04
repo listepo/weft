@@ -3,6 +3,7 @@
 //! WebAssembly and native Node addons.
 
 mod canonical;
+mod data;
 mod diagnostics;
 mod explain;
 mod json;
@@ -18,7 +19,13 @@ mod validate;
 mod values;
 
 pub use canonical::{canonicalize, stringify};
-pub use diagnostics::{Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors};
+pub use data::{
+    DataCheckOptions, DataSchema, DataSchemaProblem, Shape, check_data, check_data_json,
+    compile_data_schema,
+};
+pub use diagnostics::{
+    Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors, one_of,
+};
 pub use explain::{Change, ChangeKind, Readback, explain, explain_changes};
 pub use json::{JSON_DEPTH_LIMIT, JsonError, js_number, order_keys, parse_json, to_compact};
 pub use model::{
@@ -28,8 +35,8 @@ pub use model::{
 pub use parse::{ParseOptions, ParseResult, parse};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};
 pub use rules::{ARIA_ROLES, MAX_DEPTH};
-/// The grammars of SPEC §2–§4, for importers and generators that build or check names, ids and
-/// references outside the parser.
+/// The grammars of SPEC §2–§4, for importers, generators and project settings that build or check
+/// names, ids and references outside the parser.
 pub use rules::{
     embedded_reference, has_non_xml_char, is_action, is_binding, is_extension_name, is_id,
     is_loop_variable, is_name, is_non_xml_char, is_token,

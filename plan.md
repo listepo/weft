@@ -9,15 +9,14 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T24 | todo | P2 | 2 | 0% | |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
-| T31 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T35 | in progress | P1 | 5 | 5% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
-| T37 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T38 | todo | P2 | 3 | 0% | |
-| T39 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
-| T40 | todo | P2 | 4 | 0% | |
+| T38 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
+| T40 | in progress | P2 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -120,6 +119,28 @@ Several `.weft` screens share one set of resources through a project file, `weft
 
 Done when a corpus project of several screens with layered tokens, a catalog extension, an action list, a data schema and a shared fragment validates and renders through the CLI and the MCP server, the TypeScript and Rust results match, and a broken project file is reported with a diagnostic, never a crash.
 
+Execution plan (part A is built now; part B, fragments, is design only and waits for the creator):
+
+1. Spec first. `SPEC.md` gets a Project section: `weft.json` found by walking up from the screen (an explicit argument overrides it), its members (`tokens` list of DTCG files layered in order, `catalog` extension file, `actions` list, `data` schema file), paths relative to the project file and never leaving its directory, token layering (later token wins, aliases resolved after the merge, as the DTCG resolver module orders sets), the catalog extension rules (new kinds are added; an entry for a core kind merges into it; the merged catalog may only widen the core catalog by the version rules of §8, anything those rules call major is a conflict), the data schema (a JSON Schema 2020-12 subset), and new codes: `W315`/`W316` for binding paths and types against the data schema, `W7xx` for project problems. `AGENT-SPEC.md`, the MCP primer and tool descriptions follow. Sources go into `research.md`.
+2. Core, TypeScript and Rust (`packages/core/src/data.ts`, `crates/weft-core/src/data.rs`): `compileDataSchema` and `checkData(document, …)` as a separate pass, so `ValidateOptions` and `ParseOptions` keep their fields (T22 and T29 construct them); new codes in both registries.
+3. Catalog, TypeScript and Rust (`packages/catalog/src/project.ts`, `crates/weft-catalog/src/project.rs`): pure `resolveProject(content)` and `loadProject(text, read)` with an injected reader; token layering, catalog extension with conflict diagnostics, action list, data schema. Never throws or panics.
+4. File reading stays at the edges: `packages/catalog/src/node.ts` (walk up, read files) for Node tools; the Rust CLI walks up itself and gets `--project`; `render-react`'s `write-page` reads the project too. The MCP server reads no files: tools take an optional `project` argument with the contents, and `createServer` takes one from the host.
+5. Differential fixtures: data checks in the core fixture, project resolution in the catalog fixture; regenerate with `WEFT_UPDATE_FIXTURES=1`.
+6. An example project (`examples/project/`, outside `corpus/` because corpus tests read every directory there as a screen) with several screens, layered tokens, a catalog extension, actions and a data schema; CLI and MCP tests on it and on broken project files.
+7. Part B: `docs/fragments-design.md`, a proposal for `<use>` fragments, for the creator to approve.
+8. Verify with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Scope extension (creator): everything that can be configured is configurable through `weft.json`. The file becomes a config with optional sections, each with documented defaults; an explicit CLI or tool argument overrides `weft.json`, which overrides the defaults.
+
+9. Spec: `SPEC.md` §10.6 lists the sections — `validate` (`mode`), `format` (`write`), `render` (`data`, `tokens`, `outDir`), `export.<target>` and `import.<target>` (`react` and `html` today, `outDir`), `mcp` (`limits`), `plugins` (free-form, one object per plugin) — their defaults, the precedence, and how a later task adds its section (T34 SwiftUI, T35 web targets, T14 Figma: `export.swiftui`, `export.html`, `export.solid`, `export.figma` with a rem base and a token strategy, `import.figma`, `import.penpot`). An unknown key is `W702`, now always a warning; a wrong type is `W701` and the default applies.
+10. `schemas/weft.schema.json` (JSON Schema 2020-12), referenced from `$schema`; a test keeps it and the loader in step.
+11. Loader (Rust, through weft-wasm for TypeScript): the sections parsed into `Project.settings`, never throwing.
+12. Tools: the Rust CLI (`validate.mode` with `--lenient` to override, `format.write` with `--print`, `explain` reads the project's catalog), `write-page` (`render.data`, `render.tokens`), the Claude Code plugin scripts (project resources plus `render`, `export.react`, `import.html`), the MCP server (`weft-mcp --project <file>` read once at start by the host: resources, `validate.mode` as the default of `strict`, `mcp.limits`; the `project` tool argument never changes limits).
+13. `AGENTS.md`: every new tool option gets a `weft.json` key in the same change.
+14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
+
+Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). Left: the fragments proposal in `docs/fragments-design.md` waits for the creator; once approved, fragments are built (format, both parsers, patches, fixtures) and the example project gains a shared fragment, which the done criteria ask for.
+
 ### T32. Claude Code plugin from GitHub
 
 The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
@@ -152,17 +173,6 @@ Execution plan (each stage is committed green):
 
 Many more tests, built on many more examples. Grow the corpus so every catalog kind, prop, slot, binding form and token type appears in at least one screen. For every screen and every target, record what each target produces as reviewed snapshots: insta in Rust, Vitest snapshots in TypeScript. Targets are canonical JSON, HTML/CSS, React, Solid, SwiftUI and Figma. Then take screenshots: rendered web targets in a real browser, through Vitest browser mode with Playwright, and generated SwiftUI in the iOS Simulator. Compare them in three ways: against the reviewed baselines, across targets for the same screen (React, Solid and static HTML must look the same within a tolerance and give the same accessibility tree), and across round trips (a screen and its round-tripped copy look identical). A failed comparison writes a visual diff image. Done when the suites run in `moon ci`, every baseline is reviewed, and a deliberate one-pixel layout change and a one-word text change are each caught.
 
-### T37. Cursor plugin
-
-The same features as the Claude Code plugin (T30, T32), packaged for Cursor:
-- import HTML to `.weft`, with the loss table;
-- export `.weft` to React;
-- render `.weft` to an HTML page and preview it in Cursor's built-in browser;
-- the weft MCP server;
-- the authoring guide from `AGENT-SPEC.md`, as rules or skills.
-
-It lives in this repository (`plugins/cursor`) and reuses the bundled scripts and MCP server of the Claude Code plugin rather than a second copy: shared files move to one place that both plugins use. Follow the plugin format from Cursor's official documentation, citing its URL and the date it was checked. Done when the plugin installs in Cursor from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
-
 ### T38. Open Design plugin
 
 A plugin for Open Design (https://open-design.ai, https://github.com/attentiondotnet/open-design), the open-source, local-first design platform that runs on top of a coding agent and has had plugins since 0.8.0. It brings Weft into Open Design:
@@ -172,7 +182,7 @@ A plugin for Open Design (https://open-design.ai, https://github.com/attentiondo
 - render and preview pages;
 - map an Open Design `DESIGN.md` design system to Weft design tokens where the two line up, with a loss list where they do not.
 
-It reuses the shared bundled scripts and MCP server of the Claude Code and Cursor plugins (T32, T37) instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
+It reuses the scripts, the MCP server and the build in `plugins/shared` (T37), which write the same bundle into the Claude Code and Cursor plugins, instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
 
 ### T39. Context in the document
 
@@ -183,6 +193,14 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 - **Untrusted by design:** context is data for the reader, never instructions. `AGENT-SPEC.md` tells models to treat it as information to weigh and to ignore commands inside it. Renderers never show it to end users.
 
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
+
+Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` changes):
+
+1. Read `SPEC.md`, `AGENT-SPEC.md`, `docs/figma-style-overrides-design.md`, the parser, model, canonical form and patches in `crates/weft-core`, plugin data in `packages/figma`, `packages/to-jsx` and the benchmark primers in `bench/`.
+2. Write `docs/context-design.md` in the shape of the style-overrides proposal: markup syntax with at least two alternatives and a recommendation, the entry model, canonical JSON and ordering, validation rules, new diagnostic codes and limits, patch operations, the effect on every target (renderers, code generators and importers, Figma, MCP, `weft explain`), the security rule and its `AGENT-SPEC.md` wording, the `weft.json` option (T31), versioning and migration, and open questions with recommendations. Worked examples use the corpus login screen in markup and canonical JSON.
+3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
+
+Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
 ### T40. Penpot round trip and plugin
 

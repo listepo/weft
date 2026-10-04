@@ -10,8 +10,8 @@ use std::collections::BTreeSet;
 use common::{catalog, codes, parse_lenient};
 use serde_json::{Value as Json, json};
 use weft_core::{
-    ApplyOptions, Code, MAX_DEPTH, Mode, ParseOptions, Severity, ValidateOptions, apply_patches,
-    parse, parse_json, validate,
+    ApplyOptions, Code, DataCheckOptions, MAX_DEPTH, Mode, ParseOptions, Severity, ValidateOptions,
+    apply_patches, check_data, compile_data_schema, parse, parse_json, validate,
 };
 
 const SPEC: &str = include_str!("../../../SPEC.md");
@@ -19,6 +19,12 @@ const FIXTURE: &str = include_str!("fixtures/differential.json");
 
 /// Codes of the import layer, produced by the importer package and never by the core.
 const IMPORT: [&str; 2] = ["W601", "W602"];
+
+/// Codes of the project file, produced by the weft-catalog loader; its project cases
+/// (packages/catalog/test/project-cases.ts, replayed by crates/weft-catalog) produce each one.
+const PROJECT: [&str; 8] = [
+    "W701", "W702", "W703", "W704", "W705", "W706", "W707", "W708",
+];
 
 enum Case {
     /// Markup parsed without a catalog: the syntax layer only.
@@ -31,6 +37,8 @@ enum Case {
     Json(Json),
     /// Patches applied to the fixture's patch base.
     Patch(Json),
+    /// A data schema, compiled, then markup checked against it (SPEC §10.5).
+    Data(Json, String),
 }
 
 fn in_screen(inner: &str) -> Case {
@@ -204,6 +212,25 @@ fn cases() -> Vec<(&'static str, Case)> {
             json!([{"op": "move", "id": "main", "parent": "go"}]),
         ),
         patch("W507", json!([{"op": "remove", "id": "s"}])),
+        (
+            "W315",
+            Case::Data(
+                json!({"type": "object", "properties": {"name": {"type": "string"}}}),
+                common::screen(r#"<text id="t" text="{$.nme}"/>"#),
+            ),
+        ),
+        (
+            "W316",
+            Case::Data(
+                json!({"type": "object", "properties": {"busy": {"type": "string"}}}),
+                common::screen(r#"<button id="b" disabled="{$.busy}">Go</button>"#),
+            ),
+        ),
+        (
+            "W709",
+            Case::Data(json!({"type": "thing"}), common::screen("")),
+        ),
+        ("W710", Case::Data(json!({"anyOf": []}), common::screen(""))),
         patch(
             "W508",
             json!([{"op": "insert", "parent": "main", "markup": "text"}]),
@@ -218,6 +245,20 @@ fn cases() -> Vec<(&'static str, Case)> {
 fn run(case: &Case) -> Vec<&'static str> {
     let catalog = catalog();
     match case {
+        Case::Data(schema, markup) => {
+            let (data, problems) = compile_data_schema(schema);
+            let mut found: Vec<&'static str> = problems.iter().map(|p| p.code.as_str()).collect();
+            if let Some(document) = parse_lenient(markup).document {
+                found.extend(codes(&check_data(
+                    &document,
+                    &DataCheckOptions {
+                        catalog: &catalog,
+                        data: &data,
+                    },
+                )));
+            }
+            found
+        }
         Case::Syntax(markup) => codes(&parse(markup, &ParseOptions::default()).diagnostics),
         Case::Markup(markup) => codes(&parse_lenient(markup).diagnostics),
         Case::Checked(markup) => {
@@ -282,7 +323,7 @@ fn every_core_code_is_produced_by_some_input() {
     for code in Code::ALL {
         let name = code.as_str();
         assert!(
-            covered.contains(name) || IMPORT.contains(&name),
+            covered.contains(name) || IMPORT.contains(&name) || PROJECT.contains(&name),
             "no case produces {name}"
         );
     }
@@ -300,7 +341,9 @@ fn severities_are_errors_except_the_mode_codes_and_the_import_warning() {
             "W401" | "W402" | "W403" => {
                 assert_eq!((lenient, strict), (Severity::Warning, Severity::Error));
             }
-            "W602" => assert_eq!((lenient, strict), (Severity::Warning, Severity::Warning)),
+            "W602" | "W702" | "W710" => {
+                assert_eq!((lenient, strict), (Severity::Warning, Severity::Warning));
+            }
             other => assert_eq!(
                 (lenient, strict),
                 (Severity::Error, Severity::Error),

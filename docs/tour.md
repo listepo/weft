@@ -108,7 +108,7 @@ exit 1
 The reference renderer turns a screen into a page. The Claude Code plugin ships a script that does it for a file; `--data` supplies the sample data the bindings read (here an email address, so the Sign in button is enabled).
 
 ```console
-$ node plugins/claude-code/scripts/render.ts weft-tour/login.weft weft-tour/login.html --data corpus/login/data.json
+$ node plugins/shared/scripts/render.ts weft-tour/login.weft weft-tour/login.html --data corpus/login/data.json
 Wrote weft-tour/login.html
 file:///path/to/weft/weft-tour/login.html
 ```
@@ -172,7 +172,7 @@ Read the last line and compare it with what you asked for: the button is now dis
 Export the screen to a React component:
 
 ```console
-$ node plugins/claude-code/scripts/export.ts weft-tour/login.weft weft-tour/LoginScreen.jsx --name LoginScreen
+$ node plugins/shared/scripts/export.ts weft-tour/login.weft weft-tour/LoginScreen.jsx --name LoginScreen
 Wrote weft-tour/LoginScreen.jsx
 $ grep -n "export default" weft-tour/LoginScreen.jsx
 28:export default function LoginScreen({ data, actions, onChange }) {
@@ -183,7 +183,7 @@ The component takes `data`, `actions` and `onChange` and needs no other Weft cod
 Import goes the other way. Feed the page the renderer wrote back into the importer. It prints what it could not carry over, because a web page has no bindings, actions or design tokens:
 
 ```console
-$ node plugins/claude-code/scripts/import.ts weft-tour/login.html weft-tour/imported.weft
+$ node plugins/shared/scripts/import.ts weft-tour/login.html weft-tour/imported.weft
 Wrote weft-tour/imported.weft
 
 Import losses:
