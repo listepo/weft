@@ -63,9 +63,10 @@ An attribute value is exactly one of:
 | --- | --- | --- |
 | Literal | `label="Email"`, `level="2"`, `required="true"` | A constant. Numbers and booleans are written as JSON (`2`, `true`). |
 | Binding | `value="{$.user.email}"` | Data from the host. On a writable prop (`field.value`, `checkbox.checked`) input writes back. |
-| Negated binding | `disabled="{!$.busy}"` | Boolean props only, never on a writable prop. |
+| Negated binding | `disabled="{!$.email}"` | `!` is NOT: disabled while `$.email` is empty. Boolean props only, never on a writable prop. |
 | Token | `gap="{token.space.md}"` | Every design value: spacing, color, size. Never `gap="16px"`. |
 
+- Read `!` as NOT, not as part of the brace. "Disabled while busy" is `disabled="{$.busy}"`; "disabled until an email is entered" is `disabled="{!$.email}"`. When an edit changes the condition, decide the `!` again; do not copy it from the old value.
 - Never mix text and a reference: `text="Hello {$.name}"` is an error. Bind the whole value, and put fixed text in its own element.
 - A literal that starts with `{` is written `{{`: `text="{{curly}"` reads as `{curly}`.
 - Binding paths: `$.a.b.0` from the data model, `$item.field` inside `<each as="item">`.
