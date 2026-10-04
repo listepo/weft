@@ -1,0 +1,3 @@
+# The folder name `figma` is already the id of packages/figma.
+id: 'figma-plugin'
+language: 'typescript'
