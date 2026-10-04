@@ -27,7 +27,7 @@ A project file, `weft.json`, next to the screens or in a parent directory, gives
 }
 ```
 
-Use the project's kinds as you use core kinds: look them up in `weft_catalog` with the same `project`.
+Use the project's kinds as you use core kinds: look them up in `weft_catalog` with the same `project`. The project file may also hold tool settings (`validate`, `format`, `render`, `export`, `import`, `mcp`, `plugins`; SPEC §10.6); they configure tools, not screens, so leave them out of the `project` argument.
 
 ## 2. Writing a screen
 
@@ -245,7 +245,7 @@ What each code asks of you:
 | W601 | The importer could not read its input; nothing to repair in a document. |
 | W602 | The import was cut at a limit; the rest of the input is missing. |
 | W701 | The project file, or the member at `path`, has the wrong shape; fix `weft.json` (or the `project` argument), not the screen. |
-| W702 | Remove the member or correct its name: `tokens`, `catalog`, `actions`, `data`, `$schema`. |
+| W702 | A warning: correct the name using the hint, or remove the key. Members are `tokens`, `catalog`, `actions`, `data`, `$schema` and the tool sections of SPEC §10.6. |
 | W703 | Name the file relative to the project file, inside its directory, with `/`. |
 | W704 | Point at a file that exists and holds JSON. |
 | W705 | Fix the token file named in the message: give the token a `$type`, point the alias at an existing token, break the cycle. |

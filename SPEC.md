@@ -292,7 +292,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 
 ### 6.2 Codes
 
-`mode` severity is a warning in lenient mode and an error in strict mode (§8). `W602` and `W710` are warnings. Every other code is an error.
+`mode` severity is a warning in lenient mode and an error in strict mode (§8). `W602`, `W702` and `W710` are warnings. Every other code is an error.
 
 | Code | Meaning |
 | --- | --- |
@@ -371,8 +371,8 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W509 | Inserted `markup` uses an id that the document already has. |
 | W601 | Imported input cannot be read: a snapshot that is neither Playwright aria snapshot YAML nor an accessibility tree, HTML that is not a string, or a catalog the importer cannot map with. |
 | W602 | Imported input exceeds an import limit (length, element count or nesting depth); the rest is not imported. |
-| W701 | Project file is not JSON or not an object, or a member has the wrong type (§10.2). |
-| W702 | Unknown member in the project file (mode). |
+| W701 | Project file is not JSON or not an object, or a member or setting has the wrong type (§10.2, §10.6). |
+| W702 | Unknown member or setting in the project file. |
 | W703 | File name in the project file is absolute, leaves the project directory or is malformed. |
 | W704 | File named by the project cannot be read or is not JSON. |
 | W705 | Problem in the project's token files (§10.3). |
@@ -478,11 +478,12 @@ Screens that belong together share their resources through a project file named 
 | `catalog` | file name | An extension of the core catalog (§10.4). |
 | `actions` | array of action names | The host's actions: `on-*` values are checked against them (`W308`). |
 | `data` | file name | A JSON Schema of the host data model (§10.5). |
-| `$schema` | string | Ignored; for editors. |
+| `$schema` | string | Ignored; for editors, which can point it at `schemas/weft.schema.json` (§10.6). |
+| `validate`, `format`, `render`, `export`, `import`, `mcp`, `plugins` | objects | Tool settings (§10.6). |
 
 - Every member is optional. Without `catalog` the project's catalog is the core catalog.
 - A file name is relative to the directory of the project file, uses `/` as separator and stays inside that directory: it is non-empty and has no empty or `..` segment, no leading `/`, no `\`, no `:` and no NUL. Any other name is `W703` and the file is not read.
-- Loading never stops at a problem. Each problem is a diagnostic and the rest of the project still applies: a project file that is not JSON or not an object is `W701` and the project is empty; a member of the wrong type is `W701` and is ignored, and so is an entry of `tokens` or `actions` of the wrong type; an unknown member is `W702`; an action name that breaks the action grammar (§2.2) is `W708` and is left out; a file that cannot be read or is not JSON is `W704` and is left out.
+- Loading never stops at a problem. Each problem is a diagnostic and the rest of the project still applies: a project file that is not JSON or not an object is `W701` and the project is empty; a member of the wrong type is `W701` and is ignored, and so is an entry of `tokens` or `actions` of the wrong type; an unknown member is `W702`, a warning in both modes so that an older tool still reads a newer file; an action name that breaks the action grammar (§2.2) is `W708` and is left out; a file that cannot be read or is not JSON is `W704` and is left out.
 - Project diagnostics point into the project file with a JSON Pointer prefixed with `#`, e.g. `#/tokens/1`; for project content passed as a tool argument the pointer starts at that argument (`#/project/tokens/1`). A pointer continues into a named file as if its content stood in the project file: `#/catalog/components/rating`, `#/data/properties/user/type`. A problem of the merged token tree points at `#/tokens`. Diagnostics of a screen keep the paths of §6.1.
 
 ### 10.3 Token layers
@@ -509,3 +510,28 @@ The `data` file is a JSON Schema (2020-12) of the host data model. Validation ch
 - **Closed objects.** One rule differs from JSON Schema: a schema with `properties` and without `additionalProperties` declares every property the object has, as if `additionalProperties` were `false`. An object with open keys (a map) says so with `"additionalProperties": true` or a schema for its values. A schema with neither keyword declares any name.
 - **Paths.** A path from `$.` starts at the root schema; a path from `$item` starts at the `items` schema of the `in` of the `<each>` that names `item`. A name segment steps into `properties`, then `additionalProperties`; an index segment steps into `items` when the schema may be an array. A step the schema does not declare, into `false`, or into a value that is neither an object nor an array, is `W315`, with the nearest declared name as the hint. A schema without `type` may be anything, so every step from it is declared.
 - **Types.** The schema at the end of a plain binding must allow a type the attribute takes: a `string` prop (`text`, `label` and `state` included) takes `string`, `number` and `integer`, because text shows numbers; a `number` prop takes `number` and `integer`; a `boolean` prop (and `hidden`) takes `boolean`; an `enum` or `token` prop takes `string`; the `in` of `<each>` takes `array`. Otherwise it is `W316`. A schema without `type` allows every type. A negated binding tests whether a value is empty and so takes any type; an attribute the catalog does not declare is not type-checked.
+
+### 10.6 Tool settings
+
+Everything a Weft tool lets its user configure can also be set in the project file, so every screen of a project is checked, formatted, rendered and converted the same way. Settings sit in one section per tool; every section and every key is optional.
+
+Precedence: an argument given to a tool (a command-line flag, a tool argument) overrides the project file, which overrides the tool's default. A project passed to an MCP tool as an argument brings its resources but never changes the server's own settings (`mcp`).
+
+| Key | Type | Default | Used by |
+| --- | --- | --- | --- |
+| `validate.mode` | `"strict"` or `"lenient"` | `"lenient"` | `weft validate`; the default of `weft_validate`'s `strict` when the MCP server is started with the project. Writers' tools (`weft_patch`, render, export) always check strictly. |
+| `format.write` | boolean | `false` | `weft fmt` rewrites the file in place instead of printing it. The canonical form itself has no options (§3). |
+| `render.data` | file name | no data | Sample data the bindings read when a screen is rendered to a static page. |
+| `render.tokens` | array of file names | the project's `tokens` | Token files to render with, layered as in §10.3. |
+| `render.outDir` | file name | next to the screen | Where rendered pages go. |
+| `export.react.outDir` | file name | next to the screen | Where generated React components go. |
+| `import.html.outDir` | file name | next to the page | Where screens imported from HTML go. |
+| `mcp.limits.markupChars`, `dataChars`, `patchesChars`, `projectChars` | whole number ≥ 1 | 200,000; 200,000; 200,000; 500,000 | Bounds, in UTF-16 code units, on the arguments of one MCP call. |
+| `mcp.limits.patches`, `diagnostics`, `inputElements` | whole number ≥ 1 | 100; 40; 20,000 | Patches per call, diagnostics listed per result, JSON values per call. |
+| `plugins.<name>` | object | — | Settings of a plugin or tool Weft does not know, under its own name. Weft checks only that each is an object. |
+
+- File names follow §10.2 and are relative to the project file; a directory name has no trailing `/`.
+- A setting of the wrong type is `W701` and the default applies; a bad file name is `W703`; an unknown key in a section is `W702`, a warning. Tools read only the settings that passed these checks.
+- `schemas/weft.schema.json` is the JSON Schema (2020-12) of the project file. It is generated from the same table the loader checks against, so the two cannot disagree; editors that follow `$schema` complete and check every key.
+- **Adding a setting.** A tool option that a user can set gets a key here in the same change: a row in this table, an entry in the loader's table (`crates/weft-catalog/src/settings.rs`), which regenerates the schema, and the tool reading it with the precedence above. A new export or import target adds its section under `export.<target>` or `import.<target>`. The names reserved for targets in progress are `export.html`, `export.solid` and `import.solid` (T35), `export.swiftui` and `import.swiftui` (T34), `export.figma` and `import.figma` (T14, where a rem base and the token strategy belong), and `export.penpot` and `import.penpot`. Until a target's section lands, its key is unknown and warns.
+
