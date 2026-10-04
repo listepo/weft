@@ -1,5 +1,5 @@
-//! End-to-end runs of the real `weft` binary against a scratch directory, the same claims as
-//! packages/core/test/cli.test.ts.
+//! End-to-end runs of the real `weft` binary against a scratch directory. `validate` and `fmt`
+//! make the same claims as packages/core/test/cli.test.ts; `explain` exists only in Rust.
 
 // A test crate: a failed unwrap or panic is a failed test, which is the point.
 #![allow(clippy::unwrap_used, clippy::panic)]
@@ -154,4 +154,117 @@ fn usage_errors_exit_2() {
     let bad = s.file("bad.json", "{}");
     assert_eq!(run(&[&"validate", &ok, &"--catalog", &bad]).code, 2);
     assert_eq!(run(&[&"fmt", &"x", &"--bogus"]).code, 2);
+}
+
+fn login(disabled: &str) -> String {
+    format!(
+        "<screen id=\"login\" weft=\"0.1\">\n  <form id=\"f\" on-submit=\"auth.submit\">\n    \
+         <field id=\"email\" label=\"Email\" value=\"{{$.email}}\"/>\n    \
+         <button id=\"go\" disabled=\"{disabled}\" submit=\"true\">Sign in</button>\n  \
+         </form>\n</screen>\n"
+    )
+}
+
+#[test]
+fn explain_prints_one_readback_per_line() {
+    let s = Scratch::new("explain");
+    let path = s.file("login.weft", &login("{!$.email}"));
+    let r = run(&[&"explain", &path, &"--catalog", &s.catalog()]);
+    assert_eq!(r.code, 0, "{}", r.stdout);
+    assert_eq!(
+        r.stdout,
+        "form#f on-submit: runs action auth.submit\n\
+         field#email value: reads and writes $.email\n\
+         button#go disabled: true while $.email is falsy (NOT $.email)\n"
+    );
+}
+
+#[test]
+fn explain_against_an_older_version_shows_a_kept_negation() {
+    // The benchmark's login.e2: "disable Sign in while $.busy is true" answered with {!$.busy}.
+    let s = Scratch::new("against");
+    let old = s.file("old.weft", &login("{!$.email}"));
+    let inverted = s.file("inverted.weft", &login("{!$.busy}"));
+    let intended = s.file("intended.weft", &login("{$.busy}"));
+    let r = run(&[
+        &"explain",
+        &inverted,
+        &"--against",
+        &old,
+        &"--catalog",
+        &s.catalog(),
+    ]);
+    assert_eq!(r.code, 0);
+    assert_eq!(
+        r.stdout,
+        "button#go disabled changed: was true while $.email is falsy (NOT $.email); \
+         now true while $.busy is falsy (NOT $.busy)\n"
+    );
+    let r = run(&[
+        &"explain",
+        &intended,
+        &"--against",
+        &old,
+        &"--catalog",
+        &s.catalog(),
+    ]);
+    assert_eq!(
+        r.stdout,
+        "button#go disabled changed: was true while $.email is falsy (NOT $.email); \
+         now true while $.busy is truthy\n"
+    );
+}
+
+#[test]
+fn explain_against_an_identical_version_prints_nothing_and_says_so() {
+    let s = Scratch::new("same");
+    let path = s.file("login.weft", &login("{!$.email}"));
+    let r = run(&[
+        &"explain",
+        &path,
+        &"--against",
+        &path,
+        &"--catalog",
+        &s.catalog(),
+    ]);
+    assert_eq!(r.code, 0);
+    assert_eq!(r.stdout, "");
+    assert!(
+        r.stderr.contains("no prop, event or loop changed"),
+        "{}",
+        r.stderr
+    );
+}
+
+#[test]
+fn explain_prints_diagnostics_and_exits_1_when_either_version_has_errors() {
+    let s = Scratch::new("explain-bad");
+    let good = s.file("good.weft", &login("{!$.email}"));
+    let bad = s.file(
+        "bad.weft",
+        &login("{!$.email}").replace("submit=\"true\"", "submit=\"yes\""),
+    );
+    let broken = s.file("broken.weft", "<screen id=s>");
+    let r = run(&[&"explain", &bad, &"--catalog", &s.catalog()]);
+    assert_eq!(r.code, 1);
+    assert!(r.stdout.contains("bad.weft:4:"), "{}", r.stdout);
+    let r = run(&[&"explain", &good, &"--against", &broken]);
+    assert_eq!(r.code, 1);
+    assert!(r.stdout.contains("broken.weft:1:12 W106 "), "{}", r.stdout);
+}
+
+#[test]
+fn explain_usage_and_io_failures_exit_2() {
+    let s = Scratch::new("explain-usage");
+    let ok = s.file("ok.weft", CANONICAL);
+    let json = s.file("doc.weft.json", "{}");
+    assert_eq!(run(&[&"explain"]).code, 2);
+    assert_eq!(run(&[&"explain", &s.0.join("missing.weft")]).code, 2);
+    assert_eq!(
+        run(&[&"explain", &ok, &"--against", &s.0.join("missing.weft")]).code,
+        2
+    );
+    let r = run(&[&"explain", &json]);
+    assert_eq!(r.code, 2);
+    assert!(r.stderr.contains("not canonical JSON"), "{}", r.stderr);
 }
