@@ -13,7 +13,7 @@ The plugin also registers the `weft` MCP server (`@weft/mcp`: `weft_primer`, `we
 
 ## Install
 
-The packages are private and run from this repository's sources, so install the plugin from a clone, with the dependencies installed (`mise install`, `pnpm install`):
+The packages are private and run from this repository's sources, so install the plugin from a clone, with the dependencies installed and the WebAssembly core built (`mise install`, `pnpm install`, `moon run root:wasm`):
 
 ```
 /plugin marketplace add /path/to/weft

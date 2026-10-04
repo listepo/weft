@@ -4,3 +4,4 @@ dist/
 .moon/cache/
 .moon/docker/
 target/
+packages/core/wasm/

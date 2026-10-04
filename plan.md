@@ -5,7 +5,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
-| T22 | in progress | P1 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T23 | todo | P2 | 3 | 0% | |
 | T24 | todo | P2 | 2 | 0% | |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
@@ -30,10 +29,6 @@ Execution plan:
 6. Full edit and read runs on the three models; `run.ts tokens` again so the report has Anthropic token counts.
 7. `bench/EVALUATION.md`: results against the done criteria (Weft first-try validity at least 95%, after one repair at least 99%), comparison with the baselines, failure analysis, continue/stop recommendation.
 8. Verify with `pnpm run ci`.
-
-### T22. WebAssembly bindings
-
-Build the Rust core and catalog with wasm-bindgen (wasm-pack) into the `@weft/core` and `@weft/catalog` packages, keeping their TypeScript API, so the browser, Deno, Bun and Node run the same code. The renderer, importer, JSX generator, MCP server and benchmark stay TypeScript and call these packages. This introduces a build step: `AGENTS.md` drops the "No build step" rule for these two packages. Done when every existing TypeScript test passes on the WASM build.
 
 ### T23. Native Node and Bun addon
 
