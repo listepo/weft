@@ -230,6 +230,21 @@ What each code asks of you:
 | W601 | The importer could not read its input; nothing to repair in a document. |
 | W602 | The import was cut at a limit; the rest of the input is missing. |
 
+### 4.1 Reading back an edit
+
+A valid document can still mean the opposite of the instruction: `disabled="{!$.busy}"` validates, and it disables the button while `$.busy` is falsy. Before you answer, read back every binding you changed and compare it with the instruction.
+
+With a tool, run `weft explain <new> --against <old> --catalog <catalog>`. It prints one line per prop, event or loop that was added, removed or changed. For the instruction "disable Sign in while `$.busy` is true":
+
+```text
+button#go disabled changed: was true while $.email is falsy (NOT $.email); now true while $.busy is falsy (NOT $.busy)
+```
+
+The instruction needs `now true while $.busy is truthy`. This line says falsy, so the `!` is wrong: write `disabled="{$.busy}"`.
+
+- Without a tool, read each changed value the same way. On a boolean prop `{$.x}` is "true while `$.x` is truthy" and `{!$.x}` is "true while `$.x` is falsy": `!` is NOT. Falsy is false, `0`, an empty string, null or missing.
+- When a readback says something the instruction did not ask for, fix it, validate and read back again.
+
 ## 5. Reading a screen
 
 - An element's purpose comes from its kind and the catalog's role, its name from `label` or its text.
@@ -249,5 +264,6 @@ Before you answer, every one of these holds:
 5. Required props, labels and slots are there; kinds sit in the parents they need.
 6. Actions are names the host provides; submit buttons are inside a form.
 7. The validator, in strict mode, reports no errors.
+8. Every binding you changed reads back as the instruction asked (§4.1).
 
 Keep this document current: see `AGENTS.md`.
