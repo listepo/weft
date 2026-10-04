@@ -18,9 +18,20 @@ A JSON Schema of the canonical form generated per catalog (kinds, props, enum va
 
 Export a Weft document to A2UI v0.9 messages and to a json-render spec, and import from both, each with a loss table in SPEC §9. Done when every corpus screen converts both ways and the losses are listed.
 
-### T14. Figma importer
+### T14. Figma round trip and plugin
 
-Weft from a Figma file node tree (`GET /v1/files/:key/nodes`): auto-layout frames become `stack` or `grid`, component instances map to catalog kinds through a mapping file, with a loss table. Lossy by design: Figma layers carry no semantics.
+Convert Weft to Figma and back without loss, and ship a Figma plugin. Approved scope:
+
+- **Library:** generate a Weft component library in Figma from the catalog and the design tokens (one component set per catalog kind, variants for its enum props, Figma variables for the tokens). Screens are built from instances of this library.
+- **Weft to Figma:** every node becomes an auto-layout frame or a library instance, and its Weft source (kind, props, bindings, data paths, ids) is stored in the node's plugin data.
+- **Figma to Weft, lossless:** a screen that was never edited comes back byte-identical after `weft fmt`. A designer's edits come back too: text, order, added or removed library instances, variants, and visual edits (spacing, colors, sizes, radii). A visual edit maps to a token when it matches one and otherwise to a style override, which needs a format extension (`AGENT-SPEC.md`, the parsers in TS and Rust, the catalog). Its design goes to the creator before it is built.
+- **Foreign layers:** layers that did not come from Weft (vectors, images, free frames) convert lossily, with a loss table, as before: Figma layers carry no semantics.
+- **Where it runs:**
+  - a Figma plugin: open or paste a `.weft` file to build frames; select a frame to export `.weft`.
+  - CLI `weft figma pull`: reads through the REST API (`GET /v1/files/:key/nodes`). The REST API is read-only, so building frames stays in the plugin.
+  - MCP / Claude Code tools (with T30), working through the Figma MCP server.
+
+Done when every corpus screen survives Weft to Figma to Weft byte-identical, a scripted set of designer edits comes back with the expected Weft diff, and the plugin, CLI command and MCP tools pass their tests in `moon ci`.
 
 ### T15. Second code target and catalog import
 
