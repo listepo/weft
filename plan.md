@@ -12,7 +12,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
-| T35 | in progress | P1 | 5 | 5% | Claude Code / claude-opus-5-5 |
+| T35 | in progress | P1 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
 | T38 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
