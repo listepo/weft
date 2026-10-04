@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@weft/catalog": "workspace:*",
+    "@weft/core": "workspace:*",
     "@weft/figma": "workspace:*"
   },
   "devDependencies": {

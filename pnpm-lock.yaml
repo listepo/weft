@@ -328,6 +328,9 @@ importers:
       '@weft/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
+      '@weft/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@weft/figma':
         specifier: workspace:*
         version: link:../../packages/figma
