@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T24 | todo | P2 | 2 | 0% | |
 | T26 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T28 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
-| T29 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -55,17 +54,3 @@ In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in
 4. Benchmark: an optional readback turn after a valid edit, the same for every format. This is a method change, recorded in `test.md`. Rerun `login` on Bonsai with 3 samples.
 
 Done when the tests for `explain` pass, the CLI prints readbacks, and the rerun is in the `test.md` history.
-
-### T29. Rust core test suite
-
-The Rust core (T20) and catalog (T21) are checked mostly by the differential fixtures, which prove agreement with TypeScript but not the claims themselves, and they cover only inputs the generators reach. This task gives `weft-core` and `weft-catalog` their own tests: unit tests named as claims for every public function, and property tests that no input panics, that parse → serialize → parse is stable, and that formatting is idempotent. Done when every public function has tests for its documented behaviour, the property tests run in `cargo nextest`, and `moon ci` is green.
-
-Execution plan:
-
-1. `chore`: add `proptest` (latest, 1.11.0) as a workspace dev-dependency of `weft-core` and `weft-catalog`, plus its row in `toolchain.md`.
-2. `weft-core` claims, written as integration tests that use only the public API (`crates/weft-core/tests/*.rs`, sharing the fixture catalog through `tests/common/mod.rs`): `json` (number printing, key order, depth limit), `syntax`/`parse` (UTF-16 columns with astral characters, every syntax code W101–W119, fragments, depth, tokens and actions options, strict vs lenient), `validate` (every code W2xx–W4xx reachable from markup or JSON), `serialize`/`canonicalize`/`stringify` (escaping, key order, idempotence), `patch` (set/insert/remove/move index rules, atomicity, every W5xx code). Claims about private helpers (`nearest`, `one_of`, value reading, name suggestions) go into the `#[cfg(test)]` modules of their files.
-3. `weft-catalog` claims (`crates/weft-catalog/tests/`): token alias chains, cycles and every T00x code; catalog diff levels for components, props, slots, states, events and bounds, both directions; the embedded core catalog.
-4. Property tests in `crates/weft-core/tests/properties.rs` and `crates/weft-catalog/tests/properties.rs`: nothing panics on arbitrary strings and arbitrary or deeply nested JSON; parse → serialize → parse keeps the document; serialize is idempotent; `stringify(canonicalize(d))` is stable; markup and its JSON round trip validate alike. A fixed proptest config (case count, no persistence file) keeps the suite fast and reproducible.
-5. A bug that a test exposes is fixed in Rust only where the TypeScript core is the reference and Rust differs, with the narrowest regression test (`fix: T29 ...`). Behaviour that both cores share and that looks wrong is reported to the creator, not changed.
-6. Verify with `cargo nextest run --workspace`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all --check`, then `moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
-
