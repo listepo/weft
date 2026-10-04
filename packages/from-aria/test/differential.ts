@@ -1,21 +1,27 @@
-// Cases for the TypeScript–Rust differential check of the importers. The package computes the
-// expected results into two fixtures that the Rust crates reproduce byte for byte:
-// crates/weft-import/tests/fixtures/build.json (role tree → document) and
-// crates/weft-web/tests/fixtures/from-dom.json (HTML → document). Random cases use a fixed seed,
-// so the fixtures only change with the code.
+// Cases the Rust importers answer to. The fixtures were first written by the TypeScript importers
+// and reproduced by the Rust ones (crates/weft-import/tests/build.rs, crates/weft-web/tests/
+// from_dom.rs); the importers now run in Rust, so they pin results against unnoticed change and
+// tie the package to the crate. helpers.json is still written by TypeScript: the helpers
+// `@weft/figma` reuses without WebAssembly have a Rust twin in crates/weft-import, and
+// crates/weft-import/tests/helpers.rs checks the two agree. Random cases use a fixed seed, so the
+// fixtures only change with the code.
 import { readdirSync, readFileSync } from "node:fs";
 import fc from "fast-check";
-import { parseDocument } from "htmlparser2";
 import { coreCatalog } from "@weft/catalog";
 import { parse, type Document } from "@weft/core";
 import { expectedTree, renderPage, type AriaNode } from "@weft/render-react";
 import { snapshotSems } from "../src/aria.ts";
-import { buildDocument } from "../src/build.ts";
+import { fillRequired, freshId, literal, slug, type IdState } from "../src/build.ts";
+import { buildDocument } from "../src/engine.ts";
 import { fromDom } from "../src/index.ts";
 import type { Sem } from "../src/types.ts";
 
 export const buildFixture = new URL(
   "../../../crates/weft-import/tests/fixtures/build.json",
+  import.meta.url,
+);
+export const helpersFixture = new URL(
+  "../../../crates/weft-import/tests/fixtures/helpers.json",
   import.meta.url,
 );
 export const domFixture = new URL(
@@ -229,7 +235,7 @@ const sem: fc.Arbitrary<Sem> = fc.letrec<{ sem: Sem }>((tie) => ({
       ),
       children: fc.oneof(
         { depthSize: "small" },
-        fc.constant([]),
+        fc.constant<Sem[]>([]),
         fc.array(tie("sem"), { maxLength: 4 }),
       ),
     },
@@ -238,48 +244,7 @@ const sem: fc.Arbitrary<Sem> = fc.letrec<{ sem: Sem }>((tie) => ({
 })).sem;
 
 export type BuildCase = { sems: unknown; reserved: string[]; result: unknown };
-export type DomCase = { html: string; sample?: true; tree: unknown; result: unknown };
-
-type HNode = {
-  type: string;
-  name?: string;
-  data?: string;
-  attribs?: Record<string, string>;
-  children?: HNode[];
-};
-const isElement = (n: HNode): boolean => ["tag", "script", "style"].includes(n.type);
-
-// The tree the importer reads, in a form both parsers can print: htmlparser2 here, html5ever in
-// Rust. They agree on well-formed markup and differ on what the HTML standard repairs, so the Rust
-// test compares results only where the trees agree.
-// Deeper than the import reads, a subtree is only marked, so deep cases fit the stack.
-const DUMP_DEPTH = 256;
-
-function dump(nodes: HNode[], depth = 0): unknown[] {
-  if (depth > DUMP_DEPTH) return ["…"];
-  const out: unknown[] = [];
-  for (const n of nodes) {
-    if (n.type === "text") out.push(n.data ?? "");
-    else if (isElement(n))
-      out.push([n.name, Object.entries(n.attribs ?? {}), dump(n.children ?? [], depth + 1)]);
-  }
-  // A browser moves whitespace after </body> into the body; it never changes a result.
-  while (typeof out.at(-1) === "string" && (out.at(-1) as string).trim() === "") out.pop();
-  return out;
-}
-
-function tree(html: string): unknown {
-  const root = parseDocument(html) as unknown as HNode;
-  const top = (root.children ?? []).filter(isElement);
-  const htmlEl = top.find((n) => n.name === "html");
-  const inner = htmlEl ? (htmlEl.children ?? []).filter(isElement) : [];
-  const body = [...top, ...inner].find((n) => n.name === "body");
-  const head = [...top, ...inner].find((n) => n.name === "head");
-  return {
-    head: dump(head?.children ?? []),
-    body: dump(body ? (body.children ?? []) : (root.children ?? [])),
-  };
-}
+export type DomCase = { html: string; result: unknown };
 
 function buildCase(sems: readonly Sem[], reserved: string[]): BuildCase {
   const built = buildDocument(sems, { catalog, reserved });
@@ -312,12 +277,96 @@ export function domCases(): DomCase[] {
   }
   for (const d of examples()) inputs.push(renderPage(d, { catalog, data: {} }));
   inputs.push(...HAND_WRITTEN);
-  const cases: DomCase[] = inputs.map((h) => ({
-    html: h,
-    tree: tree(h),
-    result: json(fromDom(h, { catalog })),
-  }));
-  for (const h of fc.sample(html, { seed: SEED, numRuns: RUNS }))
-    cases.push({ html: h, sample: true, tree: tree(h), result: json(fromDom(h, { catalog })) });
-  return cases;
+  inputs.push(...fc.sample(html, { seed: SEED, numRuns: RUNS }));
+  return inputs.map((h) => ({ html: h, result: json(fromDom(h, { catalog })) }));
+}
+
+const helperText = fc.oneof(
+  fc.string(),
+  fc.string({ unit: "binary" }),
+  fc
+    .array(
+      fc.constantFrom("{", "$", "!$", "token.", "a", " ", "}", "\u0000", "é", "ﬁ", "-", "日"),
+      {
+        maxLength: 12,
+      },
+    )
+    .map((parts) => parts.join("")),
+);
+
+export type HelperCases = {
+  slug: [string, string][];
+  literal: { text: string; out: string; losses: unknown }[];
+  freshId: { used: string[]; calls: [string, string][]; ids: string[] }[];
+  fillRequired: {
+    kind: string;
+    parent: string | null;
+    root: boolean;
+    name: string;
+    props: unknown;
+    losses: unknown;
+  }[];
+};
+
+export function helperCases(): HelperCases {
+  const texts = [
+    "",
+    "Save changes!",
+    "  Crème brûlée ",
+    "ﬁle",
+    "--",
+    "日本",
+    "ab ".repeat(20),
+    "{$.x} {$.y}",
+    "a {$.x} and {token.y}",
+    "a {!$.x}",
+    ...fc.sample(helperText, { seed: SEED, numRuns: RUNS }),
+  ];
+  const literalCases = texts.map((text) => {
+    const log = { losses: [] };
+    return { text, out: literal(log, "/p", text), losses: json(log.losses) };
+  });
+  const idCalls = fc.sample(
+    fc.record({
+      used: fc.array(fc.constantFrom("a-x", "a-x-2", "a-1", "a-2", "b-save", "b"), {
+        maxLength: 4,
+      }),
+      calls: fc.array(
+        fc.tuple(
+          fc.constantFrom("a", "b"),
+          fc.oneof(fc.constantFrom("", "x", "X!", "save"), helperText),
+        ),
+        { maxLength: 8 },
+      ),
+    }),
+    { seed: SEED, numRuns: RUNS },
+  );
+  const freshCases = idCalls.map(({ used, calls }) => {
+    const state: IdState = { used: new Set(used), counters: new Map() };
+    return { used, calls, ids: calls.map(([base, name]) => freshId(state, base, name)) };
+  });
+  const kinds = Object.keys(catalog.components);
+  const fills: HelperCases["fillRequired"] = [];
+  for (const kind of kinds) {
+    for (const parent of [null, ...kinds]) {
+      for (const [root, name] of [
+        [false, "Pick me"],
+        [true, ""],
+      ] as const) {
+        const log = { losses: [] };
+        const props = {};
+        const def = catalog.components[kind]!;
+        const parentDef = parent === null ? undefined : catalog.components[parent];
+        fillRequired(log, props, def, parentDef, root, name, "/x");
+        if (log.losses.length > 0)
+          fills.push({ kind, parent, root, name, props, losses: json(log.losses) });
+      }
+    }
+  }
+  return {
+    slug: texts.map((t) => [t, slug(t)]),
+    literal: literalCases,
+    freshId: freshCases,
+    fillRequired: fills,
+  };
 }

@@ -2,7 +2,8 @@
 // shape is tolerated, nothing is evaluated, and size, depth and node count are bounded.
 import { diagnostic, type Diagnostic } from "@weft/core";
 import { parseAriaSnapshot, type AriaNode } from "@weft/render-react";
-import { buildDocument, emptyResult, limitReached, MAX_DEPTH, MAX_NODES } from "./build.ts";
+import { emptyResult, limitReached, MAX_DEPTH, MAX_NODES } from "./build.ts";
+import { buildDocument } from "./engine.ts";
 import type { ImportOptions, ImportResult, Loss, LossKind, Scalar, Sem } from "./types.ts";
 
 // Large enough for any real screen; the YAML parser is line-based, so this bounds its work.

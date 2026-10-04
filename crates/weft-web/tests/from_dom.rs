@@ -1,58 +1,20 @@
-//! The HTML importer against the TypeScript one: `fixtures/from-dom.json` holds what `fromDom` of
-//! @weft/from-aria returned for every case (packages/from-aria/test/differential.ts), with the tree
-//! htmlparser2 built. This crate parses with html5ever, which repairs malformed markup the way a
-//! browser does and htmlparser2 does not; a result is compared wherever the two trees agree.
+//! The HTML importer against `fixtures/from-dom.json` (written by packages/from-aria/test/
+//! differential.ts through this crate). The fixture began as the results of the TypeScript importer
+//! this crate replaced, with the tree htmlparser2 built for each page; the port reproduced every
+//! case whose tree html5ever builds the same (all renders, corpus pages and hand-written samples,
+//! and 197 of 250 random pages). The rest are pages the HTML standard repairs, where html5ever reads
+//! them as a browser does.
 
 // A test crate: a failed unwrap or panic is a failed test, which is the point.
 #![allow(clippy::unwrap_used, clippy::panic)]
 
 use proptest::prelude::*;
-use serde_json::{Value as Json, json};
 use weft_catalog::core_catalog;
 use weft_core::{parse_json, to_compact};
-use weft_web::tree::DOCUMENT;
-use weft_web::{Dom, HNode, from_dom, parse_html};
+use weft_web::from_dom;
 
 const FIXTURE: &str = include_str!("fixtures/from-dom.json");
 const SHOWN: usize = 15;
-/// Deeper than the import reads, the fixture marks a subtree instead of spelling it out.
-const DUMP_DEPTH: usize = 256;
-
-fn dump(dom: &Dom, nodes: &[usize], depth: usize) -> Json {
-    if depth > DUMP_DEPTH {
-        return json!(["…"]);
-    }
-    let mut out: Vec<Json> = Vec::new();
-    for &n in nodes {
-        match &dom.nodes[n] {
-            HNode::Text(t) => out.push(json!(t)),
-            HNode::Element {
-                name,
-                attrs,
-                children,
-            } => out.push(json!([name, attrs, dump(dom, children, depth + 1)])),
-        }
-    }
-    while out
-        .last()
-        .and_then(Json::as_str)
-        .is_some_and(|t| weft_import::js_trim(t).is_empty())
-    {
-        out.pop();
-    }
-    Json::Array(out)
-}
-
-fn tree(dom: &Dom) -> Json {
-    let html = dom
-        .elements(DOCUMENT)
-        .find(|&e| dom.name(e) == Some("html"));
-    let part = |name: &str| {
-        html.and_then(|h| dom.elements(h).find(|&e| dom.name(e) == Some(name)))
-            .map_or(json!([]), |e| dump(dom, dom.children(e), 0))
-    };
-    json!({ "head": part("head"), "body": part("body") })
-}
 
 /// Unoptimized builds spend several kilobytes of stack per nesting level, and the fixture holds
 /// pages nested past the import limit; release WebAssembly fits them in its 1 MiB.
@@ -75,19 +37,8 @@ fn compare_with_fixture() {
     let cases = parse_json(FIXTURE).unwrap();
     let cases = cases.as_array().unwrap();
     let mut failures = Vec::new();
-    let mut fixed_trees = Vec::new();
-    let (mut compared, mut samples) = (0, 0);
     for (i, case) in cases.iter().enumerate() {
         let html = case["html"].as_str().unwrap();
-        let sample = case["sample"] == json!(true);
-        samples += usize::from(sample);
-        if to_compact(&tree(&parse_html(html))) != to_compact(&case["tree"]) {
-            if !sample {
-                fixed_trees.push(i);
-            }
-            continue;
-        }
-        compared += 1;
         let got = to_compact(&serde_json::to_value(from_dom(html, &catalog)).unwrap());
         let expected = to_compact(&case["result"]);
         if got != expected {
@@ -96,21 +47,11 @@ fn compare_with_fixture() {
             ));
         }
     }
-    eprintln!(
-        "{compared} of {} cases compared ({samples} random); trees differ in {} fixed cases: {fixed_trees:?}",
-        cases.len(),
-        fixed_trees.len()
-    );
-    // Well-formed markup (renders, corpus pages, hand-written samples) parses the same in both.
-    assert!(fixed_trees.is_empty(), "trees differ: {fixed_trees:?}");
-    assert!(
-        compared * 2 > cases.len(),
-        "too few cases compared: {compared}"
-    );
     assert!(
         failures.is_empty(),
-        "{} of {compared} compared cases differ from the TypeScript importer:\n{}",
+        "{} of {} cases differ from the fixture:\n{}",
         failures.len(),
+        cases.len(),
         failures
             .iter()
             .take(SHOWN)

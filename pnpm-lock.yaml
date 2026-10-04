@@ -199,9 +199,6 @@ importers:
       '@weft/render-react':
         specifier: workspace:*
         version: link:../render-react
-      htmlparser2:
-        specifier: 12.0.0
-        version: 12.0.0
     devDependencies:
       '@weft/catalog':
         specifier: workspace:*
