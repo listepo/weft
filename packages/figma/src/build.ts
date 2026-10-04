@@ -3,7 +3,6 @@
 // layers back returns the document as written.
 import type { Token } from "@weft/catalog";
 import type { Catalog, Child, Document, Node } from "@weft/core";
-import { canonicalize } from "@weft/core";
 import type { FFrame, FigmaApi, FInstance, FLayout, FNode, FText } from "./api.ts";
 import { isContainer } from "./api.ts";
 import { KEY, sourceOf, writeJson } from "./keys.ts";
@@ -40,7 +39,11 @@ type Ctx = BuildOptions & { api: FigmaApi };
 const SCREEN_WIDTH = 480;
 const SCREEN_GAP = 120;
 
-/** Builds the document on the current page, to the right of what is there, and returns its frame. */
+/**
+ * Builds the document on the current page, to the right of what is there, and returns its frame.
+ * The document must be canonical, as `parse` and `canonicalize` return it: canonicalizing here
+ * would need the WebAssembly core, which Figma's main thread cannot run.
+ */
 export async function buildScreen(
   api: FigmaApi,
   document: Document,
@@ -48,7 +51,7 @@ export async function buildScreen(
 ): Promise<FFrame | FInstance> {
   await loadFonts(api);
   const ctx: Ctx = { ...options, api };
-  const doc = canonicalize(document);
+  const doc = document;
   const right = api.currentPage.children.reduce(
     (x, n) => Math.max(x, n.x + n.width + SCREEN_GAP),
     0,

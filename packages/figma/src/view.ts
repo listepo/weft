@@ -2,10 +2,10 @@
 // the read-back computes it again from the stored source: where the layer still shows the same
 // view, the source is kept exactly as written, and only a difference counts as a designer's edit.
 import type { ComponentDef, Node, Value } from "@weft/core";
-import { formatValue } from "@weft/core";
 import type { Token } from "@weft/catalog";
 import type { FLayout, FPaint } from "./api.ts";
 import { tokenPx } from "./tokens.ts";
+import { formatValue } from "./values.ts";
 
 /** The variant value of an enum prop or `state` that is not set and has no default. */
 export const UNSET = "(unset)";

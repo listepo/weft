@@ -8,12 +8,28 @@ Converts Weft screens (see `SPEC.md`) to Figma and back. The conversion is pure 
 | --- | --- | --- |
 | Library | `ensureLibrary(api, catalog, tokens)` | A `Weft library` page holding one component set per catalog kind, plus a `Weft tokens` variable collection. Enum props and `state` are the variant axes. Each token becomes a variable: dimensions and numbers as `FLOAT` in px, colors as `COLOR`. Calling it again reuses what is already there. |
 | Weft → Figma | `buildScreen(api, document, options)` | Text-only kinds (`content` `none` or `text`) become instances of their variant. Every other kind becomes an auto-layout frame. Each layer carries its Weft source in plugin data: kind, id, props, `on` handlers, and the text content of leaves. A `gap` token is bound to its variable. |
-| Figma → Weft | `readScreen(api, layer, options)` | Returns `{ document, losses, diagnostics }` (see "Reading a frame back" below). |
-| Plugin | `handleRequest(api, selection, message, options)` | Validates a message from the plugin UI, then builds a pasted screen or exports the selected frame. |
+| Figma → Weft | `readScreen(api, layer, options)` | Returns `{ document, losses, diagnostics }` (see "Reading a frame back" below). It is `readLayers`, which only reads layers, followed by `finishRead`, which canonicalizes and validates with the core. |
+| Plugin, main thread | `handleRequest(api, selection, message, options)` | Validates a message from the plugin UI, then builds a parsed screen or reads the selected frame. |
+| Plugin, UI | `buildRequest`, `exportRequest`, `finishExport` | Parse pasted markup into a build request, and turn a read into `.weft` markup. |
+
+## Where the code runs
+
+The Weft core (`@weft/core`, `@weft/catalog`) is the Rust core compiled to WebAssembly. A Figma plugin runs in two places:
+
+- **The main thread** reaches the file but has no WebAssembly. The official list of what the sandbox provides does not include `WebAssembly`, and it says the sandbox has no `fetch` (https://developers.figma.com/docs/plugins/how-plugins-run/, checked 2026-10-05).
+- **The UI iframe** is a browser page. The same page says that inside it you can "access any browser APIs", which includes WebAssembly.
+
+So the work is split:
+
+- **Main thread:** `buildScreen`, `readLayers`, `ensureLibrary` and `handleRequest` never call the core. They need a canonical document as input, and they return an unfinished one.
+- **UI:** parsing, canonicalizing, validating, serializing and token loading run here.
+- **Value forms:** reading `{$…}` and `{token.…}` in text a designer types (`values.ts`) is a small TypeScript copy of the core's rule. `test/values.test.ts` runs every case through both, so the copy cannot drift.
+
+**Unverified:** the main thread runs in QuickJS compiled to WebAssembly, which would explain why WebAssembly is missing there. This comes from a Figma co-founder's post of 2019-10-02 (https://madebyevan.com/figma/an-update-on-plugin-security/), not from Figma's docs. A community forum answer from 2023-11-26 also says WebAssembly is not supported in the main thread (https://forum.figma.com/ask-the-community-7/does-the-plugin-environment-support-webassembly-31158). The plugin does not depend on either: it works whether or not the main thread has WebAssembly.
 
 ### Reading a frame back
 
-`readScreen` recomputes what each layer looked like when it was built (`src/view.ts`) and compares that with what the layer shows now:
+`readLayers` recomputes what each layer looked like when it was built (`src/view.ts`) and compares that with what the layer shows now:
 
 - **Unedited layers:** the stored source is kept as written, so an unedited screen comes back byte-identical after `serialize`.
 - **Designer edits come back as Weft changes:**

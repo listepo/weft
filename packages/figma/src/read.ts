@@ -3,11 +3,7 @@
 // written, so an unedited screen comes back byte-identical; what differs is a designer's edit and
 // is written into the element. Layers that did not come from Weft convert lossily (`foreign.ts`).
 import type { Token } from "@weft/catalog";
-import { tokenTypes } from "@weft/catalog";
 import {
-  canonicalize,
-  readValue,
-  validate,
   WEFT_VERSION,
   type Catalog,
   type Child,
@@ -33,6 +29,7 @@ import { findText } from "./build.ts";
 import { convertForeign } from "./foreign.ts";
 import { KEY, readMark, readSource, readVersion, type Source } from "./keys.ts";
 import { matchToken, tokenPathOf, tokenPx } from "./tokens.ts";
+import { readText } from "./values.ts";
 import {
   CAPTION_KINDS,
   isLeafKind,
@@ -82,8 +79,12 @@ export function component(catalog: Catalog, kind: string): ComponentDef | undefi
   return Object.hasOwn(catalog.components, kind) ? catalog.components[kind] : undefined;
 }
 
-/** Reads a frame built by `buildScreen` (or any layer) back into a Weft document. */
-export async function readScreen(
+/**
+ * Reads a frame built by `buildScreen` (or any layer) back into a Weft document that is not yet
+ * canonical or validated: `finishRead` does that with the WebAssembly core, which Figma's main
+ * thread cannot run, so the plugin finishes in its UI. `readScreen` does both where the core runs.
+ */
+export async function readLayers(
   api: FigmaApi,
   layer: FNode,
   options: ReadOptions,
@@ -116,9 +117,7 @@ export async function readScreen(
       "the selection is not a Weft screen; a screen was added as the root",
     );
   }
-  const document = canonicalize({ weft: readVersion(layer) ?? WEFT_VERSION, root });
-  const tokens = options.tokens === undefined ? undefined : tokenTypes(new Map(options.tokens));
-  ctx.diagnostics.push(...validate(document, { catalog: options.catalog, tokens }));
+  const document = { weft: readVersion(layer) ?? WEFT_VERSION, root };
   return { document, losses: ctx.losses, diagnostics: ctx.diagnostics };
 }
 
@@ -316,8 +315,7 @@ function readLeafText(
 
 /** Text a designer typed, as a value: a whole `{$…}` or `{token.…}` is a reference, else text. */
 export function typed(ctx: ReadCtx, shown: string, path: string): Value {
-  const read = readValue(shown, "string");
-  const value = read.ok ? read.value : shown;
+  const value = readText(shown) ?? shown;
   return typeof value === "string" ? literal(ctx, path, value) : value;
 }
 
