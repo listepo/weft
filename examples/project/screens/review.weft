@@ -1,0 +1,11 @@
+<screen id="review" label="Review" weft="0.1">
+  <heading id="title" level="1">Review your order</heading>
+  <each id="lines" as="line" in="{$.cart.items}">
+    <stack id="line" direction="row" gap="{token.space.sm}">
+      <text id="line-name" text="{$line.name}"/>
+      <rating id="line-score" label="Customer score" value="{$line.score}"/>
+    </stack>
+  </each>
+  <text id="empty" tone="muted" hidden="{!$.cart.empty}">Nothing to review.</text>
+  <button id="checkout" variant="primary" disabled="{$.busy}" on-press="cart.checkout">Place order</button>
+</screen>

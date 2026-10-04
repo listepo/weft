@@ -1,0 +1,23 @@
+<screen id="cart" label="Cart" weft="0.1">
+  <heading id="title" level="1">Cart</heading>
+  <list id="items" label="Items in the cart">
+    <each id="lines" as="line" in="{$.cart.items}">
+      <item id="line">
+        <stack id="line-row" direction="row" gap="{token.space.sm}">
+          <text id="line-name" text="{$line.name}"/>
+          <rating id="line-score" label="Customer score" value="{$line.score}" color="{token.color.star}"/>
+          <text id="line-price" text="{$line.price}"/>
+          <button id="remove" variant="ghost" on-press="cart.remove">Remove</button>
+        </stack>
+      </item>
+    </each>
+    <slot name="empty">
+      <text id="empty" tone="muted">Your cart is empty.</text>
+    </slot>
+  </list>
+  <stack id="footer" direction="row" gap="{token.space.md}">
+    <text id="total" text="{$.cart.total}"/>
+    <button id="back" on-press="nav.back">Keep shopping</button>
+    <button id="checkout" variant="primary" disabled="{$.busy}" on-press="cart.checkout">Check out</button>
+  </stack>
+</screen>

@@ -12,6 +12,7 @@ publish = false
 
 [workspace.dependencies]
 weft-core = { path = "crates/weft-core" }
+weft-catalog = { path = "crates/weft-catalog" }
 # weft-core
 indexmap = { version = "2.14.2", features = ["serde"] }
 # JavaScript's number-to-string rules, so canonical JSON and messages match the TypeScript core.
