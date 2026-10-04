@@ -8,7 +8,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T22 | in progress | P1 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T23 | todo | P2 | 3 | 0% | |
 | T24 | todo | P2 | 2 | 0% | |
-| T26 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T28 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T29 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 
@@ -40,10 +39,6 @@ A napi-rs addon of the same Rust core for Node and Bun, chosen at load time with
 ### T24. Runtime matrix
 
 Run the binding tests in Node, Deno, Bun and a headless browser through moon. Done when all four pass from one command.
-
-### T26. Vitest for the TypeScript tests
-
-Run every TypeScript test suite with Vitest (on Vite) instead of `node:test`: the 28 test files in `packages/*/test` and `bench/test` move to Vitest's API, `fast-check` stays for property tests, and each package's moon `test` task calls `vitest run`. Vitest's browser mode then serves the browser leg of T24, and the same suites check the WASM build of T22. `AGENTS.md` changes its test rule from `node:test` to Vitest. Done when every existing test passes under Vitest with the same count, `moon ci` is green, and `node:test` is no longer used.
 
 ### T28. Binding readback against inverted conditions
 

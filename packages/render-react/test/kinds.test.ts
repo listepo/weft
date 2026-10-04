@@ -1,6 +1,6 @@
 // One server-render test per `weft-core` kind: element, role, accessible name and states.
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog, loadTokens } from "@weft/catalog";
 import { b, doc, dom, el, html } from "./helpers.ts";
 

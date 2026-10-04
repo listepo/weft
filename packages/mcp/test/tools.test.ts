@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
 import { parse } from "@weft/core";
 import { parseAriaSnapshot } from "@weft/render-react";

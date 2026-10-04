@@ -2,7 +2,7 @@
 // this one should depend on, and its checkers are the one definition of "the task is done".
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog, loadTokens, tokenTypes } from "@weft/catalog";
 import { hasErrors, parse } from "@weft/core";
 import { loadTasks, readScreen, type EditTask } from "../../../bench/src/corpus.ts";

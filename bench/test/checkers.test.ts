@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { SCREENS, loadTasks, readScreen, type EditTask, type QuestionTask } from "../src/corpus.ts";
 import { FORMATS, type Format } from "../src/neutral.ts";
 import { mockProvider } from "../src/provider.ts";

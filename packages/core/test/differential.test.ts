@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { differential, fixturePath } from "./differential.ts";
 
 // The Rust core reads the same file in crates/weft-core/tests/differential.rs, so both cores

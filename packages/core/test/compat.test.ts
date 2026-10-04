@@ -1,7 +1,7 @@
 // SPEC §8: a 0.1 reader survives documents from the future and from other vendors.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { hasErrors, parse, serialize, stringify, validate, type Mode } from "../src/index.ts";
 import { catalog } from "./catalog.ts";
 

@@ -2,7 +2,7 @@
 // accessibility snapshot equals the tree the document declares. Skips when the Chromium binary is not installed, so CI
 // does not depend on a browser download (`pnpm exec playwright install chromium`).
 import assert from "node:assert/strict";
-import { after, before, describe, test } from "node:test";
+import { afterAll, beforeAll, describe, test } from "vitest";
 import { chromium, type Browser } from "playwright";
 import { coreCatalog } from "@weft/catalog";
 import type { Document } from "@weft/core";
@@ -34,7 +34,7 @@ let browser: Browser | undefined;
 let skipReason = "";
 
 describe("browser accessibility snapshot", () => {
-  before(async () => {
+  beforeAll(async () => {
     try {
       browser = await chromium.launch();
     } catch (error) {
@@ -43,7 +43,7 @@ describe("browser accessibility snapshot", () => {
       }`;
     }
   });
-  after(async () => {
+  afterAll(async () => {
     await browser?.close();
   });
 

@@ -1,7 +1,7 @@
 // The fixtures are documents a writer could have produced, so they follow the current SPEC; only
 // the extension fixture breaks it on purpose, to exercise the SPEC §8 fallbacks.
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
 import { validate } from "@weft/core";
 import { fixtures } from "./fixtures.ts";
