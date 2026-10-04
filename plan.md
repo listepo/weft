@@ -13,6 +13,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T33 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
+| T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -99,3 +100,7 @@ The repository explains Weft to models (`AGENT-SPEC.md`) and to implementers (`S
 ### T34. SwiftUI generator and importer
 
 Generate SwiftUI from `.weft` and read SwiftUI source back into `.weft`, in a Rust crate `weft-swiftui` next to the core, exposed through the CLI. Approved scope: the generated code targets iOS 17 and macOS 14 or later (the data model through `@Observable` and `@Bindable`); the importer parses Swift source (no running app needed). Code that Weft generated comes back without loss; other SwiftUI code imports with a loss table, like the HTML importer. Done when every corpus screen generates Swift that compiles for iOS 17, survives Weft → SwiftUI → Weft byte-identical after formatting, and a hand-written SwiftUI sample imports with the expected losses.
+
+### T35. Web targets both ways: HTML/CSS, React and SolidJS
+
+Generate static HTML with CSS, React (JSX/TSX) and SolidJS components from `.weft`, and read each of them back from source. Approved scope: one Rust crate next to the core (JSX and TSX parsed with oxc, HTML with html5ever, or better maintained options), exposed through the CLI and through WebAssembly. The TypeScript `@weft/to-jsx` and the HTML import of `@weft/from-aria` move into it, and their packages keep their API as wrappers, as T22 did for the core, so there is one implementation. Code that Weft generated comes back without loss; hand-written code imports with a loss table. Done when every corpus screen survives Weft → HTML/CSS, React and Solid → Weft byte-identical after formatting, the generated React and Solid components render with the same accessibility tree as today's renderer, and hand-written samples import with the expected losses.

@@ -7,3 +7,4 @@
 - T32. Claude Code plugin from GitHub
 - T33. Documentation for people
 - T34. SwiftUI generator and importer
+- T35. Web targets both ways: HTML/CSS, React and SolidJS
