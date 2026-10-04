@@ -1,15 +1,14 @@
-// What a Weft element looks like on the Figma side, as plain data. The build writes this view and
+// What a Weft element looks like in a design tool, as plain data. The build writes this view and
 // the read-back computes it again from the stored source: where the layer still shows the same
 // view, the source is kept exactly as written, and only a difference counts as a designer's edit.
 import type { ComponentDef, Node, Value } from "@weft/core";
 import type { Token } from "@weft/catalog";
-import type { FLayout, FPaint } from "./api.ts";
 import { tokenPx } from "./tokens.ts";
 
 /** The variant value of an enum prop or `state` that is not set and has no default. */
 export const UNSET = "(unset)";
 
-/** Figma builds every combination of variant values; a kind past this many drops axes. */
+/** The library holds every combination of variant values; a kind past this many drops axes. */
 export const MAX_VARIANTS = 64;
 
 export type Axis = { name: string; values: readonly string[]; fallback: string };
@@ -64,7 +63,8 @@ export const CAPTION_KINDS: ReadonlySet<string> = new Set([
 
 /**
  * Values in attribute form (`{$.a}`, `{token.x}`), keyed by their JSON. The WebAssembly core writes
- * them (`displayTexts`) where it runs, and the build, in Figma's main thread, only looks them up.
+ * them (`displayTexts`) where it runs, and the build, in a plugin sandbox without WebAssembly, only
+ * looks them up.
  */
 export type Display = Readonly<Record<string, string>>;
 
@@ -90,8 +90,10 @@ export function labelDisplay(
   return label === undefined ? "" : shownAs(display, label);
 }
 
-export type Mode = FLayout["layoutMode"];
-export type Align = FLayout["counterAxisAlignItems"];
+/** How a container lays out its children: a row, a column or a grid. */
+export type Mode = "row" | "column" | "grid";
+/** Cross-axis alignment. Weft's `stretch` is drawn as `start`, which both tools show the same way. */
+export type Align = "start" | "center" | "end";
 
 export type LayoutView = {
   mode: Mode;
@@ -103,10 +105,10 @@ export type LayoutView = {
 };
 
 const ALIGN: Readonly<Record<string, Align>> = {
-  start: "MIN",
-  center: "CENTER",
-  end: "MAX",
-  stretch: "MIN",
+  start: "start",
+  center: "center",
+  end: "end",
+  stretch: "start",
 };
 
 /** Padding of the frame a kind becomes; containers that group without a box have none. */
@@ -123,12 +125,12 @@ const PADDING: Readonly<Record<string, number>> = {
 
 const STRUCTURAL = new Set(["each", "slot"]);
 
-/** The auto layout a frame gets: `stack` and `grid` from their props, every other kind fixed. */
+/** The layout a frame gets: `stack` and `grid` from their props, every other kind fixed. */
 export function layoutView(
   kind: string,
   props: Readonly<Record<string, Value>> | undefined,
   tokens: ReadonlyMap<string, Token> | undefined,
-  parentMode: Mode,
+  parentMode: Mode | "none",
 ): LayoutView {
   const gapOf = () => {
     const gap = props?.["gap"];
@@ -138,12 +140,12 @@ export function layoutView(
   };
   const padding = PADDING[kind] ?? 8;
   if (kind === "stack") {
-    const mode: Mode = props?.["direction"] === "row" ? "HORIZONTAL" : "VERTICAL";
+    const mode: Mode = props?.["direction"] === "row" ? "row" : "column";
     const align = props?.["align"];
     return {
       mode,
-      align: (typeof align === "string" ? ALIGN[align] : undefined) ?? "MIN",
-      wrap: mode === "HORIZONTAL" && props?.["wrap"] === true,
+      align: (typeof align === "string" ? ALIGN[align] : undefined) ?? "start",
+      wrap: mode === "row" && props?.["wrap"] === true,
       columns: 1,
       gap: gapOf(),
       padding,
@@ -152,8 +154,8 @@ export function layoutView(
   if (kind === "grid") {
     const columns = props?.["columns"];
     return {
-      mode: "GRID",
-      align: "MIN",
+      mode: "grid",
+      align: "start",
       wrap: false,
       columns:
         typeof columns === "number" && Number.isInteger(columns) && columns >= 1 ? columns : 1,
@@ -161,10 +163,10 @@ export function layoutView(
       padding,
     };
   }
-  const inherit = parentMode === "HORIZONTAL" ? "HORIZONTAL" : "VERTICAL";
+  const inherit = parentMode === "row" ? "row" : "column";
   return {
-    mode: STRUCTURAL.has(kind) ? inherit : kind === "row" ? "HORIZONTAL" : "VERTICAL",
-    align: "MIN",
+    mode: STRUCTURAL.has(kind) ? inherit : kind === "row" ? "row" : "column",
+    align: "start",
     wrap: false,
     columns: 1,
     gap: { px: STRUCTURAL.has(kind) ? 0 : 8 },
@@ -175,25 +177,10 @@ export function layoutView(
 /** Kinds whose spacing is a Weft prop; on every other frame spacing is part of the style. */
 export const LAYOUT_KINDS: ReadonlySet<string> = new Set(["stack", "grid"]);
 
-function paints(list: readonly FPaint[] | symbol): unknown {
-  if (typeof list === "symbol") return "mixed";
-  return list.map((p) =>
-    p.type === "SOLID"
-      ? [p.color.r, p.color.g, p.color.b, p.opacity ?? 1, p.boundVariables?.color?.id ?? ""]
-      : p.type,
-  );
-}
-
-/**
- * The visual properties Weft has no prop for, as one comparable string: fills, strokes, corner
- * radius and padding, plus spacing on frames whose spacing is not a prop.
- */
-export function styleKey(layer: FLayout, withSpacing: boolean): string {
-  return JSON.stringify([
-    paints(layer.fills),
-    paints(layer.strokes),
-    typeof layer.cornerRadius === "symbol" ? "mixed" : layer.cornerRadius,
-    [layer.paddingLeft, layer.paddingRight, layer.paddingTop, layer.paddingBottom],
-    withSpacing ? layer.itemSpacing : null,
-  ]);
+/** Every combination of the axes' values, in axis order: the variants a library kind holds. */
+export function combinations(axes: readonly Axis[]): Record<string, string>[] {
+  let out: Record<string, string>[] = [{}];
+  for (const axis of axes)
+    out = out.flatMap((c) => axis.values.map((v) => ({ ...c, [axis.name]: v })));
+  return out;
 }

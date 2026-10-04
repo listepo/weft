@@ -1,5 +1,5 @@
 {
-  "name": "@weft/figma",
+  "name": "@weft/design-tool",
   "version": "0.1.0",
   "private": true,
   "license": "Apache-2.0",
@@ -10,10 +10,7 @@
   "dependencies": {
     "@weft/catalog": "workspace:*",
     "@weft/core": "workspace:*",
-    "@weft/design-tool": "workspace:*"
-  },
-  "devDependencies": {
-    "@figma/plugin-typings": "1.140.0",
-    "@weft/from-aria": "workspace:*"
+    "@weft/from-aria": "workspace:*",
+    "zod": "4.6.5"
   }
 }
