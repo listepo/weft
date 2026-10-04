@@ -14,6 +14,7 @@
 | claude (Claude Code) | https://code.claude.com/docs/en/setup | Hosts the plugin (`plugins/claude-code`); `claude plugin validate` checks its manifests | https://github.com/anthropics/claude-code |
 | Cursor | https://cursor.com/download | Hosts the plugin (`plugins/cursor`); no test needs it | https://cursor.com |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
+| Xcode (`xcrun swiftc`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14; those tests skip without it | https://developer.apple.com/xcode/ |
 
 ## mise
 
@@ -41,7 +42,9 @@
 | thiserror | local | https://github.com/dtolnay/thiserror | Typed errors in weft-core |
 | anyhow | local | https://github.com/dtolnay/anyhow | Errors in the `weft` binary |
 | clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
-| proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core and weft-catalog: no panics, round trips, idempotent formatting |
+| proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core, weft-catalog and weft-swiftui: no panics, round trips, idempotent formatting |
+| tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
+| tree-sitter-swift | local | https://github.com/alex-pinkus/tree-sitter-swift | The Swift grammar for that parser |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
 
 ## npm
