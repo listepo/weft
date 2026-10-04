@@ -1,0 +1,23 @@
+# The bundled scripts, MCP server and WebAssembly core that the Claude Code and Cursor plugins
+# both ship. The tests read both plugin folders and the marketplace manifests at the root.
+tasks:
+  test:
+    inputs:
+      - "/plugins/*/**/*"
+      - "/.claude-plugin/**/*"
+      - "/.cursor-plugin/**/*"
+  # Regenerates the committed dist/ and AGENT-SPEC.md copy of every plugin from one build. dist/
+  # carries the WebAssembly core, so it is built after root:wasm. Uncached: the outputs are
+  # committed files.
+  build:
+    command: "node build.ts"
+    deps: ["root:wasm"]
+    inputs:
+      - "/packages/*/src/**/*"
+      - "scripts/**/*"
+      - "build.ts"
+      - "/AGENT-SPEC.md"
+      - "/packages/catalog/tokens/**/*"
+    options:
+      cache: false
+      runInCI: false

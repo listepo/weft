@@ -1,0 +1,12 @@
+{
+  "name": "weft",
+  "owner": { "name": "Ivan Tugay" },
+  "metadata": { "description": "Weft, an open UI description format for AI agents." },
+  "plugins": [
+    {
+      "name": "weft",
+      "source": "plugins/cursor",
+      "description": "Work with Weft UI screens: import HTML, export React, preview in the browser, and author with the Weft MCP server."
+    }
+  ]
+}

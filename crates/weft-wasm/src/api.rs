@@ -10,7 +10,8 @@ use weft_catalog::{ProjectOptions, Token, TokenProblem, load_project_text};
 use weft_core::{
     ApplyOptions, Catalog, DataCheckOptions, Diagnostic, Document, ParseOptions, ValidateOptions,
     apply_patches, canonicalize, check_data, check_data_json, compile_data_schema, did_you_mean,
-    parse, serialize, stringify, to_document, validate, validate_document,
+    format_value, parse, read_value, serialize, stringify, to_document, to_value, validate,
+    validate_document,
 };
 
 use crate::boundary::{
@@ -289,6 +290,20 @@ pub fn load_project(text: &str, files: Option<&str>, options: &str) -> Result<St
     })
 }
 
+/// `readValue`: one attribute value as written, read as a string prop reads it (SPEC §2.1):
+/// `{ok: true, value}` or `{ok: false, message, hint}`.
+pub fn read_attribute_value(raw: &str) -> Result<String> {
+    write(&match read_value(raw, None) {
+        Ok(value) => serde_json::json!({ "ok": true, "value": value }),
+        Err(bad) => serde_json::json!({ "ok": false, "message": bad.message, "hint": bad.hint }),
+    })
+}
+
+/// `formatValue`: a value as attribute text, before XML escaping.
+pub fn format_attribute_value(value: Option<&str>) -> Result<String> {
+    Ok(format_value(&to_value(&read_input(value)?)))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -391,6 +406,32 @@ mod tests {
         let rejected = json(&apply(Some(&doc), Some("{}"), &catalog(), "{}").unwrap());
         assert!(rejected.get("document").is_none());
         assert_eq!(rejected["diagnostics"][0]["code"], "W501");
+    }
+
+    #[test]
+    fn single_values_are_read_and_written_like_attributes() {
+        let read = |raw: &str| json(&read_attribute_value(raw).unwrap());
+        assert_eq!(read("Sign in"), json!({ "ok": true, "value": "Sign in" }));
+        assert_eq!(read("{{brace"), json!({ "ok": true, "value": "{brace" }));
+        assert_eq!(
+            read("{$.user.name}"),
+            json!({ "ok": true, "value": { "bind": "$.user.name" } })
+        );
+        assert_eq!(
+            read("{!$.email}"),
+            json!({ "ok": true, "value": { "bind": "$.email", "not": true } })
+        );
+        assert_eq!(
+            read("{token.space.md}"),
+            json!({ "ok": true, "value": { "token": "space.md" } })
+        );
+        assert_eq!(read("true"), json!({ "ok": true, "value": "true" }));
+        assert_eq!(read("{oops}")["ok"], json!(false));
+        let format = |value: &str| format_attribute_value(Some(value)).unwrap();
+        assert_eq!(format(r#""{brace""#), "{{brace");
+        assert_eq!(format(r#"{"bind":"$.a","not":true}"#), "{!$.a}");
+        assert_eq!(format(r#"{"token":"space.md"}"#), "{token.space.md}");
+        assert_eq!(format("2"), "2");
     }
 
     #[test]

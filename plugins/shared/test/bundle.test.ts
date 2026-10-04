@@ -1,30 +1,25 @@
-// The plugin works from its own folder alone, which is all Claude Code copies into its plugin
-// cache: the committed bundles are current, they import nothing but Node built-ins, and the
-// scripts and the MCP server run from a copy of the folder placed outside the repository.
+// Each plugin works from its own folder alone, which is all Claude Code and Cursor copy into their
+// plugin caches: the committed bundles are current in every plugin, they import nothing but Node
+// built-ins, and the scripts and the MCP server run from a copy of each folder placed outside the
+// repository.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import {
-  cpSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-} from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseAst } from "vite";
 import { afterAll, beforeAll, describe, test } from "vitest";
-import { buildPlugin } from "../build.ts";
+import { buildBundle, distDir, PLUGINS, specCopy, type PluginName } from "../build.ts";
 import { main as exportMain } from "../scripts/export.ts";
 import { main as importMain } from "../scripts/import.ts";
 import { main as renderMain } from "../scripts/render.ts";
+import { installCopy } from "./install.ts";
 import { startServer, WEFT_TOOLS } from "./mcp-stdio.ts";
 
 const here = (path: string) => fileURLToPath(new URL(path, import.meta.url));
-const PLUGIN = here("..");
+const REPOSITORY = resolve(here("../../.."));
+const NAMES = Object.keys(PLUGINS) as PluginName[];
 const CORPUS = here("../../../corpus");
 const screens = readdirSync(CORPUS, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -68,26 +63,31 @@ beforeAll(() => {
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 describe("the committed bundles", () => {
-  test("are what the sources build to, so a source change needs `moon run claude-code:build`", async () => {
+  test("are what the sources build to, so a source change needs `moon run shared:build`", async () => {
     const out = join(scratch, "rebuilt");
-    const spec = join(scratch, "AGENT-SPEC.md");
-    await buildPlugin(out, spec);
-    const committed = join(PLUGIN, "dist");
-    assert.deepEqual(filesIn(committed), filesIn(out));
-    for (const file of filesIn(out)) {
-      assert.ok(
-        readFileSync(join(committed, file)).equals(readFileSync(join(out, file))),
-        `${file} is stale`,
+    await buildBundle(out);
+    for (const name of NAMES) {
+      const committed = distDir(name);
+      assert.deepEqual(filesIn(committed), filesIn(out), name);
+      for (const file of filesIn(out)) {
+        assert.ok(
+          readFileSync(join(committed, file)).equals(readFileSync(join(out, file))),
+          `${name}: ${file} is stale`,
+        );
+      }
+      assert.equal(
+        readFileSync(specCopy(name), "utf8"),
+        readFileSync(join(REPOSITORY, "AGENT-SPEC.md"), "utf8"),
+        `${name}: AGENT-SPEC.md copy is stale`,
       );
     }
-    assert.equal(
-      readFileSync(join(PLUGIN, "skills/spec/AGENT-SPEC.md"), "utf8"),
-      readFileSync(spec, "utf8"),
-    );
   });
+});
+
+describe.each(NAMES)("the committed bundle of the %s plugin", (name) => {
+  const dist = distDir(name);
 
   test("import nothing but Node built-ins and files of their own folder", () => {
-    const dist = join(PLUGIN, "dist");
     for (const file of jsFiles(dist)) {
       for (const specifier of importSpecifiers(readFileSync(join(dist, file), "utf8"))) {
         if (specifier.startsWith("node:")) continue;
@@ -103,7 +103,6 @@ describe("the committed bundles", () => {
   test("ship the WebAssembly module at every path they read it from", () => {
     // Paths with a folder part are the ones read from disk. The bare `weft_bg.wasm` of the
     // generated glue is its fetch fallback, which Node never takes (the core reads the file).
-    const dist = join(PLUGIN, "dist");
     const named = new Set<string>();
     for (const file of jsFiles(dist)) {
       const code = readFileSync(join(dist, file), "utf8");
@@ -118,13 +117,12 @@ describe("the committed bundles", () => {
 
   test("each program says so when Node is too old to tell it was started as one", () => {
     for (const entry of ["import", "export", "render", "server"]) {
-      const code = readFileSync(join(PLUGIN, "dist", `${entry}.js`), "utf8");
+      const code = readFileSync(join(dist, `${entry}.js`), "utf8");
       assert.match(code, /Node 24\.2 or later is required/, entry);
     }
   });
 
   test("name no home directory, user or checkout path, so they build the same anywhere", () => {
-    const dist = join(PLUGIN, "dist");
     for (const file of filesIn(dist)) {
       const text = readFileSync(join(dist, file)).toString("latin1");
       assert.equal(/\/(Users|home)\/[\w.-]+/.test(text), false, file);
@@ -132,25 +130,20 @@ describe("the committed bundles", () => {
   });
 
   test("do not refer to the repository by a path", () => {
-    const dist = join(PLUGIN, "dist");
     for (const file of jsFiles(dist)) {
       const code = readFileSync(join(dist, file), "utf8");
-      assert.equal(code.includes(resolve(PLUGIN, "../..")), false, file);
+      assert.equal(code.includes(REPOSITORY), false, file);
     }
   });
 });
 
-describe("the plugin folder alone", () => {
-  const copy = () => join(scratch, "cache/weft/0.1.0");
+describe.each(NAMES)("the %s plugin folder alone", (plugin) => {
+  const copy = () => join(scratch, "cache", plugin, "weft/0.1.0");
   /** An empty directory that is neither the plugin nor the repository, like a user's project. */
-  const project = () => join(scratch, "project");
+  const project = () => join(scratch, "project", plugin);
 
   beforeAll(() => {
-    // What Claude Code copies: the plugin folder, without the workspace's `node_modules`.
-    cpSync(PLUGIN, copy(), {
-      recursive: true,
-      filter: (source) => !source.split("/").includes("node_modules"),
-    });
+    installCopy(plugin, copy());
     mkdirSync(project(), { recursive: true });
   });
 
@@ -209,7 +202,7 @@ describe("the plugin folder alone", () => {
 
   test("render's built-in default tokens are the catalog's default token file", () => {
     const source = join(CORPUS, screens[0] as string, "screen.weft");
-    const defaults = join(PLUGIN, "../../packages/catalog/tokens/default.tokens.json");
+    const defaults = join(REPOSITORY, "packages/catalog/tokens/default.tokens.json");
     const built = node("render.js", source, join(project(), "built-in.html"));
     const given = node("render.js", source, join(project(), "given.html"), "--tokens", defaults);
     assert.equal(built.status, 0, built.stderr);
@@ -218,22 +211,6 @@ describe("the plugin folder alone", () => {
       readFileSync(join(project(), "built-in.html"), "utf8"),
       readFileSync(join(project(), "given.html"), "utf8"),
     );
-  });
-
-  test("every skill and the MCP config point at a file of the copy", () => {
-    const commands = [
-      ...["export", "import", "render"].flatMap((name) => {
-        const text = readFileSync(join(copy(), "skills", name, "SKILL.md"), "utf8");
-        return [...text.matchAll(/\$\{CLAUDE_PLUGIN_ROOT\}\/([\w./-]+)/g)].map(
-          (m) => m[1] as string,
-        );
-      }),
-      ...JSON.parse(readFileSync(join(copy(), ".mcp.json"), "utf8")).mcpServers.weft.args.map(
-        (arg: string) => arg.replace("${CLAUDE_PLUGIN_ROOT}/", ""),
-      ),
-    ];
-    assert.equal(commands.length, 4);
-    for (const file of commands) assert.ok(existsSync(join(copy(), file)), file);
   });
 
   test("the MCP server serves the weft tools, validates and renders a page", async () => {

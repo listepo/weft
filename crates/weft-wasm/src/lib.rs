@@ -123,3 +123,13 @@ pub fn project_files(text: &str) -> Result<String, JsError> {
 pub fn load_project(text: &str, files: Option<String>, options: &str) -> Result<String, JsError> {
     Ok(api::load_project(text, files.as_deref(), options)?)
 }
+
+#[wasm_bindgen(js_name = readValue)]
+pub fn read_value(raw: &str) -> Result<String, JsError> {
+    Ok(api::read_attribute_value(raw)?)
+}
+
+#[wasm_bindgen(js_name = formatValue)]
+pub fn format_value(value: Option<String>) -> Result<String, JsError> {
+    Ok(api::format_attribute_value(value.as_deref())?)
+}

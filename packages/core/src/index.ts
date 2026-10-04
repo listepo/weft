@@ -31,5 +31,6 @@ export {
   TOKEN,
 } from "./rules.ts";
 export { serialize } from "./serialize.ts";
+export { formatValue, readValue, type ReadValue } from "./values.ts";
 export type { ListSource, NodeSource, SourceMap } from "./source.ts";
 export { validate, type ValidateOptions } from "./validate.ts";
