@@ -18,3 +18,10 @@ tasks:
     options:
       cache: false
       runInCI: false
+  # The Rust core and CLI. The differential fixture ties these to the TypeScript core's results.
+  rust-test:
+    command: 'cargo nextest run --workspace'
+    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock']
+  rust-lint:
+    script: 'cargo clippy --workspace --all-targets -- -D warnings && cargo fmt --all --check'
+    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock']
