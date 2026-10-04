@@ -14,7 +14,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
-| T37 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T37 | in progress | P1 | 3 | 5% | Claude Code / claude-sonnet-5-5 |
 | T38 | todo | P2 | 3 | 0% | |
 | T39 | todo | P1 | 4 | 0% | |
 | T40 | todo | P2 | 4 | 0% | |
@@ -119,6 +119,13 @@ The same features as the Claude Code plugin (T30, T32), packaged for Cursor:
 - the authoring guide from `AGENT-SPEC.md`, as rules or skills.
 
 It lives in this repository (`plugins/cursor`) and reuses the bundled scripts and MCP server of the Claude Code plugin rather than a second copy: shared files move to one place that both plugins use. Follow the plugin format from Cursor's official documentation, citing its URL and the date it was checked. Done when the plugin installs in Cursor from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
+
+Execution plan:
+- Format (checked 2026-10-05, cursor.com/docs/plugins and /docs/reference/plugins, github.com/cursor/plugins): a Cursor plugin is a folder with `.cursor-plugin/plugin.json`, default-discovered `skills/`, `rules/*.mdc`, `commands/`, `mcp.json` (`${CURSOR_PLUGIN_ROOT}` in command/args), and a repository-level `.cursor-plugin/marketplace.json`. Cursor caches only the `source` folder of a marketplace entry (verified in `~/.cursor/plugins/cache`, read-only), so the bundle must sit inside `plugins/cursor`.
+- Shared bundle: move the scripts (`import`, `export`, `render`, `lib`), the bundler (`build.ts`) and the shared tests into a new `plugins/shared` project. One build writes `dist/` (scripts, MCP server, WebAssembly core) and the AGENT-SPEC copy into both plugin folders; `moon run shared:build` is the only task that writes them. Claude Code's `moon run claude-code:build` goes away in favour of it; AGENTS.md and the docs are updated.
+- Plugin: `plugins/cursor` with the manifest, `mcp.json`, skills `weft-import`, `weft-export`, `weft-render`, `weft-spec` (skills reach the scripts by a path relative to the skill folder, because Cursor documents no root variable for skills), a glob-attached rule for `*.weft`, and a README citing the sources. Root `.cursor-plugin/marketplace.json` lists it.
+- Tests (Vitest): the bundle test runs for both plugin folders (committed `dist/` and spec copies equal a fresh build; only Node built-ins imported; scripts and MCP server run from a copy of the folder as Cursor installs it); Cursor manifest and marketplace are validated with Cursor's official JSON schemas (vendored, MIT), plus checks of component discovery, skill frontmatter, rule frontmatter and `mcp.json` variables.
+- Docs: `docs/cursor-plugin.md`, AGENTS.md rule about the bundle, `toolchain.md` rows. Manual checks in a signed-in Cursor are listed in the report.
 
 ### T38. Open Design plugin
 
