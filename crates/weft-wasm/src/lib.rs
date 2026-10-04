@@ -73,6 +73,13 @@ impl Catalog {
         Ok(web::build(sems, reserved, &self.0)?)
     }
 
+    /// `toJsx` of `@weft/to-jsx`.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = toJsx)]
+    pub fn to_jsx(&self, document: Option<String>, options: &str) -> Result<String, JsError> {
+        Ok(web::to_jsx(document.as_deref(), options, &self.0)?)
+    }
+
     #[wasm_bindgen(js_name = checkData)]
     pub fn check_data(
         &self,
@@ -170,4 +177,10 @@ pub fn instance_id(raw: &str) -> Option<String> {
 #[wasm_bindgen(js_name = webTables)]
 pub fn web_tables() -> Result<String, JsError> {
     Ok(web::tables()?)
+}
+
+#[cfg(feature = "web")]
+#[wasm_bindgen(js_name = jsxTables)]
+pub fn jsx_tables() -> Result<String, JsError> {
+    Ok(web::jsx_tables()?)
 }

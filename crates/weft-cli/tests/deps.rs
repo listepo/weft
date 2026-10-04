@@ -104,6 +104,7 @@ fn the_web_crate_adds_only_its_parsers() {
             "html5ever",
             "serde",
             "serde_json",
+            "unicode-properties",
             "weft-core",
             "weft-import"
         ]

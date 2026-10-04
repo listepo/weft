@@ -2,13 +2,14 @@
 //! (`@weft/core/web` loads it): core-only consumers do not carry the HTML and JSX parsers.
 
 use indexmap::IndexMap;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use weft_core::{Catalog, Code, Diagnostic};
 use weft_import::{
     BuildOptions, DISSOLVED_ROLES, ROLE_REFINEMENTS, Sem, build_document, empty_result,
 };
+use weft_web::{Framework, JsxOptions};
 
-use crate::boundary::{BindingError, Result, read_list, write};
+use crate::boundary::{BindingError, Result, read_input, read_list, write};
 
 /// `fromDom` of `@weft/from-aria`.
 pub fn from_dom(html: &str, catalog: &Catalog) -> Result<String> {
@@ -91,6 +92,71 @@ pub fn tables() -> Result<String> {
     })
 }
 
+#[derive(Default, Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum FrameworkWire {
+    #[default]
+    React,
+    Solid,
+}
+
+#[derive(Default, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct JsxWire {
+    component_name: Option<String>,
+    #[serde(default)]
+    framework: FrameworkWire,
+    #[serde(default)]
+    typescript: bool,
+}
+
+/// What a generator returns: the code, or why it refused the options.
+#[derive(Serialize)]
+#[serde(untagged)]
+enum Generated {
+    Code { code: String },
+    Error { error: String },
+}
+
+/// `toJsx` of `@weft/to-jsx`: `{code}`, or `{error}` for a component name it cannot use.
+pub fn to_jsx(document: Option<&str>, options: &str, catalog: &Catalog) -> Result<String> {
+    let document = read_input(document)?;
+    let wire: JsxWire = serde_json::from_str(options).map_err(|source| BindingError::Wire {
+        what: "JSX options",
+        source,
+    })?;
+    let options = JsxOptions {
+        catalog,
+        component_name: wire.component_name.as_deref(),
+        framework: match wire.framework {
+            FrameworkWire::React => Framework::React,
+            FrameworkWire::Solid => Framework::Solid,
+        },
+        typescript: wire.typescript,
+    };
+    write(&match weft_web::to_jsx(&document, &options) {
+        Ok(code) => Generated::Code { code },
+        Err(e) => Generated::Error {
+            error: e.to_string(),
+        },
+    })
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct JsxTables {
+    max_depth: usize,
+    runtime: IndexMap<&'static str, &'static str>,
+}
+
+/// The constants `@weft/to-jsx` exports, read from the generator instead of copied.
+pub fn jsx_tables() -> Result<String> {
+    write(&JsxTables {
+        max_depth: weft_web::jsx::MAX_DEPTH,
+        runtime: weft_web::jsx::react_runtime().collect(),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -107,6 +173,18 @@ mod tests {
         let value: serde_json::Value = serde_json::from_str(&out).unwrap();
         assert_eq!(value["rootPath"], "/screen#screen");
         assert!(value["document"]["root"]["children"].is_array());
+    }
+
+    #[test]
+    fn jsx_reports_a_bad_component_name_as_data() {
+        let catalog = weft_catalog::core_catalog().unwrap();
+        let out = to_jsx(Some("null"), r#"{"componentName":"x"}"#, &catalog).unwrap();
+        assert!(out.starts_with(r#"{"error":"#), "{out}");
+        let out = to_jsx(Some("null"), r#"{"framework":"solid"}"#, &catalog).unwrap();
+        assert!(
+            out.contains("export default function WeftScreen(props)"),
+            "{out}"
+        );
     }
 
     #[test]

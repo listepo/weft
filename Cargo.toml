@@ -28,6 +28,8 @@ thiserror = "2.0.21"
 unicode-normalization = "0.1.25"
 # weft-web: the WHATWG HTML parser, so imported pages are read as a browser builds them.
 html5ever = "0.40.1"
+# weft-web: Unicode letter and number classes, as the `\p{L}`/`\p{N}` of the generators' JSX text checks.
+unicode-properties = { version = "0.1.4", default-features = false, features = ["general-category"] }
 # tests: weft-core, weft-catalog
 proptest = "1.11.0"
 # weft-cli

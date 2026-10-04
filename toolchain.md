@@ -44,6 +44,7 @@
 | proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core and weft-catalog: no panics, round trips, idempotent formatting |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
 | unicode-normalization | local | https://github.com/unicode-rs/unicode-normalization | NFKD before folding imported names into id slugs, as `String.prototype.normalize` does in the TypeScript importers |
+| unicode-properties | local | https://github.com/unicode-rs/unicode-properties | Unicode letter and number classes (`\p{L}`, `\p{N}`) for the JSX generators' check of which text runs print as written |
 | html5ever | local | https://github.com/servo/html5ever | Parses HTML in `weft-web` with the WHATWG tree builder, so imported pages read as a browser builds them |
 
 ## npm
