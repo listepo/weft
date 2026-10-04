@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Weft</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 12px;
+        font: 12px/1.4 Inter, system-ui, sans-serif;
+        color: var(--figma-color-text, #222);
+        background: var(--figma-color-bg, #fff);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 160px;
+        font: 11px/1.4 ui-monospace, monospace;
+        color: inherit;
+        background: var(--figma-color-bg-secondary, #f5f5f5);
+        border: 1px solid var(--figma-color-border, #ddd);
+        border-radius: 4px;
+        padding: 6px;
+      }
+      .row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      button {
+        font: inherit;
+        padding: 4px 10px;
+      }
+      #notes li {
+        margin-bottom: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <strong>Weft → Figma</strong>
+    <div class="row">
+      <input id="file" type="file" accept=".weft,text/plain" />
+    </div>
+    <textarea id="source" placeholder="Paste a .weft screen" spellcheck="false"></textarea>
+    <div class="row"><button id="build">Build frames</button></div>
+    <strong>Figma → Weft</strong>
+    <div class="row">
+      <button id="export">Export selected frame</button>
+      <button id="copy" disabled>Copy</button>
+      <button id="download" disabled>Download</button>
+    </div>
+    <textarea id="result" readonly spellcheck="false"></textarea>
+    <div id="status" role="status"></div>
+    <ul id="notes"></ul>
+    <script>
+      // Replies come from the plugin's own main code; they are still shown as text, never as HTML,
+      // because layer names and texts in them come from whatever file the plugin runs in.
+      const $ = (id) => document.getElementById(id);
+      let fileName = "screen.weft";
+      const send = (pluginMessage) => parent.postMessage({ pluginMessage }, "*");
+      const setStatus = (text) => ($("status").textContent = text);
+      const showNotes = (items) => {
+        const list = $("notes");
+        list.replaceChildren();
+        for (const text of items) {
+          const li = document.createElement("li");
+          li.textContent = text;
+          list.append(li);
+        }
+      };
+
+      $("file").addEventListener("change", async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (file) $("source").value = await file.text();
+      });
+      $("build").addEventListener("click", () => {
+        setStatus("Building…");
+        send({ type: "build", markup: $("source").value });
+      });
+      $("export").addEventListener("click", () => {
+        setStatus("Exporting…");
+        send({ type: "export" });
+      });
+      $("copy").addEventListener("click", () => {
+        // The plugin iframe has no clipboard permission, so the text is copied through a selection.
+        $("result").select();
+        document.execCommand("copy");
+        setStatus("Copied.");
+      });
+      $("download").addEventListener("click", () => {
+        const blob = new Blob([$("result").value], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      });
+
+      window.onmessage = (event) => {
+        const reply = event.data && event.data.pluginMessage;
+        if (!reply || typeof reply.type !== "string") return;
+        const diagnostics = (reply.diagnostics || []).map(
+          (d) => `${d.severity} ${d.code}: ${d.message}`,
+        );
+        if (reply.type === "built") {
+          setStatus("Built.");
+          showNotes(diagnostics);
+        } else if (reply.type === "exported") {
+          fileName = reply.fileName;
+          $("result").value = reply.markup;
+          $("copy").disabled = false;
+          $("download").disabled = false;
+          const losses = reply.losses.map((l) => `${l.kind} at ${l.path}: ${l.note}`);
+          setStatus(losses.length === 0 ? "Exported." : `Exported with ${losses.length} losses.`);
+          showNotes([...losses, ...diagnostics]);
+        } else if (reply.type === "error") {
+          setStatus(reply.message);
+          showNotes(diagnostics);
+        }
+      };
+    </script>
+  </body>
+</html>

@@ -302,6 +302,22 @@ importers:
         specifier: 19.3.0
         version: 19.3.0(react@19.3.0)
 
+  plugins/figma:
+    dependencies:
+      '@weft/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
+      '@weft/figma':
+        specifier: workspace:*
+        version: link:../../packages/figma
+    devDependencies:
+      '@figma/plugin-typings':
+        specifier: 1.140.0
+        version: 1.140.0
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@26.6.4)
+
 packages:
 
   '@figma/plugin-typings@1.140.0':

@@ -13,5 +13,14 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["vitest.config.ts", "packages/*/src", "packages/*/test", "bench/src", "bench/test"]
+  "include": [
+    "vitest.config.ts",
+    "packages/*/src",
+    "packages/*/test",
+    "plugins/*/src",
+    "plugins/*/test",
+    "plugins/*/vite.config.ts",
+    "bench/src",
+    "bench/test"
+  ]
 }

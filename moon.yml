@@ -9,10 +9,10 @@ workspace:
 tasks:
   typecheck:
     command: 'tsc --noEmit -p .'
-    inputs: ['/packages/**/*', '/bench/**/*', '/tsconfig.json']
+    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/tsconfig.json']
   lint:
     script: 'oxlint --deny-warnings . && oxfmt --check "**/*.{ts,tsx,json}"'
-    inputs: ['/packages/**/*', '/bench/**/*', '/compat/**/*', '/*.json']
+    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/compat/**/*', '/*.json']
   fmt:
     command: 'oxfmt "**/*.{ts,tsx,json}"'
     options:
