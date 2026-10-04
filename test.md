@@ -66,3 +66,4 @@ Every kept run is recorded here, newest last; see `AGENTS.md`. Weft columns: fir
 | 2026-10-03 | 55b3159 | Anthropic / claude-haiku-4-5-20251001 | edit, all | 1 | 100 / 100 / 100% | 97.2 / 94.4 / 97.2% | same file | No replies saved |
 | 2026-10-03 | 55b3159 | Anthropic / claude-sonnet-5-5 | read | — | — | — | none | Stopped after 39 of 288 requests: credit balance exhausted; nothing saved. Most baseline misses were action spellings, fixed in T25 |
 | 2026-10-04 | 6c36b24 | LM Studio / prism-ml/bonsai-27b | read, login only | 1 | 100% answered | 100 / 100 / 100% | `read-2026-10-04T19-35-27-209Z` | Smoke run; HTML and JSX answered in their own action spelling |
+| 2026-10-04 | a9e189a | LM Studio / prism-ml/bonsai-27b | edit, login only | 1 | 100 / 100 / 66.7% | 100 / 100 / 100% | `edit-2026-10-04T19-44-58-547Z` | Smoke run; the Weft miss is `login.e2`: the model bound `disabled` to `{!$.busy}` instead of `{$.busy}` |
