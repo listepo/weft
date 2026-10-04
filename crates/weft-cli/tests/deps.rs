@@ -110,9 +110,11 @@ fn the_web_crate_adds_only_its_parsers() {
         deps,
         [
             "html5ever",
+            "indexmap",
             "serde",
             "serde_json",
             "unicode-properties",
+            "weft-catalog",
             "weft-core",
             "weft-import"
         ]
@@ -145,5 +147,8 @@ fn the_swiftui_generator_builds_without_the_importers_c_parser() {
         .map(|d| d["name"].as_str().unwrap().to_owned())
         .collect();
     optional.sort();
-    assert_eq!(optional, ["tree-sitter", "tree-sitter-swift", "weft-import"]);
+    assert_eq!(
+        optional,
+        ["tree-sitter", "tree-sitter-swift", "weft-import"]
+    );
 }

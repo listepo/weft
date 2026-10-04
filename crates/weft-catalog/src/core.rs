@@ -5,6 +5,10 @@ use weft_core::Catalog;
 
 pub const CORE_CATALOG_JSON: &str = include_str!("../../../packages/catalog/catalog.json");
 
+/// The default design tokens of `packages/catalog`, for generators whose caller has no token file.
+pub const DEFAULT_TOKENS_JSON: &str =
+    include_str!("../../../packages/catalog/tokens/default.tokens.json");
+
 #[derive(Debug, thiserror::Error)]
 pub enum CatalogError {
     #[error("the embedded core catalog does not parse: {0}")]

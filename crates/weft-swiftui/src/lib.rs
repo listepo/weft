@@ -18,8 +18,7 @@ pub use import::{
 };
 
 /// The default design tokens of `packages/catalog`, for callers that have no token file.
-pub const DEFAULT_TOKENS_JSON: &str =
-    include_str!("../../../packages/catalog/tokens/default.tokens.json");
+pub use weft_catalog::DEFAULT_TOKENS_JSON;
 
 /// Something a valid document says that the generator cannot express in Swift.
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -9,15 +9,16 @@ publish.workspace = true
 
 [dependencies]
 html5ever = { workspace = true }
+indexmap = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 unicode-properties = { workspace = true }
+weft-catalog = { workspace = true }
 weft-core = { workspace = true }
 weft-import = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
-weft-catalog = { workspace = true }
 
 [lints]
 workspace = true
