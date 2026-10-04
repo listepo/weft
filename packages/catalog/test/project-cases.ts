@@ -297,6 +297,25 @@ export const projectCases: Record<string, ProjectCase> = {
     }),
     codes: ["W702", "W702", "W702", "W702", "W702"],
   },
+  "the Open Design plugin's settings are checked, other plugins are not": {
+    project: project({
+      plugins: {
+        "open-design": { tokensDir: "tokens/imported" },
+        "my-plugin": { tokensDir: "../anything" },
+      },
+    }),
+    codes: [],
+  },
+  "a bad Open Design tokensDir is a file name error, a wrong key an unknown key": {
+    project: project({
+      plugins: { "open-design": { tokensDir: "../escape", tokenDir: "tokens" } },
+    }),
+    codes: ["W703", "W702"],
+  },
+  "an Open Design tokensDir that is no string": {
+    project: project({ plugins: { "open-design": { tokensDir: 3 } } }),
+    codes: ["W701"],
+  },
   "file names in tool sections follow the project rules": {
     project: project({ render: { tokens: ["ok.json", "/abs.json", "a\\b.json"], data: "c:/x" } }),
     codes: ["W703", "W703", "W703"],
