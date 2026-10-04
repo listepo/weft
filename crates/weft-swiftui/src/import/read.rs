@@ -543,24 +543,25 @@ impl<'a> Reader<'a> {
         }
     }
 
+    /// `path` is the element's path without its id (`…/button`); a loss names the element with
+    /// the id generated for it, so it points at an element of the imported document.
     fn take_id(&mut self, explicit: Option<String>, kind: &str, name: &str, path: &str) -> String {
-        if let Some(id) = explicit {
-            if is_id(&id) && !self.used.contains(&id) {
+        let note = match explicit {
+            Some(id) if is_id(&id) && !self.used.contains(&id) => {
                 self.used.insert(id.clone());
                 return id;
             }
-            self.lose(
-                LossKind::Ids,
-                path,
-                format!("the id {id:?} is not a valid, unique Weft id; a new one is generated"),
-            );
-        } else {
-            self.lose(
-                LossKind::Ids,
-                path,
-                "the view has no accessibilityIdentifier; the id is generated",
-            );
-        }
+            Some(id) => {
+                format!("the id {id:?} is not a valid, unique Weft id; a new one is generated")
+            }
+            None => "the view has no accessibilityIdentifier; the id is generated".to_owned(),
+        };
+        let id = self.generate_id(kind, name);
+        self.lose(LossKind::Ids, &format!("{path}#{id}"), note);
+        id
+    }
+
+    fn generate_id(&mut self, kind: &str, name: &str) -> String {
         let base = if kind == "each" { "each" } else { kind };
         let s = slug(name);
         let candidate = format!("{base}-{s}");
@@ -612,14 +613,20 @@ impl<'a> Reader<'a> {
     }
 
     fn path_inner(&self, e: &Expr, depth: usize) -> Option<String> {
+        self.path_in(e, depth, self.aliases.len())
+    }
+
+    /// `scopes` is how many alias scopes `e` sees: an argument of an inlined view is written in
+    /// the caller, so it sees only the scopes outside the view (`DeviceRow(device: device)`).
+    fn path_in(&self, e: &Expr, depth: usize, scopes: usize) -> Option<String> {
         if depth > MAX_DEPTH * 4 {
             return None;
         }
         match e {
             Expr::Ident { name, .. } => {
-                for scope in self.aliases.iter().rev() {
+                for (i, scope) in self.aliases[..scopes].iter().enumerate().rev() {
                     if let Some(alias) = scope.get(name) {
-                        return self.path_inner(alias, depth + 1);
+                        return self.path_in(alias, depth + 1, i);
                     }
                 }
                 if let Some(l) = self.loops.iter().rev().find(|l| l.ident == *name) {
@@ -639,15 +646,16 @@ impl<'a> Reader<'a> {
             } if name == "isEmpty" => None,
             Expr::Member { base, name, .. } => {
                 if matches!(base.as_ref(), Expr::Ident { name: s, .. } if s == "self") {
-                    return self.path_inner(
+                    return self.path_in(
                         &Expr::Ident {
                             name: name.clone(),
                             raw: false,
                         },
                         depth + 1,
+                        scopes,
                     );
                 }
-                let base = self.path_inner(base, depth + 1)?;
+                let base = self.path_in(base, depth + 1, scopes)?;
                 is_path_name(name).then(|| format!("{base}.{name}"))
             }
             Expr::Subscript { base, args } => match args.as_slice() {
@@ -663,7 +671,7 @@ impl<'a> Reader<'a> {
                     }
                     match value {
                         Expr::Num(n) if *n >= 0.0 && n.fract() == 0.0 => {
-                            let base = self.path_inner(base, depth + 1)?;
+                            let base = self.path_in(base, depth + 1, scopes)?;
                             Some(format!("{base}.{}", *n as u64))
                         }
                         _ => None,
