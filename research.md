@@ -122,7 +122,7 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | --- | --- | --- |
 | `weft.json` is found by walking up from the screen; an explicit argument wins | The `tsconfig.json` lookup: the compiler searches the current directory, then each parent, unless a project is named | https://www.typescriptlang.org/docs/handbook/tsconfig-json.html (2026-10-05) |
 | Token files merge in order and aliases resolve after the merge | The DTCG resolver module merges token sets in order, later sets override earlier ones, and references are resolved on the merged result | https://www.designtokens.org/tr/2025.10/resolver/ (2026-10-05) |
-| The data schema is a JSON Schema 2020-12 subset (`type`, `properties`, `required`, `additionalProperties`, `items`, `enum`, `const`) | The schema format providers and editors already accept; the unsupported keywords are reported, not ignored | https://json-schema.org/draft/2020-12/json-schema-core (2026-10-05) |
+| The data schema is a JSON Schema 2020-12 subset (`type`, `properties`, `additionalProperties`, `items`, boolean schemas) | The schema format providers and editors already accept; the unsupported keywords are reported, not ignored | https://json-schema.org/draft/2020-12/json-schema-core (2026-10-05) |
 | Not JSON Type Definition | JTD (RFC 8927) is closed by default and simpler, but fewer tools and models know it | https://www.rfc-editor.org/rfc/rfc8927 (2026-10-05) |
 | An object schema with `properties` and no `additionalProperties` is closed | A deliberate deviation from JSON Schema, where objects are open: a misspelled binding path must be an error, not an allowed extra member (SPEC §10.5) | — |
 | Fragments (part B, proposal) | `docs/fragments-design.md`, with its own sources | — |
