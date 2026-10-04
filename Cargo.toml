@@ -22,6 +22,8 @@ serde = { version = "1.0.229", features = ["derive"] }
 # parses numbers exactly as JSON.parse does; unbounded_depth admits documents nested 256 deep.
 serde_json = { version = "1.0.151", features = ["preserve_order", "float_roundtrip", "unbounded_depth"] }
 thiserror = "2.0.21"
+# tests: weft-core, weft-catalog
+proptest = "1.11.0"
 # weft-cli
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }

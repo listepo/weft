@@ -40,6 +40,7 @@
 | thiserror | local | https://github.com/dtolnay/thiserror | Typed errors in weft-core |
 | anyhow | local | https://github.com/dtolnay/anyhow | Errors in the `weft` binary |
 | clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
+| proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core and weft-catalog: no panics, round trips, idempotent formatting |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
 
 ## npm
