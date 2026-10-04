@@ -45,6 +45,15 @@ Run the binding tests in Node, Deno, Bun and a headless browser through moon. Do
 
 Run every TypeScript test suite with Vitest (on Vite) instead of `node:test`: the 28 test files in `packages/*/test` and `bench/test` move to Vitest's API, `fast-check` stays for property tests, and each package's moon `test` task calls `vitest run`. Vitest's browser mode then serves the browser leg of T24, and the same suites check the WASM build of T22. `AGENTS.md` changes its test rule from `node:test` to Vitest. Done when every existing test passes under Vitest with the same count, `moon ci` is green, and `node:test` is no longer used.
 
+Execution plan:
+
+1. Baseline under `node:test` (per package, `node --test --test-reporter=tap`): catalog 122, core 152, from-aria 107, mcp 32, render-react 154 (plus 1 suite), to-jsx 139, bench 76; 782 in total over 32 test files (the card's 28 is outdated).
+2. Add `vitest` and `vite` (a required peer of Vitest) to the root `devDependencies` and one root `vitest.config.ts` (`include: test/**/*.test.ts`, a Node environment, no build step: Vite transforms the TypeScript sources). Keep `node:assert/strict`: a minimal diff over 32 files and Vitest's `expect` adds nothing here.
+3. Convert the test files: `import { test } from "node:test"` becomes `from "vitest"`; `t.test(...)` subtests become `describe` blocks of `test`s (Vitest has no subtests); `t.skip(reason)` becomes `ctx.skip(reason)`; `before`/`after` become `beforeAll`/`afterAll`. Test names stay identical.
+4. The inherited moon `test` task runs `vitest run` and keeps its inputs; the render-react `test:browser` script follows.
+5. `AGENTS.md`, `README.md` (if it shows test commands) and `toolchain.md` move to Vitest.
+6. Verify: per-package counts under Vitest (JSON reporter) equal the baseline, test names match, `WEFT_UPDATE_FIXTURES=1` leaves the fixtures byte-identical, `moon run :test root:typecheck root:lint root:rust-test root:rust-lint` is green, and `grep` finds no `node:test` or `node --test` outside the history docs.
+
 ### T28. Binding readback against inverted conditions
 
 In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in while `$.busy` is true. It changed `{!$.email}` to `{!$.busy}` and kept the `!`. The markup is valid, but the condition is inverted. The HTML and JSX baselines got it right. Validation cannot see intent. The model can, if the core tells it in plain words what a binding means. Depends on T20.
