@@ -117,6 +117,8 @@ codes! {
     W312 => Error, "`screen` below the root.";
     W313 => Error, "Submit button outside a `form`.";
     W314 => Error, "`<each>` without an element to repeat.";
+    W315 => Error, "Binding path not declared in the data schema.";
+    W316 => Error, "Bound data has a type the attribute does not take.";
     W401 => Mode, "Unknown element.";
     W402 => Mode, "Unknown attribute.";
     W403 => Mode, "Newer minor version of the format.";
@@ -132,6 +134,16 @@ codes! {
     W509 => Error, "Inserted markup reuses an id of the document.";
     W601 => Error, "Imported input cannot be read.";
     W602 => Warning, "Imported input exceeds an import limit.";
+    W701 => Error, "Project file or one of its members has the wrong shape.";
+    W702 => Mode, "Unknown member in the project file.";
+    W703 => Error, "File name in the project file is not allowed.";
+    W704 => Error, "File named by the project cannot be read.";
+    W705 => Error, "Problem in the project's token files.";
+    W706 => Error, "Catalog extension is not a valid catalog.";
+    W707 => Error, "Catalog extension narrows or changes the core catalog.";
+    W708 => Error, "Project action name breaks the action grammar.";
+    W709 => Error, "Data schema is malformed.";
+    W710 => Warning, "Data schema keyword is not supported.";
 }
 
 impl Code {

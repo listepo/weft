@@ -73,6 +73,8 @@ export const DIAGNOSTIC_CODES = {
   W312: { severity: "error", summary: "`screen` below the root." },
   W313: { severity: "error", summary: "Submit button outside a `form`." },
   W314: { severity: "error", summary: "`<each>` without an element to repeat." },
+  W315: { severity: "error", summary: "Binding path not declared in the data schema." },
+  W316: { severity: "error", summary: "Bound data has a type the attribute does not take." },
 
   W401: { severity: "mode", summary: "Unknown element." },
   W402: { severity: "mode", summary: "Unknown attribute." },
@@ -91,6 +93,17 @@ export const DIAGNOSTIC_CODES = {
 
   W601: { severity: "error", summary: "Imported input cannot be read." },
   W602: { severity: "warning", summary: "Imported input exceeds an import limit." },
+
+  W701: { severity: "error", summary: "Project file or one of its members has the wrong shape." },
+  W702: { severity: "mode", summary: "Unknown member in the project file." },
+  W703: { severity: "error", summary: "File name in the project file is not allowed." },
+  W704: { severity: "error", summary: "File named by the project cannot be read." },
+  W705: { severity: "error", summary: "Problem in the project's token files." },
+  W706: { severity: "error", summary: "Catalog extension is not a valid catalog." },
+  W707: { severity: "error", summary: "Catalog extension narrows or changes the core catalog." },
+  W708: { severity: "error", summary: "Project action name breaks the action grammar." },
+  W709: { severity: "error", summary: "Data schema is malformed." },
+  W710: { severity: "warning", summary: "Data schema keyword is not supported." },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;

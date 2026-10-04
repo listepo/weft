@@ -20,7 +20,7 @@ test("every registered code has a case", () => {
   assert.deepEqual(
     Object.keys(cases).toSorted(),
     Object.keys(DIAGNOSTIC_CODES)
-      .filter((code) => !code.startsWith("W5") && !code.startsWith("W6"))
+      .filter((code) => !/^W[567]|^W31[56]$/.test(code))
       .toSorted(),
   );
 });

@@ -108,7 +108,7 @@ fn too_deep() -> Diagnostic {
 }
 
 /// Iterative, so that hostile JSON cannot overflow the stack before validation starts.
-fn json_exceeds_depth(input: &Json) -> bool {
+pub(crate) fn json_exceeds_depth(input: &Json) -> bool {
     let mut stack = vec![(input, 0usize)];
     while let Some((value, depth)) = stack.pop() {
         if depth > JSON_DEPTH_LIMIT {
