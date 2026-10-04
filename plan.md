@@ -16,6 +16,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
 | T37 | todo | P1 | 3 | 0% | |
+| T38 | todo | P2 | 3 | 0% | |
 
 ### T8. Evaluation
 
@@ -121,3 +122,14 @@ The same features as the Claude Code plugin (T30, T32), packaged for Cursor:
 - the authoring guide from `AGENT-SPEC.md`, as rules or skills.
 
 It lives in this repository (`plugins/cursor`) and reuses the bundled scripts and MCP server of the Claude Code plugin rather than a second copy: shared files move to one place that both plugins use. Follow the plugin format from Cursor's official documentation, citing its URL and the date it was checked. Done when the plugin installs in Cursor from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
+
+### T38. Open Design plugin
+
+A plugin for Open Design (https://open-design.ai, https://github.com/attentiondotnet/open-design), the open-source, local-first design platform that runs on top of a coding agent and has had plugins since 0.8.0. It brings Weft into Open Design:
+- author screens as `.weft` with the authoring guide and the weft MCP server;
+- import HTML to `.weft`;
+- export to React (and the other targets once T34 and T35 land);
+- render and preview pages;
+- map an Open Design `DESIGN.md` design system to Weft design tokens where the two line up, with a loss list where they do not.
+
+It reuses the shared bundled scripts and MCP server of the Claude Code and Cursor plugins (T32, T37) instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
