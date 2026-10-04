@@ -955,6 +955,7 @@ dependencies = [
  "tree-sitter-swift",
  "weft-catalog",
  "weft-core",
+ "weft-import",
 ]
 
 [[package]]

@@ -7,6 +7,9 @@ use crate::text::slug;
 #[derive(Clone, Debug, Default)]
 pub struct IdState {
     pub used: HashSet<String>,
+    /// Ids the source carries that no element has taken yet: generated ids avoid them, and the
+    /// element that carries one may still take it.
+    pub reserved: HashSet<String>,
     /// Where the last numbered search for a stem stopped, so many equal names stay linear.
     pub counters: HashMap<String, usize>,
 }
@@ -18,7 +21,7 @@ impl IdState {
         let s = slug(name);
         if !s.is_empty() {
             let id = format!("{base}-{s}");
-            if !self.used.contains(&id) {
+            if !self.taken(&id) {
                 self.used.insert(id.clone());
                 return id;
             }
@@ -33,13 +36,17 @@ impl IdState {
             .get(&stem)
             .copied()
             .unwrap_or(if s.is_empty() { 1 } else { 2 });
-        while self.used.contains(&format!("{stem}-{n}")) {
+        while self.taken(&format!("{stem}-{n}")) {
             n += 1;
         }
         self.counters.insert(stem.clone(), n + 1);
         let id = format!("{stem}-{n}");
         self.used.insert(id.clone());
         id
+    }
+
+    fn taken(&self, id: &str) -> bool {
+        self.used.contains(id) || self.reserved.contains(id)
     }
 }
 
@@ -56,5 +63,7 @@ mod tests {
         assert_eq!(ids.fresh("stack", ""), "stack-1");
         ids.used.insert("stack-2".into());
         assert_eq!(ids.fresh("stack", "!!"), "stack-3");
+        ids.reserved.insert("link-home".into());
+        assert_eq!(ids.fresh("link", "Home"), "link-home-2");
     }
 }

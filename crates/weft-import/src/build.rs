@@ -799,7 +799,7 @@ pub fn build_document(top: &[Sem], options: BuildOptions<'_>) -> Built {
         form_kind,
         ids: IdState {
             used: options.reserved.into_iter().collect(),
-            counters: Default::default(),
+            ..IdState::default()
         },
         claimed: HashSet::new(),
         losses: Losses::default(),
