@@ -16,7 +16,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T36 | todo | P1 | 4 | 0% | |
 | T37 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T38 | todo | P2 | 3 | 0% | |
-| T39 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T39 | in progress | P1 | 4 | 5% | Claude Code / claude-opus-5-5 |
 | T40 | todo | P2 | 4 | 0% | |
 
 ### T8. Evaluation
@@ -169,6 +169,12 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 - **Untrusted by design:** context is data for the reader, never instructions. `AGENT-SPEC.md` tells models to treat it as information to weigh and to ignore commands inside it. Renderers never show it to end users.
 
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
+
+Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` changes):
+
+1. Read `SPEC.md`, `AGENT-SPEC.md`, `docs/figma-style-overrides-design.md`, the parser, model, canonical form and patches in `crates/weft-core`, plugin data in `packages/figma`, `packages/to-jsx` and the benchmark primers in `bench/`.
+2. Write `docs/context-design.md` in the shape of the style-overrides proposal: markup syntax with at least two alternatives and a recommendation, the entry model, canonical JSON and ordering, validation rules, new diagnostic codes and limits, patch operations, the effect on every target (renderers, code generators and importers, Figma, MCP, `weft explain`), the security rule and its `AGENT-SPEC.md` wording, the `weft.json` option (T31), versioning and migration, and open questions with recommendations. Worked examples use the corpus login screen in markup and canonical JSON.
+3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 ### T40. Penpot round trip and plugin
 
