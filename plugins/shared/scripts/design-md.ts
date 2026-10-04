@@ -5,7 +5,7 @@
 // properties, and a folder (an Open Design design system) for its tokens.css, else its DESIGN.md.
 // `plugins.open-design.tokensDir` (SPEC §10.6) in the project says where the file goes.
 import { statSync } from "node:fs";
-import { isAbsolute, join } from "node:path";
+import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { fromDesignMd, fromTokensCss, MAX_SOURCE_LENGTH, type Mapped } from "@weft/design-md";
 import {
@@ -18,7 +18,6 @@ import {
   targetPath,
   writeOutput,
   type Io,
-  type Workspace,
 } from "./lib.ts";
 
 const USAGE =
@@ -51,24 +50,6 @@ function pickSource(
   return undefined;
 }
 
-/**
- * The plugin's own setting. The project loader checks only that `plugins.<name>` is an object, so the
- * value is checked here, and a directory that leaves the project is refused as the loader would.
- */
-function tokensDir(workspace: Workspace, io: Io): { dir?: string | undefined } | number {
-  const value = workspace.project?.settings.plugins?.["open-design"]?.["tokensDir"];
-  if (value === undefined || workspace.file === undefined) return {};
-  // A path is joined onto the project folder, so an absolute one would silently become relative to it.
-  const outside = (name: string) => isAbsolute(name) || name.split(/[\\/]/).includes("..");
-  if (typeof value !== "string" || value === "" || outside(value)) {
-    io.stderr(
-      `weft: plugins.open-design.tokensDir in ${workspace.file} must name a folder inside the project\n`,
-    );
-    return EXIT.invalid;
-  }
-  return { dir: value };
-}
-
 export function main(argv: readonly string[], io: Io = defaultIo): number {
   let parsed;
   try {
@@ -92,8 +73,6 @@ export function main(argv: readonly string[], io: Io = defaultIo): number {
   if (text === undefined) return EXIT.failure;
   const workspace = openProject(input, parsed.values, io);
   if (typeof workspace === "number") return workspace;
-  const setting = tokensDir(workspace, io);
-  if (typeof setting === "number") return setting;
 
   const { tokens, losses, problems } = source.read(text);
   for (const problem of problems) io.stderr(`weft: ${source.file}: ${problem}\n`);
@@ -101,7 +80,16 @@ export function main(argv: readonly string[], io: Io = defaultIo): number {
     io.stderr(`weft: no tokens were found in ${source.file}\n`);
     return EXIT.invalid;
   }
-  const target = targetPath(input, ".tokens.json", output, workspace, setting.dir, io);
+  // The loader has already refused a tokensDir that is not a folder inside the project.
+  const tokensDir = workspace.project?.settings.plugins?.["open-design"]?.["tokensDir"];
+  const target = targetPath(
+    input,
+    ".tokens.json",
+    output,
+    workspace,
+    typeof tokensDir === "string" ? tokensDir : undefined,
+    io,
+  );
   if (target === undefined) return EXIT.failure;
   if (
     !writeOutput(target, `${JSON.stringify(tokens, null, 2)}\n`, parsed.values.force === true, io)
