@@ -5,7 +5,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
-| T20 | todo | P1 | 5 | 0% | |
 | T21 | todo | P1 | 3 | 0% | |
 | T22 | todo | P1 | 3 | 0% | |
 | T23 | todo | P2 | 3 | 0% | |
@@ -29,10 +28,6 @@ Execution plan:
 6. Full edit and read runs on the three models; `run.ts tokens` again so the report has Anthropic token counts.
 7. `bench/EVALUATION.md`: results against the done criteria (Weft first-try validity at least 95%, after one repair at least 99%), comparison with the baselines, failure analysis, continue/stop recommendation.
 8. Verify with `pnpm run ci`.
-
-### T20. Rust core
-
-Port `packages/core` (semantic model, parser, serializer, validator, patch operations, diagnostics, CLI) to a Cargo crate. `SPEC.md` stays the contract and diagnostic codes keep their meaning. Done when the Rust core passes the existing core test suite through the bindings of T22 plus its own `cargo test`, and the CLI behaves like the TypeScript one.
 
 ### T21. Rust catalog
 

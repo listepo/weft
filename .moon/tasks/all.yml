@@ -11,3 +11,4 @@ tasks:
       - '/compat/**/*'
       - '/SPEC.md'
       - '/AGENT-SPEC.md'
+      - '/crates/weft-core/tests/fixtures/**/*'

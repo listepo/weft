@@ -11,6 +11,7 @@
 | napi (`@napi-rs/cli`) | mise | Builds the native Node and Bun addon | https://github.com/napi-rs/napi-rs |
 | deno | mise | Runtime the bindings are tested on | https://github.com/denoland/deno |
 | bun | mise | Runtime the bindings are tested on | https://github.com/oven-sh/bun |
+| cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 
 ## mise
 
@@ -25,6 +26,19 @@
 | aqua:rustwasm/wasm-pack | global | https://github.com/rustwasm/wasm-pack | WebAssembly packaging |
 | github:wasm-bindgen/wasm-bindgen | global | https://github.com/wasm-bindgen/wasm-bindgen | WebAssembly JS glue |
 | npm:@napi-rs/cli | global | https://github.com/napi-rs/napi-rs | Native addon builds |
+| cargo:cargo-nextest | global | https://github.com/nextest-rs/nextest | Rust test runner |
+
+## cargo
+
+| Package | Where | Source | Why here |
+| --- | --- | --- | --- |
+| serde | local | https://github.com/serde-rs/serde | Catalog and model (de)serialization |
+| serde_json | local | https://github.com/serde-rs/json | JSON documents, patches and catalogs; `preserve_order` keeps key order |
+| indexmap | local | https://github.com/indexmap-rs/indexmap | Ordered maps for props, slots and tokens |
+| ryu-js | local | https://github.com/boa-dev/ryu-js | Numbers printed as JavaScript prints them, so both cores emit the same bytes |
+| thiserror | local | https://github.com/dtolnay/thiserror | Typed errors in weft-core |
+| anyhow | local | https://github.com/dtolnay/anyhow | Errors in the `weft` binary |
+| clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
 
 ## npm
 
