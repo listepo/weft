@@ -9,7 +9,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T24 | todo | P2 | 2 | 0% | |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
-| T31 | in progress | P1 | 4 | 5% | Claude Code / claude-opus-5-5 |
+| T31 | in progress | P1 | 5 | 45% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T33 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
@@ -96,6 +96,17 @@ Execution plan (part A is built now; part B, fragments, is design only and waits
 6. An example project (`examples/project/`, outside `corpus/` because corpus tests read every directory there as a screen) with several screens, layered tokens, a catalog extension, actions and a data schema; CLI and MCP tests on it and on broken project files.
 7. Part B: `docs/fragments-design.md`, a proposal for `<use>` fragments, for the creator to approve.
 8. Verify with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Scope extension (creator): everything that can be configured is configurable through `weft.json`. The file becomes a config with optional sections, each with documented defaults; an explicit CLI or tool argument overrides `weft.json`, which overrides the defaults.
+
+9. Spec: `SPEC.md` §10.6 lists the sections — `validate` (`mode`), `format` (`write`), `render` (`data`, `tokens`, `outDir`), `export.<target>` and `import.<target>` (`react` and `html` today, `outDir`), `mcp` (`limits`), `plugins` (free-form, one object per plugin) — their defaults, the precedence, and how a later task adds its section (T34 SwiftUI, T35 web targets, T14 Figma: `export.swiftui`, `export.html`, `export.solid`, `export.figma` with a rem base and a token strategy, `import.figma`, `import.penpot`). An unknown key is `W702`, now always a warning; a wrong type is `W701` and the default applies.
+10. `schemas/weft.schema.json` (JSON Schema 2020-12), referenced from `$schema`; a test keeps it and the loader in step.
+11. Loader (Rust, through weft-wasm for TypeScript): the sections parsed into `Project.settings`, never throwing.
+12. Tools: the Rust CLI (`validate.mode` with `--lenient` to override, `format.write` with `--print`, `explain` reads the project's catalog), `write-page` (`render.data`, `render.tokens`), the Claude Code plugin scripts (project resources plus `render`, `export.react`, `import.html`), the MCP server (`weft-mcp --project <file>` read once at start by the host: resources, `validate.mode` as the default of `strict`, `mcp.limits`; the `project` tool argument never changes limits).
+13. `AGENTS.md`: every new tool option gets a `weft.json` key in the same change.
+14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
+
+Progress: steps 1–8 are done (the TypeScript side runs on the Rust core through weft-wasm since T22); the fragments proposal is in `docs/fragments-design.md` and waits for the creator. Steps 9–14 are in progress.
 
 ### T32. Claude Code plugin from GitHub
 
