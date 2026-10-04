@@ -1,0 +1,9 @@
+{
+  "name": "weft",
+  "displayName": "Weft",
+  "version": "0.1.0",
+  "description": "Work with Weft UI screens: import HTML, export React, preview in the browser, and author with the Weft MCP server.",
+  "author": { "name": "Ivan Tugay" },
+  "license": "Apache-2.0",
+  "keywords": ["weft", "ui", "html", "react", "mcp"]
+}

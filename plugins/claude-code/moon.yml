@@ -1,0 +1,5 @@
+# The plugin's tests read the marketplace manifest at the repository root.
+tasks:
+  test:
+    inputs:
+      - '/.claude-plugin/**/*'
