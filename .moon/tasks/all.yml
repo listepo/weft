@@ -10,3 +10,4 @@ tasks:
       - '/corpus/**/*'
       - '/compat/**/*'
       - '/SPEC.md'
+      - '/AGENT-SPEC.md'
