@@ -8,4 +8,3 @@
 - T35. Web targets both ways: HTML/CSS, React and SolidJS
 - T36. Examples, snapshots, screenshots and comparisons
 - T39. Context in the document
-- T40. Penpot round trip and plugin

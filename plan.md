@@ -14,7 +14,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T40 | in progress | P2 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -170,24 +169,3 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
-
-### T40. Penpot round trip and plugin
-
-The same as T14, for Penpot (https://penpot.app), the open-source design tool. Scope:
-- a Weft component library generated from the catalog and the tokens;
-- Weft to Penpot, with the Weft source kept in plugin data;
-- Penpot to Weft without loss for screens Weft built, including designer edits;
-- foreign layers with a loss table;
-- a Penpot plugin to build frames from `.weft` and export a selection;
-- tests on every corpus screen and a scripted set of designer edits.
-
-Penpot lays out boards with flex and grid layouts, which map to `stack` and `grid`. Check this and every other API fact against Penpot's official plugin docs, citing the URL and the date checked.
-
-The conversion logic that does not depend on the tool moves out of `@weft/figma` into a shared design-tool layer used by both, so Figma and Penpot keep one implementation of the mapping. Style overrides follow the design approved for T14. Starts after T14 stage 1 is on main. Done when every corpus screen survives Weft to Penpot to Weft byte-identical, the edit scenarios give the expected Weft diff, and the plugin and its tests pass in `moon ci`.
-
-Execution plan:
-1. `packages/design-tool` (`@weft/design-tool`): move the tool-independent parts of `@weft/figma` here: plugin-data keys and the Source schema, token matching, the view (variant axes, display texts, neutral layout modes), `finishRead`, the read-back (stored source vs. recomputed view, fresh ids, foreign layers with losses) over a neutral live-layer interface, the build over a narrow host interface, the library spec, the plugin message schema and the UI helpers. `@weft/figma` becomes the Figma adapter and keeps its public API; its tests stay unchanged and green.
-2. `packages/penpot` (`@weft/penpot`): the Penpot subset of the plugin API (`src/api.ts`, type-checked against `@penpot/plugin-types`), the Penpot host (shared plugin data in namespace `weft`, flex and grid boards, component variants, design tokens in a "Weft tokens" set), an in-memory fake of that subset modelled on Penpot's sources, and tests: every corpus screen byte-identical, the T14 edit scenarios that apply, an idempotent library rebuild, message validation. The README lists each API fact with its URL and the date checked.
-3. `plugins/penpot`: `manifest.json` (version 2, relative paths), the plugin script as one classic script without the WebAssembly core, the UI page with the core inlined, a build shared with the Figma plugin where the steps are the same, and a bundle test that evaluates the script in an SES compartment like Penpot's runtime.
-4. Wiring: pnpm workspace, moon, tsconfig, `toolchain.md` rows (`@penpot/plugin-types`, `ses`). weft.json: no new options, so `export.penpot` / `import.penpot` stay reserved; the Penpot package names that extension point.
-5. Verify with `mise exec -- pnpm install && mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Checks in a real Penpot are listed as open items. Style overrides are out until their design is approved.
