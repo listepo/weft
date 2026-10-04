@@ -1,9 +1,10 @@
 // Stands in for the wasm-bindgen glue of @weft/core in the UI bundle. The glue fetches
 // `weft_bg.wasm` next to itself, but Figma loads the UI as one HTML string with no files beside it
-// and no network, so the module's bytes are inlined (base64) and handed to the real glue.
-import realInit, { initSync as realInitSync } from "../../../packages/core/wasm/weft.js";
+// and no network, so the module's bytes are inlined (base64) and handed to the real glue. Penpot
+// loads the page by URL, and the same one-file page needs nothing else from the plugin's host.
+import realInit, { initSync as realInitSync } from "../../core/wasm/weft.js";
 
-export * from "../../../packages/core/wasm/weft.js";
+export * from "../../core/wasm/weft.js";
 
 /** Replaced by the build with the module's bytes in base64. */
 declare const WEFT_WASM_BASE64: string;

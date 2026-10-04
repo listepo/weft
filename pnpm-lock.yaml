@@ -185,6 +185,21 @@ importers:
         specifier: 4.10.2
         version: 4.10.2
 
+  packages/design-plugin:
+    dependencies:
+      '@weft/catalog':
+        specifier: workspace:*
+        version: link:../catalog
+      '@weft/core':
+        specifier: workspace:*
+        version: link:../core
+      '@weft/design-tool':
+        specifier: workspace:*
+        version: link:../design-tool
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@26.6.4)(yaml@2.9.1)
+
   packages/design-tool:
     dependencies:
       '@weft/catalog':
@@ -346,9 +361,9 @@ importers:
       '@weft/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
-      '@weft/core':
+      '@weft/design-plugin':
         specifier: workspace:*
-        version: link:../../packages/core
+        version: link:../../packages/design-plugin
       '@weft/figma':
         specifier: workspace:*
         version: link:../../packages/figma
@@ -356,9 +371,6 @@ importers:
       '@figma/plugin-typings':
         specifier: 1.140.0
         version: 1.140.0
-      vite:
-        specifier: 8.3.2
-        version: 8.3.2(@types/node@26.6.4)(yaml@2.9.1)
 
   plugins/open-design:
     devDependencies:
