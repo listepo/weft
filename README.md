@@ -15,7 +15,7 @@ An open format for describing user interfaces that AI agents can read, write, va
 </screen>
 ```
 
-Status: prototype. The format is specified in [SPEC.md](SPEC.md); the reasoning is in [research.md](research.md).
+Status: prototype. The format is specified in [SPEC.md](SPEC.md); the reasoning is in [research.md](research.md). [AGENT-SPEC.md](AGENT-SPEC.md) is the guide for AI agents that read, write, patch and repair Weft.
 
 ## Quality test
 
