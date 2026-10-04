@@ -1,5 +1,6 @@
 export { fromAriaSnapshot, MAX_SNAPSHOT_LENGTH } from "./aria.ts";
 export {
+  fillRequired,
   freshId,
   limitReached,
   literal,

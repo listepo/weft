@@ -231,31 +231,36 @@ function setProp(
   props[name] = typeof value === "string" ? literal(ctx, at.path, value) : value;
 }
 
-function fillRequired(
-  ctx: Ctx,
+/**
+ * Stand-ins for required props the input has no value for. `name` is the element's text or name,
+ * used for string props; `parentDef` is the parent's component (absent at the root).
+ */
+export function fillRequired(
+  ctx: LossLog,
   props: Record<string, Value>,
   def: ComponentDef,
-  parent: Parent,
-  s: Sem,
+  parentDef: ComponentDef | undefined,
+  root: boolean,
+  name: string,
   path: string,
 ): void {
-  for (const [name, pd] of Object.entries(def.props ?? {})) {
-    if (pd.required !== true || Object.hasOwn(props, name)) continue;
+  for (const [prop, pd] of Object.entries(def.props ?? {})) {
+    if (pd.required !== true || Object.hasOwn(props, prop)) continue;
     // The root's `weft` is `Document.weft`, never a prop (SPEC §3).
-    if (name === "weft" && parent.kind === "") continue;
+    if (prop === "weft" && root) continue;
     // A value the parent selects by (radio and option `value`) must tell the children apart.
-    const selects = parent.def?.props?.[name]?.writable === true;
+    const selects = parentDef?.props?.[prop]?.writable === true;
     let value: Value;
     if (pd.type === "number") value = pd.default ?? pd.min ?? 0;
     else if (pd.type === "boolean") value = pd.default ?? false;
     else if (pd.type === "enum") value = pd.default ?? pd.values?.[0] ?? "";
-    else value = selects ? slug(textOf(s.children) || s.name) || name : "";
-    props[name] = value;
+    else value = selects ? slug(name) || prop : "";
+    props[prop] = value;
     lose(
       ctx,
       "values",
       path,
-      `required ${name} is not in the input; ${JSON.stringify(value)} stands in`,
+      `required ${prop} is not in the input; ${JSON.stringify(value)} stands in`,
     );
   }
 }
@@ -458,7 +463,7 @@ function componentNode(
     props["label"] = "";
     lose(ctx, "names", path, `<${kind}> needs an accessible name and the input gives none`);
   }
-  fillRequired(ctx, props, def, parent, s, path);
+  fillRequired(ctx, props, def, parent.def, parent.kind === "", textOf(s.children) || s.name, path);
   const node: Node = { kind, id, props };
   if (Object.keys(slots).length > 0) node.slots = slots;
   if (children.length > 0) node.children = children;
