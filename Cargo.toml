@@ -12,6 +12,7 @@ publish = false
 
 [workspace.dependencies]
 weft-core = { path = "crates/weft-core" }
+weft-catalog = { path = "crates/weft-catalog" }
 # weft-core
 indexmap = { version = "2.14.2", features = ["serde"] }
 # JavaScript's number-to-string rules, so canonical JSON and messages match the TypeScript core.
@@ -26,6 +27,9 @@ proptest = "1.11.0"
 # weft-cli
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
+# weft-wasm. Exact: the generated glue only loads with the wasm-bindgen CLI of the same version,
+# which mise pins.
+wasm-bindgen = "=0.2.129"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

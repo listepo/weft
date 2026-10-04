@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { test } from "node:test";
+import { test } from "vitest";
 import { loadTokens, tokenTypes } from "../src/tokens.ts";
 
 const px = (value: number) => ({ value, unit: "px" });

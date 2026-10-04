@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
 import type { Document } from "@weft/core";
 import { render, safeUrl } from "@weft/render-react";

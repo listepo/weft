@@ -1,7 +1,7 @@
 // Every corpus screen parses, renders on the server and declares a tree, so the corpus is covered
 // on machines without Chromium too (the browser test compares the trees).
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
 import { corpusScreens } from "../src/corpus.ts";
 import { expectedTree, renderPage } from "../src/index.ts";

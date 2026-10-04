@@ -18,10 +18,6 @@ A JSON Schema of the canonical form generated per catalog (kinds, props, enum va
 
 Export a Weft document to A2UI v0.9 messages and to a json-render spec, and import from both, each with a loss table in SPEC §9. Done when every corpus screen converts both ways and the losses are listed.
 
-### T14. Figma importer
-
-Weft from a Figma file node tree (`GET /v1/files/:key/nodes`): auto-layout frames become `stack` or `grid`, component instances map to catalog kinds through a mapping file, with a loss table. Lossy by design: Figma layers carry no semantics.
-
 ### T15. Second code target and catalog import
 
 A generator for Lit web components and an importer that turns a Custom Elements Manifest (schema 2.1.0) into a Weft catalog, to show that the format is not bound to React. Done when a corpus screen renders through the Lit target with the same accessibility tree as the React renderer.

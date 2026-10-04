@@ -1,19 +1,24 @@
-//! `weft validate` and `weft fmt`. The catalog comes from `--catalog`; without one, only the
-//! syntax layer runs. Exit codes: 0 ok, 1 diagnostics with errors, 2 usage or I/O failure.
+//! `weft validate`, `weft fmt` and `weft explain`. The catalog comes from `--catalog`; without
+//! one, only the syntax layer runs. Exit codes: 0 ok, 1 diagnostics with errors, 2 usage or I/O
+//! failure.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::{Parser, Subcommand};
 use weft_core::{
-    Catalog, Diagnostic, Mode, ParseOptions, ValidateOptions, has_errors, parse, parse_json,
-    serialize, validate,
+    Catalog, Diagnostic, Document, Mode, ParseOptions, ValidateOptions, explain, explain_changes,
+    has_errors, parse, parse_json, serialize, validate,
 };
 
 #[derive(Parser)]
-#[command(name = "weft", version, about = "Validate and format Weft documents")]
+#[command(
+    name = "weft",
+    version,
+    about = "Validate, format and explain Weft documents"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -37,6 +42,17 @@ enum Command {
         /// Rewrite the file instead of printing; untouched when already canonical.
         #[arg(long)]
         write: bool,
+    },
+    /// Read back what each binding, token, event and loop of a markup document means, one per
+    /// line, so the meaning can be compared with the instruction behind an edit.
+    Explain {
+        file: PathBuf,
+        /// An older version of the document: print only what was added, removed or changed.
+        #[arg(long)]
+        against: Option<PathBuf>,
+        /// Catalog JSON; without it, boolean and writable props read as plain reads.
+        #[arg(long)]
+        catalog: Option<PathBuf>,
     },
 }
 
@@ -138,6 +154,69 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             } else {
                 0
             })
+        }
+        Command::Explain {
+            file,
+            against,
+            catalog,
+        } => {
+            let catalog = catalog.as_deref().map(load_catalog).transpose()?;
+            if catalog.is_none() {
+                eprintln!(
+                    "weft: no --catalog given; boolean and writable props read as plain reads"
+                );
+            }
+            let catalog = catalog.as_ref();
+            let Some(document) = load_markup(&file, catalog, out)? else {
+                return Ok(DIAGNOSTICS);
+            };
+            let Some(against) = against else {
+                for readback in explain(&document, catalog) {
+                    writeln!(out, "{readback}")?;
+                }
+                return Ok(0);
+            };
+            let Some(before) = load_markup(&against, catalog, out)? else {
+                return Ok(DIAGNOSTICS);
+            };
+            let changes = explain_changes(&before, &document, catalog);
+            if changes.is_empty() {
+                eprintln!("weft: no prop, event or loop changed");
+            }
+            for change in changes {
+                writeln!(out, "{change}")?;
+            }
+            Ok(0)
+        }
+    }
+}
+
+/// A document with errors has no reliable meaning to read back, so its diagnostics are printed as
+/// `validate` prints them and the caller stops.
+fn load_markup(
+    file: &Path,
+    catalog: Option<&Catalog>,
+    out: &mut dyn Write,
+) -> Result<Option<Document>> {
+    if file.extension().is_some_and(|e| e == "json") {
+        bail!(
+            "{}: explain reads markup, not canonical JSON",
+            file.display()
+        );
+    }
+    let text = read(file)?;
+    let result = parse(
+        &text,
+        &ParseOptions {
+            catalog,
+            ..Default::default()
+        },
+    );
+    match result.document {
+        Some(document) if !has_errors(&result.diagnostics) => Ok(Some(document)),
+        _ => {
+            print(file, &result.diagnostics, out)?;
+            Ok(None)
         }
     }
 }

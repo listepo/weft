@@ -7,18 +7,26 @@ workspace:
     exclude: ['test']
 
 tasks:
+  # The Rust core compiled to WebAssembly for @weft/core and @weft/catalog. Generated and
+  # gitignored: the module must always match the crates it came from.
+  wasm:
+    command: 'wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft'
+    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json']
+    outputs: ['/packages/core/wasm/**/*']
   typecheck:
     command: 'tsc --noEmit -p .'
-    inputs: ['/packages/**/*', '/bench/**/*', '/tsconfig.json']
+    deps: ['root:wasm']
+    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/tsconfig.json']
   lint:
     script: 'oxlint --deny-warnings . && oxfmt --check "**/*.{ts,tsx,json}"'
-    inputs: ['/packages/**/*', '/bench/**/*', '/compat/**/*', '/*.json']
+    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/compat/**/*', '/*.json', '/.claude-plugin/*.json']
   fmt:
     command: 'oxfmt "**/*.{ts,tsx,json}"'
     options:
       cache: false
       runInCI: false
-  # The Rust core and CLI. The differential fixture ties these to the TypeScript core's results.
+  # The Rust core and CLI. The differential fixtures, written by the former TypeScript core, pin
+  # their results; the TypeScript suites check that the WebAssembly build still reproduces them.
   rust-test:
     command: 'cargo nextest run --workspace'
     # weft-catalog embeds catalog.json and its tests read the examples and default tokens.

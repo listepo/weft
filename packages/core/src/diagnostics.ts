@@ -1,6 +1,7 @@
 // The diagnostic code registry of SPEC §6.1. Codes are a public API: a published code keeps its
 // meaning forever, so new checks get new codes instead of reusing old ones.
 import type { Diagnostic } from "./model.ts";
+import { toJson, wasm, wellFormed } from "./wasm.ts";
 
 export type Severity = Diagnostic["severity"];
 export type Mode = "lenient" | "strict";
@@ -124,55 +125,7 @@ export function hasErrors(diagnostics: readonly Diagnostic[]): boolean {
   return diagnostics.some((d) => d.severity === "error");
 }
 
-export function byPosition(a: Diagnostic, b: Diagnostic): number {
-  return (a.line ?? 0) - (b.line ?? 0) || (a.column ?? 0) - (b.column ?? 0);
-}
-
-export function quote(value: unknown): string {
-  return typeof value === "string" ? JSON.stringify(value) : String(JSON.stringify(value));
-}
-
-export function oneOf(values: Iterable<string>): string {
-  const list = [...values];
-  return list.length === 0 ? "nothing" : `one of: ${list.map((v) => quote(v)).join(", ")}`;
-}
-
-/** Nearest candidate by edit distance, close enough to be a likely typo. */
-export function nearest(word: string, candidates: Iterable<string>): string | undefined {
-  const lower = word.toLowerCase();
-  const limit = word.length <= 3 ? 1 : Math.max(2, Math.floor(word.length / 3));
-  let best: string | undefined;
-  let bestDistance = Infinity;
-  for (const candidate of candidates) {
-    if (candidate === word) continue;
-    if (candidate.toLowerCase() === lower) return candidate;
-    const distance = levenshtein(word, candidate);
-    if (distance < bestDistance) {
-      best = candidate;
-      bestDistance = distance;
-    }
-  }
-  return bestDistance <= limit ? best : undefined;
-}
-
+/** Nearest candidate by edit distance, close enough to be a likely typo (the Rust core decides). */
 export function didYouMean(word: string, candidates: Iterable<string>): string | undefined {
-  const match = nearest(word, candidates);
-  return match === undefined ? undefined : `did you mean ${quote(match)}?`;
-}
-
-function levenshtein(a: string, b: string): number {
-  let previous = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i++) {
-    const current = [i];
-    for (let j = 1; j <= b.length; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      current[j] = Math.min(
-        (previous[j] ?? 0) + 1,
-        (current[j - 1] ?? 0) + 1,
-        (previous[j - 1] ?? 0) + cost,
-      );
-    }
-    previous = current;
-  }
-  return previous[b.length] ?? 0;
+  return wasm.didYouMean(wellFormed(word), toJson([...candidates]) ?? "[]");
 }
