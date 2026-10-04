@@ -4,6 +4,8 @@ tasks:
   test:
     description: 'Vitest suite of this package'
     command: 'vitest run --config $workspaceRoot/vitest.config.ts'
+    # Every package reaches @weft/core, which loads the generated WebAssembly module.
+    deps: ['root:wasm']
     inputs:
       - '**/*'
       - '/packages/**/*'

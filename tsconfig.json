@@ -17,10 +17,12 @@
     "vitest.config.ts",
     "packages/*/src",
     "packages/*/test",
+    "bench/src",
+    "bench/test",
+    "plugins/*/build.ts",
+    "plugins/*/scripts",
     "plugins/*/src",
     "plugins/*/test",
-    "plugins/*/vite.config.ts",
-    "bench/src",
-    "bench/test"
+    "plugins/*/vite.config.ts"
   ]
 }

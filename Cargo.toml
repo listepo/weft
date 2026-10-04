@@ -12,6 +12,7 @@ publish = false
 
 [workspace.dependencies]
 weft-core = { path = "crates/weft-core" }
+weft-catalog = { path = "crates/weft-catalog" }
 # weft-core
 indexmap = { version = "2.14.2", features = ["serde"] }
 # JavaScript's number-to-string rules, so canonical JSON and messages match the TypeScript core.
@@ -21,9 +22,14 @@ serde = { version = "1.0.229", features = ["derive"] }
 # parses numbers exactly as JSON.parse does; unbounded_depth admits documents nested 256 deep.
 serde_json = { version = "1.0.151", features = ["preserve_order", "float_roundtrip", "unbounded_depth"] }
 thiserror = "2.0.21"
+# tests: weft-core, weft-catalog
+proptest = "1.11.0"
 # weft-cli
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
+# weft-wasm. Exact: the generated glue only loads with the wasm-bindgen CLI of the same version,
+# which mise pins.
+wasm-bindgen = "=0.2.129"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

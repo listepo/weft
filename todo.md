@@ -1,9 +1,9 @@
 - T8. Evaluation
-- T22. WebAssembly bindings
 - T23. Native Node and Bun addon
 - T24. Runtime matrix
 - T28. Binding readback against inverted conditions
-- T29. Rust core test suite
 - T14. Figma round trip and plugin
-- T30. Claude Code plugin
 - T31. Project file and shared resources
+- T32. Claude Code plugin from GitHub
+- T33. Documentation for people
+- T34. SwiftUI generator and importer

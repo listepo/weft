@@ -61,6 +61,7 @@ An attribute value is exactly one of:
 - A value that starts with `{{` is a literal: the first `{` is dropped, so a literal that must start with `{` is written `{{`. Any other value that starts with `{` MUST be a whole reference, `{$…}`, `{!$…}` or `{token.…}`; anything else is an error. Values that do not start with `{` are literals.
 - These forms apply to prop values only. `id`, `on-*` and the slot `name` are always plain text.
 - Binding path grammar: `$` (`.` name)+ for the root data model, or `$` name (`.` name)* for a loop variable introduced by `<each>` (§4.3). `name` is `[A-Za-z_][A-Za-z0-9_]*` or a non-negative integer index.
+- A binding read as a boolean is true unless its value is falsy: `false`, `0`, an empty string, `null` or a missing path. An empty array or object is true. A negated binding is the opposite, so `{!$.email}` is true while `$.email` is empty or missing.
 - Mixing text and bindings in one value (`"Hello {$.name}"`) is an error: a literal must not contain `{$`, `{!$` or `{token.` after its first character. Use `<text text="{$.name}"/>`.
 - Token path grammar: segments of `[A-Za-z0-9_-]+` joined by `.`.
 - Booleans are `true` / `false`. Numbers are JSON numbers.
