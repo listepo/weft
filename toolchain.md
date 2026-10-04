@@ -67,7 +67,7 @@
 | @types/react | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React type definitions |
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
-| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist`, `plugins/cursor/dist` and `plugins/open-design/dist`, and the Figma plugin into `plugins/figma/dist` |
+| vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist`, `plugins/cursor/dist` and `plugins/open-design/dist`, and, through `@weft/design-plugin`, the Figma and Penpot plugins into `plugins/figma/dist` and `plugins/penpot/dist` |
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
@@ -77,3 +77,4 @@
 | ajv-formats | local | https://github.com/ajv-validator/ajv-formats | The `uri` and `email` formats those schemas use |
 | @figma/plugin-typings | local | https://github.com/figma/plugin-typings | Official Figma Plugin API types; the conversion is typed against them |
 | @penpot/plugin-types | local | https://github.com/penpot/penpot | Official Penpot plugin API types (MPL-2.0); `@weft/penpot` and the Penpot plugin are typed against them |
+| ses | local | https://github.com/endojs/endo | The SES library Penpot runs plugins in; the Penpot plugin's bundle test evaluates the plugin in an SES compartment |

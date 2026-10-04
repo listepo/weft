@@ -406,6 +406,25 @@ importers:
         specifier: 2.9.1
         version: 2.9.1
 
+  plugins/penpot:
+    dependencies:
+      '@weft/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
+      '@weft/design-plugin':
+        specifier: workspace:*
+        version: link:../../packages/design-plugin
+      '@weft/penpot':
+        specifier: workspace:*
+        version: link:../../packages/penpot
+    devDependencies:
+      '@penpot/plugin-types':
+        specifier: 1.5.0
+        version: 1.5.0
+      ses:
+        specifier: 2.3.0
+        version: 2.3.0
+
   plugins/shared:
     devDependencies:
       '@weft/catalog':
@@ -431,6 +450,15 @@ importers:
         version: link:../../packages/to-jsx
 
 packages:
+
+  '@endo/cache-map@1.1.0':
+    resolution: {integrity: sha512-owFGshs/97PDw9oguZqU/px8Lv1d0KjAUtDUiPwKHNXRVUE/jyettEbRoTbNJR1OaI8biMn6bHr9kVJsOh6dXw==}
+
+  '@endo/env-options@1.1.11':
+    resolution: {integrity: sha512-p9OnAPsdqoX4YJsE98e3NBVhIr2iW9gNZxHhAI2/Ul5TdRfoOViItzHzTqrgUVopw6XxA1u1uS6CykLMDUxarA==}
+
+  '@endo/immutable-arraybuffer@2.0.0':
+    resolution: {integrity: sha512-xvfJvo4CgETh6UjSKwhNsFLZrqrTf2k4ZFpcprEN2UtCQRSOk+CcLP70kFbrOesB2Z/c1z9MaUZDS1JY6IlnUg==}
 
   '@figma/plugin-typings@1.140.0':
     resolution: {integrity: sha512-xo2yz7QqaK0uHCowOmoqmT2SRKSIgSW00T1DxRTtB8/JSWzr8f800LSxFyp0LuSGd9OiiDC3TCI2payahrKP7g==}
@@ -1734,6 +1762,9 @@ packages:
     resolution: {integrity: sha512-xRXBn0pPqQTVQiC8wyQrKs2MOlX24zQ0POGaj0kultvoOCstBQM5yvOhAVSUwOMjQtTvsPWoNCHfPGwaaQJhTw==}
     engines: {node: '>= 18'}
 
+  ses@2.3.0:
+    resolution: {integrity: sha512-qd3iWzDqGKllI2FmExKsWLrJwt+6COWb8jUdzaCn8Cq5OTeoXdQ62Gn/xLy0GWLORC3du6yBAVe/V0B0dLVKew==}
+
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
 
@@ -1931,6 +1962,12 @@ packages:
     resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
 snapshots:
+
+  '@endo/cache-map@1.1.0': {}
+
+  '@endo/env-options@1.1.11': {}
+
+  '@endo/immutable-arraybuffer@2.0.0': {}
 
   '@figma/plugin-typings@1.140.0': {}
 
@@ -2907,6 +2944,12 @@ snapshots:
       send: 1.2.1
     transitivePeerDependencies:
       - supports-color
+
+  ses@2.3.0:
+    dependencies:
+      '@endo/cache-map': 1.1.0
+      '@endo/env-options': 1.1.11
+      '@endo/immutable-arraybuffer': 2.0.0
 
   setprototypeof@1.2.0: {}
 

@@ -1,0 +1,19 @@
+{
+  "name": "@weft/penpot-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.ts"
+  },
+  "dependencies": {
+    "@weft/catalog": "workspace:*",
+    "@weft/design-plugin": "workspace:*",
+    "@weft/penpot": "workspace:*"
+  },
+  "devDependencies": {
+    "@penpot/plugin-types": "1.5.0",
+    "ses": "2.3.0"
+  }
+}
