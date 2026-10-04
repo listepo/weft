@@ -1,31 +1,9 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { coreCatalog, loadTokens } from "@weft/catalog";
-import { parse, type Document } from "@weft/core";
+import { coreCatalog } from "@weft/catalog";
 import { buildScreen, displayTexts, ensureLibrary, readScreen } from "../src/index.ts";
+import { parseStrict, tokens } from "../../design-tool/test/corpus.ts";
 import { FakeFigma, type FakeFrame } from "./fake-figma.ts";
 
-export const tokens = loadTokens(
-  JSON.parse(
-    readFileSync(new URL("../../catalog/tokens/default.tokens.json", import.meta.url), "utf8"),
-  ),
-).tokens;
-
-const corpus = new URL("../../../corpus/", import.meta.url);
-
-export const corpusNames = readdirSync(corpus, { withFileTypes: true })
-  .filter((e) => e.isDirectory())
-  .map((e) => e.name)
-  .sort();
-
-export const corpusMarkup = (name: string): string =>
-  readFileSync(new URL(`${name}/screen.weft`, corpus), "utf8");
-
-export function parseStrict(markup: string): Document {
-  const { document, diagnostics } = parse(markup, { catalog: coreCatalog, mode: "strict" });
-  if (document === undefined || diagnostics.length > 0)
-    throw new Error(`invalid test markup: ${JSON.stringify(diagnostics)}`);
-  return document;
-}
+export { corpusMarkup, corpusNames, parseStrict, tokens } from "../../design-tool/test/corpus.ts";
 
 /** A fake file with the library and the screen built in it. */
 export async function built(markup: string): Promise<{ figma: FakeFigma; frame: FakeFrame }> {

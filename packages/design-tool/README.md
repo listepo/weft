@@ -63,4 +63,4 @@ Both tools run plugin code in a sandbox without WebAssembly, and the UI in a bro
 
 ## Tests
 
-`test/shared.test.ts` covers message validation, the neutral layout view and the library drawings. The round trips run in the tool packages, over their fakes.
+`test/shared.test.ts` covers message validation, the neutral layout view and the library drawings. The round trips run in the tool packages, over their fakes. `test/corpus.ts` gives those packages the corpus screens and the default tokens, so both tools are tested on the same screens.
