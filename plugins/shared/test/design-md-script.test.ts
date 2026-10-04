@@ -90,7 +90,7 @@ test("plugins.open-design.tokensDir in weft.json decides the folder, created whe
   assert.match(result.stdout, /List it under "tokens" in .*weft\.json/);
 });
 
-test("a tokensDir that is not a folder name inside the project is refused", () => {
+test("a tokensDir the loader refuses stops the script with the loader's diagnostic", () => {
   const root = work();
   const project = join(root, "project");
   mkdirSync(project);
@@ -105,9 +105,26 @@ test("a tokensDir that is not a folder name inside the project is refused", () =
       join(project, "weft.json"),
     );
     assert.equal(result.code, 1, JSON.stringify(tokensDir));
-    assert.match(result.stderr, /tokensDir/);
+    assert.match(result.stderr, /plugins\/open-design\/tokensDir W70[13] /);
   }
   assert.equal(existsSync(join(root, "escape")), false);
+  assert.equal(existsSync(join(root, "open-design/minimal/tokens.tokens.json")), false);
+});
+
+test("an unknown key in plugins.open-design only warns and the default folder applies", () => {
+  const root = work();
+  const project = join(root, "project");
+  mkdirSync(project);
+  writeFileSync(
+    join(project, "weft.json"),
+    JSON.stringify({ plugins: { "open-design": { tokenDir: "tokens" } } }),
+  );
+  const input = join(root, "open-design/minimal/tokens.css");
+  const result = run(input, "--project", join(project, "weft.json"));
+  assert.equal(result.code, 0, result.stderr);
+  assert.match(result.stderr, /plugins\/open-design\/tokenDir W702 /);
+  assert.ok(existsSync(join(root, "open-design/minimal/tokens.tokens.json")));
+  assert.equal(existsSync(join(project, "tokens")), false);
 });
 
 test("a file without tokens, a missing path and a bad command line each stop with their own code", () => {

@@ -69,7 +69,7 @@ Inputs are untrusted: sources over 1,000,000 characters are refused, YAML aliase
 
 ### weft.json
 
-The mapper's one setting is `plugins.open-design.tokensDir` in `weft.json` (SPEC section 10.6 leaves `plugins.<name>` to the plugin): a folder name inside the project where `design-md.js` writes its token file when no output path is given. Weft checks only that `plugins.open-design` is an object, so the script checks the value and refuses an absolute path, a `..` segment or a non-string with exit code 1. An argument always wins.
+The mapper's one setting is `plugins.open-design.tokensDir` in `weft.json` (SPEC section 10.6): a folder name inside the project where `design-md.js` writes its token file when no output path is given. The project loader checks it like any other file name: an absolute path, a `..` segment or a non-string is `W703` or `W701` and the script stops with exit code 1, and an unknown key in `plugins.open-design` is a `W702` warning. An argument always wins.
 
 ## Tests
 

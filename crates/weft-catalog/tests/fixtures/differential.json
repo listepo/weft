@@ -17792,6 +17792,105 @@
    }
   },
   {
+   "name": "the Open Design plugin's settings are checked, other plugins are not",
+   "project": "{\"plugins\":{\"open-design\":{\"tokensDir\":\"tokens/imported\"},\"my-plugin\":{\"tokensDir\":\"../anything\"}}}",
+   "codes": [],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {
+     "plugins": {
+      "open-design": {
+       "tokensDir": "tokens/imported"
+      },
+      "my-plugin": {
+       "tokensDir": "../anything"
+      }
+     }
+    },
+    "diagnostics": []
+   }
+  },
+  {
+   "name": "a bad Open Design tokensDir is a file name error, a wrong key an unknown key",
+   "project": "{\"plugins\":{\"open-design\":{\"tokensDir\":\"../escape\",\"tokenDir\":\"tokens\"}}}",
+   "codes": [
+    "W703",
+    "W702"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {
+     "plugins": {
+      "open-design": {}
+     }
+    },
+    "diagnostics": [
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The file name \"../escape\" is absolute, leaves the project directory or is malformed.",
+      "path": "#/plugins/open-design/tokensDir",
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../escape"
+     },
+     {
+      "code": "W702",
+      "severity": "warning",
+      "message": "Unknown key \"tokenDir\" in \"plugins.open-design\".",
+      "path": "#/plugins/open-design/tokenDir",
+      "expected": "one of: \"tokensDir\"",
+      "got": "tokenDir",
+      "hint": "did you mean \"tokensDir\"?"
+     }
+    ]
+   }
+  },
+  {
+   "name": "an Open Design tokensDir that is no string",
+   "project": "{\"plugins\":{\"open-design\":{\"tokensDir\":3}}}",
+   "codes": [
+    "W701"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {
+     "plugins": {
+      "open-design": {}
+     }
+    },
+    "diagnostics": [
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"plugins.open-design.tokensDir\" must hold file names.",
+      "path": "#/plugins/open-design/tokensDir",
+      "expected": "a file name relative to the project"
+     }
+    ]
+   }
+  },
+  {
    "name": "file names in tool sections follow the project rules",
    "project": "{\"render\":{\"tokens\":[\"ok.json\",\"/abs.json\",\"a\\\\b.json\"],\"data\":\"c:/x\"}}",
    "codes": [

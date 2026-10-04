@@ -22,8 +22,9 @@ pub(crate) enum Kind {
     Files,
     /// A whole number from 1 to `MAX_COUNT`.
     Count,
-    /// An object of objects whose content the loader does not check: one entry per plugin.
-    Plugins,
+    /// An object of objects, one entry per plugin. A plugin the table lists is checked as a
+    /// section; the content of any other is not.
+    Plugins(&'static [Setting]),
 }
 
 pub(crate) struct Setting {
@@ -133,6 +134,17 @@ const LIMITS: &[Setting] = &[
     ),
 ];
 
+/// Plugins Weft knows: their settings are checked like any other section.
+const PLUGINS: &[Setting] = &[setting(
+    "open-design",
+    "The Open Design plugin.",
+    Kind::Section(&[setting(
+        "tokensDir",
+        "Folder, relative to the project file, that the plugin's design-md script writes mapped tokens to. Default: next to the design system.",
+        Kind::File,
+    )]),
+)];
+
 /// Every tool section, in the order SPEC §10.6 lists them.
 pub(crate) const SECTIONS: &[Setting] = &[
     setting(
@@ -193,8 +205,8 @@ pub(crate) const SECTIONS: &[Setting] = &[
     ),
     setting(
         "plugins",
-        "Settings of plugins and other tools Weft does not know, one object per plugin name. Not checked.",
-        Kind::Plugins,
+        "Settings of plugins, one object per plugin name. The plugins listed here are checked; the content of any other is not.",
+        Kind::Plugins(PLUGINS),
     ),
 ];
 
@@ -296,7 +308,7 @@ pub(crate) fn sanitize(
                 .collect();
             Some(Json::Array(kept))
         }
-        Kind::Plugins => {
+        Kind::Plugins(known) => {
             let Some(members) = value.as_object() else {
                 report(wrong(
                     format!("{} must be an object.", quote(&dotted)),
@@ -306,15 +318,18 @@ pub(crate) fn sanitize(
             };
             let mut kept = Object::new();
             for (name, entry) in members {
-                if entry.is_object() {
-                    kept.insert(name.clone(), entry.clone());
-                } else {
+                let at = format!("{pointer}/{}", escape_pointer(name));
+                if !entry.is_object() {
                     report(Diagnostic::new(
                         Code::W701,
-                        format!("{pointer}/{}", escape_pointer(name)),
+                        at,
                         format!("The settings of plugin {} must be an object.", quote(name)),
                         "a JSON object",
                     ));
+                } else if let Some(plugin) = known.iter().find(|p| p.name == name) {
+                    kept.extend(sanitize(plugin, entry, &at, report).map(|c| (name.clone(), c)));
+                } else {
+                    kept.insert(name.clone(), entry.clone());
                 }
             }
             Some(Json::Object(kept))
@@ -380,10 +395,17 @@ fn schema_of(setting: &Setting) -> Json {
             "items": { "$ref": "#/$defs/fileName" },
         }),
         Kind::Count => json!({ "type": "integer", "minimum": 1, "maximum": MAX_COUNT }),
-        Kind::Plugins => json!({
-            "type": "object",
-            "additionalProperties": { "type": "object" },
-        }),
+        Kind::Plugins(known) => {
+            let properties: Object<String, Json> = known
+                .iter()
+                .map(|p| (p.name.to_owned(), schema_of(p)))
+                .collect();
+            json!({
+                "type": "object",
+                "properties": properties,
+                "additionalProperties": { "type": "object" },
+            })
+        }
     };
     if let Json::Object(map) = &mut schema {
         map.insert("description".to_owned(), json!(setting.description));

@@ -205,10 +205,23 @@
     },
     "plugins": {
       "type": "object",
+      "properties": {
+        "open-design": {
+          "type": "object",
+          "properties": {
+            "tokensDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Folder, relative to the project file, that the plugin's design-md script writes mapped tokens to. Default: next to the design system."
+            }
+          },
+          "additionalProperties": false,
+          "description": "The Open Design plugin."
+        }
+      },
       "additionalProperties": {
         "type": "object"
       },
-      "description": "Settings of plugins and other tools Weft does not know, one object per plugin name. Not checked."
+      "description": "Settings of plugins, one object per plugin name. The plugins listed here are checked; the content of any other is not."
     }
   },
   "additionalProperties": false,
