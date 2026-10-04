@@ -12,6 +12,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T29 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T14 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T32 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -92,3 +93,7 @@ Several `.weft` screens share one set of resources through a project file, `weft
 - **Tools:** the CLI, the MCP server, the renderer, the Claude Code plugin (T30) and the Figma work (T14) all read the project file, and an explicit argument still overrides it.
 
 Done when a corpus project of several screens with layered tokens, a catalog extension, an action list, a data schema and a shared fragment validates and renders through the CLI and the MCP server, the TypeScript and Rust results match, and a broken project file is reported with a diagnostic, never a crash.
+
+### T32. Claude Code plugin from GitHub
+
+The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.

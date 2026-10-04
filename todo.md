@@ -6,3 +6,4 @@
 - T29. Rust core test suite
 - T14. Figma round trip and plugin
 - T31. Project file and shared resources
+- T32. Claude Code plugin from GitHub
