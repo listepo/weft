@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T24 | todo | P2 | 2 | 0% | |
 | T28 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T29 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T14 | in progress | P2 | 5 | 5% | Claude Code / claude-opus-5-5 |
+| T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
 | T30 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T31 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
@@ -84,6 +84,22 @@ Execution plan, stage 1 (library, both conversions, plugin; the CLI command, the
 7. Tests (Vitest): every corpus screen round-trips byte-identical through the fake; a scripted set of designer edits yields the expected Weft; foreign layers yield the expected losses; library generation is idempotent.
 8. `packages/figma/README.md` with the Plugin API facts the code relies on, each with its official URL and the date checked. `docs/figma-style-overrides-design.md`: the style-override proposal for the creator (not built).
 9. Wire into pnpm, moon, `tsconfig.json`, `toolchain.md`; verify with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Progress (stage 1 done, on branch `t14-figma`):
+
+- Steps 1–9 are done. `@weft/figma` builds the library, both conversions, foreign layers and the plugin message handler. `plugins/figma` holds the manifest, a thin `code.ts`, `ui.html` and the Vite bundle. The bundle is tested by running it in a bare VM over the fake.
+- Tests:
+  - all 12 corpus screens round-trip byte-identical with no losses;
+  - 18 scripted designer edits match the expected Weft patches and loss kinds;
+  - building the library twice reuses it.
+- `from-aria` now exports `freshId`, `literal`, `fillRequired` and the limit helpers, which both importers share.
+- `docs/figma-style-overrides-design.md` waits for the creator's approval.
+- Remaining:
+  - style overrides: after approval, the format extension in TS and Rust, then the Figma mapping for colors, radii and padding (only `gap` maps to a token today);
+  - CLI `weft figma pull` over the REST API;
+  - MCP / Claude Code tools (with T30);
+  - a check of the plugin in the real Figma app;
+  - the open questions in the report: single components for kinds without variants, `state` as a variant axis, the manifest id, and plugin data on duplicate/detach.
 
 ### T30. Claude Code plugin
 
