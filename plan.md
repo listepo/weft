@@ -94,12 +94,13 @@ Progress (stage 1 done, on branch `t14-figma`):
   - 18 scripted designer edits match the expected Weft patches and loss kinds;
   - building the library twice reuses it.
 - `from-aria` now exports `freshId`, `literal`, `fillRequired` and the limit helpers, which both importers share.
+- After T22 (WebAssembly core), the plugin is split. Figma's main thread has no WebAssembly, so it only builds and reads layers (`code.js`, with the core's loader stubbed). The UI iframe parses and serializes with the core inlined in `ui.html`. A harness runs both halves, the main thread without WebAssembly.
 - `docs/figma-style-overrides-design.md` waits for the creator's approval.
 - Remaining:
   - style overrides: after approval, the format extension in TS and Rust, then the Figma mapping for colors, radii and padding (only `gap` maps to a token today);
   - CLI `weft figma pull` over the REST API;
   - MCP / Claude Code tools (with T30);
-  - a check of the plugin in the real Figma app;
+  - a check of the plugin in the real Figma app, including the inline module script and WebAssembly in its UI iframe;
   - the open questions in the report: single components for kinds without variants, `state` as a variant axis, the manifest id, and plugin data on duplicate/detach.
 
 ### T31. Project file and shared resources
