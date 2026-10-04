@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T28 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T29 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T14 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
-| T30 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T30 | in progress | P1 | 3 | 5% | Claude Code / claude-sonnet-5-5 |
 | T31 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
@@ -83,6 +83,16 @@ A Claude Code plugin, used from Claude Code Desktop, that works on `.weft` files
 - The plugin also registers the existing MCP server (`@weft/mcp`) and a skill that teaches `AGENT-SPEC.md`, so authoring, validation and patches work in the same session. The MCP server stays file-free; file reading and writing belong to the plugin's commands.
 
 Done when the plugin installs from the marketplace in Claude Code Desktop, the three commands work on corpus screens, and their tests pass in `moon ci`.
+
+Execution plan:
+
+1. Format, checked against code.claude.com on 2026-10-05 (cited in the plugin README): `.claude-plugin/plugin.json` (only `name` required), skills in `skills/<name>/SKILL.md` (docs prefer them to `commands/` for new plugins; a plugin skill is invoked as `/weft:<name>`), MCP servers in `.mcp.json` with `${CLAUDE_PLUGIN_ROOT}`, marketplace at `.claude-plugin/marketplace.json` with a relative `source`. `claude plugin validate` exists in the installed CLI (2.1.267) and runs on the plugin and on the marketplace.
+2. New workspace package `plugins/claude-code` (`@weft/claude-code`, private), registered in `pnpm-workspace.yaml` and `.moon/workspace.yml` so it inherits the `test` task; it depends on `@weft/catalog`, `@weft/core`, `@weft/from-aria`, `@weft/to-jsx`, `@weft/render-react`, `@weft/mcp` by `workspace:*`. No logic is copied: the scripts only read and write files around those packages.
+3. Scripts, run by Node with type stripping like every other package: `scripts/import.ts <page.html> [out.weft] [--force]` (`fromDom`, `serialize`, loss table on stdout), `scripts/export.ts <screen.weft> [out.jsx] [--name Component] [--force]` (`parse` strict, `toJsx`), `scripts/render.ts <screen.weft> [out.html] [--data data.json] [--tokens tokens.json] [--force]` (`parse` strict, `loadTokens`, `renderPage`; default tokens are the catalog's default tokens, as in the gallery). Shared file helpers (bounded read, diagnostics line, no overwrite without `--force`) in `scripts/lib.ts`. Diagnostics go to stderr, exit code 1 on errors, 2 on usage or I/O.
+4. Plugin files: `skills/import`, `skills/export`, `skills/render` (each tells Claude to run its script from `${CLAUDE_PLUGIN_ROOT}` and report the result; render also tells it to open the page in the Desktop built-in browser), `skills/spec` (teaches `AGENT-SPEC.md` through a symlink to the repository file, so the plugin never holds a second copy), `.mcp.json` (the existing `weft-mcp` server, file-free).
+5. Root `.claude-plugin/marketplace.json` listing the plugin with `source: ./plugins/claude-code`.
+6. Tests in `plugins/claude-code/test/`: every corpus screen through import (from `screen.html`), export (matches `screen.jsx`-compatible output of `toJsx`), render (page contains the screen's text), error paths (bad input, existing output, invalid markup), and a manifest test (plugin.json, marketplace.json, `.mcp.json` point at files that exist and the MCP server starts and lists its tools).
+7. Verify: `claude plugin validate` on the plugin and on the repo root, then `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
 
 ### T31. Project file and shared resources
 
