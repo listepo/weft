@@ -1,7 +1,8 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { applyPatches, serialize } from "@weft/core";
+import { applyPatches, checkData, hasErrors, serialize } from "@weft/core";
 import { z } from "zod";
 import { LIMITS, type Context } from "../context.ts";
+import { projectSchema, scope } from "../project.ts";
 import { readMarkup } from "../read.ts";
 import { diagnosticsText, failure, guarded } from "../result.ts";
 import { warned } from "./format.ts";
@@ -21,21 +22,33 @@ export function registerPatch(server: McpServer, context: Context): void {
           .array(z.unknown())
           .max(LIMITS.patches)
           .describe(`Patches in application order, at most ${LIMITS.patches}.`),
+        project: projectSchema,
       },
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     },
-    guarded(({ markup, patches }) => {
+    guarded(({ markup, patches, project }) => {
       if (JSON.stringify(patches).length > LIMITS.patchesChars) {
         return failure(`The patch list is longer than ${LIMITS.patchesChars} characters.`);
       }
-      const input = readMarkup(markup, context, "lenient");
+      const scoped = scope(context, project, "strict");
+      if ("tooLong" in scoped) return failure(scoped.tooLong);
+      if (scoped.context === undefined) return failure(diagnosticsText(scoped.diagnostics));
+      const { data, ...options } = scoped.context;
+      // The current markup only has to parse; the patched result is what gets validated.
+      const input = readMarkup(markup, options, "lenient");
       if (input.document === undefined) return failure(diagnosticsText(input.diagnostics));
       const { document, diagnostics } = applyPatches(input.document, patches, {
-        ...context,
+        ...options,
         mode: "strict",
       });
       if (document === undefined) return failure(diagnosticsText(diagnostics));
-      return warned(serialize(document), diagnostics);
+      const all = [
+        ...scoped.diagnostics,
+        ...diagnostics,
+        ...(data === undefined ? [] : checkData(document, { catalog: options.catalog, data })),
+      ];
+      if (hasErrors(all)) return failure(diagnosticsText(all));
+      return warned(serialize(document), all);
     }),
   );
 }

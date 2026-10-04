@@ -1,4 +1,4 @@
-import type { Catalog } from "@weft/core";
+import type { Catalog, DataSchema } from "@weft/core";
 
 /** What every tool needs to judge markup; the host decides, never the model. */
 export type Context = {
@@ -7,6 +7,8 @@ export type Context = {
   tokens?: ReadonlyMap<string, string> | undefined;
   /** Known host actions. Action names are checked only when given. */
   actions?: readonly string[] | undefined;
+  /** The data model's schema. Bindings are checked against it only when given (SPEC §10.5). */
+  data?: DataSchema | undefined;
 };
 
 /**
@@ -22,6 +24,8 @@ export const LIMITS = {
   patches: 100,
   /** UTF-16 code units of the JSON text of the whole patch list. */
   patchesChars: 200_000,
+  /** UTF-16 code units of the JSON text of the `project` argument (SPEC §10). */
+  projectChars: 500_000,
   /** Diagnostics returned in one result; the rest are counted, not listed. */
   diagnostics: 40,
   /** JSON values (objects, arrays, scalars) in one call's arguments, enforced by the SDK. */

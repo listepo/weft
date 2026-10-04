@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { expectedTree, formatAriaSnapshot, renderPage } from "@weft/render-react";
 import { z } from "zod";
 import { LIMITS, type Context } from "../context.ts";
+import { projectSchema, scope } from "../project.ts";
 import { readMarkup } from "../read.ts";
 import { diagnosticsText, failure, guarded, text } from "../result.ts";
 import { markupSchema } from "./validate.ts";
@@ -22,16 +23,22 @@ export function registerRender(server: McpServer, context: Context): void {
           .boolean()
           .optional()
           .describe("Also return the rendered static HTML page. Default false."),
+        project: projectSchema,
       },
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     },
-    guarded(({ markup, data, html }) => {
+    guarded(({ markup, data, html, project }) => {
       if ((JSON.stringify(data) ?? "").length > LIMITS.dataChars) {
         return failure(`The data is longer than ${LIMITS.dataChars} characters of JSON.`);
       }
-      const { document, diagnostics, ok } = readMarkup(markup, context, "strict");
-      if (!ok || document === undefined) return failure(diagnosticsText(diagnostics));
-      const options = { catalog: context.catalog, data };
+      const scoped = scope(context, project, "strict");
+      if ("tooLong" in scoped) return failure(scoped.tooLong);
+      if (scoped.context === undefined) return failure(diagnosticsText(scoped.diagnostics));
+      const { document, diagnostics, ok } = readMarkup(markup, scoped.context, "strict");
+      if (!ok || document === undefined) {
+        return failure(diagnosticsText([...scoped.diagnostics, ...diagnostics]));
+      }
+      const options = { catalog: scoped.context.catalog, data };
       const tree = formatAriaSnapshot(expectedTree(document, options));
       const result = text(tree === "" ? "(nothing is exposed to assistive technology)" : tree);
       if (html === true) result.content.push({ type: "text", text: renderPage(document, options) });
