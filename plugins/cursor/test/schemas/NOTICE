@@ -1,0 +1,35 @@
+plugin.schema.json and marketplace.schema.json in this folder are copies of
+schemas/plugin.schema.json and schemas/marketplace.schema.json from
+https://github.com/cursor/plugins, taken at commit
+e43c7ee26e0038c6c1fa8380dd34ce86ff94cb2a (2026-10-04, checked 2026-10-05); both files last
+changed in that repository at commit 5229aad76c37451561c5b81a9b5072ae1c549a5b. Only the
+whitespace differs (formatted with oxfmt).
+
+Copyright holder: the README of cursor/plugins says only "MIT" and names no copyright holder,
+and the repository has no LICENSE file at its root. The LICENSE file of each plugin folder in
+that repository (for example create-plugin/LICENSE) reads "Copyright (c) 2026 Cursor", which is
+the notice reproduced below.
+
+----------------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2026 Cursor
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -146,7 +146,7 @@ A plugin for Open Design (https://open-design.ai, https://github.com/attentiondo
 - render and preview pages;
 - map an Open Design `DESIGN.md` design system to Weft design tokens where the two line up, with a loss list where they do not.
 
-It reuses the shared bundled scripts and MCP server of the Claude Code and Cursor plugins (T32, T37) instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
+It reuses the scripts, the MCP server and the build in `plugins/shared` (T37), which write the same bundle into the Claude Code and Cursor plugins, instead of a copy. The plugin format and the `DESIGN.md` format follow Open Design's own docs and repository, cited with URL and the version checked. Done when the plugin installs into Open Design from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
 
 ### T39. Context in the document
 

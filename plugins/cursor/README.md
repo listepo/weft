@@ -44,7 +44,7 @@ Checked on 2026-10-05 against Cursor's official documentation and the official p
 - Marketplace: `.cursor-plugin/marketplace.json` at the repository root with `name`, `owner` and `plugins` (entries `name` and `source`, a path relative to the root). <https://cursor.com/docs/reference/plugins>
 - Local plugins: `~/.cursor/plugins/local/<name>/`. <https://cursor.com/docs/plugins>
 - Built-in browser: the agent drives it with a Navigate tool; the docs do not say whether `file://` URLs open, so `weft-render` falls back to a localhost server. <https://cursor.com/docs/agent/tools/browser>
-- Validator: Cursor publishes no CLI. Its plugin repository ships the JSON schemas and a script (`scripts/validate-plugins.mjs`) that checks a marketplace and each plugin against them; `test/schemas/` holds those two schemas (MIT, <https://github.com/cursor/plugins> at commit `e43c7ee26e00`, 2026-10-04, reformatted with oxfmt, content unchanged) and `test/plugin.test.ts` runs the same checks with Ajv: both manifests against the schemas, the entry's name against the manifest's name, the source folder and manifest exist.
+- Validator: Cursor publishes no CLI. Its plugin repository ships the JSON schemas and a script (`scripts/validate-plugins.mjs`) that checks a marketplace and each plugin against them; `test/schemas/` holds those two schemas (MIT, <https://github.com/cursor/plugins> at commit `e43c7ee26e00`, 2026-10-04, reformatted with oxfmt, content unchanged; its `NOTICE` keeps the source, the copyright notice and the license text) and `test/plugin.test.ts` runs the same checks with Ajv: both manifests against the schemas, the entry's name against the manifest's name, the source folder and manifest exist.
 
 ## Not checked yet
 
