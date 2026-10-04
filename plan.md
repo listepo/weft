@@ -14,6 +14,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T33 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
+| T36 | todo | P1 | 4 | 0% | |
 
 ### T8. Evaluation
 
@@ -104,3 +105,7 @@ Generate SwiftUI from `.weft` and read SwiftUI source back into `.weft`, in a Ru
 ### T35. Web targets both ways: HTML/CSS, React and SolidJS
 
 Generate static HTML with CSS, React (JSX/TSX) and SolidJS components from `.weft`, and read each of them back from source. Approved scope: one Rust crate next to the core (JSX and TSX parsed with oxc, HTML with html5ever, or better maintained options), exposed through the CLI and through WebAssembly. The TypeScript `@weft/to-jsx` and the HTML import of `@weft/from-aria` move into it, and their packages keep their API as wrappers, as T22 did for the core, so there is one implementation. Code that Weft generated comes back without loss; hand-written code imports with a loss table. Done when every corpus screen survives Weft → HTML/CSS, React and Solid → Weft byte-identical after formatting, the generated React and Solid components render with the same accessibility tree as today's renderer, and hand-written samples import with the expected losses.
+
+### T36. Examples, snapshots, screenshots and comparisons
+
+Many more tests, built on many more examples. Grow the corpus so every catalog kind, prop, slot, binding form and token type appears in at least one screen. For every screen and every target, record what each target produces as reviewed snapshots: insta in Rust, Vitest snapshots in TypeScript. Targets are canonical JSON, HTML/CSS, React, Solid, SwiftUI and Figma. Then take screenshots: rendered web targets in a real browser, through Vitest browser mode with Playwright, and generated SwiftUI in the iOS Simulator. Compare them in three ways: against the reviewed baselines, across targets for the same screen (React, Solid and static HTML must look the same within a tolerance and give the same accessibility tree), and across round trips (a screen and its round-tripped copy look identical). A failed comparison writes a visual diff image. Done when the suites run in `moon ci`, every baseline is reviewed, and a deliberate one-pixel layout change and a one-word text change are each caught.
