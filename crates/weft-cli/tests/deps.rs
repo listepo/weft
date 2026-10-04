@@ -37,6 +37,16 @@ fn core_depends_only_on_pure_crates() {
 }
 
 #[test]
+fn the_catalog_depends_only_on_the_core_and_pure_crates() {
+    let mut deps = dependencies("weft-catalog");
+    deps.sort();
+    assert_eq!(
+        deps,
+        ["indexmap", "serde", "serde_json", "thiserror", "weft-core"]
+    );
+}
+
+#[test]
 fn only_the_cli_depends_on_clap_and_anyhow() {
     let cli = dependencies("weft-cli");
     assert!(cli.iter().any(|d| d == "clap") && cli.iter().any(|d| d == "anyhow"));

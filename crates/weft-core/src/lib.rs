@@ -18,7 +18,7 @@ mod values;
 
 pub use canonical::{canonicalize, stringify};
 pub use diagnostics::{Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors};
-pub use json::{JsonError, parse_json};
+pub use json::{JsonError, order_keys, parse_json, to_compact};
 pub use model::{
     Catalog, Child, ComponentDef, Content, Document, Map, Node, PropDef, PropDefault, PropType,
     SlotDef, Value, WEFT_VERSION,
