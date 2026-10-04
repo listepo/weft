@@ -4,6 +4,8 @@ tasks:
   test:
     description: 'node:test suite of this package'
     command: 'node --test "test/**/*.test.ts"'
+    # Every package reaches @weft/core, which loads the generated WebAssembly module.
+    deps: ['root:wasm']
     inputs:
       - '**/*'
       - '/packages/**/*'
