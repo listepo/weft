@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T22 | todo | P1 | 3 | 0% | |
 | T23 | todo | P2 | 3 | 0% | |
 | T24 | todo | P2 | 2 | 0% | |
-| T25 | todo | P1 | 3 | 0% | |
+| T25 | in progress | P1 | 3 | 5% | Claude Code / claude-opus-5-5 |
 | T26 | todo | P1 | 3 | 0% | |
 
 ### T8. Evaluation
@@ -53,6 +53,16 @@ Run the binding tests in Node, Deno, Bun and a headless browser through moon. Do
 ### T25. Benchmark rigor
 
 Fix the benchmark limitations found in T8: three samples per task with the spread reported; answer checks that accept a format's own spelling of the same action or value (`press:nav.reset`, `actions.nav.reset()`) and re-score saved replies without new calls; parallel requests; a Message Batches API mode at half the price. Done when the harness tests cover each of these and a re-score of the saved T8 replies runs offline.
+
+The creator asked to run the benchmark on a local model too: Bonsai 27B (`prism-ml/bonsai-27b`) served by LM Studio's OpenAI-compatible API.
+
+Execution plan:
+
+1. `bench/src/provider.ts`: an OpenAI-compatible provider (LM Studio at `http://localhost:1234/v1` by default, `--base-url` to change it); only the final `content` counts, reasoning text is ignored.
+2. `bench/src/run.ts`: `--provider anthropic|openai`, `--samples N` (default 3), `--concurrency N` (p-limit), `--batch` (Anthropic Message Batches: one batch for first replies, one for repairs), and `rescore <results.json>` that re-checks saved replies offline.
+3. `bench/src/run-tasks.ts`: results carry the sample index; summaries give the mean over samples and the min–max spread; answer checks accept a format's own spelling of an action (`press:nav.reset`, `actions.nav.reset()`).
+4. Tests with mocked fetch for both providers and the batch flow, the answer spellings, sampling and the rescore command.
+5. Verify with `moon ci`, then a short live run against Bonsai.
 
 ### T26. Vitest for the TypeScript tests
 
