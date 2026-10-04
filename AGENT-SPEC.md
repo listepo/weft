@@ -9,12 +9,25 @@ The examples are valid in strict mode against the core catalog `weft-core` 0.1 a
 | Input | Use it for |
 | --- | --- |
 | The catalog (`weft_catalog`, or `catalog.json`) | The only elements, attributes, slots, states and events that exist. |
-| The data model (paths such as `$.user.email`) | The targets of bindings. Do not invent paths the host does not have. |
+| The data model (paths such as `$.user.email`) | The targets of bindings. Do not invent paths the host does not have. When the host has a data schema, a path it does not declare is `W315` and data of the wrong type for the attribute is `W316`. |
 | The action names (`auth.submit`, `nav.back`) | The values of `on-<event>`. When the host lists actions, use only those (`W308`). |
 | The design tokens (`space.md`, `color.accent`) | The values of token props. When the host lists tokens, use only those (`W306`). |
 | The format version and catalogs it reads | `weft="0.1"` on the root; write nothing a host does not advertise. |
 
 Validate in **strict** mode before you answer: unknown elements and attributes are warnings for readers but errors for writers.
+
+A project file, `weft.json`, next to the screens or in a parent directory, gives all of these at once: layered token files, a catalog extension (the project's own kinds, props and variants on top of `weft-core`), the action list and a JSON Schema of the data model (SPEC §10). The screen itself never names it; tools find it. Through MCP, tools take the project's content as a `project` argument:
+
+```json
+{
+  "tokens": [{ "space": { "$type": "dimension", "md": { "$value": { "value": 16, "unit": "px" } } } }],
+  "catalog": { "weft": "0.1", "name": "shop", "version": "1.0.0", "components": {} },
+  "actions": ["cart.add"],
+  "data": { "type": "object", "properties": { "cart": { "type": "array" } } }
+}
+```
+
+Use the project's kinds as you use core kinds: look them up in `weft_catalog` with the same `project`.
 
 ## 2. Writing a screen
 
@@ -214,6 +227,8 @@ What each code asks of you:
 | W312 | Use `section` or `stack` below the root. |
 | W313 | Move the submit button into a `form`, or drop `submit` and give it `on-press`. |
 | W314 | Put the element to repeat inside `<each>`, or remove the `<each>`. |
+| W315 | Bind a path the data schema declares; `expected` lists the names at that step and `hint` the nearest one. Inside `<each>`, start from the loop variable. |
+| W316 | Bind data of a type the attribute takes (`expected`), pick another attribute, or negate the binding when the attribute is a boolean condition. |
 | W401 | Use a catalog component (see `hint`), or an extension the host knows. |
 | W402 | Use an attribute the component declares, or remove it. |
 | W403 | Write `weft="0.1"`: the reader is older than the version you wrote. |
@@ -229,6 +244,16 @@ What each code asks of you:
 | W509 | Give the inserted elements ids the document does not have; `hint` suggests one. |
 | W601 | The importer could not read its input; nothing to repair in a document. |
 | W602 | The import was cut at a limit; the rest of the input is missing. |
+| W701 | The project file, or the member at `path`, has the wrong shape; fix `weft.json` (or the `project` argument), not the screen. |
+| W702 | Remove the member or correct its name: `tokens`, `catalog`, `actions`, `data`, `$schema`. |
+| W703 | Name the file relative to the project file, inside its directory, with `/`. |
+| W704 | Point at a file that exists and holds JSON. |
+| W705 | Fix the token file named in the message: give the token a `$type`, point the alias at an existing token, break the cycle. |
+| W706 | Make the catalog extension, or the entry at `path`, a valid catalog definition; new kinds need `description`, `role` and `content` and no `x-` prefix. |
+| W707 | An extension may only add: keep the core's role, type and content model, and add props and slots as optional. |
+| W708 | Write the action as dot-separated names: `cart.add`. |
+| W709 | Repair the data schema at the place the message names. |
+| W710 | Rewrite the schema without that keyword (inline the `$ref`, pick one branch of `anyOf`); until then bindings there are not checked. |
 
 ## 5. Reading a screen
 

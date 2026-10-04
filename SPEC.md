@@ -265,7 +265,7 @@ Validation has three layers, each reporting diagnostics rather than throwing:
 
 1. **Syntax** — §2. The document is well-formed restricted XML.
 2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, numbers within their declared `min`, `max` and `integer`, required props present, declared slots, states and events.
-3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, a `submit` button inside a `form`, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
+3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), binding paths are declared, with a type the attribute takes, in the supplied data schema (when one is supplied, §10.5), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, a `submit` button inside a `form`, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
 
 A document that does not have the JSON shape of §3 gets `W200` diagnostics only; the other checks need the shape.
 
@@ -285,13 +285,13 @@ type Diagnostic = {
 };
 ```
 
-Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility, `W5xx` patches, `W6xx` import (§9). A code, once published, never changes meaning.
+Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility, `W5xx` patches, `W6xx` import (§9), `W7xx` projects (§10). A code, once published, never changes meaning.
 
 `path` addresses the element from the root: one segment per element, `kind#id`, or `kind[index]` when the element has no valid id (the index counts the parent's list, text included). A named slot adds `slot[name]`, a text child `#text[index]`, an attribute `@name` (`@on-press` for events, `@weft` for the version). Syntax diagnostics name the open elements only. For JSON that does not have the shape of §3, the path is a JSON Pointer prefixed with `#`, e.g. `#/root/children/0/kind`. A patch diagnostic (§7) about the patch itself points into the patch list the same way, e.g. `#/patches/2/parent`.
 
 ### 6.2 Codes
 
-`mode` severity is a warning in lenient mode and an error in strict mode (§8). `W602` is a warning. Every other code is an error.
+`mode` severity is a warning in lenient mode and an error in strict mode (§8). `W602` and `W710` are warnings. Every other code is an error.
 
 | Code | Meaning |
 | --- | --- |
@@ -353,6 +353,8 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W312 | `screen` below the root. |
 | W313 | `button` with `submit="true"` outside a `form`. |
 | W314 | `<each>` without an element child. |
+| W315 | Binding path not declared in the supplied data schema (§10.5). |
+| W316 | Data type at the binding path is not one the attribute takes (§10.5). |
 | W401 | Unknown element (mode). |
 | W402 | Unknown attribute (mode). |
 | W403 | Newer minor version of the format (mode). |
@@ -368,6 +370,16 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W509 | Inserted `markup` uses an id that the document already has. |
 | W601 | Imported input cannot be read: a snapshot that is neither Playwright aria snapshot YAML nor an accessibility tree, HTML that is not a string, or a catalog the importer cannot map with. |
 | W602 | Imported input exceeds an import limit (length, element count or nesting depth); the rest is not imported. |
+| W701 | Project file is not JSON or not an object, or a member has the wrong type (§10.2). |
+| W702 | Unknown member in the project file (mode). |
+| W703 | File name in the project file is absolute, leaves the project directory or is malformed. |
+| W704 | File named by the project cannot be read or is not JSON. |
+| W705 | Problem in the project's token files (§10.3). |
+| W706 | Catalog extension, or one of its entries, is not a valid catalog or definition (§10.4). |
+| W707 | Catalog extension narrows or changes the core catalog (§10.4). |
+| W708 | Action name in the project file breaks the action grammar. |
+| W709 | Data schema is malformed (§10.5). |
+| W710 | Data schema uses a keyword Weft does not support; that part accepts any data (§10.5). |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
@@ -437,3 +449,62 @@ type Patch =
 | `kinds` | A role without a kind becomes `x-aria-<role>`. | Likewise. |
 | `text` | Text with no place in the content model is dropped; a reference-like brace is replaced. | Likewise. |
 | `structure` | No single `main` landmark: a `screen` root is added. | Likewise. |
+
+## 10. Projects
+
+Screens that belong together share their resources through a project file named `weft.json`. A screen names neither its project nor its resources.
+
+### 10.1 Finding the project
+
+- A tool that reads a screen from a file looks for `weft.json` in the screen's directory, then in each parent directory up to the root of the file system. The first one found is the project; without one, the tool behaves as before (no project).
+- An explicit argument wins: a project file given to the tool replaces the search, and a catalog or token set given to the tool replaces the project's.
+- A tool that reads no files (the MCP server) takes the project's content instead: the same members, with each file name replaced by the file's JSON content.
+
+### 10.2 The project file
+
+```json
+{
+  "tokens": ["tokens/base.tokens.json", "tokens/brand.tokens.json"],
+  "catalog": "catalog.json",
+  "actions": ["cart.add", "nav.home"],
+  "data": "data.schema.json"
+}
+```
+
+| Member | Type | Meaning |
+| --- | --- | --- |
+| `tokens` | array of file names, at most 64 | DTCG token files, in layer order (§10.3). More than 64 is `W701`. |
+| `catalog` | file name | An extension of the core catalog (§10.4). |
+| `actions` | array of action names | The host's actions: `on-*` values are checked against them (`W308`). |
+| `data` | file name | A JSON Schema of the host data model (§10.5). |
+| `$schema` | string | Ignored; for editors. |
+
+- Every member is optional. Without `catalog` the project's catalog is the core catalog.
+- A file name is relative to the directory of the project file, uses `/` as separator and stays inside that directory: it is non-empty and has no empty or `..` segment, no leading `/`, no `\`, no `:` and no NUL. Any other name is `W703` and the file is not read.
+- Loading never stops at a problem. Each problem is a diagnostic and the rest of the project still applies: a project file that is not JSON or not an object is `W701` and the project is empty; a member of the wrong type is `W701` and is ignored; an unknown member is `W702`; an action name that breaks the action grammar (§2.2) is `W708` and is left out; a file that cannot be read or is not JSON is `W704` and is left out.
+- Project diagnostics point into the project file with a JSON Pointer prefixed with `#`, e.g. `#/tokens/1`; for project content passed as a tool argument the pointer starts at that argument (`#/project/tokens/1`). Diagnostics of a screen keep the paths of §6.1.
+
+### 10.3 Token layers
+
+- Each file is a DTCG 2025.10 token tree. The files merge in order into one tree, which then loads as one token file. Groups merge member by member; a token (an object with `$value`) replaces whatever the earlier files have at its path, as a whole; any other clash is won by the later file. So a later file overrides a token by declaring it again, and a `$type` an earlier file sets on a group still applies to tokens a later file adds to that group.
+- Aliases resolve after the merge, as the DTCG resolver module orders its sets: an alias in the base file to a token the brand file overrides reads the brand value.
+- A file that is not a JSON object, and every problem of the merged tree (a bad name, a token without a type, an alias to nothing, an alias cycle), is `W705`. The token in question is left out.
+
+### 10.4 Catalog extension
+
+The `catalog` file is a catalog (§5): `weft`, `name`, `version` and `components`. The project's catalog is the core catalog with the extension's components merged in, under the extension's `name` and `version`.
+
+- A kind the core catalog does not have is a new component and needs a whole definition (`description`, `role`, `content`, …). Its name follows the name grammar and does not start with `x-`, because `x-` elements are opaque to every catalog (§8).
+- A kind the core catalog has is extended. The entry may leave out `description`, `role` and `content` to keep the core's. `props` and `slots` merge by name, an entry replacing the core definition of that name (to add a variant, restate the prop with the longer `values` list). `states`, `events`, `allowedChildren` and `allowedParents` are joined: the core's values, then the new ones. Every other field replaces the core's.
+- An extension may only widen the core catalog. The merged catalog is compared with the core catalog by the rules of §8: a kind whose merged definition makes a change those rules call major (a changed role or type, a new required prop, a narrowed content model, …) is `W707`, and that kind keeps its core definition.
+- An extension that is not a catalog is `W706` and is ignored; an entry that is not a valid definition, or names a kind that breaks the rules above, is `W706` and only that entry is ignored.
+- `null` is not a value in a catalog: a member written `null` makes its entry invalid.
+
+### 10.5 Data schema
+
+The `data` file is a JSON Schema (2020-12) of the host data model. Validation checks every binding against it: the path must be declared, and the data there must have a type the attribute takes.
+
+- **Subset.** Weft reads `type` (a type name or a list of them), `properties`, `additionalProperties` and `items` (one schema), and the boolean schemas `true` (any data) and `false` (no data). Keywords that only annotate or constrain values (`$schema`, `$id`, `$comment`, `$defs`, `title`, `description`, `default`, `examples`, `required`, `enum`, `const`, `format`, `minimum`, …) are ignored. Keywords that combine or reference schemas (`$ref`, `$dynamicRef`, `allOf`, `anyOf`, `oneOf`, `not`, `if`, `then`, `else`, `dependentSchemas`, `prefixItems`, `contains`, `patternProperties`, `propertyNames`, `unevaluatedItems`, `unevaluatedProperties`) are not supported: `W710`, and the schema they sit in accepts any data. A schema that is not an object or a boolean, a `type` that names no JSON Schema type, `properties` that is not an object, or nesting deeper than 256 schemas, is `W709`, and that schema accepts any data.
+- **Closed objects.** One rule differs from JSON Schema: a schema with `properties` and without `additionalProperties` declares every property the object has, as if `additionalProperties` were `false`. An object with open keys (a map) says so with `"additionalProperties": true` or a schema for its values. A schema with neither keyword declares any name.
+- **Paths.** A path from `$.` starts at the root schema; a path from `$item` starts at the `items` schema of the `in` of the `<each>` that names `item`. A name segment steps into `properties`, then `additionalProperties`; an index segment steps into `items` when the schema may be an array. A step the schema does not declare, into `false`, or into a value that is neither an object nor an array, is `W315`, with the nearest declared name as the hint. A schema without `type` may be anything, so every step from it is declared.
+- **Types.** The schema at the end of a plain binding must allow a type the attribute takes: a `string` prop (`text`, `label` and `state` included) takes `string`, `number` and `integer`, because text shows numbers; a `number` prop takes `number` and `integer`; a `boolean` prop (and `hidden`) takes `boolean`; an `enum` or `token` prop takes `string`; the `in` of `<each>` takes `array`. Otherwise it is `W316`. A schema without `type` allows every type. A negated binding tests whether a value is empty and so takes any type; an attribute the catalog does not declare is not type-checked.
