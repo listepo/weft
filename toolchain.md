@@ -75,5 +75,5 @@
 | undici | local | https://github.com/nodejs/undici | Fetch without the header timeout, for slow local model servers |
 | ajv | local | https://github.com/ajv-validator/ajv | Validates the Cursor plugin manifests against Cursor's own JSON schemas |
 | ajv-formats | local | https://github.com/ajv-validator/ajv-formats | The `uri` and `email` formats those schemas use |
-
 | @figma/plugin-typings | local | https://github.com/figma/plugin-typings | Official Figma Plugin API types; the conversion is typed against them |
+| @penpot/plugin-types | local | https://github.com/penpot/penpot | Official Penpot plugin API types (MPL-2.0); `@weft/penpot` and the Penpot plugin are typed against them |

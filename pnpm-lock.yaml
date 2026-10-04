@@ -277,6 +277,25 @@ importers:
         specifier: 4.6.5
         version: 4.6.5
 
+  packages/penpot:
+    dependencies:
+      '@weft/catalog':
+        specifier: workspace:*
+        version: link:../catalog
+      '@weft/core':
+        specifier: workspace:*
+        version: link:../core
+      '@weft/design-tool':
+        specifier: workspace:*
+        version: link:../design-tool
+    devDependencies:
+      '@penpot/plugin-types':
+        specifier: 1.5.0
+        version: 1.5.0
+      '@weft/from-aria':
+        specifier: workspace:*
+        version: link:../from-aria
+
   packages/render-react:
     dependencies:
       '@weft/catalog':
@@ -932,6 +951,9 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [win32]
+
+  '@penpot/plugin-types@1.5.0':
+    resolution: {integrity: sha512-hFk4Rx66rLaSUWoN6bhxXkDI2ymwKg9xokdslvZvXM5MSmEmfhsJKUMwtuzgYWljbbfaQhK+DjK8g8yVbbavtA==}
 
   '@rolldown/binding-android-arm-eabi@1.2.12':
     resolution: {integrity: sha512-dB/a1214qKfHMXCpgqR4OZT+jS4kTyEXbQGJPqzobt5EwH5rX080pxE37alt3RzvR1bf1Yz/yGqRfrYAxuPw0A==}
@@ -2176,6 +2198,8 @@ snapshots:
 
   '@oxlint/binding-win32-x64-msvc@1.86.0':
     optional: true
+
+  '@penpot/plugin-types@1.5.0': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.12':
     optional: true

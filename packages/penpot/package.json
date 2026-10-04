@@ -1,0 +1,19 @@
+{
+  "name": "@weft/penpot",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@weft/catalog": "workspace:*",
+    "@weft/core": "workspace:*",
+    "@weft/design-tool": "workspace:*"
+  },
+  "devDependencies": {
+    "@penpot/plugin-types": "1.5.0",
+    "@weft/from-aria": "workspace:*"
+  }
+}
