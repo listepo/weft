@@ -36,13 +36,13 @@ Options:
 
 ```console
 $ weft validate weft-tour/login.weft; echo "exit $?"
-weft: no --catalog given; only the syntax layer was checked
+weft: no --catalog and no project; only the syntax layer was checked
 exit 0
 $ weft validate weft-tour/login.weft --catalog packages/catalog/catalog.json --strict; echo "exit $?"
 exit 0
 ```
 
-Without `--catalog` only the syntax layer runs (is it well-formed Weft markup?) and the program says so. The core catalog is at `packages/catalog/catalog.json`; with it, `validate` also checks every element, attribute, value, slot, state, event and parent-child rule. Pass your own catalog file to check against your own vocabulary ([Catalog and tokens](catalog-and-tokens.md)).
+Without `--catalog` or a project only the syntax layer runs (is it well-formed Weft markup?) and the program says so. The core catalog is at `packages/catalog/catalog.json`; with it, `validate` also checks every element, attribute, value, slot, state, event and parent-child rule. Pass your own catalog file to check against your own vocabulary ([Catalog and tokens](catalog-and-tokens.md)).
 
 **`--strict`** turns unknown elements and attributes from warnings into errors. Use it for anything you write and in CI. Without it, a file from a newer minor version of the format passes with warnings, which is what a reader wants. The lines look the same in both modes; the exit code is what changes:
 
@@ -56,6 +56,8 @@ compat/unknown-element.weft:2:31 W403 Version 0.2 is newer than 0.1; unknown con
 compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.1.0. — use a catalog component, or an extension named x-<vendor>-hologram
 exit 1
 ```
+
+**Projects.** Every command first looks for a `weft.json` in the file's folder or above it and, when it finds one, checks against the project's catalog, tokens, actions and data schema, so token names, action names and bindings are checked too. `--project <file>` names another project file, `--no-project` ignores it, and `--catalog` replaces only the project's catalog. The project's `validate.mode` sets the default of `--strict` (`--lenient` overrides it), and its `format.write` the default of `fmt --write` (`--print` overrides it). Project problems are printed first, as `weft.json:#/pointer code message`. See [Projects](projects.md).
 
 **Output.** One line per diagnostic: `file:line:column code message`, then ` — hint` when there is one. [SPEC §6.2](../SPEC.md#62-codes) lists the codes; a code never changes meaning.
 
@@ -138,13 +140,13 @@ Sentences never hide a negation: a negated binding always contains `NOT`. If nei
 
 ## What `weft` does not do
 
-- It does not check token names or action names. Those checks need the list of tokens or actions your app has, which only the TypeScript library accepts today (`validate` and `parse` take `tokens` and `actions` options; see [Catalog and tokens](catalog-and-tokens.md)).
+- It does not check token names, action names or bindings without a project: those checks need your app's tokens, actions and data schema, which a `weft.json` declares ([Projects](projects.md)).
 - It does not render, import or export. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
 - It does not apply patches. [Patches](patches.md) go through the MCP server or the library.
 
 ## The Node version
 
-`packages/core/src/cli.ts` is an older front end with the same name that runs on Node through WebAssembly. It has `validate` and `fmt` with the same flags and output, but no `explain`:
+`packages/core/src/cli.ts` is an older front end with the same name that runs on Node through WebAssembly. It has `validate` and `fmt` with the same output, but no `explain` and no project support:
 
 ```console
 $ node packages/core/src/cli.ts validate weft-tour/login.weft --catalog packages/catalog/catalog.json --strict; echo "exit $?"

@@ -53,6 +53,8 @@ Each command is a script in `plugins/shared/scripts/`, so you can run the same t
 | 1 | The input has errors; they are printed as `file:line:column code message`. Nothing was written. |
 | 2 | A usage or file problem: a missing file, an input that is too large, an output that already exists. |
 
+Each script works in the project of its input: the first `weft.json` in the input's folder or above it (`--project <file>` names another, `--no-project` ignores it). The project brings its own components, tokens, actions and data schema, and its settings stand in for options you leave out: `render.data`, `render.tokens` and `render.outDir` for render, `export.react.outDir` for export, `import.html.outDir` for import. A project with errors stops the script with exit code 1. See [Projects](projects.md).
+
 The examples use the scratch folder from the [tour](tour.md); this block makes it again if you skipped that page.
 
 ```console
