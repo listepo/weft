@@ -42,6 +42,7 @@
 | clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
 | proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core and weft-catalog: no panics, round trips, idempotent formatting |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
+| unicode-normalization | local | https://github.com/unicode-rs/unicode-normalization | NFKD before folding imported names into id slugs, as `String.prototype.normalize` does in the TypeScript importers |
 
 ## npm
 

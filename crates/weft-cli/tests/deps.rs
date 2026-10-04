@@ -74,3 +74,19 @@ fn only_the_cli_depends_on_clap_and_anyhow() {
         "{core:?}"
     );
 }
+
+#[test]
+fn the_importer_kit_depends_only_on_the_core_and_pure_crates() {
+    let mut deps = dependencies("weft-import");
+    deps.sort();
+    assert_eq!(
+        deps,
+        [
+            "indexmap",
+            "serde",
+            "serde_json",
+            "unicode-normalization",
+            "weft-core"
+        ]
+    );
+}
