@@ -1,0 +1,30 @@
+<screen id="screen-1" weft="0.1">
+  <form id="form-1">
+    <section id="section-profile" label="Profile">
+      <field id="name" label="Name" value="{$.name}"/>
+      <field id="field-email" label="Email" type="email" value="{$.email}"/>
+    </section>
+    <section id="section-notifications" label="Notifications">
+      <switch id="switch-1" checked="{$.notifications}" label="Push notifications"/>
+      <select id="select-1" label="Plan" value="{$.plan}">
+        <option id="option-free" value="free">Free</option>
+        <option id="option-pro" value="pro">Pro</option>
+      </select>
+    </section>
+    <section id="section-devices" label="Devices">
+      <each id="each-device" as="device" in="{$.devices}">
+        <stack id="stack-1" direction="row">
+          <image id="image-1" label="" src="laptopcomputer"/>
+          <text id="text-1" text="{$device.title}"/>
+        </stack>
+      </each>
+      <text id="text-2">Slot</text>
+    </section>
+    <text id="text-you-have-many-devices" tone="muted">You have many devices.</text>
+    <button id="button-save" disabled="{$.saving}" variant="primary" on-press="onSave">Save</button>
+    <button id="button-help">Help</button>
+  </form>
+  <dialog id="dialog-1" label="" open="{$.showHelp}">
+    <text id="text-ask-support-for-help">Ask support for help.</text>
+  </dialog>
+</screen>

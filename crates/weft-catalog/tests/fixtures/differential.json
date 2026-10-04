@@ -17719,7 +17719,7 @@
   },
   {
    "name": "unknown keys in tool sections only warn",
-   "project": "{\"validate\":{\"mod\":\"strict\"},\"export\":{\"swiftui\":{\"outDir\":\"ios\"},\"react\":{\"outdir\":\"x\"}},\"import\":{\"figma\":{}},\"mcp\":{\"limit\":{}}}",
+   "project": "{\"validate\":{\"mod\":\"strict\"},\"export\":{\"cobol\":{\"outDir\":\"ios\"},\"react\":{\"outdir\":\"x\"}},\"import\":{\"figma\":{}},\"mcp\":{\"limit\":{}}}",
    "codes": [
     "W702",
     "W702",
@@ -17757,10 +17757,10 @@
      {
       "code": "W702",
       "severity": "warning",
-      "message": "Unknown key \"swiftui\" in \"export\".",
-      "path": "#/export/swiftui",
-      "expected": "one of: \"react\"",
-      "got": "swiftui"
+      "message": "Unknown key \"cobol\" in \"export\".",
+      "path": "#/export/cobol",
+      "expected": "one of: \"react\", \"swiftui\"",
+      "got": "cobol"
      },
      {
       "code": "W702",
@@ -17776,7 +17776,7 @@
       "severity": "warning",
       "message": "Unknown key \"figma\" in \"import\".",
       "path": "#/import/figma",
-      "expected": "one of: \"html\"",
+      "expected": "one of: \"html\", \"swiftui\"",
       "got": "figma"
      },
      {
