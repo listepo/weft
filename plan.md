@@ -14,7 +14,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T34 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T35 | in progress | P1 | 5 | 0% | Claude Code / claude-opus-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
-| T37 | in progress | P1 | 3 | 5% | Claude Code / claude-sonnet-5-5 |
 | T38 | todo | P2 | 3 | 0% | |
 | T39 | todo | P1 | 4 | 0% | |
 | T40 | todo | P2 | 4 | 0% | |
@@ -108,24 +107,6 @@ Generate static HTML with CSS, React (JSX/TSX) and SolidJS components from `.wef
 ### T36. Examples, snapshots, screenshots and comparisons
 
 Many more tests, built on many more examples. Grow the corpus so every catalog kind, prop, slot, binding form and token type appears in at least one screen. For every screen and every target, record what each target produces as reviewed snapshots: insta in Rust, Vitest snapshots in TypeScript. Targets are canonical JSON, HTML/CSS, React, Solid, SwiftUI and Figma. Then take screenshots: rendered web targets in a real browser, through Vitest browser mode with Playwright, and generated SwiftUI in the iOS Simulator. Compare them in three ways: against the reviewed baselines, across targets for the same screen (React, Solid and static HTML must look the same within a tolerance and give the same accessibility tree), and across round trips (a screen and its round-tripped copy look identical). A failed comparison writes a visual diff image. Done when the suites run in `moon ci`, every baseline is reviewed, and a deliberate one-pixel layout change and a one-word text change are each caught.
-
-### T37. Cursor plugin
-
-The same features as the Claude Code plugin (T30, T32), packaged for Cursor:
-- import HTML to `.weft`, with the loss table;
-- export `.weft` to React;
-- render `.weft` to an HTML page and preview it in Cursor's built-in browser;
-- the weft MCP server;
-- the authoring guide from `AGENT-SPEC.md`, as rules or skills.
-
-It lives in this repository (`plugins/cursor`) and reuses the bundled scripts and MCP server of the Claude Code plugin rather than a second copy: shared files move to one place that both plugins use. Follow the plugin format from Cursor's official documentation, citing its URL and the date it was checked. Done when the plugin installs in Cursor from a local clone, each feature works on a corpus screen, and its tests pass in `moon ci`.
-
-Execution plan:
-- Format (checked 2026-10-05, cursor.com/docs/plugins and /docs/reference/plugins, github.com/cursor/plugins): a Cursor plugin is a folder with `.cursor-plugin/plugin.json`, default-discovered `skills/`, `rules/*.mdc`, `commands/`, `mcp.json` (`${CURSOR_PLUGIN_ROOT}` in command/args), and a repository-level `.cursor-plugin/marketplace.json`. Cursor caches only the `source` folder of a marketplace entry (verified in `~/.cursor/plugins/cache`, read-only), so the bundle must sit inside `plugins/cursor`.
-- Shared bundle: move the scripts (`import`, `export`, `render`, `lib`), the bundler (`build.ts`) and the shared tests into a new `plugins/shared` project. One build writes `dist/` (scripts, MCP server, WebAssembly core) and the AGENT-SPEC copy into both plugin folders; `moon run shared:build` is the only task that writes them. Claude Code's `moon run claude-code:build` goes away in favour of it; AGENTS.md and the docs are updated.
-- Plugin: `plugins/cursor` with the manifest, `mcp.json`, skills `weft-import`, `weft-export`, `weft-render`, `weft-spec` (skills reach the scripts by a path relative to the skill folder, because Cursor documents no root variable for skills), a glob-attached rule for `*.weft`, and a README citing the sources. Root `.cursor-plugin/marketplace.json` lists it.
-- Tests (Vitest): the bundle test runs for both plugin folders (committed `dist/` and spec copies equal a fresh build; only Node built-ins imported; scripts and MCP server run from a copy of the folder as Cursor installs it); Cursor manifest and marketplace are validated with Cursor's official JSON schemas (vendored, MIT), plus checks of component discovery, skill frontmatter, rule frontmatter and `mcp.json` variables.
-- Docs: `docs/cursor-plugin.md`, AGENTS.md rule about the bundle, `toolchain.md` rows. Manual checks in a signed-in Cursor are listed in the report.
 
 ### T38. Open Design plugin
 

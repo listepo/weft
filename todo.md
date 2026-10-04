@@ -8,7 +8,6 @@
 - T34. SwiftUI generator and importer
 - T35. Web targets both ways: HTML/CSS, React and SolidJS
 - T36. Examples, snapshots, screenshots and comparisons
-- T37. Cursor plugin
 - T38. Open Design plugin
 - T39. Context in the document
 - T40. Penpot round trip and plugin
