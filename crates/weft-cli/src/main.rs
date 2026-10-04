@@ -1,9 +1,12 @@
-//! `weft validate`, `weft fmt` and `weft explain`. The project file (`weft.json`, SPEC §10) found
+//! `weft validate`, `weft fmt`, `weft explain`, and the SwiftUI generator and importer
+//! (`weft swiftui`, `weft import-swiftui`, in `swiftui.rs`). The project file (`weft.json`, SPEC §10) found
 //! above the document, or given with `--project`, supplies the catalog, tokens, actions and data
 //! schema, and the settings of §10.6 (`validate.mode`, `format.write`); a flag overrides the
 //! project, which overrides the default. `--catalog` replaces the project's catalog. Without
 //! either, `validate` checks only the syntax layer. Exit codes: 0 ok, 1 diagnostics with errors,
 //! 2 usage or I/O failure.
+
+mod swiftui;
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -22,7 +25,7 @@ use weft_core::{
 #[command(
     name = "weft",
     version,
-    about = "Validate, format and explain Weft documents"
+    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -85,6 +88,35 @@ enum Command {
         #[command(flatten)]
         project: ProjectArgs,
     },
+    /// Generate a SwiftUI view (iOS 17, macOS 14) from a markup document.
+    Swiftui {
+        file: PathBuf,
+        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        #[arg(long)]
+        catalog: Option<PathBuf>,
+        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        #[arg(long)]
+        tokens: Option<PathBuf>,
+        #[command(flatten)]
+        project: ProjectArgs,
+        /// Write `<file stem>.swift` here instead of printing (default: the project's
+        /// `export.swiftui.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+    },
+    /// Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses.
+    ImportSwiftui {
+        file: PathBuf,
+        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        #[arg(long)]
+        catalog: Option<PathBuf>,
+        #[command(flatten)]
+        project: ProjectArgs,
+        /// Write `<file stem>.weft` here instead of printing (default: the project's
+        /// `import.swiftui.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+    },
 }
 
 const USAGE_ERROR: u8 = 2;
@@ -121,6 +153,15 @@ fn find_project(document: &Path) -> Option<PathBuf> {
         .find(|candidate| candidate.is_file())
 }
 
+/// The project file that applies to `document`: the one given, else the nearest one.
+fn project_file(document: &Path, args: ProjectArgs) -> Option<PathBuf> {
+    if args.no_project {
+        None
+    } else {
+        args.project.or_else(|| find_project(document))
+    }
+}
+
 /// The project that applies to `document`, if any, after printing its diagnostics to `out`.
 /// Returns whether those diagnostics hold an error too.
 fn project_for(
@@ -129,12 +170,7 @@ fn project_for(
     mode: Mode,
     out: &mut dyn Write,
 ) -> Result<(Option<Project>, bool)> {
-    let file = if args.no_project {
-        None
-    } else {
-        args.project.or_else(|| find_project(document))
-    };
-    let Some(file) = file else {
+    let Some(file) = project_file(document, args) else {
         return Ok((None, false));
     };
     let (project, diagnostics) = load_project(&file, mode)?;
@@ -331,6 +367,36 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             }
             Ok(0)
         }
+        Command::Swiftui {
+            file,
+            catalog,
+            tokens,
+            project,
+            out_dir,
+        } => swiftui::export(
+            swiftui::ExportArgs {
+                file,
+                catalog,
+                tokens,
+                project,
+                out_dir,
+            },
+            out,
+        ),
+        Command::ImportSwiftui {
+            file,
+            catalog,
+            project,
+            out_dir,
+        } => swiftui::import(
+            swiftui::ImportArgs {
+                file,
+                catalog,
+                project,
+                out_dir,
+            },
+            out,
+        ),
     }
 }
 
