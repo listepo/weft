@@ -21,7 +21,8 @@ tasks:
   # The Rust core and CLI. The differential fixture ties these to the TypeScript core's results.
   rust-test:
     command: 'cargo nextest run --workspace'
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock']
+    # weft-catalog embeds catalog.json and its tests read the examples and default tokens.
+    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json', '/packages/catalog/examples/**/*', '/packages/catalog/tokens/**/*']
   rust-lint:
     script: 'cargo clippy --workspace --all-targets -- -D warnings && cargo fmt --all --check'
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock']
+    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/clippy.toml']
