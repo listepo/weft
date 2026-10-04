@@ -217,6 +217,30 @@ const cases: Edit[] = [
     losses: ["ids", "values", "values", "ids", "ids", "kinds"],
   },
   {
+    name: "a group placed by hand",
+    edit: (f, frame) => {
+      const lines = ["Second", "First"].map((characters, i) => {
+        const t = f.createText();
+        t.characters = characters;
+        t.y = 40 - i * 40;
+        return t;
+      });
+      const group = new FakeOther("GROUP", lines);
+      group.name = "Notes";
+      f.find<FakeFrame>(frame, "form#form").appendChild(group);
+    },
+    patches: [
+      {
+        op: "insert",
+        parent: "form",
+        index: 3,
+        markup:
+          '<stack id="stack-notes"><text id="text-first">First</text><text id="text-second">Second</text></stack>',
+      },
+    ],
+    losses: ["ids", "layout", "ids", "ids"],
+  },
+  {
     name: "a detached library button",
     edit: (f, frame) => {
       const button = libraryComponent(f, "variant=danger, state=(unset)").createInstance();
