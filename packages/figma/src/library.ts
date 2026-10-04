@@ -1,9 +1,30 @@
 // The Weft component library in a Figma file: one page with a component set per catalog kind
 // (a single component when the kind has no variant properties) and one variable collection with
 // the design tokens. Running it again finds what is there by plugin data and adds only what is
-// missing, so a designer's changes to existing components survive.
+// missing, so a designer's changes to existing components survive. What each component draws is
+// shared with the other tools (`drawing` of @weft/design-tool); this file draws it with Figma nodes.
 import type { Token } from "@weft/catalog";
 import type { Catalog, ComponentDef } from "@weft/core";
+import {
+  combinations,
+  drawing,
+  KEY,
+  LIBRARY_BOARD,
+  LIBRARY_PAGE,
+  libraryTag,
+  readMark,
+  TOKEN_COLLECTION,
+  tokenColor,
+  tokenPx,
+  variantAxes,
+  variantName,
+  type BoxDrawing,
+  type Drawing,
+  type KindEntry as SharedKindEntry,
+  type Length,
+  type Paint,
+  type TextDrawing,
+} from "@weft/design-tool";
 import type {
   FBindable,
   FCollection,
@@ -12,23 +33,16 @@ import type {
   FFrame,
   FigmaApi,
   FLayout,
+  FNode,
   FPage,
-  FRGB,
   FRGBA,
   FSolid,
   FText,
   FVariable,
 } from "./api.ts";
-import { KEY, readMark } from "./keys.ts";
-import { tokenColor, tokenPx, variableName } from "./tokens.ts";
-import { CAPTION_KINDS, isLeafKind, variantAxes, variantName, type Axis } from "./view.ts";
+import { variableName } from "./tokens.ts";
 
-export type KindEntry = {
-  axes: Axis[];
-  /** Variant components by variant name (`variant=primary, state=(unset)`); `""` without axes. */
-  variants: Map<string, FComponent>;
-  fallback: FComponent;
-};
+export type KindEntry = SharedKindEntry<FComponent>;
 
 export type Library = {
   page: FPage;
@@ -45,19 +59,13 @@ export async function loadFonts(api: FigmaApi): Promise<void> {
   await Promise.all([api.loadFontAsync(FONT.regular), api.loadFontAsync(FONT.bold)]);
 }
 
-const LIBRARY_PAGE = "Weft library";
-const COLLECTION = "Weft tokens";
-const INK: FRGB = { r: 0.1, g: 0.11, b: 0.13 };
-const WHITE: FRGB = { r: 1, g: 1, b: 1 };
-const GREY: FRGB = { r: 0.9, g: 0.91, b: 0.92 };
-
 export async function ensureLibrary(
   api: FigmaApi,
   catalog: Catalog,
   tokens: ReadonlyMap<string, Token>,
 ): Promise<Library> {
   await loadFonts(api);
-  const tag = `${catalog.name}@${catalog.version}`;
+  const tag = libraryTag(catalog);
   let page = api.root.children.find((p) => readMark(p, KEY.library) !== undefined);
   if (page === undefined) {
     page = api.createPage();
@@ -76,7 +84,7 @@ export async function ensureLibrary(
   );
   if (board === undefined) {
     board = api.createFrame();
-    board.name = "Weft components";
+    board.name = LIBRARY_BOARD;
     board.setPluginData(KEY.library, tag);
     autoLayout(board, "HORIZONTAL", 32, 32);
     board.layoutWrap = "WRAP";
@@ -116,8 +124,8 @@ async function ensureVariables(
     (c) => readMark(c, KEY.library) !== undefined,
   );
   if (collection === undefined) {
-    collection = api.variables.createVariableCollection(COLLECTION);
-    collection.setPluginData(KEY.library, COLLECTION);
+    collection = api.variables.createVariableCollection(TOKEN_COLLECTION);
+    collection.setPluginData(KEY.library, TOKEN_COLLECTION);
   }
   const variables = new Map<string, FVariable>();
   for (const v of await api.variables.getLocalVariablesAsync()) {
@@ -148,13 +156,6 @@ function variableValue(
   return color === undefined ? undefined : { type: "COLOR", value: color };
 }
 
-function combinations(axes: readonly Axis[]): Record<string, string>[] {
-  let out: Record<string, string>[] = [{}];
-  for (const axis of axes)
-    out = out.flatMap((c) => axis.values.map((v) => ({ ...c, [axis.name]: v })));
-  return out;
-}
-
 function createKind(
   api: FigmaApi,
   library: Library,
@@ -165,7 +166,8 @@ function createKind(
   const axes = variantAxes(def);
   const variants = new Map<string, FComponent>();
   const components = combinations(axes).map((values) => {
-    const c = drawComponent(api, library, kind, def, values);
+    const c = api.createComponent();
+    drawBox(api, library, c, drawing(kind, def, values));
     c.name = axes.length === 0 ? kind : variantName(values, axes);
     c.setPluginData(KEY.kind, kind);
     variants.set(axes.length === 0 ? "" : c.name, c);
@@ -202,10 +204,11 @@ export function autoLayout(
   layer.paddingBottom = padding;
 }
 
-/** A solid paint bound to the token's variable when the library has it. */
-export function paint(api: FigmaApi, library: Library, path: string, fallback: FRGB): FSolid {
-  const solid: FSolid = { type: "SOLID", color: fallback };
-  const variable = library.variables.get(path);
+/** A solid paint, bound to the token's variable when the library has it. */
+export function paint(api: FigmaApi, library: Library, of: Paint): FSolid {
+  if ("color" in of) return { type: "SOLID", color: of.color };
+  const solid: FSolid = { type: "SOLID", color: of.fallback };
+  const variable = library.variables.get(of.token);
   return variable === undefined
     ? solid
     : api.variables.setBoundVariableForPaint(solid, "color", variable);
@@ -276,109 +279,49 @@ export function makeText(
   return text;
 }
 
-const TEXT_STYLE: Readonly<Record<string, { font: FFont; size: number }>> = {
-  heading: { font: FONT.bold, size: 24 },
-  column: { font: FONT.bold, size: 14 },
+export function drawText(api: FigmaApi, library: Library, d: TextDrawing): FText {
+  const text = makeText(api, d.name, d.characters, FONT[d.font], d.size);
+  if (d.fill !== undefined) text.fills = [paint(api, library, d.fill)];
+  return text;
+}
+
+const bindLength = (
+  layer: FLayout,
+  fields: readonly FBindable[],
+  library: Library,
+  length: Length | undefined,
+) => {
+  if (length !== undefined) bindNumber(layer, fields, library, length.token, length.px);
 };
 
-function drawComponent(
-  api: FigmaApi,
-  library: Library,
-  kind: string,
-  def: ComponentDef,
-  values: Readonly<Record<string, string>>,
-): FComponent {
-  const c = api.createComponent();
-  const row = kind === "button" || kind === "checkbox" || kind === "switch" || kind === "radio";
-  autoLayout(c, row ? "HORIZONTAL" : "VERTICAL", 8, 0);
-  c.fills = [];
-  const ink = paint(api, library, "color.ink", INK);
-  const sample = kind.charAt(0).toUpperCase() + kind.slice(1).replace("-", " ");
-
-  if (!isLeafKind(def)) {
-    // A container: an empty frame. Its instances cannot take children, so a designer detaches
-    // one to fill it; the detached frame keeps the kind as its name.
-    bindNumber(
-      c,
-      ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"],
-      library,
-      "space.sm",
-      8,
-    );
-    c.strokes = [ink];
-    c.appendChild(makeText(api, "hint", `${kind}: detach to add content`, FONT.regular, 11));
-    return c;
-  }
-
-  if (kind === "button") {
-    const variant = values["variant"];
-    const filled = variant === "primary" || variant === "danger";
-    bindNumber(c, ["paddingLeft", "paddingRight"], library, "space.md", 16);
-    bindNumber(c, ["paddingTop", "paddingBottom"], library, "space.sm", 8);
-    bindNumber(c, CORNERS, library, "radius.md", 8);
-    c.fills = [
-      filled
-        ? paint(api, library, `color.action.${variant}`, INK)
-        : paint(api, library, "color.white", WHITE),
-    ];
-    if (!filled) c.strokes = [ink];
-    const label = makeText(api, "text", "Button");
-    label.fills = [filled ? paint(api, library, "color.white", WHITE) : ink];
-    c.appendChild(label);
-    return c;
-  }
-  if (kind === "field") {
-    c.itemSpacing = 4;
-    c.appendChild(makeText(api, "label", "Label", FONT.regular, 12));
-    const box = api.createFrame();
-    box.name = "box";
-    autoLayout(box, "HORIZONTAL", 0, 8);
-    box.fills = [paint(api, library, "color.white", WHITE)];
-    box.strokes = [ink];
-    bindNumber(box, CORNERS, library, "radius.sm", 4);
-    box.resize(240, 36);
+function drawBox(api: FigmaApi, library: Library, box: FLayout, d: BoxDrawing): void {
+  box.name = d.name;
+  autoLayout(box, d.direction === "row" ? "HORIZONTAL" : "VERTICAL", d.gap, 0);
+  box.fills = d.fill === undefined ? [] : [paint(api, library, d.fill)];
+  bindLength(box, ["paddingLeft", "paddingRight"], library, d.padX);
+  bindLength(box, ["paddingTop", "paddingBottom"], library, d.padY);
+  bindLength(box, CORNERS, library, d.radius);
+  if (d.stroke !== undefined) box.strokes = [paint(api, library, d.stroke)];
+  if (d.size !== undefined) {
+    box.resize(d.size.width, d.size.height);
     box.primaryAxisSizingMode = "FIXED";
     box.counterAxisSizingMode = "FIXED";
-    c.appendChild(box);
-    return c;
   }
-  if (kind === "image") {
-    const rect = api.createRectangle();
-    rect.name = "image";
-    rect.resize(160, 100);
-    rect.fills = [{ type: "SOLID", color: GREY }];
-    c.appendChild(rect);
-    return c;
+  for (const child of d.children) box.appendChild(draw(api, library, child));
+}
+
+function draw(api: FigmaApi, library: Library, d: Drawing): FNode {
+  if (d.type === "text") return drawText(api, library, d);
+  if (d.type === "box") {
+    const frame = api.createFrame();
+    drawBox(api, library, frame, d);
+    return frame;
   }
-  if (kind === "checkbox" || kind === "switch" || kind === "radio") {
-    const mark = api.createRectangle();
-    mark.name = "mark";
-    mark.resize(kind === "switch" ? 32 : 16, 16);
-    mark.cornerRadius = kind === "checkbox" ? 4 : 999;
-    mark.fills = [paint(api, library, "color.white", WHITE)];
-    mark.strokes = [ink];
-    c.appendChild(mark);
-    c.appendChild(
-      makeText(
-        api,
-        kind === "radio" ? "text" : "label",
-        CAPTION_KINDS.has(kind) ? "Label" : sample,
-      ),
-    );
-    return c;
-  }
-  const style = TEXT_STYLE[kind] ?? { font: FONT.regular, size: 14 };
-  const text = makeText(api, "text", sample, style.font, style.size);
-  const tone = values["tone"];
-  text.fills = [
-    kind === "link"
-      ? paint(api, library, "color.action.primary", INK)
-      : tone === "danger"
-        ? paint(api, library, "color.action.danger", INK)
-        : ink,
-  ];
-  if (kind === "menu-item" || kind === "option")
-    bindNumber(c, ["paddingLeft", "paddingRight"], library, "space.sm", 8);
-  c.appendChild(text);
-  return c;
+  const rect = api.createRectangle();
+  rect.name = d.name;
+  rect.resize(d.width, d.height);
+  if (d.radius !== undefined) rect.cornerRadius = d.radius;
+  rect.fills = [paint(api, library, d.fill)];
+  if (d.stroke !== undefined) rect.strokes = [paint(api, library, d.stroke)];
+  return rect;
 }

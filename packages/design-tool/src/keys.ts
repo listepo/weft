@@ -1,16 +1,21 @@
-// What the plugin stores on Figma layers (private plugin data, one string per key) and how it is
-// read back. Stored data is untrusted on the way in: a file can be copied, edited by another
-// version of the plugin or crafted, so every entry is parsed and checked, never assumed.
+// What a plugin stores on design-tool layers (plugin data, one string per key) and how it is read
+// back. Stored data is untrusted on the way in: a file can be copied, edited by another version of
+// the plugin or crafted, so every entry is parsed and checked, never assumed.
 import { ValueSchema, type Node, type Value } from "@weft/core";
 import { z } from "zod";
-import type { FPluginData } from "./api.ts";
+
+/** Plugin data as both tools offer it: `""` stands for a key that is not set. */
+export interface PluginData {
+  getPluginData(key: string): string;
+  setPluginData(key: string, value: string): void;
+}
 
 export const KEY = {
   /** On a layer built from a Weft element: its kind, id, props and events (`Source`). */
   source: "weft.source",
   /** On the layer built from the root: the document's `weft` version. */
   document: "weft.document",
-  /** The Figma id the layer had when it was built, to tell the original from a copy. */
+  /** The tool's id the layer had when it was built, to tell the original from a copy. */
   origin: "weft.origin",
   /** On a text layer that holds a text child of its parent. */
   text: "weft.text",
@@ -20,11 +25,11 @@ export const KEY = {
   slot: "weft.slot",
   /** A fingerprint of the visual properties the build set, to notice visual edits. */
   style: "weft.style",
-  /** On library components and component sets: the catalog kind. */
+  /** On library components (and Figma component sets): the catalog kind. */
   kind: "weft.kind",
   /** On the library page: the catalog name and version it was built from. */
   library: "weft.library",
-  /** On a library variable: the design token path. */
+  /** On a library variable (Figma): the design token path. */
   token: "weft.token",
 } as const;
 
@@ -44,7 +49,7 @@ export type Source = {
 
 export type Shown = { text?: string | undefined; label?: string | undefined };
 
-// Figma allows 100 kB per entry; a larger value cannot be ours.
+// Figma allows 100 kB per entry; a larger value cannot be ours in either tool.
 const MAX_ENTRY = 100_000;
 
 const SourceSchema = z.strictObject({
@@ -67,7 +72,7 @@ export function sourceOf(node: Node, leaf: boolean, shown: Shown): Source {
   return source;
 }
 
-function readJson(layer: FPluginData, key: string): unknown {
+function readJson(layer: PluginData, key: string): unknown {
   const raw = layer.getPluginData(key);
   if (raw === "" || raw.length > MAX_ENTRY) return undefined;
   try {
@@ -77,7 +82,7 @@ function readJson(layer: FPluginData, key: string): unknown {
   }
 }
 
-export function readSource(layer: FPluginData): Source | undefined {
+export function readSource(layer: PluginData): Source | undefined {
   const parsed = SourceSchema.safeParse(readJson(layer, KEY.source));
   if (!parsed.success) return undefined;
   const { kind, id, props, on, children, shown } = parsed.data;
@@ -91,17 +96,17 @@ export function readSource(layer: FPluginData): Source | undefined {
   return source;
 }
 
-export function writeJson(layer: FPluginData, key: string, value: unknown): void {
+export function writeJson(layer: PluginData, key: string, value: unknown): void {
   layer.setPluginData(key, JSON.stringify(value));
 }
 
-export function readVersion(layer: FPluginData): string | undefined {
+export function readVersion(layer: PluginData): string | undefined {
   const parsed = z.strictObject({ weft: z.string() }).safeParse(readJson(layer, KEY.document));
   return parsed.success ? parsed.data.weft : undefined;
 }
 
 /** A marker key that holds a short plain string (`kind`, `slot`, `token`), or undefined. */
-export function readMark(layer: FPluginData, key: string): string | undefined {
+export function readMark(layer: PluginData, key: string): string | undefined {
   const raw = layer.getPluginData(key);
   return raw === "" || raw.length > 1_000 ? undefined : raw;
 }

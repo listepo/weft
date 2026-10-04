@@ -2,6 +2,12 @@
 
 Converts Weft screens (see `SPEC.md`) to Figma and back. The conversion is pure TypeScript over a narrow subset of the Figma Plugin API (`src/api.ts`). The plugin in `plugins/figma` runs it inside Figma. The tests run it against an in-memory fake of the same subset.
 
+The mapping itself is not here. It lives in `@weft/design-tool`, which `@weft/penpot` uses too. This package is the Figma side of it:
+
+- `src/layer.ts` shows Figma nodes to the shared read-back as `Layer`s;
+- `src/build.ts` draws the shared build with frames, auto layout and instances;
+- `src/library.ts` draws the shared library drawings with components and variables.
+
 ## What it does
 
 | Step | Function | Result |
@@ -28,7 +34,7 @@ So the work is split:
 
 ### Reading a frame back
 
-`readLayers` recomputes what each layer looked like when it was built (`src/view.ts`; the text and label it showed are stored with the source) and compares that with what the layer shows now:
+`readLayers` recomputes what each layer looked like when it was built (`view.ts` of `@weft/design-tool`; the text and label it showed are stored with the source) and compares that with what the layer shows now:
 
 - **Unedited layers:** the stored source is kept as written, so an unedited screen comes back byte-identical after `serialize`.
 - **Designer edits come back as Weft changes:**

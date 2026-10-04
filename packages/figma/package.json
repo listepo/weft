@@ -10,10 +10,10 @@
   "dependencies": {
     "@weft/catalog": "workspace:*",
     "@weft/core": "workspace:*",
-    "@weft/from-aria": "workspace:*",
-    "zod": "4.6.5"
+    "@weft/design-tool": "workspace:*"
   },
   "devDependencies": {
-    "@figma/plugin-typings": "1.140.0"
+    "@figma/plugin-typings": "1.140.0",
+    "@weft/from-aria": "workspace:*"
   }
 }

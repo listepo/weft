@@ -45,22 +45,22 @@
     </style>
   </head>
   <body>
-    <strong>Weft → Figma</strong>
+    <strong>Weft → {{tool}}</strong>
     <div class="row">
       <input id="file" type="file" accept=".weft,text/plain" />
     </div>
     <textarea id="source" placeholder="Paste a .weft screen" spellcheck="false"></textarea>
-    <div class="row"><button id="build">Build frames</button></div>
-    <strong>Figma → Weft</strong>
+    <div class="row"><button id="build">Build {{layer}}s</button></div>
+    <strong>{{tool}} → Weft</strong>
     <div class="row">
-      <button id="export">Export selected frame</button>
+      <button id="export">Export selected {{layer}}</button>
       <button id="copy" disabled>Copy</button>
       <button id="download" disabled>Download</button>
     </div>
     <textarea id="result" readonly spellcheck="false"></textarea>
     <div id="status" role="status"></div>
     <ul id="notes"></ul>
-    <!-- The build puts the bundled src/ui.ts here as a module script (build.ts). -->
+    <!-- The build puts the bundled UI entry here as a module script (src/build.ts). -->
     <!-- weft:script -->
   </body>
 </html>

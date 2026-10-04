@@ -4,21 +4,12 @@
 import type { Child, Node, Value } from "@weft/core";
 import { ID } from "@weft/core";
 import { fillRequired, freshId, literal } from "@weft/from-aria";
-import type { FNode, FPaint } from "./api.ts";
-import { isContainer } from "./api.ts";
-import { findText } from "./build.ts";
+import { findText, isContainer, type Layer } from "./layer.ts";
 import { component, convertChildren, lose, type Parent, type ReadCtx } from "./read.ts";
-import { matchToken, tokenPathOf } from "./tokens.ts";
+import { matchToken } from "./tokens.ts";
 import { CAPTION_KINDS, isLeafKind } from "./view.ts";
-import { KEY, readMark } from "./keys.ts";
 
 const NAMED = /^([a-z][a-z0-9]*(?:-[a-z0-9]+)*)(?:#(\S+))?$/;
-
-const hasImage = (fills: readonly FPaint[] | symbol | undefined): boolean =>
-  fills !== undefined && typeof fills !== "symbol" && fills.some((p) => p.type === "IMAGE");
-
-const painted = (fills: readonly FPaint[] | symbol | undefined): boolean =>
-  fills !== undefined && (typeof fills === "symbol" || fills.length > 0);
 
 function generated(
   ctx: ReadCtx,
@@ -34,7 +25,7 @@ function generated(
 
 export async function convertForeign(
   ctx: ReadCtx,
-  layer: FNode,
+  layer: Layer,
   parent: Parent,
   depth: number,
 ): Promise<Child[]> {
@@ -42,7 +33,7 @@ export async function convertForeign(
     lose(ctx, "hidden", parent.path, `the hidden layer "${layer.name}" was dropped`);
     return [];
   }
-  if (layer.type === "TEXT") {
+  if (layer.kind === "text") {
     const text = layer.characters.trim();
     if (text === "") return [];
     const content = parent.def?.content;
@@ -58,7 +49,7 @@ export async function convertForeign(
   }
   const named = await namedKind(ctx, layer, parent, depth);
   if (named !== undefined) return [named];
-  if (hasImage("fills" in layer ? layer.fills : undefined)) {
+  if (layer.image) {
     const { id, path } = generated(ctx, "image", layer.name, parent);
     const props: Record<string, Value> = { label: literal(ctx, path, layer.name) };
     const def = component(ctx.catalog, "image");
@@ -66,13 +57,13 @@ export async function convertForeign(
     lose(ctx, "values", path, "the image fill has no URL; src is empty");
     return [{ kind: "image", id, props }];
   }
-  const children = "children" in layer ? layer.children : undefined;
+  const { children } = layer;
   if (children === undefined) {
     lose(
       ctx,
       "kinds",
       parent.path,
-      `the ${layer.type.toLowerCase()} layer "${layer.name}" has no Weft kind and was dropped`,
+      `the ${layer.type} layer "${layer.name}" has no Weft kind and was dropped`,
     );
     return [];
   }
@@ -82,20 +73,21 @@ export async function convertForeign(
 /** A frame or group without semantics: a stack (or a grid) with its layout carried over. */
 async function stackOf(
   ctx: ReadCtx,
-  layer: FNode,
-  children: readonly FNode[],
+  layer: Layer,
+  children: readonly Layer[],
   parent: Parent,
   depth: number,
 ): Promise<Node> {
-  const container = isContainer(layer) ? layer : undefined;
-  const mode = container?.layoutMode ?? "NONE";
-  const kind = mode === "GRID" ? "grid" : "stack";
+  const container = isContainer(layer);
+  // A layout Weft has no form for is read as free positions.
+  const mode = container ? layer.layout.mode : "none";
+  const kind = mode === "grid" ? "grid" : "stack";
   const { id, path } = generated(ctx, kind, layer.name, parent);
   const props: Record<string, Value> = {};
-  if (mode === "HORIZONTAL") props["direction"] = "row";
-  if (mode === "GRID") props["columns"] = Math.max(1, container?.gridColumnCount ?? 1);
+  if (mode === "row") props["direction"] = "row";
+  if (mode === "grid") props["columns"] = Math.max(1, layer.layout.columns);
   let ordered = children;
-  if (mode === "NONE") {
+  if (mode === "none") {
     // Free positions have no Weft form; reading order is top to bottom, then left to right.
     ordered = [...children].sort((a, b) => a.y - b.y || a.x - b.x);
     lose(
@@ -105,22 +97,17 @@ async function stackOf(
       "free positions are not carried; the layers are stacked in reading order",
     );
   }
-  if (container !== undefined && mode !== "NONE") {
-    const field = mode === "GRID" ? "gridRowGap" : "itemSpacing";
-    const px = mode === "GRID" ? container.gridRowGap : container.itemSpacing;
-    const alias = container.boundVariables?.[field];
-    const variable =
-      alias === undefined ? null : await ctx.api.variables.getVariableByIdAsync(alias.id);
+  if (mode !== "none") {
+    const px = layer.gap(mode === "grid");
     const token =
-      variable !== null
-        ? (readMark(variable, KEY.token) ?? tokenPathOf(variable.name))
-        : ctx.tokens === undefined
-          ? undefined
-          : matchToken(px, ctx.tokens, "dimension", undefined, ctx.gapGroups);
+      (await layer.gapToken(mode === "grid")) ??
+      (ctx.tokens === undefined
+        ? undefined
+        : matchToken(px, ctx.tokens, "dimension", undefined, ctx.gapGroups));
     if (token !== undefined) props["gap"] = { token };
     else if (px !== 0) lose(ctx, "tokens", path, `gap ${px}px matches no token and was dropped`);
   }
-  if (painted("fills" in layer ? layer.fills : undefined) || (container?.strokes.length ?? 0) > 0)
+  if (layer.painted)
     lose(
       ctx,
       "tokens",
@@ -132,9 +119,9 @@ async function stackOf(
     kind,
     def,
     path,
-    mode: mode === "HORIZONTAL" ? "HORIZONTAL" : "VERTICAL",
+    mode: mode === "row" ? "row" : "column",
   };
-  const inner = await convertChildren(ctx, { children: ordered }, owner, depth);
+  const inner = await convertChildren(ctx, ordered, owner, depth);
   return { kind, id, props, children: inner.children, slots: Object.fromEntries(inner.slots) };
 }
 
@@ -145,7 +132,7 @@ async function stackOf(
  */
 async function namedKind(
   ctx: ReadCtx,
-  layer: FNode,
+  layer: Layer,
   parent: Parent,
   depth: number,
 ): Promise<Node | undefined> {
@@ -158,8 +145,8 @@ async function namedKind(
   const label = CAPTION_KINDS.has(kind) ? (findText(layer, "label")?.characters ?? "") : "";
   let shown = "";
   if (isLeafKind(def) && def.content === "text") {
-    const text = findText(layer, "text") ?? layer.children.find((c) => c.type === "TEXT");
-    shown = text?.type === "TEXT" ? text.characters.trim() : "";
+    const text = findText(layer, "text") ?? layer.children?.find((c) => c.kind === "text");
+    shown = text?.kind === "text" ? text.characters.trim() : "";
   }
   const name = label || shown;
   const wanted = match?.[2];
@@ -184,15 +171,13 @@ async function namedKind(
   if (isLeafKind(def)) {
     if (shown !== "") node.children = [literal(ctx, path, shown)];
   } else {
-    const owner: Parent = { kind, def, path, mode: layer.layoutMode };
+    const owner: Parent = { kind, def, path, mode: layer.layout.mode };
     const inner = await convertChildren(
       ctx,
       // The library draws a hint into empty containers and a caption into labelled ones.
-      {
-        children: layer.children.filter(
-          (c) => !(c.type === "TEXT" && (c.name === "hint" || c.name === "label")),
-        ),
-      },
+      (layer.children ?? []).filter(
+        (c) => !(c.kind === "text" && (c.name === "hint" || c.name === "label")),
+      ),
       owner,
       depth,
     );

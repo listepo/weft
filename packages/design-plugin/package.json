@@ -1,0 +1,17 @@
+{
+  "name": "@weft/design-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./build": "./src/build.ts"
+  },
+  "dependencies": {
+    "@weft/catalog": "workspace:*",
+    "@weft/core": "workspace:*",
+    "@weft/design-tool": "workspace:*",
+    "vite": "8.3.2"
+  }
+}
