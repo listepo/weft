@@ -149,4 +149,3 @@ describe("tool sections", () => {
     assert.deepEqual(loadProjectText("[").project.settings, {});
   });
 });
-
