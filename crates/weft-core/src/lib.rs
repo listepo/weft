@@ -4,6 +4,7 @@
 
 mod canonical;
 mod diagnostics;
+mod explain;
 mod json;
 mod model;
 mod parse;
@@ -18,6 +19,7 @@ mod values;
 
 pub use canonical::{canonicalize, stringify};
 pub use diagnostics::{Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors};
+pub use explain::{Change, ChangeKind, Readback, explain, explain_changes};
 pub use json::{JsonError, order_keys, parse_json, to_compact};
 pub use model::{
     Catalog, Child, ComponentDef, Content, Document, Map, Node, PropDef, PropDefault, PropType,
