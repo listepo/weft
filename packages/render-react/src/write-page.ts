@@ -1,12 +1,13 @@
 // Writes a static HTML page for a canonical JSON document:
 //   node src/write-page.ts <document.weft.json> <out.html> [--data <data.json>]
 //     [--tokens <tokens.json>] [--project <weft.json> | --no-project]
-// The catalog and tokens come from the project file above the document (SPEC §10.1), if any;
-// `--tokens` replaces the project's tokens.
+// The catalog, tokens and sample data come from the project file above the document (SPEC §10.1),
+// if any: `render.tokens` and `render.data` (SPEC §10.6), else the project's tokens. `--tokens`
+// and `--data` override them.
 import { readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { coreCatalog, loadTokens } from "@weft/catalog";
-import { findProject, readProject } from "@weft/catalog/node";
+import { chooseProject, projectPath, readProject, readTokenLayers } from "@weft/catalog/node";
 import type { Document } from "@weft/core";
 import { renderPage } from "./page.ts";
 
@@ -28,15 +29,27 @@ if (input === undefined || output === undefined) {
   );
   process.exit(2);
 }
-const projectFile =
-  values["no-project"] === true ? undefined : (values.project ?? findProject(input));
+const projectFile = chooseProject(input, {
+  project: values.project,
+  noProject: values["no-project"],
+});
 let catalog = coreCatalog;
 let tokens;
+let dataFile = values.data;
 if (projectFile !== undefined) {
+  const report = (d: { path: string; code: string; message: string }) =>
+    console.error(`${projectFile}:${d.path} ${d.code} ${d.message}`);
   const { project, diagnostics } = readProject(projectFile);
-  for (const d of diagnostics) console.error(`${projectFile}:${d.path} ${d.code} ${d.message}`);
+  diagnostics.forEach(report);
   catalog = project.catalog;
   tokens = project.tokens;
+  const render = project.settings.render;
+  if (render?.tokens !== undefined && values.tokens === undefined) {
+    const layered = readTokenLayers(projectFile, render.tokens, "#/render");
+    layered.diagnostics.forEach(report);
+    tokens = layered.tokens;
+  }
+  if (render?.data !== undefined) dataFile ??= projectPath(projectFile, render.data);
 }
 if (values.tokens !== undefined) {
   const loaded = loadTokens(readJson(values.tokens));
@@ -45,7 +58,7 @@ if (values.tokens !== undefined) {
 }
 const html = renderPage(readJson(input) as Document, {
   catalog,
-  data: values.data === undefined ? {} : readJson(values.data),
+  data: dataFile === undefined ? {} : readJson(dataFile),
   ...(tokens ? { tokens } : {}),
 });
 writeFileSync(output, html);
