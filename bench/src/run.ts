@@ -1,11 +1,27 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { SCREENS, loadTasks } from "./corpus.ts";
 import { FORMATS, type Format } from "./neutral.ts";
 import { PRIMERS } from "./primers.ts";
-import { DEFAULT_MODELS, anthropicProvider, type AnthropicOptions } from "./provider.ts";
-import { renderSummary, runTask, summarize, type TaskResult } from "./run-tasks.ts";
+import {
+  DEFAULT_MODELS,
+  LMSTUDIO_URL,
+  anthropicBatch,
+  anthropicProvider,
+  batchingProvider,
+  openAiProvider,
+  type AnthropicOptions,
+  type Provider,
+} from "./provider.ts";
+import {
+  planJobs,
+  renderSummary,
+  rescore,
+  runJobs,
+  summarize,
+  type TaskResult,
+} from "./run-tasks.ts";
 import { PROXY_TOKENIZER, countProxy, measure, renderTokenTable } from "./tokens.ts";
 
 const BENCH = fileURLToPath(new URL("../", import.meta.url));
@@ -13,7 +29,16 @@ const RESULTS = `${BENCH}results/`;
 
 function usage(): never {
   console.error(
-    "usage: node bench/src/run.ts tokens\n       node bench/src/run.ts edit|read --model <id> [--screens a,b] [--formats weft,html,jsx,a2ui]",
+    [
+      "usage: node bench/src/run.ts tokens",
+      "       node bench/src/run.ts edit|read [--provider anthropic|openai] [--base-url <url>] [--model a,b]",
+      "                                       [--screens a,b] [--formats weft,html,jsx,a2ui] [--samples 3]",
+      "                                       [--concurrency 4] [--batch]",
+      "       node bench/src/run.ts rescore <results.json>",
+      "",
+      "--provider openai talks to any OpenAI-compatible server; --base-url defaults to LM Studio",
+      `(${LMSTUDIO_URL}) and --model is required. --batch uses the Anthropic Message Batches API.`,
+    ].join("\n"),
   );
   process.exit(2);
 }
@@ -50,56 +75,128 @@ async function tokensCommand(): Promise<void> {
   console.log(report);
 }
 
-async function tasksCommand(
-  mode: "edit" | "read",
-  values: { model?: string; screens?: string; formats?: string },
-): Promise<void> {
+interface TaskOptions {
+  provider?: string;
+  "base-url"?: string;
+  model?: string;
+  screens?: string;
+  formats?: string;
+  samples?: string;
+  concurrency?: string;
+  batch?: boolean;
+}
+
+const positiveInt = (v: string | undefined, fallback: number): number => {
+  if (v === undefined) return fallback;
+  const n = Number(v);
+  if (!Number.isInteger(n) || n < 1) usage();
+  return n;
+};
+
+function providers(values: TaskOptions): {
+  models: string[];
+  providerFor: (m: string) => Provider;
+} {
+  const kind = values.provider ?? "anthropic";
+  if (kind === "openai") {
+    if (values.batch || !values.model) usage();
+    const baseUrl = values["base-url"] ?? LMSTUDIO_URL;
+    const apiKey = process.env.OPENAI_API_KEY;
+    return {
+      models: values.model.split(","),
+      providerFor: (model) => openAiProvider({ baseUrl, model, ...(apiKey ? { apiKey } : {}) }),
+    };
+  }
+  if (kind !== "anthropic") usage();
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.error(
-      "ANTHROPIC_API_KEY is not set: the edit and read runs call the Anthropic Messages API. `run.ts tokens` works offline.",
+      "ANTHROPIC_API_KEY is not set: Anthropic runs call the Messages API. Use --provider openai for a local server; `run.ts tokens` works offline.",
     );
     process.exit(2);
   }
-  const models = values.model ? values.model.split(",") : [...DEFAULT_MODELS];
+  // One batching provider per model, so each batch holds a single model's requests.
+  const batched = new Map<string, Provider>();
+  return {
+    models: values.model ? values.model.split(",") : [...DEFAULT_MODELS],
+    providerFor: (model) => {
+      if (!values.batch) return anthropicProvider({ apiKey, model });
+      if (!batched.has(model))
+        batched.set(
+          model,
+          batchingProvider((prompts) => {
+            console.error(`${model}: batch of ${prompts.length} requests submitted`);
+            return anthropicBatch({ apiKey, model }, prompts);
+          }),
+        );
+      return batched.get(model) as Provider;
+    },
+  };
+}
+
+function save(mode: string, stamp: string, title: string, results: TaskResult[]): string {
+  const summary = renderSummary(title, summarize(results));
+  mkdirSync(RESULTS, { recursive: true });
+  writeFileSync(`${RESULTS}${mode}-${stamp}.json`, JSON.stringify(results, null, 2) + "\n");
+  writeFileSync(`${RESULTS}${mode}-${stamp}.md`, summary);
+  return summary;
+}
+
+async function tasksCommand(mode: "edit" | "read", values: TaskOptions): Promise<void> {
+  const { models, providerFor } = providers(values);
   const screens = values.screens ? values.screens.split(",") : [...SCREENS];
   const formats = (values.formats ? values.formats.split(",") : [...FORMATS]) as Format[];
   for (const f of formats) if (!FORMATS.includes(f)) usage();
+  const samples = positiveInt(values.samples, 3);
+  // A batch is only formed from requests issued together, so batch mode starts every job at once.
+  const concurrency = values.batch ? Number.MAX_SAFE_INTEGER : positiveInt(values.concurrency, 4);
   const type = mode === "edit" ? "edit" : "question";
   const tasks = loadTasks().filter((t) => t.type === type && screens.includes(t.screen));
-  const results: TaskResult[] = [];
-  mkdirSync(RESULTS, { recursive: true });
+  const jobs = planJobs(tasks, formats, models, samples);
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  // Paid calls already made must not be lost when a later one fails (quota, outage).
-  const save = (title: string) => {
-    const summary = renderSummary(title, summarize(results));
-    writeFileSync(`${RESULTS}${mode}-${stamp}.json`, JSON.stringify(results, null, 2) + "\n");
-    writeFileSync(`${RESULTS}${mode}-${stamp}.md`, summary);
-    return summary;
-  };
-  try {
-    for (const model of models) {
-      const provider = anthropicProvider({ apiKey, model });
-      for (const task of tasks) {
-        for (const format of formats) {
-          const r = await runTask(task, format, provider, model);
-          results.push(r);
-          console.error(`${model} ${task.id} ${format}: ${r.success ? "ok" : "FAIL"}`);
-        }
-      }
-    }
-  } catch (e) {
-    console.log(save(`${mode} run (partial: stopped after ${results.length} results)`));
-    throw e;
+  let done = 0;
+  const { results, error } = await runJobs(jobs, providerFor, concurrency, (r) =>
+    console.error(
+      `[${++done}/${jobs.length}] ${r.model} ${r.id} ${r.format} #${r.sample}: ${r.success ? "ok" : "FAIL"}`,
+    ),
+  );
+  if (error !== undefined) {
+    console.log(
+      save(mode, stamp, `${mode} run (partial: ${results.length} of ${jobs.length})`, results),
+    );
+    throw error;
   }
-  console.log(save(`${mode} run`));
+  console.log(save(mode, stamp, `${mode} run`, results));
+}
+
+function rescoreCommand(file: string | undefined): void {
+  if (!file) usage();
+  const saved = JSON.parse(readFileSync(file, "utf8")) as TaskResult[];
+  const results = rescore(saved, loadTasks());
+  const kept = results.filter((r, i) => r === saved[i]).length;
+  const base = file.replace(/\.json$/, "");
+  writeFileSync(`${base}.rescored.json`, JSON.stringify(results, null, 2) + "\n");
+  const summary = renderSummary(`rescore of ${base.split("/").pop()}`, summarize(results));
+  writeFileSync(`${base}.rescored.md`, summary);
+  if (kept) console.error(`${kept} results have no saved reply and keep their original verdict`);
+  console.log(summary);
 }
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
-  options: { model: { type: "string" }, screens: { type: "string" }, formats: { type: "string" } },
+  options: {
+    provider: { type: "string" },
+    "base-url": { type: "string" },
+    model: { type: "string" },
+    screens: { type: "string" },
+    formats: { type: "string" },
+    samples: { type: "string" },
+    concurrency: { type: "string" },
+    batch: { type: "boolean" },
+  },
 });
 const command = positionals[0];
 if (command === "tokens") await tokensCommand();
 else if (command === "edit" || command === "read") await tasksCommand(command, values);
+else if (command === "rescore") rescoreCommand(positionals[1]);
 else usage();

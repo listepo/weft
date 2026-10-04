@@ -7,7 +7,10 @@ import {
   checkAnswer,
   checkEdit,
   editPrompt,
+  planJobs,
   readPrompt,
+  rescore,
+  runJobs,
   runTask,
   summarize,
 } from "../src/run-tasks.ts";
@@ -239,6 +242,20 @@ test("question answers are matched on the last ANSWER line", () => {
   assert.equal(checkAnswer(q, "nav.reset"), false);
 });
 
+test("an action named in the format's own spelling is the right answer", () => {
+  const q = question("login.q1");
+  for (const spelled of [
+    "press:nav.reset",
+    "actions.nav.reset()",
+    "actions.nav.reset",
+    "nav.reset()",
+  ])
+    assert.equal(checkAnswer(q, `ANSWER: ${spelled}`), true, spelled);
+  assert.equal(checkAnswer(q, "ANSWER: press:nav.signup"), false);
+  // Only action spellings are unwrapped; other answers still have to match exactly.
+  assert.equal(checkAnswer(question("login.q2"), "ANSWER: press:2"), false);
+});
+
 test("prompts contain the primer, data model, screen and the request", () => {
   const e = editPrompt(task("login.e2"), "weft");
   assert.match(e, /Weft is a strict XML-subset/);
@@ -259,7 +276,7 @@ test("runTask scores a mocked model and summaries aggregate it", async () => {
   assert.equal(a.success, true);
   assert.equal(b.success, false);
   const [s] = summarize([a, b]);
-  assert.equal(s?.successRate, 0.5);
+  assert.equal(s?.success.mean, 0.5);
   const q = await runTask(
     question("login.q2"),
     "html",
@@ -292,7 +309,7 @@ test("an invalid edit reply gets one repair prompt with the validator's diagnost
     [false, false, true, true, true],
   );
   const [s] = summarize([r]);
-  assert.deepEqual([s?.validRate, s?.validAfterRepairRate], [0, 1]);
+  assert.deepEqual([s?.valid.mean, s?.validAfterRepair.mean], [0, 1]);
 
   let calls = 0;
   const once = await runTask(
@@ -310,4 +327,68 @@ test("an invalid edit reply gets one repair prompt with the validator's diagnost
 
 test("tasks cover every screen", () => {
   assert.equal(new Set(loadTasks().map((t) => t.screen)).size, SCREENS.length);
+});
+
+test("samples are summarized as a mean with the single-sample range", async () => {
+  const t = task("login.e2");
+  const solve = (p: string) =>
+    wrap("weft", solutions["login.e2"]!.weft!(p.match(/```xml\n([\s\S]*?)```/)![1]!.trim()));
+  const jobs = planJobs([t], ["weft"], ["m"], 3);
+  assert.deepEqual(
+    jobs.map((j) => j.sample),
+    [0, 1, 2],
+  );
+  let n = 0;
+  // The second sample fails, the others succeed.
+  const { results, error } = await runJobs(
+    jobs,
+    () => mockProvider((p) => (n++ === 1 ? "```xml\n<screen/>\n```" : solve(p))),
+    1,
+  );
+  assert.equal(error, undefined);
+  const [s] = summarize(results);
+  assert.deepEqual([s?.tasks, s?.samples], [1, 3]);
+  assert.deepEqual(s?.success, { mean: 2 / 3, min: 0, max: 1 });
+});
+
+test("runJobs keeps finished results and stops at the first failure", async () => {
+  const q = question("login.q2");
+  const jobs = planJobs([q], ["weft", "html", "jsx", "a2ui"], ["m"], 1);
+  let calls = 0;
+  let active = 0;
+  let peak = 0;
+  const { results, error } = await runJobs(
+    jobs,
+    () => ({
+      async complete() {
+        active++;
+        peak = Math.max(peak, active);
+        await new Promise((r) => setTimeout(r, 5));
+        active--;
+        if (++calls === 2) throw new Error("quota");
+        return { text: "ANSWER: 2" };
+      },
+    }),
+    2,
+  );
+  assert.match(String(error), /quota/);
+  assert.equal(peak, 2);
+  assert.ok(results.length >= 1 && results.length < 4);
+  assert.ok(results.every((r) => r.success));
+});
+
+test("rescore re-checks saved replies and keeps results without one", async () => {
+  const q = question("login.q1");
+  const r = await runTask(
+    q,
+    "html",
+    mockProvider(() => "ANSWER: press:nav.reset"),
+    "m",
+  );
+  // As scored by a checker that did not know format spellings.
+  const old = { ...r, success: false, successAfterRepair: false, failed: ["wrong answer"] };
+  const legacy = { ...old, id: "login.q1", reply: undefined as unknown as string };
+  const [fixed, kept] = rescore([old, legacy], loadTasks());
+  assert.equal(fixed?.success, true);
+  assert.equal(kept, legacy);
 });

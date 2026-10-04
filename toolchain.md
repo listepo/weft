@@ -46,3 +46,5 @@
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
+| p-limit | local | https://github.com/sindresorhus/p-limit | Concurrency limit for benchmark requests |
+| undici | local | https://github.com/nodejs/undici | Fetch without the header timeout, for slow local model servers |

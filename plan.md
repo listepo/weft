@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T22 | todo | P1 | 3 | 0% | |
 | T23 | todo | P2 | 3 | 0% | |
 | T24 | todo | P2 | 2 | 0% | |
-| T25 | todo | P1 | 3 | 0% | |
 | T26 | todo | P1 | 3 | 0% | |
 | T28 | todo | P2 | 3 | 0% | |
 
@@ -50,10 +49,6 @@ A napi-rs addon of the same Rust core for Node and Bun, chosen at load time with
 ### T24. Runtime matrix
 
 Run the binding tests in Node, Deno, Bun and a headless browser through moon. Done when all four pass from one command.
-
-### T25. Benchmark rigor
-
-Fix the benchmark limitations found in T8: three samples per task with the spread reported; answer checks that accept a format's own spelling of the same action or value (`press:nav.reset`, `actions.nav.reset()`) and re-score saved replies without new calls; parallel requests; a Message Batches API mode at half the price. Done when the harness tests cover each of these and a re-score of the saved T8 replies runs offline.
 
 ### T26. Vitest for the TypeScript tests
 
