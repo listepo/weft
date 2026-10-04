@@ -9,4 +9,6 @@ export {
   type Project,
   type ProjectOptions,
   type ProjectResult,
+  type LimitName,
+  type Settings,
 } from "./project.ts";

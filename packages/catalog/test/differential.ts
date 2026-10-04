@@ -195,6 +195,7 @@ function projectExpect(c: ProjectCase) {
     tokens: project.tokens === undefined ? null : [...project.tokens],
     actions: project.actions ?? null,
     data: project.data !== undefined,
+    settings: project.settings,
     diagnostics,
   };
 }

@@ -15807,6 +15807,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -15825,6 +15826,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -15851,6 +15853,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -15877,6 +15880,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -15904,13 +15908,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"token\" in the project file.",
       "path": "#/token",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "token",
       "hint": "did you mean \"tokens\"?"
      },
@@ -15937,6 +15942,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -15955,13 +15961,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"__proto__\" in the project file.",
       "path": "#/__proto__",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "__proto__"
      }
     ]
@@ -16012,6 +16019,7 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -16060,6 +16068,7 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -16079,6 +16088,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -16114,6 +16124,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -16140,6 +16151,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -16189,6 +16201,7 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -16214,6 +16227,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W703",
@@ -16335,6 +16349,7 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -16357,6 +16372,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -16441,6 +16457,7 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -16492,6 +16509,7 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -16525,6 +16543,7 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -16548,6 +16567,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W708",
@@ -16590,6 +16610,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -16700,6 +16721,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -16718,6 +16740,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -16747,6 +16770,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -16776,6 +16800,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -16810,6 +16835,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -16880,6 +16906,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -16912,6 +16939,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -16959,6 +16987,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -16999,6 +17028,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -17050,6 +17080,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W707",
@@ -17252,6 +17283,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -17273,6 +17305,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -17298,6 +17331,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -17316,6 +17350,7 @@
     "tokens": [],
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W710",
@@ -17342,6 +17377,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W709",
@@ -17368,6 +17404,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -17512,7 +17549,328 @@
      "cart.add"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": []
+   }
+  },
+  {
+   "name": "every tool section with valid settings",
+   "project": "{\"validate\":{\"mode\":\"strict\"},\"format\":{\"write\":true},\"render\":{\"data\":\"sample.json\",\"tokens\":[\"tokens/base.tokens.json\"],\"outDir\":\"out/pages\"},\"export\":{\"react\":{\"outDir\":\"src/screens\"}},\"import\":{\"html\":{\"outDir\":\"imported\"}},\"mcp\":{\"limits\":{\"markupChars\":1000,\"patches\":5,\"inputElements\":30000}},\"plugins\":{\"my-plugin\":{\"anything\":[1,\"x\"]}}}",
+   "codes": [],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {
+     "validate": {
+      "mode": "strict"
+     },
+     "format": {
+      "write": true
+     },
+     "render": {
+      "data": "sample.json",
+      "tokens": [
+       "tokens/base.tokens.json"
+      ],
+      "outDir": "out/pages"
+     },
+     "export": {
+      "react": {
+       "outDir": "src/screens"
+      }
+     },
+     "import": {
+      "html": {
+       "outDir": "imported"
+      }
+     },
+     "mcp": {
+      "limits": {
+       "markupChars": 1000,
+       "patches": 5,
+       "inputElements": 30000
+      }
+     },
+     "plugins": {
+      "my-plugin": {
+       "anything": [
+        1,
+        "x"
+       ]
+      }
+     }
+    },
+    "diagnostics": []
+   }
+  },
+  {
+   "name": "tool settings of the wrong type are left out",
+   "project": "{\"validate\":{\"mode\":\"loose\"},\"format\":{\"write\":\"yes\"},\"render\":{\"data\":7,\"tokens\":\"a.json\",\"outDir\":\"../out\"},\"export\":[],\"mcp\":{\"limits\":{\"markupChars\":0,\"patches\":2.5,\"diagnostics\":-1}},\"plugins\":{\"a\":1}}",
+   "codes": [
+    "W701",
+    "W701",
+    "W701",
+    "W701",
+    "W703",
+    "W701",
+    "W701",
+    "W701",
+    "W701",
+    "W701"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {
+     "validate": {},
+     "format": {},
+     "render": {},
+     "mcp": {
+      "limits": {}
+     },
+     "plugins": {}
+    },
+    "diagnostics": [
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"validate.mode\" must be \"strict\" or \"lenient\".",
+      "path": "#/validate/mode",
+      "expected": "\"strict\" or \"lenient\""
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"format.write\" must be true or false.",
+      "path": "#/format/write",
+      "expected": "a boolean"
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"render.data\" must hold file names.",
+      "path": "#/render/data",
+      "expected": "a file name relative to the project"
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"render.tokens\" must be an array of at most 64 file names.",
+      "path": "#/render/tokens",
+      "expected": "an array of file names"
+     },
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The file name \"../out\" is absolute, leaves the project directory or is malformed.",
+      "path": "#/render/outDir",
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../out"
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"export\" must be an object.",
+      "path": "#/export",
+      "expected": "a JSON object"
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"mcp.limits.markupChars\" must be a whole number from 1 to 1099511627776.",
+      "path": "#/mcp/limits/markupChars",
+      "expected": "a positive whole number"
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"mcp.limits.patches\" must be a whole number from 1 to 1099511627776.",
+      "path": "#/mcp/limits/patches",
+      "expected": "a positive whole number"
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"mcp.limits.diagnostics\" must be a whole number from 1 to 1099511627776.",
+      "path": "#/mcp/limits/diagnostics",
+      "expected": "a positive whole number"
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "The settings of plugin \"a\" must be an object.",
+      "path": "#/plugins/a",
+      "expected": "a JSON object"
+     }
+    ]
+   }
+  },
+  {
+   "name": "unknown keys in tool sections only warn",
+   "project": "{\"validate\":{\"mod\":\"strict\"},\"export\":{\"swiftui\":{\"outDir\":\"ios\"},\"react\":{\"outdir\":\"x\"}},\"import\":{\"figma\":{}},\"mcp\":{\"limit\":{}}}",
+   "codes": [
+    "W702",
+    "W702",
+    "W702",
+    "W702",
+    "W702"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {
+     "validate": {},
+     "export": {
+      "react": {}
+     },
+     "import": {},
+     "mcp": {}
+    },
+    "diagnostics": [
+     {
+      "code": "W702",
+      "severity": "warning",
+      "message": "Unknown key \"mod\" in \"validate\".",
+      "path": "#/validate/mod",
+      "expected": "one of: \"mode\"",
+      "got": "mod",
+      "hint": "did you mean \"mode\"?"
+     },
+     {
+      "code": "W702",
+      "severity": "warning",
+      "message": "Unknown key \"swiftui\" in \"export\".",
+      "path": "#/export/swiftui",
+      "expected": "one of: \"react\"",
+      "got": "swiftui"
+     },
+     {
+      "code": "W702",
+      "severity": "warning",
+      "message": "Unknown key \"outdir\" in \"export.react\".",
+      "path": "#/export/react/outdir",
+      "expected": "one of: \"outDir\"",
+      "got": "outdir",
+      "hint": "did you mean \"outDir\"?"
+     },
+     {
+      "code": "W702",
+      "severity": "warning",
+      "message": "Unknown key \"figma\" in \"import\".",
+      "path": "#/import/figma",
+      "expected": "one of: \"html\"",
+      "got": "figma"
+     },
+     {
+      "code": "W702",
+      "severity": "warning",
+      "message": "Unknown key \"limit\" in \"mcp\".",
+      "path": "#/mcp/limit",
+      "expected": "one of: \"limits\"",
+      "got": "limit",
+      "hint": "did you mean \"limits\"?"
+     }
+    ]
+   }
+  },
+  {
+   "name": "file names in tool sections follow the project rules",
+   "project": "{\"render\":{\"tokens\":[\"ok.json\",\"/abs.json\",\"a\\\\b.json\"],\"data\":\"c:/x\"}}",
+   "codes": [
+    "W703",
+    "W703",
+    "W703"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {
+     "render": {
+      "tokens": [
+       "ok.json"
+      ]
+     }
+    },
+    "diagnostics": [
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The file name \"/abs.json\" is absolute, leaves the project directory or is malformed.",
+      "path": "#/render/tokens/1",
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "/abs.json"
+     },
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The file name \"a\\\\b.json\" is absolute, leaves the project directory or is malformed.",
+      "path": "#/render/tokens/2",
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "a\\b.json"
+     },
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The file name \"c:/x\" is absolute, leaves the project directory or is malformed.",
+      "path": "#/render/data",
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "c:/x"
+     }
+    ]
+   }
+  },
+  {
+   "name": "content: tool settings point below the argument",
+   "project": "{\"validate\":{\"mode\":1}}",
+   "content": true,
+   "codes": [
+    "W701"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {
+     "validate": {}
+    },
+    "diagnostics": [
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "\"validate.mode\" must be \"strict\" or \"lenient\".",
+      "path": "#/project/validate/mode",
+      "expected": "\"strict\" or \"lenient\""
+     }
+    ]
    }
   },
   {
@@ -17649,6 +18007,7 @@
      "cart.add"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -17697,13 +18056,14 @@
     ],
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/project/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -17751,13 +18111,14 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -17783,6 +18144,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W708",
@@ -17825,13 +18187,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18106,6 +18469,7 @@
      "x.y.z"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -18145,13 +18509,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18192,13 +18557,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18233,13 +18599,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18273,13 +18640,14 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18312,13 +18680,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18348,13 +18717,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18395,6 +18765,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -18443,13 +18814,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18475,6 +18847,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -18508,13 +18881,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18548,6 +18922,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -18611,13 +18986,14 @@
     ],
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18677,13 +19053,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18732,13 +19109,14 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18868,6 +19246,7 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -18884,6 +19263,7 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W703",
@@ -18926,13 +19306,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18958,13 +19339,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -18992,13 +19374,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19031,13 +19414,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19064,6 +19448,7 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -19089,13 +19474,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19129,6 +19515,7 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -19160,13 +19547,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19215,13 +19603,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19254,13 +19643,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19296,6 +19686,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -19328,6 +19719,7 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -19352,13 +19744,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19393,6 +19786,7 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -19448,13 +19842,14 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19489,13 +19884,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19521,6 +19917,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -19552,6 +19949,7 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -19577,13 +19975,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19623,6 +20022,7 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -19641,13 +20041,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19696,6 +20097,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -19727,13 +20129,14 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19781,13 +20184,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19829,6 +20233,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -19860,13 +20265,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19899,6 +20305,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -19934,13 +20341,14 @@
      "cart.add"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -19981,13 +20389,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20028,13 +20437,14 @@
     "tokens": [],
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20061,13 +20471,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20100,6 +20511,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20174,6 +20586,7 @@
      "x.y.z"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W703",
@@ -20213,6 +20626,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20237,13 +20651,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20283,13 +20698,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20322,6 +20738,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20354,6 +20771,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20393,13 +20811,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20425,6 +20844,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20456,13 +20876,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20503,13 +20924,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20559,13 +20981,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20593,6 +21016,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20643,6 +21067,7 @@
      "cart.add"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20691,6 +21116,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20729,6 +21155,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20760,13 +21187,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20794,13 +21222,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20842,6 +21271,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -20873,6 +21303,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -20898,13 +21329,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20937,13 +21369,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -20976,13 +21409,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21016,13 +21450,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21055,6 +21490,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -21089,13 +21525,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21171,13 +21608,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21210,6 +21648,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -21257,13 +21696,14 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -21282,13 +21722,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21321,13 +21762,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21357,13 +21799,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21389,6 +21832,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -21426,13 +21870,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21460,13 +21905,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21514,6 +21960,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -21538,13 +21985,14 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21587,6 +22035,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -21613,13 +22062,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21676,13 +22126,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21724,13 +22175,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21756,13 +22208,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21800,6 +22253,7 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -21834,6 +22288,7 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -21866,6 +22321,7 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -21898,13 +22354,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21951,13 +22408,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22002,13 +22460,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22049,13 +22508,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22081,13 +22541,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22124,6 +22585,7 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -22163,13 +22625,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22209,13 +22672,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22249,13 +22713,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22281,6 +22746,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -22297,13 +22763,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22511,13 +22978,14 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22728,13 +23196,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22762,13 +23231,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22802,6 +23272,7 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -22861,13 +23332,14 @@
      "nav.home"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22910,13 +23382,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22942,13 +23415,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22983,13 +23457,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23023,6 +23498,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -23059,6 +23535,7 @@
      "cart.add"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -23109,6 +23586,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W708",
@@ -23157,13 +23635,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23196,13 +23675,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23235,13 +23715,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23275,13 +23756,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23326,13 +23808,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23391,6 +23874,7 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -23430,13 +23914,14 @@
     "tokens": [],
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23462,6 +23947,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -23490,6 +23976,7 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W708",
@@ -23551,6 +24038,7 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -23596,6 +24084,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -23639,6 +24128,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -23655,6 +24145,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -23686,13 +24177,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23742,13 +24234,14 @@
      "cart.add"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23821,6 +24314,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -23854,6 +24348,7 @@
      "x.y.z"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -23902,6 +24397,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -23943,13 +24439,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24005,6 +24502,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -24033,6 +24531,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -24059,6 +24558,7 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W708",
@@ -24102,13 +24602,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -24131,6 +24632,7 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -24177,13 +24679,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24244,13 +24747,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24283,13 +24787,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24329,13 +24834,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24371,13 +24877,14 @@
      "nav.home"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24411,13 +24918,14 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24459,13 +24967,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24492,6 +25001,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -24518,6 +25028,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -24542,13 +25053,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24574,13 +25086,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24613,13 +25126,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24648,13 +25162,14 @@
      "x.y.z"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24687,6 +25202,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -24711,6 +25227,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -24738,13 +25255,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24875,13 +25393,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24940,13 +25459,14 @@
     "tokens": [],
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24995,13 +25515,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25034,13 +25555,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25089,13 +25611,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25128,13 +25651,14 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25188,13 +25712,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25227,13 +25752,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25260,13 +25786,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25299,13 +25826,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25339,13 +25867,14 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25394,13 +25923,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25428,13 +25958,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25475,13 +26006,14 @@
     "tokens": [],
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25515,6 +26047,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -25556,13 +26089,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25690,13 +26224,14 @@
      "nav.home"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25755,13 +26290,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25803,13 +26339,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26004,13 +26541,14 @@
      "cart.add"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26069,6 +26607,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -26116,13 +26655,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26157,13 +26697,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26219,13 +26760,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26251,13 +26793,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26290,13 +26833,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26338,6 +26882,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -26530,13 +27075,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26576,13 +27122,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26608,13 +27155,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26641,6 +27189,7 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -26665,6 +27214,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W705",
@@ -26705,13 +27255,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26747,13 +27298,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26797,13 +27349,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26854,6 +27407,7 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -26893,13 +27447,14 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26952,13 +27507,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26999,13 +27555,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27182,13 +27739,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27236,13 +27794,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -27263,6 +27822,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -27294,13 +27854,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27326,6 +27887,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -27357,13 +27919,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27408,13 +27971,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27448,13 +28012,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27497,13 +28062,14 @@
      "nav.home"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27544,13 +28110,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27584,6 +28151,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -27622,13 +28190,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27661,13 +28230,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27715,13 +28285,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27773,13 +28344,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27821,13 +28393,14 @@
      "x.y.z"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27875,13 +28448,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27914,6 +28488,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -27945,13 +28520,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27978,6 +28554,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -28004,6 +28581,7 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -28049,6 +28627,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -28080,6 +28659,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -28112,13 +28692,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -28137,13 +28718,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28184,6 +28766,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -28208,13 +28791,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28254,13 +28838,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28287,13 +28872,14 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28320,13 +28906,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28361,13 +28948,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28422,6 +29010,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -28461,13 +29050,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28500,6 +29090,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W708",
@@ -28527,13 +29118,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28574,6 +29166,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -28599,13 +29192,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28631,13 +29225,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28670,13 +29265,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28709,13 +29305,14 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28748,6 +29345,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -28773,6 +29371,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -28804,13 +29403,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28850,13 +29450,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28899,13 +29500,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28977,13 +29579,14 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29017,13 +29620,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29052,13 +29656,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29108,13 +29713,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29150,6 +29756,7 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -29196,13 +29803,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29228,13 +29836,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29260,6 +29869,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": []
    }
   },
@@ -29276,13 +29886,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29315,13 +29926,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29355,13 +29967,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29395,6 +30008,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -29426,13 +30040,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29469,13 +30084,14 @@
      "x.y.z"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29516,6 +30132,7 @@
     ],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -29573,6 +30190,7 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -29630,13 +30248,14 @@
      "nav.home"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29765,13 +30384,14 @@
      "cart.add"
     ],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29837,13 +30457,14 @@
     ],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29886,13 +30507,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30004,13 +30626,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30036,6 +30659,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -30098,13 +30722,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30137,13 +30762,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30169,6 +30795,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -30239,6 +30866,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -30263,6 +30891,7 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W706",
@@ -30287,6 +30916,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -30311,6 +30941,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -30344,13 +30975,14 @@
      "x.y.z"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30507,13 +31139,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30539,13 +31172,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30578,13 +31212,14 @@
     "tokens": null,
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30617,13 +31252,14 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30688,13 +31324,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30720,13 +31357,14 @@
     "tokens": [],
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30767,13 +31405,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30806,6 +31445,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -30837,13 +31477,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30876,6 +31517,7 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -30907,13 +31549,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30959,13 +31602,14 @@
      "cart.add"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31016,13 +31660,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31051,13 +31696,14 @@
      "nav.home"
     ],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31091,13 +31737,14 @@
     "tokens": [],
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31123,6 +31770,7 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W701",
@@ -31147,13 +31795,14 @@
     "tokens": null,
     "actions": [],
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31195,6 +31844,7 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W704",
@@ -31250,13 +31900,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31321,13 +31972,14 @@
     "tokens": [],
     "actions": [],
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31360,13 +32012,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31399,13 +32052,14 @@
     "tokens": null,
     "actions": null,
     "data": true,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31432,13 +32086,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31473,13 +32128,14 @@
     "tokens": [],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31631,13 +32287,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31671,13 +32328,14 @@
     ],
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31711,13 +32369,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31743,13 +32402,14 @@
     "tokens": null,
     "actions": null,
     "data": false,
+    "settings": {},
     "diagnostics": [
      {
       "code": "W702",
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {

@@ -96,7 +96,7 @@ export const DIAGNOSTIC_CODES = {
   W602: { severity: "warning", summary: "Imported input exceeds an import limit." },
 
   W701: { severity: "error", summary: "Project file or one of its members has the wrong shape." },
-  W702: { severity: "mode", summary: "Unknown member in the project file." },
+  W702: { severity: "warning", summary: "Unknown member in the project file." },
   W703: { severity: "error", summary: "File name in the project file is not allowed." },
   W704: { severity: "error", summary: "File named by the project cannot be read." },
   W705: { severity: "error", summary: "Problem in the project's token files." },

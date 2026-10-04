@@ -11,6 +11,7 @@ tasks:
       - '/packages/**/*'
       - '/corpus/**/*'
       - '/examples/**/*'
+      - '/schemas/**/*'
       - '/compat/**/*'
       - '/SPEC.md'
       - '/AGENT-SPEC.md'

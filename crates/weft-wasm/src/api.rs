@@ -245,6 +245,7 @@ struct LoadedProject<'a> {
     actions: Option<&'a [String]>,
     /// The data schema as JSON text, which `checkData` takes.
     data: Option<String>,
+    settings: &'a serde_json::Map<String, Json>,
     diagnostics: &'a [Diagnostic],
 }
 
@@ -283,6 +284,7 @@ pub fn load_project(text: &str, files: Option<&str>, options: &str) -> Result<St
         tokens: project.tokens.as_ref().map(|t| t.iter().collect()),
         actions: project.actions.as_deref(),
         data: project.data_source.as_ref().map(Json::to_string),
+        settings: &project.settings,
         diagnostics: &loaded.diagnostics,
     })
 }

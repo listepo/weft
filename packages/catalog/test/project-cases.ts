@@ -265,6 +265,47 @@ export const projectCases: Record<string, ProjectCase> = {
     }),
     codes: [],
   },
+  "every tool section with valid settings": {
+    project: project({
+      validate: { mode: "strict" },
+      format: { write: true },
+      render: { data: "sample.json", tokens: ["tokens/base.tokens.json"], outDir: "out/pages" },
+      export: { react: { outDir: "src/screens" } },
+      import: { html: { outDir: "imported" } },
+      mcp: { limits: { markupChars: 1000, patches: 5, inputElements: 30_000 } },
+      plugins: { "my-plugin": { anything: [1, "x"] } },
+    }),
+    codes: [],
+  },
+  "tool settings of the wrong type are left out": {
+    project: project({
+      validate: { mode: "loose" },
+      format: { write: "yes" },
+      render: { data: 7, tokens: "a.json", outDir: "../out" },
+      export: [],
+      mcp: { limits: { markupChars: 0, patches: 2.5, diagnostics: -1 } },
+      plugins: { a: 1 },
+    }),
+    codes: ["W701", "W701", "W701", "W701", "W703", "W701", "W701", "W701", "W701", "W701"],
+  },
+  "unknown keys in tool sections only warn": {
+    project: project({
+      validate: { mod: "strict" },
+      export: { swiftui: { outDir: "ios" }, react: { outdir: "x" } },
+      import: { figma: {} },
+      mcp: { limit: {} },
+    }),
+    codes: ["W702", "W702", "W702", "W702", "W702"],
+  },
+  "file names in tool sections follow the project rules": {
+    project: project({ render: { tokens: ["ok.json", "/abs.json", "a\\b.json"], data: "c:/x" } }),
+    codes: ["W703", "W703", "W703"],
+  },
+  "content: tool settings point below the argument": {
+    project: project({ validate: { mode: 1 } }),
+    content: true,
+    codes: ["W701"],
+  },
   "content: every member": {
     project: project({
       tokens: [base, brand],

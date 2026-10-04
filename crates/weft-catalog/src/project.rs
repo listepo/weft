@@ -13,12 +13,14 @@ use weft_core::{
 
 use crate::core::{CORE_CATALOG_JSON, CatalogError, core_catalog};
 use crate::diff::{ChangeLevel, diff_catalogs};
+use crate::settings::{SECTIONS, sanitize};
 use crate::tokens::{Token, TokenCode, load_tokens};
 
 pub const PROJECT_FILE: &str = "weft.json";
 pub const MAX_TOKEN_FILES: usize = 64;
 
-const MEMBERS: [&str; 5] = ["$schema", "tokens", "catalog", "actions", "data"];
+/// The shared resources; the tool sections follow them (`settings::SECTIONS`).
+const RESOURCES: [&str; 5] = ["$schema", "tokens", "catalog", "actions", "data"];
 /// Joined rather than replaced by an extension entry (SPEC §10.4).
 const JOINED: [&str; 4] = ["states", "events", "allowedChildren", "allowedParents"];
 /// Merged by name rather than replaced by an extension entry.
@@ -40,6 +42,18 @@ pub struct Project {
     /// The data schema as written, for callers that hand it on rather than check with it (the
     /// WebAssembly boundary passes JSON, not compiled schemas).
     pub data_source: Option<Json>,
+    /// The tool sections that passed their checks (SPEC §10.6), shaped as in the file; a key that
+    /// is absent takes the tool's default.
+    pub settings: Object<String, Json>,
+}
+
+impl Project {
+    /// The setting at `path`, e.g. `["render", "outDir"]`, when the project file gives a valid one.
+    pub fn setting(&self, path: &[&str]) -> Option<&Json> {
+        let (first, rest) = path.split_first()?;
+        rest.iter()
+            .try_fold(self.settings.get(*first)?, |value, key| value.get(key))
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -79,12 +93,12 @@ pub fn is_project_file_name(name: &str) -> bool {
         && name.split('/').all(|s| !s.is_empty() && s != "..")
 }
 
-fn escape_pointer(name: &str) -> String {
+pub(crate) fn escape_pointer(name: &str) -> String {
     name.replace('~', "~0").replace('/', "~1")
 }
 
 /// `JSON.stringify` of a string, as the TypeScript messages quote names.
-fn quote(s: &str) -> String {
+pub(crate) fn quote(s: &str) -> String {
     serde_json::to_string(s).unwrap_or_default()
 }
 
@@ -461,6 +475,7 @@ fn empty_project() -> Result<Project, CatalogError> {
         actions: None,
         data: None,
         data_source: None,
+        settings: Object::new(),
     })
 }
 
@@ -486,8 +501,9 @@ pub fn load_project(
         });
     };
 
+    let known = || RESOURCES.into_iter().chain(SECTIONS.iter().map(|s| s.name));
     for name in members.keys() {
-        if MEMBERS.contains(&name.as_str()) {
+        if known().any(|k| k == name) {
             continue;
         }
         loader.report(
@@ -495,10 +511,10 @@ pub fn load_project(
                 Code::W702,
                 loader.at(&format!("/{}", escape_pointer(name))),
                 format!("Unknown member {} in the project file.", quote(name)),
-                one_of(MEMBERS),
+                one_of(known()),
             )
             .got(name)
-            .hint_opt(did_you_mean(name, MEMBERS)),
+            .hint_opt(did_you_mean(name, known())),
         );
     }
 
@@ -537,6 +553,19 @@ pub fn load_project(
             };
             let path = loader.at(&format!("/data{}", p.pointer));
             loader.report(Diagnostic::new(p.code, path, p.message, expected));
+        }
+    }
+    for section in SECTIONS {
+        if let Some(member) = members.get(section.name) {
+            let pointer = loader.at(&format!("/{}", section.name));
+            let mut found = Vec::new();
+            let clean = sanitize(section, member, &pointer, &mut |d| found.push(d));
+            for d in found {
+                loader.report(d);
+            }
+            if let Some(clean) = clean {
+                project.settings.insert(section.name.to_owned(), clean);
+            }
         }
     }
     Ok(ProjectLoad {

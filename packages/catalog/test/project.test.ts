@@ -89,12 +89,12 @@ describe("project diagnostics", () => {
     );
   });
 
-  test("an unknown member is a warning in lenient mode and an error in strict mode", () => {
+  test("an unknown member is a warning in both modes, so an older tool reads a newer file", () => {
     const lenient = loadProjectText('{"tokenz": []}').diagnostics[0];
     assert.equal(lenient?.severity, "warning");
     assert.equal(lenient?.hint, 'did you mean "tokens"?');
     const strict = loadProjectText('{"tokenz": []}', { mode: "strict" }).diagnostics[0];
-    assert.equal(strict?.severity, "error");
+    assert.equal(strict?.severity, "warning");
   });
 
   test("a file name that leaves the project is never read", () => {
@@ -115,3 +115,38 @@ describe("project diagnostics", () => {
     }
   });
 });
+
+describe("tool sections", () => {
+  // Sections are checked in the order SPEC §10.6 lists them, whatever the order in the file.
+  test("valid settings are kept as written; invalid ones are left out", () => {
+    const { project, diagnostics } = loadProjectText(
+      JSON.stringify({
+        validate: { mode: "strict" },
+        render: { data: "sample.json", tokens: ["a.json", "../b.json"], outDir: 5 },
+        mcp: { limits: { patches: 3, diagnostics: 0 } },
+        export: { react: { outDir: "src" }, swiftui: { outDir: "ios" } },
+      }),
+    );
+    assert.deepEqual(project.settings, {
+      validate: { mode: "strict" },
+      render: { data: "sample.json", tokens: ["a.json"] },
+      mcp: { limits: { patches: 3 } },
+      export: { react: { outDir: "src" } },
+    });
+    assert.deepEqual(
+      diagnostics.map((d) => [d.code, d.path, d.severity]),
+      [
+        ["W703", "#/render/tokens/1", "error"],
+        ["W701", "#/render/outDir", "error"],
+        ["W702", "#/export/swiftui", "warning"],
+        ["W701", "#/mcp/limits/diagnostics", "error"],
+      ],
+    );
+  });
+
+  test("a project without sections has empty settings", () => {
+    assert.deepEqual(loadProjectText("{}").project.settings, {});
+    assert.deepEqual(loadProjectText("[").project.settings, {});
+  });
+});
+

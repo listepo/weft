@@ -65,6 +65,7 @@ fn projects_match_the_typescript_package() {
             "tokens": tokens,
             "actions": project.actions,
             "data": project.data.is_some(),
+            "settings": project.settings,
             "diagnostics": serde_json::to_value(&loaded.diagnostics).unwrap(),
         });
         if js(&got) != case["expect"] {

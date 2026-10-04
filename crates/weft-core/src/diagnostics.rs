@@ -135,7 +135,7 @@ codes! {
     W601 => Error, "Imported input cannot be read.";
     W602 => Warning, "Imported input exceeds an import limit.";
     W701 => Error, "Project file or one of its members has the wrong shape.";
-    W702 => Mode, "Unknown member in the project file.";
+    W702 => Warning, "Unknown member in the project file.";
     W703 => Error, "File name in the project file is not allowed.";
     W704 => Error, "File named by the project cannot be read.";
     W705 => Error, "Problem in the project's token files.";

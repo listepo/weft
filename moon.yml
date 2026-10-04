@@ -34,8 +34,8 @@ tasks:
   rust-test:
     command: 'cargo nextest run --workspace'
     # weft-catalog embeds catalog.json and its tests read the examples and default tokens; the
-    # CLI tests read the example project.
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json', '/packages/catalog/examples/**/*', '/packages/catalog/tokens/**/*', '/examples/**/*']
+    # CLI tests read the example project; the schema test checks schemas/weft.schema.json.
+    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json', '/packages/catalog/examples/**/*', '/packages/catalog/tokens/**/*', '/examples/**/*', '/schemas/**/*']
   rust-lint:
     script: 'cargo clippy --workspace --all-targets -- -D warnings && cargo fmt --all --check'
     inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/clippy.toml']

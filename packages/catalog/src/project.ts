@@ -17,6 +17,33 @@ export type Project = {
   actions?: string[] | undefined;
   /** Present when the project declares `data`. */
   data?: DataSchema | undefined;
+  /** The tool sections that passed their checks (SPEC §10.6). */
+  settings: Settings;
+};
+
+/** A limit of the MCP server that `mcp.limits` may set. */
+export type LimitName =
+  | "markupChars"
+  | "dataChars"
+  | "patches"
+  | "patchesChars"
+  | "projectChars"
+  | "diagnostics"
+  | "inputElements";
+
+/**
+ * The tool sections of `weft.json`, shaped as in the file (`schemas/weft.schema.json` documents
+ * them). A key that is absent takes the tool's default; an explicit tool argument overrides both.
+ * File names are relative to the project file.
+ */
+export type Settings = {
+  validate?: { mode?: Mode };
+  format?: { write?: boolean };
+  render?: { data?: string; tokens?: string[]; outDir?: string };
+  export?: { react?: { outDir?: string } };
+  import?: { html?: { outDir?: string } };
+  mcp?: { limits?: Partial<Record<LimitName, number>> };
+  plugins?: Record<string, Record<string, unknown>>;
 };
 
 export type ProjectOptions = {
@@ -40,6 +67,7 @@ type Loaded = {
   tokens: [string, Token][] | null;
   actions: string[] | null;
   data: string | null;
+  settings: Settings;
   diagnostics: Diagnostic[];
 };
 
@@ -60,7 +88,7 @@ export function loadProjectText(text: string, options: ProjectOptions = {}): Pro
   }
   const wire = JSON.stringify({ strict: options.mode === "strict", prefix: options.prefix ?? "#" });
   const out = JSON.parse(wasm.loadProject(source, files, wire)) as Loaded;
-  const project: Project = { catalog: out.catalog };
+  const project: Project = { catalog: out.catalog, settings: out.settings };
   if (out.tokens !== null) project.tokens = new Map(out.tokens);
   if (out.actions !== null) project.actions = out.actions;
   if (out.data !== null) project.data = { json: out.data };
