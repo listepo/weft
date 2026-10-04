@@ -18,6 +18,7 @@ If an `AGENTS.md` or `CLAUDE.md` exists higher in the tree, follow it too; on co
 - **Diagnostics are an API.** A published code never changes meaning. Every diagnostic carries path, expectation and, where one exists, a hint.
 - **No build step.** Node runs the TypeScript sources directly (type stripping), so only erasable syntax: no `enum`, no `namespace`, no parameter properties. Import with the `.ts` extension.
 - **Tests** use `node:test` and `node:assert/strict`; property tests use `fast-check`. Test files live in `<package>/test/*.test.ts`.
+- **Measurement history.** Every benchmark run that is kept, full or partial, adds one row to the History table in `test.md` in the same commit as its raw results in `bench/results/`: date, commit the run used, provider and model, run, samples, headline rates, results file, notes. Rows are never edited or removed; a re-score or a rerun adds a new row. A change to the method (tasks, checks, prompt, criteria) updates the method sections of `test.md` in the same commit.
 - **Layout.** `packages/core` (model, parser, serializer, validator, CLI), `packages/catalog` (core catalog and tokens), `corpus/` (reference screens in every compared format), `bench/` (benchmark harness).
 
 ## Commands
