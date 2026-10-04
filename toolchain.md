@@ -6,7 +6,7 @@
 | pnpm | mise | Workspace package manager | https://github.com/pnpm/pnpm |
 | moon | mise | Workspace tasks with caching (`moon ci`) | https://github.com/moonrepo/moon |
 | rust | mise | Compiles the core to native code and to `wasm32-unknown-unknown` | https://github.com/rust-lang/rust |
-| wasm-pack | mise | Builds the WebAssembly packages | https://github.com/rustwasm/wasm-pack |
+| wasm-pack | mise | Builds `packages/core/wasm/` from `crates/weft-wasm` (`moon run root:wasm`) | https://github.com/rustwasm/wasm-pack |
 | wasm-bindgen | mise | JS glue for the WebAssembly build | https://github.com/wasm-bindgen/wasm-bindgen |
 | napi (`@napi-rs/cli`) | mise | Builds the native Node and Bun addon | https://github.com/napi-rs/napi-rs |
 | deno | mise | Runtime the bindings are tested on | https://github.com/denoland/deno |
@@ -39,6 +39,7 @@
 | thiserror | local | https://github.com/dtolnay/thiserror | Typed errors in weft-core |
 | anyhow | local | https://github.com/dtolnay/anyhow | Errors in the `weft` binary |
 | clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
+| wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
 
 ## npm
 
