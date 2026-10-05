@@ -16,7 +16,9 @@
 | Open Design | https://open-design.ai | Hosts the plugin (`plugins/open-design`); no test needs it | https://github.com/nexu-io/open-design |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 | cargo-insta | `cargo install cargo-insta` (optional) | Reviews changed snapshots (`cargo insta review`); the tests run without it | https://github.com/mitsuhiko/insta |
-| Xcode (`xcrun swiftc`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14; those tests skip without it | https://developer.apple.com/xcode/ |
+| Xcode (`xcrun swiftc`, `xcodebuild`, `swift`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14, and builds the SwiftPM plugins, the sample projects and the Source Editor Extension (`plugins/xcode`); those tests skip without it | https://developer.apple.com/xcode/ |
+| XcodeGen | mise | Generates the `.xcodeproj` of the Xcode sample and of the Source Editor Extension from YAML (`plugins/xcode`), so no project file is committed | https://github.com/yonaskolb/XcodeGen |
+| codex (optional) | https://github.com/openai/codex | `plugins/xcode/scripts/xcode-agents.ts` registers the MCP server with it; its test skips without it | https://github.com/openai/codex |
 | iOS Simulator (`xcrun simctl`) | Xcode, with the iOS 27.0 runtime and an iPhone 17 simulator | `@weft/visual` builds the generated SwiftUI screens into an app and screenshots them; skipped without it | https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device |
 | Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode (skipped without it); the browser leg of `moon run root:runtimes` fails without it | https://github.com/microsoft/playwright |
 
@@ -34,6 +36,7 @@
 | github:wasm-bindgen/wasm-bindgen | global | https://github.com/wasm-bindgen/wasm-bindgen | WebAssembly JS glue |
 | npm:@napi-rs/cli | global | https://github.com/napi-rs/napi-rs | Native addon builds |
 | cargo:cargo-nextest | global | https://github.com/nextest-rs/nextest | Rust test runner |
+| aqua:yonaskolb/XcodeGen | global | https://github.com/yonaskolb/XcodeGen | Xcode projects of `plugins/xcode` |
 
 ## cargo
 
@@ -51,6 +54,8 @@
 | tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
 | tree-sitter-swift | local | https://github.com/alex-pinkus/tree-sitter-swift | The Swift grammar for that parser |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
+| napi, napi-derive | local | https://github.com/napi-rs/napi-rs | `weft-node` exports for Node and Bun; its macros expand to `allow(unsafe_code)`, so that crate alone relaxes the workspace's `forbid` to `deny` |
+| napi-build | local (build) | https://github.com/napi-rs/napi-rs | Link flags of the addon (`weft-node/build.rs`) |
 | unicode-normalization | local | https://github.com/unicode-rs/unicode-normalization | NFKD before folding imported names into id slugs, as `String.prototype.normalize` does in the TypeScript importers |
 | unicode-properties | local | https://github.com/unicode-rs/unicode-properties | Unicode letter and number classes (`\p{L}`, `\p{N}`) for the JSX generators' check of which text runs print as written |
 | html5ever | local | https://github.com/servo/html5ever | Parses HTML in `weft-web` with the WHATWG tree builder, so imported pages read as a browser builds them |

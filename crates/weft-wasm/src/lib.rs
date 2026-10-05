@@ -1,17 +1,13 @@
-//! WebAssembly exports of the Weft core and catalog, the engine behind `@weft/core` and
-//! `@weft/catalog` (`packages/core/src/wasm.ts` loads it). The surface is thin: each export reads
-//! JSON text, calls one function of `api`, and returns JSON text the TypeScript wrapper parses.
-//! A `None` JSON argument means `JSON.stringify` could not write the value (see `boundary`).
-
-mod api;
-mod boundary;
-mod sources;
-#[cfg(feature = "web")]
-mod web;
+//! WebAssembly exports of the Weft core and catalog, one of the two engines behind `@weft/core`
+//! and `@weft/catalog` (`packages/core/src/wasm.ts` loads it). The surface is thin: each export
+//! reads JSON text, calls one function of `weft-binding`, and returns JSON text the TypeScript
+//! wrapper parses. `weft-node` exports the same names; `packages/core/test/engines.test.ts` keeps
+//! the two lists equal.
 
 use wasm_bindgen::prelude::*;
-
-pub use boundary::BindingError;
+#[cfg(feature = "web")]
+use weft_binding::web;
+use weft_binding::{api, boundary};
 
 /// A catalog parsed once and reused across calls; the wrapper keeps one per catalog object.
 #[wasm_bindgen]
@@ -21,9 +17,7 @@ pub struct Catalog(weft_core::Catalog);
 impl Catalog {
     #[wasm_bindgen(constructor)]
     pub fn new(json: &str) -> Result<Catalog, JsError> {
-        Ok(Catalog(
-            serde_json::from_str(json).map_err(BindingError::Catalog)?,
-        ))
+        Ok(Catalog(boundary::read_catalog(json)?))
     }
 
     pub fn parse(&self, markup: &str, options: &str) -> Result<String, JsError> {
@@ -211,7 +205,7 @@ pub fn import_failure(
 #[cfg(feature = "web")]
 #[wasm_bindgen(js_name = instanceId)]
 pub fn instance_id(raw: &str) -> Option<String> {
-    weft_web::instance_id(raw)
+    web::instance_id(raw)
 }
 
 #[cfg(feature = "web")]

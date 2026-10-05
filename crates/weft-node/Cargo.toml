@@ -1,0 +1,37 @@
+[package]
+name = "weft-node"
+description = "Native Node and Bun addon of the Weft core and catalog behind @weft/core and @weft/catalog"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+# The addon's symbols come from the host process (Node or Bun), so a test binary would not link.
+# The logic is tested in weft-binding; `packages/core/test` runs this build.
+test = false
+doctest = false
+
+[dependencies]
+napi = { workspace = true }
+napi-derive = { workspace = true }
+weft-binding = { workspace = true, features = ["web"] }
+weft-core = { workspace = true }
+
+[build-dependencies]
+napi-build = { workspace = true }
+
+# The workspace forbids unsafe code, and `forbid` also rejects the `allow(unsafe_code)` that
+# napi-derive writes into its registration code. Hand-written code here has none; the clippy lists
+# are the workspace's.
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"

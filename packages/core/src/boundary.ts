@@ -1,4 +1,4 @@
-// The JSON boundary in front of the WebAssembly modules (`./wasm.ts`, `./web.ts`): what crosses
+// The JSON boundary in front of the two engines (`./wasm.ts`, `./web.ts`): what crosses
 // is JSON text, and these helpers write it. No module is loaded here.
 import type { Mode } from "./diagnostics.ts";
 import type { Catalog } from "./model.ts";
@@ -74,7 +74,7 @@ export function options(o: CoreOptions): string {
  * JSON text is compared on every call, so a catalog changed in place is parsed again instead of
  * answering from a stale copy.
  */
-export function catalogHandles<H extends { free(): void }>(
+export function catalogHandles<H extends { free?(): void }>(
   make: (json: string) => H,
 ): (catalog: Catalog) => H {
   const catalogs = new WeakMap<object, { text: string; handle: H }>();
@@ -82,7 +82,8 @@ export function catalogHandles<H extends { free(): void }>(
     const text = toJson(catalog) ?? "null";
     const cached = catalogs.get(catalog);
     if (cached?.text === text) return cached.handle;
-    cached?.handle.free();
+    // Only WebAssembly handles own memory to release; the addon's are garbage collected.
+    cached?.handle.free?.();
     const handle = make(text);
     catalogs.set(catalog, { text, handle });
     return handle;

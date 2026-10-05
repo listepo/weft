@@ -1,0 +1,7 @@
+# The suite runs on both engines of the core: the WebAssembly module and the native addon. Under
+# `WEFT_ENGINE=native` the core test `engines.test.ts` fails when the addon did not load, so the
+# second run cannot pass on the module by falling back.
+tasks:
+  test:
+    script: "WEFT_ENGINE=wasm vitest run --config $workspaceRoot/vitest.config.ts && WEFT_ENGINE=native vitest run --config $workspaceRoot/vitest.config.ts"
+    deps: ["root:wasm", "root:native"]

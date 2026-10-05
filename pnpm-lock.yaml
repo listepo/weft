@@ -527,6 +527,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/to-jsx
 
+  plugins/xcode: {}
+
 packages:
 
   '@babel/code-frame@7.29.7':

@@ -30,6 +30,10 @@ const needsFileSystem = [
   "packages/catalog/test/tokens.test.ts",
 ];
 
+// The engine tests drive the native-addon loader, which only Node and Bun run (Deno and a page always
+// use the WebAssembly module), and spawn Node and Bun processes of their own.
+const needsAddonRuntime = ["packages/core/test/engines.test.ts"];
+
 const browser = runtime === "browser";
 // Unlike the visual suite, which skips its web screenshots, a matrix with a leg missing is not a
 // pass, so a machine without Chromium fails with the way to install it.
@@ -47,7 +51,11 @@ export default defineConfig({
   test: {
     name: runtime,
     include: ["packages/core/test/**/*.test.ts", "packages/catalog/test/**/*.test.ts"],
-    exclude: browser ? needsFileSystem : [],
+    exclude: browser
+      ? [...needsFileSystem, ...needsAddonRuntime]
+      : runtime === "deno"
+        ? needsAddonRuntime
+        : [],
     setupFiles: [resolve(import.meta.dirname, "setup.ts")],
     provide: { runtime },
     testTimeout: 120_000,

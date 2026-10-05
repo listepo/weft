@@ -1,0 +1,98 @@
+import Foundation
+import PackagePlugin
+
+/// `swift package weft export <screen.weft>...` writes SwiftUI, `swift package weft import
+/// <View.swift>...` writes a screen. Both write into the package, which SwiftPM asks the user to
+/// allow (`--allow-writing-to-package-directory`).
+@main
+struct WeftCommandPlugin: CommandPlugin {
+    func performCommand(context: PluginContext, arguments: [String]) async throws {
+        try convert(arguments, tool: context.tool(named: "weft").url, root: context.package.directoryURL)
+    }
+}
+
+#if canImport(XcodeProjectPlugin)
+    import XcodeProjectPlugin
+
+    extension WeftCommandPlugin: XcodeCommandPlugin {
+        func performCommand(context: XcodePluginContext, arguments: [String]) throws {
+            try convert(arguments, tool: context.tool(named: "weft").url, root: context.xcodeProject.directoryURL)
+        }
+    }
+#endif
+
+private struct Direction {
+    /// The `weft` subcommand, the input and output extensions, and the `weft.json` section.
+    let subcommand: String
+    let input: String
+    let output: String
+    let section: String
+
+    static let export = Direction(subcommand: "swiftui", input: "weft", output: "swift", section: "export")
+    static let `import` = Direction(subcommand: "import-swiftui", input: "swift", output: "weft", section: "import")
+}
+
+private struct Failure: Error, CustomStringConvertible {
+    let description: String
+}
+
+private let usage = "usage: swift package --allow-writing-to-package-directory weft export|import <file>... [--out-dir <dir>] [--force]"
+
+private func convert(_ arguments: [String], tool: URL, root: URL) throws {
+    var extractor = ArgumentExtractor(arguments)
+    let outDirectory = extractor.extractOption(named: "out-dir").first
+    let force = extractor.extractFlag(named: "force") > 0
+    var positional = extractor.remainingArguments
+    guard !positional.isEmpty else { throw Failure(description: usage) }
+    let direction: Direction
+    switch positional.removeFirst() {
+    case "export": direction = .export
+    case "import": direction = .import
+    default: throw Failure(description: usage)
+    }
+    guard !positional.isEmpty else { throw Failure(description: usage) }
+
+    for name in positional {
+        // Relative names are relative to the package, wherever `swift package` was started.
+        let document = URL(fileURLWithPath: name, relativeTo: root).standardizedFileURL
+        guard document.pathExtension == direction.input else {
+            throw Failure(description: "\(name): expected a .\(direction.input) file")
+        }
+        guard FileManager.default.fileExists(atPath: document.path) else {
+            throw Failure(description: "\(name): no such file")
+        }
+        let project = WeftProject.nearest(above: document, within: root)
+        // Where the file goes: the flag, else the project's outDir setting, else next to the input.
+        let directory: URL
+        if let outDirectory {
+            directory = URL(fileURLWithPath: outDirectory, relativeTo: root).standardizedFileURL
+        } else if let configured = project?.setting([direction.section, "swiftui", "outDir"]), let project {
+            directory = project.directory.appendingPathComponent(configured).standardizedFileURL
+        } else {
+            directory = document.deletingLastPathComponent()
+        }
+        let output = directory.appendingPathComponent(
+            document.deletingPathExtension().lastPathComponent + "." + direction.output)
+        // Exporting then importing in place would replace the screen with its round trip.
+        if FileManager.default.fileExists(atPath: output.path) && !force {
+            throw Failure(description: "\(output.path) exists; pass --force to replace it")
+        }
+        try run(
+            tool, [direction.subcommand, document.path] + (project.map { ["--project", $0.file.path] } ?? ["--no-project"])
+                + ["--out-dir", directory.path])
+        print("wrote \(output.path)")
+    }
+}
+
+/// Runs `weft`. Its diagnostics and the importer's losses go to standard error, which is passed
+/// through; a nonzero exit fails the command.
+private func run(_ tool: URL, _ arguments: [String]) throws {
+    let process = Process()
+    process.executableURL = tool
+    process.arguments = arguments
+    try process.run()
+    process.waitUntilExit()
+    guard process.terminationStatus == 0 else {
+        throw Failure(description: "weft \(arguments.first ?? "") failed with exit code \(process.terminationStatus)")
+    }
+}
