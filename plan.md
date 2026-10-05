@@ -165,6 +165,15 @@ Split from T52. A `model` element showing a 3D asset, with a still fallback imag
 - Groundwork tried in T52 and removed again: the `model` kind in `packages/catalog/src/core.ts`, `asset_problem` in `weft-core/src/rules.rs`, the `W317` check in `validate.rs`, cases in `packages/core/test/cases.ts` and `crates/weft-core/tests/codes.rs`, `model` in the fixture catalog `packages/core/test/catalog.ts`.
 - Add a corpus screen with a model, covered like the corpus. Screenshots are deterministic (the fallback). Done when the full check exits 0 and new baselines are reviewed.
 
+Execution plan:
+
+1. Core: the `model` kind in `packages/catalog/src/core.ts` (props `bindable: false`, regenerate `catalog.json`), `asset_problem` in `rules.rs`, `W317` in `validate.rs`, `diagnostics.rs` and `diagnostics.ts`, cases in `codes.rs`, `cases.ts` and the fixture catalog, SPEC §5.1 and §6.2, `AGENT-SPEC.md`.
+2. Web: the static page and the React and SolidJS generators write `<model-viewer>` with the poster `<img>` child (`html.rs`, `jsx/mod.rs`), the DOM importers read it back (`dom.rs`), the reference renderer does the same (`render-react`), all through the existing `safe_url` / `safeUrl` guard.
+3. SwiftUI: a `WeftModel` helper, added to a file only when the screen has a model (`Model3D` on visionOS, `RealityView` with the USDZ elsewhere, the fallback image while loading and when the process sets `WEFT_STILL_MODELS`); the importer reads the call back.
+4. Design tools: the library draws the fallback image rectangle (`packages/design-tool`, Figma and Penpot snapshots).
+5. Corpus: a `models` screen and a small generated asset (glTF binary, USDZ, still PNG) in `corpus/models/assets/` under the project licence, a size-bound test; regenerate the differential and importer fixtures and snapshots; screenshots show the fallback.
+6. Verify with `moon run root:changed` while iterating, then the full check; close the task.
+
 ### T18. Follow-ups from the prototype
 
 - `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
