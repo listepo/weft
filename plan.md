@@ -6,7 +6,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
 | T23 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T24 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
@@ -35,10 +34,6 @@ Execution plan:
 ### T23. Native Node and Bun addon
 
 A napi-rs addon of the same Rust core for Node and Bun, chosen at load time with the WASM build as the fallback when no prebuilt binary fits the platform. Done when the test suite passes on both builds and a broken or missing addon falls back to WASM with a warning.
-
-### T24. Runtime matrix
-
-Run the binding tests in Node, Deno, Bun and a headless browser through moon. Done when all four pass from one command.
 
 ### T28. Binding readback against inverted conditions
 

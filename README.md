@@ -33,6 +33,8 @@ moon ci
 
 The checks run in Rust (`crates/`). `@weft/core` and `@weft/catalog` call them through WebAssembly: `moon run root:wasm` builds the module into `packages/core/wasm/`, and every test task builds it first. Node 22.3 or later, Deno and Bun load it synchronously; browsers fetch it with top-level await.
 
+`moon run root:runtimes` runs the `@weft/core` and `@weft/catalog` suites on Node, Deno, Bun and headless Chromium (`pnpm exec playwright install chromium` once). The browser leg skips the suites that read files (listed in `runtimes/vitest.config.ts`); the other three run everything.
+
 ## License
 
 Apache License 2.0 — see [LICENSE](LICENSE). Copyright 2026 Ivan Tugay.
