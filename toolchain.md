@@ -76,5 +76,5 @@
 | ajv | local | https://github.com/ajv-validator/ajv | Validates the Cursor plugin manifests against Cursor's own JSON schemas |
 | ajv-formats | local | https://github.com/ajv-validator/ajv-formats | The `uri` and `email` formats those schemas use |
 | @figma/plugin-typings | local | https://github.com/figma/plugin-typings | Official Figma Plugin API types; the conversion is typed against them |
-| @penpot/plugin-types | local | https://github.com/penpot/penpot | Official Penpot plugin API types (MPL-2.0); `@weft/penpot` and the Penpot plugin are typed against them |
+| @penpot/plugin-types | local | https://github.com/penpot/penpot | Official Penpot plugin API types (MPL-2.0); `@weft/penpot` and the Penpot plugin are typed against them. Pinned to 1.5.0 from the `next` tag, approved by the creator: `latest` (1.4.2) has no design tokens API |
 | ses | local | https://github.com/endojs/endo | The SES library Penpot runs plugins in; the Penpot plugin's bundle test evaluates the plugin in an SES compartment |
