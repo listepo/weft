@@ -4,7 +4,6 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T46. Simulator sharing for the SwiftUI screenshot suite
 - T47. Static page parity with the generated components
 - T50. Richer controls
 - T51. Glass material tokens
