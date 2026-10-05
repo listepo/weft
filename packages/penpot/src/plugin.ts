@@ -6,6 +6,7 @@ import { handleRequest as handleShared, type PluginReply } from "@weft/design-to
 import type { PenpotApi, PShape } from "./api.ts";
 import { buildScreen } from "./build.ts";
 import { ensureLibrary } from "./library.ts";
+import { readThemes } from "./modes.ts";
 import { readLayers } from "./read.ts";
 
 /**
@@ -25,11 +26,12 @@ export function handleRequest(
   const { catalog } = options;
   return handleShared(
     {
-      async build(document, display, tokens) {
-        const library = await ensureLibrary(api, catalog, tokens);
+      async build(document, display, tokens, modifier) {
+        const library = await ensureLibrary(api, catalog, tokens, modifier);
         return buildScreen(api, document, { catalog, library, tokens, display });
       },
       read: (shape, tokens) => readLayers(shape, { catalog, tokens }),
+      modes: async (tokens) => readThemes(api.library.local.tokens, tokens),
     },
     selection,
     message,

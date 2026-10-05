@@ -9,6 +9,8 @@
 // - a component copy's structure cannot change;
 // - `createText("")` returns null and empty `characters` are refused;
 // - tokens are applied by name, and `combineAsVariants` finishes after the call returns.
+// Token themes follow `@penpot/plugin-types` 1.5.0 (`TokenTheme`, `TokenSet`): one theme of a
+// group is on at a time, and turning a set on or off by hand turns every theme off.
 // Typing a value over a token detaches it, as Penpot's UI does; whether the plugin API does the
 // same is not documented, and the read-back handles both.
 import type { PFill, PStroke, PToken, PTokenType, PTrack } from "../src/api.ts";
@@ -670,16 +672,80 @@ export class FakeTokenSet {
   readonly id = nextId("set");
   readonly tokens: FakeToken[] = [];
   name: string;
-  active: boolean;
-  constructor(name: string, active: boolean) {
+  #active: boolean;
+  private readonly catalog: FakeTokenCatalog;
+  constructor(catalog: FakeTokenCatalog, name: string, active: boolean) {
+    this.catalog = catalog;
     this.name = name;
-    this.active = active;
+    this.#active = active;
+  }
+  get active(): boolean {
+    return this.#active;
+  }
+  /** Penpot: turning a set on or off by hand turns every theme off (a "custom" theme). */
+  set active(value: boolean) {
+    this.#active = value;
+    for (const theme of this.catalog.themes) theme.active = false;
+  }
+  /** What a theme does to its sets, which leaves the other themes as they are. */
+  activate(value: boolean): void {
+    this.#active = value;
   }
   addToken(token: { type: PTokenType; name: string; value: string }): FakeToken {
     if (this.tokens.some((t) => t.name === token.name))
       throw new Error(`a token named ${token.name} exists`);
     const made = new FakeToken(token.type, token.name, token.value);
     this.tokens.push(made);
+    return made;
+  }
+}
+
+export class FakeTokenTheme {
+  readonly id = nextId("theme");
+  readonly activeSets: FakeTokenSet[] = [];
+  group: string;
+  name: string;
+  active = false;
+  private readonly catalog: FakeTokenCatalog;
+  constructor(catalog: FakeTokenCatalog, group: string, name: string) {
+    this.catalog = catalog;
+    this.group = group;
+    this.name = name;
+  }
+  /** Penpot: one theme per group is on; switching turns the other's sets off, then this one's on. */
+  toggleActive(): void {
+    if (this.active) {
+      this.active = false;
+      return;
+    }
+    for (const other of this.catalog.themes) {
+      if (other === this || other.group !== this.group || !other.active) continue;
+      other.active = false;
+      for (const set of other.activeSets) if (!this.activeSets.includes(set)) set.activate(false);
+    }
+    this.active = true;
+    for (const set of this.activeSets) set.activate(true);
+  }
+  addSet(setId: string): void {
+    const set = this.catalog.sets.find((s) => s.id === setId);
+    if (set === undefined) throw new Error(`no token set ${setId}`);
+    if (!this.activeSets.includes(set)) this.activeSets.push(set);
+  }
+}
+
+export class FakeTokenCatalog {
+  readonly sets: FakeTokenSet[] = [];
+  readonly themes: FakeTokenTheme[] = [];
+  addSet(set: { name: string; active?: boolean }): FakeTokenSet {
+    const made = new FakeTokenSet(this, set.name, set.active ?? false);
+    this.sets.push(made);
+    return made;
+  }
+  addTheme(theme: { group: string; name: string }): FakeTokenTheme {
+    if (this.themes.some((t) => t.group === theme.group && t.name === theme.name))
+      throw new Error(`a theme ${theme.group}/${theme.name} exists`);
+    const made = new FakeTokenTheme(this, theme.group, theme.name);
+    this.themes.push(made);
     return made;
   }
 }
@@ -708,14 +774,7 @@ export class FakePenpot {
   readonly library = {
     local: {
       components: [] as FakeComponent[],
-      tokens: {
-        sets: [] as FakeTokenSet[],
-        addSet: (set: { name: string; active?: boolean }) => {
-          const made = new FakeTokenSet(set.name, set.active ?? false);
-          this.library.local.tokens.sets.push(made);
-          return made;
-        },
-      },
+      tokens: new FakeTokenCatalog(),
       createComponent: (shapes: FakeShape[]): FakeComponent => {
         const [main] = shapes;
         if (!(main instanceof FakeBoard) || shapes.length !== 1)

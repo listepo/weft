@@ -70,8 +70,27 @@ export interface PTokenSet {
   addToken(token: { type: PTokenType; name: string; value: string }): PToken;
 }
 
+/**
+ * A preset of active sets. Only one theme of a group is active at a time, so a group is a resolver
+ * modifier and its themes the contexts; activating a set directly turns every theme off.
+ */
+export interface PTokenTheme {
+  readonly id: string;
+  group: string;
+  name: string;
+  active: boolean;
+  toggleActive(): void;
+  readonly activeSets: readonly PTokenSet[];
+  /** Takes the set's id: the official type also takes the set, which the subset cannot name. */
+  addSet(setId: string): void;
+}
+
 export interface PTokenCatalog {
+  /** In creation order. */
+  readonly themes: readonly PTokenTheme[];
+  /** In the user's order: among active sets with the same token name, the later one wins. */
   readonly sets: readonly PTokenSet[];
+  addTheme(theme: { group: string; name: string }): PTokenTheme;
   addSet(set: { name: string; active?: boolean }): PTokenSet;
 }
 

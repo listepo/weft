@@ -54,6 +54,12 @@ A tool wraps its nodes in `Layer`, and `readLayers(layer, options)` reads them b
 
 `handleRequest(tool, selection, message)` validates a message from the plugin UI with zod, then calls `tool.build` or `tool.read`. `buildRequest`, `exportRequest` and `finishExport` (`src/plugin-ui.ts`) are the UI side.
 
+A build request may carry a resolver `modifier` (SPEC §10.3), at most 64 contexts, whose contexts the tool turns into its modes; `tool.build` gets it and may return `notes` for what it skipped without failing. A tool that keeps modes implements `tool.modes(tokens)`, and an export reply then carries the modes as a resolver document in `resolver`.
+
+### Token modes (`src/modes.ts`)
+
+`resolverDocument(modifier)` writes a DTCG Resolver Module 2025.10 document: one set `base` with the default context's tokens, the modifier with each context's differing tokens (the default context's list is empty), and a `resolutionOrder` of the two, the modifier's name escaped as a JSON Pointer. A path that is not a DTCG name, or clashes with another token, is left out; every object is made without a prototype. `modeToken(original, value)` turns a value read from a file into a token: the original token when the value is what it already gives, else a `px` dimension, a number or an sRGB colour, and nothing for a value out of range.
+
 ## Where the code runs
 
 Both tools run plugin code in a sandbox without WebAssembly, and the UI in a browser iframe. The Weft core is WebAssembly. So:
@@ -63,4 +69,4 @@ Both tools run plugin code in a sandbox without WebAssembly, and the UI in a bro
 
 ## Tests
 
-`test/shared.test.ts` covers message validation, the neutral layout view and the library drawings. The round trips run in the tool packages, over their fakes. `test/corpus.ts` gives those packages the corpus screens and the default tokens, so both tools are tested on the same screens.
+`test/shared.test.ts` covers message validation, the neutral layout view, the library drawings and the resolver document. `test/modes.ts` gives the tool packages the example project's light and dark modifier and the check that a resolver read back from a file has the same values per context. The round trips run in the tool packages, over their fakes. `test/corpus.ts` gives those packages the corpus screens and the default tokens, so both tools are tested on the same screens.

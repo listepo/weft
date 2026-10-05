@@ -6,6 +6,7 @@ import { handleRequest as handleShared, type PluginReply } from "@weft/design-to
 import type { FigmaApi, FNode } from "./api.ts";
 import { buildScreen } from "./build.ts";
 import { ensureLibrary } from "./library.ts";
+import { readModes } from "./modes.ts";
 import { readLayers } from "./read.ts";
 
 export type PluginOptions = { catalog: Catalog };
@@ -19,11 +20,13 @@ export function handleRequest(
   const { catalog } = options;
   return handleShared(
     {
-      async build(document, display, tokens) {
-        const library = await ensureLibrary(api, catalog, tokens);
-        return buildScreen(api, document, { catalog, library, tokens, display });
+      async build(document, display, tokens, modifier) {
+        const library = await ensureLibrary(api, catalog, tokens, modifier);
+        const root = await buildScreen(api, document, { catalog, library, tokens, display });
+        return { id: root.id, notes: library.notes };
       },
       read: (layer, tokens) => readLayers(api, layer, { catalog, tokens }),
+      modes: (tokens) => readModes(api, tokens),
     },
     selection,
     message,

@@ -100,6 +100,7 @@ Tokens that differ by mode (light and dark, compact and roomy, two brands) live 
 - A modifier with `light` and `dark` contexts is the appearance: generated SwiftUI colours, pages and stylesheets follow the system's light or dark mode.
 - File references are relative to the resolver and stay inside the project. Every problem is `W705` (or `W703` and `W704` for files) with a pointer into the resolver, and the rest still loads.
 - A plain list of token files works as before.
+- In Figma the contexts of a modifier become variable modes, and in Penpot token themes, when the plugin is given that modifier; exporting from the file gives the modes back as a resolver document (`@weft/figma`, `@weft/penpot`).
 - React and SolidJS components read their tokens from CSS custom properties: `weft css-tokens` writes them as `weft-tokens.css`, light values first and the dark ones under `prefers-color-scheme: dark`. Link it once in the app.
 
 ## Choosing the project

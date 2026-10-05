@@ -1,11 +1,20 @@
 // The UI iframe's half of the plugin (see `plugin.ts`): the steps that need the WebAssembly core.
-import type { Token } from "@weft/catalog";
+import type { Token, TokenModifier } from "@weft/catalog";
 import { parse, serialize, type Catalog, type Diagnostic } from "@weft/core";
 import type { Loss } from "@weft/from-aria";
 import { displayTexts, finishRead } from "./finish.ts";
+import { modifierEntries } from "./modes.ts";
 import { MAX_MARKUP, type PluginReply, type PluginRequest } from "./plugin.ts";
 
-export type UiOptions = { catalog: Catalog; tokens: ReadonlyMap<string, Token> };
+export type UiOptions = {
+  catalog: Catalog;
+  tokens: ReadonlyMap<string, Token>;
+  /**
+   * The resolver modifier whose contexts become the file's modes (SPEC §10.3), such as the
+   * project's appearance modifier. Without it the file has one mode, as before.
+   */
+  modifier?: TokenModifier | undefined;
+};
 
 /** The build request for pasted markup, or the reason there is none. */
 export function buildRequest(
@@ -22,6 +31,7 @@ export function buildRequest(
     document,
     display: displayTexts(document),
     tokens: [...options.tokens],
+    ...(options.modifier === undefined ? {} : { modifier: modifierEntries(options.modifier) }),
   };
   return { request, diagnostics };
 }
@@ -35,6 +45,8 @@ export type Exported = {
   markup: string;
   losses: Loss[];
   diagnostics: Diagnostic[];
+  /** The file's token modes as a resolver document (`tokens.resolver.json`), when it has them. */
+  resolver?: string | undefined;
 };
 
 /** Turns the main thread's raw read into `.weft` markup. */
@@ -48,5 +60,8 @@ export function finishExport(
     markup: serialize(read.document),
     losses: read.losses,
     diagnostics: read.diagnostics,
+    ...(reply.resolver === undefined
+      ? {}
+      : { resolver: `${JSON.stringify(reply.resolver, null, 2)}\n` }),
   };
 }

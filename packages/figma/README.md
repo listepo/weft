@@ -12,11 +12,22 @@ The mapping itself is not here. It lives in `@weft/design-tool`, which `@weft/pe
 
 | Step | Function | Result |
 | --- | --- | --- |
-| Library | `ensureLibrary(api, catalog, tokens)` | A `Weft library` page holding one component set per catalog kind, plus a `Weft tokens` variable collection. Enum props and `state` are the variant axes. Each token becomes a variable: dimensions and numbers as `FLOAT` in px, colors as `COLOR`. Calling it again reuses what is already there. |
+| Library | `ensureLibrary(api, catalog, tokens, modifier?)` | A `Weft library` page holding one component set per catalog kind, plus a `Weft tokens` variable collection. Enum props and `state` are the variant axes. Each token becomes a variable: dimensions and numbers as `FLOAT` in px, colors as `COLOR`. Calling it again reuses what is already there. With a resolver `modifier`, its contexts become the collection's modes (see "Token modes" below). |
 | Weft → Figma | `buildScreen(api, document, options)` | Text-only kinds (`content` `none` or `text`) become instances of their variant. Every other kind becomes an auto-layout frame. Each layer carries its Weft source in plugin data: kind, id, props, `on` handlers, the text content of leaves, and the text and label it showed. `options.display` gives the `text` and `label` values in attribute form; `displayTexts(document)` computes it with the core. A `gap` token is bound to its variable. |
+| Modes → resolver | `readModes(api, tokens)` | The collection's modes as a DTCG resolver document, when it has more than one. |
 | Figma → Weft | `readScreen(api, layer, options)` | Returns `{ document, losses, diagnostics }` (see "Reading a frame back" below). It is `readLayers`, which only reads layers, followed by `finishRead`, which reads typed text as values, canonicalizes and validates with the core. |
 | Plugin, main thread | `handleRequest(api, selection, message, options)` | Validates a message from the plugin UI, then builds a parsed screen or reads the selected frame. |
 | Plugin, UI | `buildRequest`, `exportRequest`, `finishExport` | Parse pasted markup into a build request, and turn a read into `.weft` markup. |
+
+## Token modes
+
+A project whose `tokens` is a DTCG resolver (SPEC §10.3) has modifiers, such as `theme` with the contexts `light` and `dark`. When the build request carries one (`UiOptions.modifier`), `ensureLibrary` makes each context a mode of the `Weft tokens` collection:
+
+- The default context takes the collection's default mode, renamed after it; the other contexts get a mode each, found by name on later builds. The modifier's name is stored on the collection (`weft.modifier`).
+- Every variable gets its value in every mode. A context without the token, or with a value of another type, takes the default context's value.
+- Modes need a paid Figma plan: `addMode` throws `in addMode: Limited to N modes only` on a plan without them (Figma's plugin typings 1.140.0). The build then keeps the default mode, skips the context and says so in the reply's `notes`; it never fails over a mode.
+
+On export, `readModes` turns a collection with two or more modes back into a resolver document, returned in the reply's `resolver` field (`finishExport` gives it as `tokens.resolver.json` text). The document has one set `base` with the default mode's values and the modifier with, per context, only the tokens whose value differs. A value equal to what the request's token gives keeps that token as it was (`rem`, hex spelling); a changed one becomes a `px` dimension, a number or an sRGB colour. An alias or a malformed value in a mode is left out, as is a second mode with the same name.
 
 ## Where the code runs
 

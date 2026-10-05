@@ -14,6 +14,7 @@ import type {
   Token,
   TokenCatalog,
   TokenSet,
+  TokenTheme,
   VariantContainer,
   Variants,
 } from "@penpot/plugin-types";
@@ -30,6 +31,7 @@ import type {
   PToken,
   PTokenCatalog,
   PTokenSet,
+  PTokenTheme,
   PVariantComponent,
   PVariantContainer,
   PVariants,
@@ -52,6 +54,7 @@ export type Checks = [
   Assignable<PToken, Token>,
   Assignable<PTokenSet, TokenSet>,
   Assignable<PTokenCatalog, TokenCatalog>,
+  Assignable<PTokenTheme, TokenTheme>,
 ];
 
 test("the narrow API is checked by the type checker", () => {

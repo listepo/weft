@@ -42,6 +42,16 @@ export {
   type TextDrawing,
 } from "./library.ts";
 export {
+  MAX_CONTEXTS,
+  modeToken,
+  modifierEntries,
+  modifierOf,
+  resolverDocument,
+  sameColor,
+  type ModeValue,
+  type ModifierEntries,
+} from "./modes.ts";
+export {
   handleRequest,
   MAX_MARKUP,
   MAX_TOKENS,
@@ -58,6 +68,7 @@ export {
 } from "./plugin-ui.ts";
 export { isRawText, readLayers, type RawText, type ReadOptions, type ReadResult } from "./read.ts";
 export {
+  hexOf,
   matchToken,
   REM_PX,
   tokenColor,

@@ -5,9 +5,10 @@
 // cross a boundary the sandbox does not control, so each one is validated.
 import type { Diagnostic } from "@weft/core";
 import { DocumentSchema, type Document } from "@weft/core";
-import type { Token } from "@weft/catalog";
+import type { Token, TokenModifier } from "@weft/catalog";
 import type { Loss } from "@weft/from-aria";
 import { z } from "zod";
+import { MAX_CONTEXTS, modifierOf } from "./modes.ts";
 import type { ReadResult } from "./read.ts";
 import type { Display } from "./view.ts";
 
@@ -21,12 +22,20 @@ const TokensSchema = z
   .array(z.tuple([z.string(), z.object({ type: z.string(), value: z.unknown() })]))
   .max(MAX_TOKENS);
 
+/** A resolver modifier (SPEC §10.3) whose contexts become the tool's modes. */
+const ModifierSchema = z.object({
+  name: z.string(),
+  default: z.string(),
+  contexts: z.array(z.tuple([z.string(), TokensSchema])).min(1).max(MAX_CONTEXTS),
+});
+
 const RequestSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("build"),
     document: DocumentSchema,
     display: z.record(z.string(), z.string()),
     tokens: TokensSchema,
+    modifier: ModifierSchema.optional(),
   }),
   z.object({ type: z.literal("export"), tokens: TokensSchema }),
 ]);
@@ -35,24 +44,36 @@ const RequestSchema = z.discriminatedUnion("type", [
 export type PluginRequest = z.infer<typeof RequestSchema>;
 
 export type PluginReply =
-  | { type: "built"; id: string }
+  | {
+      type: "built";
+      id: string;
+      /** What the build skipped without failing, such as modes the file's plan does not allow. */
+      notes?: string[] | undefined;
+    }
   | {
       type: "exported";
       /** As read from the layers: unfinished, typed text still raw (`finishExport` finishes it). */
       document: Document;
       losses: Loss[];
       diagnostics: Diagnostic[];
+      /** The file's token modes as a DTCG resolver document, when it has more than one mode. */
+      resolver?: Record<string, unknown> | undefined;
     }
   | { type: "error"; message: string; diagnostics?: Diagnostic[] | undefined };
 
-/** The tool's side of a request: build into the file, or read the one selected layer. */
+/**
+ * The tool's side of a request: build into the file, or read the one selected layer and, when
+ * the tool keeps token modes, the modes as a resolver document (`modes`).
+ */
 export type PluginTool<L> = {
   build(
     document: Document,
     display: Display,
     tokens: ReadonlyMap<string, Token>,
-  ): Promise<{ readonly id: string }>;
+    modifier?: TokenModifier,
+  ): Promise<{ readonly id: string; readonly notes?: readonly string[] }>;
   read(layer: L, tokens: ReadonlyMap<string, Token>): Promise<ReadResult>;
+  modes?(tokens: ReadonlyMap<string, Token>): Promise<Record<string, unknown> | undefined>;
 };
 
 export async function handleRequest<L>(
@@ -66,13 +87,25 @@ export async function handleRequest<L>(
   const tokens = new Map<string, Token>(request.data.tokens);
   try {
     if (request.data.type === "build") {
-      const root = await tool.build(request.data.document, request.data.display, tokens);
-      return { type: "built", id: root.id };
+      const { document, display, modifier } = request.data;
+      const root = await tool.build(
+        document,
+        display,
+        tokens,
+        modifier === undefined ? undefined : modifierOf(modifier),
+      );
+      return root.notes === undefined || root.notes.length === 0
+        ? { type: "built", id: root.id }
+        : { type: "built", id: root.id, notes: [...root.notes] };
     }
     const [layer, ...rest] = selection;
     if (layer === undefined || rest.length > 0)
       return { type: "error", message: "Select exactly one frame to export." };
-    return { type: "exported", ...(await tool.read(layer, tokens)) };
+    const read = await tool.read(layer, tokens);
+    const resolver = await tool.modes?.(tokens);
+    return resolver === undefined
+      ? { type: "exported", ...read }
+      : { type: "exported", ...read, resolver };
   } catch (error) {
     // The file the plugin runs in can hold anything; a failure is reported, never left to hang the UI.
     return { type: "error", message: error instanceof Error ? error.message : String(error) };

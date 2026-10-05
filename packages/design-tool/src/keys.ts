@@ -31,6 +31,8 @@ export const KEY = {
   library: "weft.library",
   /** On a library variable (Figma): the design token path. */
   token: "weft.token",
+  /** On the library's variable collection (Figma): the resolver modifier its modes stand for. */
+  modifier: "weft.modifier",
 } as const;
 
 /**
