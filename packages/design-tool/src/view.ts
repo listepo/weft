@@ -59,6 +59,12 @@ export const CAPTION_KINDS: ReadonlySet<string> = new Set([
   "radio-group",
   "select",
   "tab",
+  "slider",
+  "stepper",
+  "date-picker",
+  "color-picker",
+  "segmented-control",
+  "combobox",
 ]);
 
 /**

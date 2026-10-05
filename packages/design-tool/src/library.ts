@@ -84,6 +84,76 @@ export const textDrawing = (
   fill?: Paint,
 ): TextDrawing => ({ type: "text", name, characters, font, size, fill });
 
+const part = (
+  name: string,
+  width: number,
+  height: number,
+  fill: Paint,
+  radius = 0,
+): RectDrawing => ({
+  type: "rect",
+  name,
+  width,
+  height,
+  radius,
+  fill,
+});
+
+const GREY_PAINT: Paint = { color: GREY };
+
+/** A row of fixed size that holds the parts of a control. */
+const strip = (name: string, width: number, height: number, children: Drawing[]): BoxDrawing => ({
+  type: "box",
+  name,
+  direction: "row",
+  gap: 0,
+  size: { width, height },
+  children,
+});
+
+/** The control a number, date or colour kind draws under its label: the same shape for each value. */
+function control(kind: string): BoxDrawing {
+  const cell = (name: string, width: number, characters: string): BoxDrawing => ({
+    type: "box",
+    name,
+    direction: "row",
+    gap: 0,
+    padX: { px: 12 },
+    padY: { px: 8 },
+    stroke: INK_PAINT,
+    fill: WHITE_PAINT,
+    size: { width, height: 36 },
+    children: [textDrawing("symbol", characters)],
+  });
+  switch (kind) {
+    case "slider":
+      // Track and thumb: a filled part, the round thumb, the rest.
+      return strip("slider", 240, 16, [
+        part("filled", 104, 16, INK_PAINT, 8),
+        { ...part("thumb", 16, 16, WHITE_PAINT, 8), stroke: INK_PAINT },
+        part("rest", 120, 16, GREY_PAINT, 8),
+      ]);
+    case "stepper":
+      return strip("stepper", 160, 36, [
+        cell("down", 40, "-"),
+        cell("value", 80, "1"),
+        cell("up", 40, "+"),
+      ]);
+    case "date-picker":
+      return strip("picker", 240, 36, [
+        cell("date", 200, "yyyy-mm-dd"),
+        cell("calendar", 40, "31"),
+      ]);
+    default:
+      return strip("swatch", 36, 36, [
+        {
+          ...part("color", 36, 36, { color: { r: 0.23, g: 0.51, b: 0.96 } }, 4),
+          stroke: INK_PAINT,
+        },
+      ]);
+  }
+}
+
 /** What the library component of a kind draws for one combination of variant values. */
 export function drawing(
   kind: string,
@@ -141,6 +211,18 @@ export function drawing(
     };
     return { ...box, gap: 4, children: [textDrawing("label", "Label", "regular", 12), input] };
   }
+  if (
+    kind === "slider" ||
+    kind === "stepper" ||
+    kind === "date-picker" ||
+    kind === "color-picker"
+  ) {
+    return {
+      ...box,
+      gap: 4,
+      children: [textDrawing("label", "Label", "regular", 12), control(kind)],
+    };
+  }
   if (kind === "image") {
     const rect: RectDrawing = {
       type: "rect",
@@ -175,7 +257,7 @@ export function drawing(
       : tone === "danger"
         ? { token: "color.action.danger", fallback: INK }
         : INK_PAINT;
-  const padded = kind === "menu-item" || kind === "option";
+  const padded = kind === "menu-item" || kind === "option" || kind === "segment";
   return {
     ...box,
     padX: padded ? { token: "space.sm", px: 8 } : undefined,
