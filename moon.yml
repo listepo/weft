@@ -21,6 +21,25 @@ fileGroups:
     - "/SPEC.md"
     - "/AGENT-SPEC.md"
     - "/crates/*/tests/fixtures/**/*"
+  # The workspace crates both Rust builds are made of (`rust-shared`, plus the crate of each task), and the files they read from outside their own
+  # folders (`include_str!` of the catalog and the default tokens). Compared with `cargo metadata` and
+  # with the includes in the sources by tooling/test/inputs.test.ts, which fails when a dependency or
+  # an include is added without updating them: a missing entry would serve a stale cached build.
+  # The `wasm` task builds weft-wasm with and without its `web` feature.
+  rust-shared:
+    - "/Cargo.toml"
+    - "/Cargo.lock"
+    - "/packages/catalog/catalog.json"
+    - "/packages/catalog/tokens/default.tokens.json"
+    - "/crates/weft-binding/**/*"
+    - "/crates/weft-catalog/**/*"
+    - "/crates/weft-core/**/*"
+    - "/crates/weft-import/**/*"
+    - "/crates/weft-web/**/*"
+  wasm-crate:
+    - "/crates/weft-wasm/**/*"
+  native-crate:
+    - "/crates/weft-node/**/*"
 
 tasks:
   # The Rust core compiled to WebAssembly for @weft/core and @weft/catalog. Generated and
@@ -33,7 +52,7 @@ tasks:
     # Two modules: the core alone (`@weft/core`), and the core with the web importers and
     # generators (`@weft/core/web`), so core-only pages do not download the HTML and JSX parsers.
     script: 'export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(pwd -P)=/weft" && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm-web --out-name weft -- --features web'
-    inputs: ["/crates/**/*", "/Cargo.toml", "/Cargo.lock", "/packages/catalog/catalog.json"]
+    inputs: ["@group(rust-shared)", "@group(wasm-crate)"]
     outputs: ["/packages/core/wasm/**/*", "/packages/core/wasm-web/**/*"]
   # The native addon of the same Rust core (crates/weft-node) for Node and Bun, built for the host
   # into the gitignored packages/core/native/. `@weft/core` picks it at load time and uses the
@@ -42,14 +61,7 @@ tasks:
   # not here. Intel macOS is not supported.
   native:
     command: "napi build --platform --release --no-js --cwd packages/core --manifest-path ../../crates/weft-node/Cargo.toml -p weft-node --output-dir native"
-    inputs:
-      [
-        "/crates/**/*",
-        "/Cargo.toml",
-        "/Cargo.lock",
-        "/packages/catalog/catalog.json",
-        "/packages/core/package.json",
-      ]
+    inputs: ["@group(rust-shared)", "@group(native-crate)", "/packages/core/package.json"]
     outputs: ["/packages/core/native/**/*"]
   # The `weft` CLI, which @weft/visual runs for the targets that exist only in Rust. Its own
   # target directory: rust-test builds `target/debug/weft` with every feature, and running in
