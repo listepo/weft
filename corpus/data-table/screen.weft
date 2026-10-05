@@ -17,7 +17,7 @@
           <text id="user-role" text="{$user.role}"/>
         </cell>
         <cell id="cell-actions">
-          <button id="delete" text="{$user.deleteLabel}" variant="danger" on-press="users.delete"/>
+          <button id="delete" label="{$user.deleteLabel}" variant="danger" on-press="users.delete">Delete</button>
         </cell>
       </row>
     </each>

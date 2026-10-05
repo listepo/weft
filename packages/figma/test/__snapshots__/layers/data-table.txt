@@ -65,5 +65,5 @@ FRAME "screen#users" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
           | weft.style = [[],[],0,[8,8,8,8],8]
           INSTANCE "button#delete" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#db2626","boundVariables":{"color":"var(color/action/danger)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=danger, state=(unset)>"
             | weft.origin = layer(button#delete)
-            | weft.source = {"kind":"button","id":"delete","props":{"text":{"bind":"$user.deleteLabel"},"variant":"danger"},"on":{"press":"users.delete"},"shown":{"text":"{$user.deleteLabel}"}}
-            TEXT "text" chars="{$user.deleteLabel}" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+            | weft.source = {"kind":"button","id":"delete","props":{"label":{"bind":"$user.deleteLabel"},"variant":"danger"},"on":{"press":"users.delete"},"children":["Delete"],"shown":{"text":"Delete"}}
+            TEXT "text" chars="Delete" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]

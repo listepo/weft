@@ -1653,7 +1653,15 @@
               "name": "Delete Ada Lovelace",
               "states": {},
               "props": {},
-              "children": []
+              "children": [
+               {
+                "role": "text",
+                "name": "Delete",
+                "states": {},
+                "props": {},
+                "children": []
+               }
+              ]
              }
             ]
            }
@@ -1697,7 +1705,15 @@
               "name": "Delete Alan Turing",
               "states": {},
               "props": {},
-              "children": []
+              "children": [
+               {
+                "role": "text",
+                "name": "Delete",
+                "states": {},
+                "props": {},
+                "children": []
+               }
+              ]
              }
             ]
            }
@@ -1769,6 +1785,9 @@
         {
          "kind": "row",
          "id": "row-ada-lovelace-ada-example-com-adm",
+         "props": {
+          "label": "Ada Lovelace ada@example.com Admin Delete Ada Lovelace"
+         },
          "children": [
           {
            "kind": "cell",
@@ -1794,12 +1813,18 @@
           {
            "kind": "cell",
            "id": "cell-delete-ada-lovelace",
+           "props": {
+            "label": "Delete Ada Lovelace"
+           },
            "children": [
             {
              "kind": "button",
              "id": "button-delete-ada-lovelace",
+             "props": {
+              "label": "Delete Ada Lovelace"
+             },
              "children": [
-              "Delete Ada Lovelace"
+              "Delete"
              ]
             }
            ]
@@ -1809,6 +1834,9 @@
         {
          "kind": "row",
          "id": "row-alan-turing-alan-example-com-edi",
+         "props": {
+          "label": "Alan Turing alan@example.com Editor Delete Alan Turing"
+         },
          "children": [
           {
            "kind": "cell",
@@ -1834,12 +1862,18 @@
           {
            "kind": "cell",
            "id": "cell-delete-alan-turing",
+           "props": {
+            "label": "Delete Alan Turing"
+           },
            "children": [
             {
              "kind": "button",
              "id": "button-delete-alan-turing",
+             "props": {
+              "label": "Delete Alan Turing"
+             },
              "children": [
-              "Delete Alan Turing"
+              "Delete"
              ]
             }
            ]

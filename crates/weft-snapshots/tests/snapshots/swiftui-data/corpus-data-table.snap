@@ -127,9 +127,10 @@ struct UsersScreen: View {
                             Button(role: .destructive) {
                                 send(.usersDelete, "delete", item: "$.users.\(userIndex)")
                             } label: {
-                                Text(user.deleteLabel)
+                                Text("Delete")
                             }
                             .buttonStyle(.borderedProminent)
+                            .accessibilityLabel(user.deleteLabel)
                             .accessibilityIdentifier("delete")
                         }
                         .accessibilityElement(children: .contain)

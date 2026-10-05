@@ -1125,7 +1125,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"users\" aria-label=\"Users\"><h1 data-weft-id=\"title\">Users</h1><table data-weft-id=\"table\" aria-label=\"Users\"><thead><tr><th data-weft-id=\"col-name\" scope=\"col\" aria-sort=\"ascending\" tabindex=\"0\">Name</th><th data-weft-id=\"col-email\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Email</th><th data-weft-id=\"col-role\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Role</th><th data-weft-id=\"col-actions\" scope=\"col\">Actions</th></tr></thead><tbody><tr data-weft-id=\"row[0]\"><td data-weft-id=\"cell-name[0]\"><div data-weft-id=\"user-name[0]\">Ada Lovelace</div></td><td data-weft-id=\"cell-email[0]\"><div data-weft-id=\"user-email[0]\">ada@example.com</div></td><td data-weft-id=\"cell-role[0]\"><div data-weft-id=\"user-role[0]\">Admin</div></td><td data-weft-id=\"cell-actions[0]\"><button data-weft-id=\"delete[0]\" type=\"button\" data-variant=\"danger\">Delete Ada Lovelace</button></td></tr><tr data-weft-id=\"row[1]\"><td data-weft-id=\"cell-name[1]\"><div data-weft-id=\"user-name[1]\">Alan Turing</div></td><td data-weft-id=\"cell-email[1]\"><div data-weft-id=\"user-email[1]\">alan@example.com</div></td><td data-weft-id=\"cell-role[1]\"><div data-weft-id=\"user-role[1]\">Editor</div></td><td data-weft-id=\"cell-actions[1]\"><button data-weft-id=\"delete[1]\" type=\"button\" data-variant=\"danger\">Delete Alan Turing</button></td></tr></tbody></table></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"users\" aria-label=\"Users\"><h1 data-weft-id=\"title\">Users</h1><table data-weft-id=\"table\" aria-label=\"Users\"><thead><tr><th data-weft-id=\"col-name\" scope=\"col\" aria-sort=\"ascending\" tabindex=\"0\">Name</th><th data-weft-id=\"col-email\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Email</th><th data-weft-id=\"col-role\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Role</th><th data-weft-id=\"col-actions\" scope=\"col\">Actions</th></tr></thead><tbody><tr data-weft-id=\"row[0]\"><td data-weft-id=\"cell-name[0]\"><div data-weft-id=\"user-name[0]\">Ada Lovelace</div></td><td data-weft-id=\"cell-email[0]\"><div data-weft-id=\"user-email[0]\">ada@example.com</div></td><td data-weft-id=\"cell-role[0]\"><div data-weft-id=\"user-role[0]\">Admin</div></td><td data-weft-id=\"cell-actions[0]\"><button data-weft-id=\"delete[0]\" aria-label=\"Delete Ada Lovelace\" type=\"button\" data-variant=\"danger\">Delete</button></td></tr><tr data-weft-id=\"row[1]\"><td data-weft-id=\"cell-name[1]\"><div data-weft-id=\"user-name[1]\">Alan Turing</div></td><td data-weft-id=\"cell-email[1]\"><div data-weft-id=\"user-email[1]\">alan@example.com</div></td><td data-weft-id=\"cell-role[1]\"><div data-weft-id=\"user-role[1]\">Editor</div></td><td data-weft-id=\"cell-actions[1]\"><button data-weft-id=\"delete[1]\" aria-label=\"Delete Alan Turing\" type=\"button\" data-variant=\"danger\">Delete</button></td></tr></tbody></table></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -1241,10 +1241,11 @@
              "kind": "button",
              "id": "delete-0",
              "props": {
+              "label": "Delete Ada Lovelace",
               "variant": "danger"
              },
              "children": [
-              "Delete Ada Lovelace"
+              "Delete"
              ]
             }
            ]
@@ -1302,10 +1303,11 @@
              "kind": "button",
              "id": "delete-1",
              "props": {
+              "label": "Delete Alan Turing",
               "variant": "danger"
              },
              "children": [
-              "Delete Alan Turing"
+              "Delete"
              ]
             }
            ]
@@ -1433,7 +1435,7 @@
   }
  },
  {
-  "html": "<main aria-label=\"Users\">\n  <h1>Users</h1>\n  <table aria-label=\"Users\">\n    <thead>\n      <tr>\n        <th aria-sort=\"ascending\"><button type=\"button\" data-action=\"press:users.sort\">Name</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Email</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Role</button></th>\n        <th>Actions</th>\n      </tr>\n    </thead>\n    <tbody>\n      <template data-each=\"$.users\" data-as=\"user\">\n        <tr>\n          <td>\n            <p data-bind=\"text:$user.name\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.email\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.role\"></p>\n          </td>\n          <td>\n            <button type=\"button\" data-variant=\"danger\" data-bind=\"text:$user.deleteLabel\" data-action=\"press:users.delete\"></button>\n          </td>\n        </tr>\n      </template>\n    </tbody>\n  </table>\n</main>\n",
+  "html": "<main aria-label=\"Users\">\n  <h1>Users</h1>\n  <table aria-label=\"Users\">\n    <thead>\n      <tr>\n        <th aria-sort=\"ascending\"><button type=\"button\" data-action=\"press:users.sort\">Name</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Email</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Role</button></th>\n        <th>Actions</th>\n      </tr>\n    </thead>\n    <tbody>\n      <template data-each=\"$.users\" data-as=\"user\">\n        <tr>\n          <td>\n            <p data-bind=\"text:$user.name\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.email\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.role\"></p>\n          </td>\n          <td>\n            <button type=\"button\" data-variant=\"danger\" data-bind=\"label:$user.deleteLabel\" data-action=\"press:users.delete\">Delete</button>\n          </td>\n        </tr>\n      </template>\n    </tbody>\n  </table>\n</main>\n",
   "result": {
    "document": {
     "weft": "0.1",
