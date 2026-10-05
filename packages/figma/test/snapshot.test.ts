@@ -48,6 +48,7 @@ async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
       gridColumnGap: 0,
       fills: [],
       strokes: [],
+      effects: [],
       strokeWeight: 1,
       cornerRadius: 0,
       bound: {},

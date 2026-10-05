@@ -121,7 +121,7 @@ struct DashboardScreen: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("stats")
-            VStack(alignment: .center, spacing: theme.space.sm) {
+            VStack(spacing: theme.space.sm) {
                 GroupBox {
                     Text("Release 2.4 ships on Friday.")
                 }

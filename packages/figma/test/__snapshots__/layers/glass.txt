@@ -1,0 +1,33 @@
+FRAME "screen#glass" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#glass)
+  | weft.source = {"kind":"screen","id":"glass","props":{"label":"Glass"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  FRAME "stack#card" layoutMode="VERTICAL" itemSpacing=16 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" fills=[{"type":"SOLID","color":"#ffffff","opacity":0.28}] effects=[{"type":"BACKGROUND_BLUR","radius":20,"visible":true}] bound={"itemSpacing":"var(space/md)"}
+    | weft.origin = layer(stack#card)
+    | weft.source = {"kind":"stack","id":"card","props":{"direction":"column","gap":{"token":"space.md"},"material":{"token":"material.glass"}}}
+    | weft.style = [[[1,1,1,0.28,""]],[],0,[0,0,0,0],null,[["BACKGROUND_BLUR",20,true]]]
+    INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+      | weft.origin = layer(heading#title)
+      | weft.source = {"kind":"heading","id":"title","props":{"level":2,"text":{"bind":"$.title"}},"shown":{"text":"{$.title}"}}
+      TEXT "text" chars="{$.title}" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "text#body" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#body)
+      | weft.source = {"kind":"text","id":"body","children":["The panel blurs what is behind it."],"shown":{"text":"The panel blurs what is behind it."}}
+      TEXT "text" chars="The panel blurs what is behind it." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "button#close" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+      | weft.origin = layer(button#close)
+      | weft.source = {"kind":"button","id":"close","props":{"variant":"primary"},"on":{"press":"glass.close"},"children":["Got it"],"shown":{"text":"Got it"}}
+      TEXT "text" chars="Got it" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  FRAME "grid#tiles" layoutMode="GRID" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" gridColumnCount=2 gridRowGap=8 gridColumnGap=8 fills=[{"type":"SOLID","color":"#ffffff","opacity":0.28}] effects=[{"type":"BACKGROUND_BLUR","radius":20,"visible":true}] bound={"gridRowGap":"var(space/sm)","gridColumnGap":"var(space/sm)"}
+    | weft.origin = layer(grid#tiles)
+    | weft.source = {"kind":"grid","id":"tiles","props":{"columns":2,"gap":{"token":"space.sm"},"material":{"token":"material.glass"}}}
+    | weft.style = [[[1,1,1,0.28,""]],[],0,[0,0,0,0],null,[["BACKGROUND_BLUR",20,true]]]
+    INSTANCE "text#tile-light" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#tile-light)
+      | weft.source = {"kind":"text","id":"tile-light","children":["Light"],"shown":{"text":"Light"}}
+      TEXT "text" chars="Light" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "text#tile-dark" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#tile-dark)
+      | weft.source = {"kind":"text","id":"tile-dark","children":["Dark"],"shown":{"text":"Dark"}}
+      TEXT "text" chars="Dark" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

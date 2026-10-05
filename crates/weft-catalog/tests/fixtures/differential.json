@@ -58,6 +58,29 @@
       }
      }
     },
+    "material": {
+     "$type": "color",
+     "glass": {
+      "$value": {
+       "colorSpace": "srgb",
+       "components": [
+        1,
+        1,
+        1
+       ],
+       "alpha": 0.28,
+       "hex": "#ffffff"
+      },
+      "$extensions": {
+       "dev.weft.material": {
+        "blur": {
+         "value": 20,
+         "unit": "px"
+        }
+       }
+      }
+     }
+    },
     "font": {
      "size": {
       "$type": "dimension",
@@ -224,6 +247,28 @@
        "value": {
         "value": 999,
         "unit": "px"
+       }
+      }
+     ],
+     [
+      "material.glass",
+      {
+       "type": "material",
+       "value": {
+        "tint": {
+         "colorSpace": "srgb",
+         "components": [
+          1,
+          1,
+          1
+         ],
+         "alpha": 0.28,
+         "hex": "#ffffff"
+        },
+        "blur": {
+         "value": 20,
+         "unit": "px"
+        }
        }
       }
      ],

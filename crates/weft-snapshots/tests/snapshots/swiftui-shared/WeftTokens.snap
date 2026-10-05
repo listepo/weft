@@ -11,6 +11,7 @@ import SwiftUI
 struct WeftTokens: Sendable {
     var color = ColorTokens()
     var font = FontTokens()
+    var material = MaterialTokens()
     var radius = RadiusTokens()
     var space = SpaceTokens()
 
@@ -42,6 +43,10 @@ struct WeftTokens: Sendable {
         }
     }
 
+    struct MaterialTokens: Sendable {
+        var glass: WeftTokens.Surface = WeftTokens.Surface(tint: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 0.28), blur: 20)
+    }
+
     struct RadiusTokens: Sendable {
         var md: CGFloat = 8
         var pill: CGFloat = 999
@@ -54,5 +59,38 @@ struct WeftTokens: Sendable {
         var sm: CGFloat = 8
         var xl: CGFloat = 32
         var xs: CGFloat = 4
+    }
+
+    /// A material token: apply it with `.modifier(theme.<path>)`.
+    struct Surface: ViewModifier, Sendable {
+        var tint: Color
+        /// The background blur in points.
+        var blur: CGFloat
+
+        func body(content: Content) -> some View {
+            #if compiler(>=6.2)
+            if #available(iOS 26, macOS 26, *) {
+                content.glassEffect(.regular.tint(tint), in: Rectangle())
+            } else {
+                standIn(content)
+            }
+            #else
+            standIn(content)
+            #endif
+        }
+
+        private func standIn(_ content: Content) -> some View {
+            content.background(tint).background(thickness, in: Rectangle())
+        }
+
+        private var thickness: Material {
+            switch blur {
+            case ..<10: .ultraThinMaterial
+            case ..<20: .thinMaterial
+            case ..<30: .regularMaterial
+            case ..<50: .thickMaterial
+            default: .ultraThickMaterial
+            }
+        }
     }
 }

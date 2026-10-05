@@ -55,6 +55,18 @@ function fromHex(hex: RegExpExecArray | null): RGBA | undefined {
   return { r: ((n >> 16) & 255) / 255, g: ((n >> 8) & 255) / 255, b: (n & 255) / 255, a };
 }
 
+/** A material token as a design tool draws it: a tint with its opacity over a background blur. */
+export type Material = { readonly color: RGB; readonly opacity: number; readonly blur: number };
+
+/** The tint and blur radius of a `material` token; undefined for any other token. */
+export function tokenMaterial(token: Token | undefined): Material | undefined {
+  if (token?.type !== "material" || !isRecord(token.value)) return undefined;
+  const tint = tokenColor({ type: "color", value: token.value["tint"] });
+  const blur = tokenPx({ type: "dimension", value: token.value["blur"] });
+  if (tint === undefined || blur === undefined) return undefined;
+  return { color: { r: tint.r, g: tint.g, b: tint.b }, opacity: tint.a, blur };
+}
+
 const channel = (c: number) => Math.round(c * 255);
 
 /** `#rrggbb`, the 8-bit colour both tools show for channels from 0 to 1. */

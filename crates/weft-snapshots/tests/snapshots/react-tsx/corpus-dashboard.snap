@@ -68,7 +68,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
           </div>
         </section>
       </div>
-      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "column" }}>
         <div data-weft-id="release" role="alert" data-tone="info">Release 2.4 ships on Friday.</div>
         <div data-weft-id="backup" role="alert" data-tone="success">
           {!(_text(data?.backupStatus).trim() === "") ? _text(data?.backupStatus) : null}

@@ -113,7 +113,7 @@ check("wrong token type", login.replace("space.md", "color.ink"));
 check("unknown action", login, ["auth.submit", "nav.signup"]);
 EOF
 $ node plugins/shared/scratch/tokens.ts
-18 tokens, 0 problems
+19 tokens, 0 problems
 { type: 'dimension', value: { value: 16, unit: 'px' } }
 as written: 0 diagnostics
 unknown token: 1 diagnostics
@@ -125,6 +125,22 @@ unknown action: 1 diagnostics
 ```
 
 `W306` (unknown token), `W307` (wrong type) and `W308` (unknown action) only appear when you supply the lists. The [renderer](rendering.md) and the plugin scripts use the default tokens unless you pass `--tokens`, so they enforce `W306` against that set.
+
+### Glass: a material token
+
+A frosted-glass surface is a token too. DTCG has no material type, so a material is an ordinary `color` token (the tint; its `alpha` is the opacity) with one vendor extension, which every DTCG tool must keep, holding the background blur:
+
+```json
+"material": {
+  "$type": "color",
+  "glass": {
+    "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.28, "hex": "#ffffff" },
+    "$extensions": { "dev.weft.material": { "blur": { "value": 20, "unit": "px" } } }
+  }
+}
+```
+
+A `stack` or `grid` takes it with `material="{token.material.glass}"`. The file is untrusted: an `alpha` outside 0 to 1, or a blur outside 0 to 100 px, is a problem and the token is left out. A mode (see the project's resolver) may give the dark theme its own tint and blur. The web targets blur what is behind the element with `backdrop-filter` and fall back to the solid colour; SwiftUI uses Liquid Glass on iOS 26 and later and a system material before it; Figma and Penpot get a fill and a background blur. See the corpus screen `corpus/glass` and SPEC §9 and §10.3.
 
 ### Where tokens turn into values
 

@@ -15,7 +15,9 @@
 
 use indexmap::IndexMap;
 use serde_json::Value as Json;
-use weft_catalog::{Appearance, Token, composite_part, font_weight, token_types};
+use weft_catalog::{
+    Appearance, MATERIAL, Token, composite_part, font_weight, material_parts, token_types,
+};
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, Mode, Node, ValidateOptions,
     Value, controls, format_value, has_errors, js_number, serialize, validate_document,
@@ -182,6 +184,9 @@ fn declarations(
     let Some(name) = token_var(path) else {
         return vec![];
     };
+    if token.kind == MATERIAL {
+        return material_declarations(&name, token);
+    }
     if token.kind != "typography" {
         return token_css(token)
             .map(|v| vec![(name, v)])
@@ -195,6 +200,48 @@ fn declarations(
         out.push((format!("{name}-letter-spacing"), spacing));
     }
     out
+}
+
+/// A material token as three custom properties: the tint (the colour with its opacity), the solid
+/// colour a browser without `backdrop-filter` shows instead, and the blur radius. One property
+/// could not hold them, and `base.css` needs each on its own.
+fn material_declarations(name: &str, token: &Token) -> Vec<(String, String)> {
+    let Some((tint, blur)) = material_parts(token) else {
+        return vec![];
+    };
+    let hex = tint.as_str().or_else(|| tint.get("hex")?.as_str());
+    let Some(digits) = hex
+        .and_then(|h| h.strip_prefix('#'))
+        .filter(|d| matches!(d.len(), 6 | 8) && d.chars().all(|c| c.is_ascii_hexdigit()))
+    else {
+        return vec![];
+    };
+    let alpha = match tint.get("alpha").and_then(Json::as_f64) {
+        Some(a) => (a.clamp(0.0, 1.0) * 255.0).round() as u8,
+        None if digits.len() == 8 => u8::from_str_radix(&digits[6..], 16).unwrap_or(255),
+        None => 255,
+    };
+    let rgb = &digits[..6];
+    vec![
+        (format!("{name}-tint"), format!("#{rgb}{alpha:02x}")),
+        (format!("{name}-solid"), format!("#{rgb}")),
+        (format!("{name}-blur"), format!("{}px", js_number(blur))),
+    ]
+}
+
+/// The custom properties an element that takes a material sets, each pointing at the token's own
+/// (`material_declarations`). They carry a leading underscore after the dashes so no token path can
+/// spell them, and the importers read the token back from them.
+pub(crate) const MATERIAL_PROPS: [&str; 3] = ["tint", "solid", "blur"];
+
+pub(crate) fn material_style(path: &str) -> Option<Vec<String>> {
+    let var = token_var(path)?;
+    Some(
+        MATERIAL_PROPS
+            .iter()
+            .map(|p| format!("--_weft-material-{p}: var({var}-{p})"))
+            .collect(),
+    )
 }
 
 /// The CSS generic families (CSS Fonts 4) and the one vendor keyword browsers still read; any
@@ -919,7 +966,11 @@ impl Writer<'_> {
     }
 
     fn layout(&mut self, n: &Node, ctx: &Ctx, depth: usize) {
-        let mut b = self.base(n, &["direction", "gap", "align", "wrap", "columns"], false);
+        let mut b = self.base(
+            n,
+            &["direction", "gap", "align", "wrap", "columns", "material"],
+            false,
+        );
         let mut style = Vec::new();
         let class = if n.kind == "grid" {
             if let Some(Value::Number(c)) = n.props.get("columns") {
@@ -939,6 +990,12 @@ impl Writer<'_> {
             && let Some(var) = token_var(t)
         {
             style.push(format!("gap: var({var})"));
+        }
+        if let Some(Value::Token(t)) = n.props.get("material")
+            && let Some(decls) = material_style(t)
+        {
+            style.extend(decls);
+            b.attrs.flag("data-weft-material");
         }
         if let Some(align) = literal_text(n.props.get("align")) {
             b.attrs.set("data-align", align);
@@ -1566,5 +1623,37 @@ mod tests {
             tokens_css(&dark, Some(appearance)),
             ":root {\n  color-scheme: light dark;\n  --weft-ink: #000000;\n  --weft-gap: 8px;\n}\n@media (prefers-color-scheme: dark) {\n  :root {\n    --weft-ink: #ffffff;\n  }\n}\n"
         );
+    }
+
+    #[test]
+    fn a_material_is_three_properties_and_the_dark_one_may_differ() {
+        let glass = |alpha: f64, blur: u32| {
+            serde_json::json!({
+                "tint": {"colorSpace": "srgb", "hex": "#102030", "components": [0.06, 0.12, 0.19], "alpha": alpha},
+                "blur": {"value": blur, "unit": "px"}
+            })
+        };
+        let light = set(&[("m.glass", "material", glass(0.5, 20))]);
+        let dark = set(&[("m.glass", "material", glass(0.25, 8))]);
+        let appearance = Appearance {
+            modifier: "theme",
+            light_context: "light",
+            dark_context: "dark",
+            light: &light,
+            dark: &dark,
+        };
+        assert_eq!(
+            tokens_css(&light, Some(appearance)),
+            ":root {\n  color-scheme: light dark;\n  --weft-m-glass-tint: #10203080;\n  --weft-m-glass-solid: #102030;\n  --weft-m-glass-blur: 20px;\n}\n@media (prefers-color-scheme: dark) {\n  :root {\n    --weft-m-glass-tint: #10203040;\n    --weft-m-glass-blur: 8px;\n  }\n}\n"
+        );
+    }
+
+    #[test]
+    fn a_material_whose_tint_is_not_a_hex_colour_writes_nothing() {
+        let token = Token {
+            kind: MATERIAL.into(),
+            value: serde_json::json!({"tint": "red", "blur": {"value": 4, "unit": "px"}}),
+        };
+        assert!(material_declarations("--weft-m", &token).is_empty());
     }
 }

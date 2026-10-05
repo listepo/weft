@@ -1993,6 +1993,97 @@
   "sems": [
    {
     "role": "main",
+    "name": "Glass",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "heading",
+      "name": "Frosted glass",
+      "states": {
+       "level": 2
+      },
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "text",
+      "name": "The panel blurs what is behind it.",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "button",
+      "name": "Got it",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "text",
+      "name": "Light Dark",
+      "states": {},
+      "props": {},
+      "children": []
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-glass",
+     "props": {
+      "label": "Glass"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "heading-frosted-glass",
+       "props": {
+        "level": 2
+       },
+       "children": [
+        "Frosted glass"
+       ]
+      },
+      {
+       "kind": "text",
+       "id": "text-the-panel-blurs-what-is-behind-i",
+       "children": [
+        "The panel blurs what is behind it."
+       ]
+      },
+      {
+       "kind": "button",
+       "id": "button-got-it",
+       "children": [
+        "Got it"
+       ]
+      },
+      {
+       "kind": "text",
+       "id": "text-light-dark",
+       "children": [
+        "Light Dark"
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-glass"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
     "name": "Inbox",
     "states": {},
     "props": {},

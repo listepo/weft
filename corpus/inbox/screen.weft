@@ -13,7 +13,10 @@
     <tab id="tab-drafts" label="{$.labels.drafts}">
       <list id="drafts" state="empty">
         <slot name="empty">
-          <text id="no-drafts">No drafts.</text>
+          <stack id="drafts-empty" align="center" direction="column" gap="{token.space.sm}">
+            <text id="no-drafts">No drafts.</text>
+            <text id="no-drafts-hint">Messages you start appear here.</text>
+          </stack>
         </slot>
       </list>
     </tab>

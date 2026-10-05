@@ -93,7 +93,10 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
             <>
               <ul data-weft-id="drafts" data-state="empty">
                 <li role="none" data-weft-slot="empty">
-                  <div data-weft-id="no-drafts">No drafts.</div>
+                  <div data-weft-id="drafts-empty" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <div data-weft-id="no-drafts">No drafts.</div>
+                    <div data-weft-id="no-drafts-hint">Messages you start appear here.</div>
+                  </div>
                 </li>
               </ul>
             </>

@@ -10,10 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T51 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
-| T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
-| T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -31,7 +28,6 @@ Execution plan:
 6. Full edit and read runs on the three models; `run.ts tokens` again so the report has Anthropic token counts.
 7. `bench/EVALUATION.md`: results against the done criteria (Weft first-try validity at least 95%, after one repair at least 99%), comparison with the baselines, failure analysis, continue/stop recommendation.
 8. Verify with `pnpm run ci`.
-
 
 ### T28. Binding readback against inverted conditions
 
@@ -155,14 +151,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T51. Glass material tokens
-A frosted-glass surface is expressed as a token, as the creator chose: a `material` token (background blur, tint colour and opacity) that an element takes through its style, like other tokens.
-- **Research:** the DTCG 2025.10 format has no material type, so the plan cites the format, says how the token is written (a Weft extension type or a composite of DTCG types), and keeps standard tools able to read the file.
-- **Web targets:** `backdrop-filter` with a solid fallback where it is unsupported.
-- **SwiftUI:** `glassEffect` on iOS 26 and later (or the current Liquid Glass API, cited), `Material` before it.
-- **Figma and Penpot:** a background blur with the tint fill, read back on export.
-- **Modes:** dark and light modes (T45) may give the material different values.
-Add a corpus screen with glass surfaces over an image or gradient background, so the effect is visible in screenshots. Cover it like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Done when the full check exits 0 and new baselines are reviewed.
 ### T52. 3D transforms and models
 Two parts, as the creator chose.
 1. **3D transforms on any element:** rotation on each axis, perspective and depth, e.g. a flipped or tilted card.
@@ -178,28 +166,3 @@ Two parts, as the creator chose.
    - Add a small model asset under a compatible licence to the corpus.
 
 Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
-
-### T58. Natural `align="center"` coverage in the corpus
-
-T55 made `center` the default for a row, so T50 moved the corpus's explicit `center` onto the dashboard's `notices` column. The alerts there now sit centred at different widths, which looks odd.
-
-- Restore the `notices` column to its earlier layout, without `align`.
-- Cover `center` where centring is natural: a column in a coverage-only screen (dashboard, account, orders, inbox, leaderboard, booking or appearance), for example an empty-state message.
-- Leave the twelve benchmark screens alone: they have HTML, JSX and A2UI versions and tasks in `corpus/tasks.json`.
-
-Done when:
-- the coverage test still sees `center`;
-- the affected snapshots, screenshots and Figma/Penpot layer trees are retaken and reviewed;
-- the full check exits 0.
-
-### T59. Deterministic home indicator in SwiftUI screenshots
-
-After T50 merged, one full check failed 21 SwiftUI screenshots by about 5,900 pixels each. On every screen the only difference was the iPhone home indicator at the bottom, which showed in that run but not in the baselines. A rerun of `visual:test` alone passed 277 of 277. The suite hides the status bar (`.statusBarHidden(true)` in the host app) but leaves the home indicator to the simulator's state.
-
-- Make it deterministic. Prefer hiding it in the host app with the documented SwiftUI API (`persistentSystemOverlays(.hidden)` or the current equivalent, cited), if a screenshot then never shows it. Otherwise exclude the home-indicator strip from the comparison, using the device's safe-area inset rather than a hard-coded size.
-- Keep both simulator modes (T46) working.
-
-Done when:
-- the suite passes repeatedly (at least three consecutive runs);
-- baselines are retaken only if the visible area changes, and are then reviewed;
-- the full check exits 0.

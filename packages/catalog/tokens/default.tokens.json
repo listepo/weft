@@ -14,6 +14,13 @@
     "md": { "$value": { "value": 8, "unit": "px" } },
     "pill": { "$value": { "value": 999, "unit": "px" } }
   },
+  "material": {
+    "$type": "color",
+    "glass": {
+      "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.28, "hex": "#ffffff" },
+      "$extensions": { "dev.weft.material": { "blur": { "value": 20, "unit": "px" } } }
+    }
+  },
   "font": {
     "size": {
       "$type": "dimension",

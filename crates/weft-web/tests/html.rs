@@ -101,6 +101,7 @@ const HTML_CONVENTION_GAPS: &[(&str, &str)] = &[
         "explicit type=\"date\" is dropped; a segment's bound text also comes back as a bound label",
     ),
     ("dashboard", "an explicit direction=\"column\" is dropped"),
+    ("glass", "an explicit direction=\"column\" is dropped"),
     (
         "inbox",
         "the tabs selected binding and on-change are lost; a bound tab label comes back empty; \

@@ -7,13 +7,15 @@
 //! `adaptive(light:dark:)`, which follows the system appearance; a typography token with letter
 //! spacing or line height is the struct's `Typography` view modifier rather than a `Font`. Both
 //! are nested in the struct, so neither the shared tokens nor any number of screen themes clash
-//! in one module, and token sets without them print exactly as before.
+//! in one module, and token sets without them print exactly as before. A `material` token is the
+//! struct's `Surface` view modifier (Liquid Glass from iOS 26 and macOS 26, a system material
+//! before).
 
 use std::collections::BTreeMap;
 
 use indexmap::IndexMap;
 use serde_json::Value as Json;
-use weft_catalog::{Appearance, Token, composite_part, font_weight};
+use weft_catalog::{Appearance, MATERIAL, Token, composite_part, font_weight, material_parts};
 
 use crate::Unsupported;
 use crate::swift::{self, number_literal, string_literal};
@@ -38,6 +40,7 @@ struct Leaf {
 struct Needs {
     adaptive: bool,
     typography: bool,
+    surface: bool,
 }
 
 /// The adaptive colour helper, nested in the root struct. UIKit and AppKit resolve a dynamic
@@ -87,6 +90,43 @@ struct Typography: ViewModifier, Sendable {
         let font = family.flatMap { NSFont(name: $0, size: size) } ?? .systemFont(ofSize: size)
         return font.ascender - font.descender + font.leading
         #endif
+    }
+}"#;
+
+/// The material modifier, nested in the root struct. Liquid Glass (iOS 26 and macOS 26) has no
+/// blur radius to set, so the radius only picks the thickness of the system material that stands
+/// in on earlier systems, which has a fixed set; the tint is applied in both. The glass branch is
+/// compiled only by a toolchain whose SDK has it (Swift 6.2 shipped with Xcode 26).
+const SURFACE: &str = r#"/// A material token: apply it with `.modifier(theme.<path>)`.
+struct Surface: ViewModifier, Sendable {
+    var tint: Color
+    /// The background blur in points.
+    var blur: CGFloat
+
+    func body(content: Content) -> some View {
+        #if compiler(>=6.2)
+        if #available(iOS 26, macOS 26, *) {
+            content.glassEffect(.regular.tint(tint), in: Rectangle())
+        } else {
+            standIn(content)
+        }
+        #else
+        standIn(content)
+        #endif
+    }
+
+    private func standIn(_ content: Content) -> some View {
+        content.background(tint).background(thickness, in: Rectangle())
+    }
+
+    private var thickness: Material {
+        switch blur {
+        case ..<10: .ultraThinMaterial
+        case ..<20: .thinMaterial
+        case ..<30: .regularMaterial
+        case ..<50: .thickMaterial
+        default: .ultraThickMaterial
+        }
     }
 }"#;
 
@@ -166,6 +206,7 @@ pub fn tokens_struct<'p>(
             continue;
         };
         needs.typography |= leaf.ty.ends_with(".Typography");
+        needs.surface |= leaf.ty.ends_with(".Surface");
         if let Some(value) = appearance.and_then(|a| adaptive(path, a, name)) {
             leaf.value = value;
             needs.adaptive = true;
@@ -180,15 +221,17 @@ pub fn tokens_struct<'p>(
         }
         group.leaves.insert((*last).to_owned(), leaf);
     }
-    // A member named like the nested type would clash with it.
-    if needs.typography
-        && (root.leaves.remove("Typography").is_some()
-            || root.groups.remove("Typography").is_some())
-    {
-        problems.push(Unsupported::new(
-            "{token.Typography}",
-            "`Typography` is the Swift name of the typography type of the tokens",
-        ));
+    // A member named like a nested type would clash with it.
+    for (needed, name, what) in [
+        (needs.typography, "Typography", "typography"),
+        (needs.surface, "Surface", "material"),
+    ] {
+        if needed && (root.leaves.remove(name).is_some() || root.groups.remove(name).is_some()) {
+            problems.push(Unsupported::new(
+                format!("{{token.{name}}}"),
+                format!("`{name}` is the Swift name of the {what} type of the tokens"),
+            ));
+        }
     }
     let mut lines = vec![];
     print_group(name, &root, &mut lines, "", "", problems);
@@ -199,6 +242,9 @@ pub fn tokens_struct<'p>(
     }
     if needs.typography {
         helpers.push(TYPOGRAPHY);
+    }
+    if needs.surface {
+        helpers.push(SURFACE);
     }
     if !helpers.is_empty() {
         let close = lines.pop().unwrap_or_default();
@@ -220,14 +266,32 @@ pub fn tokens_struct<'p>(
 /// The adaptive colour for `path` when its light and dark values differ.
 fn adaptive(path: &str, appearance: Appearance<'_>, root: &str) -> Option<String> {
     let value = |tokens: &IndexMap<String, Token>| {
-        tokens
-            .get(path)
-            .filter(|t| t.kind == "color")
-            .and_then(|t| color(&t.value))
+        let token = tokens.get(path)?;
+        match token.kind.as_str() {
+            "color" => color(&token.value),
+            MATERIAL => material_parts(token).and_then(|(tint, _)| color(tint)),
+            _ => None,
+        }
     };
     let light = value(appearance.light)?;
     let dark = value(appearance.dark)?;
-    (light != dark).then(|| format!("{root}.adaptive(light: {light}, dark: {dark})"))
+    if light == dark {
+        return None;
+    }
+    let adaptive = format!("{root}.adaptive(light: {light}, dark: {dark})");
+    match appearance.light.get(path).and_then(material_parts) {
+        // The blur is one value: a stored property cannot change with the appearance, and the
+        // system material that takes it has a fixed set of thicknesses anyway.
+        Some((_, blur)) => Some(surface(root, &adaptive, blur)),
+        None => Some(adaptive),
+    }
+}
+
+fn surface(root: &str, tint: &str, blur: f64) -> String {
+    format!(
+        "{root}.Surface(tint: {tint}, blur: {})",
+        number_literal(blur)
+    )
 }
 
 fn print_group(
@@ -339,6 +403,9 @@ fn swift_value(
         "duration" => seconds(v).map(|s| leaf("Double", number_literal(s))),
         "cubicBezier" => bezier(v).map(|value| leaf("UnitCurve", value)),
         "typography" => typography(v, tokens, root),
+        MATERIAL => material_parts(token).and_then(|(tint, blur)| {
+            color(tint).map(|tint| leaf(&format!("{root}.Surface"), surface(root, &tint, blur)))
+        }),
         other => return Err(format!("SwiftUI has no form for `{other}` tokens")),
     };
     leaf.ok_or_else(|| {
@@ -734,5 +801,34 @@ mod tests {
     #[test]
     fn root_tokens_get_a_swift_name() {
         assert_eq!(token_expr("color.blue.$root"), "theme.color.blue._root");
+    }
+
+    #[test]
+    fn a_material_is_a_surface_and_follows_the_appearance_by_its_tint() {
+        let glass = |hex: &str, blur: u32| Token {
+            kind: MATERIAL.to_owned(),
+            value: json!({ "tint": hex, "blur": { "value": blur, "unit": "px" } }),
+        };
+        let one = glass("#ffffff80", 20);
+        assert_eq!(
+            swift_value(&one, &IndexMap::new(), "T").map(|l| l.value),
+            Ok("T.Surface(tint: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 0.502), blur: 20)"
+                .to_owned())
+        );
+        let light: IndexMap<String, Token> = [("m".to_owned(), glass("#ffffff80", 20))].into();
+        let dark: IndexMap<String, Token> = [("m".to_owned(), glass("#00000080", 8))].into();
+        let appearance = Appearance {
+            modifier: "theme",
+            light_context: "light",
+            dark_context: "dark",
+            light: &light,
+            dark: &dark,
+        };
+        let got = adaptive("m", appearance, "T").unwrap();
+        assert!(
+            got.starts_with("T.Surface(tint: T.adaptive(light: "),
+            "{got}"
+        );
+        assert!(got.ends_with("blur: 20)"), "{got}");
     }
 }

@@ -9,6 +9,7 @@ import type {
   FComponent,
   FComponentProperties,
   FComponentSet,
+  FEffect,
   FFont,
   FFrame,
   FigmaApi,
@@ -179,6 +180,7 @@ abstract class FakeLayout extends FakeBase {
   gridColumnGap = 0;
   fills: readonly FPaint[] | FMixed = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }];
   strokes: readonly FPaint[] = [];
+  effects: readonly FEffect[] = [];
   strokeWeight: number | FMixed = 1;
   cornerRadius: number | FMixed = 0;
   bound: { [field in FBindable]?: FAlias } = {};
@@ -234,6 +236,7 @@ abstract class FakeLayout extends FakeBase {
       "gridColumnGap",
       "fills",
       "strokes",
+      "effects",
       "strokeWeight",
       "cornerRadius",
     ] as const)

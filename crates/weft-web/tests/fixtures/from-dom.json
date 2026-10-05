@@ -817,7 +817,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"dashboard\" data-state=\"ready\" aria-label=\"Team dashboard\"><div data-weft-id=\"header\" style=\"gap:var(--weft-space-xl);display:flex;flex-direction:row;align-items:center;flex-wrap:wrap\"><h1 data-weft-id=\"title\">Platform</h1><div data-weft-id=\"updated\" data-tone=\"muted\">Updated 5 minutes ago</div></div><div data-weft-id=\"stats\" style=\"gap:var(--weft-space-lg);display:grid;grid-template-columns:repeat(3, minmax(0, 1fr))\"><section data-weft-id=\"velocity\" aria-label=\"Velocity\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"velocity-title\">Velocity</h2></div><div data-weft-id=\"velocity-value\" data-tone=\"success\">42</div></section><section data-weft-id=\"bugs\" aria-label=\"Open bugs\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"bugs-title\">Open bugs</h2></div><div data-weft-id=\"bugs-value\" data-tone=\"warning\">7</div></section><section data-weft-id=\"incidents\" aria-label=\"Incidents\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"incidents-title\">Incidents</h2></div><div data-weft-id=\"incidents-value\" data-tone=\"danger\">1</div></section></div><div data-weft-id=\"notices\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:column;align-items:center\"><div data-weft-id=\"release\" role=\"alert\" data-tone=\"info\">Release 2.4 ships on Friday.</div><div data-weft-id=\"backup\" role=\"alert\" data-tone=\"success\">Last backup finished at 03:00.</div><div data-weft-id=\"quota\" role=\"alert\" data-tone=\"warning\"><div data-weft-id=\"quota-text\">Storage is 90% full.</div><a data-weft-id=\"quota-link\" href=\"https://example.com/storage\" style=\"display:inline-block\">Manage storage</a></div></div><div data-weft-id=\"footer\" style=\"gap:var(--weft-space-xs);display:flex;flex-direction:column;align-items:flex-end\"><div data-weft-id=\"owner\" data-tone=\"default\">Owned by the platform team</div><div data-weft-id=\"footer-links\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:flex-start\"><a data-weft-id=\"docs\" href=\"/docs\" style=\"display:inline-block\">Docs</a><a data-weft-id=\"status\" href=\"https://status.example.com\" style=\"display:inline-block\">Status page</a></div></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"dashboard\" data-state=\"ready\" aria-label=\"Team dashboard\"><div data-weft-id=\"header\" style=\"gap:var(--weft-space-xl);display:flex;flex-direction:row;align-items:center;flex-wrap:wrap\"><h1 data-weft-id=\"title\">Platform</h1><div data-weft-id=\"updated\" data-tone=\"muted\">Updated 5 minutes ago</div></div><div data-weft-id=\"stats\" style=\"gap:var(--weft-space-lg);display:grid;grid-template-columns:repeat(3, minmax(0, 1fr))\"><section data-weft-id=\"velocity\" aria-label=\"Velocity\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"velocity-title\">Velocity</h2></div><div data-weft-id=\"velocity-value\" data-tone=\"success\">42</div></section><section data-weft-id=\"bugs\" aria-label=\"Open bugs\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"bugs-title\">Open bugs</h2></div><div data-weft-id=\"bugs-value\" data-tone=\"warning\">7</div></section><section data-weft-id=\"incidents\" aria-label=\"Incidents\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"incidents-title\">Incidents</h2></div><div data-weft-id=\"incidents-value\" data-tone=\"danger\">1</div></section></div><div data-weft-id=\"notices\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:column\"><div data-weft-id=\"release\" role=\"alert\" data-tone=\"info\">Release 2.4 ships on Friday.</div><div data-weft-id=\"backup\" role=\"alert\" data-tone=\"success\">Last backup finished at 03:00.</div><div data-weft-id=\"quota\" role=\"alert\" data-tone=\"warning\"><div data-weft-id=\"quota-text\">Storage is 90% full.</div><a data-weft-id=\"quota-link\" href=\"https://example.com/storage\" style=\"display:inline-block\">Manage storage</a></div></div><div data-weft-id=\"footer\" style=\"gap:var(--weft-space-xs);display:flex;flex-direction:column;align-items:flex-end\"><div data-weft-id=\"owner\" data-tone=\"default\">Owned by the platform team</div><div data-weft-id=\"footer-links\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:flex-start\"><a data-weft-id=\"docs\" href=\"/docs\" style=\"display:inline-block\">Docs</a><a data-weft-id=\"status\" href=\"https://status.example.com\" style=\"display:inline-block\">Status page</a></div></div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -970,9 +970,6 @@
       {
        "kind": "stack",
        "id": "notices",
-       "props": {
-        "align": "center"
-       },
        "children": [
         {
          "kind": "alert",
@@ -1713,7 +1710,123 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"inbox\" data-state=\"loading\" aria-busy=\"true\" aria-label=\"Inbox\"><div data-weft-tabs=\"\"><div data-weft-id=\"folders\" role=\"tablist\"><button data-weft-id=\"tab-inbox\" type=\"button\" role=\"tab\" id=\"weft-tab-inbox-tab\" aria-selected=\"true\" aria-controls=\"weft-tab-inbox-panel\" tabindex=\"0\">Inbox</button><button data-weft-id=\"tab-drafts\" type=\"button\" role=\"tab\" id=\"weft-tab-drafts-tab\" aria-selected=\"false\" aria-controls=\"weft-tab-drafts-panel\" tabindex=\"-1\">Drafts</button><button data-weft-id=\"tab-sent\" type=\"button\" role=\"tab\" id=\"weft-tab-sent-tab\" aria-selected=\"false\" aria-controls=\"weft-tab-sent-panel\" tabindex=\"-1\">Sent</button></div><div role=\"tabpanel\" id=\"weft-tab-inbox-panel\" aria-labelledby=\"weft-tab-inbox-tab\" tabindex=\"0\"><ol data-weft-id=\"messages\" data-state=\"ready\"><li data-weft-id=\"message[0]\" tabindex=\"0\">Quarterly report</li><li data-weft-id=\"message[1]\" tabindex=\"0\">Lunch on Thursday?</li></ol></div><div role=\"tabpanel\" id=\"weft-tab-drafts-panel\" aria-labelledby=\"weft-tab-drafts-tab\" hidden=\"\" tabindex=\"0\"><ul data-weft-id=\"drafts\" data-state=\"empty\"><li role=\"none\" data-weft-slot=\"empty\"><div data-weft-id=\"no-drafts\">No drafts.</div></li></ul></div><div role=\"tabpanel\" id=\"weft-tab-sent-panel\" aria-labelledby=\"weft-tab-sent-tab\" hidden=\"\" tabindex=\"0\"><ul data-weft-id=\"sent\" data-state=\"loading\" aria-busy=\"true\"><li data-weft-id=\"sent-loading\">Loading…</li></ul></div></div><div data-weft-id=\"message-actions\" aria-label=\"Message actions\" role=\"menu\"><button data-weft-id=\"archive\" type=\"button\" role=\"menuitem\">Archive</button><button data-weft-id=\"delete\" type=\"button\" role=\"menuitem\" disabled=\"\">Delete</button></div><dialog data-weft-id=\"compose\" aria-label=\"New message\" open=\"\"><form data-weft-id=\"compose-form\" data-state=\"submitting\" aria-busy=\"true\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">To</span><input data-weft-id=\"to\" aria-label=\"To\" type=\"email\" value=\"grace@example.com\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Message</span><textarea data-weft-id=\"body\" aria-label=\"Message\">See you there.</textarea></label></div></form><div data-weft-slot=\"actions\"><button data-weft-id=\"send\" type=\"button\" data-variant=\"primary\">Send</button></div></dialog></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"glass\" aria-label=\"Glass\"><div data-weft-id=\"card\" style=\"gap:var(--weft-space-md);--_weft-material-tint:var(--weft-material-glass-tint);--_weft-material-solid:var(--weft-material-glass-solid);--_weft-material-blur:var(--weft-material-glass-blur);display:flex;flex-direction:column\" data-weft-material=\"\"><h2 data-weft-id=\"title\">Frosted glass</h2><div data-weft-id=\"body\">The panel blurs what is behind it.</div><button data-weft-id=\"close\" type=\"button\" data-variant=\"primary\">Got it</button></div><div data-weft-id=\"tiles\" style=\"gap:var(--weft-space-sm);--_weft-material-tint:var(--weft-material-glass-tint);--_weft-material-solid:var(--weft-material-glass-solid);--_weft-material-blur:var(--weft-material-glass-blur);display:grid;grid-template-columns:repeat(2, minmax(0, 1fr))\" data-weft-material=\"\"><div data-weft-id=\"tile-light\">Light</div><div data-weft-id=\"tile-dark\">Dark</div></div></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "glass",
+     "props": {
+      "label": "Glass"
+     },
+     "children": [
+      {
+       "kind": "stack",
+       "id": "card",
+       "children": [
+        {
+         "kind": "heading",
+         "id": "title",
+         "props": {
+          "level": 2
+         },
+         "children": [
+          "Frosted glass"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "body",
+         "children": [
+          "The panel blurs what is behind it."
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "close",
+         "props": {
+          "variant": "primary"
+         },
+         "children": [
+          "Got it"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "grid",
+       "id": "tiles",
+       "props": {
+        "columns": 2
+       },
+       "children": [
+        {
+         "kind": "text",
+         "id": "tile-light",
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "tile-dark",
+         "children": [
+          "Dark"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#glass",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#glass",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#glass",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#glass",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#glass/stack#card",
+     "note": "material var(--weft-material-glass-tint) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#glass/stack#card",
+     "note": "gap var(--weft-space-md) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#glass/grid#tiles",
+     "note": "material var(--weft-material-glass-tint) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#glass/grid#tiles",
+     "note": "gap var(--weft-space-sm) cannot be mapped back to a design token"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"inbox\" data-state=\"loading\" aria-busy=\"true\" aria-label=\"Inbox\"><div data-weft-tabs=\"\"><div data-weft-id=\"folders\" role=\"tablist\"><button data-weft-id=\"tab-inbox\" type=\"button\" role=\"tab\" id=\"weft-tab-inbox-tab\" aria-selected=\"true\" aria-controls=\"weft-tab-inbox-panel\" tabindex=\"0\">Inbox</button><button data-weft-id=\"tab-drafts\" type=\"button\" role=\"tab\" id=\"weft-tab-drafts-tab\" aria-selected=\"false\" aria-controls=\"weft-tab-drafts-panel\" tabindex=\"-1\">Drafts</button><button data-weft-id=\"tab-sent\" type=\"button\" role=\"tab\" id=\"weft-tab-sent-tab\" aria-selected=\"false\" aria-controls=\"weft-tab-sent-panel\" tabindex=\"-1\">Sent</button></div><div role=\"tabpanel\" id=\"weft-tab-inbox-panel\" aria-labelledby=\"weft-tab-inbox-tab\" tabindex=\"0\"><ol data-weft-id=\"messages\" data-state=\"ready\"><li data-weft-id=\"message[0]\" tabindex=\"0\">Quarterly report</li><li data-weft-id=\"message[1]\" tabindex=\"0\">Lunch on Thursday?</li></ol></div><div role=\"tabpanel\" id=\"weft-tab-drafts-panel\" aria-labelledby=\"weft-tab-drafts-tab\" hidden=\"\" tabindex=\"0\"><ul data-weft-id=\"drafts\" data-state=\"empty\"><li role=\"none\" data-weft-slot=\"empty\"><div data-weft-id=\"drafts-empty\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:column;align-items:center\"><div data-weft-id=\"no-drafts\">No drafts.</div><div data-weft-id=\"no-drafts-hint\">Messages you start appear here.</div></div></li></ul></div><div role=\"tabpanel\" id=\"weft-tab-sent-panel\" aria-labelledby=\"weft-tab-sent-tab\" hidden=\"\" tabindex=\"0\"><ul data-weft-id=\"sent\" data-state=\"loading\" aria-busy=\"true\"><li data-weft-id=\"sent-loading\">Loading…</li></ul></div></div><div data-weft-id=\"message-actions\" aria-label=\"Message actions\" role=\"menu\"><button data-weft-id=\"archive\" type=\"button\" role=\"menuitem\">Archive</button><button data-weft-id=\"delete\" type=\"button\" role=\"menuitem\" disabled=\"\">Delete</button></div><dialog data-weft-id=\"compose\" aria-label=\"New message\" open=\"\"><form data-weft-id=\"compose-form\" data-state=\"submitting\" aria-busy=\"true\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">To</span><input data-weft-id=\"to\" aria-label=\"To\" type=\"email\" value=\"grace@example.com\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Message</span><textarea data-weft-id=\"body\" aria-label=\"Message\">See you there.</textarea></label></div></form><div data-weft-slot=\"actions\"><button data-weft-id=\"send\" type=\"button\" data-variant=\"primary\">Send</button></div></dialog></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -1781,10 +1894,26 @@
            "slots": {
             "empty": [
              {
-              "kind": "text",
-              "id": "no-drafts",
+              "kind": "stack",
+              "id": "drafts-empty",
+              "props": {
+               "align": "center"
+              },
               "children": [
-               "No drafts."
+               {
+                "kind": "text",
+                "id": "no-drafts",
+                "children": [
+                 "No drafts."
+                ]
+               },
+               {
+                "kind": "text",
+                "id": "no-drafts-hint",
+                "children": [
+                 "Messages you start appear here."
+                ]
+               }
               ]
              }
             ]
@@ -1929,6 +2058,11 @@
      "kind": "repetition",
      "path": "/screen#inbox/tabs#folders/tab#tab-inbox/list#messages/item#message-1",
      "note": "instance message[1] of a repeated element is imported as the static element message-1"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#inbox/tabs#folders/tab#tab-drafts/list#drafts/slot[empty]/stack#drafts-empty",
+     "note": "gap var(--weft-space-sm) cannot be mapped back to a design token"
     }
    ],
    "diagnostics": []

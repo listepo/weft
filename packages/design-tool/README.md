@@ -39,7 +39,7 @@ A tool wraps its nodes in `Layer`, and `readLayers(layer, options)` reads them b
 | --- | --- |
 | `prepare()` | Runs before anything is drawn (fonts, where the screen goes). |
 | `instance(main, values)` | A copy of a component; `values` when the exact variant is missing and the copy must be switched. |
-| `frame(view, fill)` | A frame with a `LayoutView` (`mode`, `align`, `wrap`, `columns`, `gap`, `padding`). |
+| `frame(view, fill)` | A frame with a `LayoutView` (`mode`, `align`, `wrap`, `columns`, `gap`, `padding`, and `material`: the tint, its opacity and the blur of a `material` token on a stack or grid, for the host to draw as a fill and a background blur). |
 | `text(drawing)`, `setText(layer, name, value)` | A text layer; the text of a named layer inside a copy. |
 | `append(parent, child)` | Adds a child at the end of the parent's layout order. |
 | `marks(layer)` | The layer's name, visibility and plugin data. |

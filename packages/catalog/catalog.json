@@ -42,6 +42,11 @@
         "wrap": {
           "description": "Set to true to let children wrap onto further lines when they do not fit.",
           "type": "boolean"
+        },
+        "material": {
+          "description": "Frosted-glass surface behind the stack, as a material token: a background blur and a tint.",
+          "type": "token",
+          "tokenType": "material"
         }
       }
     },
@@ -61,6 +66,11 @@
           "description": "Space between grid cells, as a dimension token.",
           "type": "token",
           "tokenType": "dimension"
+        },
+        "material": {
+          "description": "Frosted-glass surface behind the grid, as a material token: a background blur and a tint.",
+          "type": "token",
+          "tokenType": "material"
         }
       }
     },

@@ -46,7 +46,12 @@ export default defineConfig({
     projects: [
       web,
       // The simulator helpers' unit tests need no Xcode, so they run beside the screenshots.
-      { test: { name: "swiftui", include: ["test/swiftui.test.ts", "test/simulator.test.ts"] } },
+      {
+        test: {
+          name: "swiftui",
+          include: ["test/swiftui.test.ts", "test/simulator.test.ts", "test/compare.test.ts"],
+        },
+      },
     ],
   },
 });
