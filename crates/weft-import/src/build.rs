@@ -76,6 +76,8 @@ struct Ctx<'c> {
     diagnostics: Vec<Diagnostic>,
     nodes: usize,
     truncated: bool,
+    /// Loop variables of the repetitions around the node being built.
+    loops: Vec<String>,
 }
 
 struct Placed {
@@ -100,6 +102,22 @@ impl<'c> Ctx<'c> {
             path,
             "is larger or deeper than the import limit",
         );
+    }
+
+    /// A binding that only reads data in scope: `$.…`, or a loop variable of an enclosing
+    /// repetition.
+    fn readable(&self, bind: &str) -> bool {
+        if !is_binding(bind) {
+            return false;
+        }
+        match bind.strip_prefix('$') {
+            Some(rest) if rest.is_empty() || rest.starts_with('.') => true,
+            Some(rest) => {
+                let var = rest.split(['.', '[']).next().unwrap_or_default();
+                self.loops.iter().any(|l| l == var)
+            }
+            None => false,
+        }
     }
 
     fn literal(&mut self, path: &str, s: &str) -> String {
@@ -265,7 +283,7 @@ fn set_value(
     let fits = match value {
         Value::Token(_) => token_prop,
         Value::Bind { bind, .. } => {
-            is_binding(bind) && (def.prop(name).is_some() || UNIVERSAL.contains(&name))
+            ctx.readable(bind) && (def.prop(name).is_some() || UNIVERSAL.contains(&name))
         }
         Value::Bool(_) => {
             name == "hidden" || def.prop(name).is_some_and(|p| p.kind == PropType::Boolean)
@@ -274,6 +292,17 @@ fn set_value(
     };
     if fits {
         props.insert(name.into(), value.clone());
+        return;
+    }
+    if let Value::Bind { bind, .. } = value
+        && is_binding(bind)
+        && !ctx.readable(bind)
+    {
+        ctx.lose(
+            LossKind::Bindings,
+            path,
+            format!("{name} reads {bind}, outside any repetition that defines it; it is left out"),
+        );
         return;
     }
     let (loss, what) = match value {
@@ -433,8 +462,8 @@ fn convert_node<'c>(s: &Sem, parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Option<P
     if s.kind.as_deref() == Some(EACH) {
         let slot = s.slot.as_deref().and_then(|h| hinted_slot(None, h, parent));
         let hinted = slot.is_some();
-        return Some(Placed {
-            node: each_node(s, parent, slot.as_deref(), ctx),
+        return each_node(s, parent, slot.as_deref(), ctx).map(|node| Placed {
+            node,
             slot,
             hinted,
         });
@@ -493,6 +522,10 @@ fn convert_node<'c>(s: &Sem, parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Option<P
 /// trailing slot a dialog calls `actions`. `None` when the parent has no such slot or the slot does
 /// not admit `kind` (an `each` is admitted where any child is).
 fn hinted_slot(kind: Option<&str>, hint: &str, parent: &Parent<'_>) -> Option<String> {
+    // No slot holds a screen: it is the root only (SPEC §2).
+    if kind == Some("screen") {
+        return None;
+    }
     let pdef = parent.def?;
     let names: &[&str] = if hint == "footer" {
         &["footer", "actions"]
@@ -513,7 +546,12 @@ fn hinted_slot(kind: Option<&str>, hint: &str, parent: &Parent<'_>) -> Option<St
 // Kept out of line: inlined into each other, these share one large frame per nesting level, and
 // imports must fit the 1 MiB stack WebAssembly gets.
 #[inline(never)]
-fn each_node<'c>(s: &Sem, parent: &Parent<'c>, slot: Option<&str>, ctx: &mut Ctx<'c>) -> Node {
+fn each_node<'c>(
+    s: &Sem,
+    parent: &Parent<'c>,
+    slot: Option<&str>,
+    ctx: &mut Ctx<'c>,
+) -> Option<Node> {
     let id = ctx.take_id(s, EACH, false);
     let path = format!(
         "{}{}/{EACH}#{id}",
@@ -524,7 +562,7 @@ fn each_node<'c>(s: &Sem, parent: &Parent<'c>, slot: Option<&str>, ctx: &mut Ctx
     let mut node = Node::new(EACH);
     node.id = Some(id);
     match s.values.get("in") {
-        Some(Value::Bind { bind, not: false }) if is_binding(bind) => {
+        Some(Value::Bind { bind, not: false }) if ctx.readable(bind) => {
             node.props.insert(
                 "in".into(),
                 Value::Bind {
@@ -548,20 +586,33 @@ fn each_node<'c>(s: &Sem, parent: &Parent<'c>, slot: Option<&str>, ctx: &mut Ctx
             );
         }
     }
-    let name = s.props.get("as").filter(|a| is_loop_variable(a));
-    match name {
-        Some(name) => {
-            node.props.insert("as".into(), Value::String(name.clone()));
-        }
-        None => ctx.lose(
+    let wanted = s.props.get("as").filter(|a| is_loop_variable(a)).cloned();
+    if wanted.is_none() {
+        ctx.lose(
             LossKind::Repetition,
             &path,
             "the loop variable is not a plain name; \"item\" stands in",
-        ),
+        );
     }
-    if name.is_none() {
-        node.props.insert("as".into(), Value::String("item".into()));
+    let mut name = wanted.unwrap_or_else(|| "item".to_owned());
+    // An inner variable may not shadow an outer one (SPEC §4), so it takes a free name and the
+    // bindings inside keep reading the outer one.
+    if ctx.loops.contains(&name) {
+        let base = name.clone();
+        let mut n = 2;
+        while ctx.loops.contains(&format!("{base}{n}")) {
+            n += 1;
+        }
+        name = format!("{base}{n}");
+        ctx.lose(
+            LossKind::Repetition,
+            &path,
+            format!("{base} is already the variable of an outer repetition; {name} stands in"),
+        );
     }
+    node.props.insert("as".into(), Value::String(name.clone()));
+    ctx.loops.push(name);
+    let path_here = path.clone();
     let inner = convert_list(
         &s.children,
         &Parent {
@@ -573,7 +624,33 @@ fn each_node<'c>(s: &Sem, parent: &Parent<'c>, slot: Option<&str>, ctx: &mut Ctx
         },
         ctx,
     );
-    node.children = inner.children;
+    ctx.loops.pop();
+    // An <each> repeats elements only (SPEC §4); loose text around them cannot stay.
+    let (nodes, text): (Vec<Child>, Vec<Child>) = inner
+        .children
+        .into_iter()
+        .partition(|c| matches!(c, Child::Node(_)));
+    if !text.is_empty() {
+        ctx.lose(
+            LossKind::Text,
+            &path_here,
+            "text directly inside a repetition is left out",
+        );
+    }
+    node.children = nodes;
+    // A repetition of nothing is not a valid document; what was inside is already reported.
+    if !node.children.iter().any(|c| matches!(c, Child::Node(_))) {
+        ctx.lose(
+            LossKind::Repetition,
+            &format!(
+                "{}/{EACH}#{}",
+                parent.path,
+                node.id.as_deref().unwrap_or_default()
+            ),
+            "nothing inside the repetition can be kept; it is left out",
+        );
+        return None;
+    }
     for (slot_name, list) in inner.slots {
         if !list.is_empty() {
             ctx.lose(
@@ -587,7 +664,7 @@ fn each_node<'c>(s: &Sem, parent: &Parent<'c>, slot: Option<&str>, ctx: &mut Ctx
             );
         }
     }
-    node
+    Some(node)
 }
 
 // Kept out of line: inlined into each other, these share one large frame per nesting level, and
@@ -768,6 +845,20 @@ fn component_node<'c>(
             );
             children = inner.children;
             slots = inner.slots;
+            // A bound text replaces what the element shows, so text beside it is only a stand-in;
+            // nested elements are real content and win over the binding.
+            if props.contains_key("text") && !children.is_empty() {
+                if children.iter().all(|c| matches!(c, Child::Text(_))) {
+                    children.clear();
+                } else {
+                    props.shift_remove("text");
+                    ctx.lose(
+                        LossKind::Bindings,
+                        &path,
+                        format!("<{kind}> shows its nested content; its text binding is left out"),
+                    );
+                }
+            }
             for (slot_name, list) in &slots {
                 if !list.is_empty() && inner.moved.contains(slot_name) {
                     ctx.lose(
@@ -1025,6 +1116,7 @@ pub fn build_document(top: &[Sem], options: BuildOptions<'_>) -> Built {
         diagnostics: options.diagnostics,
         nodes: 0,
         truncated: false,
+        loops: Vec::new(),
     };
     let items = ctx.flatten(top, 0, "");
     let shown: Vec<&Sem> = items

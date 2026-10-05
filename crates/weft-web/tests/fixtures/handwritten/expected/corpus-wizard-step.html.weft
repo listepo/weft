@@ -1,0 +1,13 @@
+<screen id="screen-setup-wizard" label="Setup wizard" weft="0.1">
+  <heading id="heading-choose-a-plan" level="1">Choose a plan</heading>
+  <text id="text-1" text="{$.progress}"/>
+  <radio-group id="radio-group-plan" label="Plan" value="{$.plan}">
+    <radio id="radio-free" value="free">Free</radio>
+    <radio id="radio-pro" value="pro">Pro</radio>
+    <radio id="radio-team" value="team">Team</radio>
+  </radio-group>
+  <stack id="stack-1" direction="row" gap="{token.space.sm}">
+    <button id="button-back" on-press="wizard.back">Back</button>
+    <button id="button-next" disabled="{!$.plan}" variant="primary" on-press="wizard.next">Next</button>
+  </stack>
+</screen>

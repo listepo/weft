@@ -31,6 +31,12 @@ unicode-normalization = "0.1.25"
 html5ever = "0.40.1"
 # weft-web: Unicode letter and number classes, as the `\p{L}`/`\p{N}` of the generators' JSX text checks.
 unicode-properties = { version = "0.1.4", default-features = false, features = ["general-category"] }
+# weft-web: the JSX and TSX parser of the React and Solid importers (pure Rust, builds for wasm32).
+# Without default features: the importers never look inside regular expression literals.
+oxc_allocator = "0.152.0"
+oxc_ast = "0.152.0"
+oxc_parser = { version = "0.152.0", default-features = false }
+oxc_span = "0.152.0"
 # tests: weft-core, weft-catalog
 proptest = "1.11.0"
 # weft-cli

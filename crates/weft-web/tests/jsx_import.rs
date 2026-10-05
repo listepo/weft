@@ -1,0 +1,125 @@
+//! The React and SolidJS importers over the corpus: generated components come back exactly, with
+//! their `weft:source` comment and without it.
+
+// A test crate: a failed unwrap or panic is a failed test, which is the point.
+#![allow(clippy::unwrap_used, clippy::panic)]
+
+use std::path::Path;
+
+use weft_catalog::{DEFAULT_TOKENS_JSON, core_catalog, load_tokens};
+use weft_core::{Document, ParseOptions, has_errors, parse, parse_json, serialize};
+use weft_import::LossKind;
+use weft_web::{Framework, ImportOptions, JsxOptions, import_jsx, to_jsx};
+
+fn corpus() -> Vec<(String, Document)> {
+    let catalog = core_catalog().unwrap();
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../corpus");
+    let mut out = Vec::new();
+    for entry in std::fs::read_dir(dir).unwrap() {
+        let path = entry.unwrap().path();
+        if let Ok(text) = std::fs::read_to_string(path.join("screen.weft")) {
+            let parsed = parse(
+                &text,
+                &ParseOptions {
+                    catalog: Some(&catalog),
+                    ..Default::default()
+                },
+            );
+            let name = path.file_name().unwrap().to_string_lossy().into_owned();
+            out.push((name, parsed.document.unwrap()));
+        }
+    }
+    out.sort_by(|a, b| a.0.cmp(&b.0));
+    out
+}
+
+const FLAVOURS: [(Framework, bool); 4] = [
+    (Framework::React, false),
+    (Framework::React, true),
+    (Framework::Solid, false),
+    (Framework::Solid, true),
+];
+
+fn generate(document: &Document, framework: Framework, typescript: bool, source: bool) -> String {
+    let catalog = core_catalog().unwrap();
+    to_jsx(
+        &serde_json::to_value(document).unwrap(),
+        &JsxOptions {
+            catalog: &catalog,
+            component_name: None,
+            framework,
+            typescript,
+            source,
+        },
+    )
+    .unwrap()
+}
+
+#[test]
+fn generated_components_come_back_exactly() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    for (name, document) in corpus() {
+        for (framework, typescript) in FLAVOURS {
+            let code = generate(&document, framework, typescript, true);
+            assert!(code.starts_with("/* weft:source "), "{name}");
+            let back = import_jsx(&code, typescript, &options);
+            let what = format!("{name} {framework:?} ts={typescript}");
+            assert!(back.losses.is_empty(), "{what}: {:?}", back.losses);
+            assert!(
+                !has_errors(&back.diagnostics),
+                "{what}: {:?}",
+                back.diagnostics
+            );
+            assert_eq!(serialize(&back.document), serialize(&document), "{what}");
+        }
+    }
+}
+
+/// The document with the ids of its repetitions left out: JSX has no element for an `<each>`, so
+/// only the `weft:source` comment carries those ids.
+fn without_each_ids(markup: &str) -> String {
+    let mut out = String::with_capacity(markup.len());
+    let mut rest = markup;
+    while let Some(at) = rest.find("<each id=\"") {
+        let after = &rest[at + 10..];
+        out.push_str(&rest[..at + 10]);
+        let end = after.find('"').unwrap();
+        out.push('?');
+        rest = &after[end..];
+    }
+    out.push_str(rest);
+    out
+}
+
+#[test]
+fn generated_components_without_their_source_come_back_by_convention() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    let mut failures = Vec::new();
+    for (name, document) in corpus() {
+        for (framework, typescript) in FLAVOURS {
+            let code = generate(&document, framework, typescript, false);
+            let back = import_jsx(&code, typescript, &options);
+            let what = format!("{name} {framework:?} ts={typescript}");
+            let got = without_each_ids(&serialize(&back.document));
+            let want = without_each_ids(&serialize(&document));
+            let other_losses = back.losses.iter().any(|l| l.kind != LossKind::Ids);
+            if other_losses || got != want || has_errors(&back.diagnostics) {
+                failures.push(format!(
+                    "##### {what}\n{got}\n--- want\n{want}\n{:#?}\n{:?}",
+                    back.losses, back.diagnostics
+                ));
+            }
+        }
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}

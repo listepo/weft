@@ -1,0 +1,10 @@
+<screen id="screen-load-error" label="Load error" state="error" weft="0.1">
+  <alert id="alert-1" tone="danger">
+    <heading id="heading-could-not-load-your-data" level="2">Could not load your data</heading>
+    <text id="text-1" text="{$.error.message}"/>
+  </alert>
+  <stack id="stack-1" direction="row" gap="{token.space.sm}">
+    <button id="button-retry" variant="primary" on-press="load.retry">Retry</button>
+    <link id="link-contact-support" on-press="nav.support">Contact support</link>
+  </stack>
+</screen>

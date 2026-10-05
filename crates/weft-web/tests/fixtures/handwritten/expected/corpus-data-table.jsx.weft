@@ -1,0 +1,25 @@
+<screen id="screen-users" label="Users" weft="0.1">
+  <heading id="heading-users" level="1">Users</heading>
+  <table id="table-users" label="Users">
+    <column id="column-name" sort="ascending" on-press="users.sort">Name</column>
+    <column id="column-email" sort="none" on-press="users.sort">Email</column>
+    <column id="column-role" sort="none" on-press="users.sort">Role</column>
+    <column id="column-actions">Actions</column>
+    <each id="each-1" as="user" in="{$.users}">
+      <row id="row-1">
+        <cell id="cell-1">
+          <text id="text-1" text="{$user.name}"/>
+        </cell>
+        <cell id="cell-2">
+          <text id="text-2" text="{$user.email}"/>
+        </cell>
+        <cell id="cell-3">
+          <text id="text-3" text="{$user.role}"/>
+        </cell>
+        <cell id="cell-4">
+          <button id="button-delete" variant="danger" on-press="users.delete">Delete</button>
+        </cell>
+      </row>
+    </each>
+  </table>
+</screen>

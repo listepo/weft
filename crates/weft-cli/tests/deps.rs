@@ -111,6 +111,10 @@ fn the_web_crate_adds_only_its_parsers() {
         [
             "html5ever",
             "indexmap",
+            "oxc_allocator",
+            "oxc_ast",
+            "oxc_parser",
+            "oxc_span",
             "serde",
             "serde_json",
             "unicode-properties",

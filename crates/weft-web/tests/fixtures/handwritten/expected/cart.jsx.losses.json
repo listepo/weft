@@ -1,0 +1,42 @@
+[
+  {
+    "kind": "ids",
+    "path": "/screen#screen-cart",
+    "note": "16 elements carry no data-weft-id; their ids are generated"
+  },
+  {
+    "kind": "props",
+    "path": "/screen#screen-cart",
+    "note": "spread attributes {...rest} are left out"
+  },
+  {
+    "kind": "hidden",
+    "path": "/screen#screen-cart",
+    "note": "what is shown depends on coupon, which is not a data path; every branch is kept"
+  },
+  {
+    "kind": "kinds",
+    "path": "/screen#screen-cart/list#list-1/each#each-1/item#item-1",
+    "note": "<Price> is a component, not an element Weft knows; only its children are kept"
+  },
+  {
+    "kind": "bindings",
+    "path": "/screen#screen-cart/text#text-2",
+    "note": "{`Total: ${total}`} is not a data path or markup Weft can read; it is left out"
+  },
+  {
+    "kind": "text",
+    "path": "/screen#screen-cart/text#text-signed-in-as",
+    "note": "the text written beside the bound value is left out"
+  },
+  {
+    "kind": "props",
+    "path": "/screen#screen-cart/field#field-coupon",
+    "note": "value={coupon} is not a literal or a data path; it is left out"
+  },
+  {
+    "kind": "actions",
+    "path": "/screen#screen-cart/field#field-coupon",
+    "note": "onChange={(e) => setCoupon(e.target.value)} calls no action Weft can read; it is left out"
+  }
+]

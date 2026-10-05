@@ -2,6 +2,7 @@
 //! table; generators write HTML/CSS, React and SolidJS from a document.
 
 pub mod dom;
+mod from_jsx;
 pub mod html;
 mod import;
 mod js;
@@ -10,6 +11,7 @@ pub mod provenance;
 pub mod tree;
 
 pub use dom::{IMPLICIT_ROLES, INPUT_ROLES, MAX_HTML_LENGTH, from_dom, instance_id};
+pub use from_jsx::{MAX_JSX_LENGTH, import_jsx};
 pub use html::{HtmlOptions, Invalid, to_html};
 pub use import::{ImportOptions, import_html};
 pub use jsx::{BadComponentName, Framework, JsxOptions, to_jsx};

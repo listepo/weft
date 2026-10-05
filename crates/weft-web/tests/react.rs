@@ -39,6 +39,7 @@ fn compare_with_fixture() {
             component_name: case.get("componentName").and_then(|n| n.as_str()),
             framework: Framework::React,
             typescript: false,
+            source: false,
         };
         let got = to_jsx(&case["document"], &options).unwrap();
         let expected = case["output"].as_str().unwrap();
@@ -79,6 +80,7 @@ fn an_invalid_component_name_is_refused() {
             component_name: Some(name),
             framework: Framework::React,
             typescript: false,
+            source: false,
         };
         assert!(
             to_jsx(&serde_json::Value::Null, &options).is_err(),

@@ -1,0 +1,12 @@
+[
+  {
+    "kind": "ids",
+    "path": "/screen#profile",
+    "note": "7 elements carry no data-weft-id; their ids are generated"
+  },
+  {
+    "kind": "actions",
+    "path": "/screen#profile/button#button-broken",
+    "note": "not an action is not an action name"
+  }
+]

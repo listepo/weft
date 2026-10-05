@@ -52,6 +52,8 @@ pub struct JsxOptions<'a> {
     pub framework: Framework,
     /// TSX: typed props and helpers.
     pub typescript: bool,
+    /// Leave the canonical source in a leading comment, so `import_jsx` gives the document back.
+    pub source: bool,
 }
 
 /// The component name is not an identifier the output could carry safely.
@@ -94,7 +96,45 @@ pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, BadCo
     {
         body = g.root_body(c, hidden);
     }
-    Ok(g.module(name, &body))
+    let module = g.module(name, &body);
+    match options
+        .source
+        .then(|| source_comment(document, options, name))
+        .flatten()
+    {
+        Some(comment) => Ok(format!("{comment}\n{module}")),
+        None => Ok(module),
+    }
+}
+
+/// The `weft:source` comment: the framework, the component name and the flavour on its first
+/// line, so the importer can regenerate the same module. Only a document of the right shape has
+/// a source to leave.
+fn source_comment(document: &Json, options: &JsxOptions<'_>, name: &str) -> Option<String> {
+    let diagnostics = weft_core::validate(
+        document,
+        &weft_core::ValidateOptions {
+            catalog: Some(options.catalog),
+            mode: weft_core::Mode::Lenient,
+            tokens: None,
+            actions: None,
+        },
+    );
+    if weft_core::has_errors(&diagnostics) {
+        return None;
+    }
+    let markup = weft_core::serialize(&weft_core::canonicalize(&weft_core::to_document(document)));
+    let framework = match options.framework {
+        Framework::React => "react",
+        Framework::Solid => "solid",
+    };
+    let flavour = if options.typescript {
+        " typescript"
+    } else {
+        ""
+    };
+    let head = format!("{framework} name={name}{flavour}");
+    Some(crate::provenance::comment("/*", &head, &markup, "*/"))
 }
 
 // ---- Compile-time values ----

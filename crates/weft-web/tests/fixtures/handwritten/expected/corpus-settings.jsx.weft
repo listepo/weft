@@ -1,0 +1,18 @@
+<screen id="screen-settings" label="Settings" weft="0.1">
+  <heading id="heading-settings" level="1">Settings</heading>
+  <section id="section-notifications" label="Notifications">
+    <heading id="heading-notifications" level="2">Notifications</heading>
+    <switch id="switch-email-alerts" checked="{$.emailAlerts}" label="Email alerts"/>
+    <switch id="switch-push-notifications" checked="{$.pushAlerts}" label="Push notifications"/>
+  </section>
+  <section id="section-appearance" label="Appearance">
+    <heading id="heading-appearance" level="2">Appearance</heading>
+    <select id="select-language" label="Language" value="{$.language}">
+      <option id="option-english" value="en">English</option>
+      <option id="option-deutsch" value="de">Deutsch</option>
+      <option id="option-francais" value="fr">Français</option>
+    </select>
+    <switch id="switch-dark-mode" checked="{$.darkMode}" label="Dark mode"/>
+  </section>
+  <button id="button-save-changes" disabled="{!$.dirty}" variant="primary" on-press="settings.save">Save changes</button>
+</screen>

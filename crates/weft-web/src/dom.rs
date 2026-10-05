@@ -245,7 +245,7 @@ impl<'d> Ctx<'d> {
                     }
                 }
                 if !notes.is_empty() {
-                    self.notes.insert(el, notes);
+                    self.notes.entry(el).or_default().extend(notes);
                 }
             }
             stack.extend(dom.elements(el).rev());
@@ -522,6 +522,26 @@ impl<'d> Ctx<'d> {
             }
             if self.conventions.is_some() {
                 lift_bound_text(&mut s);
+                // A bare wrapper that shows bound text is a text of its own, not one to dissolve.
+                if s.kind.is_none()
+                    && role == "generic"
+                    && attr("role").is_none()
+                    && s.values.contains_key("text")
+                {
+                    // Text beside the binding is what the page shows before data arrives.
+                    if s.children.iter().all(|c| c.role == "text") {
+                        s.children.clear();
+                        s.kind = Some("text".into());
+                    } else {
+                        s.values.shift_remove("text");
+                        s.notes.push(Note {
+                            kind: LossKind::Bindings,
+                            note:
+                                "a text binding on an element that also holds content is left out"
+                                    .into(),
+                        });
+                    }
+                }
                 if role == "columnheader" {
                     lift_header_button(&mut s);
                 }
@@ -792,7 +812,10 @@ fn lift_bound_text(s: &mut Sem) {
         return;
     }
     if let [only] = s.children.as_mut_slice()
-        && only.kind.is_none()
+        && (only.kind.is_none()
+            || (only.kind.as_deref() == Some("text")
+                && only.id.is_none()
+                && only.values.len() == 1))
         && only.role == "generic"
         && only.children.is_empty()
         && let Some(text) = only.values.shift_remove("text")
@@ -940,7 +963,7 @@ pub(crate) fn bounded<'h>(html: &'h str, diagnostics: &mut Vec<Diagnostic>) -> &
 pub fn from_dom(html: &str, catalog: &Catalog) -> ImportResult {
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
     let dom = parse_html(bounded(html, &mut diagnostics));
-    let built = read_dom(&dom, catalog, None, diagnostics);
+    let built = read_dom(&dom, catalog, None, HashMap::new(), diagnostics);
     let mut result = built.result;
     let mut losses: Vec<_> = DOM_LOSSES
         .iter()
@@ -960,6 +983,7 @@ pub(crate) fn read_dom(
     dom: &Dom,
     catalog: &Catalog,
     conventions: Option<&Conventions>,
+    notes: HashMap<usize, Vec<Note>>,
     mut diagnostics: Vec<Diagnostic>,
 ) -> Built {
     let mut ctx = Ctx {
@@ -969,7 +993,7 @@ pub(crate) fn read_dom(
         label_for: HashMap::new(),
         ids: HashMap::new(),
         reserved: Vec::new(),
-        notes: HashMap::new(),
+        notes,
         consumed: HashSet::new(),
         forms: 0,
         nodes: 0,

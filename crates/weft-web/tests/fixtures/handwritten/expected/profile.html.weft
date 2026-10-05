@@ -1,0 +1,11 @@
+<screen id="profile" label="Profile" weft="0.1">
+  <heading id="heading-name" level="1" text="{$.user.name}"/>
+  <image id="image-avatar" label="Avatar" src="{$.user.avatar}"/>
+  <text id="text-member-since-2020">Member since 2020</text>
+  <stack id="stack-1" direction="row" gap="{token.space.md}">
+    <link id="site" href="https://example.com">Website</link>
+    <link id="link-unsafe" href="javascript:alert(1)">Unsafe</link>
+  </stack>
+  <button id="button-edit" on-press="profile.edit">Edit</button>
+  <button id="button-broken">Broken</button>
+</screen>

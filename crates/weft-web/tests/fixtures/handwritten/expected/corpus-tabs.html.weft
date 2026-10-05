@@ -1,0 +1,22 @@
+<screen id="screen-account" label="Account" weft="0.1">
+  <heading id="heading-account" level="1">Account</heading>
+  <tabs id="tabs-account-sections" label="Account sections">
+    <tab id="tab-1" label="Overview">
+      <text id="text-1" text="{$.account.name}"/>
+      <text id="text-2" text="{$.account.email}"/>
+    </tab>
+    <tab id="tab-2" label="Billing">
+      <text id="text-3" text="{$.billing.plan}"/>
+      <button id="button-change-plan" variant="primary" on-press="billing.change">Change plan</button>
+    </tab>
+    <tab id="tab-3" label="Team">
+      <list id="list-1">
+        <each id="each-1" as="member" in="{$.team}">
+          <item id="item-1">
+            <text id="text-4" text="{$member.name}"/>
+          </item>
+        </each>
+      </list>
+    </tab>
+  </tabs>
+</screen>

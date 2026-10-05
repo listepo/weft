@@ -1,0 +1,9 @@
+<screen id="screen-account-menu" label="Account menu" weft="0.1">
+  <text id="text-1" text="{$.user.email}"/>
+  <menu id="menu-account" label="Account">
+    <menu-item id="menu-item-profile" on-press="nav.profile">Profile</menu-item>
+    <menu-item id="menu-item-settings" on-press="nav.settings">Settings</menu-item>
+    <menu-item id="menu-item-billing" disabled="{!$.isOwner}" on-press="nav.billing">Billing</menu-item>
+    <menu-item id="menu-item-sign-out" on-press="auth.signout">Sign out</menu-item>
+  </menu>
+</screen>

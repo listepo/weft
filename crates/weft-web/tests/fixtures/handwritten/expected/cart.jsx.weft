@@ -1,0 +1,23 @@
+<screen id="screen-cart" label="Cart" weft="0.1">
+  <heading id="heading-your-cart" level="1">Your cart</heading>
+  <list id="list-1">
+    <each id="each-1" as="item" in="{$.items}">
+      <item id="item-1">
+        <text id="text-1" text="{$item.name}"/>
+        <button id="button-remove" on-press="cart.remove">Remove</button>
+      </item>
+    </each>
+    <slot name="empty">
+      <text id="text-your-cart-is-empty">Your cart is empty.</text>
+    </slot>
+  </list>
+  <text id="text-2"/>
+  <text id="text-signed-in-as" hidden="{!$.loggedIn}" text="{$.user.name}"/>
+  <text id="text-coupon-applied">Coupon applied</text>
+  <radio-group id="radio-group-delivery" label="Delivery" value="{$.delivery}">
+    <radio id="radio-standard" value="standard">Standard</radio>
+    <radio id="radio-express" value="express">Express</radio>
+  </radio-group>
+  <field id="field-coupon" label="Coupon"/>
+  <button id="button-check-out" disabled="{!$.items.length}" variant="primary" on-press="cart.checkout">Check out</button>
+</screen>

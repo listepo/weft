@@ -1,0 +1,20 @@
+<screen id="screen-search" label="Search" weft="0.1">
+  <form id="form-1" on-submit="search.run">
+    <stack id="stack-1" direction="row" gap="{token.space.sm}">
+      <field id="field-search" label="Search" type="search" value="{$.query}"/>
+      <button id="button-search" submit="true" variant="primary">Search</button>
+    </stack>
+  </form>
+  <list id="list-1">
+    <each id="each-1" as="result" in="{$.results}">
+      <item id="item-1">
+        <heading id="heading-1" level="3" text="{$result.title}"/>
+        <text id="text-1" text="{$result.snippet}"/>
+        <link id="link-open" on-press="results.open">Open</link>
+      </item>
+    </each>
+    <slot name="empty">
+      <text id="text-no-results-found">No results found</text>
+    </slot>
+  </list>
+</screen>

@@ -62,7 +62,14 @@ pub fn import_html(html: &str, options: &ImportOptions<'_>) -> ImportResult {
         };
     }
     let conventions = Conventions::new(options.tokens);
-    read_dom(&dom, options.catalog, Some(&conventions), diagnostics).result
+    read_dom(
+        &dom,
+        options.catalog,
+        Some(&conventions),
+        std::collections::HashMap::new(),
+        diagnostics,
+    )
+    .result
 }
 
 /// The content a reader sees: elements, and text that is not only whitespace.

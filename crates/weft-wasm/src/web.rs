@@ -108,6 +108,8 @@ struct JsxWire {
     framework: FrameworkWire,
     #[serde(default)]
     typescript: bool,
+    #[serde(default)]
+    source: bool,
 }
 
 /// What a generator returns: the code, or why it refused the options.
@@ -133,6 +135,7 @@ pub fn to_jsx(document: Option<&str>, options: &str, catalog: &Catalog) -> Resul
             FrameworkWire::Solid => Framework::Solid,
         },
         typescript: wire.typescript,
+        source: wire.source,
     };
     write(&match weft_web::to_jsx(&document, &options) {
         Ok(code) => Generated::Code { code },
