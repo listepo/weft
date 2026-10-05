@@ -28,6 +28,12 @@ const dimension = (description: string): PropDef => ({
   tokenType: "dimension",
 });
 
+const material = (description: string): PropDef => ({
+  description,
+  type: "token",
+  tokenType: "material",
+});
+
 const checkedProp = bool("Whether the control is on; bind it to a boolean to read and write it.", {
   writable: true,
 });
@@ -74,6 +80,9 @@ const components: Record<string, ComponentDef> = {
         "stretch",
       ]),
       wrap: bool("Set to true to let children wrap onto further lines when they do not fit."),
+      material: material(
+        "Frosted-glass surface behind the stack, as a material token: a background blur and a tint.",
+      ),
     },
   },
   grid: {
@@ -88,6 +97,9 @@ const components: Record<string, ComponentDef> = {
         min: 1,
       }),
       gap: dimension("Space between grid cells, as a dimension token."),
+      material: material(
+        "Frosted-glass surface behind the grid, as a material token: a background blur and a tint.",
+      ),
     },
   },
   section: {
