@@ -39,6 +39,8 @@ pub enum Expr {
     KeyPath(String),
     Closure(Closure),
     Array(Vec<Expr>),
+    /// `(x: 0, y: 1)`: two or more items.
+    Tuple(Vec<Arg>),
     /// Anything the importer does not read, by its tree-sitter kind.
     Other(String),
 }
@@ -381,7 +383,24 @@ impl Reader<'_> {
                 let items = named(node);
                 match items.as_slice() {
                     [only] => self.expr(*only, d),
-                    _ => Expr::Other("tuple_expression".to_owned()),
+                    [] => Expr::Other("tuple_expression".to_owned()),
+                    _ => {
+                        let mut args = vec![];
+                        let mut label = None;
+                        for (field, child) in fields(node) {
+                            match field {
+                                Some("name") => {
+                                    label = Some(unescape_identifier(&self.text(child)).to_owned());
+                                }
+                                Some("value") => args.push(Arg {
+                                    label: label.take(),
+                                    value: self.expr(child, d),
+                                }),
+                                _ => {}
+                            }
+                        }
+                        Expr::Tuple(args)
+                    }
                 }
             }
             "equality_expression"
