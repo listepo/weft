@@ -85,7 +85,11 @@ export async function ensureLibrary(
   await api.openPage(page.id);
   try {
     dataOf(page).setPluginData(KEY.library, tag);
-    const library: Library = { page, tokens: ensureTokens(api, tokens, modifier), kinds: new Map() };
+    const library: Library = {
+      page,
+      tokens: ensureTokens(api, tokens, modifier),
+      kinds: new Map(),
+    };
     const board = libraryBoard(api, page, tag);
     for (const child of board.children) {
       const kind = readMark(dataOf(child), KEY.kind);

@@ -26,7 +26,10 @@ const TokensSchema = z
 const ModifierSchema = z.object({
   name: z.string(),
   default: z.string(),
-  contexts: z.array(z.tuple([z.string(), TokensSchema])).min(1).max(MAX_CONTEXTS),
+  contexts: z
+    .array(z.tuple([z.string(), TokensSchema]))
+    .min(1)
+    .max(MAX_CONTEXTS),
 });
 
 const RequestSchema = z.discriminatedUnion("type", [

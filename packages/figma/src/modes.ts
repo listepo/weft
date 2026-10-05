@@ -34,13 +34,16 @@ export function writeModes(
   notes: string[],
 ): void {
   collection.setPluginData(KEY.modifier, modifier.name);
-  if (collection.modes.find((m) => m.modeId === collection.defaultModeId)?.name !== modifier.default)
+  if (
+    collection.modes.find((m) => m.modeId === collection.defaultModeId)?.name !== modifier.default
+  )
     collection.renameMode(collection.defaultModeId, modifier.default);
   const modes: [string, ReadonlyMap<string, Token>][] = [];
   for (const [name, tokens] of [...modifier.contexts].slice(0, MAX_CONTEXTS)) {
     if (name === modifier.default) continue;
-    let id = collection.modes.find((m) => m.name === name && m.modeId !== collection.defaultModeId)
-      ?.modeId;
+    let id = collection.modes.find(
+      (m) => m.name === name && m.modeId !== collection.defaultModeId,
+    )?.modeId;
     if (id === undefined) {
       try {
         id = collection.addMode(name);
