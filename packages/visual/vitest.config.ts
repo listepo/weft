@@ -43,6 +43,10 @@ export default defineConfig({
   test: {
     testTimeout: 120_000,
     hookTimeout: 300_000,
-    projects: [web, { test: { name: "swiftui", include: ["test/swiftui.test.ts"] } }],
+    projects: [
+      web,
+      // The simulator helpers' unit tests need no Xcode, so they run beside the screenshots.
+      { test: { name: "swiftui", include: ["test/swiftui.test.ts", "test/simulator.test.ts"] } },
+    ],
   },
 });
