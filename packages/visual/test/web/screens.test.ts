@@ -16,14 +16,6 @@ import {
 
 type Props = { data?: unknown };
 
-// Known gaps the convention importers leave visible on screen, found by these tests (T36). Each
-// listed round trip must still differ, so a fix fails here until its entry is removed.
-const JSX_ROUND_TRIP_GAPS: Record<string, string> = {
-  account: "the number field's value is written through `_float(...)`, which the importer drops",
-  inbox: "a bound tab label comes back empty and the tabs' selected binding is lost",
-  leaderboard: "an array-index binding is written as `_get(...)`, which the importer drops",
-};
-
 // The static page shows the screen's data like the components do (`weft html --data`, T43), but
 // it has a layout stylesheet of its own: field captions stack above their controls, a toggle's
 // label is a flex row that pushes the next control onto a new line, and stacks are spaced with
@@ -78,12 +70,6 @@ const STATIC_TREE_DIFFERS: Record<string, string[]> = {
   "wizard-step": [P, CAPTION],
 };
 
-// Known gaps the HTML importer leaves visible once the page shows data. The round trip reads the
-// template page, then fills the document it gives back with the same data.
-const HTML_ROUND_TRIP_GAPS: Record<string, string> = {
-  inbox: "the tabs' `selected` and a tab's bound `label` are dropped by the tab inversion",
-};
-
 for (const screen of screens) {
   const { name, data } = screen;
   const load = async (variant: "react" | "solid" | "react-back" | "solid-back") =>
@@ -133,17 +119,13 @@ for (const screen of screens) {
       expect(await commands.ariaSnapshot("#reference")).toBe(react);
     });
 
-    (name in HTML_ROUND_TRIP_GAPS ? test.fails : test)(
-      "round trip through the HTML importer looks the same",
-      async () => {
-        await expectSameLook("#html", "#html-back", `roundtrip/${name}.html`);
-      },
-    );
-    const jsxRoundTrip = name in JSX_ROUND_TRIP_GAPS ? test.fails : test;
-    jsxRoundTrip("round trip through the React importer looks the same", async () => {
+    test("round trip through the HTML importer looks the same", async () => {
+      await expectSameLook("#html", "#html-back", `roundtrip/${name}.html`);
+    });
+    test("round trip through the React importer looks the same", async () => {
       await expectSameLook("#react", "#react-back", `roundtrip/${name}.react`);
     });
-    jsxRoundTrip("round trip through the SolidJS importer looks the same", async () => {
+    test("round trip through the SolidJS importer looks the same", async () => {
       await expectSameLook("#solid", "#solid-back", `roundtrip/${name}.solid`);
     });
     test("round trip through Figma looks the same", async () => {
