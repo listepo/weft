@@ -6,4 +6,3 @@
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
 - T42. Xcode plugins
-- T43. Sample data in static HTML and SwiftUI
