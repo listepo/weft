@@ -14,7 +14,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 | T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
-| T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -204,18 +203,3 @@ Done when:
 - the suite passes repeatedly (at least three consecutive runs);
 - baselines are retaken only if the visible area changes, and are then reviewed;
 - the full check exits 0.
-
-### T18. Follow-ups from the prototype
-
-- `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
-- Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
-- Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.
-
-Status check: none of the three items is done. `from_dom` reads `data-weft-slot` only when it reads generated source (conventions), and `DOM_LOSSES` always reports `slots`; the validator names `tabs`, `tab` and `screen` in code; the corpus screens bind no per-row names and the counter says "items left" for one item.
-
-Execution plan:
-
-1. Item 1 (`crates/weft-web/src/dom.rs`): read `data-weft-slot` on rendered HTML as well (`<footer>` stays source-only: in a rendered page it is a landmark), drop the always-on `slots` loss from `DOM_LOSSES` (the importer's own "placed in its slot" loss stays), update `SPEC.md` §9, `docs/importing.md`, `docs/tour.md`, fixtures and insta snapshots; test with a rendered dialog, form footer and list `empty`.
-2. Item 2: add `references` (prop: the value is the id of an element of that kind) and `root` (component: the only valid root, allowed nowhere else) to the catalog model (`weft-core` `model.rs`, `packages/core/src/model.ts`), set them on `tabs.selected` and `screen` in `packages/catalog/src/core.ts` (regenerating `catalog.json`), make `validate.rs` read them with the same codes and messages (`W309`, `W201`, `W312`), make the diff rate them (adding is major, removing is minor), and describe them in `SPEC.md` §6, `AGENT-SPEC.md` and `docs/catalog-and-tokens.md`.
-3. Item 3: `corpus/data-table` gets a per-row `deleteLabel` in its data bound to the Delete button's `label`, `corpus/todo-list` binds the counter to one `remainingLabel` string (Weft has no interpolation, so the host supplies the phrase); update all four corpus renditions, the data, the bench corpus, and every baseline.
-4. Verify with `moon run root:changed`, review changed PNGs, then the full check; merge main last.
