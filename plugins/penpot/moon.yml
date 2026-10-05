@@ -12,3 +12,9 @@ tasks:
     options:
       cache: false
       runInCI: false
+  # Serves dist/ on http://localhost:4400 for installing the plugin in Penpot from
+  # http://localhost:4400/manifest.json.
+  serve:
+    command: 'vite preview --config serve.config.ts'
+    deps: ['build']
+    preset: 'server'

@@ -18,7 +18,13 @@ The build and the UI page are shared with the Figma plugin and live in `@weft/de
 mise exec -- moon run penpot-plugin:build
 ```
 
-This builds the WebAssembly core first, then writes `dist/manifest.json`, `dist/plugin.js` and `dist/ui.html`. Penpot loads a plugin from a URL and plugins are hosted outside Penpot, so serve `dist/` with any static file server, then install the plugin in Penpot's plugin manager with the URL of `manifest.json`. Whether the server must send CORS headers has not been checked in a real Penpot. The manifest uses version 2, so `plugin.js` and `ui.html` are loaded from the manifest's folder.
+This builds the WebAssembly core first, then writes `dist/manifest.json`, `dist/plugin.js` and `dist/ui.html`. Penpot loads a plugin from a URL and plugins are hosted outside Penpot, so `dist/` is not committed: it is served. The manifest uses version 2, so `plugin.js` and `ui.html` are loaded from the manifest's folder.
+
+```sh
+mise exec -- moon run penpot-plugin:serve
+```
+
+This builds, then serves `dist/` on `http://localhost:4400` with `Access-Control-Allow-Origin: *` (`serve.config.ts`), because Penpot fetches the files from its own origin and Vite's default allows only localhost origins. Install the plugin in Penpot's plugin manager with `http://localhost:4400/manifest.json`. Whether a real Penpot needs the CORS header has not been checked; the server sends it either way. A hosted copy for users is T41 in `roadmap.md`.
 
 The plugin asks for `content:write` and `library:write`, which include the read permissions. It needs no network access: the default token set (`packages/catalog/tokens/default.tokens.json`) is inlined into the UI.
 
