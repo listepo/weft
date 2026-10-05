@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
-import { redirect } from "./redirect.ts";
+import { redirect } from "@weft/design-plugin/build";
 
 const SHARED = dirname(fileURLToPath(import.meta.url));
 const REPOSITORY = join(SHARED, "../..");

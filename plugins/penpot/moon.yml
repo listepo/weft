@@ -1,0 +1,20 @@
+# The folder name `penpot` is already the id of packages/penpot.
+id: 'penpot-plugin'
+language: 'typescript'
+
+tasks:
+  # Writes dist/ (manifest.json, plugin.js, ui.html) for serving the plugin to Penpot. dist/ is
+  # not committed; the tests build into a temp folder. The UI inlines the WebAssembly core, so
+  # root:wasm comes first.
+  build:
+    command: 'node build.ts'
+    deps: ['root:wasm']
+    options:
+      cache: false
+      runInCI: false
+  # Serves dist/ on http://localhost:4400 for installing the plugin in Penpot from
+  # http://localhost:4400/manifest.json.
+  serve:
+    command: 'vite preview --config serve.config.ts'
+    deps: ['build']
+    preset: 'server'

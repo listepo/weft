@@ -1,0 +1,7 @@
+{
+  "name": "Weft",
+  "description": "Builds boards from Weft screens and exports a selected board back as .weft.",
+  "code": "plugin.js",
+  "version": 2,
+  "permissions": ["content:read", "content:write", "library:read", "library:write"]
+}

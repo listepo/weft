@@ -1,7 +1,7 @@
 // The helpers every importer shares: ids, literals, the loss log, required-prop stand-ins and
 // limits. The importers themselves run in Rust (crates/weft-import, crates/weft-web, through
 // ./engine.ts); these stay TypeScript because importers that run without WebAssembly reuse them
-// (`@weft/figma` reads layers on Figma's main thread). crates/weft-import has the same helpers,
+// (`@weft/design-tool` reads layers in a design tool's plugin sandbox). crates/weft-import has the same helpers,
 // and test/helpers.test.ts keeps the two in step.
 import {
   diagnostic,
@@ -36,7 +36,7 @@ export function slug(text: string): string {
     .replace(/-+$/, "");
 }
 
-// What the helpers below need, so that other importers (`@weft/figma`) can reuse them.
+// What the helpers below need, so that other importers (`@weft/design-tool`) can reuse them.
 export type IdState = { used: Set<string>; counters: Map<string, number> };
 export type LossLog = { losses: Loss[] };
 

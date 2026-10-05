@@ -2,46 +2,16 @@
 // Node's globals: `node test/harness.ts <dist> <screen.weft>` prints one JSON line of results.
 //
 // - Main thread: `code.js` in a VM context without WebAssembly or fetch, over the fake file.
-// - UI: the module script of `ui.html` in this realm, with `process` and `fetch` removed, so the
-//   WebAssembly core must load from the bytes inlined in the page, as it must in Figma's iframe.
+// - UI: the module script of `ui.html` in this realm (`@weft/design-plugin`'s UI harness).
 // Messages between the two are structured-cloned, as `postMessage` does.
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
 import { createContext, runInContext } from "node:vm";
+import { loadUi, runUi } from "../../../packages/design-plugin/test/ui-harness.ts";
 import { FakeFigma, type FakeNode } from "../../../packages/figma/test/fake-figma.ts";
 
 const [dist = "", markupPath = ""] = process.argv.slice(2);
 const print = process.stdout.write.bind(process.stdout);
-
-class FakeElement {
-  value = "";
-  textContent = "";
-  disabled = false;
-  items: FakeElement[] = [];
-  readonly listeners = new Map<string, (event: unknown) => unknown>();
-  addEventListener(type: string, listener: (event: unknown) => unknown) {
-    this.listeners.set(type, listener);
-  }
-  click() {
-    return this.listeners.get("click")?.({ target: this });
-  }
-  replaceChildren() {
-    this.items = [];
-  }
-  append(child: FakeElement) {
-    this.items.push(child);
-  }
-  select() {}
-}
-
-const elements = new Map<string, FakeElement>();
-const byId = (id: string): FakeElement => {
-  let found = elements.get(id);
-  if (found === undefined) elements.set(id, (found = new FakeElement()));
-  return found;
-};
 
 // The main thread.
 const figma = new FakeFigma();
@@ -69,49 +39,29 @@ const mainHasWasm = runInContext("typeof WebAssembly", main) !== "undefined";
 const window: { onmessage?: (event: { data: unknown }) => void } = {};
 const toUi = (pluginMessage: unknown) => window.onmessage?.({ data: { pluginMessage } });
 const pending: Promise<void>[] = [];
-Object.assign(globalThis, {
+const byId = await loadUi(dist, {
   window,
-  document: {
-    getElementById: byId,
-    createElement: () => new FakeElement(),
-    execCommand: () => true,
-  },
   parent: {
     postMessage: (message: { pluginMessage: unknown }) => {
       pending.push(ui.onmessage?.(structuredClone(message.pluginMessage)) ?? Promise.resolve());
     },
   },
 });
-Object.defineProperty(globalThis, "process", { value: undefined, configurable: true });
-Object.defineProperty(globalThis, "fetch", { value: undefined, configurable: true });
-
-const html = readFileSync(join(dist, "ui.html"), "utf8");
-const script = /<script type="module">\n([\s\S]*)<\/script>/.exec(html)?.[1];
-if (script === undefined) throw new Error("ui.html has no module script");
-const file = join(mkdtempSync(join(tmpdir(), "weft-figma-ui-")), "ui.mjs");
-writeFileSync(file, script);
-await import(pathToFileURL(file).href);
 
 const settle = async () => {
   while (pending.length > 0) await pending.shift();
 };
+let selected = 0;
+const result = await runUi(byId, readFileSync(markupPath, "utf8"), async () => {
+  await settle();
+  selected ||= page.selection.length;
+});
 
-byId("source").value = readFileSync(markupPath, "utf8");
-byId("build").click();
-await settle();
-const built = { status: byId("status").textContent, selected: page.selection.length };
-
-byId("export").click();
-await settle();
-const exported = {
-  status: byId("status").textContent,
-  markup: byId("result").value,
-  notes: byId("notes").items.map((i) => i.textContent),
-};
-
-byId("source").value = "<screen";
-byId("build").click();
-await settle();
-const broken = { status: byId("status").textContent, notes: byId("notes").items.length };
-
-print(`${JSON.stringify({ mainHasWasm, built, exported, broken })}\n`);
+print(
+  `${JSON.stringify({
+    mainHasWasm,
+    built: { status: result.built, selected },
+    exported: result.exported,
+    broken: result.broken,
+  })}\n`,
+);

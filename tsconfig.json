@@ -20,6 +20,7 @@
     "bench/src",
     "bench/test",
     "plugins/*/build.ts",
+    "plugins/*/serve.config.ts",
     "plugins/*/scripts",
     "plugins/*/src",
     "plugins/*/test"

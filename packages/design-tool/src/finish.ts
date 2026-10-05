@@ -1,5 +1,5 @@
 // The steps of a build and a read that need the WebAssembly core. They run wherever the core does:
-// in Node, and in the plugin's UI iframe, never in Figma's main thread.
+// in Node, and in a plugin's UI iframe, never in the tool's plugin sandbox.
 import { tokenTypes, type Token } from "@weft/catalog";
 import {
   canonicalize,
@@ -11,7 +11,7 @@ import {
   type Node,
 } from "@weft/core";
 import { literal, type LossLog } from "@weft/from-aria";
-import type { FigmaApi, FNode } from "./api.ts";
+import type { Layer } from "./layer.ts";
 import { isRawText, readLayers, type ReadOptions, type ReadResult } from "./read.ts";
 
 /** The props a layer shows as text, and so the ones a designer can type a value into. */
@@ -77,10 +77,6 @@ export function finishRead(
 }
 
 /** Reads a layer back into a canonical, validated Weft document. */
-export async function readScreen(
-  api: FigmaApi,
-  layer: FNode,
-  options: ReadOptions,
-): Promise<ReadResult> {
-  return finishRead(await readLayers(api, layer, options), options);
+export async function readScreen(layer: Layer, options: ReadOptions): Promise<ReadResult> {
+  return finishRead(await readLayers(layer, options), options);
 }
