@@ -208,3 +208,11 @@ Done when:
 - the plugin bundles are rebuilt;
 - the plugin READMEs and skills are updated;
 - the full check exits 0.
+
+Execution plan (Claude Code / claude-sonnet-5-5):
+
+1. `packages/design-plugin`: add a resolver input beside the screen input (file picker, paste box, Load button). The text is bounded by `MAX_MARKUP`, parsed with `JSON.parse`, and loaded through `loadProject({ tokens })` of `@weft/catalog` (the Rust resolver loader through WebAssembly, no new TS parser), so every breach shows as a `W705` note. A modifier `<select>` lists the resolver's modifiers plus "No modes"; the appearance modifier is preselected. The chosen modifier goes into `UiOptions.modifier`, and the resolver's default context becomes the token set of build and export.
+2. Export: a second read-only box shows the reply's `resolver`, with a Download button for `tokens.resolver.json`. The existing download code becomes one helper.
+3. Penpot: record the default context on the library's plugin data (`Library extends PluginData`) when themes are written, and read it back before falling back to creation order.
+4. Tests: `ui.test.ts` over the fake DOM (choose modifier, default, `W705`, size guard, download), the Figma and Penpot bundle tests with a resolver, a Penpot `modes.test.ts` case for the recorded default.
+5. Update the READMEs and plugin skills, rebuild the bundles, run the full check, close T49 into `done.md`.
