@@ -2,9 +2,9 @@
 // the iOS Simulator, then compared with its reviewed baseline. A screen changed by one point of
 // layout or one word must fail the same comparison.
 //
-// The screens render with their models' defaults: a generated model has no initializer from
-// JSON, so the corpus data would need code written per screen. What the screenshot pins is the
-// generated layout, controls and text.
+// Each screen is generated with its corpus data (`weft swiftui --data`) and shows the model's
+// `sample`, the data the React screenshots show, so the screenshot pins the layout, controls and
+// text with real content in them.
 //
 // The simulator is pinned (device and runtime below), since a baseline is only meaningful on the
 // runtime that drew it. Without macOS, Xcode or that simulator the suite is skipped and says why.
@@ -99,7 +99,7 @@ struct WeftScreensApp: App {
 
 function dispatcher(types: Map<string, string>): string {
   const cases = [...types].map(
-    ([name, type]) => `        case "${name}": ${type}Screen(model: ${type}Model())`,
+    ([name, type]) => `        case "${name}": ${type}Screen(model: .sample)`,
   );
   return `import SwiftUI
 
@@ -184,7 +184,13 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     for (const name of names) {
       sources.set(
         name,
-        cli("swiftui", "screen.weft", readFileSync(join(CORPUS, name, "screen.weft"), "utf8")),
+        cli(
+          "swiftui",
+          "screen.weft",
+          readFileSync(join(CORPUS, name, "screen.weft"), "utf8"),
+          "--data",
+          join(CORPUS, name, "data.json"),
+        ),
       );
     }
     const login = sources.get("login")!;

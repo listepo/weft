@@ -2,8 +2,8 @@
 
 Screenshot tests for every corpus screen (`corpus/`), on every target that draws pixels. Private; nothing imports it.
 
-- **Web** (`test/web/`, Vitest browser mode on Playwright's Chromium): the generated React and SolidJS components, the reference renderer and the static HTML page each render in an iframe of their own. Each screen is compared with its reviewed baseline, across targets (SolidJS and the reference renderer must look exactly like React, with the same accessibility tree), and across round trips through the HTML, React and SolidJS importers and the Figma and Penpot fakes.
-- **SwiftUI** (`test/swiftui.test.ts`, Node): the generated views are built into one app and screenshotted in the iOS Simulator, then compared with their reviewed baselines.
+- **Web** (`test/web/`, Vitest browser mode on Playwright's Chromium): the generated React and SolidJS components, the reference renderer and the static HTML page each render the screen's `data.json` in an iframe of their own. Each screen is compared with its reviewed baseline, across targets (SolidJS and the reference renderer must look exactly like React, with the same accessibility tree), and across round trips through the HTML, React and SolidJS importers and the Figma and Penpot fakes.
+- **SwiftUI** (`test/swiftui.test.ts`, Node): the generated views, each showing its screen's `data.json` as the model's `sample`, are built into one app and screenshotted in the iOS Simulator, then compared with their reviewed baselines.
 - **Mutations**: the same comparisons must fail for a screen nudged by one pixel (one point in SwiftUI) or with one word changed.
 
 Known differences are listed in the tests with the reason, as `test.fails`: a listed difference that goes away fails the suite until its entry is removed.
