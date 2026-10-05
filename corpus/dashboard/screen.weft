@@ -1,5 +1,5 @@
 <screen id="dashboard" label="Team dashboard" state="ready" weft="0.1">
-  <stack id="header" align="center" direction="row" gap="{token.space.xl}" wrap="true">
+  <stack id="header" direction="row" gap="{token.space.xl}" wrap="true">
     <heading id="title" level="1" text="{$.team.name}"/>
     <text id="updated" text="{$.updatedAt}" tone="muted"/>
   </stack>
@@ -23,7 +23,7 @@
       </slot>
     </section>
   </grid>
-  <stack id="notices" align="stretch" direction="column" gap="{token.space.sm}">
+  <stack id="notices" align="center" direction="column" gap="{token.space.sm}">
     <alert id="release" tone="info">Release 2.4 ships on Friday.</alert>
     <alert id="backup" text="{$.backupStatus}" tone="success"/>
     <alert id="quota" tone="warning">

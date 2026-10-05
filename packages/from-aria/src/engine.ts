@@ -44,6 +44,7 @@ type Tables = {
   maxHtmlLength: number;
   dissolvedRoles: string[];
   roleRefinements: Record<string, { kind: string; props?: Record<string, string> }>;
+  roleDefaults: Record<string, string>;
 };
 
 /** The importers' constant tables, read once from Rust instead of copied. */

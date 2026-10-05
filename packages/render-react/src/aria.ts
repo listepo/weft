@@ -2,7 +2,9 @@
 // snapshot, plus a parser for that snapshot and a comparison that lists the differences.
 import type { Catalog, Document } from "@weft/core";
 import {
+  colorValue,
   contentText,
+  dateValue,
   dialogOpen,
   expandRoot,
   fieldRole,
@@ -18,6 +20,8 @@ import {
   selectedOption,
   selectedTab,
   showsEmpty,
+  sliderValue,
+  stepperValue,
   text,
   type Inst,
   type InstChild,
@@ -136,8 +140,10 @@ function build(c: InstChild, ctx: Ctx): AriaNode[] {
     case "switch":
       return node(n.kind, n, [], { states: { checked: flag(n, "checked"), disabled } });
     case "radio-group":
+    case "segmented-control":
       return node("radiogroup", n, many(ordered(n), { group: n }));
     case "radio":
+    case "segment":
       return node("radio", n, [], {
         name: label(n) || contentText(n.children),
         states: { checked: radioChecked(n, ctx.group), disabled },
@@ -150,6 +156,20 @@ function build(c: InstChild, ctx: Ctx): AriaNode[] {
         }),
       );
       return node("combobox", n, opts, { states: { disabled } });
+    }
+    // The value is the text of the control, as for a field: a browser lists it after the name.
+    case "slider":
+      return node("slider", n, [textNode(String(sliderValue(n)))], { states: { disabled } });
+    case "stepper":
+      return node("spinbutton", n, [textNode(String(stepperValue(n)))], { states: { disabled } });
+    case "date-picker":
+    case "color-picker": {
+      const value = n.kind === "color-picker" ? colorValue(n) : dateValue(n, "value");
+      return node("textbox", n, value ? [textNode(value)] : [], { states: { disabled } });
+    }
+    case "combobox": {
+      const value = text(n, "value");
+      return node("combobox", n, value ? [textNode(value)] : [], { states: { disabled } });
     }
     case "option":
       // Outside a select an option has no list to belong to; it renders as its text.

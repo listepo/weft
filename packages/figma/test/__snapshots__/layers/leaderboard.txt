@@ -7,7 +7,7 @@ FRAME "screen#leaderboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primary
     | weft.origin = layer(heading#title)
     | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Leaderboard"],"shown":{"text":"Leaderboard"}}
     TEXT "text" chars="Leaderboard" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
-  FRAME "stack#leader" layoutMode="HORIZONTAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
+  FRAME "stack#leader" layoutMode="HORIZONTAL" itemSpacing=4 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
     | weft.origin = layer(stack#leader)
     | weft.source = {"kind":"stack","id":"leader","props":{"direction":"row","gap":{"token":"space.xs"}}}
     | weft.style = [[],[],0,[0,0,0,0],null]

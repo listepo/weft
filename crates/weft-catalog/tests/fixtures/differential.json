@@ -33504,7 +33504,8 @@
      "path": [
       "components",
       "stack",
-      "props"
+      "props",
+      "direction"
      ],
      "key": "tokenType",
      "value": "mixed"

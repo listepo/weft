@@ -10,10 +10,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T50 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
-| T55 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T56 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T57 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
@@ -157,26 +155,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T50. Richer controls
-The catalog has `select`, `menu`, `radio-group`, `checkbox` and `switch`, but none of the controls richer screens need. Add these kinds, as the creator chose:
-- a slider (a range with min, max and step);
-- a stepper (a number with a step);
-- a date and time picker;
-- a colour picker;
-- a segmented control;
-- a combobox. Say in the plan whether it is a new kind or a mode of `select`, and why.
-For each kind:
-- **Research first:** the WAI-ARIA pattern, the HTML element, the SwiftUI view, and the Figma/Penpot drawing, cited in `research.md`.
-- **SPEC and catalog:** add them to SPEC (kinds, props, events and bindings) and to the catalog.
-- **Every target:** the reference renderer, React, SolidJS, the static page, SwiftUI and the design tools.
-- **Importers:** each importer that can read the kind back reads it.
-Add one or more corpus screens that use every new kind, with data, and cover them wherever the existing corpus is covered:
-- insta snapshots;
-- Chromium screenshots of React, SolidJS and the static page;
-- SwiftUI simulator screenshots;
-- round trips;
-- Figma and Penpot builds over the fakes.
-The coverage test that every kind, prop and enum is used must still pass. Done when the full check exits 0 and new baselines are reviewed.
 ### T51. Glass material tokens
 A frosted-glass surface is expressed as a token, as the creator chose: a `material` token (background blur, tint colour and opacity) that an element takes through its style, like other tokens.
 - **Research:** the DTCG 2025.10 format has no material type, so the plan cites the format, says how the token is written (a Weft extension type or a composite of DTCG types), and keeps standard tools able to read the file.
@@ -200,23 +178,6 @@ Two parts, as the creator chose.
    - Add a small model asset under a compatible licence to the corpus.
 
 Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
-
-### T55. Default cross-axis alignment of a row stack
-
-SPEC lists `align` (`start`/`center`/`end`/`stretch`) on `stack` but gives it no default, so the targets disagree. SwiftUI's `HStack` centres its children, while on the web a flex row stretches them: in todo-list, a button next to a field grows to the field's height (seen in T53).
-
-Following SwiftUI and common design-system practice, the creator chose to define the default in SPEC: a `row` stack without `align` centres its children on the cross axis. A `column` stack keeps its current behaviour, and an explicit `align` always wins.
-
-- SPEC §stack states both defaults.
-- The base stylesheet, the static page and the generated components apply `center` to a row with no `align`.
-- The reference renderer and the Figma/Penpot builds do the same.
-- SwiftUI needs no change, but a test pins it.
-- Importers do not write `align="center"` back for a row when it is the default.
-
-Done when:
-- the affected baselines and snapshots are retaken and reviewed;
-- todo-list's button no longer stretches;
-- the full check exits 0.
 
 ### T56. Narrow the WebAssembly task's inputs
 

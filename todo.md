@@ -4,9 +4,7 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T50. Richer controls
 - T51. Glass material tokens
 - T52. 3D transforms and models
-- T55. Default cross-axis alignment of a row stack
 - T56. Narrow the WebAssembly task's inputs
 - T57. Cache the mcp test task

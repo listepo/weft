@@ -18,7 +18,7 @@ use serde_json::Value as Json;
 use weft_catalog::{Appearance, Token, composite_part, font_weight, token_types};
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, Mode, Node, ValidateOptions,
-    Value, format_value, has_errors, js_number, serialize, validate_document,
+    Value, controls, format_value, has_errors, js_number, serialize, validate_document,
 };
 
 use crate::fill::fill;
@@ -118,7 +118,7 @@ pub fn to_html_with_data(
 /// the page look different from them.
 const LAYOUT_CSS: &str = "\
 .weft-stack { display: flex; flex-direction: column; }
-.weft-row { display: flex; flex-direction: row; }
+.weft-row { display: flex; flex-direction: row; align-items: center; }
 .weft-grid { display: grid; }
 [data-align=\"start\"] { align-items: flex-start; }
 [data-align=\"center\"] { align-items: center; }
@@ -663,9 +663,12 @@ impl Writer<'_> {
             }
             "field" => self.field(n, depth),
             "checkbox" | "switch" => self.toggle(n, depth),
-            "radio-group" => {
+            "radio-group" | "segmented-control" => {
                 let mut b = self.base(n, &["value"], true);
                 b.attrs.set("role", "radiogroup");
+                if n.kind == "segmented-control" {
+                    b.attrs.flag("data-weft-segmented");
+                }
                 let a = Self::finish(n, b);
                 // A `fieldset` would draw a border and padding the components do not.
                 self.open(depth, "div", &a);
@@ -680,7 +683,12 @@ impl Writer<'_> {
                 self.children(n, &inner, depth + 1);
                 self.close(depth, "div");
             }
-            "radio" => self.radio(n, ctx, depth),
+            "radio" | "segment" => self.radio(n, ctx, depth),
+            "slider" => self.slider(n, depth),
+            "stepper" => self.stepper(n, depth),
+            "date-picker" => self.date_picker(n, depth),
+            "color-picker" => self.color_picker(n, depth),
+            "combobox" => self.combobox(n, ctx, depth),
             "select" => {
                 let mut b = self.base(n, &["value", "disabled"], true);
                 if is_true(n.props.get("disabled")) {
@@ -1011,6 +1019,169 @@ impl Writer<'_> {
             self.inline(depth + 1, "div", &ea, &escape_text(&e));
         }
         self.close(depth, "div");
+    }
+
+    /// A number prop of a document that is filled in: a number, or text written as one.
+    fn number(n: &Node, name: &str) -> Option<f64> {
+        match n.props.get(name) {
+            Some(Value::Number(x)) => controls::numeric(Some(*x), None),
+            Some(Value::String(t)) => controls::numeric(None, Some(t)),
+            _ => None,
+        }
+    }
+
+    /// A control in its label with the caption before it: the control carries the accessible
+    /// name, so the caption is hidden from the tree.
+    fn labelled(&mut self, n: &Node, depth: usize, input: Attrs) {
+        self.open(depth, "label", &Attrs::default());
+        self.caption(depth + 1, &Self::label(n));
+        self.inline(depth + 1, "input", &input, "");
+        self.close(depth, "label");
+    }
+
+    fn slider(&mut self, n: &Node, depth: usize) {
+        let mut b = self.base(n, &["value", "min", "max", "step", "disabled"], true);
+        let span = controls::slider_span(
+            Self::number(n, "min"),
+            Self::number(n, "max"),
+            Self::number(n, "step"),
+        );
+        b.attrs.set("type", "range");
+        b.attrs.set("min", js_number(span.min));
+        b.attrs.set("max", js_number(span.max));
+        b.attrs.set("step", js_number(span.step));
+        b.attrs.set(
+            "value",
+            js_number(controls::slider_value(Self::number(n, "value"), span)),
+        );
+        if is_true(n.props.get("disabled")) {
+            b.attrs.flag("disabled");
+        }
+        self.labelled(n, depth, Self::finish(n, b));
+    }
+
+    fn stepper(&mut self, n: &Node, depth: usize) {
+        let mut b = self.base(n, &["value", "min", "max", "step", "disabled"], true);
+        let bounds = controls::stepper_bounds(
+            Self::number(n, "min"),
+            Self::number(n, "max"),
+            Self::number(n, "step"),
+        );
+        let disabled = is_true(n.props.get("disabled"));
+        b.attrs.set("type", "number");
+        if let Some(min) = bounds.min {
+            b.attrs.set("min", js_number(min));
+        }
+        if let Some(max) = bounds.max {
+            b.attrs.set("max", js_number(max));
+        }
+        b.attrs.set("step", js_number(bounds.step));
+        b.attrs.set(
+            "value",
+            js_number(controls::stepper_value(Self::number(n, "value"), bounds)),
+        );
+        if disabled {
+            b.attrs.flag("disabled");
+        }
+        let input = Self::finish(n, b);
+        self.open(depth, "label", &Attrs::default());
+        self.caption(depth + 1, &Self::label(n));
+        let mut wrapper = Attrs::default();
+        wrapper.flag("data-weft-stepper");
+        self.open(depth + 1, "span", &wrapper);
+        // The buttons are for the pointer; the number input steps with the arrow keys, so they
+        // stay out of the tab order and the accessibility tree (APG spinbutton).
+        let button = |which: &str| {
+            let mut a = Attrs::default();
+            a.set("type", "button");
+            a.set("tabindex", "-1");
+            a.set("aria-hidden", "true");
+            a.set("data-weft-step", which);
+            if disabled {
+                a.flag("disabled");
+            }
+            a
+        };
+        self.inline(depth + 2, "button", &button("down"), "\u{2212}");
+        self.inline(depth + 2, "input", &input, "");
+        self.inline(depth + 2, "button", &button("up"), "+");
+        self.close(depth + 1, "span");
+        self.close(depth, "label");
+    }
+
+    fn date_picker(&mut self, n: &Node, depth: usize) {
+        let mut b = self.base(n, &["type", "value", "min", "max", "disabled"], true);
+        let kind = controls::DateType::of(&literal_text(n.props.get("type")).unwrap_or_default());
+        let text = |name: &str| {
+            controls::date_text(kind, &literal_text(n.props.get(name)).unwrap_or_default())
+        };
+        b.attrs.set(
+            "type",
+            match kind {
+                controls::DateType::Date => "date",
+                controls::DateType::Time => "time",
+                controls::DateType::DateTime => "datetime-local",
+            },
+        );
+        for bound in ["min", "max"] {
+            let value = text(bound);
+            if !value.is_empty() {
+                b.attrs.set(bound, value);
+            }
+        }
+        b.attrs.set("value", text("value"));
+        if is_true(n.props.get("disabled")) {
+            b.attrs.flag("disabled");
+        }
+        self.labelled(n, depth, Self::finish(n, b));
+    }
+
+    fn color_picker(&mut self, n: &Node, depth: usize) {
+        let mut b = self.base(n, &["value", "disabled"], true);
+        b.attrs.set("type", "color");
+        b.attrs.set(
+            "value",
+            controls::color_value(&literal_text(n.props.get("value")).unwrap_or_default()),
+        );
+        if is_true(n.props.get("disabled")) {
+            b.attrs.flag("disabled");
+        }
+        self.labelled(n, depth, Self::finish(n, b));
+    }
+
+    /// An editable combobox: the text input with a `datalist` of its options, linked by id.
+    fn combobox(&mut self, n: &Node, ctx: &Ctx, depth: usize) {
+        let mut b = self.base(n, &["value", "placeholder", "disabled"], true);
+        let list = n.id.as_ref().map(|id| format!("weft-{id}-options"));
+        if let Some(list) = &list {
+            b.attrs.set("list", list.clone());
+        }
+        if let Some(p) = literal_text(n.props.get("placeholder")).filter(|p| !p.is_empty()) {
+            b.attrs.set("placeholder", p);
+        }
+        if is_true(n.props.get("disabled")) {
+            b.attrs.flag("disabled");
+        }
+        b.attrs.set(
+            "value",
+            literal_text(n.props.get("value")).unwrap_or_default(),
+        );
+        let input = Self::finish(n, b);
+        self.open(depth, "label", &Attrs::default());
+        self.caption(depth + 1, &Self::label(n));
+        self.inline(depth + 1, "input", &input, "");
+        if let Some(list) = list {
+            let mut a = Attrs::default();
+            a.set("id", list);
+            self.open(depth + 1, "datalist", &a);
+            let inner = Ctx {
+                select: None,
+                ..ctx.clone()
+            };
+            self.children(n, &inner, depth + 2);
+            self.close(depth + 1, "datalist");
+        }
+        self.close(depth, "label");
     }
 
     fn toggle(&mut self, n: &Node, depth: usize) {

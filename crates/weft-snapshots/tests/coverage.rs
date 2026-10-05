@@ -96,7 +96,7 @@ fn every_corpus_screen_is_strictly_valid_and_canonical() {
     let catalog = common::catalog();
     let tokens = common::tokens();
     let screens = common::corpus();
-    assert_eq!(screens.len(), 17);
+    assert_eq!(screens.len(), 19);
     for screen in screens {
         let (document, diagnostics) = common::parse_strict(&screen.markup, &catalog, &tokens);
         assert!(

@@ -19,7 +19,7 @@ FRAME "screen#profile" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxis
     | weft.origin = layer(heading#links-title)
     | weft.source = {"kind":"heading","id":"links-title","props":{"level":2},"children":["Links"],"shown":{"text":"Links"}}
     TEXT "text" chars="Links" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
-  FRAME "stack#links" layoutMode="HORIZONTAL" itemSpacing=16 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
+  FRAME "stack#links" layoutMode="HORIZONTAL" itemSpacing=16 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
     | weft.origin = layer(stack#links)
     | weft.source = {"kind":"stack","id":"links","props":{"direction":"row","gap":{"token":"space.md"}}}
     | weft.style = [[],[],0,[0,0,0,0],null]

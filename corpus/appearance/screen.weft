@@ -1,0 +1,20 @@
+<screen id="appearance" label="Appearance" weft="0.1">
+  <heading id="title" level="1">Appearance</heading>
+  <stack id="options" align="stretch" gap="{token.space.md}">
+    <segmented-control id="theme" label="Theme" value="{$.theme}">
+      <segment id="theme-light" value="light">Light</segment>
+      <segment id="theme-dark" disabled="true" value="dark">Dark</segment>
+      <segment id="theme-auto" text="{$.automatic}" value="auto"/>
+    </segmented-control>
+    <slider id="size" label="Text size" max="24" min="12" value="{$.size}"/>
+    <slider id="contrast" disabled="true" label="Contrast" value="{$.contrast}"/>
+    <stepper id="columns" label="Columns" value="{$.columns}"/>
+    <stepper id="zoom" disabled="{$.locked}" label="Zoom" max="3" step="0.5" value="{$.zoom}"/>
+    <color-picker id="accent" disabled="true" label="Accent colour" value="#d946ef"/>
+    <date-picker id="since" disabled="true" label="Member since" type="date" value="2024-05-17"/>
+    <combobox id="font" disabled="true" label="Font" value="Inter">
+      <option id="font-inter" value="Inter">Inter</option>
+      <option id="font-mono" value="Menlo">Menlo</option>
+    </combobox>
+  </stack>
+</screen>

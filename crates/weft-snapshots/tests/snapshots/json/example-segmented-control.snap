@@ -1,0 +1,61 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-segmented-control as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Calendar"
+    },
+    "children": [
+      {
+        "kind": "segmented-control",
+        "id": "view",
+        "props": {
+          "label": "View",
+          "value": {
+            "bind": "$.view"
+          }
+        },
+        "on": {
+          "change": "calendar.update"
+        },
+        "children": [
+          {
+            "kind": "segment",
+            "id": "view-day",
+            "props": {
+              "value": "day"
+            },
+            "children": [
+              "Day"
+            ]
+          },
+          {
+            "kind": "segment",
+            "id": "view-week",
+            "props": {
+              "value": "week"
+            },
+            "children": [
+              "Week"
+            ]
+          },
+          {
+            "kind": "segment",
+            "id": "view-month",
+            "props": {
+              "value": "month"
+            },
+            "children": [
+              "Month"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -40,7 +40,7 @@ export default function WeftScreen(props: WeftProps) {
   return (
     <main data-weft-id="leaderboard" aria-label="Leaderboard">
       <h1 data-weft-id="title">Leaderboard</h1>
-      <div data-weft-id="leader" style={{ gap: "var(--weft-space-xs)", display: "flex", "flex-direction": "row" }}>
+      <div data-weft-id="leader" style={{ gap: "var(--weft-space-xs)", display: "flex", "flex-direction": "row", "align-items": "center" }}>
         <div data-weft-id="leader-label">In the lead:</div>
         <div data-weft-id="leader-name">
           {!(_text(_get(props.data, ["players","0","name"])).trim() === "") ? _squash(_text(_get(props.data, ["players","0","name"]))) : ""}

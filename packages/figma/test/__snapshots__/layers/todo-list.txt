@@ -11,7 +11,7 @@ FRAME "screen#todos" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
     | weft.origin = layer(form#add-form)
     | weft.source = {"kind":"form","id":"add-form","on":{"submit":"todo.add"}}
     | weft.style = [[],[],0,[0,0,0,0],8]
-    FRAME "stack#add-row" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+    FRAME "stack#add-row" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
       | weft.origin = layer(stack#add-row)
       | weft.source = {"kind":"stack","id":"add-row","props":{"direction":"row","gap":{"token":"space.sm"}}}
       | weft.style = [[],[],0,[0,0,0,0],null]
@@ -45,7 +45,7 @@ FRAME "screen#todos" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
           | weft.origin = layer(button#todo-remove)
           | weft.source = {"kind":"button","id":"todo-remove","on":{"press":"todo.remove"},"children":["Remove"],"shown":{"text":"Remove"}}
           TEXT "text" chars="Remove" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
-  FRAME "stack#summary" layoutMode="HORIZONTAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
+  FRAME "stack#summary" layoutMode="HORIZONTAL" itemSpacing=4 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
     | weft.origin = layer(stack#summary)
     | weft.source = {"kind":"stack","id":"summary","props":{"direction":"row","gap":{"token":"space.xs"}}}
     | weft.style = [[],[],0,[0,0,0,0],null]

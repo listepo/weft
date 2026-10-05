@@ -9913,6 +9913,118 @@
   },
   {
    "kind": "screen",
+   "parent": "combobox",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "weft": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required weft is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "screen",
+   "parent": "slider",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "weft": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required weft is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "screen",
+   "parent": "stepper",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "weft": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required weft is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "screen",
+   "parent": "date-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "weft": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required weft is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "screen",
+   "parent": "color-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "weft": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required weft is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "screen",
+   "parent": "segmented-control",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "weft": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required weft is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "screen",
+   "parent": "segment",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "weft": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required weft is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "screen",
    "parent": "list",
    "root": false,
    "name": "Pick me",
@@ -10681,6 +10793,230 @@
   },
   {
    "kind": "grid",
+   "parent": "combobox",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "combobox",
+   "root": true,
+   "name": "",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "slider",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "slider",
+   "root": true,
+   "name": "",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "stepper",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "stepper",
+   "root": true,
+   "name": "",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "date-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "date-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "color-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "color-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "segmented-control",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "segmented-control",
+   "root": true,
+   "name": "",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "segment",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
+   "parent": "segment",
+   "root": true,
+   "name": "",
+   "props": {
+    "columns": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required columns is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "grid",
    "parent": "list",
    "root": false,
    "name": "Pick me",
@@ -11641,6 +11977,230 @@
   },
   {
    "kind": "heading",
+   "parent": "combobox",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "combobox",
+   "root": true,
+   "name": "",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "slider",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "slider",
+   "root": true,
+   "name": "",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "stepper",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "stepper",
+   "root": true,
+   "name": "",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "date-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "date-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "color-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "color-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "segmented-control",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "segmented-control",
+   "root": true,
+   "name": "",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "segment",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
+   "parent": "segment",
+   "root": true,
+   "name": "",
+   "props": {
+    "level": 1
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required level is not in the input; 1 stands in"
+    }
+   ]
+  },
+  {
+   "kind": "heading",
    "parent": "list",
    "root": false,
    "name": "Pick me",
@@ -12586,6 +13146,230 @@
   {
    "kind": "image",
    "parent": "option",
+   "root": true,
+   "name": "",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "combobox",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "combobox",
+   "root": true,
+   "name": "",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "slider",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "slider",
+   "root": true,
+   "name": "",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "stepper",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "stepper",
+   "root": true,
+   "name": "",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "date-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "date-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "color-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "color-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "segmented-control",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "segmented-control",
+   "root": true,
+   "name": "",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "segment",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "src": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required src is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "image",
+   "parent": "segment",
    "root": true,
    "name": "",
    "props": {
@@ -13561,6 +14345,230 @@
   },
   {
    "kind": "radio",
+   "parent": "combobox",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "combobox",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "slider",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "slider",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "stepper",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "stepper",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "date-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "date-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "color-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "color-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "segmented-control",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "segmented-control",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "segment",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
+   "parent": "segment",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "radio",
    "parent": "list",
    "root": false,
    "name": "Pick me",
@@ -14521,6 +15529,230 @@
   },
   {
    "kind": "option",
+   "parent": "combobox",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "combobox",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "slider",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "slider",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "stepper",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "stepper",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "date-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "date-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "color-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "color-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "segmented-control",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "segmented-control",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "segment",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
+   "parent": "segment",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "option",
    "parent": "list",
    "root": false,
    "name": "Pick me",
@@ -14889,6 +16121,1190 @@
   },
   {
    "kind": "option",
+   "parent": "menu-item",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": null,
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": null,
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "screen",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "screen",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "stack",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "stack",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "grid",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "grid",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "section",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "section",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "heading",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "heading",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "text",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "text",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "image",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "image",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "link",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "link",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "button",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "button",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "form",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "form",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "field",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "field",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "checkbox",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "checkbox",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "switch",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "switch",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "radio-group",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "radio-group",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "radio",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "radio",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "select",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "select",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "option",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "option",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "combobox",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "combobox",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "slider",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "slider",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "stepper",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "stepper",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "date-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "date-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "color-picker",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "color-picker",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "segmented-control",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": "pick-me"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"pick-me\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "segmented-control",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": "value"
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"value\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "segment",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "segment",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "list",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "list",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "item",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "item",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "table",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "table",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "column",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "column",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "row",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "row",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "cell",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "cell",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "tabs",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "tabs",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "tab",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "tab",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "dialog",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "dialog",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "alert",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "alert",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "menu",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "menu",
+   "root": true,
+   "name": "",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
+   "parent": "menu-item",
+   "root": false,
+   "name": "Pick me",
+   "props": {
+    "value": ""
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/x",
+     "note": "required value is not in the input; \"\" stands in"
+    }
+   ]
+  },
+  {
+   "kind": "segment",
    "parent": "menu-item",
    "root": true,
    "name": "",

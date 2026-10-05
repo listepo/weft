@@ -1,0 +1,53 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-combobox as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Shipping"
+    },
+    "children": [
+      {
+        "kind": "combobox",
+        "id": "city",
+        "props": {
+          "disabled": false,
+          "label": "City",
+          "placeholder": "Type a city",
+          "value": {
+            "bind": "$.city"
+          }
+        },
+        "on": {
+          "change": "shipping.update"
+        },
+        "children": [
+          {
+            "kind": "option",
+            "id": "city-lisbon",
+            "props": {
+              "value": "Lisbon"
+            },
+            "children": [
+              "Portugal"
+            ]
+          },
+          {
+            "kind": "option",
+            "id": "city-madrid",
+            "props": {
+              "value": "Madrid"
+            },
+            "children": [
+              "Spain"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

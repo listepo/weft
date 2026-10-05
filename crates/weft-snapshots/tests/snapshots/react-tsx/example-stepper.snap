@@ -1,0 +1,87 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-stepper as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _num(v: unknown, integer: boolean, min?: number, max?: number): unknown {
+  if (typeof v !== "number") return v;
+  if (!Number.isFinite(v)) return undefined;
+  if (integer) v = Math.round(v);
+  if (min !== undefined) v = Math.max(v, min);
+  if (max !== undefined) v = Math.min(v, max);
+  return v;
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _numeric(v: unknown): number | undefined {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(v.trim())) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+function _tidy(x: number, ...inputs: number[]): number {
+  const d = (y: number): number => {
+    const [m = "", e] = String(y).split("e");
+    return Math.max(0, (m.split(".")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));
+  };
+  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));
+}
+
+function _bounds(min: unknown, max: unknown, step: unknown): { min?: number; max?: number; step: number } {
+  const lo = _numeric(min);
+  const hi = _numeric(max);
+  const st = _numeric(step);
+  const b: { min?: number; max?: number; step: number } = { step: st !== undefined && st > 0 ? st : 1 };
+  if (lo !== undefined) b.min = lo;
+  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);
+  return b;
+}
+
+function _clamp(v: number, b: { min?: number; max?: number; step: number }): number {
+  if (b.min !== undefined) v = Math.max(v, b.min);
+  if (b.max !== undefined) v = Math.min(v, b.max);
+  return v;
+}
+
+function _count(value: unknown, b: { min?: number; max?: number; step: number }): number {
+  return _clamp(_numeric(value) ?? 0, b);
+}
+
+function _step(current: number, direction: 1 | -1, b: { min?: number; max?: number; step: number }): number {
+  return _tidy(_clamp(current + direction * b.step, b), current, b.step);
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="root" aria-label="Order">
+      <label>
+        <span aria-hidden="true">Quantity</span>
+        {(() => {
+          const _b = _bounds(1, 10, 1);
+          return (
+            <span data-weft-stepper="">
+              <button type="button" tabIndex={-1} aria-hidden="true" data-weft-step="down" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector("input"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.quantity, false, undefined, undefined), _b), -1, _b); onChange?.("$.quantity", _n); _act(actions, { id: "quantity", action: "order.update" }); }}>{"−"}</button>
+              <input data-weft-id="quantity" type="number" aria-label="Quantity" min={_b.min} max={_b.max} step={_b.step} value={String(_count(_num(data?.quantity, false, undefined, undefined), _b))} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.("$.quantity", _v); _act(actions, { id: "quantity", action: "order.update" }); }} />
+              <button type="button" tabIndex={-1} aria-hidden="true" data-weft-step="up" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector("input"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.quantity, false, undefined, undefined), _b), 1, _b); onChange?.("$.quantity", _n); _act(actions, { id: "quantity", action: "order.update" }); }}>+</button>
+            </span>
+          );
+        })()}
+      </label>
+    </main>
+  );
+}

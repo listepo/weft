@@ -14,6 +14,8 @@ pub enum Leaf {
     Text,
     Bool,
     Int,
+    /// What a slider or stepper reads and writes: a fraction is a legal value.
+    Double,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -21,6 +23,7 @@ pub enum Ty {
     String,
     Bool,
     Int,
+    Double,
     Struct(usize),
     Array(Box<Ty>),
 }
@@ -55,6 +58,7 @@ pub fn prop_leaf(catalog: &Catalog, kind: &str, prop: &str) -> Option<(Leaf, boo
     let leaf = match def.kind {
         PropType::String | PropType::Enum => Leaf::Text,
         PropType::Boolean => Leaf::Bool,
+        PropType::Number if matches!(kind, "slider" | "stepper") => Leaf::Double,
         PropType::Number => Leaf::Int,
         PropType::Token => return None,
     };
@@ -216,10 +220,17 @@ impl Shapes {
                     "a data path is written by a control and also holds a list or an object",
                 ));
             }
-            if shape.writes.contains(&Leaf::Text) && shape.writes.contains(&Leaf::Bool) {
+            let written = |leaf| shape.writes.contains(&leaf);
+            if written(Leaf::Text) && written(Leaf::Bool) {
                 problems.push(Unsupported::new(
                     "$",
                     "a data path is written both as text and as a flag",
+                ));
+            } else if written(Leaf::Double) && (written(Leaf::Text) || written(Leaf::Bool)) {
+                // One Swift type per path: a slider's `Binding<Double>` cannot also be text.
+                problems.push(Unsupported::new(
+                    "$",
+                    "a data path is written both as a number and as text or a flag",
                 ));
             }
             self.types[at] = ty;
@@ -248,15 +259,20 @@ impl Shapes {
     }
 }
 
-/// A control's write decides the type; otherwise text wins over numbers and numbers over flags,
+/// A control's write decides the type; otherwise text wins over numbers (fractions over whole
+/// numbers) and numbers over flags,
 /// because text can always be tested and converted where the others are read.
 fn leaf_type(reads: &[Leaf], writes: &[Leaf]) -> Ty {
     if writes.contains(&Leaf::Text) {
         Ty::String
     } else if writes.contains(&Leaf::Bool) {
         Ty::Bool
+    } else if writes.contains(&Leaf::Double) {
+        Ty::Double
     } else if reads.contains(&Leaf::Text) {
         Ty::String
+    } else if reads.contains(&Leaf::Double) {
+        Ty::Double
     } else if reads.contains(&Leaf::Int) {
         Ty::Int
     } else {

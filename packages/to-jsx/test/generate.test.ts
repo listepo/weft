@@ -7,7 +7,7 @@ import fc from "fast-check";
 import { parseSync } from "oxc-parser";
 import { renderToStaticMarkup } from "react-dom/server";
 import { RUNTIME, toJsx } from "../src/index.ts";
-import { load, markup, normalizeMarkup } from "./compile.ts";
+import { load, loadSolid, markup, normalizeMarkup, type Props } from "./compile.ts";
 
 type El = {
   kind: string;
@@ -479,4 +479,138 @@ test("runtime: _text, _on, _level, _num, _squash, _float and _get", () => {
     [get({ a: [{ b: 1 }] }, ["a", "0", "b"]), get({}, ["constructor"]), get("abc", ["length"])],
     [1, undefined, undefined],
   );
+});
+
+test("the number, date, colour and combobox controls read bound data like the renderer", async () => {
+  const d = doc(
+    {
+      kind: "slider",
+      id: "sl",
+      props: {
+        label: "S",
+        value: { bind: "$.n" },
+        min: { bind: "$.lo" },
+        max: { bind: "$.hi" },
+        step: { bind: "$.st" },
+      },
+    },
+    { kind: "slider", id: "sl2", props: { label: "S2", value: 3, min: 1, max: 9, step: 4 } },
+    {
+      kind: "stepper",
+      id: "sp",
+      props: {
+        label: "P",
+        value: { bind: "$.n" },
+        min: { bind: "$.lo" },
+        max: { bind: "$.hi" },
+        step: { bind: "$.st" },
+      },
+    },
+    { kind: "stepper", id: "sp2", props: { label: "P2", disabled: true } },
+    {
+      kind: "date-picker",
+      id: "dp",
+      props: {
+        label: "D",
+        type: { bind: "$.t" },
+        value: { bind: "$.d" },
+        min: { bind: "$.dmin" },
+        max: "2030-12-31",
+      },
+    },
+    {
+      kind: "date-picker",
+      id: "dp2",
+      props: { label: "D2", type: "datetime", value: "2026-10-05T09:30" },
+    },
+    { kind: "color-picker", id: "cp", props: { label: "C", value: { bind: "$.c" } } },
+    {
+      kind: "combobox",
+      id: "cb",
+      props: { label: "B", value: { bind: "$.b" }, placeholder: { bind: "$.ph" } },
+      on: { change: "typed" },
+      children: [
+        { kind: "option", id: "o1", props: { value: "apple" }, children: ["Apple"] },
+        {
+          kind: "each",
+          id: "e",
+          props: { in: { bind: "$.items" }, as: "it" },
+          children: [{ kind: "option", id: "o2", props: { value: { bind: "$it" } } }],
+        },
+      ],
+    },
+    {
+      kind: "segmented-control",
+      id: "sc",
+      props: { label: "V", value: { bind: "$.seg" } },
+      on: { change: "chose" },
+      children: [
+        { kind: "segment", id: "sg1", props: { value: "day" }, children: ["Day"] },
+        {
+          kind: "segment",
+          id: "sg2",
+          props: { value: "week", disabled: true },
+          children: ["Week"],
+        },
+      ],
+    },
+  );
+  const datas = [
+    {
+      n: 7.3,
+      lo: 2,
+      hi: 12,
+      st: 2.5,
+      t: "time",
+      d: "09:30",
+      dmin: "08:00",
+      c: "#ABCDEF",
+      b: "app",
+      ph: "Pick",
+      items: ["x", "y"],
+      seg: "week",
+    },
+    {
+      n: "5",
+      lo: "1",
+      hi: 0,
+      st: 0,
+      t: "datetime",
+      d: "2026-02-30T10:00",
+      dmin: "x",
+      c: "red",
+      b: 4,
+      items: "none",
+      seg: "",
+    },
+    {
+      n: 1e21,
+      lo: "0x10",
+      hi: "Infinity",
+      st: -3,
+      t: "weird",
+      d: "2026-10-05",
+      c: "#12345",
+      items: [],
+    },
+    { n: 0.1, lo: 0, hi: 1, st: 0.1 },
+    {},
+  ];
+  for (const framework of ["react", "solid"] as const) {
+    const source = toJsx(d, { catalog: coreCatalog, framework });
+    const run: (props: Props) => string =
+      framework === "react"
+        ? (
+            (c) => (props: Props) =>
+              markup(c, props)
+          )(await load(source))
+        : await loadSolid(source);
+    for (const data of datas) {
+      assert.equal(
+        normalizeMarkup(run({ data })),
+        normalizeMarkup(renderToStaticMarkup(render(d, { catalog: coreCatalog, data }))),
+        `${framework} ${JSON.stringify(data)}`,
+      );
+    }
+  }
 });

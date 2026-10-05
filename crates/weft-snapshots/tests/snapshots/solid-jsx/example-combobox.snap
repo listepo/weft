@@ -1,0 +1,42 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-combobox as solid-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="root" aria-label="Shipping">
+      {(() => {
+        const _o = [
+          { value: "Lisbon", el: (
+            <option data-weft-id="city-lisbon" value="Lisbon">Portugal</option>
+          ) },
+          { value: "Madrid", el: (
+            <option data-weft-id="city-madrid" value="Madrid">Spain</option>
+          ) },
+        ];
+        return (
+          <label>
+            <span aria-hidden="true">City</span>
+            <input data-weft-id="city" aria-label="City" list={"weft-city-options"} placeholder="Type a city" value={_text(props.data?.city)} onInput={(_e) => { const _v = _e.currentTarget.value; if (_v !== undefined) props.onChange?.("$.city", _v); _act(props.actions, { id: "city", action: "shipping.update" }); }} />
+            <datalist id={"weft-city-options"}>
+              {_o.map((_x) => _x.el)}
+            </datalist>
+          </label>
+        );
+      })()}
+    </main>
+  );
+}

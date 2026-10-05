@@ -1,0 +1,6 @@
+<screen id="root" label="Shipping" weft="0.1">
+  <combobox id="city" disabled="false" label="City" placeholder="Type a city" value="{$.city}" on-change="shipping.update">
+    <option id="city-lisbon" value="Lisbon">Portugal</option>
+    <option id="city-madrid" value="Madrid">Spain</option>
+  </combobox>
+</screen>

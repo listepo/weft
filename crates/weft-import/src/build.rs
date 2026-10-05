@@ -468,7 +468,7 @@ fn convert_node<'c>(s: &Sem, parent: &Parent<'c>, ctx: &mut Ctx<'c>) -> Option<P
             hinted,
         });
     }
-    let Some(target) = ctx.index.resolve(&s.role, s.kind.as_deref()) else {
+    let Some(target) = ctx.index.resolve(&s.role, s.kind.as_deref(), &parent.kind) else {
         return Some(Placed {
             node: extension(s, parent, ctx, None),
             slot: None,

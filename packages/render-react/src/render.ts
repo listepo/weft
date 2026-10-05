@@ -12,7 +12,11 @@ import {
   type ReactNode,
 } from "react";
 import {
+  colorValue,
   contentText,
+  dateText,
+  dateType,
+  dateValue,
   dialogOpen,
   expandRoot,
   fieldInvalid,
@@ -21,13 +25,19 @@ import {
   headingLevel,
   label,
   nodes,
+  numeric,
   options,
   prop,
   radioChecked,
   regions,
   selectedTab,
   showsEmpty,
+  sliderSpan,
+  sliderValue,
   state,
+  stepped,
+  stepperBounds,
+  stepperValue,
   text,
   type Inst,
   type InstChild,
@@ -162,9 +172,12 @@ function layoutStyle(n: Inst, ctx: Ctx): CSSProperties {
     return style;
   }
   style.display = "flex";
-  style.flexDirection = text(n, "direction") === "row" ? "row" : "column";
+  const row = text(n, "direction") === "row";
+  style.flexDirection = row ? "row" : "column";
   const align = text(n, "align");
+  // SPEC §5.1: a row without a valid `align` centres its children across the row.
   if (Object.hasOwn(ALIGN, align)) style.alignItems = ALIGN[align];
+  else if (row) style.alignItems = "center";
   if (flag(n, "wrap")) style.flexWrap = "wrap";
   return style;
 }
@@ -211,14 +224,30 @@ function renderNode(n: Inst, ctx: Ctx): ReactNode {
     case "switch":
       return toggle(n, ctx);
     case "radio-group":
+    case "segmented-control":
       return h(
         "div",
-        { ...base(n), role: "radiogroup" },
+        {
+          ...base(n),
+          role: "radiogroup",
+          "data-weft-segmented": n.kind === "segmented-control" ? "" : undefined,
+        },
         caption(n),
         ...content(n, { ...ctx, group: n }),
       );
     case "radio":
+    case "segment":
       return radio(n, ctx);
+    case "slider":
+      return slider(n, ctx);
+    case "stepper":
+      return stepper(n, ctx);
+    case "date-picker":
+      return datePicker(n, ctx);
+    case "color-picker":
+      return colorPicker(n, ctx);
+    case "combobox":
+      return combobox(n, ctx);
     case "select":
       return select(n, ctx);
     case "option":
@@ -467,6 +496,145 @@ function select(n: Inst, ctx: Ctx): ReactNode {
     ),
   );
   return h("label", null, caption(n), control);
+}
+
+// A control whose value is bound is controlled, so what it shows follows the data; a literal one
+// only starts there. Either way a change reports the new value and fires `change`.
+function valued(
+  ctx: Ctx,
+  n: Inst,
+  shown: string,
+  read: (target: { value: string }) => unknown,
+): Attrs {
+  if (!isBinding(n.props["value"]))
+    return { defaultValue: shown, onChange: () => fire(ctx, n, "change") };
+  return {
+    value: shown,
+    onChange: (e: { currentTarget: { value: string } }) => {
+      const next = read(e.currentTarget);
+      if (next !== undefined) write(ctx, n, "value", next);
+      fire(ctx, n, "change");
+    },
+  };
+}
+
+// SPEC §5.1 notes: the bounds and the value a range input shows are written out here rather than
+// left to the browser, so every target shows the same number.
+function slider(n: Inst, ctx: Ctx): ReactNode {
+  const { min, max, step } = sliderSpan(n);
+  const control = h("input", {
+    ...base(n, false),
+    type: "range",
+    "aria-label": label(n),
+    min: String(min),
+    max: String(max),
+    step: String(step),
+    disabled: flag(n, "disabled"),
+    ...valued(ctx, n, String(sliderValue(n)), (t) => numeric(t.value)),
+  });
+  return h("label", null, caption(n), control);
+}
+
+// The plus and minus buttons are for the pointer; the number input already steps with the arrow
+// keys, so the buttons stay out of the tab order and the accessibility tree (APG spinbutton).
+function stepper(n: Inst, ctx: Ctx): ReactNode {
+  const bounds = stepperBounds(n);
+  const bound = isBinding(n.props["value"]);
+  const press = (direction: 1 | -1) => (e: { currentTarget: HTMLElement }) => {
+    const input = e.currentTarget.parentElement?.querySelector("input");
+    const next = stepped(numeric(input?.value) ?? stepperValue(n), direction, bounds);
+    // A literal value has no data to follow, so the shown number is set directly.
+    if (input && !bound) input.value = String(next);
+    write(ctx, n, "value", next);
+    fire(ctx, n, "change");
+  };
+  const disabled = flag(n, "disabled");
+  const button = (direction: 1 | -1, name: string, sign: string) =>
+    h(
+      "button",
+      {
+        type: "button",
+        tabIndex: -1,
+        "aria-hidden": "true",
+        "data-weft-step": name,
+        disabled,
+        onClick: press(direction),
+      },
+      sign,
+    );
+  const control = h("input", {
+    ...base(n, false),
+    type: "number",
+    "aria-label": label(n),
+    min: bounds.min === undefined ? undefined : String(bounds.min),
+    max: bounds.max === undefined ? undefined : String(bounds.max),
+    step: String(bounds.step),
+    disabled,
+    ...valued(ctx, n, String(stepperValue(n)), (t) => numeric(t.value)),
+  });
+  return h(
+    "label",
+    null,
+    caption(n),
+    h(
+      "span",
+      { "data-weft-stepper": "" },
+      button(-1, "down", "\u2212"),
+      control,
+      button(1, "up", "+"),
+    ),
+  );
+}
+
+const DATE_INPUT = { date: "date", time: "time", datetime: "datetime-local" } as const;
+
+function datePicker(n: Inst, ctx: Ctx): ReactNode {
+  const control = h("input", {
+    ...base(n, false),
+    type: DATE_INPUT[dateType(n)],
+    "aria-label": label(n),
+    min: dateValue(n, "min") || undefined,
+    max: dateValue(n, "max") || undefined,
+    disabled: flag(n, "disabled"),
+    ...valued(ctx, n, dateValue(n, "value"), (t) => dateText(dateType(n), t.value)),
+  });
+  return h("label", null, caption(n), control);
+}
+
+function colorPicker(n: Inst, ctx: Ctx): ReactNode {
+  const control = h("input", {
+    ...base(n, false),
+    type: "color",
+    "aria-label": label(n),
+    disabled: flag(n, "disabled"),
+    ...valued(ctx, n, colorValue(n), (t) => t.value),
+  });
+  return h("label", null, caption(n), control);
+}
+
+// An editable combobox is the native text input with a datalist of suggestions, linked by id.
+// Only options become suggestions, as the HTML parser drops anything else inside a datalist.
+function combobox(n: Inst, ctx: Ctx): ReactNode {
+  const list = n.id === "" ? undefined : `${ctx.prefix}${n.id}-options`;
+  const control = h("input", {
+    ...base(n, false),
+    "aria-label": label(n),
+    list,
+    placeholder: text(n, "placeholder") || undefined,
+    disabled: flag(n, "disabled"),
+    ...valued(ctx, n, text(n, "value"), (t) => t.value),
+  });
+  const suggestions =
+    list === undefined
+      ? null
+      : h(
+          "datalist",
+          { id: list },
+          ...options(n).map((o) =>
+            h("option", { ...base(o), value: text(o, "value") }, contentText(o.children)),
+          ),
+        );
+  return h("label", null, caption(n), control, suggestions);
 }
 
 // SPEC §5.1: `column` children form the header row; the renderer emits it in <thead>.

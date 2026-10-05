@@ -1,0 +1,79 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-stepper as react-jsx
+---
+function _num(v, integer, min, max) {
+  if (typeof v !== "number") return v;
+  if (!Number.isFinite(v)) return undefined;
+  if (integer) v = Math.round(v);
+  if (min !== undefined) v = Math.max(v, min);
+  if (max !== undefined) v = Math.min(v, max);
+  return v;
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _numeric(v) {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(v.trim())) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+function _tidy(x, ...inputs) {
+  const d = (y) => {
+    const [m = "", e] = String(y).split("e");
+    return Math.max(0, (m.split(".")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));
+  };
+  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));
+}
+
+function _bounds(min, max, step) {
+  const lo = _numeric(min);
+  const hi = _numeric(max);
+  const st = _numeric(step);
+  const b = { step: st !== undefined && st > 0 ? st : 1 };
+  if (lo !== undefined) b.min = lo;
+  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);
+  return b;
+}
+
+function _clamp(v, b) {
+  if (b.min !== undefined) v = Math.max(v, b.min);
+  if (b.max !== undefined) v = Math.min(v, b.max);
+  return v;
+}
+
+function _count(value, b) {
+  return _clamp(_numeric(value) ?? 0, b);
+}
+
+function _step(current, direction, b) {
+  return _tidy(_clamp(current + direction * b.step, b), current, b.step);
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Order">
+      <label>
+        <span aria-hidden="true">Quantity</span>
+        {(() => {
+          const _b = _bounds(1, 10, 1);
+          return (
+            <span data-weft-stepper="">
+              <button type="button" tabIndex={-1} aria-hidden="true" data-weft-step="down" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector("input"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.quantity, false, undefined, undefined), _b), -1, _b); onChange?.("$.quantity", _n); _act(actions, { id: "quantity", action: "order.update" }); }}>{"−"}</button>
+              <input data-weft-id="quantity" type="number" aria-label="Quantity" min={_b.min} max={_b.max} step={_b.step} value={String(_count(_num(data?.quantity, false, undefined, undefined), _b))} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.("$.quantity", _v); _act(actions, { id: "quantity", action: "order.update" }); }} />
+              <button type="button" tabIndex={-1} aria-hidden="true" data-weft-step="up" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector("input"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.quantity, false, undefined, undefined), _b), 1, _b); onChange?.("$.quantity", _n); _act(actions, { id: "quantity", action: "order.update" }); }}>+</button>
+            </span>
+          );
+        })()}
+      </label>
+    </main>
+  );
+}

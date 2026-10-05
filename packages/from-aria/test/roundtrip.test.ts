@@ -154,6 +154,13 @@ function assertValid(result: ImportResult): void {
 // element is lost in both imports. Pinned with `test.fails` so a fix shows up as a failure here.
 const TABLE_EMPTY_SLOT = new Set(["orders"]);
 
+// Known gap: an accessibility snapshot carries a role and a name, not the markup around it. A
+// segmented control reads back as a radio group, a stepper, date picker and colour picker as
+// fields, a combobox as a select, and a slider loses the range its value was inside. The DOM
+// import tells them apart by the hints the renderer writes, so only the snapshot import is
+// pinned, with `test.fails` so a fix shows up as a failure here.
+const SNAPSHOT_SHARED_ROLES = new Set(["booking", "appearance"]);
+
 for (const s of screens()) {
   const structure = TABLE_EMPTY_SLOT.has(s.name) ? test.fails : test;
   // Vitest has no subtests: each check is a test of its own under the screen's name, and the import runs once per block in
@@ -176,6 +183,8 @@ for (const s of screens()) {
     });
   });
 
+  const snapshotTest = SNAPSHOT_SHARED_ROLES.has(s.name) ? test.fails : test;
+  const snapshotStructure = SNAPSHOT_SHARED_ROLES.has(s.name) ? test.fails : structure;
   describe(`round trip from an accessibility snapshot: ${s.name}`, () => {
     const tree = expectedTree(s.document, { catalog, data: s.data });
     let result!: ImportResult;
@@ -183,13 +192,13 @@ for (const s of screens()) {
       result = fromAriaSnapshot(tree, { catalog });
     });
     test("valid", () => assertValid(result));
-    structure("structure, roles and states", () => {
+    snapshotStructure("structure, roles and states", () => {
       assert.deepEqual(
         skeletonOf(result.document, {}, "aria"),
         skeletonOf(s.document, s.data, "aria"),
       );
     });
-    test("same accessibility tree", () => {
+    snapshotTest("same accessibility tree", () => {
       assert.deepEqual(diffAria(tree, expectedTree(result.document, { catalog })), []);
     });
   });

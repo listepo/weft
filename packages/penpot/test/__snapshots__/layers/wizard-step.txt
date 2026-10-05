@@ -37,7 +37,7 @@ board "screen#wizard" width=480 tokens={"fill":"color.white"} fillList=[{"fillCo
       | weft/weft.source = {"kind":"radio","id":"plan-team","props":{"value":"team"},"children":["Team"],"shown":{"text":"Team"}}
       rectangle "mark" width=16 height=16 borderRadius=999 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
       text "text" inCopy=true growType="auto-width" text="Team"
-  board "stack#nav" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#nav>","dir":"row","wrap":"nowrap"}
+  board "stack#nav" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#nav>","dir":"row","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#nav)
     | weft/weft.source = {"kind":"stack","id":"nav","props":{"direction":"row","gap":{"token":"space.sm"}}}
     | weft/weft.style = [[],[],0,[0,0,0,0],null]

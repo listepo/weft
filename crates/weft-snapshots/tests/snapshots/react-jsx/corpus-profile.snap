@@ -40,7 +40,7 @@ export default function WeftScreen({ data, actions, onChange }) {
         {!(_text(data?.user?.bio).trim() === "") ? _squash(_text(data?.user?.bio)) : ""}
       </div>
       <h2 data-weft-id="links-title">Links</h2>
-      <div data-weft-id="links" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row" }}>
+      <div data-weft-id="links" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "center" }}>
         {(() => {
           const _href = _url(_text(data?.user?.website));
           return (

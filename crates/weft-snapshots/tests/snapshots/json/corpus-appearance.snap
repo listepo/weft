@@ -1,0 +1,179 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-appearance as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "appearance",
+    "props": {
+      "label": "Appearance"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Appearance"
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "options",
+        "props": {
+          "align": "stretch",
+          "gap": {
+            "token": "space.md"
+          }
+        },
+        "children": [
+          {
+            "kind": "segmented-control",
+            "id": "theme",
+            "props": {
+              "label": "Theme",
+              "value": {
+                "bind": "$.theme"
+              }
+            },
+            "children": [
+              {
+                "kind": "segment",
+                "id": "theme-light",
+                "props": {
+                  "value": "light"
+                },
+                "children": [
+                  "Light"
+                ]
+              },
+              {
+                "kind": "segment",
+                "id": "theme-dark",
+                "props": {
+                  "disabled": true,
+                  "value": "dark"
+                },
+                "children": [
+                  "Dark"
+                ]
+              },
+              {
+                "kind": "segment",
+                "id": "theme-auto",
+                "props": {
+                  "text": {
+                    "bind": "$.automatic"
+                  },
+                  "value": "auto"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "slider",
+            "id": "size",
+            "props": {
+              "label": "Text size",
+              "max": 24,
+              "min": 12,
+              "value": {
+                "bind": "$.size"
+              }
+            }
+          },
+          {
+            "kind": "slider",
+            "id": "contrast",
+            "props": {
+              "disabled": true,
+              "label": "Contrast",
+              "value": {
+                "bind": "$.contrast"
+              }
+            }
+          },
+          {
+            "kind": "stepper",
+            "id": "columns",
+            "props": {
+              "label": "Columns",
+              "value": {
+                "bind": "$.columns"
+              }
+            }
+          },
+          {
+            "kind": "stepper",
+            "id": "zoom",
+            "props": {
+              "disabled": {
+                "bind": "$.locked"
+              },
+              "label": "Zoom",
+              "max": 3,
+              "step": 0.5,
+              "value": {
+                "bind": "$.zoom"
+              }
+            }
+          },
+          {
+            "kind": "color-picker",
+            "id": "accent",
+            "props": {
+              "disabled": true,
+              "label": "Accent colour",
+              "value": "#d946ef"
+            }
+          },
+          {
+            "kind": "date-picker",
+            "id": "since",
+            "props": {
+              "disabled": true,
+              "label": "Member since",
+              "type": "date",
+              "value": "2024-05-17"
+            }
+          },
+          {
+            "kind": "combobox",
+            "id": "font",
+            "props": {
+              "disabled": true,
+              "label": "Font",
+              "value": "Inter"
+            },
+            "children": [
+              {
+                "kind": "option",
+                "id": "font-inter",
+                "props": {
+                  "value": "Inter"
+                },
+                "children": [
+                  "Inter"
+                ]
+              },
+              {
+                "kind": "option",
+                "id": "font-mono",
+                "props": {
+                  "value": "Menlo"
+                },
+                "children": [
+                  "Menlo"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

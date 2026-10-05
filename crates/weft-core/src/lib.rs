@@ -3,6 +3,7 @@
 //! WebAssembly and native Node addons.
 
 mod canonical;
+pub mod controls;
 mod data;
 mod diagnostics;
 mod explain;
