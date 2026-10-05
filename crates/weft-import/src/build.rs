@@ -1057,10 +1057,19 @@ fn convert_tabs<'c>(
                 n
             }
         };
-        let label = ctx.literal(&tab_path, &label_text);
         let mut node = Node::new(tab_kind);
         node.id = Some(tab_id.clone());
-        node.props.insert("label".into(), Value::String(label));
+        // A bound label reads back as the binding: HTML writes `label:` where React and SolidJS
+        // render the label as the button's bound text.
+        match item.values.get("label").or_else(|| item.values.get("text")) {
+            Some(bound @ Value::Bind { bind, not: false }) if ctx.readable(bind) => {
+                node.props.insert("label".into(), bound.clone());
+            }
+            _ => {
+                let label = ctx.literal(&tab_path, &label_text);
+                node.props.insert("label".into(), Value::String(label));
+            }
+        }
         if let Some(inner) = inner {
             node.children = inner.children;
             node.slots = inner.slots;
@@ -1082,6 +1091,10 @@ fn convert_tabs<'c>(
             .is_some_and(|p| p.kind == weft_core::PropType::String)
     {
         props.insert("selected".into(), Value::String(selected));
+    }
+    // The page shows the tab its binding picks, so the binding replaces the one it showed.
+    if let Some(bound @ Value::Bind { .. }) = list.values.get("selected") {
+        set_value(ctx, &mut props, tabs_def, tabs_kind, "selected", bound, &path);
     }
     let mut node = Node::new(tabs_kind);
     node.id = Some(id);
