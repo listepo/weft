@@ -13,7 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T50 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
-| T55 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -222,20 +221,3 @@ Two parts, as the creator chose.
    - Add a small model asset under a compatible licence to the corpus.
 
 Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
-
-### T55. Default cross-axis alignment of a row stack
-
-SPEC lists `align` (`start`/`center`/`end`/`stretch`) on `stack` but gives it no default, so the targets disagree. SwiftUI's `HStack` centres its children, while on the web a flex row stretches them: in todo-list, a button next to a field grows to the field's height (seen in T53).
-
-Following SwiftUI and common design-system practice, the creator chose to define the default in SPEC: a `row` stack without `align` centres its children on the cross axis. A `column` stack keeps its current behaviour, and an explicit `align` always wins.
-
-- SPEC §stack states both defaults.
-- The base stylesheet, the static page and the generated components apply `center` to a row with no `align`.
-- The reference renderer and the Figma/Penpot builds do the same.
-- SwiftUI needs no change, but a test pins it.
-- Importers do not write `align="center"` back for a row when it is the default.
-
-Done when:
-- the affected baselines and snapshots are retaken and reviewed;
-- todo-list's button no longer stretches;
-- the full check exits 0.

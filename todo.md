@@ -7,4 +7,3 @@
 - T50. Richer controls
 - T51. Glass material tokens
 - T52. 3D transforms and models
-- T55. Default cross-axis alignment of a row stack
