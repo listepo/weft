@@ -70,7 +70,10 @@ fn assert_bound(markup: &str, what: &str) {
         r#"<tab id="a" label="One">"#,
         r#"<tab id="b" label="{$.labels.two}">"#,
     ] {
-        assert!(markup.contains(line), "{what}: {line} is missing in\n{markup}");
+        assert!(
+            markup.contains(line),
+            "{what}: {line} is missing in\n{markup}"
+        );
     }
 }
 
@@ -103,7 +106,10 @@ fn the_jsx_importers_read_the_tab_number_and_index_bindings_back() {
                 r#"value="{$.account.age}""#,
                 r#"<text id="lead" text="{$.players.0.name}"/>"#,
             ] {
-                assert!(markup.contains(line), "{what}: {line} is missing in\n{markup}");
+                assert!(
+                    markup.contains(line),
+                    "{what}: {line} is missing in\n{markup}"
+                );
             }
         }
     }

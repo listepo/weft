@@ -6,9 +6,9 @@
 use std::rc::Rc;
 
 use oxc_ast::ast::{
-    Argument, ArrayExpressionElement, ArrowFunctionBody, ArrowFunctionExpression, BinaryExpression, BinaryOperator,
-    BindingPattern, CallExpression, ChainElement, Expression, FormalParameters, LogicalOperator,
-    ObjectPropertyKind, PropertyKey, Statement, UnaryOperator,
+    Argument, ArrayExpressionElement, ArrowFunctionBody, ArrowFunctionExpression, BinaryExpression,
+    BinaryOperator, BindingPattern, CallExpression, ChainElement, Expression, FormalParameters,
+    LogicalOperator, ObjectPropertyKind, PropertyKey, Statement, UnaryOperator,
 };
 use weft_core::{is_binding, is_loop_variable, js_number};
 
@@ -342,9 +342,8 @@ impl Eval {
                 },
             },
             BinaryOperator::StrictEquality | BinaryOperator::Equality => match (&left, &right) {
-                (Sv::Num(_) | Sv::Index, Sv::Choice(p)) | (Sv::Choice(p), Sv::Num(_) | Sv::Index) => {
-                    Sv::Chosen(p.clone())
-                }
+                (Sv::Num(_) | Sv::Index, Sv::Choice(p))
+                | (Sv::Choice(p), Sv::Num(_) | Sv::Index) => Sv::Chosen(p.clone()),
                 _ => same(&left, &right).map_or(Sv::Unknown, Sv::Bool),
             },
             BinaryOperator::StrictInequality | BinaryOperator::Inequality => {
@@ -438,8 +437,13 @@ impl Eval {
         let (Some(base), Some(segments), None) = (args.next(), args.next(), args.next()) else {
             return Sv::Unknown;
         };
-        let (Sv::Path { mut path, not: false }, Sv::Arr(segments)) =
-            (self.eval(base, env), self.eval(segments, env))
+        let (
+            Sv::Path {
+                mut path,
+                not: false,
+            },
+            Sv::Arr(segments),
+        ) = (self.eval(base, env), self.eval(segments, env))
         else {
             return Sv::Unknown;
         };

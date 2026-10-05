@@ -1094,7 +1094,9 @@ fn convert_tabs<'c>(
     }
     // The page shows the tab its binding picks, so the binding replaces the one it showed.
     if let Some(bound @ Value::Bind { .. }) = list.values.get("selected") {
-        set_value(ctx, &mut props, tabs_def, tabs_kind, "selected", bound, &path);
+        set_value(
+            ctx, &mut props, tabs_def, tabs_kind, "selected", bound, &path,
+        );
     }
     let mut node = Node::new(tabs_kind);
     node.id = Some(id);
