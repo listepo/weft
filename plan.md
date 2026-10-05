@@ -176,6 +176,22 @@ The setting is an environment variable read by the suite (a test-harness choice,
   - Pick one layout for both sides and say why in this card before coding. The two options are one shared layout stylesheet, or matching the static page to the components.
   - Do not loosen the comparison with a pixel tolerance.
 
+Execution plan:
+
+- **Layout direction: match the static page to the components, not a shared stylesheet.**
+  - The components, the reference renderer, and the Figma and Penpot round trips are already pixel-compared with each other, and only the static page is the outlier.
+  - A shared stylesheet would restyle React, SolidJS and the reference renderer together and move every web baseline.
+  - SPEC already says the page has "the accessible structure of the reference renderer".
+  - So the static page drops what the components do not have, and keeps only the layout rules the components also carry as inline styles.
+- **Steps:**
+  - In `crates/weft-web/src/html.rs`: write a `text` as a block `div`, a link without a usable `href` as `role="link" tabindex="0"` with no `href`, and an inline-block link as the components do.
+  - Same file, controls: give the control `aria-label` and the visible caption `aria-hidden="true"`.
+  - Same file, wrappers: drop the `weft-field` and `weft-toggle` classes and their CSS rules, and write the error as a `div`.
+  - Chase any remaining pixel difference per screen (radio group, select, tabs) by comparing the DOM of the static page and the components.
+  - Make sure the HTML importer still reads what the generator now writes. Fix it only for what T47 changes, and keep T48's binding work out.
+- **Verify:** `cargo insta` review of the weft-web and weft-snapshots changes, then `vitest run` in `packages/visual`; shrink `STATIC_PAGE_DIFFERS` and `STATIC_TREE_DIFFERS` until they pass; then the full check.
+- **Docs:** update SPEC §To HTML and `crates/weft-web/README.md` where they describe the page.
+
 Done when:
 - every entry of `STATIC_TREE_DIFFERS` is gone;
 - `STATIC_PAGE_DIFFERS` keeps only screens with a stated, unavoidable reason;
