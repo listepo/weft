@@ -94,6 +94,8 @@ pub fn to_html_with_data(
     out.push_str(&format!("<title>{}</title>\n", escape_text(&title)));
     out.push_str("<style>\n");
     out.push_str(&tokens_css(options.tokens, options.appearance));
+    out.push_str(BASE_CSS);
+    // After the base sheet: layout is what the components also carry inline.
     out.push_str(LAYOUT_CSS);
     out.push_str("</style>\n</head>\n<body>\n");
     let mut w = Writer {
@@ -126,6 +128,11 @@ const LAYOUT_CSS: &str = "\
 a { display: inline-block; }
 [hidden] { display: none !important; }
 ";
+
+/// The base stylesheet every web target shares (`weft css-base`), written once in `base.css`.
+/// It follows the token custom properties of `tokens_css`, each with the default token's value as
+/// its fallback, and only uses what the page, the components and the reference renderer all write.
+pub const BASE_CSS: &str = include_str!("base.css");
 
 pub(crate) fn token_var(path: &str) -> Option<String> {
     let valid = !path.is_empty()
@@ -1396,6 +1403,44 @@ fn tab_nodes(list: &[Child]) -> Vec<&Node> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The `(property, fallback)` of every `var(--weft-…, fallback)` in the base stylesheet.
+    fn base_references() -> Vec<(String, String)> {
+        BASE_CSS
+            .split("var(--weft-")
+            .skip(1)
+            .map(|rest| {
+                let (name, rest) = rest.split_once(',').expect("a fallback");
+                let (fallback, _) = rest.split_once(')').expect("a closing parenthesis");
+                (format!("--weft-{name}"), fallback.trim().to_owned())
+            })
+            .collect()
+    }
+
+    #[test]
+    fn the_base_stylesheet_falls_back_to_the_default_tokens() {
+        let json: Json = serde_json::from_str(weft_catalog::DEFAULT_TOKENS_JSON).unwrap();
+        let defaults = weft_catalog::load_tokens(&json).tokens;
+        let css = tokens_css(&defaults, None);
+        // Tokens a project may add; the sheet has no default token to fall back to.
+        let optional = ["--weft-color-success", "--weft-color-warning"];
+        let references = base_references();
+        assert!(references.len() > 20, "{references:?}");
+        for (name, fallback) in references {
+            if optional.contains(&name.as_str()) {
+                continue;
+            }
+            assert!(
+                css.contains(&format!("  {name}: {fallback};\n")),
+                "{name} falls back to {fallback}, which is not the default token's value:\n{css}"
+            );
+        }
+    }
+
+    #[test]
+    fn the_base_stylesheet_cannot_close_the_style_element() {
+        assert!(!BASE_CSS.contains('<'));
+    }
 
     #[test]
     fn only_safe_urls_survive() {

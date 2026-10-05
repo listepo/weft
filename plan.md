@@ -13,7 +13,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T50 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
-| T53 | todo | P1 | 3 | 0% | |
+| T54 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -222,22 +222,20 @@ Two parts, as the creator chose.
    - Add a small model asset under a compatible licence to the corpus.
 Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
 
-### T53. Shared base stylesheet for web targets
+### T54. Run only the checks a change affects
 
-T47 made the static page match the generated React and SolidJS components by dropping the page's own styling. Both now render unstyled: a caption sits flush against its control, fields have no spacing, and a link without `href` does not look like a link. The creator chose one Weft base stylesheet for every web target, so all of them look good and stay identical.
+The full check (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`) takes 5–7 minutes, and agents run it many times while they iterate. Rust tests already run on cargo-nextest (`root:rust-test`), but always the whole workspace. The creator asked for nextest and for runs of only what the changed files affect.
 
-- **The stylesheet.** One minimal, token-driven base stylesheet:
-  - captions above fields, with spacing between fields;
-  - checkbox, switch and radio rows;
-  - link appearance, including `role="link"`;
-  - buttons, stacks and the other kinds that need it.
-  - Values come from the project's tokens (spacing, colours, typography), with fallbacks when a token is absent, and follow light and dark modes (T45).
-- **Where it ships.** Written by `weft css-tokens` (or a sibling command, decided in the plan) for React and SolidJS hosts, and inlined by `weft html`.
-- **Where it applies.** The visual harness gives it to every web frame, as it now does with `weft-tokens.css`. The reference renderer and the Figma/Penpot round trips are adjusted wherever they are compared with the components.
-- **Accessibility.** The tree stays as T47 left it.
+- **Rust:** run only the crates the changed files belong to and the crates that depend on them. Use nextest's `rdeps()` filterset, or a maintained tool that maps changed files to workspace packages; pick in the plan and cite it.
+- **TypeScript:** run only the affected moon projects (moon's affected mode against the base branch plus uncommitted changes), and inside a project only the tests related to the changed files where Vitest can tell (`--changed`). A change to the Rust core, the WebAssembly module or shared inputs must still reach the packages that load them.
+- **One command:** a moon task or script that runs the affected subset (e.g. `moon run root:changed`), documented in `AGENTS.md` and the README as the iteration loop.
+- **The merge gate stays full:** the full check stays the required run before a merge.
+- **Safety:** when the change set cannot be computed (no git, no merge base, a changed lockfile, toolchain or workspace config), fall back to the full run and say why.
 
-Done when:
-- the static page and the components still match pixel for pixel and in the accessibility tree;
-- the reviewed baselines show captions above fields, spacing and visible links;
-- SPEC and docs describe the stylesheet;
-- the full check exits 0.
+Done when the command runs the expected subset for:
+- a Rust-only change in a leaf crate;
+- a change in `weft-core` (reaches every dependent);
+- a TypeScript-only change;
+- a docs-only change (runs nothing or only lint).
+
+The selection logic also needs tests, and the full check must exit 0.

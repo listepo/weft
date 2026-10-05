@@ -29,6 +29,171 @@ description: corpus-data-table as html
   --weft-color-action-primary: #2563eb;
   --weft-color-action-danger: #dc2626;
 }
+/* Weft base stylesheet: the least a screen needs to read as a form, not a theme. Every value is a
+   token (`weft css-tokens`) with the default token's value as its fallback, so the sheet also
+   works alone. Borders and muted text mix `currentColor`, so both appearances follow the page.
+   Rules use only elements and attributes that the static page, the React and SolidJS components
+   and the reference renderer share. */
+
+main, form, section, dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--weft-space-md, 16px);
+}
+dialog { padding: var(--weft-space-md, 16px); }
+h1, h2, h3, h4, h5, h6 { margin: 0; }
+img { max-width: 100%; }
+
+/* A field: its caption above the control, then the error. */
+label:has(> :is(input:not([type="checkbox"], [type="radio"]), select, textarea)) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--weft-space-xs, 4px);
+}
+label > span[aria-hidden="true"],
+[role="radiogroup"] > span[aria-hidden="true"] { font-size: var(--weft-font-size-sm, 0.875rem); }
+input:not([type="checkbox"], [type="radio"]), select, textarea {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--weft-space-xs, 4px) var(--weft-space-sm, 8px);
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  border-radius: var(--weft-radius-sm, 4px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+[aria-invalid="true"] { border-color: var(--weft-color-action-danger, #dc2626); }
+[data-weft-field] > :not(label) {
+  color: var(--weft-color-action-danger, #dc2626);
+  font-size: var(--weft-font-size-sm, 0.875rem);
+}
+label:has(> :disabled), button:disabled { opacity: 0.6; }
+
+/* A checkbox, switch or radio: the control, then its caption, in a row. */
+label:has(> :is(input[type="checkbox"], input[type="radio"])) {
+  display: flex;
+  align-items: center;
+  gap: var(--weft-space-sm, 8px);
+}
+input { accent-color: var(--weft-color-action-primary, #2563eb); }
+input[type="checkbox"], input[type="radio"] { margin: 0; }
+input[role="switch"] {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 2.25em;
+  height: 1.25em;
+  border-radius: var(--weft-radius-pill, 999px);
+  background: color-mix(in srgb, currentColor 30%, transparent);
+}
+input[role="switch"]::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(1.25em - 4px);
+  height: calc(1.25em - 4px);
+  border-radius: 50%;
+  background: var(--weft-color-white, #ffffff);
+}
+input[role="switch"]:checked { background: var(--weft-color-action-primary, #2563eb); }
+input[role="switch"]:checked::before { left: calc(1em + 2px); }
+[role="radiogroup"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--weft-space-xs, 4px);
+}
+
+a, [role="link"] {
+  color: var(--weft-color-action-primary, #2563eb);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+button {
+  padding: var(--weft-space-xs, 4px) var(--weft-space-md, 16px);
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  border-radius: var(--weft-radius-sm, 4px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+button:disabled { cursor: not-allowed; }
+/* Not stretched across the column; a button in a row keeps the row's own alignment. */
+main > button, form > button, section > button { align-self: flex-start; }
+button[data-variant="primary"] {
+  border-color: var(--weft-color-action-primary, #2563eb);
+  background: var(--weft-color-action-primary, #2563eb);
+  color: var(--weft-color-white, #ffffff);
+}
+button[data-variant="danger"] {
+  border-color: var(--weft-color-action-danger, #dc2626);
+  background: var(--weft-color-action-danger, #dc2626);
+  color: var(--weft-color-white, #ffffff);
+}
+
+/* Buttons and links in a footer or an actions slot sit in one row. */
+[data-weft-slot="footer"], [data-weft-slot="actions"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--weft-space-sm, 8px);
+}
+
+[role="tablist"] {
+  display: flex;
+  gap: var(--weft-space-xs, 4px);
+  border-bottom: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+}
+[role="tab"] {
+  border-width: 0 0 2px;
+  border-color: transparent;
+  border-radius: 0;
+}
+[role="tab"][aria-selected="true"] { border-color: currentColor; }
+[role="tabpanel"] { padding-block: var(--weft-space-md, 16px); }
+[role="menu"] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--weft-space-xs, 4px);
+}
+
+[data-tone] { --tone: currentColor; }
+[data-tone="danger"] { --tone: var(--weft-color-action-danger, #dc2626); }
+[data-tone="info"] { --tone: var(--weft-color-action-primary, #2563eb); }
+[data-tone="success"] { --tone: var(--weft-color-success, #16a34a); }
+[data-tone="warning"] { --tone: var(--weft-color-warning, #d97706); }
+[data-tone="muted"] { --tone: color-mix(in srgb, currentColor 60%, transparent); }
+[data-tone] { color: var(--tone); }
+[role="alert"] {
+  padding: var(--weft-space-sm, 8px) var(--weft-space-md, 16px);
+  border-left: 4px solid var(--tone, currentColor);
+  border-radius: var(--weft-radius-sm, 4px);
+  background: color-mix(in srgb, var(--tone, currentColor) 12%, transparent);
+}
+
+table { border-collapse: collapse; }
+th, td {
+  padding: var(--weft-space-xs, 4px) var(--weft-space-sm, 8px);
+  border-bottom: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  text-align: start;
+}
+/* A bulleted list is a plain column of rows; an ordered one keeps its numbers. */
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--weft-space-xs, 4px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+ol { margin: 0; }
+ul > li {
+  display: flex;
+  align-items: center;
+  gap: var(--weft-space-sm, 8px);
+}
 .weft-stack { display: flex; flex-direction: column; }
 .weft-row { display: flex; flex-direction: row; }
 .weft-grid { display: grid; }

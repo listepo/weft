@@ -117,7 +117,7 @@ const EXPORT: &[Setting] = &[
     ),
     setting(
         "css",
-        "The token stylesheet `weft-tokens.css` that React and SolidJS components read their `var(--weft-…)` from (`weft css-tokens`). Default folder: standard output.",
+        "The stylesheets React and SolidJS components need: `weft-tokens.css`, the `var(--weft-…)` values they read (`weft css-tokens`), and `weft-base.css`, the rules they share with the static page (`weft css-base`). Default folder: standard output.",
         Kind::Section(OUT_ONLY),
     ),
 ];

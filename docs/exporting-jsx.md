@@ -77,7 +77,9 @@ The component takes three props, and every Weft idea maps to one of them:
 | An `<each>` loop | `.map` over the array in `data`, with the item index as the key. |
 | A token, `gap="{token.space.md}"` | The CSS variable `var(--weft-space-md)` |
 
-**Tokens need a stylesheet.** The component refers to a CSS variable named after the token path, with dots turned into hyphens. It does not define the variable. Put the values in your own CSS (`:root { --weft-space-md: 16px; }`), ideally generated from the same tokens file the designer owns ([Catalog and tokens](catalog-and-tokens.md)).
+**Tokens need a stylesheet.** The component refers to a CSS variable named after the token path, with dots turned into hyphens. It does not define the variable. Put the values in your own CSS (`:root { --weft-space-md: 16px; }`), ideally generated from the same tokens file the designer owns ([Catalog and tokens](catalog-and-tokens.md)). `weft css-tokens` writes them as `weft-tokens.css`.
+
+**A base stylesheet for the screen.** The component carries only its layout, so unstyled it shows a caption flush against its field and a link that does not look like one. `weft css-base` writes `weft-base.css`, the minimal rules that `weft html` also puts in its page; link it after `weft-tokens.css` ([the base stylesheet](cli.md#the-base-stylesheet)). It sets no page colour or font and does not change what the component renders.
 
 ## Safe by construction
 

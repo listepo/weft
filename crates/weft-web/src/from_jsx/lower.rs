@@ -917,6 +917,12 @@ impl<'a> Lower<'a> {
                     // SolidJS components repeat the select's value on each option for server
                     // rendering; the select's own value is what the document keeps.
                     Some(_) if name == "selected" && tag == "option" => continue,
+                    // The generated field points at its error message only while there is one;
+                    // the message is that field's `error`, so its id is what the page keeps.
+                    Some(x) if name == "aria-describedby" => match x.get_inner_expression() {
+                        Expression::ConditionalExpression(c) => self.eval.eval(&c.consequent, env),
+                        _ => self.eval.eval(x, env),
+                    },
                     Some(x) if name == "checked" && is_radio(items) => {
                         if let Some(path) = self.radio_path(x, env) {
                             self.radio = Some(path);
