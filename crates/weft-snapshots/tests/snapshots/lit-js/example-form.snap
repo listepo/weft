@@ -1,0 +1,52 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-form as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Sign in"
+      ><form data-weft-id="login" data-state="idle" @submit=${(_e) => { _e.preventDefault(); _act(actions, { id: "login", action: "auth.submit" }); }}
+        ><div data-weft-field=""
+          ><label
+            ><span aria-hidden="true">Email</span
+            ><input data-weft-id="email" aria-label="Email" type="email" required .value=${_text(data?.email)} @input=${(_e) => onChange?.("$.email", _e.currentTarget.value)}
+          ></label
+        ></div
+        ><div data-weft-slot="footer"
+          ><button data-weft-id="go" type="submit" data-variant="primary" @click=${(_e) => { _e.preventDefault(); _act(actions, { id: "login", action: "auth.submit" }); }}>Sign in</button
+        ></div
+      ></form
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

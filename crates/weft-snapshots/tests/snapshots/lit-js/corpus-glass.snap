@@ -1,0 +1,55 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-glass as lit-js
+---
+import { LitElement, html } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="glass" aria-label="Glass"
+      ><div data-weft-id="card" style=${styleMap({ gap: "var(--weft-space-md)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "flex", flexDirection: "column" })} data-weft-material=""
+        ><h2 data-weft-id="title">${!(_text(data?.title).trim() === "") ? _squash(_text(data?.title)) : ""}</h2
+        ><div data-weft-id="body">The panel blurs what is behind it.</div
+        ><button data-weft-id="close" type="button" data-variant="primary" @click=${(_e) => _act(actions, { id: "close", action: "glass.close" })}>Got it</button
+      ></div
+      ><div data-weft-id="tiles" style=${styleMap({ gap: "var(--weft-space-sm)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" })} data-weft-material=""
+        ><div data-weft-id="tile-light">Light</div
+        ><div data-weft-id="tile-dark">Dark</div
+      ></div
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

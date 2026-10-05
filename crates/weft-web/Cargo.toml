@@ -1,6 +1,6 @@
 [package]
 name = "weft-web"
-description = "Weft and the web, both ways: HTML/CSS, React and SolidJS generators and importers"
+description = "Weft and the web, both ways: HTML/CSS, React, SolidJS and Lit generators, and HTML, React and SolidJS importers"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

@@ -1,0 +1,60 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-tab as lit-js
+---
+import { LitElement, html, nothing } from "lit";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _busy(state) {
+  return state === "loading" || state === "busy" || state === "submitting" ? "true" : undefined;
+}
+
+function _tabKey(e, i, count, choose) {
+  const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+  if (step === 0 || count === 0) return;
+  e.preventDefault();
+  const next = (i + step + count) % count;
+  choose(next);
+  e.currentTarget.parentElement?.querySelectorAll('[role="tab"]')[next]?.focus();
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Account">${(() => {
+        const _t = [
+          { id: "tab-profile", doc: "tab-profile", state: "", label: "Profile", panel: html`<div data-weft-field=""
+              ><label
+                ><span aria-hidden="true">Display name</span
+                ><input data-weft-id="name" aria-label="Display name" type="text" .value=${_text(data?.name)} @input=${(_e) => onChange?.("$.name", _e.currentTarget.value)}
+              ></label
+            ></div>` },
+        ];
+        const _s = Math.max(0, _t.findIndex((_x) => _x.doc === "tab-profile" || _x.id === "tab-profile"));
+        const _choose = (_k) => { const _x = _t[_k]; if (!_x || _k === _s) return; };
+        return html`<div data-weft-tabs=""
+            ><div data-weft-id="account-tabs" role="tablist">${_t.map((_x, _k) => html`<button data-weft-id=${(_x.id || undefined) ?? nothing} data-state=${(_x.state || undefined) ?? nothing} aria-busy=${(_busy(_x.state)) ?? nothing} type="button" role="tab" id=${"weft-" + _x.id + "-tab"} aria-selected=${String(_k === _s)} aria-controls=${"weft-" + _x.id + "-panel"} tabindex=${(_k === _s ? 0 : -1) ?? nothing} @click=${() => _choose(_k)} @keydown=${(_e) => _tabKey(_e, _k, _t.length, _choose)}>${_x.label}</button>`)}</div>${_t.map((_x, _k) => html`<div role="tabpanel" id=${"weft-" + _x.id + "-panel"} aria-labelledby=${"weft-" + _x.id + "-tab"} ?hidden=${_k !== _s} tabindex=${0}>${_x.panel}</div>`)}</div>`;
+      })()}</main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

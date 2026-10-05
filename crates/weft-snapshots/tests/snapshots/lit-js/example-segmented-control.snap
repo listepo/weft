@@ -1,0 +1,56 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-segmented-control as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Calendar"
+      ><div data-weft-id="view" aria-label="View" role="radiogroup" data-weft-segmented=""
+        ><span aria-hidden="true">View</span
+        ><label
+          ><input data-weft-id="view-day" type="radio" name=${"weft-view"} value="day" aria-label="Day" .checked=${_text(data?.view) !== "" && "day" === _text(data?.view)} @change=${() => { onChange?.("$.view", "day"); _act(actions, { id: "view", action: "calendar.update" }); }}
+          ><span aria-hidden="true">Day</span
+        ></label
+        ><label
+          ><input data-weft-id="view-week" type="radio" name=${"weft-view"} value="week" aria-label="Week" .checked=${_text(data?.view) !== "" && "week" === _text(data?.view)} @change=${() => { onChange?.("$.view", "week"); _act(actions, { id: "view", action: "calendar.update" }); }}
+          ><span aria-hidden="true">Week</span
+        ></label
+        ><label
+          ><input data-weft-id="view-month" type="radio" name=${"weft-view"} value="month" aria-label="Month" .checked=${_text(data?.view) !== "" && "month" === _text(data?.view)} @change=${() => { onChange?.("$.view", "month"); _act(actions, { id: "view", action: "calendar.update" }); }}
+          ><span aria-hidden="true">Month</span
+        ></label
+      ></div
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

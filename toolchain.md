@@ -88,6 +88,7 @@
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests and for the browser in `@weft/visual` |
 | solid-js | local | https://github.com/solidjs/solid | Server-renders generated SolidJS components in the equivalence tests; renders them in the browser in `@weft/visual` |
+| lit | local | https://github.com/lit/lit | Runs generated Lit elements in the browser in `@weft/visual`, where their accessibility tree is compared with React's |
 | babel-preset-solid | local | https://github.com/solidjs/solid/tree/main/packages/babel-preset-solid | Compiles generated SolidJS JSX for server rendering in the equivalence tests and for the DOM in `@weft/visual` |
 | @babel/core | local | https://github.com/babel/babel | Runs babel-preset-solid; 7.x because the preset requires Babel 7 |
 | @types/babel__core | local | https://github.com/DefinitelyTyped/DefinitelyTyped | Types for @babel/core in the equivalence tests |
