@@ -503,7 +503,8 @@ function valued(
   shown: string,
   read: (target: { value: string }) => unknown,
 ): Attrs {
-  if (!isBinding(n.props["value"])) return { defaultValue: shown, onChange: () => fire(ctx, n, "change") };
+  if (!isBinding(n.props["value"]))
+    return { defaultValue: shown, onChange: () => fire(ctx, n, "change") };
   return {
     value: shown,
     onChange: (e: { currentTarget: { value: string } }) => {
@@ -572,7 +573,13 @@ function stepper(n: Inst, ctx: Ctx): ReactNode {
     "label",
     null,
     caption(n),
-    h("span", { "data-weft-stepper": "" }, button(-1, "down", "\u2212"), control, button(1, "up", "+")),
+    h(
+      "span",
+      { "data-weft-stepper": "" },
+      button(-1, "down", "\u2212"),
+      control,
+      button(1, "up", "+"),
+    ),
   );
 }
 

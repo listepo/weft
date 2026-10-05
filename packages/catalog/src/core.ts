@@ -253,8 +253,7 @@ const components: Record<string, ComponentDef> = {
     events: ["change"],
   },
   option: {
-    description:
-      "One choice inside a select or combobox; its content is the visible text.",
+    description: "One choice inside a select or combobox; its content is the visible text.",
     role: "option",
     content: "text",
     allowedParents: ["select", "combobox"],
@@ -272,9 +271,12 @@ const components: Record<string, ComponentDef> = {
     allowedChildren: ["option", "each"],
     requiresLabel: true,
     props: {
-      value: str("The text of the input; bind it to read and write what the user typed or picked.", {
-        writable: true,
-      }),
+      value: str(
+        "The text of the input; bind it to read and write what the user typed or picked.",
+        {
+          writable: true,
+        },
+      ),
       placeholder: str("Hint text shown while the input is empty; it does not replace the label."),
       disabled: disabledProp("the combobox"),
     },
@@ -309,8 +311,7 @@ const components: Record<string, ComponentDef> = {
     events: ["change"],
   },
   "date-picker": {
-    description:
-      "Chooses a date, a time or both; the value is written as text in a fixed format.",
+    description: "Chooses a date, a time or both; the value is written as text in a fixed format.",
     role: "textbox",
     content: "none",
     requiresLabel: true,
@@ -330,7 +331,8 @@ const components: Record<string, ComponentDef> = {
     events: ["change"],
   },
   "color-picker": {
-    description: "Chooses a colour; the value is written as a lowercase hex colour such as #3b82f6.",
+    description:
+      "Chooses a colour; the value is written as a lowercase hex colour such as #3b82f6.",
     role: "textbox",
     content: "none",
     requiresLabel: true,

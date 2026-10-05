@@ -462,3 +462,70 @@ test("deeply nested documents do not overflow the stack", () => {
   for (let i = 1; i < 5000; i++) n = el("stack", `s${i}`, {}, [n]);
   assert.doesNotThrow(() => html(doc(n)));
 });
+
+test("the new controls write typed values and fire change", () => {
+  const writes: [string, unknown][] = [];
+  const events: string[] = [];
+  const d = doc(
+    el("slider", "sl", { label: "S", value: b("$.s"), min: 0, max: 10 }, [], {
+      on: { change: "x.c" },
+    }),
+    el("stepper", "st", { label: "T", value: b("$.t"), min: 0, max: 3 }, [], {
+      on: { change: "x.c" },
+    }),
+    el("date-picker", "dp", { label: "D", type: "time", value: b("$.d") }),
+    el("color-picker", "cp", { label: "C", value: b("$.c") }),
+    el("combobox", "cb", { label: "B", value: b("$.b") }),
+    el("segmented-control", "sc", { label: "G", value: b("$.g") }, [
+      el("segment", "sg", { value: "day" }, ["Day"]),
+    ]),
+  );
+  const data = { s: 1, t: 3, d: "", c: "#000000", b: "", g: "week" };
+  const t = tree(d, {
+    data,
+    onChange: (path, value) => writes.push([path, value]),
+    actions: { "x.c": (e: ActionEvent) => events.push(e.id) },
+  });
+  const change = (id: string, value: string) =>
+    (propsOf(t, id)["onChange"] as (e: unknown) => void)({ currentTarget: { value } });
+  change("sl", "7");
+  change("st", "2");
+  change("dp", "09:30");
+  change("dp", "25:99");
+  change("cp", "#ffffff");
+  change("cb", "app");
+  (propsOf(t, "sg")["onChange"] as () => void)();
+  assert.deepEqual(writes, [
+    ["$.s", 7],
+    ["$.t", 2],
+    ["$.d", "09:30"],
+    ["$.d", ""],
+    ["$.c", "#ffffff"],
+    ["$.b", "app"],
+    ["$.g", "day"],
+  ]);
+  assert.deepEqual(events, ["sl", "st"]);
+});
+
+test("the stepper buttons step from the shown number, within its bounds", () => {
+  const writes: [string, unknown][] = [];
+  const input = { value: "3" };
+  const d = doc(el("stepper", "st", { label: "T", value: b("$.t"), min: 0, max: 3, step: 2 }));
+  const t = tree(d, { data: { t: 3 }, onChange: (p, v) => writes.push([p, v]) });
+  // The buttons carry no document id, so they are found by their marker.
+  const found: { onClick: (e: unknown) => void }[] = [];
+  const visit = (n: unknown): void => {
+    if (Array.isArray(n)) return n.forEach(visit);
+    if (!n || typeof n !== "object" || !("props" in n)) return;
+    const p = (n as { props: Record<string, unknown> }).props;
+    if (p["data-weft-step"]) found.push(p as never);
+    visit(p["children"]);
+  };
+  visit(t);
+  const ev = { currentTarget: { parentElement: { querySelector: () => input } } };
+  for (const button of found) button.onClick(ev);
+  assert.deepEqual(writes, [
+    ["$.t", 1],
+    ["$.t", 3],
+  ]);
+});
