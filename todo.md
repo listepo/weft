@@ -1,9 +1,2 @@
-- T8. Evaluation
-- T23. Native Node and Bun addon
-- T24. Runtime matrix
-- T28. Binding readback against inverted conditions
-- T14. Figma round trip and plugin
-- T31. Project file and shared resources
-- T32. Claude Code plugin from GitHub
-- T39. Context in the document
-- T42. Xcode plugins
+
+- T43. Sample data in static HTML and SwiftUI

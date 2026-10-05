@@ -13,6 +13,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T42 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
+| T43 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -171,4 +172,13 @@ Bring Weft into Xcode for SwiftUI projects, on top of the T34 generator and impo
 - **Xcode's agents through MCP:** the weft MCP server registered for the coding agents built into Xcode, if Xcode supports MCP servers; the guide (AGENT-SPEC) made available to them. Facts come from Apple's documentation with the version and date checked.
 
 The plugins get the `weft` program as an artifact bundle (`binaryTarget`), arm64 macOS only. Until the repository has a remote, the bundle is built locally and referenced by path; publishing it on GitHub Releases waits for the remote. Done when a sample SwiftUI app builds with a `.weft` screen through the build tool plugin, the command plugin round-trips a corpus screen, the editor extension commands work on a corpus screen, each part has automated tests where it can be tested headless, and the manual checks that need Xcode's UI are listed.
+
+### T43. Sample data in static HTML and SwiftUI
+
+The T36 screenshots show that the static HTML generator (`weft html`) and the SwiftUI generator (`weft swiftui`) render bound values empty: buttons and radio options without labels, lists without rows, counters without numbers. React and SolidJS show the screen's data, so the static page cannot be compared with them, and the SwiftUI screenshots use the models' defaults because a generated model cannot be filled from JSON.
+
+- **Static HTML:** `weft html` takes sample data (an argument and a `weft.json` key under `export.html`) and renders bindings, conditions and `<each>` with it; without data the output is unchanged.
+- **SwiftUI:** the generated model can be filled from the screen's data (an initializer from values or from JSON), and with sample data the generated file gets a `#Preview` that uses it (an argument and a key under `export.swiftui`). The importer ignores what the generator adds for the data, so round trips stay byte-identical.
+
+Done when the T36 visual suite renders the static page and the SwiftUI screens with the corpus data, the new baselines are reviewed, the static page is compared with React where the comparison is now meaningful, and the snapshots and round trips stay green.
 
