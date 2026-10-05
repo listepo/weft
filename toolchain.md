@@ -17,6 +17,7 @@
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 | cargo-insta | `cargo install cargo-insta` (optional) | Reviews changed snapshots (`cargo insta review`); the tests run without it | https://github.com/mitsuhiko/insta |
 | Xcode (`xcrun swiftc`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14; those tests skip without it | https://developer.apple.com/xcode/ |
+| Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode; skipped without it | https://github.com/microsoft/playwright |
 
 ## mise
 
@@ -74,11 +75,14 @@
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
 | vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist`, `plugins/cursor/dist` and `plugins/open-design/dist`, and, through `@weft/design-plugin`, the Figma and Penpot plugins into `plugins/figma/dist` and `plugins/penpot/dist` |
-| playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
+| playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages; drives Chromium for the screenshots in `@weft/visual` |
+| @vitest/browser-playwright | local | https://github.com/vitest-dev/vitest | Vitest browser mode on Playwright, for the web screenshots in `@weft/visual` |
+| pixelmatch | local | https://github.com/mapbox/pixelmatch | Pixel comparison of screenshots, with a diff image, in `@weft/visual` |
+| fast-png | local | https://github.com/image-js/fast-png | Decodes and encodes the PNG screenshots and diff images in `@weft/visual`; pure JavaScript |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
-| oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
-| solid-js | local | https://github.com/solidjs/solid | Server-renders generated SolidJS components in the equivalence tests |
-| babel-preset-solid | local | https://github.com/solidjs/solid/tree/main/packages/babel-preset-solid | Compiles generated SolidJS JSX for server rendering in the equivalence tests |
+| oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests and for the browser in `@weft/visual` |
+| solid-js | local | https://github.com/solidjs/solid | Server-renders generated SolidJS components in the equivalence tests; renders them in the browser in `@weft/visual` |
+| babel-preset-solid | local | https://github.com/solidjs/solid/tree/main/packages/babel-preset-solid | Compiles generated SolidJS JSX for server rendering in the equivalence tests and for the DOM in `@weft/visual` |
 | @babel/core | local | https://github.com/babel/babel | Runs babel-preset-solid; 7.x because the preset requires Babel 7 |
 | @types/babel__core | local | https://github.com/DefinitelyTyped/DefinitelyTyped | Types for @babel/core in the equivalence tests |
 | p-limit | local | https://github.com/sindresorhus/p-limit | Concurrency limit for benchmark requests |
