@@ -211,6 +211,12 @@ Done when:
 
 SPEC §8 says a host advertises `{ weft, catalogs }` and an agent writes only what is advertised; no code does this. The MCP server reports its capabilities, loads catalogs, tokens and actions from configuration, and turns token and action checks on when they are given.
 
+Execution plan. Loading catalogs, tokens, actions and a data schema from a project file, and checking them when given, already exist (T31: `weft-mcp --project`, the `project` argument); what is missing is the advertisement.
+1. `packages/mcp/src/tools/capabilities.ts`: a read-only tool `weft_capabilities` answers `{ weft, catalogs: [{ name, version }], tokens?, actions?, data? }` for the host's context or a `project` argument, reusing `scope` and `Context`; the lists are bounded and say when they were cut. Registered in `tools/index.ts`; the server `instructions` and the primer point to it.
+2. Tests in `packages/mcp/test` (core only, extended catalog, tokens and actions, `project` argument, broken project, list cut) and the tool lists of `plugins/shared/test/mcp-stdio.ts`.
+3. Docs: SPEC §8 (how an MCP host advertises), `docs/mcp.md`, `packages/mcp/README.md`, `research.md` row; rebuild the plugin bundles (`moon run shared:build`).
+4. Verify with `moon run root:changed`, then the full check once.
+
 ### T11. Streaming and incremental generation
 
 A2UI and json-render use flat id lists so that a UI can render while a model is still writing it. Weft must show the same for nested markup: a truncated document parses into a renderable prefix with diagnostics only for the unfinished tail, and the renderer shows it. If it cannot, the trade-off is measured and written into `research.md`.
