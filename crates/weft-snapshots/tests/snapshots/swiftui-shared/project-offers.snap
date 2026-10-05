@@ -17,9 +17,34 @@ final class OffersModel {
     var note: String = ""
     var offer: OfferData = OfferData()
 
+    /// Every property, defaulting to the value it is declared with.
+    init(
+        score: Int = 0,
+        note: String = "",
+        offer: OfferData = OfferData()
+    ) {
+        self.score = score
+        self.note = note
+        self.offer = offer
+    }
+
     struct OfferData: Hashable, Sendable {
         var title: String = ""
         var percent: String = ""
+    }
+}
+
+extension OffersModel {
+    /// The sample data the screen was generated with.
+    static var sample: OffersModel {
+        OffersModel(
+            score: 4,
+            note: "Ask about the bundle.",
+            offer: OfferData(
+                title: "Spring sale",
+                percent: "20%"
+            )
+        )
     }
 }
 
@@ -104,7 +129,7 @@ struct OffersScreen: View {
 }
 
 #Preview {
-    OffersScreen(model: OffersModel())
+    OffersScreen(model: .sample)
 }
 
 // MARK: - Weft helpers
