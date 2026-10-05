@@ -15,6 +15,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T56 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T57 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T58 | todo | P3 | 1 | 0% | |
+| T59 | todo | P1 | 1 | 0% | |
 
 ### T8. Evaluation
 
@@ -216,4 +217,16 @@ T55 made `center` the default for a row, so T50 moved the corpus's explicit `cen
 Done when:
 - the coverage test still sees `center`;
 - the affected snapshots, screenshots and Figma/Penpot layer trees are retaken and reviewed;
+- the full check exits 0.
+
+### T59. Deterministic home indicator in SwiftUI screenshots
+
+After T50 merged, one full check failed 21 SwiftUI screenshots by about 5,900 pixels each. On every screen the only difference was the iPhone home indicator at the bottom, which showed in that run but not in the baselines. A rerun of `visual:test` alone passed 277 of 277. The suite hides the status bar (`.statusBarHidden(true)` in the host app) but leaves the home indicator to the simulator's state.
+
+- Make it deterministic. Prefer hiding it in the host app with the documented SwiftUI API (`persistentSystemOverlays(.hidden)` or the current equivalent, cited), if a screenshot then never shows it. Otherwise exclude the home-indicator strip from the comparison, using the device's safe-area inset rather than a hard-coded size.
+- Keep both simulator modes (T46) working.
+
+Done when:
+- the suite passes repeatedly (at least three consecutive runs);
+- baselines are retaken only if the visible area changes, and are then reviewed;
 - the full check exits 0.
