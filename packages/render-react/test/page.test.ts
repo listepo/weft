@@ -31,6 +31,16 @@ test("renderPage declares the colour scheme the tokens were picked for", () => {
   assert.ok(!renderPage(text, { catalog: coreCatalog }).includes("color-scheme"));
 });
 
+test("renderPage puts a given stylesheet in its head and refuses one that closes the element", () => {
+  const text = doc(el("text", "t", {}, ["Hi"]));
+  const page = renderPage(text, { catalog: coreCatalog, styles: "a > b { color: red; }" });
+  assert.match(page, /<title>Weft<\/title><style>a > b \{ color: red; \}<\/style><\/head>/);
+  assert.throws(
+    () => renderPage(text, { catalog: coreCatalog, styles: "a {}</STYLE><script>" }),
+    /close its <style> element/,
+  );
+});
+
 test("write-page renders a fixture with its data and tokens to a file", () => {
   const out = join(mkdtempSync(join(tmpdir(), "weft-page-")), "page.html");
   const path = (p: string) => fileURLToPath(new URL(p, import.meta.url));
