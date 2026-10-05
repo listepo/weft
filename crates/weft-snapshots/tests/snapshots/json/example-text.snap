@@ -1,0 +1,35 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-text as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Status"
+    },
+    "children": [
+      {
+        "kind": "text",
+        "id": "saved",
+        "props": {
+          "tone": "success"
+        },
+        "children": [
+          "All changes saved."
+        ]
+      },
+      {
+        "kind": "text",
+        "id": "user",
+        "props": {
+          "text": {
+            "bind": "$.user.name"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "@weft/visual",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@types/babel__core": "7.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitest/browser-playwright": "5.0.3",
+    "@weft/catalog": "workspace:*",
+    "@weft/core": "workspace:*",
+    "@weft/figma": "workspace:*",
+    "@weft/penpot": "workspace:*",
+    "@weft/render-react": "workspace:*",
+    "@weft/to-jsx": "workspace:*",
+    "babel-preset-solid": "1.9.15",
+    "fast-png": "8.0.0",
+    "oxc-transform": "0.152.0",
+    "pixelmatch": "7.2.0",
+    "playwright": "1.63.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "solid-js": "1.9.15"
+  }
+}

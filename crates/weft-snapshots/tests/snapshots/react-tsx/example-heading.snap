@@ -1,0 +1,33 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-heading as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="root" aria-label="Settings">
+      <h1 data-weft-id="title">Settings</h1>
+      <h2 data-weft-id="subtitle">
+        {!(_text(data?.section?.title).trim() === "") ? _squash(_text(data?.section?.title)) : ""}
+      </h2>
+    </main>
+  );
+}

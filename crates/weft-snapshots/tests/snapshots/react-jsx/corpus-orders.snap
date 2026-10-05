@@ -1,0 +1,157 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-orders as react-jsx
+---
+import { Fragment } from "react";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _keyed(list) {
+  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);
+}
+
+function _press(e, fire) {
+  if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  fire();
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="orders" aria-label="Orders">
+      <h2 data-weft-id="title">Orders</h2>
+      {(() => {
+        const _cols = [
+          (
+            <th data-weft-id="col-id" scope="col" aria-sort="descending" tabIndex={0} onClick={() => _act(actions, { id: "col-id", action: "orders.sortById" })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: "col-id", action: "orders.sortById" }))}>Order</th>
+          ),
+          (
+            <th data-weft-id="col-total" scope="col" aria-sort="none">
+              {!(_text(data?.labels?.total).trim() === "") ? _squash(_text(data?.labels?.total)) : ""}
+            </th>
+          ),
+          ..._list(data?.orders).flatMap((order, _i0) => []),
+        ];
+        const _rows = [
+          ..._list(data?.orders).flatMap((order, _i0) => [
+            (
+              <tr data-weft-id={"order[" + _i0 + "]"} aria-selected={String(_on(order?.selected))} tabIndex={0} onClick={() => _act(actions, { id: "order[" + _i0 + "]", action: "orders.open", item: "$.orders." + _i0 })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: "order[" + _i0 + "]", action: "orders.open", item: "$.orders." + _i0 }))}>
+                <td data-weft-id={"order-id[" + _i0 + "]"}>
+                  {!(_text(order?.id).trim() === "") ? _text(order?.id) : null}
+                </td>
+                <td data-weft-id={"order-total[" + _i0 + "]"}>
+                  <div data-weft-id={"order-amount[" + _i0 + "]"}>
+                    {!(_text(order?.total).trim() === "") ? _squash(_text(order?.total)) : ""}
+                  </div>
+                </td>
+              </tr>
+            ),
+          ]),
+        ];
+        return (
+          <table data-weft-id="open-orders" data-state="ready" aria-label="Open orders">
+            {_cols.length > 0 ? (
+              <thead>
+                <tr>
+                  {_keyed(_cols)}
+                </tr>
+              </thead>
+            ) : null}
+            {!(_list(data?.orders).length > 0) ? (
+              <tbody>
+                <tr data-weft-slot="empty">
+                  <td colSpan={Math.max(1, _cols.length)}>
+                    <div data-weft-id="no-orders">No open orders.</div>
+                  </td>
+                </tr>
+              </tbody>
+            ) : _rows.length > 0 ? (
+              <tbody>
+                {_keyed(_rows)}
+              </tbody>
+            ) : null}
+          </table>
+        );
+      })()}
+      {(() => {
+        const _cols = [
+          (
+            <th data-weft-id="col-archived" scope="col">Order</th>
+          ),
+        ];
+        const _rows = [];
+        return (
+          <table data-weft-id="archived" data-state="empty" aria-label="Archived orders">
+            {_cols.length > 0 ? (
+              <thead>
+                <tr>
+                  {_keyed(_cols)}
+                </tr>
+              </thead>
+            ) : null}
+            <tbody>
+              <tr data-weft-slot="empty">
+                <td colSpan={Math.max(1, _cols.length)}>
+                  <div data-weft-id="archived-empty">Nothing archived yet.</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        );
+      })()}
+      {(() => {
+        const _cols = [
+          (
+            <th data-weft-id="col-pending" scope="col">Order</th>
+          ),
+        ];
+        const _rows = [
+          (
+            <tr data-weft-id="pending-row" aria-selected="true">
+              <td data-weft-id="pending-cell">{"Fetching…"}</td>
+            </tr>
+          ),
+        ];
+        return (
+          <table data-weft-id="pending" data-state="loading" aria-busy="true" aria-label="Pending orders">
+            {_cols.length > 0 ? (
+              <thead>
+                <tr>
+                  {_keyed(_cols)}
+                </tr>
+              </thead>
+            ) : null}
+            {_rows.length > 0 ? (
+              <tbody>
+                {_keyed(_rows)}
+              </tbody>
+            ) : null}
+          </table>
+        );
+      })()}
+    </main>
+  );
+}

@@ -1,0 +1,80 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-menu as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "account-menu",
+    "props": {
+      "label": "Account menu"
+    },
+    "children": [
+      {
+        "kind": "text",
+        "id": "signed-in",
+        "props": {
+          "text": {
+            "bind": "$.user.email"
+          }
+        }
+      },
+      {
+        "kind": "menu",
+        "id": "menu",
+        "props": {
+          "label": "Account"
+        },
+        "children": [
+          {
+            "kind": "menu-item",
+            "id": "item-profile",
+            "on": {
+              "press": "nav.profile"
+            },
+            "children": [
+              "Profile"
+            ]
+          },
+          {
+            "kind": "menu-item",
+            "id": "item-settings",
+            "on": {
+              "press": "nav.settings"
+            },
+            "children": [
+              "Settings"
+            ]
+          },
+          {
+            "kind": "menu-item",
+            "id": "item-billing",
+            "props": {
+              "disabled": {
+                "bind": "$.isOwner",
+                "not": true
+              }
+            },
+            "on": {
+              "press": "nav.billing"
+            },
+            "children": [
+              "Billing"
+            ]
+          },
+          {
+            "kind": "menu-item",
+            "id": "item-signout",
+            "on": {
+              "press": "auth.signout"
+            },
+            "children": [
+              "Sign out"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

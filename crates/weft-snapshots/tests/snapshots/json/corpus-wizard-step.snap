@@ -1,0 +1,116 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-wizard-step as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "wizard",
+    "props": {
+      "label": "Setup wizard"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Choose a plan"
+        ]
+      },
+      {
+        "kind": "text",
+        "id": "progress",
+        "props": {
+          "text": {
+            "bind": "$.progress"
+          }
+        }
+      },
+      {
+        "kind": "radio-group",
+        "id": "plan",
+        "props": {
+          "label": "Plan",
+          "value": {
+            "bind": "$.plan"
+          }
+        },
+        "children": [
+          {
+            "kind": "radio",
+            "id": "plan-free",
+            "props": {
+              "value": "free"
+            },
+            "children": [
+              "Free"
+            ]
+          },
+          {
+            "kind": "radio",
+            "id": "plan-pro",
+            "props": {
+              "value": "pro"
+            },
+            "children": [
+              "Pro"
+            ]
+          },
+          {
+            "kind": "radio",
+            "id": "plan-team",
+            "props": {
+              "value": "team"
+            },
+            "children": [
+              "Team"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "nav",
+        "props": {
+          "direction": "row",
+          "gap": {
+            "token": "space.sm"
+          }
+        },
+        "children": [
+          {
+            "kind": "button",
+            "id": "back",
+            "on": {
+              "press": "wizard.back"
+            },
+            "children": [
+              "Back"
+            ]
+          },
+          {
+            "kind": "button",
+            "id": "next",
+            "props": {
+              "disabled": {
+                "bind": "$.plan",
+                "not": true
+              },
+              "variant": "primary"
+            },
+            "on": {
+              "press": "wizard.next"
+            },
+            "children": [
+              "Next"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

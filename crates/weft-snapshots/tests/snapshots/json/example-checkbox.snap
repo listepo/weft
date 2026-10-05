@@ -1,0 +1,30 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-checkbox as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Terms"
+    },
+    "children": [
+      {
+        "kind": "checkbox",
+        "id": "terms",
+        "props": {
+          "checked": {
+            "bind": "$.acceptTerms"
+          },
+          "disabled": false,
+          "label": "I accept the terms"
+        },
+        "on": {
+          "change": "form.edit"
+        }
+      }
+    ]
+  }
+}

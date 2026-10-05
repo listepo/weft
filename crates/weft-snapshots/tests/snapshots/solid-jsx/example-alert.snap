@@ -1,0 +1,35 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-alert as solid-jsx
+---
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="root" aria-label="Payment">
+      <div data-weft-id="failed" role="alert" data-tone="danger">
+        <div data-weft-id="failed-text">Your card was declined.</div>
+        {(() => {
+          const _href = _url("");
+          return (
+            <a data-weft-id="retry" href={_href} role={_href === undefined ? "link" : undefined} tabindex={_href === undefined ? 0 : undefined} onKeyDown={_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(props.actions, { id: "retry", action: "payment.retry" }); } : undefined} onClick={() => _act(props.actions, { id: "retry", action: "payment.retry" })} style={{ display: "inline-block" }}>Try again</a>
+          );
+        })()}
+      </div>
+    </main>
+  );
+}

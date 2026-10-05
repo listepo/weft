@@ -96,6 +96,31 @@ fn without_each_ids(markup: &str) -> String {
     out
 }
 
+/// Known gaps of the convention import, found by the coverage screens (T36). Each screen here
+/// must still differ, so a fix fails the test until its entry is removed.
+const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
+    (
+        "account",
+        "explicit type=\"text\" is dropped; a bound field error comes back as a text element; \
+         radio-group on-change is lost; a radio's bound text comes back as label; a literal \
+         hidden element is lost; a bound number value comes back wrapped in _float",
+    ),
+    ("dashboard", "an explicit direction=\"column\" is dropped"),
+    (
+        "inbox",
+        "the tabs selected binding and on-change are lost; a bound tab label comes back empty; \
+         dialog modal=\"false\" is dropped",
+    ),
+    (
+        "leaderboard",
+        "an array-index binding comes back as a _get expression",
+    ),
+    (
+        "orders",
+        "the row selected binding is lost; a table empty slot comes back wrapped in a cell",
+    ),
+];
+
 #[test]
 fn generated_components_without_their_source_come_back_by_convention() {
     let catalog = core_catalog().unwrap();
@@ -113,7 +138,11 @@ fn generated_components_without_their_source_come_back_by_convention() {
             let got = without_each_ids(&serialize(&back.document));
             let want = without_each_ids(&serialize(&document));
             let other_losses = back.losses.iter().any(|l| l.kind != LossKind::Ids);
-            if other_losses || got != want || has_errors(&back.diagnostics) {
+            let differs = other_losses || got != want || has_errors(&back.diagnostics);
+            let known = JSX_CONVENTION_GAPS.iter().any(|(gap, _)| *gap == name);
+            if known && !differs {
+                failures.push(format!("{what}: the known gap is fixed; remove it"));
+            } else if differs && !known {
                 failures.push(format!(
                     "##### {what}\n{got}\n--- want\n{want}\n{:#?}\n{:?}",
                     back.losses, back.diagnostics

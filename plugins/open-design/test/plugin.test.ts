@@ -187,7 +187,10 @@ describe("the plugin folder alone", () => {
   const project = join(scratch, "project");
   const root = join(project, ".od-skills/weft-0123456789ab");
   const corpus = join(ROOT, "corpus");
-  const screen = readdirSync(corpus, { withFileTypes: true }).find((e) => e.isDirectory())?.name;
+  // Coverage screens have no hand-written page (corpus/README.md); the import needs one.
+  const screen = readdirSync(corpus, { withFileTypes: true }).find(
+    (e) => e.isDirectory() && existsSync(join(corpus, e.name, "screen.html")),
+  )?.name;
   assert.ok(screen);
 
   beforeAll(() => {

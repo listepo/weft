@@ -1,0 +1,55 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-form as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Sign in"
+    },
+    "children": [
+      {
+        "kind": "form",
+        "id": "login",
+        "props": {
+          "state": "idle"
+        },
+        "on": {
+          "submit": "auth.submit"
+        },
+        "slots": {
+          "footer": [
+            {
+              "kind": "button",
+              "id": "go",
+              "props": {
+                "submit": true,
+                "variant": "primary"
+              },
+              "children": [
+                "Sign in"
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "field",
+            "id": "email",
+            "props": {
+              "label": "Email",
+              "required": true,
+              "type": "email",
+              "value": {
+                "bind": "$.email"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

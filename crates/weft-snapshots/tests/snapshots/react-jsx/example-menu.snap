@@ -1,0 +1,20 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-menu as react-jsx
+---
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Document">
+      <div data-weft-id="actions" aria-label="Document actions" role="menu">
+        <button data-weft-id="rename" type="button" role="menuitem" onClick={() => _act(actions, { id: "rename", action: "doc.rename" })}>Rename</button>
+        <button data-weft-id="delete" type="button" role="menuitem" onClick={() => _act(actions, { id: "delete", action: "doc.delete" })}>Delete</button>
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,53 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-row as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Users"
+    },
+    "children": [
+      {
+        "kind": "table",
+        "id": "users",
+        "props": {
+          "label": "Users"
+        },
+        "children": [
+          {
+            "kind": "column",
+            "id": "col-name",
+            "children": [
+              "Name"
+            ]
+          },
+          {
+            "kind": "row",
+            "id": "row-ana",
+            "props": {
+              "selected": {
+                "bind": "$.anaSelected"
+              }
+            },
+            "on": {
+              "press": "users.select"
+            },
+            "children": [
+              {
+                "kind": "cell",
+                "id": "cell-ana",
+                "children": [
+                  "Ana"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

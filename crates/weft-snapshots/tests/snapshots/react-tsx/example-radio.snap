@@ -1,0 +1,40 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-radio as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v: unknown): boolean {
+  return v === "false" ? false : Boolean(v);
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="root" aria-label="Delivery">
+      <div data-weft-id="speed" aria-label="Delivery speed" role="radiogroup">
+        <span aria-hidden="true">Delivery speed</span>
+        <label>
+          <input data-weft-id="speed-std" type="radio" name={"weft-speed"} value="standard" aria-label="Standard" checked={_text(data?.speed) !== "" && "standard" === _text(data?.speed)} onChange={() => onChange?.("$.speed", "standard")} />
+          <span aria-hidden="true">Standard</span>
+        </label>
+        <label>
+          <input data-weft-id="speed-fast" type="radio" name={"weft-speed"} value="express" aria-label="Express" disabled={!_on(data?.expressAvailable)} checked={_text(data?.speed) !== "" && "express" === _text(data?.speed)} onChange={() => onChange?.("$.speed", "express")} />
+          <span aria-hidden="true">Express</span>
+        </label>
+      </div>
+    </main>
+  );
+}

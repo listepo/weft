@@ -1,0 +1,79 @@
+FRAME "screen#orders" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#orders)
+  | weft.source = {"kind":"screen","id":"orders","props":{"label":"Orders"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":2},"children":["Orders"],"shown":{"text":"Orders"}}
+    TEXT "text" chars="Orders" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "table#open-orders" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(table#open-orders)
+    | weft.source = {"kind":"table","id":"open-orders","props":{"label":"Open orders","state":"ready"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    INSTANCE "column#col-id" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<sort=descending>"
+      | weft.origin = layer(column#col-id)
+      | weft.source = {"kind":"column","id":"col-id","props":{"sort":"descending"},"on":{"press":"orders.sortById"},"children":["Order"],"shown":{"text":"Order"}}
+      TEXT "text" chars="Order" font={"family":"Inter","style":"Bold"} size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "column#col-total" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<sort=none>"
+      | weft.origin = layer(column#col-total)
+      | weft.source = {"kind":"column","id":"col-total","props":{"sort":"none","text":{"bind":"$.labels.total"}},"shown":{"text":"{$.labels.total}"}}
+      TEXT "text" chars="{$.labels.total}" font={"family":"Inter","style":"Bold"} size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "each#order-each" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.origin = layer(each#order-each)
+      | weft.source = {"kind":"each","id":"order-each","props":{"as":"order","in":{"bind":"$.orders"}}}
+      | weft.style = [[],[],0,[0,0,0,0],0]
+      FRAME "row#order" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(row#order)
+        | weft.source = {"kind":"row","id":"order","props":{"selected":{"bind":"$order.selected"}},"on":{"press":"orders.open"}}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        FRAME "cell#order-id" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+          | weft.origin = layer(cell#order-id)
+          | weft.source = {"kind":"cell","id":"order-id","props":{"text":{"bind":"$order.id"}}}
+          | weft.style = [[],[],0,[8,8,8,8],8]
+        FRAME "cell#order-total" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+          | weft.origin = layer(cell#order-total)
+          | weft.source = {"kind":"cell","id":"order-total"}
+          | weft.style = [[],[],0,[8,8,8,8],8]
+          INSTANCE "text#order-amount" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+            | weft.origin = layer(text#order-amount)
+            | weft.source = {"kind":"text","id":"order-amount","props":{"text":{"bind":"$order.total"}},"shown":{"text":"{$order.total}"}}
+            TEXT "text" chars="{$order.total}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "slot:empty" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.slot = empty
+      INSTANCE "text#no-orders" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#no-orders)
+        | weft.source = {"kind":"text","id":"no-orders","children":["No open orders."],"shown":{"text":"No open orders."}}
+        TEXT "text" chars="No open orders." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "table#archived" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(table#archived)
+    | weft.source = {"kind":"table","id":"archived","props":{"label":"Archived orders","state":"empty"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    INSTANCE "column#col-archived" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<sort=(unset)>"
+      | weft.origin = layer(column#col-archived)
+      | weft.source = {"kind":"column","id":"col-archived","children":["Order"],"shown":{"text":"Order"}}
+      TEXT "text" chars="Order" font={"family":"Inter","style":"Bold"} size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "slot:empty" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.slot = empty
+      INSTANCE "text#archived-empty" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#archived-empty)
+        | weft.source = {"kind":"text","id":"archived-empty","children":["Nothing archived yet."],"shown":{"text":"Nothing archived yet."}}
+        TEXT "text" chars="Nothing archived yet." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "table#pending" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(table#pending)
+    | weft.source = {"kind":"table","id":"pending","props":{"label":"Pending orders","state":"loading"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    INSTANCE "column#col-pending" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<sort=(unset)>"
+      | weft.origin = layer(column#col-pending)
+      | weft.source = {"kind":"column","id":"col-pending","children":["Order"],"shown":{"text":"Order"}}
+      TEXT "text" chars="Order" font={"family":"Inter","style":"Bold"} size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "row#pending-row" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(row#pending-row)
+      | weft.source = {"kind":"row","id":"pending-row","props":{"selected":true}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      FRAME "cell#pending-cell" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(cell#pending-cell)
+        | weft.source = {"kind":"cell","id":"pending-cell"}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        TEXT "text" chars="Fetching…" size=14
+          | weft.text = 1

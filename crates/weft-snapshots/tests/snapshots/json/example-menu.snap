@@ -1,0 +1,45 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-menu as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Document"
+    },
+    "children": [
+      {
+        "kind": "menu",
+        "id": "actions",
+        "props": {
+          "label": "Document actions"
+        },
+        "children": [
+          {
+            "kind": "menu-item",
+            "id": "rename",
+            "on": {
+              "press": "doc.rename"
+            },
+            "children": [
+              "Rename"
+            ]
+          },
+          {
+            "kind": "menu-item",
+            "id": "delete",
+            "on": {
+              "press": "doc.delete"
+            },
+            "children": [
+              "Delete"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

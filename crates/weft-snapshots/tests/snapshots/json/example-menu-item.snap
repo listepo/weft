@@ -1,0 +1,53 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-menu-item as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Document"
+    },
+    "children": [
+      {
+        "kind": "menu",
+        "id": "actions",
+        "props": {
+          "label": "Document actions"
+        },
+        "children": [
+          {
+            "kind": "each",
+            "id": "action-each",
+            "props": {
+              "as": "action",
+              "in": {
+                "bind": "$.actions"
+              }
+            },
+            "children": [
+              {
+                "kind": "menu-item",
+                "id": "action-item",
+                "props": {
+                  "disabled": {
+                    "bind": "$action.enabled",
+                    "not": true
+                  },
+                  "text": {
+                    "bind": "$action.label"
+                  }
+                },
+                "on": {
+                  "press": "doc.run"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

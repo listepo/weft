@@ -1,0 +1,55 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-option as react-tsx
+---
+import { Fragment, type ReactNode } from "react";
+
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _list(v: unknown): any[] {
+  return Array.isArray(v) ? v : [];
+}
+
+function _keyed(list: ReactNode[]): ReactNode[] {
+  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="root" aria-label="Sizes">
+      <label>
+        <span aria-hidden="true">Size</span>
+        {(() => {
+          const _o = [
+            ..._list(data?.sizes).flatMap((size, _i0) => [
+              { value: size?.code, el: (
+                <option data-weft-id={"size-option[" + _i0 + "]"} value={_text(size?.code)}>Size</option>
+              ) },
+            ]),
+            { value: "other", el: (
+              <option data-weft-id="size-other" value="other">Other</option>
+            ) },
+          ];
+          return (
+            <select data-weft-id="size" aria-label="Size" value={_text(data?.size)} onChange={(_e) => { const _c = _o.find((_x) => _text(_x.value) === _e.currentTarget.value); onChange?.("$.size", _c ? _c.value : _e.currentTarget.value); }}>
+              {_keyed(_o.map((_x) => _x.el))}
+            </select>
+          );
+        })()}
+      </label>
+    </main>
+  );
+}

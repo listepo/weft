@@ -1,0 +1,278 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-dashboard as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "dashboard",
+    "props": {
+      "label": "Team dashboard",
+      "state": "ready"
+    },
+    "children": [
+      {
+        "kind": "stack",
+        "id": "header",
+        "props": {
+          "align": "center",
+          "direction": "row",
+          "gap": {
+            "token": "space.xl"
+          },
+          "wrap": true
+        },
+        "children": [
+          {
+            "kind": "heading",
+            "id": "title",
+            "props": {
+              "level": 1,
+              "text": {
+                "bind": "$.team.name"
+              }
+            }
+          },
+          {
+            "kind": "text",
+            "id": "updated",
+            "props": {
+              "text": {
+                "bind": "$.updatedAt"
+              },
+              "tone": "muted"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "grid",
+        "id": "stats",
+        "props": {
+          "columns": 3,
+          "gap": {
+            "token": "space.lg"
+          }
+        },
+        "children": [
+          {
+            "kind": "section",
+            "id": "velocity",
+            "props": {
+              "label": "Velocity"
+            },
+            "slots": {
+              "header": [
+                {
+                  "kind": "heading",
+                  "id": "velocity-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "children": [
+                    "Velocity"
+                  ]
+                }
+              ]
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "velocity-value",
+                "props": {
+                  "text": {
+                    "bind": "$.stats.velocity"
+                  },
+                  "tone": "success"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "section",
+            "id": "bugs",
+            "props": {
+              "label": "Open bugs"
+            },
+            "slots": {
+              "header": [
+                {
+                  "kind": "heading",
+                  "id": "bugs-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "children": [
+                    "Open bugs"
+                  ]
+                }
+              ]
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "bugs-value",
+                "props": {
+                  "text": {
+                    "bind": "$.stats.bugs"
+                  },
+                  "tone": "warning"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "section",
+            "id": "incidents",
+            "props": {
+              "label": "Incidents"
+            },
+            "slots": {
+              "header": [
+                {
+                  "kind": "heading",
+                  "id": "incidents-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "children": [
+                    "Incidents"
+                  ]
+                }
+              ]
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "incidents-value",
+                "props": {
+                  "text": {
+                    "bind": "$.stats.incidents"
+                  },
+                  "tone": "danger"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "notices",
+        "props": {
+          "align": "stretch",
+          "direction": "column",
+          "gap": {
+            "token": "space.sm"
+          }
+        },
+        "children": [
+          {
+            "kind": "alert",
+            "id": "release",
+            "props": {
+              "tone": "info"
+            },
+            "children": [
+              "Release 2.4 ships on Friday."
+            ]
+          },
+          {
+            "kind": "alert",
+            "id": "backup",
+            "props": {
+              "text": {
+                "bind": "$.backupStatus"
+              },
+              "tone": "success"
+            }
+          },
+          {
+            "kind": "alert",
+            "id": "quota",
+            "props": {
+              "tone": "warning"
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "quota-text",
+                "children": [
+                  "Storage is 90% full."
+                ]
+              },
+              {
+                "kind": "link",
+                "id": "quota-link",
+                "props": {
+                  "href": "https://example.com/storage"
+                },
+                "children": [
+                  "Manage storage"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "footer",
+        "props": {
+          "align": "end",
+          "gap": {
+            "token": "space.xs"
+          }
+        },
+        "children": [
+          {
+            "kind": "text",
+            "id": "owner",
+            "props": {
+              "tone": "default"
+            },
+            "children": [
+              "Owned by the platform team"
+            ]
+          },
+          {
+            "kind": "stack",
+            "id": "footer-links",
+            "props": {
+              "align": "start",
+              "direction": "row",
+              "gap": {
+                "token": "space.md"
+              }
+            },
+            "children": [
+              {
+                "kind": "link",
+                "id": "docs",
+                "props": {
+                  "href": "/docs"
+                },
+                "children": [
+                  "Docs"
+                ]
+              },
+              {
+                "kind": "link",
+                "id": "status",
+                "props": {
+                  "href": {
+                    "bind": "$.statusUrl"
+                  }
+                },
+                "children": [
+                  "Status page"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

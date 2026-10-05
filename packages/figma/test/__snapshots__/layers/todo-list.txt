@@ -1,0 +1,59 @@
+FRAME "screen#todos" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#todos)
+  | weft.source = {"kind":"screen","id":"todos","props":{"label":"Tasks"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Tasks"],"shown":{"text":"Tasks"}}
+    TEXT "text" chars="Tasks" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "form#add-form" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+    | weft.origin = layer(form#add-form)
+    | weft.source = {"kind":"form","id":"add-form","on":{"submit":"todo.add"}}
+    | weft.style = [[],[],0,[0,0,0,0],8]
+    FRAME "stack#add-row" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+      | weft.origin = layer(stack#add-row)
+      | weft.source = {"kind":"stack","id":"add-row","props":{"direction":"row","gap":{"token":"space.sm"}}}
+      | weft.style = [[],[],0,[0,0,0,0],null]
+      INSTANCE "field#draft" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=text, state=(unset)>"
+        | weft.origin = layer(field#draft)
+        | weft.source = {"kind":"field","id":"draft","props":{"label":"New task","value":{"bind":"$.draft"}},"shown":{"text":"","label":"New task"}}
+        TEXT "label" chars="New task"
+        FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+      INSTANCE "button#add" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+        | weft.origin = layer(button#add)
+        | weft.source = {"kind":"button","id":"add","props":{"disabled":{"bind":"$.draft","not":true},"submit":true,"variant":"primary"},"children":["Add"],"shown":{"text":"Add"}}
+        TEXT "text" chars="Add" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  FRAME "list#list" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(list#list)
+    | weft.source = {"kind":"list","id":"list"}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    FRAME "each#todo-each" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.origin = layer(each#todo-each)
+      | weft.source = {"kind":"each","id":"todo-each","props":{"as":"todo","in":{"bind":"$.todos"}}}
+      | weft.style = [[],[],0,[0,0,0,0],0]
+      FRAME "item#todo" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(item#todo)
+        | weft.source = {"kind":"item","id":"todo"}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        INSTANCE "checkbox#todo-done" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<checkbox>"
+          | weft.origin = layer(checkbox#todo-done)
+          | weft.source = {"kind":"checkbox","id":"todo-done","props":{"checked":{"bind":"$todo.done"},"label":{"bind":"$todo.title"}},"shown":{"text":"","label":"{$todo.title}"}}
+          RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4
+          TEXT "label" chars="{$todo.title}" size=14
+        INSTANCE "button#todo-remove" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=secondary, state=(unset)>"
+          | weft.origin = layer(button#todo-remove)
+          | weft.source = {"kind":"button","id":"todo-remove","on":{"press":"todo.remove"},"children":["Remove"],"shown":{"text":"Remove"}}
+          TEXT "text" chars="Remove" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "stack#summary" layoutMode="HORIZONTAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
+    | weft.origin = layer(stack#summary)
+    | weft.source = {"kind":"stack","id":"summary","props":{"direction":"row","gap":{"token":"space.xs"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "text#remaining" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#remaining)
+      | weft.source = {"kind":"text","id":"remaining","props":{"text":{"bind":"$.remaining"}},"shown":{"text":"{$.remaining}"}}
+      TEXT "text" chars="{$.remaining}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "text#remaining-label" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#remaining-label)
+      | weft.source = {"kind":"text","id":"remaining-label","children":["items left"],"shown":{"text":"items left"}}
+      TEXT "text" chars="items left" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

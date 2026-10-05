@@ -1,0 +1,44 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-tab as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Account"
+    },
+    "children": [
+      {
+        "kind": "tabs",
+        "id": "account-tabs",
+        "props": {
+          "selected": "tab-profile"
+        },
+        "children": [
+          {
+            "kind": "tab",
+            "id": "tab-profile",
+            "props": {
+              "label": "Profile"
+            },
+            "children": [
+              {
+                "kind": "field",
+                "id": "name",
+                "props": {
+                  "label": "Display name",
+                  "value": {
+                    "bind": "$.name"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

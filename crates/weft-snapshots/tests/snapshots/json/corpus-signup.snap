@@ -1,0 +1,135 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-signup as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "signup",
+    "props": {
+      "label": "Create account"
+    },
+    "children": [
+      {
+        "kind": "form",
+        "id": "form",
+        "props": {
+          "state": "idle"
+        },
+        "on": {
+          "submit": "auth.signup"
+        },
+        "slots": {
+          "footer": [
+            {
+              "kind": "link",
+              "id": "signin",
+              "on": {
+                "press": "nav.signin"
+              },
+              "children": [
+                "Already have an account? Sign in"
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "heading",
+            "id": "title",
+            "props": {
+              "level": 1
+            },
+            "children": [
+              "Create your account"
+            ]
+          },
+          {
+            "kind": "stack",
+            "id": "fields",
+            "props": {
+              "gap": {
+                "token": "space.md"
+              }
+            },
+            "children": [
+              {
+                "kind": "field",
+                "id": "name",
+                "props": {
+                  "label": "Full name",
+                  "required": true,
+                  "value": {
+                    "bind": "$.name"
+                  }
+                }
+              },
+              {
+                "kind": "field",
+                "id": "email",
+                "props": {
+                  "label": "Email",
+                  "required": true,
+                  "type": "email",
+                  "value": {
+                    "bind": "$.email"
+                  }
+                }
+              },
+              {
+                "kind": "field",
+                "id": "password",
+                "props": {
+                  "label": "Password",
+                  "required": true,
+                  "type": "password",
+                  "value": {
+                    "bind": "$.password"
+                  }
+                }
+              },
+              {
+                "kind": "field",
+                "id": "confirm",
+                "props": {
+                  "label": "Confirm password",
+                  "required": true,
+                  "type": "password",
+                  "value": {
+                    "bind": "$.confirm"
+                  }
+                }
+              },
+              {
+                "kind": "checkbox",
+                "id": "terms",
+                "props": {
+                  "checked": {
+                    "bind": "$.acceptTerms"
+                  },
+                  "label": "I accept the terms of service"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "button",
+            "id": "submit",
+            "props": {
+              "disabled": {
+                "bind": "$.acceptTerms",
+                "not": true
+              },
+              "submit": true,
+              "variant": "primary"
+            },
+            "children": [
+              "Create account"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

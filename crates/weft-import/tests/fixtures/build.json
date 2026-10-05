@@ -3,6 +3,459 @@
   "sems": [
    {
     "role": "main",
+    "name": "Edit account",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "heading",
+      "name": "Edit account",
+      "states": {
+       "level": 1
+      },
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "form",
+      "name": "Account",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "textbox",
+        "name": "Full name",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "Ada Lovelace",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "spinbutton",
+        "name": "Age",
+        "states": {
+         "invalid": true
+        },
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "17",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "text",
+        "name": "You must be 18 or older.",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "textbox",
+        "name": "Handle",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "ada",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "textbox",
+        "name": "Bio",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "Wrote the first program.",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "textbox",
+        "name": "Email",
+        "states": {
+         "disabled": true
+        },
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "ada@example.com",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "checkbox",
+        "name": "Send me the newsletter",
+        "states": {
+         "checked": true
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "checkbox",
+        "name": "Terms accepted",
+        "states": {
+         "checked": true,
+         "disabled": true
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "switch",
+        "name": "Public profile",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "radiogroup",
+        "name": "Plan",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "radio",
+          "name": "Free",
+          "states": {},
+          "props": {},
+          "children": []
+         },
+         {
+          "role": "radio",
+          "name": "Pro",
+          "states": {
+           "checked": true
+          },
+          "props": {},
+          "children": []
+         },
+         {
+          "role": "radio",
+          "name": "Team",
+          "states": {
+           "disabled": true
+          },
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "combobox",
+        "name": "Language",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "option",
+          "name": "English",
+          "states": {},
+          "props": {},
+          "children": []
+         },
+         {
+          "role": "option",
+          "name": "Français",
+          "states": {
+           "selected": true
+          },
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "button",
+        "name": "Save",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "button",
+        "name": "Cancel",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "link",
+        "name": "Help",
+        "states": {},
+        "props": {
+         "href": "https://example.com/help"
+        },
+        "children": []
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-edit-account",
+     "props": {
+      "label": "Edit account"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "heading-edit-account",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Edit account"
+       ]
+      },
+      {
+       "kind": "form",
+       "id": "form-account",
+       "props": {
+        "label": "Account"
+       },
+       "children": [
+        {
+         "kind": "field",
+         "id": "field-full-name",
+         "props": {
+          "label": "Full name",
+          "value": "Ada Lovelace"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "field-age",
+         "props": {
+          "label": "Age",
+          "state": "invalid",
+          "type": "number",
+          "value": "17"
+         }
+        },
+        {
+         "kind": "text",
+         "id": "text-you-must-be-18-or-older",
+         "children": [
+          "You must be 18 or older."
+         ]
+        },
+        {
+         "kind": "field",
+         "id": "field-handle",
+         "props": {
+          "label": "Handle",
+          "value": "ada"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "field-bio",
+         "props": {
+          "label": "Bio",
+          "value": "Wrote the first program."
+         }
+        },
+        {
+         "kind": "field",
+         "id": "field-email",
+         "props": {
+          "disabled": true,
+          "label": "Email",
+          "value": "ada@example.com"
+         }
+        },
+        {
+         "kind": "checkbox",
+         "id": "checkbox-send-me-the-newsletter",
+         "props": {
+          "checked": true,
+          "label": "Send me the newsletter"
+         }
+        },
+        {
+         "kind": "checkbox",
+         "id": "checkbox-terms-accepted",
+         "props": {
+          "checked": true,
+          "disabled": true,
+          "label": "Terms accepted"
+         }
+        },
+        {
+         "kind": "switch",
+         "id": "switch-public-profile",
+         "props": {
+          "label": "Public profile"
+         }
+        },
+        {
+         "kind": "radio-group",
+         "id": "radio-group-plan",
+         "props": {
+          "label": "Plan",
+          "value": "pro"
+         },
+         "children": [
+          {
+           "kind": "radio",
+           "id": "radio-free",
+           "props": {
+            "value": "free"
+           },
+           "children": [
+            "Free"
+           ]
+          },
+          {
+           "kind": "radio",
+           "id": "radio-pro",
+           "props": {
+            "value": "pro"
+           },
+           "children": [
+            "Pro"
+           ]
+          },
+          {
+           "kind": "radio",
+           "id": "radio-team",
+           "props": {
+            "disabled": true,
+            "value": "team"
+           },
+           "children": [
+            "Team"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "select",
+         "id": "select-language",
+         "props": {
+          "label": "Language",
+          "value": "francais"
+         },
+         "children": [
+          {
+           "kind": "option",
+           "id": "option-english",
+           "props": {
+            "value": "english"
+           },
+           "children": [
+            "English"
+           ]
+          },
+          {
+           "kind": "option",
+           "id": "option-francais",
+           "props": {
+            "value": "francais"
+           },
+           "children": [
+            "Français"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "button-save",
+         "children": [
+          "Save"
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "button-cancel",
+         "children": [
+          "Cancel"
+         ]
+        },
+        {
+         "kind": "link",
+         "id": "link-help",
+         "props": {
+          "href": "https://example.com/help"
+         },
+         "children": [
+          "Help"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/screen#screen-edit-account/form#form-account/radio-group#radio-group-plan/radio#radio-free",
+     "note": "required value is not in the input; \"free\" stands in"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-edit-account/form#form-account/radio-group#radio-group-plan/radio#radio-pro",
+     "note": "required value is not in the input; \"pro\" stands in"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-edit-account/form#form-account/radio-group#radio-group-plan/radio#radio-team",
+     "note": "required value is not in the input; \"team\" stands in"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-edit-account/form#form-account/select#select-language/option#option-english",
+     "note": "required value is not in the input; \"english\" stands in"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-edit-account/form#form-account/select#select-language/option#option-francais",
+     "note": "required value is not in the input; \"francais\" stands in"
+    }
+   ],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-edit-account"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
     "name": "File",
     "states": {},
     "props": {},
@@ -60,6 +513,356 @@
    "losses": [],
    "diagnostics": [],
    "rootPath": "/screen#screen-file"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
+    "name": "Team dashboard",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "heading",
+      "name": "Platform",
+      "states": {
+       "level": 1
+      },
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "text",
+      "name": "Updated 5 minutes ago",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "region",
+      "name": "Velocity",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "heading",
+        "name": "Velocity",
+        "states": {
+         "level": 2
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "text",
+        "name": "42",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "region",
+      "name": "Open bugs",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "heading",
+        "name": "Open bugs",
+        "states": {
+         "level": 2
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "text",
+        "name": "7",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "region",
+      "name": "Incidents",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "heading",
+        "name": "Incidents",
+        "states": {
+         "level": 2
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "text",
+        "name": "1",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "alert",
+      "name": "",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "Release 2.4 ships on Friday.",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "alert",
+      "name": "",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "Last backup finished at 03:00.",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "alert",
+      "name": "",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "Storage is 90% full.",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "link",
+        "name": "Manage storage",
+        "states": {},
+        "props": {
+         "href": "https://example.com/storage"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "text",
+      "name": "Owned by the platform team",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "link",
+      "name": "Docs",
+      "states": {},
+      "props": {
+       "href": "/docs"
+      },
+      "children": []
+     },
+     {
+      "role": "link",
+      "name": "Status page",
+      "states": {},
+      "props": {
+       "href": "https://status.example.com"
+      },
+      "children": []
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-team-dashboard",
+     "props": {
+      "label": "Team dashboard"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "heading-platform",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Platform"
+       ]
+      },
+      {
+       "kind": "text",
+       "id": "text-updated-5-minutes-ago",
+       "children": [
+        "Updated 5 minutes ago"
+       ]
+      },
+      {
+       "kind": "section",
+       "id": "section-velocity",
+       "props": {
+        "label": "Velocity"
+       },
+       "children": [
+        {
+         "kind": "heading",
+         "id": "heading-velocity",
+         "props": {
+          "level": 2
+         },
+         "children": [
+          "Velocity"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "text-42",
+         "children": [
+          "42"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "section",
+       "id": "section-open-bugs",
+       "props": {
+        "label": "Open bugs"
+       },
+       "children": [
+        {
+         "kind": "heading",
+         "id": "heading-open-bugs",
+         "props": {
+          "level": 2
+         },
+         "children": [
+          "Open bugs"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "text-7",
+         "children": [
+          "7"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "section",
+       "id": "section-incidents",
+       "props": {
+        "label": "Incidents"
+       },
+       "children": [
+        {
+         "kind": "heading",
+         "id": "heading-incidents",
+         "props": {
+          "level": 2
+         },
+         "children": [
+          "Incidents"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "text-1",
+         "children": [
+          "1"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "alert",
+       "id": "alert-1",
+       "children": [
+        "Release 2.4 ships on Friday."
+       ]
+      },
+      {
+       "kind": "alert",
+       "id": "alert-2",
+       "children": [
+        "Last backup finished at 03:00."
+       ]
+      },
+      {
+       "kind": "alert",
+       "id": "alert-3",
+       "children": [
+        "Storage is 90% full.",
+        {
+         "kind": "link",
+         "id": "link-manage-storage",
+         "props": {
+          "href": "https://example.com/storage"
+         },
+         "children": [
+          "Manage storage"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "text",
+       "id": "text-owned-by-the-platform-team",
+       "children": [
+        "Owned by the platform team"
+       ]
+      },
+      {
+       "kind": "link",
+       "id": "link-docs",
+       "props": {
+        "href": "/docs"
+       },
+       "children": [
+        "Docs"
+       ]
+      },
+      {
+       "kind": "link",
+       "id": "link-status-page",
+       "props": {
+        "href": "https://status.example.com"
+       },
+       "children": [
+        "Status page"
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-team-dashboard"
   }
  },
  {
@@ -479,6 +1282,447 @@
   "sems": [
    {
     "role": "main",
+    "name": "Inbox",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "tablist",
+      "name": "",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "tab",
+        "name": "Inbox",
+        "states": {
+         "selected": true
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "tab",
+        "name": "Drafts",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "tab",
+        "name": "Sent",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "tabpanel",
+      "name": "Inbox",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "list",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "listitem",
+          "name": "",
+          "states": {},
+          "props": {},
+          "children": [
+           {
+            "role": "text",
+            "name": "Quarterly report",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         },
+         {
+          "role": "listitem",
+          "name": "",
+          "states": {},
+          "props": {},
+          "children": [
+           {
+            "role": "text",
+            "name": "Lunch on Thursday?",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "role": "menu",
+      "name": "Message actions",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "menuitem",
+        "name": "Archive",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "menuitem",
+        "name": "Delete",
+        "states": {
+         "disabled": true
+        },
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "dialog",
+      "name": "New message",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "textbox",
+        "name": "To",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "grace@example.com",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "textbox",
+        "name": "Message",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "See you there.",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "button",
+        "name": "Send",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-inbox",
+     "props": {
+      "label": "Inbox"
+     },
+     "children": [
+      {
+       "kind": "tabs",
+       "id": "tabs-1",
+       "props": {
+        "selected": "tab-inbox"
+       },
+       "children": [
+        {
+         "kind": "tab",
+         "id": "tab-inbox",
+         "props": {
+          "label": "Inbox"
+         },
+         "children": [
+          {
+           "kind": "list",
+           "id": "list-1",
+           "children": [
+            {
+             "kind": "item",
+             "id": "item-1",
+             "children": [
+              "Quarterly report"
+             ]
+            },
+            {
+             "kind": "item",
+             "id": "item-2",
+             "children": [
+              "Lunch on Thursday?"
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "tab",
+         "id": "tab-drafts",
+         "props": {
+          "label": "Drafts"
+         }
+        },
+        {
+         "kind": "tab",
+         "id": "tab-sent",
+         "props": {
+          "label": "Sent"
+         }
+        }
+       ]
+      },
+      {
+       "kind": "menu",
+       "id": "menu-message-actions",
+       "props": {
+        "label": "Message actions"
+       },
+       "children": [
+        {
+         "kind": "menu-item",
+         "id": "menu-item-archive",
+         "children": [
+          "Archive"
+         ]
+        },
+        {
+         "kind": "menu-item",
+         "id": "menu-item-delete",
+         "props": {
+          "disabled": true
+         },
+         "children": [
+          "Delete"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "dialog",
+       "id": "dialog-new-message",
+       "props": {
+        "label": "New message",
+        "open": true
+       },
+       "children": [
+        {
+         "kind": "field",
+         "id": "field-to",
+         "props": {
+          "label": "To",
+          "value": "grace@example.com"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "field-message",
+         "props": {
+          "label": "Message",
+          "value": "See you there."
+         }
+        },
+        {
+         "kind": "button",
+         "id": "button-send",
+         "children": [
+          "Send"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "hidden",
+     "path": "/screen#screen-inbox/tabs#tabs-1/tab#tab-drafts",
+     "note": "the panel of this tab is not in the input (only the selected panel is exposed)"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#screen-inbox/tabs#tabs-1/tab#tab-sent",
+     "note": "the panel of this tab is not in the input (only the selected panel is exposed)"
+    }
+   ],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-inbox"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
+    "name": "Leaderboard",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "heading",
+      "name": "Leaderboard",
+      "states": {
+       "level": 1
+      },
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "text",
+      "name": "In the lead: Grace",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "list",
+      "name": "",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "listitem",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "Grace 1280",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "listitem",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "Alan 1105",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "listitem",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "Ada 990",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-leaderboard",
+     "props": {
+      "label": "Leaderboard"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "heading-leaderboard",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Leaderboard"
+       ]
+      },
+      {
+       "kind": "text",
+       "id": "text-in-the-lead-grace",
+       "children": [
+        "In the lead: Grace"
+       ]
+      },
+      {
+       "kind": "list",
+       "id": "list-1",
+       "children": [
+        {
+         "kind": "item",
+         "id": "item-1",
+         "children": [
+          "Grace 1280"
+         ]
+        },
+        {
+         "kind": "item",
+         "id": "item-2",
+         "children": [
+          "Alan 1105"
+         ]
+        },
+        {
+         "kind": "item",
+         "id": "item-3",
+         "children": [
+          "Ada 990"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-leaderboard"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
     "name": "Sign in",
     "states": {},
     "props": {},
@@ -723,6 +1967,384 @@
    "losses": [],
    "diagnostics": [],
    "rootPath": "/screen#screen-account-menu"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
+    "name": "Orders",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "heading",
+      "name": "Orders",
+      "states": {
+       "level": 2
+      },
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "table",
+      "name": "Open orders",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "rowgroup",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "row",
+          "name": "Order Total",
+          "states": {},
+          "props": {},
+          "children": [
+           {
+            "role": "columnheader",
+            "name": "Order",
+            "states": {},
+            "props": {},
+            "children": []
+           },
+           {
+            "role": "columnheader",
+            "name": "Total",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "role": "rowgroup",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "row",
+          "name": "A-1002 $120.00",
+          "states": {
+           "selected": true
+          },
+          "props": {},
+          "children": [
+           {
+            "role": "cell",
+            "name": "A-1002",
+            "states": {},
+            "props": {},
+            "children": []
+           },
+           {
+            "role": "cell",
+            "name": "$120.00",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         },
+         {
+          "role": "row",
+          "name": "A-1001 $35.50",
+          "states": {},
+          "props": {},
+          "children": [
+           {
+            "role": "cell",
+            "name": "A-1001",
+            "states": {},
+            "props": {},
+            "children": []
+           },
+           {
+            "role": "cell",
+            "name": "$35.50",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "role": "table",
+      "name": "Archived orders",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "rowgroup",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "row",
+          "name": "Order",
+          "states": {},
+          "props": {},
+          "children": [
+           {
+            "role": "columnheader",
+            "name": "Order",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "role": "rowgroup",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "row",
+          "name": "Nothing archived yet.",
+          "states": {},
+          "props": {},
+          "children": [
+           {
+            "role": "cell",
+            "name": "Nothing archived yet.",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "role": "table",
+      "name": "Pending orders",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "rowgroup",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "row",
+          "name": "Order",
+          "states": {},
+          "props": {},
+          "children": [
+           {
+            "role": "columnheader",
+            "name": "Order",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "role": "rowgroup",
+        "name": "",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "row",
+          "name": "Fetching…",
+          "states": {
+           "selected": true
+          },
+          "props": {},
+          "children": [
+           {
+            "role": "cell",
+            "name": "Fetching…",
+            "states": {},
+            "props": {},
+            "children": []
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-orders",
+     "props": {
+      "label": "Orders"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "heading-orders",
+       "props": {
+        "level": 2
+       },
+       "children": [
+        "Orders"
+       ]
+      },
+      {
+       "kind": "table",
+       "id": "table-open-orders",
+       "props": {
+        "label": "Open orders"
+       },
+       "children": [
+        {
+         "kind": "column",
+         "id": "column-order",
+         "children": [
+          "Order"
+         ]
+        },
+        {
+         "kind": "column",
+         "id": "column-total",
+         "children": [
+          "Total"
+         ]
+        },
+        {
+         "kind": "row",
+         "id": "row-a-1002-120-00",
+         "props": {
+          "selected": true
+         },
+         "children": [
+          {
+           "kind": "cell",
+           "id": "cell-a-1002",
+           "props": {
+            "label": "A-1002"
+           }
+          },
+          {
+           "kind": "cell",
+           "id": "cell-120-00",
+           "props": {
+            "label": "$120.00"
+           }
+          }
+         ]
+        },
+        {
+         "kind": "row",
+         "id": "row-a-1001-35-50",
+         "children": [
+          {
+           "kind": "cell",
+           "id": "cell-a-1001",
+           "props": {
+            "label": "A-1001"
+           }
+          },
+          {
+           "kind": "cell",
+           "id": "cell-35-50",
+           "props": {
+            "label": "$35.50"
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "table",
+       "id": "table-archived-orders",
+       "props": {
+        "label": "Archived orders"
+       },
+       "children": [
+        {
+         "kind": "column",
+         "id": "column-order-2",
+         "children": [
+          "Order"
+         ]
+        },
+        {
+         "kind": "row",
+         "id": "row-nothing-archived-yet",
+         "children": [
+          {
+           "kind": "cell",
+           "id": "cell-nothing-archived-yet",
+           "props": {
+            "label": "Nothing archived yet."
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "table",
+       "id": "table-pending-orders",
+       "props": {
+        "label": "Pending orders"
+       },
+       "children": [
+        {
+         "kind": "column",
+         "id": "column-order-3",
+         "children": [
+          "Order"
+         ]
+        },
+        {
+         "kind": "row",
+         "id": "row-fetching",
+         "props": {
+          "selected": true
+         },
+         "children": [
+          {
+           "kind": "cell",
+           "id": "cell-fetching",
+           "props": {
+            "label": "Fetching…"
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-orders"
   }
  },
  {

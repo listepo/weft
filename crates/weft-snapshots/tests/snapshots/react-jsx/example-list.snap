@@ -1,0 +1,46 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-list as react-jsx
+---
+import { Fragment } from "react";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Todos">
+      <ul data-weft-id="todos" data-state="ready">
+        {!(_list(data?.todos).length > 0) ? (
+          <li role="none" data-weft-slot="empty">
+            <div data-weft-id="todos-empty" data-tone="muted">Nothing to do.</div>
+          </li>
+        ) : (
+          <>
+            {_list(data?.todos).map((todo, _i0) => (
+              <Fragment key={_i0}>
+                <li data-weft-id={"todo-item[" + _i0 + "]"}>
+                  <div data-weft-id={"todo-title[" + _i0 + "]"}>
+                    {!(_text(todo?.title).trim() === "") ? _squash(_text(todo?.title)) : ""}
+                  </div>
+                </li>
+              </Fragment>
+            ))}
+          </>
+        )}
+      </ul>
+    </main>
+  );
+}

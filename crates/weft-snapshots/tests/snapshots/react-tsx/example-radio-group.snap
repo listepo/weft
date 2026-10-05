@@ -1,0 +1,42 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-radio-group as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="root" aria-label="Plan">
+      <div data-weft-id="plan" aria-label="Plan" role="radiogroup">
+        <span aria-hidden="true">Plan</span>
+        <label>
+          <input data-weft-id="plan-free" type="radio" name={"weft-plan"} value="free" aria-label="Free" checked={_text(data?.plan) !== "" && "free" === _text(data?.plan)} onChange={() => { onChange?.("$.plan", "free"); _act(actions, { id: "plan", action: "plan.choose" }); }} />
+          <span aria-hidden="true">Free</span>
+        </label>
+        <label>
+          <input data-weft-id="plan-pro" type="radio" name={"weft-plan"} value="pro" aria-label="Pro" checked={_text(data?.plan) !== "" && "pro" === _text(data?.plan)} onChange={() => { onChange?.("$.plan", "pro"); _act(actions, { id: "plan", action: "plan.choose" }); }} />
+          <span aria-hidden="true">Pro</span>
+        </label>
+      </div>
+    </main>
+  );
+}

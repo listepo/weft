@@ -1,0 +1,36 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-link as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Help"
+    },
+    "children": [
+      {
+        "kind": "link",
+        "id": "docs",
+        "props": {
+          "href": "https://example.com/help"
+        },
+        "children": [
+          "Read the help center"
+        ]
+      },
+      {
+        "kind": "link",
+        "id": "reset",
+        "on": {
+          "press": "nav.reset"
+        },
+        "children": [
+          "Forgot password?"
+        ]
+      }
+    ]
+  }
+}

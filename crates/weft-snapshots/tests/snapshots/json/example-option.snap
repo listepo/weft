@@ -1,0 +1,62 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-option as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Sizes"
+    },
+    "children": [
+      {
+        "kind": "select",
+        "id": "size",
+        "props": {
+          "label": "Size",
+          "value": {
+            "bind": "$.size"
+          }
+        },
+        "children": [
+          {
+            "kind": "each",
+            "id": "size-each",
+            "props": {
+              "as": "size",
+              "in": {
+                "bind": "$.sizes"
+              }
+            },
+            "children": [
+              {
+                "kind": "option",
+                "id": "size-option",
+                "props": {
+                  "value": {
+                    "bind": "$size.code"
+                  }
+                },
+                "children": [
+                  "Size"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "option",
+            "id": "size-other",
+            "props": {
+              "value": "other"
+            },
+            "children": [
+              "Other"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

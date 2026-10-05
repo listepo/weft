@@ -1,0 +1,101 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-profile as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "profile",
+    "props": {
+      "label": "Profile"
+    },
+    "children": [
+      {
+        "kind": "image",
+        "id": "avatar",
+        "props": {
+          "label": "Profile photo",
+          "src": {
+            "bind": "$.user.avatar"
+          }
+        }
+      },
+      {
+        "kind": "heading",
+        "id": "name",
+        "props": {
+          "level": 1,
+          "text": {
+            "bind": "$.user.name"
+          }
+        }
+      },
+      {
+        "kind": "text",
+        "id": "bio",
+        "props": {
+          "text": {
+            "bind": "$.user.bio"
+          }
+        }
+      },
+      {
+        "kind": "heading",
+        "id": "links-title",
+        "props": {
+          "level": 2
+        },
+        "children": [
+          "Links"
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "links",
+        "props": {
+          "direction": "row",
+          "gap": {
+            "token": "space.md"
+          }
+        },
+        "children": [
+          {
+            "kind": "link",
+            "id": "website",
+            "props": {
+              "href": {
+                "bind": "$.user.website"
+              }
+            },
+            "children": [
+              "Website"
+            ]
+          },
+          {
+            "kind": "link",
+            "id": "github",
+            "props": {
+              "href": {
+                "bind": "$.user.github"
+              }
+            },
+            "children": [
+              "GitHub"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "button",
+        "id": "edit",
+        "on": {
+          "press": "profile.edit"
+        },
+        "children": [
+          "Edit profile"
+        ]
+      }
+    ]
+  }
+}

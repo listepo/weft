@@ -1,0 +1,38 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-link as react-jsx
+---
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Help">
+      {(() => {
+        const _href = _url("https://example.com/help");
+        return (
+          <a data-weft-id="docs" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: "inline-block" }}>Read the help center</a>
+        );
+      })()}
+      {(() => {
+        const _href = _url("");
+        return (
+          <a data-weft-id="reset" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} onKeyDown={_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "reset", action: "nav.reset" }); } : undefined} onClick={() => _act(actions, { id: "reset", action: "nav.reset" })} style={{ display: "inline-block" }}>Forgot password?</a>
+        );
+      })()}
+    </main>
+  );
+}

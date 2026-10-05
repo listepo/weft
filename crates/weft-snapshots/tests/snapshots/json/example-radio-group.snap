@@ -1,0 +1,51 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-radio-group as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Plan"
+    },
+    "children": [
+      {
+        "kind": "radio-group",
+        "id": "plan",
+        "props": {
+          "label": "Plan",
+          "value": {
+            "bind": "$.plan"
+          }
+        },
+        "on": {
+          "change": "plan.choose"
+        },
+        "children": [
+          {
+            "kind": "radio",
+            "id": "plan-free",
+            "props": {
+              "value": "free"
+            },
+            "children": [
+              "Free"
+            ]
+          },
+          {
+            "kind": "radio",
+            "id": "plan-pro",
+            "props": {
+              "value": "pro"
+            },
+            "children": [
+              "Pro"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

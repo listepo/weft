@@ -1,0 +1,44 @@
+board "screen#profile" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#profile>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#profile)
+  | weft/weft.source = {"kind":"screen","id":"profile","props":{"label":"Profile"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "image#avatar" inCopy=true head=true componentOf="<image>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<image#avatar>","dir":"column"}
+    | weft/weft.kind = image
+    | weft/weft.origin = shape(image#avatar)
+    | weft/weft.source = {"kind":"image","id":"avatar","props":{"label":"Profile photo","src":{"bind":"$.user.avatar"}},"shown":{"text":""}}
+    rectangle "image" width=160 inCopy=true fillList=[{"fillColor":"#e6e8eb","fillOpacity":1}]
+  board "heading#name" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#name>","dir":"column"}
+    | weft/weft.kind = heading
+    | weft/weft.origin = shape(heading#name)
+    | weft/weft.source = {"kind":"heading","id":"name","props":{"level":1,"text":{"bind":"$.user.name"}},"shown":{"text":"{$.user.name}"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="{$.user.name}"
+  board "text#bio" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#bio>","dir":"column"}
+    | weft/weft.kind = text
+    | weft/weft.origin = shape(text#bio)
+    | weft/weft.source = {"kind":"text","id":"bio","props":{"text":{"bind":"$.user.bio"}},"shown":{"text":"{$.user.bio}"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.user.bio}"
+  board "heading#links-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#links-title>","dir":"column"}
+    | weft/weft.kind = heading
+    | weft/weft.origin = shape(heading#links-title)
+    | weft/weft.source = {"kind":"heading","id":"links-title","props":{"level":2},"children":["Links"],"shown":{"text":"Links"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Links"
+  board "stack#links" tokens={"rowGap":"space.md","columnGap":"space.md"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#links>","dir":"row","wrap":"nowrap"}
+    | weft/weft.origin = shape(stack#links)
+    | weft/weft.source = {"kind":"stack","id":"links","props":{"direction":"row","gap":{"token":"space.md"}}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    board "link#website" inCopy=true head=true componentOf="<link>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<link#website>","dir":"column"}
+      | weft/weft.kind = link
+      | weft/weft.origin = shape(link#website)
+      | weft/weft.source = {"kind":"link","id":"website","props":{"href":{"bind":"$.user.website"}},"children":["Website"],"shown":{"text":"Website"}}
+      text "text" tokens={"fill":"color.action.primary"} inCopy=true fillList=[{"fillColor":"#2663eb","fillOpacity":1}] growType="auto-width" text="Website"
+    board "link#github" inCopy=true head=true componentOf="<link>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<link#github>","dir":"column"}
+      | weft/weft.kind = link
+      | weft/weft.origin = shape(link#github)
+      | weft/weft.source = {"kind":"link","id":"github","props":{"href":{"bind":"$.user.github"}},"children":["GitHub"],"shown":{"text":"GitHub"}}
+      text "text" tokens={"fill":"color.action.primary"} inCopy=true fillList=[{"fillColor":"#2663eb","fillOpacity":1}] growType="auto-width" text="GitHub"
+  board "button#edit" borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.white","strokeColor":"color.ink"} inCopy=true head=true componentOf="<variant=secondary, state=(unset)>" fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#edit>","dir":"row"}
+    | weft/weft.kind = button
+    | weft/weft.origin = shape(button#edit)
+    | weft/weft.source = {"kind":"button","id":"edit","on":{"press":"profile.edit"},"children":["Edit profile"],"shown":{"text":"Edit profile"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Edit profile"

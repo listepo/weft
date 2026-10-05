@@ -1,0 +1,163 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-account as react-tsx
+---
+import { Fragment, type ReactNode } from "react";
+
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v: unknown): boolean {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value: string): string | undefined {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+function _float(v: string): string {
+  return /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(v) ? v : "";
+}
+
+function _keyed(list: ReactNode[]): ReactNode[] {
+  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="account" aria-label="Edit account">
+      <h1 data-weft-id="title">Edit account</h1>
+      <form data-weft-id="account-form" data-state="invalid" aria-label="Account" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: "account-form", action: "account.save" }); }}>
+        <div data-weft-field="">
+          <label>
+            <span aria-hidden="true">Full name</span>
+            <input data-weft-id="name" data-state="valid" aria-label="Full name" type="text" placeholder="Ada Lovelace" value={_text(data?.account?.name)} onChange={(_e) => { onChange?.("$.account.name", _e.currentTarget.value); _act(actions, { id: "name", action: "account.edit" }); }} />
+          </label>
+        </div>
+        <div data-weft-field="">
+          <label>
+            <span aria-hidden="true">Age</span>
+            <input data-weft-id="age" data-state="invalid" aria-label="Age" type="number" aria-invalid={"invalid" === "invalid" || _text(data?.errors?.age) !== "" ? "true" : undefined} aria-describedby={_text(data?.errors?.age) ? "weft-age-error" : undefined} value={_float(_text(data?.account?.age))} onChange={(_e) => onChange?.("$.account.age", _e.currentTarget.value)} />
+          </label>
+          {_text(data?.errors?.age) ? (
+            <div id={"weft-age-error"}>
+              {_text(data?.errors?.age)}
+            </div>
+          ) : null}
+        </div>
+        <div data-weft-field="">
+          <label>
+            <span aria-hidden="true">Handle</span>
+            <input data-weft-id="handle" aria-label="Handle" type="text" placeholder={"{handle}"} disabled={_on(data?.account?.locked)} value={_text(data?.account?.handle)} onChange={(_e) => onChange?.("$.account.handle", _e.currentTarget.value)} />
+          </label>
+        </div>
+        <div data-weft-field="">
+          <label>
+            <span aria-hidden="true">Bio</span>
+            <textarea data-weft-id="bio" aria-label="Bio" value={_text(data?.account?.bio)} onChange={(_e) => onChange?.("$.account.bio", _e.currentTarget.value)} />
+          </label>
+        </div>
+        <div data-weft-field="">
+          <label>
+            <span aria-hidden="true">Email</span>
+            <input data-weft-id="email" aria-label="Email" type="email" disabled value={_text(data?.account?.email)} onChange={(_e) => onChange?.("$.account.email", _e.currentTarget.value)} />
+          </label>
+        </div>
+        <label>
+          <input data-weft-id="newsletter" type="checkbox" aria-label="Send me the newsletter" checked={_on(data?.account?.newsletter)} onChange={(_e) => { onChange?.("$.account.newsletter", _e.currentTarget.checked); _act(actions, { id: "newsletter", action: "account.edit" }); }} />
+          <span aria-hidden="true">Send me the newsletter</span>
+        </label>
+        <label>
+          <input data-weft-id="terms" type="checkbox" aria-label="Terms accepted" disabled defaultChecked />
+          <span aria-hidden="true">Terms accepted</span>
+        </label>
+        <label>
+          <input data-weft-id="public" type="checkbox" role="switch" aria-label="Public profile" disabled={!_on(data?.account?.verified)} checked={_on(data?.account?.public)} onChange={(_e) => { onChange?.("$.account.public", _e.currentTarget.checked); _act(actions, { id: "public", action: "account.edit" }); }} />
+          <span aria-hidden="true">Public profile</span>
+        </label>
+        <div data-weft-id="plan" aria-label="Plan" role="radiogroup">
+          <span aria-hidden="true">Plan</span>
+          <label>
+            <input data-weft-id="plan-free" type="radio" name={"weft-plan"} value="free" aria-label="Free" checked={_text(data?.account?.plan) !== "" && "free" === _text(data?.account?.plan)} onChange={() => { onChange?.("$.account.plan", "free"); _act(actions, { id: "plan", action: "account.edit" }); }} />
+            <span aria-hidden="true">Free</span>
+          </label>
+          <label>
+            <input data-weft-id="plan-pro" type="radio" name={"weft-plan"} value="pro" aria-label={"" || !(_text(data?.labels?.pro).trim() === "") ? _squash(_text(data?.labels?.pro)) : ""} checked={_text(data?.account?.plan) !== "" && "pro" === _text(data?.account?.plan)} onChange={() => { onChange?.("$.account.plan", "pro"); _act(actions, { id: "plan", action: "account.edit" }); }} />
+            <span aria-hidden="true">
+              {!(_text(data?.labels?.pro).trim() === "") ? _squash(_text(data?.labels?.pro)) : "" || ""}
+            </span>
+          </label>
+          <label>
+            <input data-weft-id="plan-team" type="radio" name={"weft-plan"} value="team" aria-label="Team" disabled checked={_text(data?.account?.plan) !== "" && "team" === _text(data?.account?.plan)} onChange={() => { onChange?.("$.account.plan", "team"); _act(actions, { id: "plan", action: "account.edit" }); }} />
+            <span aria-hidden="true">Team</span>
+          </label>
+        </div>
+        <label>
+          <span aria-hidden="true">Language</span>
+          {(() => {
+            const _o = [
+              { value: "en", el: (
+                <option data-weft-id="language-en" value="en">English</option>
+              ) },
+              { value: "fr", el: (
+                <option data-weft-id="language-fr" value="fr">
+                  {!(_text(data?.labels?.french).trim() === "") ? _squash(_text(data?.labels?.french)) : ""}
+                </option>
+              ) },
+            ];
+            return (
+              <select data-weft-id="language" aria-label="Language" disabled={_on(data?.account?.locked)} value={_text(data?.account?.language)} onChange={(_e) => { const _c = _o.find((_x) => _text(_x.value) === _e.currentTarget.value); onChange?.("$.account.language", _c ? _c.value : _e.currentTarget.value); _act(actions, { id: "language", action: "account.edit" }); }}>
+                {_keyed(_o.map((_x) => _x.el))}
+              </select>
+            );
+          })()}
+        </label>
+        {!!_on(data?.saved) && (
+          <div data-weft-id="saved" role="alert" data-tone="success">Your changes were saved.</div>
+        )}
+        <div data-weft-slot="footer">
+          <button data-weft-id="save" data-state="busy" aria-busy="true" type="submit" data-variant="primary" onClick={(_e) => { _e.preventDefault(); _act(actions, { id: "account-form", action: "account.save" }); }}>Save</button>
+          <button data-weft-id="cancel" data-state="idle" type="button" data-variant="secondary" onClick={(_e) => _act(actions, { id: "cancel", action: "account.cancel" })}>
+            {!(_text(data?.labels?.cancel).trim() === "") ? _squash(_text(data?.labels?.cancel)) : ""}
+          </button>
+          {(() => {
+            const _href = _url("https://example.com/help");
+            return (
+              <a data-weft-id="help" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: "inline-block" }}>
+                {!(_text(data?.labels?.help).trim() === "") ? _squash(_text(data?.labels?.help)) : ""}
+              </a>
+            );
+          })()}
+        </div>
+      </form>
+    </main>
+  );
+}

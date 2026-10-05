@@ -4,6 +4,299 @@
    "weft": "0.1",
    "root": {
     "kind": "screen",
+    "id": "account",
+    "props": {
+     "label": "Edit account"
+    },
+    "children": [
+     {
+      "kind": "heading",
+      "id": "title",
+      "props": {
+       "level": 1
+      },
+      "children": [
+       "Edit account"
+      ]
+     },
+     {
+      "kind": "form",
+      "id": "account-form",
+      "props": {
+       "label": "Account",
+       "state": "invalid"
+      },
+      "on": {
+       "submit": "account.save"
+      },
+      "slots": {
+       "footer": [
+        {
+         "kind": "button",
+         "id": "save",
+         "props": {
+          "state": "busy",
+          "submit": true,
+          "variant": "primary"
+         },
+         "children": [
+          "Save"
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "cancel",
+         "props": {
+          "state": "idle",
+          "text": {
+           "bind": "$.labels.cancel"
+          },
+          "variant": "secondary"
+         },
+         "on": {
+          "press": "account.cancel"
+         }
+        },
+        {
+         "kind": "link",
+         "id": "help",
+         "props": {
+          "href": "https://example.com/help",
+          "text": {
+           "bind": "$.labels.help"
+          }
+         }
+        }
+       ]
+      },
+      "children": [
+       {
+        "kind": "field",
+        "id": "name",
+        "props": {
+         "label": "Full name",
+         "placeholder": "Ada Lovelace",
+         "state": "valid",
+         "type": "text",
+         "value": {
+          "bind": "$.account.name"
+         }
+        },
+        "on": {
+         "change": "account.edit"
+        }
+       },
+       {
+        "kind": "field",
+        "id": "age",
+        "props": {
+         "error": {
+          "bind": "$.errors.age"
+         },
+         "label": "Age",
+         "state": "invalid",
+         "type": "number",
+         "value": {
+          "bind": "$.account.age"
+         }
+        }
+       },
+       {
+        "kind": "field",
+        "id": "handle",
+        "props": {
+         "disabled": {
+          "bind": "$.account.locked"
+         },
+         "label": "Handle",
+         "placeholder": "{handle}",
+         "value": {
+          "bind": "$.account.handle"
+         }
+        }
+       },
+       {
+        "kind": "field",
+        "id": "bio",
+        "props": {
+         "label": "Bio",
+         "type": "multiline",
+         "value": {
+          "bind": "$.account.bio"
+         }
+        }
+       },
+       {
+        "kind": "field",
+        "id": "email",
+        "props": {
+         "disabled": true,
+         "label": "Email",
+         "type": "email",
+         "value": {
+          "bind": "$.account.email"
+         }
+        }
+       },
+       {
+        "kind": "checkbox",
+        "id": "newsletter",
+        "props": {
+         "checked": {
+          "bind": "$.account.newsletter"
+         },
+         "label": "Send me the newsletter"
+        },
+        "on": {
+         "change": "account.edit"
+        }
+       },
+       {
+        "kind": "checkbox",
+        "id": "terms",
+        "props": {
+         "checked": true,
+         "disabled": true,
+         "label": "Terms accepted"
+        }
+       },
+       {
+        "kind": "switch",
+        "id": "public",
+        "props": {
+         "checked": {
+          "bind": "$.account.public"
+         },
+         "disabled": {
+          "bind": "$.account.verified",
+          "not": true
+         },
+         "label": "Public profile"
+        },
+        "on": {
+         "change": "account.edit"
+        }
+       },
+       {
+        "kind": "radio-group",
+        "id": "plan",
+        "props": {
+         "label": "Plan",
+         "value": {
+          "bind": "$.account.plan"
+         }
+        },
+        "on": {
+         "change": "account.edit"
+        },
+        "children": [
+         {
+          "kind": "radio",
+          "id": "plan-free",
+          "props": {
+           "value": "free"
+          },
+          "children": [
+           "Free"
+          ]
+         },
+         {
+          "kind": "radio",
+          "id": "plan-pro",
+          "props": {
+           "text": {
+            "bind": "$.labels.pro"
+           },
+           "value": "pro"
+          }
+         },
+         {
+          "kind": "radio",
+          "id": "plan-team",
+          "props": {
+           "disabled": true,
+           "value": "team"
+          },
+          "children": [
+           "Team"
+          ]
+         }
+        ]
+       },
+       {
+        "kind": "select",
+        "id": "language",
+        "props": {
+         "disabled": {
+          "bind": "$.account.locked"
+         },
+         "label": "Language",
+         "value": {
+          "bind": "$.account.language"
+         }
+        },
+        "on": {
+         "change": "account.edit"
+        },
+        "children": [
+         {
+          "kind": "option",
+          "id": "language-en",
+          "props": {
+           "value": "en"
+          },
+          "children": [
+           "English"
+          ]
+         },
+         {
+          "kind": "option",
+          "id": "language-fr",
+          "props": {
+           "text": {
+            "bind": "$.labels.french"
+           },
+           "value": "fr"
+          }
+         }
+        ]
+       },
+       {
+        "kind": "text",
+        "id": "internal",
+        "props": {
+         "hidden": true
+        },
+        "children": [
+         "Internal note: never shown."
+        ]
+       },
+       {
+        "kind": "alert",
+        "id": "saved",
+        "props": {
+         "hidden": {
+          "bind": "$.saved",
+          "not": true
+         },
+         "tone": "success"
+        },
+        "children": [
+         "Your changes were saved."
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _on(v) {\n  return v === \"false\" ? false : Boolean(v);\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _url(value) {\n  const url = value.replace(/[\\t\\n\\r]/g, \"\").replace(/^[\\u0000- ]+|[\\u0000- ]+$/g, \"\");\n  if (url === \"\") return undefined;\n  const colon = url.indexOf(\":\");\n  const delimiter = url.search(/[/?#]/);\n  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;\n  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();\n  return scheme === \"http\" || scheme === \"https\" || scheme === \"mailto\" ? url : undefined;\n}\n\nfunction _float(v) {\n  return /^-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[eE][-+]?\\d+)?$/.test(v) ? v : \"\";\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"account\" aria-label=\"Edit account\">\n      <h1 data-weft-id=\"title\">Edit account</h1>\n      <form data-weft-id=\"account-form\" data-state=\"invalid\" aria-label=\"Account\" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: \"account-form\", action: \"account.save\" }); }}>\n        <div data-weft-field=\"\">\n          <label>\n            <span aria-hidden=\"true\">Full name</span>\n            <input data-weft-id=\"name\" data-state=\"valid\" aria-label=\"Full name\" type=\"text\" placeholder=\"Ada Lovelace\" value={_text(data?.account?.name)} onChange={(_e) => { onChange?.(\"$.account.name\", _e.currentTarget.value); _act(actions, { id: \"name\", action: \"account.edit\" }); }} />\n          </label>\n        </div>\n        <div data-weft-field=\"\">\n          <label>\n            <span aria-hidden=\"true\">Age</span>\n            <input data-weft-id=\"age\" data-state=\"invalid\" aria-label=\"Age\" type=\"number\" aria-invalid={\"invalid\" === \"invalid\" || _text(data?.errors?.age) !== \"\" ? \"true\" : undefined} aria-describedby={_text(data?.errors?.age) ? \"weft-age-error\" : undefined} value={_float(_text(data?.account?.age))} onChange={(_e) => onChange?.(\"$.account.age\", _e.currentTarget.value)} />\n          </label>\n          {_text(data?.errors?.age) ? (\n            <div id={\"weft-age-error\"}>\n              {_text(data?.errors?.age)}\n            </div>\n          ) : null}\n        </div>\n        <div data-weft-field=\"\">\n          <label>\n            <span aria-hidden=\"true\">Handle</span>\n            <input data-weft-id=\"handle\" aria-label=\"Handle\" type=\"text\" placeholder={\"{handle}\"} disabled={_on(data?.account?.locked)} value={_text(data?.account?.handle)} onChange={(_e) => onChange?.(\"$.account.handle\", _e.currentTarget.value)} />\n          </label>\n        </div>\n        <div data-weft-field=\"\">\n          <label>\n            <span aria-hidden=\"true\">Bio</span>\n            <textarea data-weft-id=\"bio\" aria-label=\"Bio\" value={_text(data?.account?.bio)} onChange={(_e) => onChange?.(\"$.account.bio\", _e.currentTarget.value)} />\n          </label>\n        </div>\n        <div data-weft-field=\"\">\n          <label>\n            <span aria-hidden=\"true\">Email</span>\n            <input data-weft-id=\"email\" aria-label=\"Email\" type=\"email\" disabled value={_text(data?.account?.email)} onChange={(_e) => onChange?.(\"$.account.email\", _e.currentTarget.value)} />\n          </label>\n        </div>\n        <label>\n          <input data-weft-id=\"newsletter\" type=\"checkbox\" aria-label=\"Send me the newsletter\" checked={_on(data?.account?.newsletter)} onChange={(_e) => { onChange?.(\"$.account.newsletter\", _e.currentTarget.checked); _act(actions, { id: \"newsletter\", action: \"account.edit\" }); }} />\n          <span aria-hidden=\"true\">Send me the newsletter</span>\n        </label>\n        <label>\n          <input data-weft-id=\"terms\" type=\"checkbox\" aria-label=\"Terms accepted\" disabled defaultChecked />\n          <span aria-hidden=\"true\">Terms accepted</span>\n        </label>\n        <label>\n          <input data-weft-id=\"public\" type=\"checkbox\" role=\"switch\" aria-label=\"Public profile\" disabled={!_on(data?.account?.verified)} checked={_on(data?.account?.public)} onChange={(_e) => { onChange?.(\"$.account.public\", _e.currentTarget.checked); _act(actions, { id: \"public\", action: \"account.edit\" }); }} />\n          <span aria-hidden=\"true\">Public profile</span>\n        </label>\n        <div data-weft-id=\"plan\" aria-label=\"Plan\" role=\"radiogroup\">\n          <span aria-hidden=\"true\">Plan</span>\n          <label>\n            <input data-weft-id=\"plan-free\" type=\"radio\" name={\"weft-plan\"} value=\"free\" aria-label=\"Free\" checked={_text(data?.account?.plan) !== \"\" && \"free\" === _text(data?.account?.plan)} onChange={() => { onChange?.(\"$.account.plan\", \"free\"); _act(actions, { id: \"plan\", action: \"account.edit\" }); }} />\n            <span aria-hidden=\"true\">Free</span>\n          </label>\n          <label>\n            <input data-weft-id=\"plan-pro\" type=\"radio\" name={\"weft-plan\"} value=\"pro\" aria-label={\"\" || !(_text(data?.labels?.pro).trim() === \"\") ? _squash(_text(data?.labels?.pro)) : \"\"} checked={_text(data?.account?.plan) !== \"\" && \"pro\" === _text(data?.account?.plan)} onChange={() => { onChange?.(\"$.account.plan\", \"pro\"); _act(actions, { id: \"plan\", action: \"account.edit\" }); }} />\n            <span aria-hidden=\"true\">\n              {!(_text(data?.labels?.pro).trim() === \"\") ? _squash(_text(data?.labels?.pro)) : \"\" || \"\"}\n            </span>\n          </label>\n          <label>\n            <input data-weft-id=\"plan-team\" type=\"radio\" name={\"weft-plan\"} value=\"team\" aria-label=\"Team\" disabled checked={_text(data?.account?.plan) !== \"\" && \"team\" === _text(data?.account?.plan)} onChange={() => { onChange?.(\"$.account.plan\", \"team\"); _act(actions, { id: \"plan\", action: \"account.edit\" }); }} />\n            <span aria-hidden=\"true\">Team</span>\n          </label>\n        </div>\n        <label>\n          <span aria-hidden=\"true\">Language</span>\n          {(() => {\n            const _o = [\n              { value: \"en\", el: (\n                <option data-weft-id=\"language-en\" value=\"en\">English</option>\n              ) },\n              { value: \"fr\", el: (\n                <option data-weft-id=\"language-fr\" value=\"fr\">\n                  {!(_text(data?.labels?.french).trim() === \"\") ? _squash(_text(data?.labels?.french)) : \"\"}\n                </option>\n              ) },\n            ];\n            return (\n              <select data-weft-id=\"language\" aria-label=\"Language\" disabled={_on(data?.account?.locked)} value={_text(data?.account?.language)} onChange={(_e) => { const _c = _o.find((_x) => _text(_x.value) === _e.currentTarget.value); onChange?.(\"$.account.language\", _c ? _c.value : _e.currentTarget.value); _act(actions, { id: \"language\", action: \"account.edit\" }); }}>\n                {_keyed(_o.map((_x) => _x.el))}\n              </select>\n            );\n          })()}\n        </label>\n        {!!_on(data?.saved) && (\n          <div data-weft-id=\"saved\" role=\"alert\" data-tone=\"success\">Your changes were saved.</div>\n        )}\n        <div data-weft-slot=\"footer\">\n          <button data-weft-id=\"save\" data-state=\"busy\" aria-busy=\"true\" type=\"submit\" data-variant=\"primary\" onClick={(_e) => { _e.preventDefault(); _act(actions, { id: \"account-form\", action: \"account.save\" }); }}>Save</button>\n          <button data-weft-id=\"cancel\" data-state=\"idle\" type=\"button\" data-variant=\"secondary\" onClick={(_e) => _act(actions, { id: \"cancel\", action: \"account.cancel\" })}>\n            {!(_text(data?.labels?.cancel).trim() === \"\") ? _squash(_text(data?.labels?.cancel)) : \"\"}\n          </button>\n          {(() => {\n            const _href = _url(\"https://example.com/help\");\n            return (\n              <a data-weft-id=\"help\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>\n                {!(_text(data?.labels?.help).trim() === \"\") ? _squash(_text(data?.labels?.help)) : \"\"}\n              </a>\n            );\n          })()}\n        </div>\n      </form>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
     "id": "files",
     "props": {
      "label": "File"
@@ -94,6 +387,283 @@
    }
   },
   "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _on(v) {\n  return v === \"false\" ? false : Boolean(v);\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"files\" aria-label=\"File\">\n      <h1 data-weft-id=\"title\">Quarterly report</h1>\n      <button data-weft-id=\"delete-file\" type=\"button\" data-variant=\"danger\" onClick={(_e) => _act(actions, { id: \"delete-file\", action: \"dialog.open\" })}>Delete file</button>\n      {_on(data?.confirmOpen) && (\n        <dialog data-weft-id=\"confirm\" aria-label=\"Delete file?\" open aria-modal=\"true\" onKeyDown={(_e) => { if (_e.key !== \"Escape\") return; _e.preventDefault(); onChange?.(\"$.confirmOpen\", false); _act(actions, { id: \"confirm\", action: \"dialog.close\" }); }}>\n          <div data-weft-id=\"warning\">This cannot be undone.</div>\n          <div data-weft-id=\"filename\">\n            {!(_text(data?.file?.name).trim() === \"\") ? _squash(_text(data?.file?.name)) : \"\"}\n          </div>\n          <div data-weft-slot=\"actions\">\n            <button data-weft-id=\"cancel\" type=\"button\" onClick={(_e) => _act(actions, { id: \"cancel\", action: \"dialog.close\" })}>Cancel</button>\n            <button data-weft-id=\"confirm-delete\" type=\"button\" data-variant=\"danger\" onClick={(_e) => _act(actions, { id: \"confirm-delete\", action: \"file.delete\" })}>Delete</button>\n          </div>\n        </dialog>\n      )}\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "dashboard",
+    "props": {
+     "label": "Team dashboard",
+     "state": "ready"
+    },
+    "children": [
+     {
+      "kind": "stack",
+      "id": "header",
+      "props": {
+       "align": "center",
+       "direction": "row",
+       "gap": {
+        "token": "space.xl"
+       },
+       "wrap": true
+      },
+      "children": [
+       {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+         "level": 1,
+         "text": {
+          "bind": "$.team.name"
+         }
+        }
+       },
+       {
+        "kind": "text",
+        "id": "updated",
+        "props": {
+         "text": {
+          "bind": "$.updatedAt"
+         },
+         "tone": "muted"
+        }
+       }
+      ]
+     },
+     {
+      "kind": "grid",
+      "id": "stats",
+      "props": {
+       "columns": 3,
+       "gap": {
+        "token": "space.lg"
+       }
+      },
+      "children": [
+       {
+        "kind": "section",
+        "id": "velocity",
+        "props": {
+         "label": "Velocity"
+        },
+        "slots": {
+         "header": [
+          {
+           "kind": "heading",
+           "id": "velocity-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Velocity"
+           ]
+          }
+         ]
+        },
+        "children": [
+         {
+          "kind": "text",
+          "id": "velocity-value",
+          "props": {
+           "text": {
+            "bind": "$.stats.velocity"
+           },
+           "tone": "success"
+          }
+         }
+        ]
+       },
+       {
+        "kind": "section",
+        "id": "bugs",
+        "props": {
+         "label": "Open bugs"
+        },
+        "slots": {
+         "header": [
+          {
+           "kind": "heading",
+           "id": "bugs-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Open bugs"
+           ]
+          }
+         ]
+        },
+        "children": [
+         {
+          "kind": "text",
+          "id": "bugs-value",
+          "props": {
+           "text": {
+            "bind": "$.stats.bugs"
+           },
+           "tone": "warning"
+          }
+         }
+        ]
+       },
+       {
+        "kind": "section",
+        "id": "incidents",
+        "props": {
+         "label": "Incidents"
+        },
+        "slots": {
+         "header": [
+          {
+           "kind": "heading",
+           "id": "incidents-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Incidents"
+           ]
+          }
+         ]
+        },
+        "children": [
+         {
+          "kind": "text",
+          "id": "incidents-value",
+          "props": {
+           "text": {
+            "bind": "$.stats.incidents"
+           },
+           "tone": "danger"
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "kind": "stack",
+      "id": "notices",
+      "props": {
+       "align": "stretch",
+       "direction": "column",
+       "gap": {
+        "token": "space.sm"
+       }
+      },
+      "children": [
+       {
+        "kind": "alert",
+        "id": "release",
+        "props": {
+         "tone": "info"
+        },
+        "children": [
+         "Release 2.4 ships on Friday."
+        ]
+       },
+       {
+        "kind": "alert",
+        "id": "backup",
+        "props": {
+         "text": {
+          "bind": "$.backupStatus"
+         },
+         "tone": "success"
+        }
+       },
+       {
+        "kind": "alert",
+        "id": "quota",
+        "props": {
+         "tone": "warning"
+        },
+        "children": [
+         {
+          "kind": "text",
+          "id": "quota-text",
+          "children": [
+           "Storage is 90% full."
+          ]
+         },
+         {
+          "kind": "link",
+          "id": "quota-link",
+          "props": {
+           "href": "https://example.com/storage"
+          },
+          "children": [
+           "Manage storage"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "kind": "stack",
+      "id": "footer",
+      "props": {
+       "align": "end",
+       "gap": {
+        "token": "space.xs"
+       }
+      },
+      "children": [
+       {
+        "kind": "text",
+        "id": "owner",
+        "props": {
+         "tone": "default"
+        },
+        "children": [
+         "Owned by the platform team"
+        ]
+       },
+       {
+        "kind": "stack",
+        "id": "footer-links",
+        "props": {
+         "align": "start",
+         "direction": "row",
+         "gap": {
+          "token": "space.md"
+         }
+        },
+        "children": [
+         {
+          "kind": "link",
+          "id": "docs",
+          "props": {
+           "href": "/docs"
+          },
+          "children": [
+           "Docs"
+          ]
+         },
+         {
+          "kind": "link",
+          "id": "status",
+          "props": {
+           "href": {
+            "bind": "$.statusUrl"
+           }
+          },
+          "children": [
+           "Status page"
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _url(value) {\n  const url = value.replace(/[\\t\\n\\r]/g, \"\").replace(/^[\\u0000- ]+|[\\u0000- ]+$/g, \"\");\n  if (url === \"\") return undefined;\n  const colon = url.indexOf(\":\");\n  const delimiter = url.search(/[/?#]/);\n  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;\n  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();\n  return scheme === \"http\" || scheme === \"https\" || scheme === \"mailto\" ? url : undefined;\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"dashboard\" data-state=\"ready\" aria-label=\"Team dashboard\">\n      <div data-weft-id=\"header\" style={{ gap: \"var(--weft-space-xl)\", display: \"flex\", flexDirection: \"row\", alignItems: \"center\", flexWrap: \"wrap\" }}>\n        <h1 data-weft-id=\"title\">\n          {!(_text(data?.team?.name).trim() === \"\") ? _squash(_text(data?.team?.name)) : \"\"}\n        </h1>\n        <div data-weft-id=\"updated\" data-tone=\"muted\">\n          {!(_text(data?.updatedAt).trim() === \"\") ? _squash(_text(data?.updatedAt)) : \"\"}\n        </div>\n      </div>\n      <div data-weft-id=\"stats\" style={{ gap: \"var(--weft-space-lg)\", display: \"grid\", gridTemplateColumns: \"repeat(3, minmax(0, 1fr))\" }}>\n        <section data-weft-id=\"velocity\" aria-label=\"Velocity\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"velocity-title\">Velocity</h2>\n          </div>\n          <div data-weft-id=\"velocity-value\" data-tone=\"success\">\n            {!(_text(data?.stats?.velocity).trim() === \"\") ? _squash(_text(data?.stats?.velocity)) : \"\"}\n          </div>\n        </section>\n        <section data-weft-id=\"bugs\" aria-label=\"Open bugs\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"bugs-title\">Open bugs</h2>\n          </div>\n          <div data-weft-id=\"bugs-value\" data-tone=\"warning\">\n            {!(_text(data?.stats?.bugs).trim() === \"\") ? _squash(_text(data?.stats?.bugs)) : \"\"}\n          </div>\n        </section>\n        <section data-weft-id=\"incidents\" aria-label=\"Incidents\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"incidents-title\">Incidents</h2>\n          </div>\n          <div data-weft-id=\"incidents-value\" data-tone=\"danger\">\n            {!(_text(data?.stats?.incidents).trim() === \"\") ? _squash(_text(data?.stats?.incidents)) : \"\"}\n          </div>\n        </section>\n      </div>\n      <div data-weft-id=\"notices\" style={{ gap: \"var(--weft-space-sm)\", display: \"flex\", flexDirection: \"column\", alignItems: \"stretch\" }}>\n        <div data-weft-id=\"release\" role=\"alert\" data-tone=\"info\">Release 2.4 ships on Friday.</div>\n        <div data-weft-id=\"backup\" role=\"alert\" data-tone=\"success\">\n          {!(_text(data?.backupStatus).trim() === \"\") ? _text(data?.backupStatus) : null}\n        </div>\n        <div data-weft-id=\"quota\" role=\"alert\" data-tone=\"warning\">\n          <div data-weft-id=\"quota-text\">Storage is 90% full.</div>\n          {(() => {\n            const _href = _url(\"https://example.com/storage\");\n            return (\n              <a data-weft-id=\"quota-link\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Manage storage</a>\n            );\n          })()}\n        </div>\n      </div>\n      <div data-weft-id=\"footer\" style={{ gap: \"var(--weft-space-xs)\", display: \"flex\", flexDirection: \"column\", alignItems: \"flex-end\" }}>\n        <div data-weft-id=\"owner\" data-tone=\"default\">Owned by the platform team</div>\n        <div data-weft-id=\"footer-links\" style={{ gap: \"var(--weft-space-md)\", display: \"flex\", flexDirection: \"row\", alignItems: \"flex-start\" }}>\n          {(() => {\n            const _href = _url(\"/docs\");\n            return (\n              <a data-weft-id=\"docs\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Docs</a>\n            );\n          })()}\n          {(() => {\n            const _href = _url(_text(data?.statusUrl));\n            return (\n              <a data-weft-id=\"status\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Status page</a>\n            );\n          })()}\n        </div>\n      </div>\n    </main>\n  );\n}\n"
  },
  {
   "document": {
@@ -341,6 +911,347 @@
    "weft": "0.1",
    "root": {
     "kind": "screen",
+    "id": "inbox",
+    "props": {
+     "label": "Inbox",
+     "state": "loading"
+    },
+    "children": [
+     {
+      "kind": "tabs",
+      "id": "folders",
+      "props": {
+       "selected": {
+        "bind": "$.folder"
+       }
+      },
+      "on": {
+       "change": "inbox.folder"
+      },
+      "children": [
+       {
+        "kind": "tab",
+        "id": "tab-inbox",
+        "props": {
+         "label": "Inbox"
+        },
+        "children": [
+         {
+          "kind": "list",
+          "id": "messages",
+          "props": {
+           "ordered": true,
+           "state": "ready"
+          },
+          "slots": {
+           "empty": [
+            {
+             "kind": "text",
+             "id": "no-messages",
+             "children": [
+              "No messages."
+             ]
+            }
+           ]
+          },
+          "children": [
+           {
+            "kind": "each",
+            "id": "message-each",
+            "props": {
+             "as": "message",
+             "in": {
+              "bind": "$.messages"
+             }
+            },
+            "children": [
+             {
+              "kind": "item",
+              "id": "message",
+              "props": {
+               "text": {
+                "bind": "$message.subject"
+               }
+              },
+              "on": {
+               "press": "inbox.open"
+              }
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "kind": "tab",
+        "id": "tab-drafts",
+        "props": {
+         "label": {
+          "bind": "$.labels.drafts"
+         }
+        },
+        "children": [
+         {
+          "kind": "list",
+          "id": "drafts",
+          "props": {
+           "state": "empty"
+          },
+          "slots": {
+           "empty": [
+            {
+             "kind": "text",
+             "id": "no-drafts",
+             "children": [
+              "No drafts."
+             ]
+            }
+           ]
+          }
+         }
+        ]
+       },
+       {
+        "kind": "tab",
+        "id": "tab-sent",
+        "props": {
+         "label": "Sent"
+        },
+        "children": [
+         {
+          "kind": "list",
+          "id": "sent",
+          "props": {
+           "state": "loading"
+          },
+          "children": [
+           {
+            "kind": "item",
+            "id": "sent-loading",
+            "children": [
+             "Loading…"
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "kind": "menu",
+      "id": "message-actions",
+      "props": {
+       "label": "Message actions"
+      },
+      "children": [
+       {
+        "kind": "menu-item",
+        "id": "archive",
+        "props": {
+         "text": {
+          "bind": "$.labels.archive"
+         }
+        },
+        "on": {
+         "press": "inbox.archive"
+        }
+       },
+       {
+        "kind": "menu-item",
+        "id": "delete",
+        "props": {
+         "disabled": {
+          "bind": "$.selection",
+          "not": true
+         }
+        },
+        "on": {
+         "press": "inbox.delete"
+        },
+        "children": [
+         "Delete"
+        ]
+       }
+      ]
+     },
+     {
+      "kind": "dialog",
+      "id": "compose",
+      "props": {
+       "label": "New message",
+       "modal": false,
+       "open": {
+        "bind": "$.composing"
+       }
+      },
+      "on": {
+       "close": "inbox.closeCompose"
+      },
+      "slots": {
+       "actions": [
+        {
+         "kind": "button",
+         "id": "send",
+         "props": {
+          "variant": "primary"
+         },
+         "on": {
+          "press": "inbox.send"
+         },
+         "children": [
+          "Send"
+         ]
+        }
+       ]
+      },
+      "children": [
+       {
+        "kind": "form",
+        "id": "compose-form",
+        "props": {
+         "state": "submitting"
+        },
+        "on": {
+         "submit": "inbox.send"
+        },
+        "children": [
+         {
+          "kind": "field",
+          "id": "to",
+          "props": {
+           "label": "To",
+           "type": "email",
+           "value": {
+            "bind": "$.draft.to"
+           }
+          }
+         },
+         {
+          "kind": "field",
+          "id": "body",
+          "props": {
+           "label": "Message",
+           "type": "multiline",
+           "value": {
+            "bind": "$.draft.body"
+           }
+          }
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _on(v) {\n  return v === \"false\" ? false : Boolean(v);\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _list(v) {\n  return Array.isArray(v) ? v : [];\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _busy(state) {\n  return state === \"loading\" || state === \"busy\" || state === \"submitting\" ? \"true\" : undefined;\n}\n\nfunction _press(e, fire) {\n  if (e.target !== e.currentTarget || (e.key !== \"Enter\" && e.key !== \" \")) return;\n  e.preventDefault();\n  fire();\n}\n\nfunction _tabKey(e, i, count, choose) {\n  const step = e.key === \"ArrowRight\" ? 1 : e.key === \"ArrowLeft\" ? -1 : 0;\n  if (step === 0 || count === 0) return;\n  e.preventDefault();\n  const next = (i + step + count) % count;\n  choose(next);\n  e.currentTarget.parentElement?.querySelectorAll('[role=\"tab\"]')[next]?.focus();\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"inbox\" data-state=\"loading\" aria-busy=\"true\" aria-label=\"Inbox\">\n      {(() => {\n        const _t = [\n          { id: \"tab-inbox\", doc: \"tab-inbox\", state: \"\", label: \"Inbox\", panel: (\n            <>\n              <ol data-weft-id=\"messages\" data-state=\"ready\">\n                {!(_list(data?.messages).length > 0) ? (\n                  <li role=\"none\" data-weft-slot=\"empty\">\n                    <div data-weft-id=\"no-messages\">No messages.</div>\n                  </li>\n                ) : (\n                  <>\n                    {_list(data?.messages).map((message, _i0) => (\n                      <Fragment key={_i0}>\n                        <li data-weft-id={\"message[\" + _i0 + \"]\"} tabIndex={0} onClick={() => _act(actions, { id: \"message[\" + _i0 + \"]\", action: \"inbox.open\", item: \"$.messages.\" + _i0 })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: \"message[\" + _i0 + \"]\", action: \"inbox.open\", item: \"$.messages.\" + _i0 }))}>\n                          {!(_text(message?.subject).trim() === \"\") ? _text(message?.subject) : null}\n                        </li>\n                      </Fragment>\n                    ))}\n                  </>\n                )}\n              </ol>\n            </>\n          ) },\n          { id: \"tab-drafts\", doc: \"tab-drafts\", state: \"\", label: _text(data?.labels?.drafts).trim(), panel: (\n            <>\n              <ul data-weft-id=\"drafts\" data-state=\"empty\">\n                <li role=\"none\" data-weft-slot=\"empty\">\n                  <div data-weft-id=\"no-drafts\">No drafts.</div>\n                </li>\n              </ul>\n            </>\n          ) },\n          { id: \"tab-sent\", doc: \"tab-sent\", state: \"\", label: \"Sent\", panel: (\n            <>\n              <ul data-weft-id=\"sent\" data-state=\"loading\" aria-busy=\"true\">\n                <li data-weft-id=\"sent-loading\">{\"Loading…\"}</li>\n              </ul>\n            </>\n          ) },\n        ];\n        const _s = Math.max(0, _t.findIndex((_x) => _x.doc === _text(data?.folder) || _x.id === _text(data?.folder)));\n        const _choose = (_k) => { const _x = _t[_k]; if (!_x || _k === _s) return; onChange?.(\"$.folder\", _x.doc); _act(actions, { id: \"folders\", action: \"inbox.folder\" }); };\n        return (\n          <div data-weft-tabs=\"\">\n            <div data-weft-id=\"folders\" role=\"tablist\">\n              {_t.map((_x, _k) => (\n                <button key={_k} data-weft-id={_x.id || undefined} data-state={_x.state || undefined} aria-busy={_busy(_x.state)} type=\"button\" role=\"tab\" id={\"weft-\" + _x.id + \"-tab\"} aria-selected={String(_k === _s)} aria-controls={\"weft-\" + _x.id + \"-panel\"} tabIndex={_k === _s ? 0 : -1} onClick={() => _choose(_k)} onKeyDown={(_e) => _tabKey(_e, _k, _t.length, _choose)}>\n                  {_x.label}\n                </button>\n              ))}\n            </div>\n            {_t.map((_x, _k) => (\n              <div key={_k} role=\"tabpanel\" id={\"weft-\" + _x.id + \"-panel\"} aria-labelledby={\"weft-\" + _x.id + \"-tab\"} hidden={_k !== _s} tabIndex={0}>\n                {_x.panel}\n              </div>\n            ))}\n          </div>\n        );\n      })()}\n      <div data-weft-id=\"message-actions\" aria-label=\"Message actions\" role=\"menu\">\n        <button data-weft-id=\"archive\" type=\"button\" role=\"menuitem\" onClick={() => _act(actions, { id: \"archive\", action: \"inbox.archive\" })}>\n          {!(_text(data?.labels?.archive).trim() === \"\") ? _squash(_text(data?.labels?.archive)) : \"\"}\n        </button>\n        <button data-weft-id=\"delete\" type=\"button\" role=\"menuitem\" disabled={!_on(data?.selection)} onClick={() => _act(actions, { id: \"delete\", action: \"inbox.delete\" })}>Delete</button>\n      </div>\n      {_on(data?.composing) && (\n        <dialog data-weft-id=\"compose\" aria-label=\"New message\" open onKeyDown={(_e) => { if (_e.key !== \"Escape\") return; _e.preventDefault(); onChange?.(\"$.composing\", false); _act(actions, { id: \"compose\", action: \"inbox.closeCompose\" }); }}>\n          <form data-weft-id=\"compose-form\" data-state=\"submitting\" aria-busy=\"true\" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: \"compose-form\", action: \"inbox.send\" }); }}>\n            <div data-weft-field=\"\">\n              <label>\n                <span aria-hidden=\"true\">To</span>\n                <input data-weft-id=\"to\" aria-label=\"To\" type=\"email\" value={_text(data?.draft?.to)} onChange={(_e) => onChange?.(\"$.draft.to\", _e.currentTarget.value)} />\n              </label>\n            </div>\n            <div data-weft-field=\"\">\n              <label>\n                <span aria-hidden=\"true\">Message</span>\n                <textarea data-weft-id=\"body\" aria-label=\"Message\" value={_text(data?.draft?.body)} onChange={(_e) => onChange?.(\"$.draft.body\", _e.currentTarget.value)} />\n              </label>\n            </div>\n          </form>\n          <div data-weft-slot=\"actions\">\n            <button data-weft-id=\"send\" type=\"button\" data-variant=\"primary\" onClick={(_e) => _act(actions, { id: \"send\", action: \"inbox.send\" })}>Send</button>\n          </div>\n        </dialog>\n      )}\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "leaderboard",
+    "props": {
+     "label": "Leaderboard"
+    },
+    "children": [
+     {
+      "kind": "heading",
+      "id": "title",
+      "props": {
+       "level": 1
+      },
+      "children": [
+       "Leaderboard"
+      ]
+     },
+     {
+      "kind": "stack",
+      "id": "leader",
+      "props": {
+       "direction": "row",
+       "gap": {
+        "token": "space.xs"
+       }
+      },
+      "children": [
+       {
+        "kind": "text",
+        "id": "leader-label",
+        "children": [
+         "In the lead:"
+        ]
+       },
+       {
+        "kind": "text",
+        "id": "leader-name",
+        "props": {
+         "text": {
+          "bind": "$.players.0.name"
+         }
+        }
+       }
+      ]
+     },
+     {
+      "kind": "list",
+      "id": "players",
+      "props": {
+       "ordered": true
+      },
+      "children": [
+       {
+        "kind": "each",
+        "id": "player-each",
+        "props": {
+         "as": "player",
+         "in": {
+          "bind": "$.players"
+         }
+        },
+        "children": [
+         {
+          "kind": "item",
+          "id": "player",
+          "children": [
+           {
+            "kind": "text",
+            "id": "player-name",
+            "props": {
+             "text": {
+              "bind": "$player.name"
+             }
+            }
+           },
+           {
+            "kind": "text",
+            "id": "player-score",
+            "props": {
+             "text": {
+              "bind": "$player.score"
+             },
+             "tone": "muted"
+            }
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _get(value, path) {\n  for (const key of path) {\n    if (Array.isArray(value)) value = /^\\d+$/.test(key) ? value[Number(key)] : undefined;\n    else if (typeof value === \"object\" && value !== null && Object.hasOwn(value, key)) value = value[key];\n    else return undefined;\n  }\n  return value;\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _list(v) {\n  return Array.isArray(v) ? v : [];\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"leaderboard\" aria-label=\"Leaderboard\">\n      <h1 data-weft-id=\"title\">Leaderboard</h1>\n      <div data-weft-id=\"leader\" style={{ gap: \"var(--weft-space-xs)\", display: \"flex\", flexDirection: \"row\" }}>\n        <div data-weft-id=\"leader-label\">In the lead:</div>\n        <div data-weft-id=\"leader-name\">\n          {!(_text(_get(data, [\"players\",\"0\",\"name\"])).trim() === \"\") ? _squash(_text(_get(data, [\"players\",\"0\",\"name\"]))) : \"\"}\n        </div>\n      </div>\n      <ol data-weft-id=\"players\">\n        {_list(data?.players).map((player, _i0) => (\n          <Fragment key={_i0}>\n            <li data-weft-id={\"player[\" + _i0 + \"]\"}>\n              <div data-weft-id={\"player-name[\" + _i0 + \"]\"}>\n                {!(_text(player?.name).trim() === \"\") ? _squash(_text(player?.name)) : \"\"}\n              </div>\n              <div data-weft-id={\"player-score[\" + _i0 + \"]\"} data-tone=\"muted\">\n                {!(_text(player?.score).trim() === \"\") ? _squash(_text(player?.score)) : \"\"}\n              </div>\n            </li>\n          </Fragment>\n        ))}\n      </ol>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
     "id": "login",
     "props": {
      "label": "Sign in"
@@ -525,6 +1436,186 @@
    }
   },
   "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _on(v) {\n  return v === \"false\" ? false : Boolean(v);\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"account-menu\" aria-label=\"Account menu\">\n      <div data-weft-id=\"signed-in\">\n        {!(_text(data?.user?.email).trim() === \"\") ? _squash(_text(data?.user?.email)) : \"\"}\n      </div>\n      <div data-weft-id=\"menu\" aria-label=\"Account\" role=\"menu\">\n        <button data-weft-id=\"item-profile\" type=\"button\" role=\"menuitem\" onClick={() => _act(actions, { id: \"item-profile\", action: \"nav.profile\" })}>Profile</button>\n        <button data-weft-id=\"item-settings\" type=\"button\" role=\"menuitem\" onClick={() => _act(actions, { id: \"item-settings\", action: \"nav.settings\" })}>Settings</button>\n        <button data-weft-id=\"item-billing\" type=\"button\" role=\"menuitem\" disabled={!_on(data?.isOwner)} onClick={() => _act(actions, { id: \"item-billing\", action: \"nav.billing\" })}>Billing</button>\n        <button data-weft-id=\"item-signout\" type=\"button\" role=\"menuitem\" onClick={() => _act(actions, { id: \"item-signout\", action: \"auth.signout\" })}>Sign out</button>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "orders",
+    "props": {
+     "label": "Orders"
+    },
+    "children": [
+     {
+      "kind": "heading",
+      "id": "title",
+      "props": {
+       "level": 2
+      },
+      "children": [
+       "Orders"
+      ]
+     },
+     {
+      "kind": "table",
+      "id": "open-orders",
+      "props": {
+       "label": "Open orders",
+       "state": "ready"
+      },
+      "slots": {
+       "empty": [
+        {
+         "kind": "text",
+         "id": "no-orders",
+         "children": [
+          "No open orders."
+         ]
+        }
+       ]
+      },
+      "children": [
+       {
+        "kind": "column",
+        "id": "col-id",
+        "props": {
+         "sort": "descending"
+        },
+        "on": {
+         "press": "orders.sortById"
+        },
+        "children": [
+         "Order"
+        ]
+       },
+       {
+        "kind": "column",
+        "id": "col-total",
+        "props": {
+         "sort": "none",
+         "text": {
+          "bind": "$.labels.total"
+         }
+        }
+       },
+       {
+        "kind": "each",
+        "id": "order-each",
+        "props": {
+         "as": "order",
+         "in": {
+          "bind": "$.orders"
+         }
+        },
+        "children": [
+         {
+          "kind": "row",
+          "id": "order",
+          "props": {
+           "selected": {
+            "bind": "$order.selected"
+           }
+          },
+          "on": {
+           "press": "orders.open"
+          },
+          "children": [
+           {
+            "kind": "cell",
+            "id": "order-id",
+            "props": {
+             "text": {
+              "bind": "$order.id"
+             }
+            }
+           },
+           {
+            "kind": "cell",
+            "id": "order-total",
+            "children": [
+             {
+              "kind": "text",
+              "id": "order-amount",
+              "props": {
+               "text": {
+                "bind": "$order.total"
+               }
+              }
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "kind": "table",
+      "id": "archived",
+      "props": {
+       "label": "Archived orders",
+       "state": "empty"
+      },
+      "slots": {
+       "empty": [
+        {
+         "kind": "text",
+         "id": "archived-empty",
+         "children": [
+          "Nothing archived yet."
+         ]
+        }
+       ]
+      },
+      "children": [
+       {
+        "kind": "column",
+        "id": "col-archived",
+        "children": [
+         "Order"
+        ]
+       }
+      ]
+     },
+     {
+      "kind": "table",
+      "id": "pending",
+      "props": {
+       "label": "Pending orders",
+       "state": "loading"
+      },
+      "children": [
+       {
+        "kind": "column",
+        "id": "col-pending",
+        "children": [
+         "Order"
+        ]
+       },
+       {
+        "kind": "row",
+        "id": "pending-row",
+        "props": {
+         "selected": true
+        },
+        "children": [
+         {
+          "kind": "cell",
+          "id": "pending-cell",
+          "children": [
+           "Fetching…"
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _on(v) {\n  return v === \"false\" ? false : Boolean(v);\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _list(v) {\n  return Array.isArray(v) ? v : [];\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nfunction _press(e, fire) {\n  if (e.target !== e.currentTarget || (e.key !== \"Enter\" && e.key !== \" \")) return;\n  e.preventDefault();\n  fire();\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"orders\" aria-label=\"Orders\">\n      <h2 data-weft-id=\"title\">Orders</h2>\n      {(() => {\n        const _cols = [\n          (\n            <th data-weft-id=\"col-id\" scope=\"col\" aria-sort=\"descending\" tabIndex={0} onClick={() => _act(actions, { id: \"col-id\", action: \"orders.sortById\" })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: \"col-id\", action: \"orders.sortById\" }))}>Order</th>\n          ),\n          (\n            <th data-weft-id=\"col-total\" scope=\"col\" aria-sort=\"none\">\n              {!(_text(data?.labels?.total).trim() === \"\") ? _squash(_text(data?.labels?.total)) : \"\"}\n            </th>\n          ),\n          ..._list(data?.orders).flatMap((order, _i0) => []),\n        ];\n        const _rows = [\n          ..._list(data?.orders).flatMap((order, _i0) => [\n            (\n              <tr data-weft-id={\"order[\" + _i0 + \"]\"} aria-selected={String(_on(order?.selected))} tabIndex={0} onClick={() => _act(actions, { id: \"order[\" + _i0 + \"]\", action: \"orders.open\", item: \"$.orders.\" + _i0 })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: \"order[\" + _i0 + \"]\", action: \"orders.open\", item: \"$.orders.\" + _i0 }))}>\n                <td data-weft-id={\"order-id[\" + _i0 + \"]\"}>\n                  {!(_text(order?.id).trim() === \"\") ? _text(order?.id) : null}\n                </td>\n                <td data-weft-id={\"order-total[\" + _i0 + \"]\"}>\n                  <div data-weft-id={\"order-amount[\" + _i0 + \"]\"}>\n                    {!(_text(order?.total).trim() === \"\") ? _squash(_text(order?.total)) : \"\"}\n                  </div>\n                </td>\n              </tr>\n            ),\n          ]),\n        ];\n        return (\n          <table data-weft-id=\"open-orders\" data-state=\"ready\" aria-label=\"Open orders\">\n            {_cols.length > 0 ? (\n              <thead>\n                <tr>\n                  {_keyed(_cols)}\n                </tr>\n              </thead>\n            ) : null}\n            {!(_list(data?.orders).length > 0) ? (\n              <tbody>\n                <tr data-weft-slot=\"empty\">\n                  <td colSpan={Math.max(1, _cols.length)}>\n                    <div data-weft-id=\"no-orders\">No open orders.</div>\n                  </td>\n                </tr>\n              </tbody>\n            ) : _rows.length > 0 ? (\n              <tbody>\n                {_keyed(_rows)}\n              </tbody>\n            ) : null}\n          </table>\n        );\n      })()}\n      {(() => {\n        const _cols = [\n          (\n            <th data-weft-id=\"col-archived\" scope=\"col\">Order</th>\n          ),\n        ];\n        const _rows = [];\n        return (\n          <table data-weft-id=\"archived\" data-state=\"empty\" aria-label=\"Archived orders\">\n            {_cols.length > 0 ? (\n              <thead>\n                <tr>\n                  {_keyed(_cols)}\n                </tr>\n              </thead>\n            ) : null}\n            <tbody>\n              <tr data-weft-slot=\"empty\">\n                <td colSpan={Math.max(1, _cols.length)}>\n                  <div data-weft-id=\"archived-empty\">Nothing archived yet.</div>\n                </td>\n              </tr>\n            </tbody>\n          </table>\n        );\n      })()}\n      {(() => {\n        const _cols = [\n          (\n            <th data-weft-id=\"col-pending\" scope=\"col\">Order</th>\n          ),\n        ];\n        const _rows = [\n          (\n            <tr data-weft-id=\"pending-row\" aria-selected=\"true\">\n              <td data-weft-id=\"pending-cell\">{\"Fetching…\"}</td>\n            </tr>\n          ),\n        ];\n        return (\n          <table data-weft-id=\"pending\" data-state=\"loading\" aria-busy=\"true\" aria-label=\"Pending orders\">\n            {_cols.length > 0 ? (\n              <thead>\n                <tr>\n                  {_keyed(_cols)}\n                </tr>\n              </thead>\n            ) : null}\n            {_rows.length > 0 ? (\n              <tbody>\n                {_keyed(_rows)}\n              </tbody>\n            ) : null}\n          </table>\n        );\n      })()}\n    </main>\n  );\n}\n"
  },
  {
   "document": {

@@ -1,0 +1,28 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-item as react-jsx
+---
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _press(e, fire) {
+  if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  fire();
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Inbox">
+      <ol data-weft-id="inbox">
+        <li data-weft-id="msg-1" tabIndex={0} onClick={() => _act(actions, { id: "msg-1", action: "inbox.open" })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: "msg-1", action: "inbox.open" }))}>
+          <div data-weft-id="msg-1-from" data-tone="muted">Ana</div>
+          <div data-weft-id="msg-1-subject">Welcome aboard</div>
+        </li>
+      </ol>
+    </main>
+  );
+}

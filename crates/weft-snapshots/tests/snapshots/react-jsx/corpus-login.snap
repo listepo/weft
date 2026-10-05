@@ -1,0 +1,69 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-login as react-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="login" aria-label="Sign in">
+      <form data-weft-id="form" data-state="idle" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: "form", action: "auth.submit" }); }}>
+        <h1 data-weft-id="title">Sign in</h1>
+        <div data-weft-id="fields" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "column" }}>
+          <div data-weft-field="">
+            <label>
+              <span aria-hidden="true">Email</span>
+              <input data-weft-id="email" aria-label="Email" type="email" required value={_text(data?.email)} onChange={(_e) => onChange?.("$.email", _e.currentTarget.value)} />
+            </label>
+          </div>
+          <div data-weft-field="">
+            <label>
+              <span aria-hidden="true">Password</span>
+              <input data-weft-id="password" aria-label="Password" type="password" required value={_text(data?.password)} onChange={(_e) => onChange?.("$.password", _e.currentTarget.value)} />
+            </label>
+          </div>
+        </div>
+        <button data-weft-id="submit" type="submit" disabled={!_on(data?.email)} data-variant="primary" onClick={(_e) => { _e.preventDefault(); _act(actions, { id: "form", action: "auth.submit" }); }}>Sign in</button>
+        <div data-weft-slot="footer">
+          {(() => {
+            const _href = _url("");
+            return (
+              <a data-weft-id="reset" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} onKeyDown={_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "reset", action: "nav.reset" }); } : undefined} onClick={() => _act(actions, { id: "reset", action: "nav.reset" })} style={{ display: "inline-block" }}>Forgot password?</a>
+            );
+          })()}
+          {(() => {
+            const _href = _url("");
+            return (
+              <a data-weft-id="signup" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} onKeyDown={_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "signup", action: "nav.signup" }); } : undefined} onClick={() => _act(actions, { id: "signup", action: "nav.signup" })} style={{ display: "inline-block" }}>Create an account</a>
+            );
+          })()}
+        </div>
+      </form>
+    </main>
+  );
+}

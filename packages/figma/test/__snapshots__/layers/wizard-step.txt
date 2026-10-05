@@ -1,0 +1,46 @@
+FRAME "screen#wizard" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#wizard)
+  | weft.source = {"kind":"screen","id":"wizard","props":{"label":"Setup wizard"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Choose a plan"],"shown":{"text":"Choose a plan"}}
+    TEXT "text" chars="Choose a plan" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  INSTANCE "text#progress" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+    | weft.origin = layer(text#progress)
+    | weft.source = {"kind":"text","id":"progress","props":{"text":{"bind":"$.progress"}},"shown":{"text":"{$.progress}"}}
+    TEXT "text" chars="{$.progress}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "radio-group#plan" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(radio-group#plan)
+    | weft.source = {"kind":"radio-group","id":"plan","props":{"label":"Plan","value":{"bind":"$.plan"}},"shown":{"label":"Plan"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    TEXT "label" chars="Plan" font={"family":"Inter","style":"Bold"} size=14
+      | weft.label = 1
+    INSTANCE "radio#plan-free" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<radio>"
+      | weft.origin = layer(radio#plan-free)
+      | weft.source = {"kind":"radio","id":"plan-free","props":{"value":"free"},"children":["Free"],"shown":{"text":"Free"}}
+      RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=999
+      TEXT "text" chars="Free" size=14
+    INSTANCE "radio#plan-pro" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<radio>"
+      | weft.origin = layer(radio#plan-pro)
+      | weft.source = {"kind":"radio","id":"plan-pro","props":{"value":"pro"},"children":["Pro"],"shown":{"text":"Pro"}}
+      RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=999
+      TEXT "text" chars="Pro" size=14
+    INSTANCE "radio#plan-team" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<radio>"
+      | weft.origin = layer(radio#plan-team)
+      | weft.source = {"kind":"radio","id":"plan-team","props":{"value":"team"},"children":["Team"],"shown":{"text":"Team"}}
+      RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=999
+      TEXT "text" chars="Team" size=14
+  FRAME "stack#nav" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+    | weft.origin = layer(stack#nav)
+    | weft.source = {"kind":"stack","id":"nav","props":{"direction":"row","gap":{"token":"space.sm"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "button#back" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=secondary, state=(unset)>"
+      | weft.origin = layer(button#back)
+      | weft.source = {"kind":"button","id":"back","on":{"press":"wizard.back"},"children":["Back"],"shown":{"text":"Back"}}
+      TEXT "text" chars="Back" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "button#next" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+      | weft.origin = layer(button#next)
+      | weft.source = {"kind":"button","id":"next","props":{"disabled":{"bind":"$.plan","not":true},"variant":"primary"},"on":{"press":"wizard.next"},"children":["Next"],"shown":{"text":"Next"}}
+      TEXT "text" chars="Next" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]

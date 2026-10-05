@@ -1,0 +1,12 @@
+# The visual suite has its own Vitest config (browser mode for the web screenshots, Node for the
+# SwiftUI ones) and reaches the Rust-only targets through the CLI, so it replaces the inherited
+# test command. Chromium, Xcode and the pinned simulator are found at run time; without them the
+# suite skips those screenshots and says why.
+tasks:
+  test:
+    command: "vitest run --config vitest.config.ts"
+    deps: ["root:wasm", "root:cli"]
+    # The CLI's sources decide what the static page and the importers produce.
+    inputs: ["/crates/**/*", "/Cargo.toml", "/Cargo.lock"]
+    options:
+      mergeArgs: "replace"

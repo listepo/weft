@@ -1,0 +1,63 @@
+FRAME "screen#account" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#account)
+  | weft.source = {"kind":"screen","id":"account","props":{"label":"Account"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Account"],"shown":{"text":"Account"}}
+    TEXT "text" chars="Account" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "tabs#tabs" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(tabs#tabs)
+    | weft.source = {"kind":"tabs","id":"tabs","props":{"label":"Account sections"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    FRAME "tab#tab-overview" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(tab#tab-overview)
+      | weft.source = {"kind":"tab","id":"tab-overview","props":{"label":"Overview"},"shown":{"label":"Overview"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Overview" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      INSTANCE "text#account-name" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#account-name)
+        | weft.source = {"kind":"text","id":"account-name","props":{"text":{"bind":"$.account.name"}},"shown":{"text":"{$.account.name}"}}
+        TEXT "text" chars="{$.account.name}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "text#account-email" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#account-email)
+        | weft.source = {"kind":"text","id":"account-email","props":{"text":{"bind":"$.account.email"}},"shown":{"text":"{$.account.email}"}}
+        TEXT "text" chars="{$.account.email}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "tab#tab-billing" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(tab#tab-billing)
+      | weft.source = {"kind":"tab","id":"tab-billing","props":{"label":"Billing"},"shown":{"label":"Billing"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Billing" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      INSTANCE "text#plan" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#plan)
+        | weft.source = {"kind":"text","id":"plan","props":{"text":{"bind":"$.billing.plan"}},"shown":{"text":"{$.billing.plan}"}}
+        TEXT "text" chars="{$.billing.plan}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "button#change-plan" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+        | weft.origin = layer(button#change-plan)
+        | weft.source = {"kind":"button","id":"change-plan","props":{"variant":"primary"},"on":{"press":"billing.change"},"children":["Change plan"],"shown":{"text":"Change plan"}}
+        TEXT "text" chars="Change plan" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+    FRAME "tab#tab-team" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(tab#tab-team)
+      | weft.source = {"kind":"tab","id":"tab-team","props":{"label":"Team"},"shown":{"label":"Team"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Team" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      FRAME "list#members" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(list#members)
+        | weft.source = {"kind":"list","id":"members"}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        FRAME "each#members-each" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+          | weft.origin = layer(each#members-each)
+          | weft.source = {"kind":"each","id":"members-each","props":{"as":"member","in":{"bind":"$.team"}}}
+          | weft.style = [[],[],0,[0,0,0,0],0]
+          FRAME "item#member" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+            | weft.origin = layer(item#member)
+            | weft.source = {"kind":"item","id":"member"}
+            | weft.style = [[],[],0,[8,8,8,8],8]
+            INSTANCE "text#member-name" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+              | weft.origin = layer(text#member-name)
+              | weft.source = {"kind":"text","id":"member-name","props":{"text":{"bind":"$member.name"}},"shown":{"text":"{$member.name}"}}
+              TEXT "text" chars="{$member.name}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

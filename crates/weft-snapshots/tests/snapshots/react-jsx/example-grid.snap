@@ -1,0 +1,15 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-grid as react-jsx
+---
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Gallery">
+      <div data-weft-id="cards" style={{ gap: "var(--weft-space-lg)", display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+        <div data-weft-id="card-a">Revenue</div>
+        <div data-weft-id="card-b">Orders</div>
+        <div data-weft-id="card-c">Visitors</div>
+      </div>
+    </main>
+  );
+}

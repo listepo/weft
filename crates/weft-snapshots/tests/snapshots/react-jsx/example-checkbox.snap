@@ -1,0 +1,24 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-checkbox as react-jsx
+---
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Terms">
+      <label>
+        <input data-weft-id="terms" type="checkbox" aria-label="I accept the terms" checked={_on(data?.acceptTerms)} onChange={(_e) => { onChange?.("$.acceptTerms", _e.currentTarget.checked); _act(actions, { id: "terms", action: "form.edit" }); }} />
+        <span aria-hidden="true">I accept the terms</span>
+      </label>
+    </main>
+  );
+}

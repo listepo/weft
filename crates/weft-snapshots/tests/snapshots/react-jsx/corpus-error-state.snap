@@ -1,0 +1,52 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-error-state as react-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="load-error" data-state="error" aria-label="Load error">
+      <div data-weft-id="alert" role="alert" data-tone="danger">
+        <h2 data-weft-id="error-title">Could not load your data</h2>
+        <div data-weft-id="error-message">
+          {!(_text(data?.error?.message).trim() === "") ? _squash(_text(data?.error?.message)) : ""}
+        </div>
+      </div>
+      <div data-weft-id="actions" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row" }}>
+        <button data-weft-id="retry" type="button" data-variant="primary" onClick={(_e) => _act(actions, { id: "retry", action: "load.retry" })}>Retry</button>
+        {(() => {
+          const _href = _url("");
+          return (
+            <a data-weft-id="support" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} onKeyDown={_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "support", action: "nav.support" }); } : undefined} onClick={() => _act(actions, { id: "support", action: "nav.support" })} style={{ display: "inline-block" }}>Contact support</a>
+          );
+        })()}
+      </div>
+    </main>
+  );
+}

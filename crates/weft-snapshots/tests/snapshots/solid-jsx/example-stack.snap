@@ -1,0 +1,20 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-stack as solid-jsx
+---
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="root" aria-label="Actions">
+      <div data-weft-id="actions" style={{ gap: "var(--weft-space-md)", display: "flex", "flex-direction": "row", "align-items": "center" }}>
+        <button data-weft-id="save" type="button" data-variant="primary" onClick={(_e) => _act(props.actions, { id: "save", action: "doc.save" })}>Save</button>
+        <button data-weft-id="discard" type="button" onClick={(_e) => _act(props.actions, { id: "discard", action: "doc.discard" })}>Discard</button>
+      </div>
+    </main>
+  );
+}
