@@ -10,17 +10,17 @@ fileGroups:
   # What the binding suites read: the packages' sources and tests, the generated module they load,
   # and the corpus, specification and fixtures the differential suites compare against.
   runtime-suites:
-    - '/runtimes/**/*'
-    - '/packages/**/*'
-    - '!/packages/**/node_modules/**'
-    - '/pnpm-lock.yaml'
-    - '/corpus/**/*'
-    - '/examples/**/*'
-    - '/schemas/**/*'
-    - '/compat/**/*'
-    - '/SPEC.md'
-    - '/AGENT-SPEC.md'
-    - '/crates/*/tests/fixtures/**/*'
+    - "/runtimes/**/*"
+    - "/packages/**/*"
+    - "!/packages/**/node_modules/**"
+    - "/pnpm-lock.yaml"
+    - "/corpus/**/*"
+    - "/examples/**/*"
+    - "/schemas/**/*"
+    - "/compat/**/*"
+    - "/SPEC.md"
+    - "/AGENT-SPEC.md"
+    - "/crates/*/tests/fixtures/**/*"
 
 tasks:
   # The Rust core compiled to WebAssembly for @weft/core and @weft/catalog. Generated and
@@ -69,68 +69,93 @@ tasks:
   # longer be tested there. Deno and the browser have no addon, so they stay on WebAssembly. A native
   # leg fails when the addon did not load (engines.test.ts), so it cannot pass on the fallback.
   runtimes:
-    command: 'noop'
+    command: "noop"
     deps:
       [
-        'root:runtimes-node',
-        'root:runtimes-node-native',
-        'root:runtimes-deno',
-        'root:runtimes-bun',
-        'root:runtimes-bun-native',
-        'root:runtimes-browser',
+        "root:runtimes-node",
+        "root:runtimes-node-native",
+        "root:runtimes-deno",
+        "root:runtimes-bun",
+        "root:runtimes-bun-native",
+        "root:runtimes-browser",
       ]
   runtimes-node:
-    command: 'vitest run --config runtimes/vitest.config.ts'
+    command: "vitest run --config runtimes/vitest.config.ts"
     env:
-      WEFT_RUNTIME: 'node'
-      WEFT_ENGINE: 'wasm'
-    deps: ['root:wasm']
-    inputs: ['@group(runtime-suites)']
+      WEFT_RUNTIME: "node"
+      WEFT_ENGINE: "wasm"
+    deps: ["root:wasm"]
+    inputs: ["@group(runtime-suites)"]
   runtimes-node-native:
-    command: 'vitest run --config runtimes/vitest.config.ts'
+    command: "vitest run --config runtimes/vitest.config.ts"
     env:
-      WEFT_RUNTIME: 'node'
-      WEFT_ENGINE: 'native'
-    deps: ['root:wasm', 'root:native']
-    inputs: ['@group(runtime-suites)']
+      WEFT_RUNTIME: "node"
+      WEFT_ENGINE: "native"
+    deps: ["root:wasm", "root:native"]
+    inputs: ["@group(runtime-suites)"]
   # Deno and Bun run Vitest's own entry point, so the leg exercises the same test files and runner
   # as Node. `--node-modules-dir=manual` makes Deno use the pnpm-installed node_modules; `--bun` makes
   # Bun also run the worker processes Vitest spawns, which would otherwise start `node`.
   runtimes-deno:
-    script: 'deno --version | head -1 && deno run -A --node-modules-dir=manual node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
+    script: "deno --version | head -1 && deno run -A --node-modules-dir=manual node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts"
     env:
-      WEFT_RUNTIME: 'deno'
-      WEFT_ENGINE: 'wasm'
-    deps: ['root:wasm']
-    inputs: ['@group(runtime-suites)']
+      WEFT_RUNTIME: "deno"
+      WEFT_ENGINE: "wasm"
+    deps: ["root:wasm"]
+    inputs: ["@group(runtime-suites)"]
   runtimes-bun:
     script: 'echo "bun $(bun --version)" && bun --bun node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
     env:
-      WEFT_RUNTIME: 'bun'
-      WEFT_ENGINE: 'wasm'
-    deps: ['root:wasm']
-    inputs: ['@group(runtime-suites)']
+      WEFT_RUNTIME: "bun"
+      WEFT_ENGINE: "wasm"
+    deps: ["root:wasm"]
+    inputs: ["@group(runtime-suites)"]
   runtimes-bun-native:
     script: 'echo "bun $(bun --version)" && bun --bun node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
     env:
-      WEFT_RUNTIME: 'bun'
-      WEFT_ENGINE: 'native'
-    deps: ['root:wasm', 'root:native']
-    inputs: ['@group(runtime-suites)']
+      WEFT_RUNTIME: "bun"
+      WEFT_ENGINE: "native"
+    deps: ["root:wasm", "root:native"]
+    inputs: ["@group(runtime-suites)"]
   runtimes-browser:
-    command: 'vitest run --config runtimes/vitest.config.ts'
+    command: "vitest run --config runtimes/vitest.config.ts"
     env:
-      WEFT_RUNTIME: 'browser'
-      WEFT_ENGINE: 'wasm'
-    deps: ['root:wasm']
-    inputs: ['@group(runtime-suites)']
+      WEFT_RUNTIME: "browser"
+      WEFT_ENGINE: "wasm"
+    deps: ["root:wasm"]
+    inputs: ["@group(runtime-suites)"]
   typecheck:
-    command: 'tsc --noEmit -p .'
-    deps: ['root:wasm']
-    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/runtimes/**/*', '/tsconfig.json']
+    command: "tsc --noEmit -p ."
+    deps: ["root:wasm"]
+    inputs:
+      [
+        "/packages/**/*",
+        "/plugins/**/*",
+        "/bench/**/*",
+        "/runtimes/**/*",
+        "/tooling/**/*",
+        "/tsconfig.json",
+      ]
   lint:
     script: "oxlint --deny-warnings --ignore-pattern 'plugins/*/dist/**' . && oxfmt --check '**/*.{ts,tsx,json}'"
-    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/runtimes/**/*', '/compat/**/*', '/*.json', '/.claude-plugin/*.json']
+    inputs:
+      [
+        "/packages/**/*",
+        "/plugins/**/*",
+        "/bench/**/*",
+        "/runtimes/**/*",
+        "/tooling/**/*",
+        "/compat/**/*",
+        "/*.json",
+        "/.claude-plugin/*.json",
+      ]
+  # The iteration loop: the checks the changed files affect (tooling/changed.ts). Not a check of its
+  # own, so it is neither cached nor part of `moon ci`; the full check stays the merge gate.
+  changed:
+    command: "node tooling/changed.ts"
+    options:
+      cache: false
+      runInCI: false
   fmt:
     command: 'oxfmt "**/*.{ts,tsx,json}"'
     options:

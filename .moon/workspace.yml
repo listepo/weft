@@ -3,6 +3,7 @@ projects:
   - 'packages/*'
   - 'plugins/*'
   - 'bench'
+  - 'tooling'
   - 'moon.yml'
 
 # Matches the moon pin in mise.toml.
