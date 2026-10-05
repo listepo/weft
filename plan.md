@@ -15,7 +15,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T56 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T57 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
-| T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -33,7 +32,6 @@ Execution plan:
 6. Full edit and read runs on the three models; `run.ts tokens` again so the report has Anthropic token counts.
 7. `bench/EVALUATION.md`: results against the done criteria (Weft first-try validity at least 95%, after one repair at least 99%), comparison with the baselines, failure analysis, continue/stop recommendation.
 8. Verify with `pnpm run ci`.
-
 
 ### T28. Binding readback against inverted conditions
 
@@ -217,24 +215,4 @@ T55 made `center` the default for a row, so T50 moved the corpus's explicit `cen
 Done when:
 - the coverage test still sees `center`;
 - the affected snapshots, screenshots and Figma/Penpot layer trees are retaken and reviewed;
-- the full check exits 0.
-
-### T59. Deterministic home indicator in SwiftUI screenshots
-
-After T50 merged, one full check failed 21 SwiftUI screenshots by about 5,900 pixels each. On every screen the only difference was the iPhone home indicator at the bottom, which showed in that run but not in the baselines. A rerun of `visual:test` alone passed 277 of 277. The suite hides the status bar (`.statusBarHidden(true)` in the host app) but leaves the home indicator to the simulator's state.
-
-- Make it deterministic. Prefer hiding it in the host app with the documented SwiftUI API (`persistentSystemOverlays(.hidden)` or the current equivalent, cited), if a screenshot then never shows it. Otherwise exclude the home-indicator strip from the comparison, using the device's safe-area inset rather than a hard-coded size.
-- Keep both simulator modes (T46) working.
-
-Execution plan:
-
-1. Reproduce: shoot every screen right after launch on a freshly booted own device and look for the strip. Cause to confirm: the app only hides the status bar, and the screenshot loop accepts two equal frames 500 ms apart, which can both fall before the system hides the indicator.
-2. Add `.persistentSystemOverlays(.hidden)` next to `.statusBarHidden(true)` in the host app in `packages/visual/test/swiftui.test.ts`. Source: https://developer.apple.com/documentation/swiftui/view/persistentsystemoverlays(_:) (iOS 16 and later; "hides every persistent system overlay" in iOS, the home indicator among them, checked 2026-10-05). Apple says the system might not honour the preference, so step 3 decides.
-3. Prove it on a fresh device: a screenshot taken immediately after launch must equal the baseline area. If the indicator still shows, mask the strip instead: crop the bottom safe-area inset (read from the app's own `safeAreaInsets` at runtime, passed back through the screenshot, not a hard-coded size) from both images in `compare`.
-4. Run the suite three times in a row in own mode and once in shared mode (`WEFT_SIMULATOR=own` and `shared`); retake baselines only if the visible area changed.
-5. Document the rule in `packages/visual/README.md`; close into `done.md`.
-
-Done when:
-- the suite passes repeatedly (at least three consecutive runs);
-- baselines are retaken only if the visible area changes, and are then reviewed;
 - the full check exits 0.

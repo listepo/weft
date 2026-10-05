@@ -17,7 +17,15 @@
 // machine-wide lock for the whole suite so runs take turns on one device; `own` gives each
 // worktree a device of its own, created on first use.
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
@@ -164,6 +172,31 @@ struct WeftScreensApp: App {
                 .dynamicTypeSize(.large)
                 .environment(\\.locale, Locale(identifier: "en_US"))
                 .statusBarHidden(true)
+                .background(InsetProbe().ignoresSafeArea())
+        }
+    }
+}
+
+// The system draws the home indicator inside the bottom safe-area inset, in some screenshots and
+// not in others, and an app cannot switch it off: persistentSystemOverlays(.hidden) only asks the
+// system to hide it, and a run with it still showed the indicator in four screenshots. The suite
+// therefore leaves that strip out of every comparison, and the app says how tall it is on this
+// device, so no size is written down here. It is read from the window, because a view that ignores
+// the safe area is told the inset is zero.
+struct InsetProbe: View {
+    var body: some View {
+        Color.clear.task {
+            while true {
+                let window = UIApplication.shared.connectedScenes
+                    .compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
+                if let window, window.bounds.width > 0 {
+                    let json = "{\\"width\\": \\(window.bounds.width), \\"bottom\\": \\(window.safeAreaInsets.bottom)}"
+                    let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    try? json.write(to: dir.appendingPathComponent("insets.json"), atomically: true, encoding: .utf8)
+                    return
+                }
+                try? await Task.sleep(nanoseconds: 100_000_000)
+            }
         }
     }
 }
@@ -392,6 +425,33 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     throw new Error(`${name} never stopped changing on screen`);
   }
 
+  /**
+   * The height in screenshot pixels of the bottom safe-area inset, where the home indicator
+   * appears, as the launched app measured it. Read once: the device does not change.
+   */
+  let insetPx: number | undefined;
+  async function bottomInsetPx(png: Uint8Array): Promise<number> {
+    if (insetPx !== undefined) return insetPx;
+    const container = run("xcrun", ["simctl", "get_app_container", udid, BUNDLE, "data"]);
+    if (container.status !== 0) throw new Error(`no app container: ${container.stderr.trim()}`);
+    const file = join(container.stdout.trim(), "Documents", "insets.json");
+    for (let attempt = 0; attempt < 40; attempt++) {
+      if (existsSync(file)) {
+        const { width, bottom } = JSON.parse(readFileSync(file, "utf8")) as {
+          width: number;
+          bottom: number;
+        };
+        if (!(width > 0) || !(bottom >= 0)) throw new Error(`bad insets in ${file}`);
+        // A PNG's width is in its IHDR chunk, bytes 16 to 19.
+        const pixels = new DataView(png.buffer, png.byteOffset).getUint32(16);
+        insetPx = Math.ceil((bottom * pixels) / width);
+        return insetPx;
+      }
+      await sleep(250);
+    }
+    throw new Error(`the app wrote no insets to ${file}`);
+  }
+
   const shots = new Map<string, Uint8Array>();
   const shot = async (name: string) => {
     if (!shots.has(name)) shots.set(name, await shoot(name));
@@ -400,7 +460,10 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
 
   for (const name of names) {
     test(`${name} matches its reviewed baseline`, async ({ skip }) => {
-      const result = matchBaseline(await shot(name), `swiftui/${name}`);
+      const png = await shot(name);
+      const result = matchBaseline(png, `swiftui/${name}`, {
+        ignoreBottom: await bottomInsetPx(png),
+      });
       if (result.status === "missing") {
         if (result.reviewed)
           throw new Error(
@@ -420,18 +483,24 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
   test("the example screen follows the appearance", async () => {
     const light = await shot(EXAMPLE_SCREEN);
     const dark = await shot(EXAMPLE_DARK);
-    expect(compare(light, dark, "appearance/swiftui-example-review").differing).toBeGreaterThan(0);
+    const ignoreBottom = await bottomInsetPx(light);
+    expect(
+      compare(light, dark, "appearance/swiftui-example-review", { ignoreBottom }).differing,
+    ).toBeGreaterThan(0);
   });
 
   for (const mutant of Object.keys(MUTANTS)) {
     test(`${mutant} is caught against login and its baseline`, async () => {
       const changed = await shot(mutant);
+      const ignoreBottom = await bottomInsetPx(changed);
       expect(
-        compare(await shot("login"), changed, `mutation/swiftui-${mutant}`).differing,
+        compare(await shot("login"), changed, `mutation/swiftui-${mutant}`, { ignoreBottom })
+          .differing,
       ).toBeGreaterThan(0);
       const result = matchBaseline(changed, "swiftui/login", {
         readOnly: true,
         label: `mutation/swiftui-${mutant}.baseline`,
+        ignoreBottom,
       });
       if (result.status !== "missing") expect(result.status).toBe("differ");
     });
