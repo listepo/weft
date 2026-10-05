@@ -3,6 +3,7 @@
 // in-memory fake of the tests. `test/api-types.test.ts` checks at compile time that the official
 // types (`@figma/plugin-typings`) satisfy it, so the subset cannot drift from the real API.
 import type {
+  Effect,
   Paint,
   SceneNode,
   VariableResolvedDataType,
