@@ -38,7 +38,7 @@ The first five members are the shared resources:
 
 | Member | What it is |
 | --- | --- |
-| `tokens` | DTCG token files, in layer order: a later file overrides an earlier one, and aliases are resolved after the merge. |
+| `tokens` | DTCG token files, in layer order: a later file overrides an earlier one, and aliases are resolved after the merge. Or one DTCG resolver file, for tokens with modes such as light and dark ([below](#light-and-dark-a-resolver)). |
 | `catalog` | An extension of the core catalog: new components, and new values or props on core ones. It may widen the core catalog, never narrow it. |
 | `actions` | The action names the app handles. An `on-*` value outside the list is an error. |
 | `data` | A JSON Schema (a 2020-12 subset) of the app's data. Bindings are checked against it, names and types. |
@@ -72,6 +72,38 @@ exit 1
 $ rm examples/project/screens/typo.weft
 ```
 
+## Light and dark: a resolver
+
+Tokens that differ by mode (light and dark, compact and roomy, two brands) live in a [DTCG resolver](https://www.designtokens.org/TR/2025.10/resolver/) file. Name that one file instead of the list:
+
+```json
+{ "tokens": "tokens/theme.resolver.json" }
+```
+
+The resolver lists sets of token files and modifiers whose contexts each add their own files, in the order they merge:
+
+```json
+{
+  "version": "2025.10",
+  "sets": { "base": { "sources": [{ "$ref": "base.tokens.json" }] } },
+  "modifiers": {
+    "theme": {
+      "contexts": {
+        "light": [{ "$ref": "light.tokens.json" }],
+        "dark": [{ "$ref": "dark.tokens.json" }]
+      },
+      "default": "light"
+    }
+  },
+  "resolutionOrder": [{ "$ref": "#/sets/base" }, { "$ref": "#/modifiers/theme" }]
+}
+```
+
+- Validation uses the default of each modifier (its first context when it names none).
+- A modifier with `light` and `dark` contexts is the appearance: generated SwiftUI colours, pages and stylesheets follow the system's light or dark mode.
+- File references are relative to the resolver and stay inside the project. Every problem is `W705` (or `W703` and `W704` for files) with a pointer into the resolver, and the rest still loads.
+- A plain list of token files works as before.
+
 ## Choosing the project
 
 Every tool that reads a screen looks for the first `weft.json` in the screen's folder or above it.
@@ -91,7 +123,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `validate.mode` | `"lenient"` | `"strict"` makes unknown elements and attributes errors in `weft validate` (`--lenient` overrides it), and is the default of `strict` in the MCP server started with the project. |
 | `format.write` | `false` | `weft fmt` rewrites the file instead of printing it (`--print` overrides it). |
 | `render.data` | none | Sample data for rendered pages (`--data` overrides it). |
-| `render.tokens` | the project's `tokens` | Token files for rendered pages, layered the same way (`--tokens` overrides it). |
+| `render.tokens` | the project's `tokens` | Token files for rendered pages, layered the same way, or one resolver file (`--tokens` overrides it). |
 | `render.outDir` | next to the screen | Where rendered pages go (an output path overrides it). |
 | `export.html.outDir` | standard output | Where `weft html` writes `<screen>.html` (`--out-dir` overrides it). |
 | `export.html.source` | `false` | The page keeps the screen in a leading comment, so `weft import-html` gives it back exactly (`--no-source` overrides it). Off by default: a deployed page would publish it. |

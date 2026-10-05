@@ -221,12 +221,21 @@ pub fn check_data_input(
 
 /// The files a project file names, in the order the loader reads them; names that would leave
 /// the project directory are not among them. The TypeScript side reads these and calls
-/// `load_project` with their text, so no callback crosses the boundary.
-pub fn project_files(text: &str) -> Result<String> {
+/// `load_project` with their text, so no callback crosses the boundary. A resolver names further
+/// files only once it is read, so `files` (name → text) gives the files read so far and the
+/// result lists the ones still missing; the caller repeats until none are.
+pub fn project_files(text: &str, files: Option<&str>) -> Result<String> {
+    let files = read_files(files)?;
     let names = RefCell::new(Vec::new());
     let record = |name: &str| {
-        names.borrow_mut().push(name.to_owned());
-        None
+        let known = files
+            .as_ref()
+            .and_then(|f| f.get(name))
+            .and_then(Json::as_str);
+        if known.is_none() {
+            names.borrow_mut().push(name.to_owned());
+        }
+        known.map(str::to_owned)
     };
     load_project_text(
         text,
@@ -239,10 +248,39 @@ pub fn project_files(text: &str) -> Result<String> {
     write(&names.into_inner())
 }
 
+fn read_files(files: Option<&str>) -> Result<Option<serde_json::Map<String, Json>>> {
+    files
+        .map(|f| {
+            serde_json::from_str(f).map_err(|source| BindingError::Wire {
+                what: "files",
+                source,
+            })
+        })
+        .transpose()
+}
+
+#[derive(Serialize)]
+struct LoadedModifier<'a> {
+    name: &'a str,
+    default: &'a str,
+    /// Entries, as for the tokens: `[context, [path, token][]][]`.
+    contexts: Vec<(&'a String, Vec<(&'a String, &'a Token)>)>,
+}
+
+#[derive(Serialize)]
+struct LoadedAppearance<'a> {
+    modifier: &'a str,
+    light: &'a str,
+    dark: &'a str,
+}
+
 #[derive(Serialize)]
 struct LoadedProject<'a> {
     catalog: &'a Catalog,
     tokens: Option<Vec<(&'a String, &'a Token)>>,
+    modifiers: Vec<LoadedModifier<'a>>,
+    /// The appearance modifier's light and dark contexts, by name (`weft_catalog::appearance`).
+    appearance: Option<LoadedAppearance<'a>>,
     actions: Option<&'a [String]>,
     /// The data schema as JSON text, which `checkData` takes.
     data: Option<String>,
@@ -253,14 +291,7 @@ struct LoadedProject<'a> {
 /// `loadProjectText`: with `files` (name → text) members name files; without, they hold content.
 pub fn load_project(text: &str, files: Option<&str>, options: &str) -> Result<String> {
     let wire = ProjectWire::read(options)?;
-    let files: Option<serde_json::Map<String, Json>> = files
-        .map(|f| {
-            serde_json::from_str(f).map_err(|source| BindingError::Wire {
-                what: "files",
-                source,
-            })
-        })
-        .transpose()?;
+    let files = read_files(files)?;
     let read = |name: &str| {
         files
             .as_ref()
@@ -283,6 +314,24 @@ pub fn load_project(text: &str, files: Option<&str>, options: &str) -> Result<St
     write(&LoadedProject {
         catalog: &project.catalog,
         tokens: project.tokens.as_ref().map(|t| t.iter().collect()),
+        modifiers: project
+            .modifiers
+            .iter()
+            .map(|m| LoadedModifier {
+                name: &m.name,
+                default: &m.default,
+                contexts: m
+                    .contexts
+                    .iter()
+                    .map(|(c, t)| (c, t.iter().collect()))
+                    .collect(),
+            })
+            .collect(),
+        appearance: weft_catalog::appearance(&project.modifiers).map(|a| LoadedAppearance {
+            modifier: a.modifier,
+            light: a.light_context,
+            dark: a.dark_context,
+        }),
         actions: project.actions.as_deref(),
         data: project.data_source.as_ref().map(Json::to_string),
         settings: &project.settings,
@@ -497,9 +546,40 @@ mod tests {
     }
 
     #[test]
+    fn a_resolver_names_its_files_once_it_is_read() {
+        let text = r#"{"tokens":"t/theme.resolver.json"}"#;
+        assert_eq!(
+            json(&project_files(text, None).unwrap()),
+            json!(["t/theme.resolver.json"])
+        );
+        let resolver = json!({
+            "version": "2025.10",
+            "modifiers": { "theme": { "contexts": {
+                "light": [{ "$ref": "light.json" }], "dark": [{ "$ref": "dark.json" }]
+            } } },
+            "resolutionOrder": [{ "$ref": "#/modifiers/theme" }]
+        });
+        let mut files = json!({ "t/theme.resolver.json": resolver.to_string() });
+        assert_eq!(
+            json(&project_files(text, Some(&files.to_string())).unwrap()),
+            json!(["t/light.json", "t/dark.json"])
+        );
+        files["t/light.json"] = json!(r##"{"ink":{"$type":"color","$value":"#000000"}}"##);
+        files["t/dark.json"] = json!(r##"{"ink":{"$type":"color","$value":"#ffffff"}}"##);
+        assert_eq!(
+            json(&project_files(text, Some(&files.to_string())).unwrap()),
+            json!([])
+        );
+        let out = json(&load_project(text, Some(&files.to_string()), "{}").unwrap());
+        assert_eq!(out["diagnostics"], json!([]));
+        assert_eq!(out["modifiers"][0]["name"], "theme");
+        assert_eq!(out["appearance"]["dark"], "dark");
+    }
+
+    #[test]
     fn a_project_names_its_files_and_loads_with_their_text() {
         let text = r#"{"tokens":["a.json","../out.json"],"actions":["go"],"data":"d.json"}"#;
-        let names = json(&project_files(text).unwrap());
+        let names = json(&project_files(text, None).unwrap());
         assert_eq!(names, json!(["a.json", "d.json"]));
         let files = json!({
             "a.json": r##"{"color":{"$type":"color","brand":{"$value":"#000"}}}"##,

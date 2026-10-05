@@ -11,14 +11,33 @@ import type { Token } from "./tokens.ts";
 export type Project = {
   /** The core catalog, or the core catalog with the project's extension merged in. */
   catalog: Catalog;
-  /** Present when the project declares `tokens`. */
+  /** Present when the project declares `tokens`; with a resolver, its default context. */
   tokens?: Map<string, Token> | undefined;
+  /** The modifiers of the project's resolver, each resolved for every context (SPEC §10.3). */
+  modifiers?: TokenModifier[] | undefined;
+  /** The light and dark tokens of the resolver's appearance modifier, when it has one. */
+  appearance?: Appearance | undefined;
   /** Present when the project declares `actions`. */
   actions?: string[] | undefined;
   /** Present when the project declares `data`. */
   data?: DataSchema | undefined;
   /** The tool sections that passed their checks (SPEC §10.6). */
   settings: Settings;
+};
+
+/** A resolver modifier: every context's tokens, with the other modifiers at their default. */
+export type TokenModifier = {
+  name: string;
+  /** The context the default input selects. */
+  default: string;
+  contexts: Map<string, Map<string, Token>>;
+};
+
+/** The appearance modifier (SPEC §10.3) and its light and dark contexts. */
+export type Appearance = {
+  modifier: string;
+  light: Map<string, Token>;
+  dark: Map<string, Token>;
 };
 
 /** A limit of the MCP server that `mcp.limits` may set. */
@@ -41,7 +60,7 @@ type JsxExportSettings = { outDir?: string; typescript?: boolean; source?: boole
 export type Settings = {
   validate?: { mode?: Mode };
   format?: { write?: boolean };
-  render?: { data?: string; tokens?: string[]; outDir?: string };
+  render?: { data?: string; tokens?: string[] | string; outDir?: string };
   export?: {
     html?: { outDir?: string; source?: boolean };
     react?: JsxExportSettings;
@@ -77,6 +96,8 @@ export const PROJECT_FILE = "weft.json";
 type Loaded = {
   catalog: Catalog;
   tokens: [string, Token][] | null;
+  modifiers: { name: string; default: string; contexts: [string, [string, Token][]][] }[];
+  appearance: { modifier: string; light: string; dark: string } | null;
   actions: string[] | null;
   data: string | null;
   settings: Settings;
@@ -90,11 +111,20 @@ export function loadProjectText(text: string, options: ProjectOptions = {}): Pro
   // (never one outside the project directory), and then loads with their text.
   let files: string | undefined;
   if (options.read !== undefined) {
-    const names = JSON.parse(wasm.projectFiles(source)) as string[];
-    const found: [string, string][] = [];
-    for (const name of names) {
-      const content = options.read(name);
-      if (content !== undefined) found.push([name, wellFormed(content)]);
+    // A resolver names more files once it is read, so ask until nothing new is missing.
+    const found = new Map<string, string>();
+    const tried = new Set<string>();
+    for (;;) {
+      const known = JSON.stringify(Object.fromEntries(found));
+      const names = (JSON.parse(wasm.projectFiles(source, known)) as string[]).filter(
+        (n) => !tried.has(n),
+      );
+      if (names.length === 0) break;
+      for (const name of names) {
+        tried.add(name);
+        const content = options.read(name);
+        if (content !== undefined) found.set(name, wellFormed(content));
+      }
     }
     files = JSON.stringify(Object.fromEntries(found));
   }
@@ -102,6 +132,18 @@ export function loadProjectText(text: string, options: ProjectOptions = {}): Pro
   const out = JSON.parse(wasm.loadProject(source, files, wire)) as Loaded;
   const project: Project = { catalog: out.catalog, settings: out.settings };
   if (out.tokens !== null) project.tokens = new Map(out.tokens);
+  if (out.modifiers.length > 0) {
+    project.modifiers = out.modifiers.map((m) => ({
+      name: m.name,
+      default: m.default,
+      contexts: new Map(m.contexts.map(([c, t]) => [c, new Map(t)])),
+    }));
+  }
+  const pair = out.appearance;
+  const modifier = project.modifiers?.find((m) => m.name === pair?.modifier);
+  const light = pair && modifier?.contexts.get(pair.light);
+  const dark = pair && modifier?.contexts.get(pair.dark);
+  if (pair && light && dark) project.appearance = { modifier: pair.modifier, light, dark };
   if (out.actions !== null) project.actions = out.actions;
   if (out.data !== null) project.data = { json: out.data };
   return { project, diagnostics: out.diagnostics };

@@ -375,7 +375,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W702 | Unknown member or setting in the project file. |
 | W703 | File name in the project file is absolute, leaves the project directory or is malformed. |
 | W704 | File named by the project cannot be read or is not JSON. |
-| W705 | Problem in the project's token files (§10.3). |
+| W705 | Problem in the project's token files or resolver (§10.3). |
 | W706 | Catalog extension, or one of its entries, is not a valid catalog or definition (§10.4). |
 | W707 | Catalog extension narrows or changes the core catalog (§10.4). |
 | W708 | Action name in the project file breaks the action grammar. |
@@ -486,7 +486,7 @@ Screens that belong together share their resources through a project file named 
 
 | Member | Type | Meaning |
 | --- | --- | --- |
-| `tokens` | array of file names, at most 64 | DTCG token files, in layer order (§10.3). More than 64 is `W701`. |
+| `tokens` | array of file names, at most 64; or one file name | DTCG token files, in layer order (§10.3), or one DTCG resolver document that orders the sets and modifiers itself (§10.3). More than 64 is `W701`. Project content (§10.1) gives the resolver document itself. |
 | `catalog` | file name | An extension of the core catalog (§10.4). |
 | `actions` | array of action names | The host's actions: `on-*` values are checked against them (`W308`). |
 | `data` | file name | A JSON Schema of the host data model (§10.5). |
@@ -498,11 +498,19 @@ Screens that belong together share their resources through a project file named 
 - Loading never stops at a problem. Each problem is a diagnostic and the rest of the project still applies: a project file that is not JSON or not an object is `W701` and the project is empty; a member of the wrong type is `W701` and is ignored, and so is an entry of `tokens` or `actions` of the wrong type; an unknown member is `W702`, a warning in both modes so that an older tool still reads a newer file; an action name that breaks the action grammar (§2.2) is `W708` and is left out; a file that cannot be read or is not JSON is `W704` and is left out.
 - Project diagnostics point into the project file with a JSON Pointer prefixed with `#`, e.g. `#/tokens/1`; for project content passed as a tool argument the pointer starts at that argument (`#/project/tokens/1`). A pointer continues into a named file as if its content stood in the project file: `#/catalog/components/rating`, `#/data/properties/user/type`. A problem of the merged token tree points at `#/tokens`. Diagnostics of a screen keep the paths of §6.1.
 
-### 10.3 Token layers
+### 10.3 Token layers and the resolver
 
 - Each file is a DTCG 2025.10 token tree. The files merge in order into one tree, which then loads as one token file. Groups merge member by member; a token (an object with `$value`) replaces whatever the earlier files have at its path, as a whole; any other clash is won by the later file. So a later file overrides a token by declaring it again, and a `$type` an earlier file sets on a group still applies to tokens a later file adds to that group.
 - Aliases resolve after the merge, as the DTCG resolver module orders its sets: an alias in the base file to a token the brand file overrides reads the brand value.
 - A file that is not a JSON object, and every problem of the merged tree (a bad name, a token without a type, an alias to nothing, an alias cycle), is `W705`. The token in question is left out.
+
+**Resolver.** When `tokens` is one file name, that file is a resolver document of the DTCG Resolver Module 2025.10 (by convention `*.resolver.json`): `version` `"2025.10"`, `sets` of token sources, `modifiers` whose `contexts` each list token sources, and a `resolutionOrder` of set and modifier entries, each a `$ref` to `#/sets/<name>` or `#/modifiers/<name>` or an inline entry with `type` and `name`. Sources are token trees or `$ref`s to a token file, a JSON Pointer inside one (`file.json#/brand`), or a set; members beside a `$ref` replace the referenced ones shallowly. Weft reads it so:
+
+- **Contexts.** The tree of each input merges in `resolutionOrder` as the token files of a list do, and aliases resolve after the merge, so an alias in a set reads the value of the active context. The *default input* picks, for every modifier, its `default`, or else its first context in document order; that tree is the project's token set, used for validation and by every tool that knows one context. The project also keeps, for each modifier, the tree of every one of its contexts with the other modifiers at their defaults; generators that support modes read those.
+- **Appearance.** The first modifier in `resolutionOrder` that has contexts named `light` and `dark` (compared without case) is the project's appearance: generators map its `light` and `dark` contexts to the platform's light and dark appearance (§9). Without one, generators emit one appearance as before.
+- **Files.** File references are relative to the directory of the resolver, follow the file name rules of §10.2 after `..` steps are taken inside that directory, and are never URLs: any other reference is `W703`. A file that cannot be read, or any file reference in project content, is `W704`. At most 64 files and 64 contexts per modifier are read.
+- **Problems.** Every rule of the module is checked and every breach is `W705` with a pointer into the resolver (`#/tokens/modifiers/theme/default`), and the rest still loads: a missing or other `version`; an entry without `type` or `name`, or a repeated name; a `$ref` to nothing, into `resolutionOrder`, or to a modifier from anywhere but `resolutionOrder`; a reference cycle; a modifier with no context (left out) or one context (kept); a `default` that names no context (the first context applies). A problem of one context's tree is `W705` with the message prefixed by `<modifier>=<context>: `, and a token whose type differs between contexts is `W705`.
+- A token tree can hold no array, so a document whose `resolutionOrder` is an array is a resolver and anything else is a token file; tools that take one token file argument (`--tokens`) accept a resolver by that test.
 
 ### 10.4 Catalog extension
 
@@ -534,7 +542,7 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | `validate.mode` | `"strict"` or `"lenient"` | `"lenient"` | `weft validate`; the default of `weft_validate`'s `strict` when the MCP server is started with the project. Writers' tools (`weft_patch`, render, export) always check strictly. |
 | `format.write` | boolean | `false` | `weft fmt` rewrites the file in place instead of printing it. The canonical form itself has no options (§3). |
 | `render.data` | file name | no data | Sample data the bindings read when a screen is rendered to a static page. |
-| `render.tokens` | array of file names | the project's `tokens` | Token files to render with, layered as in §10.3. |
+| `render.tokens` | array of file names, or one file name | the project's `tokens` | Token files to render with, layered as in §10.3, or one resolver document (§10.3). |
 | `render.outDir` | file name | next to the screen | Where rendered pages go. |
 | `export.html.outDir` | file name | standard output | Where `weft html` writes `<screen>.html`. |
 | `export.html.source` | boolean | `false` | The page keeps the canonical screen in a leading comment, so `weft import-html` gives it back exactly (§9). |
