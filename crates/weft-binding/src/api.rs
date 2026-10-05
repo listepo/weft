@@ -10,8 +10,8 @@ use weft_catalog::{ProjectOptions, Token, TokenProblem, load_project_text};
 use weft_core::{
     ApplyOptions, Catalog, DataCheckOptions, Diagnostic, Document, ParseOptions, ValidateOptions,
     apply_patches, canonicalize, check_data, check_data_json, compile_data_schema, did_you_mean,
-    format_value, parse, read_value, serialize, stringify, to_document, to_value, validate,
-    validate_document,
+    format_value, parse, parse_partial, read_value, serialize, stringify, to_document, to_value,
+    validate, validate_document,
 };
 
 use crate::boundary::{
@@ -24,6 +24,9 @@ struct Parsed<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     document: Option<&'a Document>,
     diagnostics: &'a [Diagnostic],
+    /// Only for a partial parse, which always writes it, so that the wrapper can tell the modes apart.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pending: Option<&'a [Diagnostic]>,
     #[serde(skip_serializing_if = "Option::is_none")]
     sources: Option<Vec<Option<Src>>>,
 }
@@ -31,18 +34,21 @@ struct Parsed<'a> {
 /// `parse`: `{document?, diagnostics, sources?}`, with `sources` beside every document.
 pub fn parse_markup(markup: &str, catalog: Option<&Catalog>, options: &str) -> Result<String> {
     let o = Options::read(options)?;
-    let result = parse(
-        markup,
-        &ParseOptions {
-            catalog,
-            mode: o.mode,
-            tokens: o.tokens.as_ref(),
-            actions: o.actions.as_deref(),
-        },
-    );
+    let options = ParseOptions {
+        catalog,
+        mode: o.mode,
+        tokens: o.tokens.as_ref(),
+        actions: o.actions.as_deref(),
+    };
+    let result = if o.partial {
+        parse_partial(markup, &options)
+    } else {
+        parse(markup, &options)
+    };
     write(&Parsed {
         document: result.document.as_ref(),
         diagnostics: &result.diagnostics,
+        pending: o.partial.then_some(result.pending.as_slice()),
         sources: result.document.as_ref().map(|d| collect(&d.root)),
     })
 }

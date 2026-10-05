@@ -398,6 +398,17 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
+### 6.3 Streaming
+
+A model writes markup front to back, so a reader can show a screen while it is still being written. Flat formats do this with id lists; nested markup does it with a prefix. Parsing in **partial** mode (`parse` with `partial: true`) takes markup that stops anywhere and returns the longest finished prefix as a document, with the problems the cut itself causes kept apart from real ones:
+
+- **Kept.** Every element whose start tag is complete, with its attributes, and the text read so far. An element still open at the end stays in the tree; its children so far are its content. A document appears as soon as the root start tag is complete; before that there is none.
+- **Dropped.** What the cut interrupts and cannot yet mean anything: a start tag without its `>`, an end tag without its `>`, a reference without its `;` (`&am`), and a comment without its `-->`. A start tag is dropped whole, because attributes cut short would build a wrong element.
+- **`pending`.** The result has `diagnostics` and `pending`. `pending` holds the diagnostics a later chunk can still fix: `W110` for each element, tag or comment not finished, `W114` while there is no root, `W115` for an unfinished comment, `W208` and `W314` on an element that is still open (its slot or repeated element may be the next thing written), and `W309` on any reference (its target may come later). Everything else is reported in `diagnostics` exactly as for a complete document, so an error in the finished part (a mismatched closing tag, an unknown attribute value) still blocks the document. A document that stops cleanly after its closing tag has an empty `pending`.
+- **Monotone.** Appending text never removes an element from the prefix; it only adds elements and text. The text of the last open element grows in place.
+
+A reader keeps the text received so far and parses it again after each chunk; the result of the last chunk equals the result of `parse` on the whole text. No state is carried between calls, so any engine, runtime and catalog works the same way. A renderer shows `document` as it is and may mark the paths in `pending` as still being written.
+
 ## 7. Patches
 
 Agents edit documents with patches addressed by `id`:
