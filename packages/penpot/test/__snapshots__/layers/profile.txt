@@ -23,7 +23,7 @@ board "screen#profile" width=480 tokens={"fill":"color.white"} fillList=[{"fillC
     | weft/weft.origin = shape(heading#links-title)
     | weft/weft.source = {"kind":"heading","id":"links-title","props":{"level":2},"children":["Links"],"shown":{"text":"Links"}}
     text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Links"
-  board "stack#links" tokens={"rowGap":"space.md","columnGap":"space.md"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#links>","dir":"row","wrap":"nowrap"}
+  board "stack#links" tokens={"rowGap":"space.md","columnGap":"space.md"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#links>","dir":"row","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#links)
     | weft/weft.source = {"kind":"stack","id":"links","props":{"direction":"row","gap":{"token":"space.md"}}}
     | weft/weft.style = [[],[],0,[0,0,0,0],null]

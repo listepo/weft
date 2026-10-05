@@ -60,7 +60,7 @@ board "screen#booking" width=480 tokens={"fill":"color.white"} fillList=[{"fillC
     board "stepper#guests" inCopy=true head=true componentOf="<stepper>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stepper#guests>","dir":"column"}
       | weft/weft.kind = stepper
       | weft/weft.origin = shape(stepper#guests)
-      | weft/weft.source = {"kind":"stepper","id":"guests","props":{"label":"Guests","max":8,"min":1,"step":1,"value":{"bind":"$.trip.guests"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Guests"}}
+      | weft/weft.source = {"kind":"stepper","id":"guests","props":{"label":"Guests","max":8,"min":1,"value":{"bind":"$.trip.guests"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Guests"}}
       text "label" inCopy=true fontSize="12" growType="auto-width" text="Guests"
       board "stepper" width=160 height=36 inCopy=true flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stepper>","dir":"row"}
         board "down" width=40 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<down>","dir":"row"}

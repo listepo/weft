@@ -15,7 +15,7 @@ FRAME "screen#load-error" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryA
       | weft.origin = layer(text#error-message)
       | weft.source = {"kind":"text","id":"error-message","props":{"text":{"bind":"$.error.message"}},"shown":{"text":"{$.error.message}"}}
       TEXT "text" chars="{$.error.message}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
-  FRAME "stack#actions" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+  FRAME "stack#actions" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
     | weft.origin = layer(stack#actions)
     | weft.source = {"kind":"stack","id":"actions","props":{"direction":"row","gap":{"token":"space.sm"}}}
     | weft.style = [[],[],0,[0,0,0,0],null]

@@ -42,7 +42,7 @@ export default function WeftScreen(props: WeftProps) {
     <main data-weft-id="todos" aria-label="Tasks">
       <h1 data-weft-id="title">Tasks</h1>
       <form data-weft-id="add-form" onSubmit={(_e) => { _e.preventDefault(); _act(props.actions, { id: "add-form", action: "todo.add" }); }}>
-        <div data-weft-id="add-row" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "row" }}>
+        <div data-weft-id="add-row" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "row", "align-items": "center" }}>
           <div data-weft-field="">
             <label>
               <span aria-hidden="true">New task</span>
@@ -71,7 +71,7 @@ export default function WeftScreen(props: WeftProps) {
           )}
         </For>
       </ul>
-      <div data-weft-id="summary" style={{ gap: "var(--weft-space-xs)", display: "flex", "flex-direction": "row" }}>
+      <div data-weft-id="summary" style={{ gap: "var(--weft-space-xs)", display: "flex", "flex-direction": "row", "align-items": "center" }}>
         <div data-weft-id="remaining">
           {!(_text(props.data?.remaining).trim() === "") ? _squash(_text(props.data?.remaining)) : ""}
         </div>

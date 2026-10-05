@@ -34,7 +34,7 @@ export default function WeftScreen({ data, actions, onChange }) {
     <main data-weft-id="todos" aria-label="Tasks">
       <h1 data-weft-id="title">Tasks</h1>
       <form data-weft-id="add-form" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: "add-form", action: "todo.add" }); }}>
-        <div data-weft-id="add-row" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row" }}>
+        <div data-weft-id="add-row" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" }}>
           <div data-weft-field="">
             <label>
               <span aria-hidden="true">New task</span>
@@ -61,7 +61,7 @@ export default function WeftScreen({ data, actions, onChange }) {
           </Fragment>
         ))}
       </ul>
-      <div data-weft-id="summary" style={{ gap: "var(--weft-space-xs)", display: "flex", flexDirection: "row" }}>
+      <div data-weft-id="summary" style={{ gap: "var(--weft-space-xs)", display: "flex", flexDirection: "row", alignItems: "center" }}>
         <div data-weft-id="remaining">
           {!(_text(data?.remaining).trim() === "") ? _squash(_text(data?.remaining)) : ""}
         </div>

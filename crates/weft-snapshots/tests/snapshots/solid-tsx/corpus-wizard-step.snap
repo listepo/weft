@@ -53,7 +53,7 @@ export default function WeftScreen(props: WeftProps) {
           <span aria-hidden="true">Team</span>
         </label>
       </div>
-      <div data-weft-id="nav" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "row" }}>
+      <div data-weft-id="nav" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "row", "align-items": "center" }}>
         <button data-weft-id="back" type="button" onClick={(_e) => _act(props.actions, { id: "back", action: "wizard.back" })}>Back</button>
         <button data-weft-id="next" type="button" disabled={!_on(props.data?.plan)} data-variant="primary" onClick={(_e) => _act(props.actions, { id: "next", action: "wizard.next" })}>Next</button>
       </div>

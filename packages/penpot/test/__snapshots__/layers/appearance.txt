@@ -10,7 +10,7 @@ board "screen#appearance" width=480 tokens={"fill":"color.white"} fillList=[{"fi
     text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Appearance"
   board "stack#options" tokens={"rowGap":"space.md","columnGap":"space.md"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#options>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#options)
-    | weft/weft.source = {"kind":"stack","id":"options","props":{"align":"stretch","direction":"column","gap":{"token":"space.md"}}}
+    | weft/weft.source = {"kind":"stack","id":"options","props":{"align":"stretch","gap":{"token":"space.md"}}}
     | weft/weft.style = [[],[],0,[0,0,0,0],null]
     board "segmented-control#theme" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<segmented-control#theme>","dir":"column","wrap":"nowrap"}
       | weft/weft.origin = shape(segmented-control#theme)

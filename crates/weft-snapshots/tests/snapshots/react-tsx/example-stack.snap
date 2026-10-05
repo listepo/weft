@@ -19,7 +19,7 @@ function _act(actions: WeftProps["actions"], event: WeftEvent): void {
 export default function WeftScreen({ data, actions, onChange }: WeftProps) {
   return (
     <main data-weft-id="root" aria-label="Actions">
-      <div data-weft-id="actions" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "center" }}>
+      <div data-weft-id="actions" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "flex-end" }}>
         <button data-weft-id="save" type="button" data-variant="primary" onClick={(_e) => _act(actions, { id: "save", action: "doc.save" })}>Save</button>
         <button data-weft-id="discard" type="button" onClick={(_e) => _act(actions, { id: "discard", action: "doc.discard" })}>Discard</button>
       </div>

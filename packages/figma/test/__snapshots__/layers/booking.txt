@@ -54,7 +54,7 @@ FRAME "screen#booking" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxis
           TEXT "symbol" chars="31" size=14
     INSTANCE "stepper#guests" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<stepper>"
       | weft.origin = layer(stepper#guests)
-      | weft.source = {"kind":"stepper","id":"guests","props":{"label":"Guests","max":8,"min":1,"step":1,"value":{"bind":"$.trip.guests"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Guests"}}
+      | weft.source = {"kind":"stepper","id":"guests","props":{"label":"Guests","max":8,"min":1,"value":{"bind":"$.trip.guests"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Guests"}}
       TEXT "label" chars="Guests"
       FRAME "stepper" width=160 height=36 layoutMode="HORIZONTAL"
         FRAME "down" width=40 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

@@ -7,7 +7,7 @@ board "screen#search" width=480 tokens={"fill":"color.white"} fillList=[{"fillCo
     | weft/weft.origin = shape(form#form)
     | weft/weft.source = {"kind":"form","id":"form","on":{"submit":"search.run"}}
     | weft/weft.style = [[],[],0,[0,0,0,0],8]
-    board "stack#bar" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#bar>","dir":"row","wrap":"nowrap"}
+    board "stack#bar" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#bar>","dir":"row","wrap":"nowrap"}
       | weft/weft.origin = shape(stack#bar)
       | weft/weft.source = {"kind":"stack","id":"bar","props":{"direction":"row","gap":{"token":"space.sm"}}}
       | weft/weft.style = [[],[],0,[0,0,0,0],null]

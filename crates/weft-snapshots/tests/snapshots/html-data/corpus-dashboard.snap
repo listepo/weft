@@ -45,7 +45,7 @@ h1, h2, h3, h4, h5, h6 { margin: 0; }
 img { max-width: 100%; }
 
 /* A field: its caption above the control, then the error. */
-label:has(> :is(input:not([type="checkbox"], [type="radio"]), select, textarea)) {
+label:has(> :is(input:not([type="checkbox"], [type="radio"]), select, textarea, [data-weft-stepper])) {
   display: flex;
   flex-direction: column;
   gap: var(--weft-space-xs, 4px);
@@ -103,6 +103,46 @@ input[role="switch"]:checked::before { left: calc(1em + 2px); }
   flex-direction: column;
   gap: var(--weft-space-xs, 4px);
 }
+
+/* A slider and a colour picker are not boxes of text: no frame, and the colour keeps a swatch's
+   size. A stepper is its input between two buttons, and a segmented control a joined row. */
+input[type="range"], input[type="color"] { padding: 0; border: 0; }
+input[type="color"] { width: 3em; height: 2em; }
+[data-weft-stepper] {
+  display: flex;
+  align-items: center;
+  gap: var(--weft-space-xs, 4px);
+}
+[data-weft-stepper] input {
+  width: 4em;
+  text-align: center;
+  appearance: textfield;
+}
+[data-weft-stepper] input::-webkit-inner-spin-button,
+[data-weft-stepper] input::-webkit-outer-spin-button { appearance: none; }
+[data-weft-segmented] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+}
+[data-weft-segmented] > span[aria-hidden="true"] { flex: 0 0 100%; margin-bottom: var(--weft-space-xs, 4px); }
+[data-weft-segmented] > label {
+  position: relative;
+  padding: var(--weft-space-xs, 4px) var(--weft-space-md, 16px);
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  margin-left: -1px;
+  gap: 0;
+}
+[data-weft-segmented] > label:first-of-type { margin-left: 0; border-radius: var(--weft-radius-sm, 4px) 0 0 var(--weft-radius-sm, 4px); }
+[data-weft-segmented] > label:last-of-type { border-radius: 0 var(--weft-radius-sm, 4px) var(--weft-radius-sm, 4px) 0; }
+[data-weft-segmented] > label:has(:checked) {
+  border-color: var(--weft-color-action-primary, #2563eb);
+  background: var(--weft-color-action-primary, #2563eb);
+  color: var(--weft-color-white, #ffffff);
+}
+/* The radio stays in the tree and takes the keyboard; the segment is what is drawn. */
+[data-weft-segmented] input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
 
 a, [role="link"] {
   color: var(--weft-color-action-primary, #2563eb);
@@ -195,7 +235,7 @@ ul > li {
   gap: var(--weft-space-sm, 8px);
 }
 .weft-stack { display: flex; flex-direction: column; }
-.weft-row { display: flex; flex-direction: row; }
+.weft-row { display: flex; flex-direction: row; align-items: center; }
 .weft-grid { display: grid; }
 [data-align="start"] { align-items: flex-start; }
 [data-align="center"] { align-items: center; }
@@ -208,7 +248,7 @@ a { display: inline-block; }
 </head>
 <body>
 <main data-weft-id="dashboard" aria-label="Team dashboard" data-state="ready">
-  <div data-weft-id="header" class="weft-row" data-align="center" data-wrap style="gap: var(--weft-space-xl)">
+  <div data-weft-id="header" class="weft-row" data-wrap style="gap: var(--weft-space-xl)">
     <h1 data-weft-id="title">Platform</h1>
     <div data-weft-id="updated" data-tone="muted" data-weft-kind="text">Updated 5 minutes ago</div>
   </div>
@@ -232,7 +272,7 @@ a { display: inline-block; }
       <div data-weft-id="incidents-value" data-tone="danger" data-weft-kind="text">1</div>
     </section>
   </div>
-  <div data-weft-id="notices" class="weft-stack" data-align="stretch" style="gap: var(--weft-space-sm)">
+  <div data-weft-id="notices" class="weft-stack" data-align="center" style="gap: var(--weft-space-sm)">
     <div data-weft-id="release" role="alert" data-tone="info">Release 2.4 ships on Friday.</div>
     <div data-weft-id="backup" role="alert" data-tone="success">Last backup finished at 03:00.</div>
     <div data-weft-id="quota" role="alert" data-tone="warning">

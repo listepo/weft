@@ -9,7 +9,7 @@ FRAME "screen#appearance" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryA
     TEXT "text" chars="Appearance" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
   FRAME "stack#options" layoutMode="VERTICAL" itemSpacing=16 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
     | weft.origin = layer(stack#options)
-    | weft.source = {"kind":"stack","id":"options","props":{"align":"stretch","direction":"column","gap":{"token":"space.md"}}}
+    | weft.source = {"kind":"stack","id":"options","props":{"align":"stretch","gap":{"token":"space.md"}}}
     | weft.style = [[],[],0,[0,0,0,0],null]
     FRAME "segmented-control#theme" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
       | weft.origin = layer(segmented-control#theme)

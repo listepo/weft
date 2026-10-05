@@ -47,7 +47,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
   return (
     <main data-weft-id="search" aria-label="Search">
       <form data-weft-id="form" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: "form", action: "search.run" }); }}>
-        <div data-weft-id="bar" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row" }}>
+        <div data-weft-id="bar" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" }}>
           <div data-weft-field="">
             <label>
               <span aria-hidden="true">Search</span>

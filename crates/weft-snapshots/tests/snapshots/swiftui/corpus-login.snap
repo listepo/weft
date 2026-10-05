@@ -275,13 +275,9 @@ fileprivate func weftColor(_ hex: Binding<String>) -> Binding<Color> {
     )
 }
 fileprivate func weftHex(_ c: Color) -> String {
-    #if canImport(UIKit)
-    var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-    UIColor(c).getRed(&r, green: &g, blue: &b, alpha: &a)
-    #else
-    let ns = NSColor(c).usingColorSpace(.sRGB) ?? .black
-    let (r, g, b) = (ns.redComponent, ns.greenComponent, ns.blueComponent)
-    #endif
-    func byte(_ x: CGFloat) -> Int { Int((min(max(x, 0), 1) * 255).rounded()) }
-    return String(format: "#%02x%02x%02x", byte(r), byte(g), byte(b))
+    // Through Core Graphics, not UIKit or AppKit, so the one helper serves every platform.
+    let space = CGColorSpace(name: CGColorSpace.sRGB)
+    let parts = space.flatMap { c.cgColor?.converted(to: $0, intent: .defaultIntent, options: nil) }?.components ?? []
+    func byte(_ i: Int) -> Int { i < parts.count ? Int((min(max(Double(parts[i]), 0), 1) * 255).rounded()) : 0 }
+    return String(format: "#%02x%02x%02x", byte(0), byte(1), byte(2))
 }

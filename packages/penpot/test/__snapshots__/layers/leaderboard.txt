@@ -8,7 +8,7 @@ board "screen#leaderboard" width=480 tokens={"fill":"color.white"} fillList=[{"f
     | weft/weft.origin = shape(heading#title)
     | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Leaderboard"],"shown":{"text":"Leaderboard"}}
     text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Leaderboard"
-  board "stack#leader" tokens={"rowGap":"space.xs","columnGap":"space.xs"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#leader>","dir":"row","wrap":"nowrap"}
+  board "stack#leader" tokens={"rowGap":"space.xs","columnGap":"space.xs"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#leader>","dir":"row","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#leader)
     | weft/weft.source = {"kind":"stack","id":"leader","props":{"direction":"row","gap":{"token":"space.xs"}}}
     | weft/weft.style = [[],[],0,[0,0,0,0],null]
