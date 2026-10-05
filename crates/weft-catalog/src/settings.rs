@@ -76,6 +76,11 @@ const JSX_EXPORT: &[Setting] = &[
     with_default("source", SOURCE, Kind::Bool, "false"),
 ];
 const OUT_ONLY: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
+const SHARED_TOKENS: &str = "Screens read the tokens from one shared `WeftTokens.swift` (`weft swiftui-tokens`) instead of each carrying the tokens it uses.";
+const SWIFTUI_EXPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default("sharedTokens", SHARED_TOKENS, Kind::Bool, "true"),
+];
 
 /// One section per target (SPEC §10.6 lists the names reserved for targets in progress).
 const EXPORT: &[Setting] = &[
@@ -97,7 +102,7 @@ const EXPORT: &[Setting] = &[
     setting(
         "swiftui",
         "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SWIFTUI_EXPORT),
     ),
 ];
 const IMPORT: &[Setting] = &[

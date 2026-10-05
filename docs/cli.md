@@ -26,6 +26,7 @@ Commands:
   fmt             Print the canonical markup of a document
   explain         Read back what each binding, token, event and loop of a markup document means, one per line, so the meaning can be compared with the instruction behind an edit
   swiftui         Generate a SwiftUI view (iOS 17, macOS 14) from a markup document
+  swiftui-tokens  Generate `WeftTokens.swift`, the design tokens every SwiftUI screen of a project shares
   import-swiftui  Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses
   html            Generate a static HTML page with CSS and no script from a markup document
   react           Generate a React component (JSX or TSX) from a markup document
@@ -146,9 +147,9 @@ button#submit disabled changed: was true while $.email is falsy (NOT $.email); n
 
 Sentences never hide a negation: a negated binding always contains `NOT`. If neither file changed anything, you get a message on stderr and no output. If either file has errors, `explain` prints the diagnostics as `validate` does and exits 1. It reads markup only, not `.json` files.
 
-## `weft swiftui` and `weft import-swiftui`
+## `weft swiftui`, `weft swiftui-tokens` and `weft import-swiftui`
 
-`weft swiftui` prints a SwiftUI file for a screen. It contains an `@Observable` model, an action enum, a theme with the screen's tokens, and the view. `weft import-swiftui` reads Swift source back into markup. What the generator printed comes back unchanged:
+`weft swiftui` prints a SwiftUI file for a screen. It contains an `@Observable` model, an action enum, and the view. In a project the view reads the tokens from `WeftTokens`, which `weft swiftui-tokens` writes once for the whole token set; without a project, or with `--no-shared-tokens`, the file carries a theme with the screen's tokens instead and builds on its own. `weft import-swiftui` reads Swift source back into markup. What the generator printed comes back unchanged:
 
 ```console
 $ weft swiftui weft-tour/login.weft --out-dir weft-tour/ios
@@ -170,7 +171,7 @@ weft-tour/Hello.swift:/screen#screen-1/text#text-hi loss layout: `.padding` not 
 </screen>
 ```
 
-Both commands use the project's catalog and tokens, or `--catalog` and `--tokens` when you give them. `--out-dir` writes `<name>.swift` or `<name>.weft` instead of printing. Without it, the project's `export.swiftui.outDir` or `import.swiftui.outDir` decides ([Projects](projects.md)). The mapping table and every loss are listed in `crates/weft-swiftui/README.md`.
+The commands use the project's catalog and tokens, or `--catalog` and `--tokens` when you give them; `weft swiftui-tokens` finds the project from the working directory. `--out-dir` writes `<name>.swift`, `WeftTokens.swift` or `<name>.weft` instead of printing. Without it, the project's `export.swiftui.outDir` or `import.swiftui.outDir` decides ([Projects](projects.md)). `--shared-tokens` and `--no-shared-tokens` override the project's `export.swiftui.sharedTokens`. A kind of the project's own catalog becomes a call of a view the app writes (`rating` → `RatingView`); the header comment of the screen file names them. The mapping table and every loss are listed in `crates/weft-swiftui/README.md`.
 
 ## `weft html`, `weft react`, `weft solid` and their importers
 

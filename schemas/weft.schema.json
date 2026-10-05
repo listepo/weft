@@ -149,6 +149,11 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "sharedTokens": {
+              "type": "boolean",
+              "description": "Screens read the tokens from one shared `WeftTokens.swift` (`weft swiftui-tokens`) instead of each carrying the tokens it uses.",
+              "default": true
             }
           },
           "additionalProperties": false,
