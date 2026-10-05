@@ -163,7 +163,10 @@ export function parseA2ui(src: string): Parsed {
         const link = c.variant === "borderless";
         // An accessibility label names the button instead of the text it shows.
         const label = named(c);
-        const n = node(link ? "link" : "button", Object.keys(label).length ? label : textOf(c.child));
+        const n = node(
+          link ? "link" : "button",
+          Object.keys(label).length ? label : textOf(c.child),
+        );
         if (!link) n.variant = c.variant === "primary" ? "primary" : "secondary";
         const ev = c.action?.event?.name;
         if (typeof ev === "string") n.on.press = ev;
