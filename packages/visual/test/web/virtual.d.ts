@@ -23,6 +23,6 @@ declare module "virtual:weft-screens" {
   }[];
   export const components: Record<
     string,
-    Record<"react" | "solid" | "react-back" | "solid-back", () => Promise<Component>>
+    Record<"react" | "solid" | "lit" | "react-back" | "solid-back", () => Promise<Component>>
   >;
 }

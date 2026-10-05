@@ -109,6 +109,7 @@ enum FrameworkWire {
     #[default]
     React,
     Solid,
+    Lit,
 }
 
 #[derive(Default, Deserialize)]
@@ -131,7 +132,7 @@ enum Generated {
     Error { error: String },
 }
 
-/// `toJsx` of `@weft/to-jsx`: `{code}`, or `{error}` for a component name it cannot use.
+/// `toJsx` of `@weft/to-jsx`: `{code}`, or `{error}` for a component name or an option it cannot use.
 pub fn to_jsx(document: Option<&str>, options: &str, catalog: &Catalog) -> Result<String> {
     let document = read_input(document)?;
     let wire: JsxWire = serde_json::from_str(options).map_err(|source| BindingError::Wire {
@@ -144,6 +145,7 @@ pub fn to_jsx(document: Option<&str>, options: &str, catalog: &Catalog) -> Resul
         framework: match wire.framework {
             FrameworkWire::React => Framework::React,
             FrameworkWire::Solid => Framework::Solid,
+            FrameworkWire::Lit => Framework::Lit,
         },
         typescript: wire.typescript,
         source: wire.source,
@@ -292,6 +294,23 @@ mod tests {
         let out = to_jsx(Some("null"), r#"{"framework":"solid"}"#, &catalog).unwrap();
         assert!(
             out.contains("export default function WeftScreen(props)"),
+            "{out}"
+        );
+    }
+
+    #[test]
+    fn jsx_makes_a_lit_element_and_refuses_what_it_lacks() {
+        let catalog = weft_catalog::core_catalog().unwrap();
+        let out = to_jsx(Some("null"), r#"{"framework":"lit"}"#, &catalog).unwrap();
+        assert!(out.contains("class WeftScreen extends LitElement"), "{out}");
+        let out = to_jsx(
+            Some("null"),
+            r#"{"framework":"lit","typescript":true}"#,
+            &catalog,
+        )
+        .unwrap();
+        assert!(
+            out.starts_with(r#"{"error":"the lit target has no"#),
             "{out}"
         );
     }

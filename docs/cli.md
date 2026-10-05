@@ -31,8 +31,9 @@ Commands:
   html            Generate a static HTML page with CSS and no script from a markup document
   react           Generate a React component (JSX or TSX) from a markup document
   solid           Generate a SolidJS component (JSX or TSX) from a markup document
-  css-tokens      Generate `weft-tokens.css`, the design tokens React and SolidJS components read as CSS custom properties
-  css-base        Generate `weft-base.css`, the base stylesheet React and SolidJS components share with the static page
+  lit             Generate a Lit web component (JavaScript) from a markup document
+  css-tokens      Generate `weft-tokens.css`, the design tokens React, SolidJS and Lit components read as CSS custom properties
+  css-base        Generate `weft-base.css`, the base stylesheet React, SolidJS and Lit components share with the static page
   import-html     Read an HTML page back into markup; what Weft cannot hold is listed on stderr as losses
   import-react    Read a React component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
   import-solid    Read a SolidJS component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
@@ -177,7 +178,7 @@ The commands use the project's catalog and tokens, or `--catalog` and `--tokens`
 
 With `--data <file>` (or the project's `export.swiftui.data`), the model also gets an initializer and a `sample` built from that JSON, and `#Preview` shows it. The importer ignores both.
 
-## `weft html`, `weft react`, `weft solid`, `weft css-tokens`, `weft css-base` and the importers
+## `weft html`, `weft react`, `weft solid`, `weft lit`, `weft css-tokens`, `weft css-base` and the importers
 
 `weft html` prints a static page: semantic HTML, the tokens as CSS custom properties, and no script. Bindings, events and repetition are kept as inert `data-` attributes and `<template>` elements. With `--data <file>` (or the project's `export.html.data`), the page shows that data instead: bound values filled in, one copy per list item, empty slots shown. Such a page is a picture of the screen, not a template. `weft react` and `weft solid` print one self-contained component, JSX by default or TSX with `--typescript`. With `--source`, the output keeps the screen in a leading comment, and the matching importer gives it back unchanged:
 
@@ -186,6 +187,8 @@ $ weft react weft-tour/login.weft --source --out-dir weft-tour/web
 $ weft import-react weft-tour/web/login.jsx | diff - <(weft fmt weft-tour/login.weft) && echo same
 same
 ```
+
+`weft lit` prints one Lit element as JavaScript: a custom element that takes `data`, `actions` and `onChange` as properties and renders into the light DOM, so it needs the same `weft-tokens.css` and `weft-base.css` as the other components. It has no TSX flavour, no `--source` and no importer; asking for the first two is an error.
 
 Without the comment, generated code still reads back by its conventions; only the ids of `<each>` are generated again. Hand-written pages and components import too, with their losses on stderr:
 

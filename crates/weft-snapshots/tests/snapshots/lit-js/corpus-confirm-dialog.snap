@@ -1,0 +1,57 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-confirm-dialog as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="files" aria-label="File"
+      ><h1 data-weft-id="title">Quarterly report</h1
+      ><button data-weft-id="delete-file" type="button" data-variant="danger" @click=${(_e) => _act(actions, { id: "delete-file", action: "dialog.open" })}>Delete file</button>${_on(data?.confirmOpen) ? html`<dialog data-weft-id="confirm" aria-label="Delete file?" open aria-modal="true" @keydown=${(_e) => { if (_e.key !== "Escape") return; _e.preventDefault(); onChange?.("$.confirmOpen", false); _act(actions, { id: "confirm", action: "dialog.close" }); }}
+          ><div data-weft-id="warning">This cannot be undone.</div
+          ><div data-weft-id="filename">${!(_text(data?.file?.name).trim() === "") ? _squash(_text(data?.file?.name)) : ""}</div
+          ><div data-weft-slot="actions"
+            ><button data-weft-id="cancel" type="button" @click=${(_e) => _act(actions, { id: "cancel", action: "dialog.close" })}>Cancel</button
+            ><button data-weft-id="confirm-delete" type="button" data-variant="danger" @click=${(_e) => _act(actions, { id: "confirm-delete", action: "file.delete" })}>Delete</button
+          ></div
+        ></dialog>` : null}</main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

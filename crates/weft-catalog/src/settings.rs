@@ -111,6 +111,11 @@ const EXPORT: &[Setting] = &[
         Kind::Section(JSX_EXPORT),
     ),
     setting(
+        "lit",
+        "Lit web components, JavaScript only (`weft lit`).",
+        Kind::Section(OUT_ONLY),
+    ),
+    setting(
         "swiftui",
         "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`).",
         Kind::Section(SWIFTUI_EXPORT),

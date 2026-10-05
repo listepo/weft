@@ -1,0 +1,42 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-switch as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Notifications"
+      ><label
+        ><input data-weft-id="push" type="checkbox" role="switch" aria-label="Push notifications" .checked=${_on(data?.pushEnabled)} @change=${(_e) => { onChange?.("$.pushEnabled", _e.currentTarget.checked); _act(actions, { id: "push", action: "settings.update" }); }}
+        ><span aria-hidden="true">Push notifications</span
+      ></label
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

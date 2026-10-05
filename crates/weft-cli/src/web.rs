@@ -9,7 +9,7 @@
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::{Result, bail};
 use weft_catalog::{PROJECT_FILE, appearance};
 use weft_web::{
     BASE_CSS, Framework, HtmlOptions, ImportOptions, JsxOptions, import_html, import_jsx,
@@ -71,6 +71,7 @@ pub enum Target {
     Html,
     React,
     Solid,
+    Lit,
 }
 
 impl Target {
@@ -79,6 +80,7 @@ impl Target {
             Self::Html => "html",
             Self::React => "react",
             Self::Solid => "solid",
+            Self::Lit => "lit",
         }
     }
 }
@@ -131,7 +133,8 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
                 }
             }
         }
-        Target::React | Target::Solid => {
+        Target::React | Target::Solid | Target::Lit => {
+            // Lit has no TypeScript flavour; the generator refuses `--typescript` for it.
             let typescript = switch(
                 args.typescript,
                 args.javascript,
@@ -142,19 +145,22 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
             let options = JsxOptions {
                 catalog: &catalog,
                 component_name: None,
-                framework: if matches!(args.target, Target::Solid) {
-                    Framework::Solid
-                } else {
-                    Framework::React
+                framework: match args.target {
+                    Target::Solid => Framework::Solid,
+                    Target::Lit => Framework::Lit,
+                    _ => Framework::React,
                 },
                 typescript,
                 source,
             };
-            // Only a component name can be refused, and the default one is valid.
-            let code = to_jsx(&json, &options)
-                .ok()
-                .context("the generator refused its default component name")?;
-            (code, if typescript { "tsx" } else { "jsx" })
+            // The default component name is valid, so only an option Lit lacks can be refused.
+            let code = to_jsx(&json, &options)?;
+            let extension = match (args.target, typescript) {
+                (Target::Lit, _) => "js",
+                (_, true) => "tsx",
+                _ => "jsx",
+            };
+            (code, extension)
         }
     };
     let dir = out_dir(
@@ -200,6 +206,8 @@ pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
     let result = match args.target {
         Target::Html => import_html(&text, &options),
         Target::React | Target::Solid => import_jsx(&text, is_typescript(&args.file), &options),
+        // No Lit importer is wired to a command.
+        Target::Lit => bail!("there is no importer for lit"),
     };
     let dir = out_dir(
         args.out_dir,
