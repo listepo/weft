@@ -18,7 +18,9 @@ indexmap = { workspace = true }
 serde_json = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
+weft-import = { workspace = true }
 weft-swiftui = { workspace = true }
+weft-web = { workspace = true }
 
 [lints]
 workspace = true

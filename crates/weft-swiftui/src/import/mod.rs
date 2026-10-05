@@ -9,15 +9,12 @@ mod read;
 mod repair;
 mod syntax;
 
-use serde::Serialize;
-use weft_core::{Catalog, Code, Diagnostic, Document, Node, WEFT_VERSION};
+use weft_core::{Catalog, Code, Diagnostic};
+pub use weft_import::{ImportResult, Loss, LossKind, MAX_DEPTH, MAX_NODES};
+use weft_import::{empty_result, limit_reached};
 
 /// Longest source read, in bytes; the rest is not imported.
 pub const MAX_SOURCE_LENGTH: usize = 2_000_000;
-/// Most elements imported.
-pub const MAX_NODES: usize = 20_000;
-/// Deepest element nesting imported.
-pub const MAX_DEPTH: usize = 200;
 
 /// Syntax nodes per element and nesting levels per element level that the reader allows: a view
 /// with a chain of modifiers is many syntax nodes deep.
@@ -26,67 +23,6 @@ const SYNTAX_DEPTH_PER_LEVEL: usize = 4;
 
 pub struct ImportOptions<'a> {
     pub catalog: &'a Catalog,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ImportResult {
-    pub document: Document,
-    pub losses: Vec<Loss>,
-    pub diagnostics: Vec<Diagnostic>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-pub struct Loss {
-    pub kind: LossKind,
-    /// The element path (SPEC §6.1) the loss is about.
-    pub path: String,
-    pub note: String,
-}
-
-/// The loss kinds of SPEC §9.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "lowercase")]
-pub enum LossKind {
-    Ids,
-    Bindings,
-    Actions,
-    Tokens,
-    Layout,
-    Repetition,
-    Slots,
-    Hidden,
-    Props,
-    Values,
-    Names,
-    Kinds,
-    Text,
-    Structure,
-}
-
-fn limit_reached(diagnostics: &mut Vec<Diagnostic>, what: &str) {
-    diagnostics.push(Diagnostic::new(
-        Code::W602,
-        "#",
-        format!("The input {what}; the rest was not imported."),
-        format!("at most {MAX_SOURCE_LENGTH} bytes, {MAX_NODES} elements, nested at most {MAX_DEPTH} levels deep"),
-    ));
-}
-
-fn empty_result(diagnostics: Vec<Diagnostic>) -> ImportResult {
-    let mut root = Node::new("screen");
-    root.id = Some("screen".to_owned());
-    ImportResult {
-        document: Document {
-            weft: WEFT_VERSION.to_owned(),
-            root,
-        },
-        losses: vec![Loss {
-            kind: LossKind::Structure,
-            path: "/screen#screen".to_owned(),
-            note: "nothing could be imported".to_owned(),
-        }],
-        diagnostics,
-    }
 }
 
 /// Reads the first SwiftUI view of `source` (the one no other view in the file uses) into a
@@ -104,6 +40,7 @@ pub fn import_swiftui(source: &str, options: &ImportOptions<'_>) -> ImportResult
         text = &text[..end];
         limit_reached(
             &mut diagnostics,
+            "#",
             &format!("is longer than {MAX_SOURCE_LENGTH} bytes"),
         );
     }
@@ -126,6 +63,7 @@ pub fn import_swiftui(source: &str, options: &ImportOptions<'_>) -> ImportResult
     if parsed.truncated {
         limit_reached(
             &mut diagnostics,
+            "#",
             "is larger or deeper than the import limit",
         );
     }

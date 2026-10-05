@@ -63,29 +63,63 @@ pub const MAX_COUNT: u64 = 1 << 40;
 
 const OUT_DIR: &str = "Directory, relative to the project file, that output files go to. Default: next to the input file.";
 
-const REACT: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
-const HTML: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
-const SWIFTUI: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
+const SOURCE: &str = "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.";
+const TYPESCRIPT: &str = "Write TSX with typed props instead of JSX.";
 
-/// Targets get a section each when their task lands (SPEC §10.6 lists the planned names).
+const HTML_EXPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default("source", SOURCE, Kind::Bool, "false"),
+];
+const JSX_EXPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default("typescript", TYPESCRIPT, Kind::Bool, "false"),
+    with_default("source", SOURCE, Kind::Bool, "false"),
+];
+const OUT_ONLY: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
+
+/// One section per target (SPEC §10.6 lists the names reserved for targets in progress).
 const EXPORT: &[Setting] = &[
     setting(
+        "html",
+        "Static HTML pages with CSS and no script (`weft html`).",
+        Kind::Section(HTML_EXPORT),
+    ),
+    setting(
         "react",
-        "React components (@weft/to-jsx).",
-        Kind::Section(REACT),
+        "React components (`weft react`, @weft/to-jsx).",
+        Kind::Section(JSX_EXPORT),
+    ),
+    setting(
+        "solid",
+        "SolidJS components (`weft solid`).",
+        Kind::Section(JSX_EXPORT),
     ),
     setting(
         "swiftui",
         "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`).",
-        Kind::Section(SWIFTUI),
+        Kind::Section(OUT_ONLY),
     ),
 ];
 const IMPORT: &[Setting] = &[
-    setting("html", "HTML pages (@weft/from-aria).", Kind::Section(HTML)),
+    setting(
+        "html",
+        "HTML pages (`weft import-html`, @weft/from-aria).",
+        Kind::Section(OUT_ONLY),
+    ),
+    setting(
+        "react",
+        "React components, .jsx or .tsx (`weft import-react`).",
+        Kind::Section(OUT_ONLY),
+    ),
+    setting(
+        "solid",
+        "SolidJS components, .jsx or .tsx (`weft import-solid`).",
+        Kind::Section(OUT_ONLY),
+    ),
     setting(
         "swiftui",
         "SwiftUI source files (`weft import-swiftui`).",
-        Kind::Section(SWIFTUI),
+        Kind::Section(OUT_ONLY),
     ),
 ];
 

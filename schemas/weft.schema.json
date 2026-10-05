@@ -85,16 +85,63 @@
     "export": {
       "type": "object",
       "properties": {
+        "html": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "source": {
+              "type": "boolean",
+              "description": "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.",
+              "default": false
+            }
+          },
+          "additionalProperties": false,
+          "description": "Static HTML pages with CSS and no script (`weft html`)."
+        },
         "react": {
           "type": "object",
           "properties": {
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "typescript": {
+              "type": "boolean",
+              "description": "Write TSX with typed props instead of JSX.",
+              "default": false
+            },
+            "source": {
+              "type": "boolean",
+              "description": "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.",
+              "default": false
             }
           },
           "additionalProperties": false,
-          "description": "React components (@weft/to-jsx)."
+          "description": "React components (`weft react`, @weft/to-jsx)."
+        },
+        "solid": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "typescript": {
+              "type": "boolean",
+              "description": "Write TSX with typed props instead of JSX.",
+              "default": false
+            },
+            "source": {
+              "type": "boolean",
+              "description": "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.",
+              "default": false
+            }
+          },
+          "additionalProperties": false,
+          "description": "SolidJS components (`weft solid`)."
         },
         "swiftui": {
           "type": "object",
@@ -123,7 +170,29 @@
             }
           },
           "additionalProperties": false,
-          "description": "HTML pages (@weft/from-aria)."
+          "description": "HTML pages (`weft import-html`, @weft/from-aria)."
+        },
+        "react": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "React components, .jsx or .tsx (`weft import-react`)."
+        },
+        "solid": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "SolidJS components, .jsx or .tsx (`weft import-solid`)."
         },
         "swiftui": {
           "type": "object",

@@ -14,12 +14,16 @@ import { build, type Plugin } from "vite";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPOSITORY = join(HERE, "../../..");
 const LOADER = join(REPOSITORY, "packages/core/src/wasm.ts");
+// The web module (`@weft/core/web`) holds the HTML and JSX importers and generators, which a
+// design-tool plugin never calls; both halves get the stub, so neither carries nor fetches it.
+const WEB_LOADER = join(REPOSITORY, "packages/core/src/web.ts");
+const NO_WASM = join(HERE, "no-wasm.ts");
 const GLUE = join(REPOSITORY, "packages/core/wasm/weft.js");
 const MODULE = join(REPOSITORY, "packages/core/wasm/weft_bg.wasm");
 const TOKENS = join(REPOSITORY, "packages/catalog/tokens/default.tokens.json");
 
 /** Resolves `from` to `to` for every importer except `to` itself, which imports the original. */
-function redirect(from: string, to: string): Plugin {
+export function redirect(from: string, to: string): Plugin {
   return {
     name: `weft-redirect-${from}`,
     enforce: "pre",
@@ -69,7 +73,7 @@ export async function buildDesignPlugin(options: PluginBuild): Promise<void> {
   };
   await build({
     ...shared,
-    plugins: [redirect(LOADER, join(HERE, "no-wasm.ts"))],
+    plugins: [redirect(LOADER, NO_WASM), redirect(WEB_LOADER, NO_WASM)],
     build: {
       ...shared.build,
       outDir: options.outDir,
@@ -91,7 +95,11 @@ export async function buildDesignPlugin(options: PluginBuild): Promise<void> {
   const ui = join(options.outDir, "ui");
   await build({
     ...shared,
-    plugins: [redirect(GLUE, join(HERE, "wasm-inline.ts")), dropWasmUrls([LOADER, GLUE])],
+    plugins: [
+      redirect(GLUE, join(HERE, "wasm-inline.ts")),
+      redirect(WEB_LOADER, NO_WASM),
+      dropWasmUrls([LOADER, GLUE]),
+    ],
     define: {
       WEFT_DEFAULT_TOKENS: readFileSync(TOKENS, "utf8"),
       WEFT_WASM_BASE64: JSON.stringify(readFileSync(MODULE).toString("base64")),

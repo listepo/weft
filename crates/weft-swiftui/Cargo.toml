@@ -11,7 +11,7 @@ publish.workspace = true
 default = ["import"]
 # The importer parses Swift with tree-sitter, whose C sources do not build for
 # wasm32-unknown-unknown; without this feature the crate is the pure-Rust generator only.
-import = ["dep:tree-sitter", "dep:tree-sitter-swift"]
+import = ["dep:tree-sitter", "dep:tree-sitter-swift", "dep:weft-import"]
 
 [dependencies]
 indexmap = { workspace = true }
@@ -21,6 +21,7 @@ tree-sitter = { workspace = true, optional = true }
 tree-sitter-swift = { workspace = true, optional = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
+weft-import = { workspace = true, optional = true }
 
 [dev-dependencies]
 proptest = { workspace = true }

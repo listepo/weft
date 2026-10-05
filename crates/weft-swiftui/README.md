@@ -115,7 +115,7 @@ Losses use the SPEC §9 kinds. `tests/fixtures/import/Settings.swift` is a hand-
 | `text` | Text has no place in the content model, or reads like a reference. |
 | `structure` | The body is not one stack, content cannot be placed, or the source has syntax errors. |
 
-The source is untrusted: it is parsed, never compiled or run. It is limited to `MAX_SOURCE_LENGTH` bytes, `MAX_NODES` elements and `MAX_DEPTH` levels of nesting; beyond them the importer stops and reports `W602`. A source with no view gives `W601`. The returned document always validates in lenient mode.
+The source is untrusted: it is parsed, never compiled or run. It is limited to `MAX_SOURCE_LENGTH` bytes, `MAX_NODES` elements and `MAX_DEPTH` levels of nesting; beyond them the importer stops and reports `W602`. A source with no view gives `W601`. The returned document always validates in lenient mode. The loss table, generated ids, literal text guards and limits come from `crates/weft-import`, which the HTML and JSX importers share.
 
 ## Tests
 

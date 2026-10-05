@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "@weft/core": "workspace:*",
-    "@weft/render-react": "workspace:*",
-    "htmlparser2": "12.0.0"
+    "@weft/render-react": "workspace:*"
   },
   "devDependencies": {
     "@weft/catalog": "workspace:*",

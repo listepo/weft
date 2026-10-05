@@ -1,0 +1,16 @@
+<screen id="screen-create-account" label="Create account" weft="0.1">
+  <form id="form-1" state="idle" on-submit="auth.signup">
+    <heading id="heading-create-your-account" level="1">Create your account</heading>
+    <stack id="stack-1" gap="{token.space.md}">
+      <field id="field-full-name" label="Full name" required="true" value="{$.name}"/>
+      <field id="field-email" label="Email" required="true" type="email" value="{$.email}"/>
+      <field id="field-password" label="Password" required="true" type="password" value="{$.password}"/>
+      <field id="field-confirm-password" label="Confirm password" required="true" type="password" value="{$.confirm}"/>
+      <checkbox id="checkbox-i-accept-the-terms-of-service" checked="{$.acceptTerms}" label="I accept the terms of service"/>
+    </stack>
+    <button id="button-create-account" disabled="{!$.acceptTerms}" submit="true" variant="primary">Create account</button>
+    <slot name="footer">
+      <link id="link-already-have-an-account-sign-in" on-press="nav.signin">Already have an account? Sign in</link>
+    </slot>
+  </form>
+</screen>

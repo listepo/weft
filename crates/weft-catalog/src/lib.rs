@@ -7,7 +7,7 @@ mod project;
 mod settings;
 mod tokens;
 
-pub use core::{CORE_CATALOG_JSON, CatalogError, core_catalog};
+pub use core::{CORE_CATALOG_JSON, CatalogError, DEFAULT_TOKENS_JSON, core_catalog};
 pub use diff::{CatalogChange, CatalogDiff, ChangeLevel, diff_catalogs};
 pub use project::{
     MAX_TOKEN_FILES, PROJECT_FILE, Project, ProjectLoad, ProjectOptions, ReadFile,

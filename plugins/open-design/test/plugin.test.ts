@@ -177,7 +177,7 @@ describe("the plugin folder as `od plugin install` takes it", () => {
     for (const file of ["design-md", "export", "import", "render", "server"]) {
       assert.ok(statSync(join(PLUGIN, "dist", `${file}.js`)).size > 0, file);
     }
-    assert.ok(existsSync(join(PLUGIN, "dist/wasm/weft_bg.wasm")));
+    assert.ok(existsSync(join(PLUGIN, "dist/wasm-web/weft_bg.wasm")));
   });
 });
 

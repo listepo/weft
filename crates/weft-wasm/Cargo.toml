@@ -19,6 +19,12 @@ thiserror = { workspace = true }
 wasm-bindgen = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
+weft-import = { workspace = true, optional = true }
+weft-web = { workspace = true, optional = true }
+
+[features]
+# The second module, `packages/core/wasm-web`: the core plus the web importers and generators.
+web = ["dep:weft-import", "dep:weft-web"]
 
 # wasm-pack would download binaryen for wasm-opt; mise does not pin it, so the build stays offline.
 [package.metadata.wasm-pack.profile.release]

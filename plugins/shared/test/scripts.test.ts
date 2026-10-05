@@ -323,6 +323,15 @@ describe("project settings (SPEC §10.6)", () => {
     assert.ok(existsSync(join(root, "out", "screens", "cart.weft")));
   });
 
+  test("export.react settings make the component TSX that keeps its source", () => {
+    const { root, cart } = copy({ export: { react: { typescript: true, source: true } } });
+    const result = run(exportMain, cart);
+    assert.equal(result.code, 0, result.stderr);
+    const tsx = readFileSync(join(root, "screens", "cart.tsx"), "utf8");
+    assert.ok(tsx.startsWith("/* weft:source react "), tsx.slice(0, 80));
+    assert.match(tsx, /typescript/);
+  });
+
   test("--no-project and --project choose the project", () => {
     const { root, cart } = copy();
     // The screen uses the project's own component, unknown to the core catalog.

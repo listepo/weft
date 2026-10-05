@@ -1,0 +1,14 @@
+<screen id="screen-sign-in" label="Sign in" weft="0.1">
+  <form id="form-1" state="idle" on-submit="auth.submit">
+    <heading id="heading-sign-in" level="1">Sign in</heading>
+    <stack id="stack-1" gap="{token.space.md}">
+      <field id="field-email" label="Email" required="true" type="email" value="{$.email}"/>
+      <field id="field-password" label="Password" required="true" type="password" value="{$.password}"/>
+    </stack>
+    <button id="button-sign-in" disabled="{!$.email}" submit="true" variant="primary">Sign in</button>
+    <slot name="footer">
+      <link id="link-forgot-password" on-press="nav.reset">Forgot password?</link>
+      <link id="link-create-an-account" on-press="nav.signup">Create an account</link>
+    </slot>
+  </form>
+</screen>

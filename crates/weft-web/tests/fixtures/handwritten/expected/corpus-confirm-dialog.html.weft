@@ -1,0 +1,12 @@
+<screen id="screen-file" label="File" weft="0.1">
+  <heading id="heading-quarterly-report" level="1">Quarterly report</heading>
+  <button id="button-delete-file" variant="danger" on-press="dialog.open">Delete file</button>
+  <dialog id="dialog-delete-file" label="Delete file?" open="{$.confirmOpen}" on-close="dialog.close">
+    <text id="text-this-cannot-be-undone">This cannot be undone.</text>
+    <text id="text-1" text="{$.file.name}"/>
+    <slot name="actions">
+      <button id="button-cancel" on-press="dialog.close">Cancel</button>
+      <button id="button-delete" variant="danger" on-press="file.delete">Delete</button>
+    </slot>
+  </dialog>
+</screen>

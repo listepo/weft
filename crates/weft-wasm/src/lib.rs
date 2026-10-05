@@ -6,6 +6,8 @@
 mod api;
 mod boundary;
 mod sources;
+#[cfg(feature = "web")]
+mod web;
 
 use wasm_bindgen::prelude::*;
 
@@ -54,6 +56,68 @@ impl Catalog {
             patches.as_deref(),
             &self.0,
             options,
+        )?)
+    }
+
+    /// `fromDom` of `@weft/from-aria`.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = fromDom)]
+    pub fn from_dom(&self, html: &str) -> Result<String, JsError> {
+        Ok(web::from_dom(html, &self.0)?)
+    }
+
+    /// The role tree builder behind `fromAriaSnapshot`.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = buildDocument)]
+    pub fn build_document(&self, sems: &str, reserved: &str) -> Result<String, JsError> {
+        Ok(web::build(sems, reserved, &self.0)?)
+    }
+
+    /// `toJsx` of `@weft/to-jsx`.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = toJsx)]
+    pub fn to_jsx(&self, document: Option<String>, options: &str) -> Result<String, JsError> {
+        Ok(web::to_jsx(document.as_deref(), options, &self.0)?)
+    }
+
+    /// A static HTML page from a screen: `{code}` or `{diagnostics}`.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = toHtml)]
+    pub fn to_html(
+        &self,
+        document: Option<String>,
+        tokens: Option<String>,
+        options: &str,
+    ) -> Result<String, JsError> {
+        Ok(web::to_html(
+            document.as_deref(),
+            tokens.as_deref(),
+            options,
+            &self.0,
+        )?)
+    }
+
+    /// A screen from an HTML page, with its losses.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = importHtml)]
+    pub fn import_html(&self, html: &str, tokens: Option<String>) -> Result<String, JsError> {
+        Ok(web::import_html(html, tokens.as_deref(), &self.0)?)
+    }
+
+    /// A screen from a React or SolidJS component (TSX when `typescript`), with its losses.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = importJsx)]
+    pub fn import_jsx(
+        &self,
+        source: &str,
+        typescript: bool,
+        tokens: Option<String>,
+    ) -> Result<String, JsError> {
+        Ok(web::import_jsx(
+            source,
+            typescript,
+            tokens.as_deref(),
+            &self.0,
         )?)
     }
 
@@ -132,4 +196,32 @@ pub fn read_value(raw: &str) -> Result<String, JsError> {
 #[wasm_bindgen(js_name = formatValue)]
 pub fn format_value(value: Option<String>) -> Result<String, JsError> {
     Ok(api::format_attribute_value(value.as_deref())?)
+}
+
+#[cfg(feature = "web")]
+#[wasm_bindgen(js_name = importFailure)]
+pub fn import_failure(
+    message: &str,
+    expected: &str,
+    got: Option<String>,
+) -> Result<String, JsError> {
+    Ok(web::import_failure(message, expected, got.as_deref())?)
+}
+
+#[cfg(feature = "web")]
+#[wasm_bindgen(js_name = instanceId)]
+pub fn instance_id(raw: &str) -> Option<String> {
+    weft_web::instance_id(raw)
+}
+
+#[cfg(feature = "web")]
+#[wasm_bindgen(js_name = webTables)]
+pub fn web_tables() -> Result<String, JsError> {
+    Ok(web::tables()?)
+}
+
+#[cfg(feature = "web")]
+#[wasm_bindgen(js_name = jsxTables)]
+pub fn jsx_tables() -> Result<String, JsError> {
+    Ok(web::jsx_tables()?)
 }

@@ -36,12 +36,24 @@ export type LimitName =
  * them). A key that is absent takes the tool's default; an explicit tool argument overrides both.
  * File names are relative to the project file.
  */
+type JsxExportSettings = { outDir?: string; typescript?: boolean; source?: boolean };
+
 export type Settings = {
   validate?: { mode?: Mode };
   format?: { write?: boolean };
   render?: { data?: string; tokens?: string[]; outDir?: string };
-  export?: { react?: { outDir?: string } };
-  import?: { html?: { outDir?: string } };
+  export?: {
+    html?: { outDir?: string; source?: boolean };
+    react?: JsxExportSettings;
+    solid?: JsxExportSettings;
+    swiftui?: { outDir?: string };
+  };
+  import?: {
+    html?: { outDir?: string };
+    react?: { outDir?: string };
+    solid?: { outDir?: string };
+    swiftui?: { outDir?: string };
+  };
   mcp?: { limits?: Partial<Record<LimitName, number>> };
   plugins?: Record<string, Record<string, unknown>>;
 };

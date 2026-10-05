@@ -67,7 +67,10 @@ fn only_the_wasm_bindings_add_wasm_bindgen_to_the_pure_crates() {
             "thiserror",
             "wasm-bindgen",
             "weft-catalog",
-            "weft-core"
+            "weft-core",
+            // Optional: only the `web` build of the module carries the web importers.
+            "weft-import",
+            "weft-web"
         ]
     );
 }
@@ -84,6 +87,45 @@ fn only_the_cli_depends_on_clap_and_anyhow() {
 }
 
 #[test]
+fn the_importer_kit_depends_only_on_the_core_and_pure_crates() {
+    let mut deps = dependencies("weft-import");
+    deps.sort();
+    assert_eq!(
+        deps,
+        [
+            "indexmap",
+            "serde",
+            "serde_json",
+            "unicode-normalization",
+            "weft-core"
+        ]
+    );
+}
+
+#[test]
+fn the_web_crate_adds_only_its_parsers() {
+    let mut deps = dependencies("weft-web");
+    deps.sort();
+    assert_eq!(
+        deps,
+        [
+            "html5ever",
+            "indexmap",
+            "oxc_allocator",
+            "oxc_ast",
+            "oxc_parser",
+            "oxc_span",
+            "serde",
+            "serde_json",
+            "unicode-properties",
+            "weft-catalog",
+            "weft-core",
+            "weft-import"
+        ]
+    );
+}
+
+#[test]
 fn the_swiftui_generator_builds_without_the_importers_c_parser() {
     let mut deps = dependencies("weft-swiftui");
     deps.sort();
@@ -96,16 +138,21 @@ fn the_swiftui_generator_builds_without_the_importers_c_parser() {
             "tree-sitter",
             "tree-sitter-swift",
             "weft-catalog",
-            "weft-core"
+            "weft-core",
+            "weft-import"
         ]
     );
     // tree-sitter is C, which does not build for wasm32-unknown-unknown: only the `import`
-    // feature may pull it in, so the generator stays a pure crate.
+    // feature may pull it in, so the generator stays a pure crate. The shared importer kit
+    // comes with the importer.
     let mut optional: Vec<String> = entries("weft-swiftui")
         .iter()
         .filter(|d| d["optional"] == true)
         .map(|d| d["name"].as_str().unwrap().to_owned())
         .collect();
     optional.sort();
-    assert_eq!(optional, ["tree-sitter", "tree-sitter-swift"]);
+    assert_eq!(
+        optional,
+        ["tree-sitter", "tree-sitter-swift", "weft-import"]
+    );
 }

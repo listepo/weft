@@ -1,0 +1,11 @@
+<screen id="screen-profile" label="Profile" weft="0.1">
+  <image id="image-profile-photo" label="Profile photo" src="{$.user.avatar}"/>
+  <heading id="heading-1" level="1" text="{$.user.name}"/>
+  <text id="text-1" text="{$.user.bio}"/>
+  <heading id="heading-links" level="2">Links</heading>
+  <stack id="stack-1" direction="row" gap="{token.space.md}">
+    <link id="link-website" href="{$.user.website}">Website</link>
+    <link id="link-github" href="{$.user.github}">GitHub</link>
+  </stack>
+  <button id="button-edit-profile" on-press="profile.edit">Edit profile</button>
+</screen>

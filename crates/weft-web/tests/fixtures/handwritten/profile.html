@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Profile</title></head>
+<body>
+  <!-- A hand-written page: the corpus conventions, plus things Weft cannot hold. -->
+  <main aria-label="Profile" data-weft-id="profile">
+    <h1 data-bind="text:$.user.name">Name</h1>
+    <img alt="Avatar" data-bind="src:$.user.avatar">
+    <p style="color: rebeccapurple">Member since <time>2020</time></p>
+    <div class="row gap-md">
+      <a href="https://example.com" data-weft-id="site">Website</a>
+      <a href="javascript:alert(1)">Unsafe</a>
+    </div>
+    <button type="button" onclick="edit()" data-action="press:profile.edit">Edit</button>
+    <button type="button" data-action="press:not an action">Broken</button>
+    <script>alert("never run")</script>
+  </main>
+</body>
+</html>

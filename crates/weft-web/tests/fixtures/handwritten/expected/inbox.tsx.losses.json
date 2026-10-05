@@ -1,0 +1,17 @@
+[
+  {
+    "kind": "ids",
+    "path": "/screen#screen-inbox",
+    "note": "11 elements carry no data-weft-id; their ids are generated"
+  },
+  {
+    "kind": "props",
+    "path": "/screen#screen-inbox/list#list-1/each#each-1/item#item-1",
+    "note": "classList={{ unread: message.unread }} is not a literal or a data path; it is left out"
+  },
+  {
+    "kind": "actions",
+    "path": "/screen#screen-inbox/button#button-compose",
+    "note": "onClick={() => setOpen(!open())} calls no action Weft can read; it is left out"
+  }
+]

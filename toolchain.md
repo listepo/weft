@@ -47,6 +47,10 @@
 | tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
 | tree-sitter-swift | local | https://github.com/alex-pinkus/tree-sitter-swift | The Swift grammar for that parser |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
+| unicode-normalization | local | https://github.com/unicode-rs/unicode-normalization | NFKD before folding imported names into id slugs, as `String.prototype.normalize` does in the TypeScript importers |
+| unicode-properties | local | https://github.com/unicode-rs/unicode-properties | Unicode letter and number classes (`\p{L}`, `\p{N}`) for the JSX generators' check of which text runs print as written |
+| html5ever | local | https://github.com/servo/html5ever | Parses HTML in `weft-web` with the WHATWG tree builder, so imported pages read as a browser builds them |
+| oxc_parser, oxc_ast, oxc_allocator, oxc_span | local | https://github.com/oxc-project/oxc | Parse JSX and TSX in `weft-web`'s React and SolidJS importers; pure Rust, builds for wasm32 |
 
 ## npm
 
@@ -71,6 +75,10 @@
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
+| solid-js | local | https://github.com/solidjs/solid | Server-renders generated SolidJS components in the equivalence tests |
+| babel-preset-solid | local | https://github.com/solidjs/solid/tree/main/packages/babel-preset-solid | Compiles generated SolidJS JSX for server rendering in the equivalence tests |
+| @babel/core | local | https://github.com/babel/babel | Runs babel-preset-solid; 7.x because the preset requires Babel 7 |
+| @types/babel__core | local | https://github.com/DefinitelyTyped/DefinitelyTyped | Types for @babel/core in the equivalence tests |
 | p-limit | local | https://github.com/sindresorhus/p-limit | Concurrency limit for benchmark requests |
 | undici | local | https://github.com/nodejs/undici | Fetch without the header timeout, for slow local model servers |
 | ajv | local | https://github.com/ajv-validator/ajv | Validates the Cursor plugin manifests against Cursor's own JSON schemas |

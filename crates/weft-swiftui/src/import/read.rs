@@ -6,9 +6,10 @@ use std::collections::{HashMap, HashSet};
 use weft_core::{Catalog, Child, Diagnostic, Document, Node, Value, WEFT_VERSION};
 
 use super::syntax::{Arg, Call, Closure, Expr, Part, Source, Stmt, TypeDecl, plain_string};
-use super::{ImportResult, Loss, LossKind, MAX_DEPTH, MAX_NODES, limit_reached};
+use super::{ImportResult, LossKind, MAX_DEPTH, MAX_NODES};
 use crate::data::{Leaf, prop_leaf};
 use crate::swift;
+use weft_import::{IdState, Losses, limit_reached, literal};
 
 pub fn element_path(parent: &str, node: &Node) -> String {
     match &node.id {
@@ -39,51 +40,6 @@ fn is_path_name(s: &str) -> bool {
         .next()
         .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
         && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
-}
-
-/// Lowercase ASCII words joined by `-`, at most 32 characters, like the other importers.
-fn slug(text: &str) -> String {
-    let mut out = String::new();
-    let mut dash = false;
-    for c in text.chars() {
-        if c.is_ascii_alphanumeric() {
-            if dash && !out.is_empty() {
-                out.push('-');
-            }
-            dash = false;
-            out.push(c.to_ascii_lowercase());
-            if out.len() >= 32 {
-                break;
-            }
-        } else {
-            dash = true;
-        }
-    }
-    out.trim_end_matches('-').to_owned()
-}
-
-/// A literal must not contain a reference after its first character (SPEC §2.1, W213); the text
-/// is real content, so the brace is replaced by a look-alike instead of dropping it.
-fn embedded_reference(s: &str) -> bool {
-    s.char_indices().skip(1).any(|(i, c)| {
-        let rest = &s[i + c.len_utf8()..];
-        c == '{' && (rest.starts_with('$') || rest.starts_with("!$") || rest.starts_with("token."))
-    })
-}
-
-fn defuse(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    for (i, c) in s.char_indices() {
-        let rest = &s[i + c.len_utf8()..];
-        let reference =
-            rest.starts_with('$') || rest.starts_with("!$") || rest.starts_with("token.");
-        if i > 0 && c == '{' && reference {
-            out.push('｛');
-        } else {
-            out.push(c);
-        }
-    }
-    out
 }
 
 /// A modifier applied to a view: `.name(args) { closures }`.
@@ -241,10 +197,8 @@ struct Reader<'a> {
     loops: Vec<Loop>,
     aliases: Vec<HashMap<String, Expr>>,
     inlining: Vec<String>,
-    reserved: HashSet<String>,
-    used: HashSet<String>,
-    counters: HashMap<String, usize>,
-    losses: Vec<Loss>,
+    ids: IdState,
+    losses: Losses,
     elements: usize,
     depth: usize,
     truncated: bool,
@@ -321,10 +275,8 @@ pub fn read(
         loops: vec![],
         aliases: vec![],
         inlining: vec![main.name.clone()],
-        reserved: HashSet::new(),
-        used: HashSet::new(),
-        counters: HashMap::new(),
-        losses: vec![],
+        ids: IdState::default(),
+        losses: Losses::default(),
         elements: 0,
         depth: 0,
         truncated: false,
@@ -340,21 +292,25 @@ pub fn read(
     for v in &views {
         if let Some(b) = body(v) {
             reader.views.insert(v.name.clone(), b);
-            reserve_ids(b, &mut reader.reserved);
+            reserve_ids(b, &mut reader.ids.reserved);
         }
     }
     reader.classify_roots(main);
     let statements = body(main).unwrap_or_default();
     let root = reader.screen(statements);
     if reader.truncated {
-        limit_reached(diagnostics, "is larger or deeper than the import limit");
+        limit_reached(
+            diagnostics,
+            "#",
+            "is larger or deeper than the import limit",
+        );
     }
     Some(ImportResult {
         document: Document {
             weft: WEFT_VERSION.to_owned(),
             root,
         },
-        losses: reader.losses,
+        losses: reader.losses.0,
         diagnostics: vec![],
     })
 }
@@ -491,11 +447,7 @@ const VALUE_TYPES: &[&str] = &[
 
 impl<'a> Reader<'a> {
     fn lose(&mut self, kind: LossKind, path: &str, note: impl Into<String>) {
-        self.losses.push(Loss {
-            kind,
-            path: path.to_owned(),
-            note: note.into(),
-        });
+        self.losses.push(kind, path, note);
     }
 
     /// Which stored properties hold data: an object's members are data paths, a value property
@@ -547,8 +499,8 @@ impl<'a> Reader<'a> {
     /// the id generated for it, so it points at an element of the imported document.
     fn take_id(&mut self, explicit: Option<String>, kind: &str, name: &str, path: &str) -> String {
         let note = match explicit {
-            Some(id) if is_id(&id) && !self.used.contains(&id) => {
-                self.used.insert(id.clone());
+            Some(id) if is_id(&id) && !self.ids.used.contains(&id) => {
+                self.ids.used.insert(id.clone());
                 return id;
             }
             Some(id) => {
@@ -556,53 +508,15 @@ impl<'a> Reader<'a> {
             }
             None => "the view has no accessibilityIdentifier; the id is generated".to_owned(),
         };
-        let id = self.generate_id(kind, name);
+        let id = self.ids.fresh(kind, name);
         self.lose(LossKind::Ids, &format!("{path}#{id}"), note);
         id
-    }
-
-    fn generate_id(&mut self, kind: &str, name: &str) -> String {
-        let base = if kind == "each" { "each" } else { kind };
-        let s = slug(name);
-        let candidate = format!("{base}-{s}");
-        if !s.is_empty() && !self.used.contains(&candidate) && !self.reserved.contains(&candidate) {
-            self.used.insert(candidate.clone());
-            return candidate;
-        }
-        let stem = if s.is_empty() {
-            base.to_owned()
-        } else {
-            candidate
-        };
-        let mut n = self
-            .counters
-            .get(&stem)
-            .copied()
-            .unwrap_or(if s.is_empty() { 1 } else { 2 });
-        loop {
-            let id = format!("{stem}-{n}");
-            n += 1;
-            if !self.used.contains(&id) && !self.reserved.contains(&id) {
-                self.counters.insert(stem, n);
-                self.used.insert(id.clone());
-                return id;
-            }
-        }
     }
 
     // ---- Values ----
 
     fn string(&mut self, s: &str, path: &str) -> String {
-        if embedded_reference(s) {
-            self.lose(
-                LossKind::Text,
-                path,
-                "text that reads as a binding or token reference had its brace replaced",
-            );
-            defuse(s)
-        } else {
-            s.to_owned()
-        }
+        literal(&mut self.losses, path, s)
     }
 
     /// The Weft data path an expression reads, if it reads one.
@@ -2624,10 +2538,6 @@ mod tests {
         assert_eq!(loop_name("model_"), "model");
         assert_eq!(loop_name("todo"), "todo");
         assert_eq!(loop_name("$0"), "item");
-        assert_eq!(slug("Save changes!"), "save-changes");
-        assert!(embedded_reference("a{$.b}"));
-        assert!(!embedded_reference("{$.b}"));
-        assert_eq!(defuse("a{$.b}"), "a｛$.b}");
         assert!(is_action("auth.submit"));
         assert!(!is_action("Auth"));
     }

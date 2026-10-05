@@ -1,0 +1,18 @@
+<screen id="screen-inbox" label="Inbox" weft="0.1">
+  <heading id="heading-inbox" level="1">Inbox</heading>
+  <field id="field-filter" label="Filter" type="search" value="{$.filter}"/>
+  <list id="list-1">
+    <each id="each-1" as="message" in="{$.messages}">
+      <item id="item-1">
+        <link id="link-1" text="{$message.subject}" on-press="inbox.open"/>
+      </item>
+    </each>
+    <slot name="empty">
+      <item id="item-2">No messages</item>
+    </slot>
+  </list>
+  <section id="section-archive" hidden="{!$.showArchived}" label="Archive">
+    <heading id="heading-archive" level="2">Archive</heading>
+  </section>
+  <button id="button-compose">Compose</button>
+</screen>
