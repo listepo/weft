@@ -60,8 +60,8 @@ export async function showPage(id: string, html: string): Promise<void> {
 }
 
 /** Server-rendered markup, as the reference renderer writes it. */
-export async function showMarkup(id: string, markup: string): Promise<HTMLElement> {
-  const el = await frame(id);
+export async function showMarkup(id: string, markup: string, head = ""): Promise<HTMLElement> {
+  const el = await frame(id, withHead(head));
   const div = host(el);
   div.innerHTML = markup;
   await settle(el);
@@ -80,8 +80,13 @@ export async function showReact(
   await settle(el);
 }
 
-export async function showSolid(id: string, component: (props: Props) => unknown, props: Props) {
-  const el = await frame(id);
+export async function showSolid(
+  id: string,
+  component: (props: Props) => unknown,
+  props: Props,
+  head = "",
+) {
+  const el = await frame(id, withHead(head));
   renderSolid(() => createComponent(component as never, props), host(el));
   await settle(el);
 }

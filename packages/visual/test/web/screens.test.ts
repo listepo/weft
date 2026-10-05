@@ -24,51 +24,7 @@ type Props = { data?: unknown };
 // a caption moved onto its own line shifts everything under it. With the data in, the accessibility
 // trees are the comparison that means something, and they are compared below. Each listed screen
 // must still differ, so one that starts matching fails here until it is removed.
-const STATIC_PAGE_DIFFERS = new Set([
-  "account",
-  "dashboard",
-  "data-table",
-  "error-state",
-  "inbox",
-  "leaderboard",
-  "login",
-  "menu",
-  "orders",
-  "profile",
-  "search-results",
-  "settings",
-  "signup",
-  "tabs",
-  "todo-list",
-  "wizard-step",
-]);
-
-// Screens whose static page, filled with the same data, still exposes a different accessibility
-// tree from React's. Seen in these tests while writing T43; none of the differences is in the data.
-// The static page writes a `text` as a paragraph where React writes a text run (`P`), shows the
-// caption of a field, checkbox, switch or radio as text of its own beside the control (`CAPTION`),
-// and gives a link with no `href` the URL `#` (`HREF`). Each must still differ.
-const P = "a text is a paragraph";
-const CAPTION = "control captions are text of their own";
-const HREF = "a link without href gets #";
-const STATIC_TREE_DIFFERS: Record<string, string[]> = {
-  account: [P, CAPTION],
-  dashboard: [P],
-  "data-table": [P],
-  "error-state": [P, HREF],
-  inbox: [CAPTION],
-  leaderboard: [P],
-  login: [CAPTION, HREF],
-  menu: [P],
-  orders: [P],
-  profile: [P],
-  "search-results": [P, CAPTION, HREF],
-  settings: [CAPTION],
-  signup: [CAPTION, HREF],
-  tabs: [P],
-  "todo-list": [P, CAPTION],
-  "wizard-step": [P, CAPTION],
-};
+const STATIC_PAGE_DIFFERS = new Set<string>([]);
 
 for (const screen of screens) {
   const { name, data } = screen;
@@ -77,15 +33,29 @@ for (const screen of screens) {
 
   describe(name, () => {
     beforeAll(async () => {
-      await showReact("react", (await load("react")) as ComponentType<Props>, { data });
-      await showSolid("solid", (await load("solid")) as (p: Props) => unknown, { data });
-      await showMarkup("reference", screen.reference);
+      // What a host adds beside the components: the static page carries its tokens in its own
+      // stylesheet, so a component without `weft-tokens.css` would lose every token it reads.
+      const head = `<style>${screen.css}</style>`;
+      const props = { data };
+      await showReact("react", (await load("react")) as ComponentType<Props>, props, head);
+      await showSolid("solid", (await load("solid")) as (p: Props) => unknown, props, head);
+      await showMarkup("reference", screen.reference, head);
       await showPage("html", screen.html);
       await showPage("html-back", screen.back.html);
-      await showReact("react-back", (await load("react-back")) as ComponentType<Props>, { data });
-      await showSolid("solid-back", (await load("solid-back")) as (p: Props) => unknown, { data });
-      await showMarkup("figma-back", screen.back.figma);
-      await showMarkup("penpot-back", screen.back.penpot);
+      await showReact(
+        "react-back",
+        (await load("react-back")) as ComponentType<Props>,
+        props,
+        head,
+      );
+      await showSolid(
+        "solid-back",
+        (await load("solid-back")) as (p: Props) => unknown,
+        props,
+        head,
+      );
+      await showMarkup("figma-back", screen.back.figma, head);
+      await showMarkup("penpot-back", screen.back.penpot, head);
     });
 
     test("React matches its reviewed baseline", async ({ skip }) => {
@@ -107,12 +77,9 @@ for (const screen of screens) {
         await expectSameLook("#react", "#html", `web/${name}.html`);
       },
     );
-    (name in STATIC_TREE_DIFFERS ? test.fails : test)(
-      "the static page gives React's accessibility tree",
-      async () => {
-        expect(await commands.ariaSnapshot("#html")).toBe(await commands.ariaSnapshot("#react"));
-      },
-    );
+    test("the static page gives React's accessibility tree", async () => {
+      expect(await commands.ariaSnapshot("#html")).toBe(await commands.ariaSnapshot("#react"));
+    });
     test("React, SolidJS and the reference renderer give the same accessibility tree", async () => {
       const react = await commands.ariaSnapshot("#react");
       expect(await commands.ariaSnapshot("#solid")).toBe(react);

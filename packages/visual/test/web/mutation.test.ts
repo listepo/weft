@@ -21,8 +21,10 @@ const body = (id: string) => {
 
 beforeEach(async () => {
   const component = (await components[NAME]!.react()).default as ComponentType<Props>;
-  await showReact("pristine", component, { data: login.data });
-  await showReact("changed", component, { data: login.data });
+  // With the tokens stylesheet, as the screen's own baseline is drawn.
+  const head = `<style>${login.css}</style>`;
+  await showReact("pristine", component, { data: login.data }, head);
+  await showReact("changed", component, { data: login.data }, head);
 });
 
 /** Changes the `#changed` frame, then expects every comparison to see it. */
