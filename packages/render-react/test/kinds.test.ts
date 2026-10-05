@@ -85,6 +85,20 @@ test("stack and grid are plain layout containers styled from tokens", () => {
   );
 });
 
+test("a row without align centres its children, a column and an explicit align do not change", () => {
+  const d = doc(
+    el("stack", "row", { direction: "row" }),
+    el("stack", "end", { direction: "row", align: "end" }),
+    el("stack", "bad", { direction: "row", align: "middle" }),
+    el("stack", "column", {}),
+  );
+  const v = dom(d);
+  assert.equal(v.byId("row").attribs["style"], "display:flex;flex-direction:row;align-items:center");
+  assert.equal(v.byId("end").attribs["style"], "display:flex;flex-direction:row;align-items:flex-end");
+  assert.equal(v.byId("bad").attribs["style"], "display:flex;flex-direction:row;align-items:center");
+  assert.equal(v.byId("column").attribs["style"], "display:flex;flex-direction:column");
+});
+
 test("section is a region only when labelled, with its header slot first", () => {
   const d = doc(
     el("section", "s", { label: "Profile" }, [el("text", "body", {}, ["Body"])], {
