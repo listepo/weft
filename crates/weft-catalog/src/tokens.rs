@@ -5,8 +5,9 @@
 //! Supported: groups and tokens (`$value`), `$type` on a token or inherited from the nearest
 //! ancestor group, the `$root` token name, and whole-value aliases written `{group.token}` (chains
 //! allowed; an untyped token takes the type of the token it aliases). Other `$`-properties are
-//! ignored. Not supported: `$extends`, JSON-pointer `$ref`, the resolver module, and aliases nested
-//! inside composite values. Bad input is reported as problems, never as an error.
+//! ignored. Not supported: `$extends`, JSON-pointer `$ref` and the resolver module (the project
+//! loader reads resolvers, `resolver.rs`), and aliases nested inside composite values, which
+//! `composite_part` resolves for the generators. Bad input is reported as problems, never as an error.
 
 use std::collections::HashMap;
 
@@ -236,6 +237,37 @@ pub fn token_types(tokens: &IndexMap<String, Token>) -> IndexMap<String, String>
         .iter()
         .map(|(path, token)| (path.clone(), token.kind.clone()))
         .collect()
+}
+
+/// A part of a composite token's value, such as the `fontSize` of a typography token, with an
+/// alias to a whole token resolved: the loader resolves whole-value aliases only.
+pub fn composite_part(value: &Json, key: &str, tokens: &IndexMap<String, Token>) -> Option<Json> {
+    let part = value.get(key)?;
+    match alias_target(part) {
+        Some(path) => tokens.get(path).map(|t| t.value.clone()),
+        None => Some(part.clone()),
+    }
+}
+
+/// A DTCG font weight, a number from 1 to 1000 or one of the names the format lists, as a number.
+pub fn font_weight(value: &Json) -> Option<f64> {
+    match value {
+        Json::String(name) => Some(match name.as_str() {
+            "thin" | "hairline" => 100.0,
+            "extra-light" | "ultra-light" => 200.0,
+            "light" => 300.0,
+            "normal" | "regular" | "book" => 400.0,
+            "medium" => 500.0,
+            "semi-bold" | "demi-bold" => 600.0,
+            "bold" => 700.0,
+            "extra-bold" | "ultra-bold" => 800.0,
+            "black" | "heavy" | "extra-black" | "ultra-black" => 900.0,
+            _ => return None,
+        }),
+        other => other
+            .as_f64()
+            .filter(|n| n.is_finite() && (1.0..=1000.0).contains(n)),
+    }
 }
 
 #[cfg(test)]

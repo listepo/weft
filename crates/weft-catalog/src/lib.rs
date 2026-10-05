@@ -18,4 +18,6 @@ pub use resolver::{
     Appearance, MAX_CONTEXTS, RESOLVER_VERSION, TokenModifier, appearance, is_resolver,
 };
 pub use settings::{MAX_COUNT, project_file_schema};
-pub use tokens::{Token, TokenCode, TokenProblem, Tokens, load_tokens, token_types};
+pub use tokens::{
+    Token, TokenCode, TokenProblem, Tokens, composite_part, font_weight, load_tokens, token_types,
+};

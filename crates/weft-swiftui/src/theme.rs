@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 
 use indexmap::IndexMap;
 use serde_json::Value as Json;
-use weft_catalog::{Appearance, Token};
+use weft_catalog::{Appearance, Token, composite_part, font_weight};
 
 use crate::Unsupported;
 use crate::swift::{self, number_literal, string_literal};
@@ -453,8 +453,8 @@ fn families(v: &Json) -> Option<Vec<String>> {
     }
 }
 
-/// The `Font.Weight` for a DTCG weight: a number from 1 to 1000 or one of its names. SwiftUI's
-/// nine weights stand for the hundreds, from `ultraLight` (100) to `black` (900).
+/// The `Font.Weight` for a DTCG weight. SwiftUI's nine weights stand for the hundreds, from
+/// `ultraLight` (100) to `black` (900).
 fn weight(v: &Json) -> Option<&'static str> {
     const WEIGHTS: [&str; 9] = [
         "ultraLight",
@@ -467,22 +467,7 @@ fn weight(v: &Json) -> Option<&'static str> {
         "heavy",
         "black",
     ];
-    let number = match v {
-        Json::String(name) => match name.as_str() {
-            "thin" | "hairline" => 100.0,
-            "extra-light" | "ultra-light" => 200.0,
-            "light" => 300.0,
-            "normal" | "regular" | "book" => 400.0,
-            "medium" => 500.0,
-            "semi-bold" | "demi-bold" => 600.0,
-            "bold" => 700.0,
-            "extra-bold" | "ultra-bold" => 800.0,
-            "black" | "heavy" | "extra-black" | "ultra-black" => 900.0,
-            _ => return None,
-        },
-        other => finite(other).filter(|n| (1.0..=1000.0).contains(n))?,
-    };
-    let step = (number / 100.0).round().clamp(1.0, 9.0) as usize;
+    let step = (font_weight(v)? / 100.0).round().clamp(1.0, 9.0) as usize;
     Some(WEIGHTS[step - 1])
 }
 
@@ -524,30 +509,16 @@ const GENERIC_FAMILIES: &[(&str, Option<&str>)] = &[
     ("ui-rounded", Some(".rounded")),
 ];
 
-/// A part of a composite token. The loader resolves whole-value aliases only; a part may still
-/// name a token.
-fn part(v: &Json, key: &str, tokens: &IndexMap<String, Token>) -> Option<Json> {
-    let value = v.get(key)?;
-    let alias = value
-        .as_str()
-        .and_then(|s| s.strip_prefix('{'))
-        .and_then(|s| s.strip_suffix('}'));
-    match alias {
-        Some(path) => tokens.get(path).map(|t| t.value.clone()),
-        None => Some(value.clone()),
-    }
-}
-
 /// A typography token: a `Font`, or `<root>.Typography` when it has letter spacing (a dimension)
 /// or line height (a multiple of the font size, DTCG 2025.10 §9.7).
 fn typography(v: &Json, tokens: &IndexMap<String, Token>, root: &str) -> Option<Leaf> {
     let font = font(v, tokens)?;
     let tracking = match v.get("letterSpacing") {
-        Some(_) => Some(points(&part(v, "letterSpacing", tokens)?)?),
+        Some(_) => Some(points(&composite_part(v, "letterSpacing", tokens)?)?),
         None => None,
     };
     let line_height = match v.get("lineHeight") {
-        Some(_) => Some(finite(&part(v, "lineHeight", tokens)?).filter(|n| *n > 0.0)?),
+        Some(_) => Some(finite(&composite_part(v, "lineHeight", tokens)?).filter(|n| *n > 0.0)?),
         None => None,
     };
     if tracking.is_none() && line_height.is_none() {
@@ -556,8 +527,8 @@ fn typography(v: &Json, tokens: &IndexMap<String, Token>, root: &str) -> Option<
             value: font,
         });
     }
-    let size = points(&part(v, "fontSize", tokens)?)?;
-    let family = match family(&part(v, "fontFamily", tokens)?)? {
+    let size = points(&composite_part(v, "fontSize", tokens)?)?;
+    let family = match family(&composite_part(v, "fontFamily", tokens)?)? {
         name if GENERIC_FAMILIES.iter().any(|(g, _)| *g == name) => "nil".to_owned(),
         name => string_literal(&name),
     };
@@ -590,7 +561,7 @@ fn family(v: &Json) -> Option<String> {
 
 /// A typography token as a `Font`; letter spacing and line height are `typography`'s.
 fn font(v: &Json, tokens: &IndexMap<String, Token>) -> Option<String> {
-    let part = |key: &str| part(v, key, tokens);
+    let part = |key: &str| composite_part(v, key, tokens);
     let size = number_literal(points(&part("fontSize")?)?);
     let weight = match part("fontWeight") {
         Some(w) => Some(weight(&w)?),
