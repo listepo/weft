@@ -55,6 +55,26 @@ pub fn tokens(
     Ok(load_tokens(&json).tokens)
 }
 
+/// Sample data for a generator: `--data` (relative to the working directory), else the project's
+/// `export.<target>.data` (relative to the project file), else none.
+pub fn sample_data(
+    flag: Option<PathBuf>,
+    project: Option<&Project>,
+    project_dir: Option<&Path>,
+    target: &str,
+) -> Result<Option<serde_json::Value>> {
+    let file = flag.or_else(|| {
+        let name = project?.setting(&["export", target, "data"])?.as_str()?;
+        Some(project_dir?.join(name))
+    });
+    let Some(file) = file else {
+        return Ok(None);
+    };
+    let json = parse_json(&read(&file)?)
+        .with_context(|| format!("sample data {} is not JSON", file.display()))?;
+    Ok(Some(json))
+}
+
 /// A boolean flag pair (`--x` / `--no-x`), else the project's setting at `path`, else false.
 pub fn switch(on: bool, off: bool, project: Option<&Project>, path: &[&str]) -> bool {
     if on || off {

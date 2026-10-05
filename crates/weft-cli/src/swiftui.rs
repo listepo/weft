@@ -2,6 +2,7 @@
 //! arguments, else the project, else the core catalog and the default tokens; the output
 //! directory from `--out-dir`, else the project's `export.swiftui.outDir` or
 //! `import.swiftui.outDir`, else standard output.
+//! Sample data comes from `--data`, else `export.swiftui.data`, else none.
 
 use std::io::Write;
 use std::path::PathBuf;
@@ -9,7 +10,9 @@ use std::path::PathBuf;
 use anyhow::Result;
 use weft_swiftui::{GenerateError, GenerateOptions, ImportOptions, generate, import_swiftui};
 
-use crate::convert::{catalog, emit, finish_import, out_dir, project, strict_document, tokens};
+use crate::convert::{
+    catalog, emit, finish_import, out_dir, project, sample_data, strict_document, tokens,
+};
 use crate::{DIAGNOSTICS, ProjectArgs, print, read};
 
 pub struct ExportArgs {
@@ -18,12 +21,19 @@ pub struct ExportArgs {
     pub tokens: Option<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
+    pub data: Option<PathBuf>,
 }
 
 pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(&args.file, args.project)?;
     let catalog = catalog(args.catalog.as_deref(), project.as_ref())?;
     let tokens = tokens(args.tokens.as_deref(), project.as_ref())?;
+    let data = sample_data(
+        args.data,
+        project.as_ref(),
+        project_dir.as_deref(),
+        "swiftui",
+    )?;
     let Some(document) = strict_document(&args.file, &catalog)? else {
         return Ok(DIAGNOSTICS);
     };
@@ -34,6 +44,7 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
             catalog: &catalog,
             tokens: &tokens,
             name: None,
+            data: data.as_ref(),
         },
     ) {
         Ok(swift) => swift,

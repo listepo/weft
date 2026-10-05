@@ -12,6 +12,8 @@ pub struct Screen {
     /// A unique name: `corpus/login` or `examples/button`.
     pub name: String,
     pub markup: String,
+    /// The screen's sample data (`data.json` of a corpus screen).
+    pub data: Option<serde_json::Value>,
 }
 
 pub fn root() -> PathBuf {
@@ -37,6 +39,9 @@ pub fn all_screens() -> Vec<Screen> {
         out.push(Screen {
             name: format!("corpus/{name}"),
             markup: std::fs::read_to_string(dir.join("screen.weft")).unwrap(),
+            data: std::fs::read_to_string(dir.join("data.json"))
+                .ok()
+                .map(|text| parse_json(&text).unwrap()),
         });
     }
     let mut examples: Vec<_> = std::fs::read_dir(root().join("packages/catalog/examples"))
@@ -50,6 +55,7 @@ pub fn all_screens() -> Vec<Screen> {
         out.push(Screen {
             name: format!("examples/{name}"),
             markup: std::fs::read_to_string(&path).unwrap(),
+            data: None,
         });
     }
     let mut fixtures: Vec<_> =
@@ -64,6 +70,7 @@ pub fn all_screens() -> Vec<Screen> {
         out.push(Screen {
             name: format!("fixtures/{name}"),
             markup: std::fs::read_to_string(&path).unwrap(),
+            data: None,
         });
     }
     assert!(out.len() > 30, "found only {} screens", out.len());

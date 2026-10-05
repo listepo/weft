@@ -5,6 +5,10 @@
 //! `data-weft-id` on every element that has an id. The page is a template: bound values are left
 //! for a host to fill in. Every design token becomes a CSS custom property `--weft-<path>`.
 //!
+//! Given sample data (`to_html_with_data`), the page shows it instead: the document is filled in
+//! first (`fill.rs`), so bindings and repetition are already literal content, and an `empty` slot
+//! shows when its list has nothing to show.
+//!
 //! The document is untrusted. Its strings reach the page only as escaped text or attribute values,
 //! URLs only when they are http(s), mailto or relative, and CSS only through the token value shapes
 //! below.
@@ -17,6 +21,7 @@ use weft_core::{
     Value, format_value, has_errors, js_number, serialize, validate_document,
 };
 
+use crate::fill::fill;
 use crate::provenance;
 
 pub struct HtmlOptions<'a> {
@@ -41,6 +46,16 @@ impl std::error::Error for Invalid {}
 
 /// The page for `document`.
 pub fn to_html(document: &Document, options: &HtmlOptions<'_>) -> Result<String, Invalid> {
+    to_html_with_data(document, options, None)
+}
+
+/// The page for `document`, showing `data` when given (SPEC §9). The data is untrusted like the
+/// document: its strings reach the page through the same escaping and URL rules.
+pub fn to_html_with_data(
+    document: &Document,
+    options: &HtmlOptions<'_>,
+    data: Option<&Json>,
+) -> Result<String, Invalid> {
     let types = token_types(options.tokens);
     let diagnostics = validate_document(
         document,
@@ -64,6 +79,9 @@ pub fn to_html(document: &Document, options: &HtmlOptions<'_>) -> Result<String,
         ));
         out.push('\n');
     }
+    // The source comment above keeps the screen as written, not as filled in.
+    let filled = data.map(|data| fill(document, options.catalog, data));
+    let document = filled.as_ref().unwrap_or(document);
     let title = match document.root.props.get("label") {
         Some(Value::String(s)) if !s.is_empty() => s.clone(),
         _ => document.root.id.clone().unwrap_or_else(|| "Weft".into()),
@@ -77,6 +95,7 @@ pub fn to_html(document: &Document, options: &HtmlOptions<'_>) -> Result<String,
     let mut w = Writer {
         catalog: options.catalog,
         out: String::new(),
+        sample: data.is_some(),
     };
     w.node(&document.root, &Ctx::default(), 0);
     out.push_str(&w.out);
@@ -274,6 +293,8 @@ const VOID: &[&str] = &["input", "img"];
 struct Writer<'a> {
     catalog: &'a Catalog,
     out: String,
+    /// The document was filled in with sample data: show the `empty` slot instead of templating it.
+    sample: bool,
 }
 
 impl Writer<'_> {
@@ -498,8 +519,21 @@ impl Writer<'_> {
                 };
                 let a = Self::finish(n, self.base(n, &["ordered"], true));
                 self.open(depth, tag, &a);
-                self.children(n, ctx, depth + 1);
-                self.empty_slot(n, ctx, depth + 1);
+                if self.shows_empty(n) {
+                    let mut li = Attrs::default();
+                    li.set("role", "none");
+                    li.set("data-weft-slot", "empty");
+                    self.open(depth + 1, "li", &li);
+                    self.list(
+                        n.slots.get("empty").map_or(&[], Vec::as_slice),
+                        ctx,
+                        depth + 2,
+                    );
+                    self.close(depth + 1, "li");
+                } else {
+                    self.children(n, ctx, depth + 1);
+                    self.empty_slot(n, ctx, depth + 1);
+                }
                 self.close(depth, tag);
             }
             "item" | "cell" | "alert" => {
@@ -606,7 +640,24 @@ impl Writer<'_> {
         self.close(depth, tag);
     }
 
+    /// SPEC §5.1: on a filled-in page, a declared `empty` slot replaces the items when there are
+    /// none or the state says so. Loops are already expanded, so any element but a column counts.
+    fn shows_empty(&self, n: &Node) -> bool {
+        let declared = self.def(n).is_some_and(|d| d.slot("empty").is_some());
+        self.sample
+            && declared
+            && n.slots.contains_key("empty")
+            && (literal_text(n.props.get("state")).as_deref() == Some("empty")
+                || !n
+                    .children
+                    .iter()
+                    .any(|c| matches!(c, Child::Node(x) if x.kind != "column")))
+    }
+
     fn empty_slot(&mut self, n: &Node, ctx: &Ctx, depth: usize) {
+        if self.sample {
+            return;
+        }
         if let Some(list) = n.slots.get("empty") {
             let mut a = Attrs::default();
             a.flag("data-empty");
@@ -837,13 +888,31 @@ impl Writer<'_> {
         if !columns.is_empty() {
             self.open(depth + 1, "thead", &Attrs::default());
             self.open(depth + 2, "tr", &Attrs::default());
-            for c in columns {
+            for &c in &columns {
                 self.list(std::slice::from_ref(c), ctx, depth + 3);
             }
             self.close(depth + 2, "tr");
             self.close(depth + 1, "thead");
         }
         self.open(depth + 1, "tbody", &Attrs::default());
+        if self.shows_empty(n) {
+            let mut tr = Attrs::default();
+            tr.set("data-weft-slot", "empty");
+            let mut td = Attrs::default();
+            td.set("colspan", columns.len().max(1).to_string());
+            self.open(depth + 2, "tr", &tr);
+            self.open(depth + 3, "td", &td);
+            self.list(
+                n.slots.get("empty").map_or(&[], Vec::as_slice),
+                ctx,
+                depth + 4,
+            );
+            self.close(depth + 3, "td");
+            self.close(depth + 2, "tr");
+            self.close(depth + 1, "tbody");
+            self.close(depth, "table");
+            return;
+        }
         for c in n.children.iter().filter(|c| !is_column(c)) {
             match c {
                 Child::Node(x) if x.kind == "row" || x.kind == "each" => {
