@@ -551,3 +551,18 @@ Done when:
 - the full check exits 0.
 
 Result: the home indicator is drawn by the system inside the bottom safe-area inset, and an app cannot switch it off. `persistentSystemOverlays(.hidden)` (iOS 16 and later, https://developer.apple.com/documentation/swiftui/view/persistentsystemoverlays(_:), checked 2026-10-05) is a preference the system "might or might not" honour: with it in the host app, the third of three consecutive runs still failed `appearance`, `booking`, `inbox` and `search-results` by 5,915 to 5,922 pixels each, all in one strip (x 387 to 818, y 2583 to 2597 of a 1206 by 2622 screenshot), so hiding was not used. Instead `compare` and `matchBaseline` take `ignoreBottom`, the number of pixel rows blanked in both images, and every SwiftUI comparison passes the height of the bottom safe-area inset. The host app reads that inset from its window (a view that ignores the safe area is told zero) and writes it to its container, and the test reads it with `simctl get_app_container` and scales it to the screenshot's width (34 pt, 102 px at 3x on the current device), so no size is written down. No baseline was retaken: the visible area is unchanged. Proof: the four captured failing frames matched their baselines with 0 differing pixels once masked; the SwiftUI suite (42 tests) then passed in three consecutive runs with `WEFT_SIMULATOR=own` and once with `WEFT_SIMULATOR=shared`; `test/compare.test.ts` pins that a difference in the ignored rows does not count and one above them does. `packages/visual/README.md` documents the rule.
+
+### T58. Natural `align="center"` coverage in the corpus
+
+T55 made `center` the default for a row, so T50 moved the corpus's explicit `center` onto the dashboard's `notices` column. The alerts there now sit centred at different widths, which looks odd.
+
+- Restore the `notices` column to its earlier layout, without `align`.
+- Cover `center` where centring is natural: a column in a coverage-only screen (dashboard, account, orders, inbox, leaderboard, booking or appearance), for example an empty-state message.
+- Leave the twelve benchmark screens alone: they have HTML, JSX and A2UI versions and tasks in `corpus/tasks.json`.
+
+Done when:
+- the coverage test still sees `center`;
+- the affected snapshots, screenshots and Figma/Penpot layer trees are retaken and reviewed;
+- the full check exits 0.
+
+Result: the dashboard's `notices` column has no `align` again, so its alerts stretch to the full width as they did before T50. `center` is now covered where centring is natural: the drafts list's empty slot in `corpus/inbox` is a column with `align="center"` holding the "No drafts." text and a new hint text. Inbox is a coverage-only screen, so no benchmark screen, HTML, JSX or A2UI version or task changed. The coverage test (which walks the corpus) still sees `center`. Retaken and reviewed: the insta snapshots of both screens in every format, the differential fixtures that carry the corpus (`crates/weft-core/tests/fixtures/differential.json`, `crates/weft-web/tests/fixtures/react.json` and `from-dom.json`), the Figma and Penpot layer trees (the `notices` frame is `start` again with no `align` in its source; the inbox gains the centred column), and the Chromium baselines of `dashboard` (React and the static page), checked downscaled: the three alerts now span the page width. The SwiftUI baselines did not change, since inbox shows its loading state in the screenshot and the dashboard's SwiftUI drawing is the same.

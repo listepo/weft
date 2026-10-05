@@ -99,6 +99,11 @@ struct InboxEvent: Sendable, Equatable {
 
 /// The design tokens the screen uses.
 struct InboxTheme: Sendable {
+    var space = SpaceTokens()
+
+    struct SpaceTokens: Sendable {
+        var sm: CGFloat = 8
+    }
 }
 
 struct InboxScreen: View {
@@ -140,8 +145,15 @@ struct InboxScreen: View {
                     List {
                     }
                     .overlay {
-                        Text("No drafts.")
-                            .accessibilityIdentifier("no-drafts")
+                        VStack(alignment: .center, spacing: theme.space.sm) {
+                            Text("No drafts.")
+                                .accessibilityIdentifier("no-drafts")
+                            Text("Messages you start appear here.")
+                                .accessibilityIdentifier("no-drafts-hint")
+                        }
+                        .weftProp("direction", "column")
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("drafts-empty")
                     }
                     .weftProp("state", "empty")
                     .accessibilityElement(children: .contain)

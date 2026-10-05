@@ -272,7 +272,7 @@ a { display: inline-block; }
       <div data-weft-id="incidents-value" data-tone="danger" data-weft-kind="text">1</div>
     </section>
   </div>
-  <div data-weft-id="notices" class="weft-stack" data-align="center" style="gap: var(--weft-space-sm)">
+  <div data-weft-id="notices" class="weft-stack" style="gap: var(--weft-space-sm)">
     <div data-weft-id="release" role="alert" data-tone="info">Release 2.4 ships on Friday.</div>
     <div data-weft-id="backup" role="alert" data-tone="success">Last backup finished at 03:00.</div>
     <div data-weft-id="quota" role="alert" data-tone="warning">

@@ -160,7 +160,6 @@ description: corpus-dashboard as json
         "kind": "stack",
         "id": "notices",
         "props": {
-          "align": "center",
           "direction": "column",
           "gap": {
             "token": "space.sm"

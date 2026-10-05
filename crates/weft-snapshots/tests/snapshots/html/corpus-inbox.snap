@@ -265,7 +265,10 @@ a { display: inline-block; }
     <div role="tabpanel" id="weft-tab-drafts-panel" aria-labelledby="weft-tab-drafts-tab" hidden>
       <ul data-weft-id="drafts" data-state="empty">
         <template data-empty>
-          <div data-weft-id="no-drafts" data-weft-kind="text">No drafts.</div>
+          <div data-weft-id="drafts-empty" class="weft-stack" data-align="center" style="gap: var(--weft-space-sm)">
+            <div data-weft-id="no-drafts" data-weft-kind="text">No drafts.</div>
+            <div data-weft-id="no-drafts-hint" data-weft-kind="text">Messages you start appear here.</div>
+          </div>
         </template>
       </ul>
     </div>
