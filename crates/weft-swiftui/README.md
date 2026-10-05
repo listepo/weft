@@ -53,7 +53,7 @@ A file for a screen whose id is `login` contains these parts, in order:
 | Weft | SwiftUI |
 | --- | --- |
 | `screen` | `VStack(alignment: .leading)`, the body of the view |
-| `stack` | `VStack` or `HStack` (`direction`); `align` gives `alignment:`, a `gap` token gives `spacing:` |
+| `stack` | `VStack` or `HStack` (`direction`); `align` gives `alignment:`, a `gap` token gives `spacing:`; a row without `align` is a plain `HStack`, which already centres its children as the SPEC default asks |
 | `grid` | `LazyVGrid` with `columns` flexible `GridItem`s |
 | `section` | `Section`, with the `header` slot as its header |
 | `heading` | `Text` with a font for the `level` and `.accessibilityHeading(.hN)` |
