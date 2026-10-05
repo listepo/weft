@@ -50,17 +50,8 @@ board "screen#todos" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
           | weft/weft.origin = shape(button#todo-remove)
           | weft/weft.source = {"kind":"button","id":"todo-remove","on":{"press":"todo.remove"},"children":["Remove"],"shown":{"text":"Remove"}}
           text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Remove"
-  board "stack#summary" tokens={"rowGap":"space.xs","columnGap":"space.xs"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#summary>","dir":"row","wrap":"nowrap"}
-    | weft/weft.origin = shape(stack#summary)
-    | weft/weft.source = {"kind":"stack","id":"summary","props":{"direction":"row","gap":{"token":"space.xs"}}}
-    | weft/weft.style = [[],[],0,[0,0,0,0],null]
-    board "text#remaining" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#remaining>","dir":"column"}
-      | weft/weft.kind = text
-      | weft/weft.origin = shape(text#remaining)
-      | weft/weft.source = {"kind":"text","id":"remaining","props":{"text":{"bind":"$.remaining"}},"shown":{"text":"{$.remaining}"}}
-      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.remaining}"
-    board "text#remaining-label" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#remaining-label>","dir":"column"}
-      | weft/weft.kind = text
-      | weft/weft.origin = shape(text#remaining-label)
-      | weft/weft.source = {"kind":"text","id":"remaining-label","children":["items left"],"shown":{"text":"items left"}}
-      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="items left"
+  board "text#remaining" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#remaining>","dir":"column"}
+    | weft/weft.kind = text
+    | weft/weft.origin = shape(text#remaining)
+    | weft/weft.source = {"kind":"text","id":"remaining","props":{"text":{"bind":"$.remainingLabel"}},"shown":{"text":"{$.remainingLabel}"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.remainingLabel}"

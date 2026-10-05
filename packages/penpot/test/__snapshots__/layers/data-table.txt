@@ -74,5 +74,5 @@ board "screen#users" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
           board "button#delete" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.danger"} inCopy=true head=true componentOf="<variant=danger, state=(unset)>" fillList=[{"fillColor":"#db2626","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#delete>","dir":"row"}
             | weft/weft.kind = button
             | weft/weft.origin = shape(button#delete)
-            | weft/weft.source = {"kind":"button","id":"delete","props":{"variant":"danger"},"on":{"press":"users.delete"},"children":["Delete"],"shown":{"text":"Delete"}}
-            text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Delete"
+            | weft/weft.source = {"kind":"button","id":"delete","props":{"text":{"bind":"$user.deleteLabel"},"variant":"danger"},"on":{"press":"users.delete"},"shown":{"text":"{$user.deleteLabel}"}}
+            text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="{$user.deleteLabel}"
