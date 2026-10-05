@@ -5,12 +5,13 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkData, parse } from "@weft/core";
 import { describe, test } from "vitest";
-import { tokenTypes } from "../src/index.ts";
+import { isResolver, tokenTypes, withAppearance } from "../src/index.ts";
 import {
   chooseProject,
   findProject,
   projectPath,
   readProject,
+  readResolver,
   readTokenLayers,
 } from "../src/node.ts";
 
@@ -106,6 +107,42 @@ describe("project settings helpers", () => {
       missing.diagnostics.map((d) => [d.code, d.path]),
       [["W704", "#/render/tokens/0"]],
     );
+  });
+
+  test("readResolver loads a resolver named on its own, with pointers into it", () => {
+    const resolver = join(example, "tokens", "theme.resolver.json");
+    assert.ok(isResolver(JSON.parse(readFileSync(resolver, "utf8"))));
+    assert.ok(!isResolver({ resolutionOrder: { a: 1 } }));
+    const layers = readResolver(resolver);
+    assert.deepEqual(layers.diagnostics, []);
+    assert.equal(layers.appearance?.dark.get("color.star")?.value, "#fbbf24");
+
+    const dir = mkdtempSync(join(tmpdir(), "weft-resolver-"));
+    try {
+      const broken = join(dir, "broken.resolver.json");
+      writeFileSync(
+        broken,
+        JSON.stringify({ version: "2025.10", resolutionOrder: [{ $ref: "#/sets/none" }] }),
+      );
+      assert.deepEqual(
+        readResolver(broken).diagnostics.map((d) => [d.code, d.path]),
+        [["W705", "#/resolutionOrder/0/$ref"]],
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("withAppearance picks a side, else the default context, and no scheme without one", () => {
+    const project = readProject(join(example, "weft.json")).project;
+    const dark = withAppearance(project, "dark");
+    assert.equal(dark.scheme, "dark");
+    assert.equal(dark.tokens?.get("color.star")?.value, "#fbbf24");
+    const byDefault = withAppearance(project);
+    assert.equal(byDefault.scheme, "light");
+    assert.equal(byDefault.tokens?.get("color.star")?.value, "#d97706");
+    const plain = readTokenLayers(join(example, "weft.json"), ["tokens/base.tokens.json"], "#");
+    assert.deepEqual(withAppearance(plain, "dark"), { tokens: plain.tokens, scheme: undefined });
   });
 });
 

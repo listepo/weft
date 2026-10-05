@@ -544,7 +544,7 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | `render.data` | file name | no data | Sample data the bindings read when a screen is rendered to a static page. |
 | `render.tokens` | array of file names, or one file name | the project's `tokens` | Token files to render with, layered as in §10.3, or one resolver document (§10.3). |
 | `render.outDir` | file name | next to the screen | Where rendered pages go. |
-| `render.appearance` | `"light"` or `"dark"` | the default context | Which context of the resolver's light and dark modifier (§10.3) the reference renderer draws with; the page also declares that `color-scheme`. Without an appearance in the tokens it changes nothing. |
+| `render.appearance` | `"light"` or `"dark"` | the default context | Which context of the resolver's light and dark modifier (§10.3) the reference renderer draws with, which the page declares as its `color-scheme`; `--appearance` overrides it. Without an appearance in the tokens it changes nothing. |
 | `export.html.outDir` | file name | standard output | Where `weft html` writes `<screen>.html`. |
 | `export.html.source` | boolean | `false` | The page keeps the canonical screen in a leading comment, so `weft import-html` gives it back exactly (§9). |
 | `export.html.data`, `export.swiftui.data` | file name | no data | Sample data (JSON) the generated page shows, or the SwiftUI model's `sample` is built from (§9). Without it the page is a template for a host to fill and the preview shows the model's defaults. |

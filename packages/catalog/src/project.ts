@@ -40,6 +40,39 @@ export type Appearance = {
   dark: Map<string, Token>;
 };
 
+/** The side of the appearance a page is drawn with (`render.appearance`, SPEC §10.6). */
+export type ColorScheme = "light" | "dark";
+
+/**
+ * The tokens a renderer draws with, and the page's colour scheme: the `asked` side of the
+ * appearance (SPEC §10.3), else the side the appearance modifier's default context names. Without
+ * an appearance the tokens are as loaded and the page declares no scheme.
+ */
+export function withAppearance(
+  layers: Pick<Project, "tokens" | "modifiers" | "appearance">,
+  asked?: ColorScheme,
+): { tokens: Map<string, Token> | undefined; scheme: ColorScheme | undefined } {
+  const { appearance } = layers;
+  if (appearance === undefined) return { tokens: layers.tokens, scheme: undefined };
+  const modifier = layers.modifiers?.find((m) => m.name === appearance.modifier);
+  // Context names compare case-insensitively, as the loader matches them (SPEC §10.3).
+  const fallback = modifier?.default.toLowerCase() === "dark" ? "dark" : "light";
+  const scheme = asked ?? fallback;
+  return { tokens: appearance[scheme], scheme };
+}
+
+/**
+ * Whether parsed token JSON is a DTCG resolver document: `resolutionOrder` is an array, which a
+ * token tree cannot hold (every member of a group is an object).
+ */
+export function isResolver(json: unknown): boolean {
+  return (
+    typeof json === "object" &&
+    json !== null &&
+    Array.isArray((json as Record<string, unknown>)["resolutionOrder"])
+  );
+}
+
 /** A limit of the MCP server that `mcp.limits` may set. */
 export type LimitName =
   | "markupChars"

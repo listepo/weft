@@ -1,7 +1,7 @@
 // The file side of SPEC §10 for Node tools: finding the project above a screen and reading the
 // files it names. Kept apart from the pure loader so that browser and MCP code never pull in fs.
 import { readFileSync, statSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import type { Diagnostic, Mode } from "@weft/core";
 import { loadProjectText, PROJECT_FILE, type Project, type ProjectResult } from "./project.ts";
 
@@ -66,6 +66,23 @@ export function readTokenLayers(
   });
   const { tokens, modifiers, appearance } = project;
   return { tokens, modifiers, appearance, diagnostics };
+}
+
+/**
+ * A DTCG resolver named on the command line (`--tokens`): it loads as the `tokens` of a project
+ * beside it, so its references follow the same rules (SPEC §10.3), and its diagnostics point into
+ * the resolver file itself.
+ */
+export function readResolver(
+  file: string,
+  options: ReadOptions = {},
+): ReturnType<typeof readTokenLayers> {
+  const layers = readTokenLayers(file, basename(file), "#", options);
+  const diagnostics = layers.diagnostics.map((d) => ({
+    ...d,
+    path: d.path.replace(/^#\/tokens(?=\/|$)/, "#"),
+  }));
+  return { ...layers, diagnostics };
 }
 
 function reader(projectFile: string, maxChars: number | undefined) {

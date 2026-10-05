@@ -308,6 +308,34 @@ describe("project settings (SPEC §10.6)", () => {
     assert.equal(existsSync(join(root, "screens", "cart.html")), false);
   });
 
+  test("render draws one side of the appearance: render.appearance, then --appearance", () => {
+    const { root, cart } = copy({ render: { data: "sample.data.json", appearance: "dark" } });
+    assert.equal(run(renderMain, cart).code, 0);
+    const page = join(root, "screens", "cart.html");
+    assert.ok(readFileSync(page, "utf8").includes('<meta name="color-scheme" content="dark"/>'));
+    assert.equal(run(renderMain, cart, page, "--force", "--appearance", "light").code, 0);
+    assert.ok(readFileSync(page, "utf8").includes('<meta name="color-scheme" content="light"/>'));
+    const wrong = run(renderMain, cart, page, "--force", "--appearance", "dusk");
+    assert.equal(wrong.code, 2);
+    assert.match(wrong.stderr, /--appearance must be "light" or "dark"/);
+  });
+
+  test("--tokens takes a resolver, with its problems pointing into it", () => {
+    const { root, cart } = copy();
+    const out = join(root, "resolved.html");
+    const resolver = join(root, "tokens", "theme.resolver.json");
+    const result = run(renderMain, cart, out, "--tokens", resolver);
+    assert.equal(result.code, 0, result.stderr);
+    assert.ok(readFileSync(out, "utf8").includes('content="light"'));
+    const broken = join(root, "tokens", "broken.resolver.json");
+    writeFileSync(
+      broken,
+      JSON.stringify({ version: "2025.10", resolutionOrder: [{ $ref: "x.json" }] }),
+    );
+    const failed = run(renderMain, cart, out, "--force", "--tokens", broken);
+    assert.match(failed.stderr, /broken\.resolver\.json:#\/resolutionOrder\/0\/\$ref W704/);
+  });
+
   test("outDir settings place each command's output", () => {
     const { root, cart } = copy({
       render: { outDir: "out/pages" },

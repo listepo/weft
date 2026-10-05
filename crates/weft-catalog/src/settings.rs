@@ -239,7 +239,7 @@ pub(crate) const SECTIONS: &[Setting] = &[
             setting("outDir", OUT_DIR, Kind::File),
             setting(
                 "appearance",
-                "Which context of the resolver's light and dark modifier (SPEC §10.3) the page is rendered with, and the page's color-scheme. Default: the resolver's default context, and no color-scheme.",
+                "Which context of the resolver's light and dark modifier (SPEC §10.3) the page is rendered with, and the page's color-scheme. Default: the resolver's default context.",
                 Kind::OneOf(&["light", "dark"]),
             ),
         ]),
