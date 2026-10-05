@@ -1,0 +1,17 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-wizard-step as a2ui-import
+---
+<screen id="wizard" weft="0.1">
+  <heading id="title" level="1">Choose a plan</heading>
+  <text id="progress" text="{$.progress}"/>
+  <radio-group id="plan" label="Plan" value="{$.plan}">
+    <radio id="radio-free" value="free">Free</radio>
+    <radio id="radio-pro" value="pro">Pro</radio>
+    <radio id="radio-team" value="team">Team</radio>
+  </radio-group>
+  <stack id="nav" direction="row">
+    <button id="back" on-press="wizard.back">Back</button>
+    <button id="next" disabled="{!$.plan}" variant="primary" on-press="wizard.next">Next</button>
+  </stack>
+</screen>

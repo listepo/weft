@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-list as a2ui-losses
+---
+Props /screen#root/list#todos: ordered: this prop has no A2UI property
+Props /screen#root/list#todos: state: this prop has no A2UI property

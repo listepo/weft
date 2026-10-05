@@ -1,0 +1,41 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-slider as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "volume"
+          ],
+          "accessibility": {
+            "label": "Sound"
+          }
+        },
+        {
+          "id": "volume",
+          "component": "Slider",
+          "min": 0,
+          "max": 100,
+          "value": {
+            "path": "/volume"
+          },
+          "label": "Volume"
+        }
+      ]
+    }
+  }
+]

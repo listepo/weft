@@ -1,0 +1,9 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-glass as a2ui-losses
+---
+Tokens /screen#glass/stack#card: gap: design tokens have no A2UI form
+Tokens /screen#glass/stack#card: material: design tokens have no A2UI form
+Layout /screen#glass/grid#tiles: columns: this layout has no A2UI form
+Tokens /screen#glass/grid#tiles: gap: design tokens have no A2UI form
+Tokens /screen#glass/grid#tiles: material: design tokens have no A2UI form

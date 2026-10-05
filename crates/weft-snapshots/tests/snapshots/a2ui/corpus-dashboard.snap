@@ -1,0 +1,278 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-dashboard as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "dashboard",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "dashboard",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "header",
+            "stats",
+            "notices",
+            "footer"
+          ],
+          "accessibility": {
+            "label": "Team dashboard"
+          }
+        },
+        {
+          "id": "header",
+          "component": "Row",
+          "children": [
+            "title",
+            "updated"
+          ]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": {
+            "path": "/team/name"
+          },
+          "variant": "h1"
+        },
+        {
+          "id": "updated",
+          "component": "Text",
+          "text": {
+            "path": "/updatedAt"
+          },
+          "variant": "caption"
+        },
+        {
+          "id": "stats",
+          "component": "Column",
+          "children": [
+            "velocity",
+            "bugs",
+            "incidents"
+          ]
+        },
+        {
+          "id": "velocity",
+          "component": "Card",
+          "child": "column",
+          "accessibility": {
+            "label": "Velocity"
+          }
+        },
+        {
+          "id": "velocity-title",
+          "component": "Text",
+          "text": "Velocity",
+          "variant": "h2"
+        },
+        {
+          "id": "velocity-value",
+          "component": "Text",
+          "text": {
+            "path": "/stats/velocity"
+          }
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "velocity-title",
+            "velocity-value"
+          ]
+        },
+        {
+          "id": "bugs",
+          "component": "Card",
+          "child": "column-2",
+          "accessibility": {
+            "label": "Open bugs"
+          }
+        },
+        {
+          "id": "bugs-title",
+          "component": "Text",
+          "text": "Open bugs",
+          "variant": "h2"
+        },
+        {
+          "id": "bugs-value",
+          "component": "Text",
+          "text": {
+            "path": "/stats/bugs"
+          }
+        },
+        {
+          "id": "column-2",
+          "component": "Column",
+          "children": [
+            "bugs-title",
+            "bugs-value"
+          ]
+        },
+        {
+          "id": "incidents",
+          "component": "Card",
+          "child": "column-3",
+          "accessibility": {
+            "label": "Incidents"
+          }
+        },
+        {
+          "id": "incidents-title",
+          "component": "Text",
+          "text": "Incidents",
+          "variant": "h2"
+        },
+        {
+          "id": "incidents-value",
+          "component": "Text",
+          "text": {
+            "path": "/stats/incidents"
+          }
+        },
+        {
+          "id": "column-3",
+          "component": "Column",
+          "children": [
+            "incidents-title",
+            "incidents-value"
+          ]
+        },
+        {
+          "id": "notices",
+          "component": "Column",
+          "children": [
+            "release",
+            "backup",
+            "quota"
+          ]
+        },
+        {
+          "id": "release",
+          "component": "Card",
+          "child": "text"
+        },
+        {
+          "id": "text",
+          "component": "Text",
+          "text": "Release 2.4 ships on Friday."
+        },
+        {
+          "id": "backup",
+          "component": "Card",
+          "child": "backup-text"
+        },
+        {
+          "id": "backup-text",
+          "component": "Text",
+          "text": {
+            "path": "/backupStatus"
+          }
+        },
+        {
+          "id": "quota",
+          "component": "Card",
+          "child": "column-4"
+        },
+        {
+          "id": "quota-text",
+          "component": "Text",
+          "text": "Storage is 90% full."
+        },
+        {
+          "id": "quota-link",
+          "component": "Button",
+          "child": "quota-link-label",
+          "variant": "borderless",
+          "action": {
+            "functionCall": {
+              "call": "openUrl",
+              "args": {
+                "url": "https://example.com/storage"
+              },
+              "returnType": "void"
+            }
+          }
+        },
+        {
+          "id": "quota-link-label",
+          "component": "Text",
+          "text": "Manage storage"
+        },
+        {
+          "id": "column-4",
+          "component": "Column",
+          "children": [
+            "quota-text",
+            "quota-link"
+          ]
+        },
+        {
+          "id": "footer",
+          "component": "Column",
+          "children": [
+            "owner",
+            "footer-links"
+          ],
+          "align": "end"
+        },
+        {
+          "id": "owner",
+          "component": "Text",
+          "text": "Owned by the platform team"
+        },
+        {
+          "id": "footer-links",
+          "component": "Row",
+          "children": [
+            "docs",
+            "status"
+          ],
+          "align": "start"
+        },
+        {
+          "id": "docs",
+          "component": "Button",
+          "child": "docs-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "docs"
+            }
+          }
+        },
+        {
+          "id": "docs-label",
+          "component": "Text",
+          "text": "Docs"
+        },
+        {
+          "id": "status",
+          "component": "Button",
+          "child": "status-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "status"
+            }
+          }
+        },
+        {
+          "id": "status-label",
+          "component": "Text",
+          "text": "Status page"
+        }
+      ]
+    }
+  }
+]

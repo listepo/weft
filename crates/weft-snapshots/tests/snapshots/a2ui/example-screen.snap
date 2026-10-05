@@ -1,0 +1,43 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-screen as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "intro"
+          ],
+          "accessibility": {
+            "label": "Home"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Welcome back",
+          "variant": "h1"
+        },
+        {
+          "id": "intro",
+          "component": "Text",
+          "text": "Pick up where you left off."
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,12 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-orders as a2ui-losses
+---
+Props /screen#orders/table#open-orders/column#col-id: sort: this prop has no A2UI property
+Props /screen#orders/table#open-orders/column#col-total: sort: this prop has no A2UI property
+Bindings /screen#orders/table#open-orders/each#order-each/row#order: selected: this binding has no A2UI property
+Actions /screen#orders/table#open-orders/each#order-each/row#order: on-press="orders.open" has no A2UI event
+Props /screen#orders/table#open-orders: state: this prop has no A2UI property
+Props /screen#orders/table#archived: state: this prop has no A2UI property
+Props /screen#orders/table#pending/row#pending-row: selected: this prop has no A2UI property
+Props /screen#orders/table#pending: state: this prop has no A2UI property

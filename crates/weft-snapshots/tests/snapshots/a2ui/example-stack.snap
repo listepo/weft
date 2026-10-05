@@ -1,0 +1,72 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-stack as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "actions"
+          ],
+          "accessibility": {
+            "label": "Actions"
+          }
+        },
+        {
+          "id": "actions",
+          "component": "Row",
+          "children": [
+            "save",
+            "discard"
+          ],
+          "align": "end"
+        },
+        {
+          "id": "save",
+          "component": "Button",
+          "child": "save-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "doc.save"
+            }
+          }
+        },
+        {
+          "id": "save-label",
+          "component": "Text",
+          "text": "Save"
+        },
+        {
+          "id": "discard",
+          "component": "Button",
+          "child": "discard-label",
+          "variant": "default",
+          "action": {
+            "event": {
+              "name": "doc.discard"
+            }
+          }
+        },
+        {
+          "id": "discard-label",
+          "component": "Text",
+          "text": "Discard"
+        }
+      ]
+    }
+  }
+]

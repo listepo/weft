@@ -1,0 +1,10 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-stepper as a2ui-losses
+---
+Kinds /screen#root/stepper#quantity: stepper has no A2UI component; a text field stands in
+Props /screen#root/stepper#quantity: disabled: this prop has no A2UI property
+Props /screen#root/stepper#quantity: max: this prop has no A2UI property
+Props /screen#root/stepper#quantity: min: this prop has no A2UI property
+Props /screen#root/stepper#quantity: step: this prop has no A2UI property
+Actions /screen#root/stepper#quantity: on-change="order.update" has no A2UI event

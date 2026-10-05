@@ -12,9 +12,11 @@ publish.workspace = true
 [dev-dependencies]
 indexmap = { workspace = true }
 insta = { workspace = true }
+jsonschema = { workspace = true }
 serde_json = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
+weft-interop = { workspace = true }
 weft-swiftui = { workspace = true }
 weft-web = { workspace = true }
 

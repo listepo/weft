@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-item as a2ui-losses
+---
+Actions /screen#root/list#inbox/item#msg-1: on-press="inbox.open" has no A2UI event
+Props /screen#root/list#inbox: ordered: this prop has no A2UI property

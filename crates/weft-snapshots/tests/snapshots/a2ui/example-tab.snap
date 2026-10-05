@@ -1,0 +1,50 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-tab as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "account-tabs"
+          ],
+          "accessibility": {
+            "label": "Account"
+          }
+        },
+        {
+          "id": "account-tabs",
+          "component": "Tabs",
+          "tabs": [
+            {
+              "title": "Profile",
+              "child": "name"
+            }
+          ]
+        },
+        {
+          "id": "name",
+          "component": "TextField",
+          "label": "Display name",
+          "variant": "shortText",
+          "value": {
+            "path": "/name"
+          }
+        }
+      ]
+    }
+  }
+]

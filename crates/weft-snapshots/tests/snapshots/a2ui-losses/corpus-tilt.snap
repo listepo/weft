@@ -1,0 +1,14 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-tilt as a2ui-losses
+---
+Props /screen#tilt/stack#deck/section#front: perspective: this prop has no A2UI property
+Props /screen#tilt/stack#deck/section#front: rotate-y: this prop has no A2UI property
+Props /screen#tilt/stack#deck/section#back: perspective: this prop has no A2UI property
+Props /screen#tilt/stack#deck/section#back: rotate-y: this prop has no A2UI property
+Props /screen#tilt/stack#deck/section#lean/field#lean-note: placeholder: this prop has no A2UI property
+Actions /screen#tilt/stack#deck/section#lean/field#lean-note: on-change="note.edit" has no A2UI event
+Props /screen#tilt/stack#deck/section#lean: perspective: this prop has no A2UI property
+Props /screen#tilt/stack#deck/section#lean: rotate-x: this prop has no A2UI property
+Props /screen#tilt/stack#deck/section#lean: rotate-z: this prop has no A2UI property
+Tokens /screen#tilt/stack#deck: gap: design tokens have no A2UI form

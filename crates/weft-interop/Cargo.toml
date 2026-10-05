@@ -1,0 +1,16 @@
+[package]
+name = "weft-interop"
+description = "Weft to and from other agent UI formats: A2UI and json-render (SPEC §9)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde_json = { workspace = true }
+weft-core = { workspace = true }
+weft-import = { workspace = true }
+
+[lints]
+workspace = true

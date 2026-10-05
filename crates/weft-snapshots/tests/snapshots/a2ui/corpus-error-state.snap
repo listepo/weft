@@ -1,0 +1,98 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-error-state as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "load-error",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "load-error",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "alert",
+            "actions"
+          ],
+          "accessibility": {
+            "label": "Load error"
+          }
+        },
+        {
+          "id": "alert",
+          "component": "Card",
+          "child": "column"
+        },
+        {
+          "id": "error-title",
+          "component": "Text",
+          "text": "Could not load your data",
+          "variant": "h2"
+        },
+        {
+          "id": "error-message",
+          "component": "Text",
+          "text": {
+            "path": "/error/message"
+          }
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "error-title",
+            "error-message"
+          ]
+        },
+        {
+          "id": "actions",
+          "component": "Row",
+          "children": [
+            "retry",
+            "support"
+          ]
+        },
+        {
+          "id": "retry",
+          "component": "Button",
+          "child": "retry-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "load.retry"
+            }
+          }
+        },
+        {
+          "id": "retry-label",
+          "component": "Text",
+          "text": "Retry"
+        },
+        {
+          "id": "support",
+          "component": "Button",
+          "child": "support-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "nav.support"
+            }
+          }
+        },
+        {
+          "id": "support-label",
+          "component": "Text",
+          "text": "Contact support"
+        }
+      ]
+    }
+  }
+]

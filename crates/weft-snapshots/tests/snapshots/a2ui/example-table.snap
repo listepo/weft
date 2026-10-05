@@ -1,0 +1,124 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-table as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "orders"
+          ],
+          "accessibility": {
+            "label": "Orders"
+          }
+        },
+        {
+          "id": "orders",
+          "component": "Column",
+          "children": [
+            "orders-header",
+            "orders-rows",
+            "orders-empty",
+            "orders-shop"
+          ],
+          "accessibility": {
+            "label": "Recent orders"
+          }
+        },
+        {
+          "id": "col-id-2",
+          "component": "Text",
+          "text": "Order"
+        },
+        {
+          "id": "col-total-label",
+          "component": "Text",
+          "text": "Total"
+        },
+        {
+          "id": "col-total",
+          "component": "Button",
+          "child": "col-total-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "orders.sort"
+            }
+          }
+        },
+        {
+          "id": "orders-header",
+          "component": "Row",
+          "children": [
+            "col-id-2",
+            "col-total"
+          ]
+        },
+        {
+          "id": "order-row",
+          "component": "Row",
+          "children": [
+            "order-id-text",
+            "order-total-text"
+          ]
+        },
+        {
+          "id": "order-id-text",
+          "component": "Text",
+          "text": {
+            "path": "id"
+          }
+        },
+        {
+          "id": "order-total-text",
+          "component": "Text",
+          "text": {
+            "path": "total"
+          }
+        },
+        {
+          "id": "orders-rows",
+          "component": "List",
+          "children": {
+            "componentId": "order-row",
+            "path": "/orders"
+          }
+        },
+        {
+          "id": "orders-empty",
+          "component": "Text",
+          "text": "No orders yet."
+        },
+        {
+          "id": "orders-shop",
+          "component": "Button",
+          "child": "orders-shop-label",
+          "variant": "default",
+          "action": {
+            "event": {
+              "name": "nav.shop"
+            }
+          }
+        },
+        {
+          "id": "orders-shop-label",
+          "component": "Text",
+          "text": "Start shopping"
+        }
+      ]
+    }
+  }
+]

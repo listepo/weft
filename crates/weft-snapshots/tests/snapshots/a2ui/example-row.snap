@@ -1,0 +1,73 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-row as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "users"
+          ],
+          "accessibility": {
+            "label": "Users"
+          }
+        },
+        {
+          "id": "users",
+          "component": "Column",
+          "children": [
+            "users-header",
+            "users-rows"
+          ],
+          "accessibility": {
+            "label": "Users"
+          }
+        },
+        {
+          "id": "col-name-2",
+          "component": "Text",
+          "text": "Name"
+        },
+        {
+          "id": "users-header",
+          "component": "Row",
+          "children": [
+            "col-name-2"
+          ]
+        },
+        {
+          "id": "row-ana",
+          "component": "Row",
+          "children": [
+            "text"
+          ]
+        },
+        {
+          "id": "text",
+          "component": "Text",
+          "text": "Ana"
+        },
+        {
+          "id": "users-rows",
+          "component": "List",
+          "children": [
+            "row-ana"
+          ]
+        }
+      ]
+    }
+  }
+]

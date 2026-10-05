@@ -1,0 +1,43 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-date-picker as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "day"
+          ],
+          "accessibility": {
+            "label": "Delivery"
+          }
+        },
+        {
+          "id": "day",
+          "component": "DateTimeInput",
+          "value": {
+            "path": "/day"
+          },
+          "enableDate": true,
+          "enableTime": false,
+          "min": "2026-01-01",
+          "max": "2026-12-31",
+          "label": "Delivery date"
+        }
+      ]
+    }
+  }
+]

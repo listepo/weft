@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-tab as a2ui-losses
+---
+Props /screen#root/tabs#account-tabs: selected: this prop has no A2UI property

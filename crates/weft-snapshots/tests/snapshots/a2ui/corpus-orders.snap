@@ -1,0 +1,194 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-orders as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "orders",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "orders",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "open-orders",
+            "archived",
+            "pending"
+          ],
+          "accessibility": {
+            "label": "Orders"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Orders",
+          "variant": "h2"
+        },
+        {
+          "id": "open-orders",
+          "component": "Column",
+          "children": [
+            "open-orders-header",
+            "open-orders-rows",
+            "no-orders"
+          ],
+          "accessibility": {
+            "label": "Open orders"
+          }
+        },
+        {
+          "id": "col-id-label",
+          "component": "Text",
+          "text": "Order"
+        },
+        {
+          "id": "col-id",
+          "component": "Button",
+          "child": "col-id-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "orders.sortById"
+            }
+          }
+        },
+        {
+          "id": "col-total-2",
+          "component": "Text",
+          "text": {
+            "path": "/labels/total"
+          }
+        },
+        {
+          "id": "open-orders-header",
+          "component": "Row",
+          "children": [
+            "col-id",
+            "col-total-2"
+          ]
+        },
+        {
+          "id": "order",
+          "component": "Row",
+          "children": [
+            "order-id-text",
+            "order-amount"
+          ]
+        },
+        {
+          "id": "order-id-text",
+          "component": "Text",
+          "text": {
+            "path": "id"
+          }
+        },
+        {
+          "id": "order-amount",
+          "component": "Text",
+          "text": {
+            "path": "total"
+          }
+        },
+        {
+          "id": "open-orders-rows",
+          "component": "List",
+          "children": {
+            "componentId": "order",
+            "path": "/orders"
+          }
+        },
+        {
+          "id": "no-orders",
+          "component": "Text",
+          "text": "No open orders."
+        },
+        {
+          "id": "archived",
+          "component": "Column",
+          "children": [
+            "archived-header",
+            "archived-rows",
+            "archived-empty"
+          ],
+          "accessibility": {
+            "label": "Archived orders"
+          }
+        },
+        {
+          "id": "col-archived-2",
+          "component": "Text",
+          "text": "Order"
+        },
+        {
+          "id": "archived-header",
+          "component": "Row",
+          "children": [
+            "col-archived-2"
+          ]
+        },
+        {
+          "id": "archived-rows",
+          "component": "List",
+          "children": []
+        },
+        {
+          "id": "archived-empty",
+          "component": "Text",
+          "text": "Nothing archived yet."
+        },
+        {
+          "id": "pending",
+          "component": "Column",
+          "children": [
+            "pending-header",
+            "pending-rows"
+          ],
+          "accessibility": {
+            "label": "Pending orders"
+          }
+        },
+        {
+          "id": "col-pending-2",
+          "component": "Text",
+          "text": "Order"
+        },
+        {
+          "id": "pending-header",
+          "component": "Row",
+          "children": [
+            "col-pending-2"
+          ]
+        },
+        {
+          "id": "pending-row",
+          "component": "Row",
+          "children": [
+            "text"
+          ]
+        },
+        {
+          "id": "text",
+          "component": "Text",
+          "text": "Fetching…"
+        },
+        {
+          "id": "pending-rows",
+          "component": "List",
+          "children": [
+            "pending-row"
+          ]
+        }
+      ]
+    }
+  }
+]

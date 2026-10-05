@@ -1,0 +1,57 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-item as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "inbox"
+          ],
+          "accessibility": {
+            "label": "Inbox"
+          }
+        },
+        {
+          "id": "inbox",
+          "component": "List",
+          "children": [
+            "column"
+          ]
+        },
+        {
+          "id": "msg-1-from",
+          "component": "Text",
+          "text": "Ana",
+          "variant": "caption"
+        },
+        {
+          "id": "msg-1-subject",
+          "component": "Text",
+          "text": "Welcome aboard"
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "msg-1-from",
+            "msg-1-subject"
+          ]
+        }
+      ]
+    }
+  }
+]

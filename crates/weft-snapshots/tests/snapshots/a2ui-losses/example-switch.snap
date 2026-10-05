@@ -1,0 +1,7 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-switch as a2ui-losses
+---
+Kinds /screen#root/switch#push: switch has no A2UI component; a checkbox stands in
+Props /screen#root/switch#push: disabled: this prop has no A2UI property
+Actions /screen#root/switch#push: on-change="settings.update" has no A2UI event

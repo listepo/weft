@@ -1,0 +1,167 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-booking as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "booking",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "booking",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "trip"
+          ],
+          "accessibility": {
+            "label": "Book a trip"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Book a trip",
+          "variant": "h1"
+        },
+        {
+          "id": "trip",
+          "component": "Column",
+          "children": [
+            "city",
+            "depart",
+            "checkin",
+            "reminder",
+            "guests",
+            "budget",
+            "cabin",
+            "tag",
+            "book"
+          ],
+          "accessibility": {
+            "label": "Trip"
+          }
+        },
+        {
+          "id": "city",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [],
+          "value": {
+            "path": "/trip/city"
+          },
+          "label": "Destination",
+          "filterable": true
+        },
+        {
+          "id": "depart",
+          "component": "DateTimeInput",
+          "value": {
+            "path": "/trip/depart"
+          },
+          "enableDate": true,
+          "enableTime": false,
+          "min": "2026-01-01",
+          "max": "2026-12-31",
+          "label": "Departure"
+        },
+        {
+          "id": "checkin",
+          "component": "DateTimeInput",
+          "value": {
+            "path": "/trip/checkin"
+          },
+          "enableDate": false,
+          "enableTime": true,
+          "label": "Check-in time"
+        },
+        {
+          "id": "reminder",
+          "component": "DateTimeInput",
+          "value": {
+            "path": "/trip/reminder"
+          },
+          "enableDate": true,
+          "enableTime": true,
+          "label": "Reminder"
+        },
+        {
+          "id": "guests",
+          "component": "TextField",
+          "label": "Guests",
+          "variant": "number",
+          "value": {
+            "path": "/trip/guests"
+          }
+        },
+        {
+          "id": "budget",
+          "component": "Slider",
+          "min": 50,
+          "max": 500,
+          "value": {
+            "path": "/trip/budget"
+          },
+          "label": "Budget per night"
+        },
+        {
+          "id": "cabin",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Economy",
+              "value": "economy"
+            },
+            {
+              "label": "Business",
+              "value": "business"
+            },
+            {
+              "label": "First",
+              "value": "first"
+            }
+          ],
+          "value": {
+            "path": "/trip/cabin"
+          },
+          "label": "Cabin",
+          "displayStyle": "chips"
+        },
+        {
+          "id": "tag",
+          "component": "TextField",
+          "label": "Trip colour",
+          "variant": "shortText",
+          "value": {
+            "path": "/trip/colour"
+          }
+        },
+        {
+          "id": "book",
+          "component": "Button",
+          "child": "book-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "trip.book"
+            }
+          }
+        },
+        {
+          "id": "book-label",
+          "component": "Text",
+          "text": "Book"
+        }
+      ]
+    }
+  }
+]

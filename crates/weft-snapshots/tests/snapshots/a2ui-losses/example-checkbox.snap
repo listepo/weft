@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-checkbox as a2ui-losses
+---
+Props /screen#root/checkbox#terms: disabled: this prop has no A2UI property
+Actions /screen#root/checkbox#terms: on-change="form.edit" has no A2UI event
