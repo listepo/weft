@@ -1,0 +1,66 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-dialog as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Files"
+    },
+    "children": [
+      {
+        "kind": "dialog",
+        "id": "confirm",
+        "props": {
+          "label": "Delete file?",
+          "modal": true,
+          "open": {
+            "bind": "$.confirmOpen"
+          }
+        },
+        "on": {
+          "close": "dialog.close"
+        },
+        "slots": {
+          "actions": [
+            {
+              "kind": "button",
+              "id": "cancel",
+              "on": {
+                "press": "dialog.close"
+              },
+              "children": [
+                "Cancel"
+              ]
+            },
+            {
+              "kind": "button",
+              "id": "ok",
+              "props": {
+                "variant": "danger"
+              },
+              "on": {
+                "press": "file.delete"
+              },
+              "children": [
+                "Delete"
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "text",
+            "id": "warn",
+            "children": [
+              "This cannot be undone."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

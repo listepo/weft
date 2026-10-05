@@ -1,0 +1,41 @@
+board "screen#files" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#files>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#files)
+  | weft/weft.source = {"kind":"screen","id":"files","props":{"label":"File"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "heading#title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#title>","dir":"column"}
+    | weft/weft.kind = heading
+    | weft/weft.origin = shape(heading#title)
+    | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Quarterly report"],"shown":{"text":"Quarterly report"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Quarterly report"
+  board "button#delete-file" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.danger"} inCopy=true head=true componentOf="<variant=danger, state=(unset)>" fillList=[{"fillColor":"#db2626","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#delete-file>","dir":"row"}
+    | weft/weft.kind = button
+    | weft/weft.origin = shape(button#delete-file)
+    | weft/weft.source = {"kind":"button","id":"delete-file","props":{"variant":"danger"},"on":{"press":"dialog.open"},"children":["Delete file"],"shown":{"text":"Delete file"}}
+    text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Delete file"
+  board "dialog#confirm" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":16,"rightPadding":16,"bottomPadding":16,"leftPadding":16},"owner":"<dialog#confirm>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(dialog#confirm)
+    | weft/weft.source = {"kind":"dialog","id":"confirm","props":{"label":"Delete file?","open":{"bind":"$.confirmOpen"}},"on":{"close":"dialog.close"}}
+    | weft/weft.style = [[],[],0,[16,16,16,16],8]
+    board "text#warning" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#warning>","dir":"column"}
+      | weft/weft.kind = text
+      | weft/weft.origin = shape(text#warning)
+      | weft/weft.source = {"kind":"text","id":"warning","children":["This cannot be undone."],"shown":{"text":"This cannot be undone."}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="This cannot be undone."
+    board "text#filename" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#filename>","dir":"column"}
+      | weft/weft.kind = text
+      | weft/weft.origin = shape(text#filename)
+      | weft/weft.source = {"kind":"text","id":"filename","props":{"text":{"bind":"$.file.name"}},"shown":{"text":"{$.file.name}"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.file.name}"
+    board "slot:actions" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:actions>","dir":"column","wrap":"nowrap"}
+      | weft/weft.slot = actions
+      board "button#cancel" borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.white","strokeColor":"color.ink"} inCopy=true head=true componentOf="<variant=secondary, state=(unset)>" fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#cancel>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#cancel)
+        | weft/weft.source = {"kind":"button","id":"cancel","on":{"press":"dialog.close"},"children":["Cancel"],"shown":{"text":"Cancel"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Cancel"
+      board "button#confirm-delete" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.danger"} inCopy=true head=true componentOf="<variant=danger, state=(unset)>" fillList=[{"fillColor":"#db2626","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#confirm-delete>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#confirm-delete)
+        | weft/weft.source = {"kind":"button","id":"confirm-delete","props":{"variant":"danger"},"on":{"press":"file.delete"},"children":["Delete"],"shown":{"text":"Delete"}}
+        text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Delete"

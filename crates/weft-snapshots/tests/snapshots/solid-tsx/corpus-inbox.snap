@@ -1,0 +1,161 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-inbox as solid-tsx
+---
+import { For, Show } from "solid-js";
+
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+type WeftKey = {
+  key: string;
+  target: unknown;
+  currentTarget: { parentElement: HTMLElement | null };
+  preventDefault(): void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v: unknown): boolean {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v: unknown): any[] {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _busy(state: string): "true" | undefined {
+  return state === "loading" || state === "busy" || state === "submitting" ? "true" : undefined;
+}
+
+function _press(e: WeftKey, fire: () => void): void {
+  if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  fire();
+}
+
+function _tabKey(e: WeftKey, i: number, count: number, choose: (i: number) => void): void {
+  const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+  if (step === 0 || count === 0) return;
+  e.preventDefault();
+  const next = (i + step + count) % count;
+  choose(next);
+  e.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="tab"]')[next]?.focus();
+}
+
+export default function WeftScreen(props: WeftProps) {
+  return (
+    <main data-weft-id="inbox" data-state="loading" aria-busy="true" aria-label="Inbox">
+      {(() => {
+        const _t = [
+          { id: "tab-inbox", doc: "tab-inbox", state: "", label: "Inbox", panel: (
+            <>
+              <ol data-weft-id="messages" data-state="ready">
+                <Show when={!(_list(props.data?.messages).length > 0)} fallback={(
+                  <>
+                    <For each={_list(props.data?.messages)}>
+                      {(message, _i0) => (
+                        <>
+                          <li data-weft-id={"message[" + _i0() + "]"} tabindex={0} onClick={() => _act(props.actions, { id: "message[" + _i0() + "]", action: "inbox.open", item: "$.messages." + _i0() })} onKeyDown={(_e) => _press(_e, () => _act(props.actions, { id: "message[" + _i0() + "]", action: "inbox.open", item: "$.messages." + _i0() }))}>
+                            <Show when={!(_text(message?.subject).trim() === "")}>
+                              {_text(message?.subject)}
+                            </Show>
+                          </li>
+                        </>
+                      )}
+                    </For>
+                  </>
+                )}>
+                  <li role="none" data-weft-slot="empty">
+                    <div data-weft-id="no-messages">No messages.</div>
+                  </li>
+                </Show>
+              </ol>
+            </>
+          ) },
+          { id: "tab-drafts", doc: "tab-drafts", state: "", label: _text(props.data?.labels?.drafts).trim(), panel: (
+            <>
+              <ul data-weft-id="drafts" data-state="empty">
+                <li role="none" data-weft-slot="empty">
+                  <div data-weft-id="no-drafts">No drafts.</div>
+                </li>
+              </ul>
+            </>
+          ) },
+          { id: "tab-sent", doc: "tab-sent", state: "", label: "Sent", panel: (
+            <>
+              <ul data-weft-id="sent" data-state="loading" aria-busy="true">
+                <li data-weft-id="sent-loading">{"Loading…"}</li>
+              </ul>
+            </>
+          ) },
+        ];
+        const _s = Math.max(0, _t.findIndex((_x) => _x.doc === _text(props.data?.folder) || _x.id === _text(props.data?.folder)));
+        const _choose = (_k: number) => { const _x = _t[_k]; if (!_x || _k === _s) return; props.onChange?.("$.folder", _x.doc); _act(props.actions, { id: "folders", action: "inbox.folder" }); };
+        return (
+          <div data-weft-tabs="">
+            <div data-weft-id="folders" role="tablist">
+              {_t.map((_x, _k) => (
+                <button data-weft-id={_x.id || undefined} data-state={_x.state || undefined} aria-busy={_busy(_x.state)} type="button" role="tab" id={"weft-" + _x.id + "-tab"} aria-selected={String(_k === _s)} aria-controls={"weft-" + _x.id + "-panel"} tabindex={_k === _s ? 0 : -1} onClick={() => _choose(_k)} onKeyDown={(_e) => _tabKey(_e, _k, _t.length, _choose)}>
+                  {_x.label}
+                </button>
+              ))}
+            </div>
+            {_t.map((_x, _k) => (
+              <div role="tabpanel" id={"weft-" + _x.id + "-panel"} aria-labelledby={"weft-" + _x.id + "-tab"} hidden={_k !== _s} tabindex={0}>
+                {_x.panel}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+      <div data-weft-id="message-actions" aria-label="Message actions" role="menu">
+        <button data-weft-id="archive" type="button" role="menuitem" onClick={() => _act(props.actions, { id: "archive", action: "inbox.archive" })}>
+          {!(_text(props.data?.labels?.archive).trim() === "") ? _squash(_text(props.data?.labels?.archive)) : ""}
+        </button>
+        <button data-weft-id="delete" type="button" role="menuitem" disabled={!_on(props.data?.selection)} onClick={() => _act(props.actions, { id: "delete", action: "inbox.delete" })}>Delete</button>
+      </div>
+      <Show when={_on(props.data?.composing)}>
+        <dialog data-weft-id="compose" aria-label="New message" open onKeyDown={(_e) => { if (_e.key !== "Escape") return; _e.preventDefault(); props.onChange?.("$.composing", false); _act(props.actions, { id: "compose", action: "inbox.closeCompose" }); }}>
+          <form data-weft-id="compose-form" data-state="submitting" aria-busy="true" onSubmit={(_e) => { _e.preventDefault(); _act(props.actions, { id: "compose-form", action: "inbox.send" }); }}>
+            <div data-weft-field="">
+              <label>
+                <span aria-hidden="true">To</span>
+                <input data-weft-id="to" aria-label="To" type="email" value={_text(props.data?.draft?.to)} onInput={(_e) => props.onChange?.("$.draft.to", _e.currentTarget.value)} />
+              </label>
+            </div>
+            <div data-weft-field="">
+              <label>
+                <span aria-hidden="true">Message</span>
+                <textarea data-weft-id="body" aria-label="Message" value={_text(props.data?.draft?.body)} onInput={(_e) => props.onChange?.("$.draft.body", _e.currentTarget.value)} />
+              </label>
+            </div>
+          </form>
+          <div data-weft-slot="actions">
+            <button data-weft-id="send" type="button" data-variant="primary" onClick={(_e) => _act(props.actions, { id: "send", action: "inbox.send" })}>Send</button>
+          </div>
+        </dialog>
+      </Show>
+    </main>
+  );
+}

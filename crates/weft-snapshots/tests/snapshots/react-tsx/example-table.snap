@@ -1,0 +1,112 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-table as react-tsx
+---
+import { Fragment, type ReactNode } from "react";
+
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+type WeftKey = {
+  key: string;
+  target: unknown;
+  currentTarget: { parentElement: HTMLElement | null };
+  preventDefault(): void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v: unknown): any[] {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _keyed(list: ReactNode[]): ReactNode[] {
+  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);
+}
+
+function _press(e: WeftKey, fire: () => void): void {
+  if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  fire();
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="root" aria-label="Orders">
+      {(() => {
+        const _cols = [
+          (
+            <th data-weft-id="col-id" scope="col">Order</th>
+          ),
+          (
+            <th data-weft-id="col-total" scope="col" aria-sort="descending" tabIndex={0} onClick={() => _act(actions, { id: "col-total", action: "orders.sort" })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: "col-total", action: "orders.sort" }))}>Total</th>
+          ),
+          ..._list(data?.orders).flatMap((order, _i0) => []),
+        ];
+        const _rows = [
+          ..._list(data?.orders).flatMap((order, _i0) => [
+            (
+              <tr data-weft-id={"order-row[" + _i0 + "]"} aria-selected="false">
+                <td data-weft-id={"order-id[" + _i0 + "]"}>
+                  <div data-weft-id={"order-id-text[" + _i0 + "]"}>
+                    {!(_text(order?.id).trim() === "") ? _squash(_text(order?.id)) : ""}
+                  </div>
+                </td>
+                <td data-weft-id={"order-total[" + _i0 + "]"}>
+                  <div data-weft-id={"order-total-text[" + _i0 + "]"}>
+                    {!(_text(order?.total).trim() === "") ? _squash(_text(order?.total)) : ""}
+                  </div>
+                </td>
+              </tr>
+            ),
+          ]),
+        ];
+        return (
+          <table data-weft-id="orders" data-state="ready" aria-label="Recent orders">
+            {_cols.length > 0 ? (
+              <thead>
+                <tr>
+                  {_keyed(_cols)}
+                </tr>
+              </thead>
+            ) : null}
+            {!(_list(data?.orders).length > 0) ? (
+              <tbody>
+                <tr data-weft-slot="empty">
+                  <td colSpan={Math.max(1, _cols.length)}>
+                    <div data-weft-id="orders-empty">No orders yet.</div>
+                    <button data-weft-id="orders-shop" type="button" onClick={(_e) => _act(actions, { id: "orders-shop", action: "nav.shop" })}>Start shopping</button>
+                  </td>
+                </tr>
+              </tbody>
+            ) : _rows.length > 0 ? (
+              <tbody>
+                {_keyed(_rows)}
+              </tbody>
+            ) : null}
+          </table>
+        );
+      })()}
+    </main>
+  );
+}

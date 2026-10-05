@@ -1,0 +1,68 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-profile as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value: string): string | undefined {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="profile" aria-label="Profile">
+      <img data-weft-id="avatar" alt="Profile photo" src={_url(_text(data?.user?.avatar))} />
+      <h1 data-weft-id="name">
+        {!(_text(data?.user?.name).trim() === "") ? _squash(_text(data?.user?.name)) : ""}
+      </h1>
+      <div data-weft-id="bio">
+        {!(_text(data?.user?.bio).trim() === "") ? _squash(_text(data?.user?.bio)) : ""}
+      </div>
+      <h2 data-weft-id="links-title">Links</h2>
+      <div data-weft-id="links" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row" }}>
+        {(() => {
+          const _href = _url(_text(data?.user?.website));
+          return (
+            <a data-weft-id="website" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: "inline-block" }}>Website</a>
+          );
+        })()}
+        {(() => {
+          const _href = _url(_text(data?.user?.github));
+          return (
+            <a data-weft-id="github" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: "inline-block" }}>GitHub</a>
+          );
+        })()}
+      </div>
+      <button data-weft-id="edit" type="button" onClick={(_e) => _act(actions, { id: "edit", action: "profile.edit" })}>Edit profile</button>
+    </main>
+  );
+}

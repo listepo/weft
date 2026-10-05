@@ -1,0 +1,68 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-settings as solid-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="settings" aria-label="Settings">
+      <h1 data-weft-id="title">Settings</h1>
+      <section data-weft-id="notifications" aria-label="Notifications">
+        <h2 data-weft-id="notifications-title">Notifications</h2>
+        <label>
+          <input data-weft-id="email-alerts" type="checkbox" role="switch" aria-label="Email alerts" checked={_on(props.data?.emailAlerts)} onChange={(_e) => props.onChange?.("$.emailAlerts", _e.currentTarget.checked)} />
+          <span aria-hidden="true">Email alerts</span>
+        </label>
+        <label>
+          <input data-weft-id="push-alerts" type="checkbox" role="switch" aria-label="Push notifications" checked={_on(props.data?.pushAlerts)} onChange={(_e) => props.onChange?.("$.pushAlerts", _e.currentTarget.checked)} />
+          <span aria-hidden="true">Push notifications</span>
+        </label>
+      </section>
+      <section data-weft-id="appearance" aria-label="Appearance">
+        <h2 data-weft-id="appearance-title">Appearance</h2>
+        <label>
+          <span aria-hidden="true">Language</span>
+          {(() => {
+            const _o = [
+              { value: "en", el: (
+                <option data-weft-id="lang-en" selected={"en" === _text(props.data?.language)} value="en">English</option>
+              ) },
+              { value: "de", el: (
+                <option data-weft-id="lang-de" selected={"de" === _text(props.data?.language)} value="de">Deutsch</option>
+              ) },
+              { value: "fr", el: (
+                <option data-weft-id="lang-fr" selected={"fr" === _text(props.data?.language)} value="fr">Français</option>
+              ) },
+            ];
+            return (
+              <select data-weft-id="language" aria-label="Language" value={_text(props.data?.language)} onChange={(_e) => { const _c = _o.find((_x) => _text(_x.value) === _e.currentTarget.value); props.onChange?.("$.language", _c ? _c.value : _e.currentTarget.value); }}>
+                {_o.map((_x) => _x.el)}
+              </select>
+            );
+          })()}
+        </label>
+        <label>
+          <input data-weft-id="dark-mode" type="checkbox" role="switch" aria-label="Dark mode" checked={_on(props.data?.darkMode)} onChange={(_e) => props.onChange?.("$.darkMode", _e.currentTarget.checked)} />
+          <span aria-hidden="true">Dark mode</span>
+        </label>
+      </section>
+      <button data-weft-id="save" type="button" disabled={!_on(props.data?.dirty)} data-variant="primary" onClick={(_e) => _act(props.actions, { id: "save", action: "settings.save" })}>Save changes</button>
+    </main>
+  );
+}

@@ -1,0 +1,29 @@
+FRAME "screen#account-menu" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#account-menu)
+  | weft.source = {"kind":"screen","id":"account-menu","props":{"label":"Account menu"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "text#signed-in" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+    | weft.origin = layer(text#signed-in)
+    | weft.source = {"kind":"text","id":"signed-in","props":{"text":{"bind":"$.user.email"}},"shown":{"text":"{$.user.email}"}}
+    TEXT "text" chars="{$.user.email}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "menu#menu" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(menu#menu)
+    | weft.source = {"kind":"menu","id":"menu","props":{"label":"Account"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    INSTANCE "menu-item#item-profile" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<menu-item>"
+      | weft.origin = layer(menu-item#item-profile)
+      | weft.source = {"kind":"menu-item","id":"item-profile","on":{"press":"nav.profile"},"children":["Profile"],"shown":{"text":"Profile"}}
+      TEXT "text" chars="Profile" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "menu-item#item-settings" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<menu-item>"
+      | weft.origin = layer(menu-item#item-settings)
+      | weft.source = {"kind":"menu-item","id":"item-settings","on":{"press":"nav.settings"},"children":["Settings"],"shown":{"text":"Settings"}}
+      TEXT "text" chars="Settings" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "menu-item#item-billing" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<menu-item>"
+      | weft.origin = layer(menu-item#item-billing)
+      | weft.source = {"kind":"menu-item","id":"item-billing","props":{"disabled":{"bind":"$.isOwner","not":true}},"on":{"press":"nav.billing"},"children":["Billing"],"shown":{"text":"Billing"}}
+      TEXT "text" chars="Billing" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "menu-item#item-signout" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<menu-item>"
+      | weft.origin = layer(menu-item#item-signout)
+      | weft.source = {"kind":"menu-item","id":"item-signout","on":{"press":"auth.signout"},"children":["Sign out"],"shown":{"text":"Sign out"}}
+      TEXT "text" chars="Sign out" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

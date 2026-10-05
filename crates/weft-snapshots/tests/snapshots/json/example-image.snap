@@ -1,0 +1,26 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-image as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Profile"
+    },
+    "children": [
+      {
+        "kind": "image",
+        "id": "avatar",
+        "props": {
+          "label": "Profile photo of the user",
+          "src": {
+            "bind": "$.user.avatar"
+          }
+        }
+      }
+    ]
+  }
+}

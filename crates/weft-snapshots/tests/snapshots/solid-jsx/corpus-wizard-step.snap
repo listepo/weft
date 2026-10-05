@@ -1,0 +1,54 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-wizard-step as solid-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="wizard" aria-label="Setup wizard">
+      <h1 data-weft-id="title">Choose a plan</h1>
+      <div data-weft-id="progress">
+        {!(_text(props.data?.progress).trim() === "") ? _squash(_text(props.data?.progress)) : ""}
+      </div>
+      <div data-weft-id="plan" aria-label="Plan" role="radiogroup">
+        <span aria-hidden="true">Plan</span>
+        <label>
+          <input data-weft-id="plan-free" type="radio" name={"weft-plan"} value="free" aria-label="Free" checked={_text(props.data?.plan) !== "" && "free" === _text(props.data?.plan)} onChange={() => props.onChange?.("$.plan", "free")} />
+          <span aria-hidden="true">Free</span>
+        </label>
+        <label>
+          <input data-weft-id="plan-pro" type="radio" name={"weft-plan"} value="pro" aria-label="Pro" checked={_text(props.data?.plan) !== "" && "pro" === _text(props.data?.plan)} onChange={() => props.onChange?.("$.plan", "pro")} />
+          <span aria-hidden="true">Pro</span>
+        </label>
+        <label>
+          <input data-weft-id="plan-team" type="radio" name={"weft-plan"} value="team" aria-label="Team" checked={_text(props.data?.plan) !== "" && "team" === _text(props.data?.plan)} onChange={() => props.onChange?.("$.plan", "team")} />
+          <span aria-hidden="true">Team</span>
+        </label>
+      </div>
+      <div data-weft-id="nav" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "row" }}>
+        <button data-weft-id="back" type="button" onClick={(_e) => _act(props.actions, { id: "back", action: "wizard.back" })}>Back</button>
+        <button data-weft-id="next" type="button" disabled={!_on(props.data?.plan)} data-variant="primary" onClick={(_e) => _act(props.actions, { id: "next", action: "wizard.next" })}>Next</button>
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,163 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-data-table as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "users",
+    "props": {
+      "label": "Users"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Users"
+        ]
+      },
+      {
+        "kind": "table",
+        "id": "table",
+        "props": {
+          "label": "Users"
+        },
+        "children": [
+          {
+            "kind": "column",
+            "id": "col-name",
+            "props": {
+              "sort": "ascending"
+            },
+            "on": {
+              "press": "users.sort"
+            },
+            "children": [
+              "Name"
+            ]
+          },
+          {
+            "kind": "column",
+            "id": "col-email",
+            "props": {
+              "sort": "none"
+            },
+            "on": {
+              "press": "users.sort"
+            },
+            "children": [
+              "Email"
+            ]
+          },
+          {
+            "kind": "column",
+            "id": "col-role",
+            "props": {
+              "sort": "none"
+            },
+            "on": {
+              "press": "users.sort"
+            },
+            "children": [
+              "Role"
+            ]
+          },
+          {
+            "kind": "column",
+            "id": "col-actions",
+            "children": [
+              "Actions"
+            ]
+          },
+          {
+            "kind": "each",
+            "id": "rows",
+            "props": {
+              "as": "user",
+              "in": {
+                "bind": "$.users"
+              }
+            },
+            "children": [
+              {
+                "kind": "row",
+                "id": "row",
+                "children": [
+                  {
+                    "kind": "cell",
+                    "id": "cell-name",
+                    "children": [
+                      {
+                        "kind": "text",
+                        "id": "user-name",
+                        "props": {
+                          "text": {
+                            "bind": "$user.name"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "cell",
+                    "id": "cell-email",
+                    "children": [
+                      {
+                        "kind": "text",
+                        "id": "user-email",
+                        "props": {
+                          "text": {
+                            "bind": "$user.email"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "cell",
+                    "id": "cell-role",
+                    "children": [
+                      {
+                        "kind": "text",
+                        "id": "user-role",
+                        "props": {
+                          "text": {
+                            "bind": "$user.role"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "cell",
+                    "id": "cell-actions",
+                    "children": [
+                      {
+                        "kind": "button",
+                        "id": "delete",
+                        "props": {
+                          "variant": "danger"
+                        },
+                        "on": {
+                          "press": "users.delete"
+                        },
+                        "children": [
+                          "Delete"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

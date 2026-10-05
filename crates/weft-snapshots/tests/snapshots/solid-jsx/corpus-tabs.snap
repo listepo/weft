@@ -1,0 +1,104 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-tabs as solid-jsx
+---
+import { For } from "solid-js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _busy(state) {
+  return state === "loading" || state === "busy" || state === "submitting" ? "true" : undefined;
+}
+
+function _tabKey(e, i, count, choose) {
+  const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+  if (step === 0 || count === 0) return;
+  e.preventDefault();
+  const next = (i + step + count) % count;
+  choose(next);
+  e.currentTarget.parentElement?.querySelectorAll('[role="tab"]')[next]?.focus();
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="account" aria-label="Account">
+      <h1 data-weft-id="title">Account</h1>
+      {(() => {
+        const _t = [
+          { id: "tab-overview", doc: "tab-overview", state: "", label: "Overview", panel: (
+            <>
+              <div data-weft-id="account-name">
+                {!(_text(props.data?.account?.name).trim() === "") ? _squash(_text(props.data?.account?.name)) : ""}
+              </div>
+              <div data-weft-id="account-email">
+                {!(_text(props.data?.account?.email).trim() === "") ? _squash(_text(props.data?.account?.email)) : ""}
+              </div>
+            </>
+          ) },
+          { id: "tab-billing", doc: "tab-billing", state: "", label: "Billing", panel: (
+            <>
+              <div data-weft-id="plan">
+                {!(_text(props.data?.billing?.plan).trim() === "") ? _squash(_text(props.data?.billing?.plan)) : ""}
+              </div>
+              <button data-weft-id="change-plan" type="button" data-variant="primary" onClick={(_e) => _act(props.actions, { id: "change-plan", action: "billing.change" })}>Change plan</button>
+            </>
+          ) },
+          { id: "tab-team", doc: "tab-team", state: "", label: "Team", panel: (
+            <>
+              <ul data-weft-id="members">
+                <For each={_list(props.data?.team)}>
+                  {(member, _i0) => (
+                    <>
+                      <li data-weft-id={"member[" + _i0() + "]"}>
+                        <div data-weft-id={"member-name[" + _i0() + "]"}>
+                          {!(_text(member?.name).trim() === "") ? _squash(_text(member?.name)) : ""}
+                        </div>
+                      </li>
+                    </>
+                  )}
+                </For>
+              </ul>
+            </>
+          ) },
+        ];
+        const _s = Math.max(0, _t.findIndex((_x) => _x.doc === "" || _x.id === ""));
+        const _choose = (_k) => { const _x = _t[_k]; if (!_x || _k === _s) return; };
+        return (
+          <div data-weft-tabs="">
+            <div data-weft-id="tabs" aria-label="Account sections" role="tablist">
+              {_t.map((_x, _k) => (
+                <button data-weft-id={_x.id || undefined} data-state={_x.state || undefined} aria-busy={_busy(_x.state)} type="button" role="tab" id={"weft-" + _x.id + "-tab"} aria-selected={String(_k === _s)} aria-controls={"weft-" + _x.id + "-panel"} tabindex={_k === _s ? 0 : -1} onClick={() => _choose(_k)} onKeyDown={(_e) => _tabKey(_e, _k, _t.length, _choose)}>
+                  {_x.label}
+                </button>
+              ))}
+            </div>
+            {_t.map((_x, _k) => (
+              <div role="tabpanel" id={"weft-" + _x.id + "-panel"} aria-labelledby={"weft-" + _x.id + "-tab"} hidden={_k !== _s} tabindex={0}>
+                {_x.panel}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+    </main>
+  );
+}

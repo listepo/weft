@@ -183,7 +183,10 @@ describe("the plugin folder as Cursor caches it", () => {
   /** An empty directory that is neither the plugin nor the repository, like a user's project. */
   const project = join(scratch, "project");
   const corpus = join(ROOT, "corpus");
-  const screen = readdirSync(corpus, { withFileTypes: true }).find((e) => e.isDirectory())?.name;
+  // Coverage screens have no hand-written page (corpus/README.md); the import needs one.
+  const screen = readdirSync(corpus, { withFileTypes: true }).find(
+    (e) => e.isDirectory() && existsSync(join(corpus, e.name, "screen.html")),
+  )?.name;
   assert.ok(screen);
 
   beforeAll(() => {

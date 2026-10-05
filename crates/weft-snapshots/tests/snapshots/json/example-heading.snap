@@ -1,0 +1,36 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-heading as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Settings"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Settings"
+        ]
+      },
+      {
+        "kind": "heading",
+        "id": "subtitle",
+        "props": {
+          "level": 2,
+          "text": {
+            "bind": "$.section.title"
+          }
+        }
+      }
+    ]
+  }
+}

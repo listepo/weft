@@ -1,0 +1,48 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-menu-item as solid-jsx
+---
+import { For } from "solid-js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="root" aria-label="Document">
+      <div data-weft-id="actions" aria-label="Document actions" role="menu">
+        <For each={_list(props.data?.actions)}>
+          {(action, _i0) => (
+            <>
+              <button data-weft-id={"action-item[" + _i0() + "]"} type="button" role="menuitem" disabled={!_on(action?.enabled)} onClick={() => _act(props.actions, { id: "action-item[" + _i0() + "]", action: "doc.run", item: "$.actions." + _i0() })}>
+                {!(_text(action?.label).trim() === "") ? _squash(_text(action?.label)) : ""}
+              </button>
+            </>
+          )}
+        </For>
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,12 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-screen as solid-jsx
+---
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="root" data-state="ready" aria-label="Home">
+      <h1 data-weft-id="title">Welcome back</h1>
+      <div data-weft-id="intro">Pick up where you left off.</div>
+    </main>
+  );
+}

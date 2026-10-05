@@ -1,0 +1,74 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-todo-list as solid-jsx
+---
+import { For, Show } from "solid-js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="todos" aria-label="Tasks">
+      <h1 data-weft-id="title">Tasks</h1>
+      <form data-weft-id="add-form" onSubmit={(_e) => { _e.preventDefault(); _act(props.actions, { id: "add-form", action: "todo.add" }); }}>
+        <div data-weft-id="add-row" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "row" }}>
+          <div data-weft-field="">
+            <label>
+              <span aria-hidden="true">New task</span>
+              <input data-weft-id="draft" aria-label="New task" type="text" value={_text(props.data?.draft)} onInput={(_e) => props.onChange?.("$.draft", _e.currentTarget.value)} />
+            </label>
+          </div>
+          <button data-weft-id="add" type="submit" disabled={!_on(props.data?.draft)} data-variant="primary" onClick={(_e) => { _e.preventDefault(); _act(props.actions, { id: "add-form", action: "todo.add" }); }}>Add</button>
+        </div>
+      </form>
+      <ul data-weft-id="list">
+        <For each={_list(props.data?.todos)}>
+          {(todo, _i0) => (
+            <>
+              <li data-weft-id={"todo[" + _i0() + "]"}>
+                <label>
+                  <input data-weft-id={"todo-done[" + _i0() + "]"} type="checkbox" aria-label={_text(todo?.title).trim()} checked={_on(todo?.done)} onChange={(_e) => props.onChange?.("$.todos." + _i0() + ".done", _e.currentTarget.checked)} />
+                  <Show when={_text(todo?.title).trim()}>
+                    <span aria-hidden="true">
+                      {_text(todo?.title).trim()}
+                    </span>
+                  </Show>
+                </label>
+                <button data-weft-id={"todo-remove[" + _i0() + "]"} type="button" onClick={(_e) => _act(props.actions, { id: "todo-remove[" + _i0() + "]", action: "todo.remove", item: "$.todos." + _i0() })}>Remove</button>
+              </li>
+            </>
+          )}
+        </For>
+      </ul>
+      <div data-weft-id="summary" style={{ gap: "var(--weft-space-xs)", display: "flex", "flex-direction": "row" }}>
+        <div data-weft-id="remaining">
+          {!(_text(props.data?.remaining).trim() === "") ? _squash(_text(props.data?.remaining)) : ""}
+        </div>
+        <div data-weft-id="remaining-label">items left</div>
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,101 @@
+FRAME "screen#inbox" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#inbox)
+  | weft.source = {"kind":"screen","id":"inbox","props":{"label":"Inbox","state":"loading"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  FRAME "tabs#folders" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(tabs#folders)
+    | weft.source = {"kind":"tabs","id":"folders","props":{"selected":{"bind":"$.folder"}},"on":{"change":"inbox.folder"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    FRAME "tab#tab-inbox" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(tab#tab-inbox)
+      | weft.source = {"kind":"tab","id":"tab-inbox","props":{"label":"Inbox"},"shown":{"label":"Inbox"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Inbox" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      FRAME "list#messages" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(list#messages)
+        | weft.source = {"kind":"list","id":"messages","props":{"ordered":true,"state":"ready"}}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        FRAME "each#message-each" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+          | weft.origin = layer(each#message-each)
+          | weft.source = {"kind":"each","id":"message-each","props":{"as":"message","in":{"bind":"$.messages"}}}
+          | weft.style = [[],[],0,[0,0,0,0],0]
+          FRAME "item#message" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+            | weft.origin = layer(item#message)
+            | weft.source = {"kind":"item","id":"message","props":{"text":{"bind":"$message.subject"}},"on":{"press":"inbox.open"}}
+            | weft.style = [[],[],0,[8,8,8,8],8]
+        FRAME "slot:empty" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+          | weft.slot = empty
+          INSTANCE "text#no-messages" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+            | weft.origin = layer(text#no-messages)
+            | weft.source = {"kind":"text","id":"no-messages","children":["No messages."],"shown":{"text":"No messages."}}
+            TEXT "text" chars="No messages." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "tab#tab-drafts" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(tab#tab-drafts)
+      | weft.source = {"kind":"tab","id":"tab-drafts","props":{"label":{"bind":"$.labels.drafts"}},"shown":{"label":"{$.labels.drafts}"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="{$.labels.drafts}" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      FRAME "list#drafts" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(list#drafts)
+        | weft.source = {"kind":"list","id":"drafts","props":{"state":"empty"}}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        FRAME "slot:empty" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+          | weft.slot = empty
+          INSTANCE "text#no-drafts" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+            | weft.origin = layer(text#no-drafts)
+            | weft.source = {"kind":"text","id":"no-drafts","children":["No drafts."],"shown":{"text":"No drafts."}}
+            TEXT "text" chars="No drafts." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "tab#tab-sent" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(tab#tab-sent)
+      | weft.source = {"kind":"tab","id":"tab-sent","props":{"label":"Sent"},"shown":{"label":"Sent"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Sent" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      FRAME "list#sent" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(list#sent)
+        | weft.source = {"kind":"list","id":"sent","props":{"state":"loading"}}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        FRAME "item#sent-loading" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+          | weft.origin = layer(item#sent-loading)
+          | weft.source = {"kind":"item","id":"sent-loading"}
+          | weft.style = [[],[],0,[8,8,8,8],8]
+          TEXT "text" chars="Loading…" size=14
+            | weft.text = 1
+  FRAME "menu#message-actions" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(menu#message-actions)
+    | weft.source = {"kind":"menu","id":"message-actions","props":{"label":"Message actions"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    INSTANCE "menu-item#archive" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<menu-item>"
+      | weft.origin = layer(menu-item#archive)
+      | weft.source = {"kind":"menu-item","id":"archive","props":{"text":{"bind":"$.labels.archive"}},"on":{"press":"inbox.archive"},"shown":{"text":"{$.labels.archive}"}}
+      TEXT "text" chars="{$.labels.archive}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "menu-item#delete" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<menu-item>"
+      | weft.origin = layer(menu-item#delete)
+      | weft.source = {"kind":"menu-item","id":"delete","props":{"disabled":{"bind":"$.selection","not":true}},"on":{"press":"inbox.delete"},"children":["Delete"],"shown":{"text":"Delete"}}
+      TEXT "text" chars="Delete" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "dialog#compose" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=16 paddingBottom=16
+    | weft.origin = layer(dialog#compose)
+    | weft.source = {"kind":"dialog","id":"compose","props":{"label":"New message","modal":false,"open":{"bind":"$.composing"}},"on":{"close":"inbox.closeCompose"}}
+    | weft.style = [[],[],0,[16,16,16,16],8]
+    FRAME "form#compose-form" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.origin = layer(form#compose-form)
+      | weft.source = {"kind":"form","id":"compose-form","props":{"state":"submitting"},"on":{"submit":"inbox.send"}}
+      | weft.style = [[],[],0,[0,0,0,0],8]
+      INSTANCE "field#to" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=email, state=(unset)>"
+        | weft.origin = layer(field#to)
+        | weft.source = {"kind":"field","id":"to","props":{"label":"To","type":"email","value":{"bind":"$.draft.to"}},"shown":{"text":"","label":"To"}}
+        TEXT "label" chars="To"
+        FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+      INSTANCE "field#body" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=multiline, state=(unset)>"
+        | weft.origin = layer(field#body)
+        | weft.source = {"kind":"field","id":"body","props":{"label":"Message","type":"multiline","value":{"bind":"$.draft.body"}},"shown":{"text":"","label":"Message"}}
+        TEXT "label" chars="Message"
+        FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+    FRAME "slot:actions" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.slot = actions
+      INSTANCE "button#send" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+        | weft.origin = layer(button#send)
+        | weft.source = {"kind":"button","id":"send","props":{"variant":"primary"},"on":{"press":"inbox.send"},"children":["Send"],"shown":{"text":"Send"}}
+        TEXT "text" chars="Send" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]

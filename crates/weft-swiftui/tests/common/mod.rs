@@ -18,7 +18,13 @@ pub fn root() -> PathBuf {
     PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/../.."))
 }
 
-pub fn screens() -> Vec<Screen> {
+/// Screens the generator refuses by design: an array-index binding path has no SwiftUI model
+/// property to bind (`generate` says to iterate with `<each>` instead). `swift.rs` checks the
+/// refusal; every other test skips them.
+pub const REFUSED: &[&str] = &["corpus/leaderboard"];
+
+/// Every screen, including the ones in [`REFUSED`].
+pub fn all_screens() -> Vec<Screen> {
     let mut out = vec![];
     let mut corpus: Vec<_> = std::fs::read_dir(root().join("corpus"))
         .unwrap()
@@ -62,6 +68,14 @@ pub fn screens() -> Vec<Screen> {
     }
     assert!(out.len() > 30, "found only {} screens", out.len());
     out
+}
+
+/// The screens the generator supports.
+pub fn screens() -> Vec<Screen> {
+    all_screens()
+        .into_iter()
+        .filter(|s| !REFUSED.contains(&s.name.as_str()))
+        .collect()
 }
 
 pub fn catalog() -> Catalog {

@@ -17,3 +17,4 @@ plugins/xcode/Artifacts/
 .swiftpm/
 DerivedData/
 *.xcodeproj/
+packages/visual/diffs/

@@ -1,0 +1,65 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-leaderboard as react-tsx
+---
+import { Fragment } from "react";
+
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _get(value: any, path: string[]): any {
+  for (const key of path) {
+    if (Array.isArray(value)) value = /^\d+$/.test(key) ? value[Number(key)] : undefined;
+    else if (typeof value === "object" && value !== null && Object.hasOwn(value, key)) value = value[key];
+    else return undefined;
+  }
+  return value;
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v: unknown): any[] {
+  return Array.isArray(v) ? v : [];
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="leaderboard" aria-label="Leaderboard">
+      <h1 data-weft-id="title">Leaderboard</h1>
+      <div data-weft-id="leader" style={{ gap: "var(--weft-space-xs)", display: "flex", flexDirection: "row" }}>
+        <div data-weft-id="leader-label">In the lead:</div>
+        <div data-weft-id="leader-name">
+          {!(_text(_get(data, ["players","0","name"])).trim() === "") ? _squash(_text(_get(data, ["players","0","name"]))) : ""}
+        </div>
+      </div>
+      <ol data-weft-id="players">
+        {_list(data?.players).map((player, _i0) => (
+          <Fragment key={_i0}>
+            <li data-weft-id={"player[" + _i0 + "]"}>
+              <div data-weft-id={"player-name[" + _i0 + "]"}>
+                {!(_text(player?.name).trim() === "") ? _squash(_text(player?.name)) : ""}
+              </div>
+              <div data-weft-id={"player-score[" + _i0 + "]"} data-tone="muted">
+                {!(_text(player?.score).trim() === "") ? _squash(_text(player?.score)) : ""}
+              </div>
+            </li>
+          </Fragment>
+        ))}
+      </ol>
+    </main>
+  );
+}

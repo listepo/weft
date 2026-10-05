@@ -1,0 +1,243 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-inbox as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "inbox",
+    "props": {
+      "label": "Inbox",
+      "state": "loading"
+    },
+    "children": [
+      {
+        "kind": "tabs",
+        "id": "folders",
+        "props": {
+          "selected": {
+            "bind": "$.folder"
+          }
+        },
+        "on": {
+          "change": "inbox.folder"
+        },
+        "children": [
+          {
+            "kind": "tab",
+            "id": "tab-inbox",
+            "props": {
+              "label": "Inbox"
+            },
+            "children": [
+              {
+                "kind": "list",
+                "id": "messages",
+                "props": {
+                  "ordered": true,
+                  "state": "ready"
+                },
+                "slots": {
+                  "empty": [
+                    {
+                      "kind": "text",
+                      "id": "no-messages",
+                      "children": [
+                        "No messages."
+                      ]
+                    }
+                  ]
+                },
+                "children": [
+                  {
+                    "kind": "each",
+                    "id": "message-each",
+                    "props": {
+                      "as": "message",
+                      "in": {
+                        "bind": "$.messages"
+                      }
+                    },
+                    "children": [
+                      {
+                        "kind": "item",
+                        "id": "message",
+                        "props": {
+                          "text": {
+                            "bind": "$message.subject"
+                          }
+                        },
+                        "on": {
+                          "press": "inbox.open"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "tab",
+            "id": "tab-drafts",
+            "props": {
+              "label": {
+                "bind": "$.labels.drafts"
+              }
+            },
+            "children": [
+              {
+                "kind": "list",
+                "id": "drafts",
+                "props": {
+                  "state": "empty"
+                },
+                "slots": {
+                  "empty": [
+                    {
+                      "kind": "text",
+                      "id": "no-drafts",
+                      "children": [
+                        "No drafts."
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "kind": "tab",
+            "id": "tab-sent",
+            "props": {
+              "label": "Sent"
+            },
+            "children": [
+              {
+                "kind": "list",
+                "id": "sent",
+                "props": {
+                  "state": "loading"
+                },
+                "children": [
+                  {
+                    "kind": "item",
+                    "id": "sent-loading",
+                    "children": [
+                      "Loading…"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "menu",
+        "id": "message-actions",
+        "props": {
+          "label": "Message actions"
+        },
+        "children": [
+          {
+            "kind": "menu-item",
+            "id": "archive",
+            "props": {
+              "text": {
+                "bind": "$.labels.archive"
+              }
+            },
+            "on": {
+              "press": "inbox.archive"
+            }
+          },
+          {
+            "kind": "menu-item",
+            "id": "delete",
+            "props": {
+              "disabled": {
+                "bind": "$.selection",
+                "not": true
+              }
+            },
+            "on": {
+              "press": "inbox.delete"
+            },
+            "children": [
+              "Delete"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "dialog",
+        "id": "compose",
+        "props": {
+          "label": "New message",
+          "modal": false,
+          "open": {
+            "bind": "$.composing"
+          }
+        },
+        "on": {
+          "close": "inbox.closeCompose"
+        },
+        "slots": {
+          "actions": [
+            {
+              "kind": "button",
+              "id": "send",
+              "props": {
+                "variant": "primary"
+              },
+              "on": {
+                "press": "inbox.send"
+              },
+              "children": [
+                "Send"
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "form",
+            "id": "compose-form",
+            "props": {
+              "state": "submitting"
+            },
+            "on": {
+              "submit": "inbox.send"
+            },
+            "children": [
+              {
+                "kind": "field",
+                "id": "to",
+                "props": {
+                  "label": "To",
+                  "type": "email",
+                  "value": {
+                    "bind": "$.draft.to"
+                  }
+                }
+              },
+              {
+                "kind": "field",
+                "id": "body",
+                "props": {
+                  "label": "Message",
+                  "type": "multiline",
+                  "value": {
+                    "bind": "$.draft.body"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

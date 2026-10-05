@@ -14,6 +14,10 @@ corpus/tasks.json    edit tasks and comprehension questions with machine-checkab
 
 Screens: login, signup, settings, data-table, tabs, confirm-dialog, wizard-step, search-results, todo-list, profile, menu, error-state.
 
+## Coverage screens
+
+Five more screens exist only as `screen.weft` and `data.json`: dashboard, account, orders, inbox, leaderboard. Together with the twelve above they use every catalog kind, prop, enum value, state, event and slot, every binding form (literal, `{{` escaped literal, `{$.path}`, `{!$.path}`, a loop path, an array-index segment, `<each>`, bound and literal `hidden`) and every token type, which a Rust test checks. The generators, importers, snapshots and screenshots run over all seventeen; `bench/` does not use them, so they have no HTML, JSX or A2UI version. leaderboard holds the array-index binding, which the SwiftUI generator refuses, so the SwiftUI tests skip it and check the refusal instead.
+
 ## How the files were produced
 
 `screen.weft` was written by hand. The first versions of the other three formats were derived from it by a throwaway transpiler that was never committed. Since then every file is edited by hand, and a change to a screen is made in all four formats in the same commit (the T9 revision, for example, rewrote the search results empty state in all four).

@@ -1,0 +1,108 @@
+board "screen#inbox" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#inbox>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#inbox)
+  | weft/weft.source = {"kind":"screen","id":"inbox","props":{"label":"Inbox","state":"loading"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "tabs#folders" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<tabs#folders>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(tabs#folders)
+    | weft/weft.source = {"kind":"tabs","id":"folders","props":{"selected":{"bind":"$.folder"}},"on":{"change":"inbox.folder"}}
+    | weft/weft.style = [[],[],0,[8,8,8,8],8]
+    board "tab#tab-inbox" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<tab#tab-inbox>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(tab#tab-inbox)
+      | weft/weft.source = {"kind":"tab","id":"tab-inbox","props":{"label":"Inbox"},"shown":{"label":"Inbox"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]
+      text "label" fontWeight="700" growType="auto-width" text="Inbox"
+        | weft/weft.label = 1
+      board "list#messages" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<list#messages>","dir":"column","wrap":"nowrap"}
+        | weft/weft.origin = shape(list#messages)
+        | weft/weft.source = {"kind":"list","id":"messages","props":{"ordered":true,"state":"ready"}}
+        | weft/weft.style = [[],[],0,[8,8,8,8],8]
+        board "each#message-each" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<each#message-each>","dir":"column","wrap":"nowrap"}
+          | weft/weft.origin = shape(each#message-each)
+          | weft/weft.source = {"kind":"each","id":"message-each","props":{"as":"message","in":{"bind":"$.messages"}}}
+          | weft/weft.style = [[],[],0,[0,0,0,0],0]
+          board "item#message" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<item#message>","dir":"column","wrap":"nowrap"}
+            | weft/weft.origin = shape(item#message)
+            | weft/weft.source = {"kind":"item","id":"message","props":{"text":{"bind":"$message.subject"}},"on":{"press":"inbox.open"}}
+            | weft/weft.style = [[],[],0,[8,8,8,8],8]
+        board "slot:empty" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:empty>","dir":"column","wrap":"nowrap"}
+          | weft/weft.slot = empty
+          board "text#no-messages" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#no-messages>","dir":"column"}
+            | weft/weft.kind = text
+            | weft/weft.origin = shape(text#no-messages)
+            | weft/weft.source = {"kind":"text","id":"no-messages","children":["No messages."],"shown":{"text":"No messages."}}
+            text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="No messages."
+    board "tab#tab-drafts" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<tab#tab-drafts>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(tab#tab-drafts)
+      | weft/weft.source = {"kind":"tab","id":"tab-drafts","props":{"label":{"bind":"$.labels.drafts"}},"shown":{"label":"{$.labels.drafts}"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]
+      text "label" fontWeight="700" growType="auto-width" text="{$.labels.drafts}"
+        | weft/weft.label = 1
+      board "list#drafts" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<list#drafts>","dir":"column","wrap":"nowrap"}
+        | weft/weft.origin = shape(list#drafts)
+        | weft/weft.source = {"kind":"list","id":"drafts","props":{"state":"empty"}}
+        | weft/weft.style = [[],[],0,[8,8,8,8],8]
+        board "slot:empty" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:empty>","dir":"column","wrap":"nowrap"}
+          | weft/weft.slot = empty
+          board "text#no-drafts" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#no-drafts>","dir":"column"}
+            | weft/weft.kind = text
+            | weft/weft.origin = shape(text#no-drafts)
+            | weft/weft.source = {"kind":"text","id":"no-drafts","children":["No drafts."],"shown":{"text":"No drafts."}}
+            text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="No drafts."
+    board "tab#tab-sent" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<tab#tab-sent>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(tab#tab-sent)
+      | weft/weft.source = {"kind":"tab","id":"tab-sent","props":{"label":"Sent"},"shown":{"label":"Sent"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]
+      text "label" fontWeight="700" growType="auto-width" text="Sent"
+        | weft/weft.label = 1
+      board "list#sent" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<list#sent>","dir":"column","wrap":"nowrap"}
+        | weft/weft.origin = shape(list#sent)
+        | weft/weft.source = {"kind":"list","id":"sent","props":{"state":"loading"}}
+        | weft/weft.style = [[],[],0,[8,8,8,8],8]
+        board "item#sent-loading" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<item#sent-loading>","dir":"column","wrap":"nowrap"}
+          | weft/weft.origin = shape(item#sent-loading)
+          | weft/weft.source = {"kind":"item","id":"sent-loading"}
+          | weft/weft.style = [[],[],0,[8,8,8,8],8]
+          text "text" growType="auto-width" text="Loading…"
+            | weft/weft.text = 1
+  board "menu#message-actions" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<menu#message-actions>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(menu#message-actions)
+    | weft/weft.source = {"kind":"menu","id":"message-actions","props":{"label":"Message actions"}}
+    | weft/weft.style = [[],[],0,[8,8,8,8],8]
+    board "menu-item#archive" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<menu-item>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<menu-item#archive>","dir":"column"}
+      | weft/weft.kind = menu-item
+      | weft/weft.origin = shape(menu-item#archive)
+      | weft/weft.source = {"kind":"menu-item","id":"archive","props":{"text":{"bind":"$.labels.archive"}},"on":{"press":"inbox.archive"},"shown":{"text":"{$.labels.archive}"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.labels.archive}"
+    board "menu-item#delete" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<menu-item>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<menu-item#delete>","dir":"column"}
+      | weft/weft.kind = menu-item
+      | weft/weft.origin = shape(menu-item#delete)
+      | weft/weft.source = {"kind":"menu-item","id":"delete","props":{"disabled":{"bind":"$.selection","not":true}},"on":{"press":"inbox.delete"},"children":["Delete"],"shown":{"text":"Delete"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Delete"
+  board "dialog#compose" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":16,"rightPadding":16,"bottomPadding":16,"leftPadding":16},"owner":"<dialog#compose>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(dialog#compose)
+    | weft/weft.source = {"kind":"dialog","id":"compose","props":{"label":"New message","modal":false,"open":{"bind":"$.composing"}},"on":{"close":"inbox.closeCompose"}}
+    | weft/weft.style = [[],[],0,[16,16,16,16],8]
+    board "form#compose-form" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<form#compose-form>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(form#compose-form)
+      | weft/weft.source = {"kind":"form","id":"compose-form","props":{"state":"submitting"},"on":{"submit":"inbox.send"}}
+      | weft/weft.style = [[],[],0,[0,0,0,0],8]
+      board "field#to" inCopy=true head=true componentOf="<type=email, state=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#to>","dir":"column"}
+        | weft/weft.kind = field
+        | weft/weft.origin = shape(field#to)
+        | weft/weft.source = {"kind":"field","id":"to","props":{"label":"To","type":"email","value":{"bind":"$.draft.to"}},"shown":{"text":"","label":"To"}}
+        text "label" inCopy=true fontSize="12" growType="auto-width" text="To"
+        board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+      board "field#body" inCopy=true head=true componentOf="<type=multiline, state=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#body>","dir":"column"}
+        | weft/weft.kind = field
+        | weft/weft.origin = shape(field#body)
+        | weft/weft.source = {"kind":"field","id":"body","props":{"label":"Message","type":"multiline","value":{"bind":"$.draft.body"}},"shown":{"text":"","label":"Message"}}
+        text "label" inCopy=true fontSize="12" growType="auto-width" text="Message"
+        board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+    board "slot:actions" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:actions>","dir":"column","wrap":"nowrap"}
+      | weft/weft.slot = actions
+      board "button#send" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.primary"} inCopy=true head=true componentOf="<variant=primary, state=(unset)>" fillList=[{"fillColor":"#2663eb","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#send>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#send)
+        | weft/weft.source = {"kind":"button","id":"send","props":{"variant":"primary"},"on":{"press":"inbox.send"},"children":["Send"],"shown":{"text":"Send"}}
+        text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Send"

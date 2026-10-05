@@ -1,0 +1,48 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-menu as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v: unknown): boolean {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="account-menu" aria-label="Account menu">
+      <div data-weft-id="signed-in">
+        {!(_text(data?.user?.email).trim() === "") ? _squash(_text(data?.user?.email)) : ""}
+      </div>
+      <div data-weft-id="menu" aria-label="Account" role="menu">
+        <button data-weft-id="item-profile" type="button" role="menuitem" onClick={() => _act(actions, { id: "item-profile", action: "nav.profile" })}>Profile</button>
+        <button data-weft-id="item-settings" type="button" role="menuitem" onClick={() => _act(actions, { id: "item-settings", action: "nav.settings" })}>Settings</button>
+        <button data-weft-id="item-billing" type="button" role="menuitem" disabled={!_on(data?.isOwner)} onClick={() => _act(actions, { id: "item-billing", action: "nav.billing" })}>Billing</button>
+        <button data-weft-id="item-signout" type="button" role="menuitem" onClick={() => _act(actions, { id: "item-signout", action: "auth.signout" })}>Sign out</button>
+      </div>
+    </main>
+  );
+}

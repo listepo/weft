@@ -1,0 +1,146 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-todo-list as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "todos",
+    "props": {
+      "label": "Tasks"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Tasks"
+        ]
+      },
+      {
+        "kind": "form",
+        "id": "add-form",
+        "on": {
+          "submit": "todo.add"
+        },
+        "children": [
+          {
+            "kind": "stack",
+            "id": "add-row",
+            "props": {
+              "direction": "row",
+              "gap": {
+                "token": "space.sm"
+              }
+            },
+            "children": [
+              {
+                "kind": "field",
+                "id": "draft",
+                "props": {
+                  "label": "New task",
+                  "value": {
+                    "bind": "$.draft"
+                  }
+                }
+              },
+              {
+                "kind": "button",
+                "id": "add",
+                "props": {
+                  "disabled": {
+                    "bind": "$.draft",
+                    "not": true
+                  },
+                  "submit": true,
+                  "variant": "primary"
+                },
+                "children": [
+                  "Add"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "list",
+        "id": "list",
+        "children": [
+          {
+            "kind": "each",
+            "id": "todo-each",
+            "props": {
+              "as": "todo",
+              "in": {
+                "bind": "$.todos"
+              }
+            },
+            "children": [
+              {
+                "kind": "item",
+                "id": "todo",
+                "children": [
+                  {
+                    "kind": "checkbox",
+                    "id": "todo-done",
+                    "props": {
+                      "checked": {
+                        "bind": "$todo.done"
+                      },
+                      "label": {
+                        "bind": "$todo.title"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "button",
+                    "id": "todo-remove",
+                    "on": {
+                      "press": "todo.remove"
+                    },
+                    "children": [
+                      "Remove"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "summary",
+        "props": {
+          "direction": "row",
+          "gap": {
+            "token": "space.xs"
+          }
+        },
+        "children": [
+          {
+            "kind": "text",
+            "id": "remaining",
+            "props": {
+              "text": {
+                "bind": "$.remaining"
+              }
+            }
+          },
+          {
+            "kind": "text",
+            "id": "remaining-label",
+            "children": [
+              "items left"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

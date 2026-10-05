@@ -1,0 +1,41 @@
+FRAME "screen#leaderboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#leaderboard)
+  | weft.source = {"kind":"screen","id":"leaderboard","props":{"label":"Leaderboard"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Leaderboard"],"shown":{"text":"Leaderboard"}}
+    TEXT "text" chars="Leaderboard" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "stack#leader" layoutMode="HORIZONTAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
+    | weft.origin = layer(stack#leader)
+    | weft.source = {"kind":"stack","id":"leader","props":{"direction":"row","gap":{"token":"space.xs"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "text#leader-label" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#leader-label)
+      | weft.source = {"kind":"text","id":"leader-label","children":["In the lead:"],"shown":{"text":"In the lead:"}}
+      TEXT "text" chars="In the lead:" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "text#leader-name" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#leader-name)
+      | weft.source = {"kind":"text","id":"leader-name","props":{"text":{"bind":"$.players.0.name"}},"shown":{"text":"{$.players.0.name}"}}
+      TEXT "text" chars="{$.players.0.name}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "list#players" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(list#players)
+    | weft.source = {"kind":"list","id":"players","props":{"ordered":true}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    FRAME "each#player-each" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.origin = layer(each#player-each)
+      | weft.source = {"kind":"each","id":"player-each","props":{"as":"player","in":{"bind":"$.players"}}}
+      | weft.style = [[],[],0,[0,0,0,0],0]
+      FRAME "item#player" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(item#player)
+        | weft.source = {"kind":"item","id":"player"}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        INSTANCE "text#player-name" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+          | weft.origin = layer(text#player-name)
+          | weft.source = {"kind":"text","id":"player-name","props":{"text":{"bind":"$player.name"}},"shown":{"text":"{$player.name}"}}
+          TEXT "text" chars="{$player.name}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+        INSTANCE "text#player-score" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=muted>"
+          | weft.origin = layer(text#player-score)
+          | weft.source = {"kind":"text","id":"player-score","props":{"text":{"bind":"$player.score"},"tone":"muted"},"shown":{"text":"{$player.score}"}}
+          TEXT "text" chars="{$player.score}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

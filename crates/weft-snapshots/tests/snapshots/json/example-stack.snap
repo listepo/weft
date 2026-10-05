@@ -1,0 +1,53 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-stack as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Actions"
+    },
+    "children": [
+      {
+        "kind": "stack",
+        "id": "actions",
+        "props": {
+          "align": "center",
+          "direction": "row",
+          "gap": {
+            "token": "space.md"
+          },
+          "wrap": false
+        },
+        "children": [
+          {
+            "kind": "button",
+            "id": "save",
+            "props": {
+              "variant": "primary"
+            },
+            "on": {
+              "press": "doc.save"
+            },
+            "children": [
+              "Save"
+            ]
+          },
+          {
+            "kind": "button",
+            "id": "discard",
+            "on": {
+              "press": "doc.discard"
+            },
+            "children": [
+              "Discard"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

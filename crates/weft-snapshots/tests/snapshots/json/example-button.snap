@@ -1,0 +1,34 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-button as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Checkout"
+    },
+    "children": [
+      {
+        "kind": "button",
+        "id": "pay",
+        "props": {
+          "disabled": {
+            "bind": "$.cartReady",
+            "not": true
+          },
+          "state": "idle",
+          "variant": "primary"
+        },
+        "on": {
+          "press": "order.pay"
+        },
+        "children": [
+          "Pay now"
+        ]
+      }
+    ]
+  }
+}

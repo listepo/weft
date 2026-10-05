@@ -1,0 +1,52 @@
+FRAME "screen#search" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#search)
+  | weft.source = {"kind":"screen","id":"search","props":{"label":"Search"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  FRAME "form#form" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+    | weft.origin = layer(form#form)
+    | weft.source = {"kind":"form","id":"form","on":{"submit":"search.run"}}
+    | weft.style = [[],[],0,[0,0,0,0],8]
+    FRAME "stack#bar" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+      | weft.origin = layer(stack#bar)
+      | weft.source = {"kind":"stack","id":"bar","props":{"direction":"row","gap":{"token":"space.sm"}}}
+      | weft.style = [[],[],0,[0,0,0,0],null]
+      INSTANCE "field#query" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=search, state=(unset)>"
+        | weft.origin = layer(field#query)
+        | weft.source = {"kind":"field","id":"query","props":{"label":"Search","type":"search","value":{"bind":"$.query"}},"shown":{"text":"","label":"Search"}}
+        TEXT "label" chars="Search"
+        FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+      INSTANCE "button#go" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+        | weft.origin = layer(button#go)
+        | weft.source = {"kind":"button","id":"go","props":{"submit":true,"variant":"primary"},"children":["Search"],"shown":{"text":"Search"}}
+        TEXT "text" chars="Search" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  FRAME "list#results" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(list#results)
+    | weft.source = {"kind":"list","id":"results"}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    FRAME "each#results-each" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.origin = layer(each#results-each)
+      | weft.source = {"kind":"each","id":"results-each","props":{"as":"result","in":{"bind":"$.results"}}}
+      | weft.style = [[],[],0,[0,0,0,0],0]
+      FRAME "item#result" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(item#result)
+        | weft.source = {"kind":"item","id":"result"}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        INSTANCE "heading#result-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#result-title)
+          | weft.source = {"kind":"heading","id":"result-title","props":{"level":3,"text":{"bind":"$result.title"}},"shown":{"text":"{$result.title}"}}
+          TEXT "text" chars="{$result.title}" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+        INSTANCE "text#result-snippet" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+          | weft.origin = layer(text#result-snippet)
+          | weft.source = {"kind":"text","id":"result-snippet","props":{"text":{"bind":"$result.snippet"}},"shown":{"text":"{$result.snippet}"}}
+          TEXT "text" chars="{$result.snippet}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+        INSTANCE "link#result-open" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+          | weft.origin = layer(link#result-open)
+          | weft.source = {"kind":"link","id":"result-open","on":{"press":"results.open"},"children":["Open"],"shown":{"text":"Open"}}
+          TEXT "text" chars="Open" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
+    FRAME "slot:empty" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.slot = empty
+      INSTANCE "text#empty" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#empty)
+        | weft.source = {"kind":"text","id":"empty","children":["No results found"],"shown":{"text":"No results found"}}
+        TEXT "text" chars="No results found" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

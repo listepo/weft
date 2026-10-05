@@ -15,7 +15,10 @@
 | Cursor | https://cursor.com/download | Hosts the plugin (`plugins/cursor`); no test needs it | https://cursor.com |
 | Open Design | https://open-design.ai | Hosts the plugin (`plugins/open-design`); no test needs it | https://github.com/nexu-io/open-design |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
+| cargo-insta | `cargo install cargo-insta` (optional) | Reviews changed snapshots (`cargo insta review`); the tests run without it | https://github.com/mitsuhiko/insta |
 | Xcode (`xcrun swiftc`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14; those tests skip without it | https://developer.apple.com/xcode/ |
+| iOS Simulator (`xcrun simctl`) | Xcode, with the iOS 27.0 runtime and an iPhone 17 simulator | `@weft/visual` builds the generated SwiftUI screens into an app and screenshots them; skipped without it | https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device |
+| Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode; skipped without it | https://github.com/microsoft/playwright |
 
 ## mise
 
@@ -44,6 +47,7 @@
 | anyhow | local | https://github.com/dtolnay/anyhow | Errors in the `weft` binary |
 | clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
 | proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core, weft-catalog and weft-swiftui: no panics, round trips, idempotent formatting |
+| insta | local (dev) | https://github.com/mitsuhiko/insta | Reviewed snapshots of every generator output per corpus screen and catalog example (weft-snapshots) |
 | tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
 | tree-sitter-swift | local | https://github.com/alex-pinkus/tree-sitter-swift | The Swift grammar for that parser |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
@@ -72,11 +76,14 @@
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
 | vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist`, `plugins/cursor/dist` and `plugins/open-design/dist`, and, through `@weft/design-plugin`, the Figma and Penpot plugins into `plugins/figma/dist` and `plugins/penpot/dist` |
-| playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
+| playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages; drives Chromium for the screenshots in `@weft/visual` |
+| @vitest/browser-playwright | local | https://github.com/vitest-dev/vitest | Vitest browser mode on Playwright, for the web screenshots in `@weft/visual` |
+| pixelmatch | local | https://github.com/mapbox/pixelmatch | Pixel comparison of screenshots, with a diff image, in `@weft/visual` |
+| fast-png | local | https://github.com/image-js/fast-png | Decodes and encodes the PNG screenshots and diff images in `@weft/visual`; pure JavaScript |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
-| oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
-| solid-js | local | https://github.com/solidjs/solid | Server-renders generated SolidJS components in the equivalence tests |
-| babel-preset-solid | local | https://github.com/solidjs/solid/tree/main/packages/babel-preset-solid | Compiles generated SolidJS JSX for server rendering in the equivalence tests |
+| oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests and for the browser in `@weft/visual` |
+| solid-js | local | https://github.com/solidjs/solid | Server-renders generated SolidJS components in the equivalence tests; renders them in the browser in `@weft/visual` |
+| babel-preset-solid | local | https://github.com/solidjs/solid/tree/main/packages/babel-preset-solid | Compiles generated SolidJS JSX for server rendering in the equivalence tests and for the DOM in `@weft/visual` |
 | @babel/core | local | https://github.com/babel/babel | Runs babel-preset-solid; 7.x because the preset requires Babel 7 |
 | @types/babel__core | local | https://github.com/DefinitelyTyped/DefinitelyTyped | Types for @babel/core in the equivalence tests |
 | p-limit | local | https://github.com/sindresorhus/p-limit | Concurrency limit for benchmark requests |

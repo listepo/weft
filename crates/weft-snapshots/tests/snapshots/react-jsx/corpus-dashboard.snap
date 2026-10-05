@@ -1,0 +1,97 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-dashboard as react-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="dashboard" data-state="ready" aria-label="Team dashboard">
+      <div data-weft-id="header" style={{ gap: "var(--weft-space-xl)", display: "flex", flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
+        <h1 data-weft-id="title">
+          {!(_text(data?.team?.name).trim() === "") ? _squash(_text(data?.team?.name)) : ""}
+        </h1>
+        <div data-weft-id="updated" data-tone="muted">
+          {!(_text(data?.updatedAt).trim() === "") ? _squash(_text(data?.updatedAt)) : ""}
+        </div>
+      </div>
+      <div data-weft-id="stats" style={{ gap: "var(--weft-space-lg)", display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+        <section data-weft-id="velocity" aria-label="Velocity">
+          <div data-weft-slot="header">
+            <h2 data-weft-id="velocity-title">Velocity</h2>
+          </div>
+          <div data-weft-id="velocity-value" data-tone="success">
+            {!(_text(data?.stats?.velocity).trim() === "") ? _squash(_text(data?.stats?.velocity)) : ""}
+          </div>
+        </section>
+        <section data-weft-id="bugs" aria-label="Open bugs">
+          <div data-weft-slot="header">
+            <h2 data-weft-id="bugs-title">Open bugs</h2>
+          </div>
+          <div data-weft-id="bugs-value" data-tone="warning">
+            {!(_text(data?.stats?.bugs).trim() === "") ? _squash(_text(data?.stats?.bugs)) : ""}
+          </div>
+        </section>
+        <section data-weft-id="incidents" aria-label="Incidents">
+          <div data-weft-slot="header">
+            <h2 data-weft-id="incidents-title">Incidents</h2>
+          </div>
+          <div data-weft-id="incidents-value" data-tone="danger">
+            {!(_text(data?.stats?.incidents).trim() === "") ? _squash(_text(data?.stats?.incidents)) : ""}
+          </div>
+        </section>
+      </div>
+      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "column", alignItems: "stretch" }}>
+        <div data-weft-id="release" role="alert" data-tone="info">Release 2.4 ships on Friday.</div>
+        <div data-weft-id="backup" role="alert" data-tone="success">
+          {!(_text(data?.backupStatus).trim() === "") ? _text(data?.backupStatus) : null}
+        </div>
+        <div data-weft-id="quota" role="alert" data-tone="warning">
+          <div data-weft-id="quota-text">Storage is 90% full.</div>
+          {(() => {
+            const _href = _url("https://example.com/storage");
+            return (
+              <a data-weft-id="quota-link" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: "inline-block" }}>Manage storage</a>
+            );
+          })()}
+        </div>
+      </div>
+      <div data-weft-id="footer" style={{ gap: "var(--weft-space-xs)", display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+        <div data-weft-id="owner" data-tone="default">Owned by the platform team</div>
+        <div data-weft-id="footer-links" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "flex-start" }}>
+          {(() => {
+            const _href = _url("/docs");
+            return (
+              <a data-weft-id="docs" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: "inline-block" }}>Docs</a>
+            );
+          })()}
+          {(() => {
+            const _href = _url(_text(data?.statusUrl));
+            return (
+              <a data-weft-id="status" href={_href} role={_href === undefined ? "link" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: "inline-block" }}>Status page</a>
+            );
+          })()}
+        </div>
+      </div>
+    </main>
+  );
+}

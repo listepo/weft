@@ -1,0 +1,135 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-tabs as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "account",
+    "props": {
+      "label": "Account"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Account"
+        ]
+      },
+      {
+        "kind": "tabs",
+        "id": "tabs",
+        "props": {
+          "label": "Account sections"
+        },
+        "children": [
+          {
+            "kind": "tab",
+            "id": "tab-overview",
+            "props": {
+              "label": "Overview"
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "account-name",
+                "props": {
+                  "text": {
+                    "bind": "$.account.name"
+                  }
+                }
+              },
+              {
+                "kind": "text",
+                "id": "account-email",
+                "props": {
+                  "text": {
+                    "bind": "$.account.email"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "kind": "tab",
+            "id": "tab-billing",
+            "props": {
+              "label": "Billing"
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "plan",
+                "props": {
+                  "text": {
+                    "bind": "$.billing.plan"
+                  }
+                }
+              },
+              {
+                "kind": "button",
+                "id": "change-plan",
+                "props": {
+                  "variant": "primary"
+                },
+                "on": {
+                  "press": "billing.change"
+                },
+                "children": [
+                  "Change plan"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "tab",
+            "id": "tab-team",
+            "props": {
+              "label": "Team"
+            },
+            "children": [
+              {
+                "kind": "list",
+                "id": "members",
+                "children": [
+                  {
+                    "kind": "each",
+                    "id": "members-each",
+                    "props": {
+                      "as": "member",
+                      "in": {
+                        "bind": "$.team"
+                      }
+                    },
+                    "children": [
+                      {
+                        "kind": "item",
+                        "id": "member",
+                        "children": [
+                          {
+                            "kind": "text",
+                            "id": "member-name",
+                            "props": {
+                              "text": {
+                                "bind": "$member.name"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

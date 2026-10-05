@@ -1,5 +1,247 @@
 [
  {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"account\" aria-label=\"Edit account\"><h1 data-weft-id=\"title\">Edit account</h1><form data-weft-id=\"account-form\" data-state=\"invalid\" aria-label=\"Account\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Full name</span><input data-weft-id=\"name\" data-state=\"valid\" aria-label=\"Full name\" type=\"text\" placeholder=\"Ada Lovelace\" value=\"Ada Lovelace\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Age</span><input data-weft-id=\"age\" data-state=\"invalid\" aria-label=\"Age\" type=\"number\" aria-invalid=\"true\" aria-describedby=\"weft-age-error\" value=\"17\"/></label><div id=\"weft-age-error\">You must be 18 or older.</div></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Handle</span><input data-weft-id=\"handle\" aria-label=\"Handle\" type=\"text\" placeholder=\"{handle}\" value=\"ada\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Bio</span><textarea data-weft-id=\"bio\" aria-label=\"Bio\">Wrote the first program.</textarea></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Email</span><input data-weft-id=\"email\" aria-label=\"Email\" type=\"email\" disabled=\"\" value=\"ada@example.com\"/></label></div><label><input data-weft-id=\"newsletter\" type=\"checkbox\" aria-label=\"Send me the newsletter\" checked=\"\"/><span aria-hidden=\"true\">Send me the newsletter</span></label><label><input data-weft-id=\"terms\" type=\"checkbox\" aria-label=\"Terms accepted\" disabled=\"\" checked=\"\"/><span aria-hidden=\"true\">Terms accepted</span></label><label><input data-weft-id=\"public\" type=\"checkbox\" role=\"switch\" aria-label=\"Public profile\"/><span aria-hidden=\"true\">Public profile</span></label><div data-weft-id=\"plan\" aria-label=\"Plan\" role=\"radiogroup\"><span aria-hidden=\"true\">Plan</span><label><input data-weft-id=\"plan-free\" type=\"radio\" aria-label=\"Free\" name=\"weft-plan\" value=\"free\"/><span aria-hidden=\"true\">Free</span></label><label><input data-weft-id=\"plan-pro\" type=\"radio\" aria-label=\"Pro\" name=\"weft-plan\" checked=\"\" value=\"pro\"/><span aria-hidden=\"true\">Pro</span></label><label><input data-weft-id=\"plan-team\" type=\"radio\" aria-label=\"Team\" disabled=\"\" name=\"weft-plan\" value=\"team\"/><span aria-hidden=\"true\">Team</span></label></div><label><span aria-hidden=\"true\">Language</span><select data-weft-id=\"language\" aria-label=\"Language\"><option data-weft-id=\"language-en\" value=\"en\">English</option><option data-weft-id=\"language-fr\" value=\"fr\" selected=\"\">Français</option></select></label><div data-weft-slot=\"footer\"><button data-weft-id=\"save\" data-state=\"busy\" aria-busy=\"true\" type=\"submit\" data-variant=\"primary\">Save</button><button data-weft-id=\"cancel\" data-state=\"idle\" type=\"button\" data-variant=\"secondary\">Cancel</button><a data-weft-id=\"help\" href=\"https://example.com/help\" style=\"display:inline-block\">Help</a></div></form></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "account",
+     "props": {
+      "label": "Edit account"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "title",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Edit account"
+       ]
+      },
+      {
+       "kind": "form",
+       "id": "account-form",
+       "props": {
+        "label": "Account",
+        "state": "invalid"
+       },
+       "children": [
+        {
+         "kind": "field",
+         "id": "name",
+         "props": {
+          "label": "Full name",
+          "placeholder": "Ada Lovelace",
+          "state": "valid",
+          "value": "Ada Lovelace"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "age",
+         "props": {
+          "error": "You must be 18 or older.",
+          "label": "Age",
+          "state": "invalid",
+          "type": "number",
+          "value": "17"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "handle",
+         "props": {
+          "label": "Handle",
+          "placeholder": "{handle}",
+          "value": "ada"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "bio",
+         "props": {
+          "label": "Bio",
+          "type": "multiline",
+          "value": "Wrote the first program."
+         }
+        },
+        {
+         "kind": "field",
+         "id": "email",
+         "props": {
+          "disabled": true,
+          "label": "Email",
+          "type": "email",
+          "value": "ada@example.com"
+         }
+        },
+        {
+         "kind": "checkbox",
+         "id": "newsletter",
+         "props": {
+          "checked": true,
+          "label": "Send me the newsletter"
+         }
+        },
+        {
+         "kind": "checkbox",
+         "id": "terms",
+         "props": {
+          "checked": true,
+          "disabled": true,
+          "label": "Terms accepted"
+         }
+        },
+        {
+         "kind": "switch",
+         "id": "public",
+         "props": {
+          "label": "Public profile"
+         }
+        },
+        {
+         "kind": "radio-group",
+         "id": "plan",
+         "props": {
+          "label": "Plan",
+          "value": "pro"
+         },
+         "children": [
+          {
+           "kind": "radio",
+           "id": "plan-free",
+           "props": {
+            "value": "free"
+           },
+           "children": [
+            "Free"
+           ]
+          },
+          {
+           "kind": "radio",
+           "id": "plan-pro",
+           "props": {
+            "value": "pro"
+           },
+           "children": [
+            "Pro"
+           ]
+          },
+          {
+           "kind": "radio",
+           "id": "plan-team",
+           "props": {
+            "disabled": true,
+            "value": "team"
+           },
+           "children": [
+            "Team"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "select",
+         "id": "language",
+         "props": {
+          "label": "Language",
+          "value": "fr"
+         },
+         "children": [
+          {
+           "kind": "option",
+           "id": "language-en",
+           "props": {
+            "value": "en"
+           },
+           "children": [
+            "English"
+           ]
+          },
+          {
+           "kind": "option",
+           "id": "language-fr",
+           "props": {
+            "value": "fr"
+           },
+           "children": [
+            "Français"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "save",
+         "props": {
+          "state": "busy",
+          "submit": true,
+          "variant": "primary"
+         },
+         "children": [
+          "Save"
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "cancel",
+         "props": {
+          "state": "idle",
+          "variant": "secondary"
+         },
+         "children": [
+          "Cancel"
+         ]
+        },
+        {
+         "kind": "link",
+         "id": "help",
+         "props": {
+          "href": "https://example.com/help"
+         },
+         "children": [
+          "Help"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#account",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#account",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#account",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#account",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#account",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
   "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"files\" aria-label=\"File\"><h1 data-weft-id=\"title\">Quarterly report</h1><button data-weft-id=\"delete-file\" type=\"button\" data-variant=\"danger\">Delete file</button></main></body></html>\n",
   "result": {
    "document": {
@@ -162,6 +404,308 @@
      "kind": "hidden",
      "path": "/screen#screen-file",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"dashboard\" data-state=\"ready\" aria-label=\"Team dashboard\"><div data-weft-id=\"header\" style=\"gap:var(--weft-space-xl);display:flex;flex-direction:row;align-items:center;flex-wrap:wrap\"><h1 data-weft-id=\"title\">Platform</h1><div data-weft-id=\"updated\" data-tone=\"muted\">Updated 5 minutes ago</div></div><div data-weft-id=\"stats\" style=\"gap:var(--weft-space-lg);display:grid;grid-template-columns:repeat(3, minmax(0, 1fr))\"><section data-weft-id=\"velocity\" aria-label=\"Velocity\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"velocity-title\">Velocity</h2></div><div data-weft-id=\"velocity-value\" data-tone=\"success\">42</div></section><section data-weft-id=\"bugs\" aria-label=\"Open bugs\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"bugs-title\">Open bugs</h2></div><div data-weft-id=\"bugs-value\" data-tone=\"warning\">7</div></section><section data-weft-id=\"incidents\" aria-label=\"Incidents\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"incidents-title\">Incidents</h2></div><div data-weft-id=\"incidents-value\" data-tone=\"danger\">1</div></section></div><div data-weft-id=\"notices\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:column;align-items:stretch\"><div data-weft-id=\"release\" role=\"alert\" data-tone=\"info\">Release 2.4 ships on Friday.</div><div data-weft-id=\"backup\" role=\"alert\" data-tone=\"success\">Last backup finished at 03:00.</div><div data-weft-id=\"quota\" role=\"alert\" data-tone=\"warning\"><div data-weft-id=\"quota-text\">Storage is 90% full.</div><a data-weft-id=\"quota-link\" href=\"https://example.com/storage\" style=\"display:inline-block\">Manage storage</a></div></div><div data-weft-id=\"footer\" style=\"gap:var(--weft-space-xs);display:flex;flex-direction:column;align-items:flex-end\"><div data-weft-id=\"owner\" data-tone=\"default\">Owned by the platform team</div><div data-weft-id=\"footer-links\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:flex-start\"><a data-weft-id=\"docs\" href=\"/docs\" style=\"display:inline-block\">Docs</a><a data-weft-id=\"status\" href=\"https://status.example.com\" style=\"display:inline-block\">Status page</a></div></div></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "dashboard",
+     "props": {
+      "label": "Team dashboard",
+      "state": "ready"
+     },
+     "children": [
+      {
+       "kind": "stack",
+       "id": "header",
+       "props": {
+        "align": "center",
+        "direction": "row",
+        "wrap": true
+       },
+       "children": [
+        {
+         "kind": "heading",
+         "id": "title",
+         "props": {
+          "level": 1
+         },
+         "children": [
+          "Platform"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "updated",
+         "props": {
+          "tone": "muted"
+         },
+         "children": [
+          "Updated 5 minutes ago"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "grid",
+       "id": "stats",
+       "props": {
+        "columns": 3
+       },
+       "children": [
+        {
+         "kind": "section",
+         "id": "velocity",
+         "props": {
+          "label": "Velocity"
+         },
+         "children": [
+          {
+           "kind": "heading",
+           "id": "velocity-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Velocity"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "velocity-value",
+           "props": {
+            "tone": "success"
+           },
+           "children": [
+            "42"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "section",
+         "id": "bugs",
+         "props": {
+          "label": "Open bugs"
+         },
+         "children": [
+          {
+           "kind": "heading",
+           "id": "bugs-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Open bugs"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "bugs-value",
+           "props": {
+            "tone": "warning"
+           },
+           "children": [
+            "7"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "section",
+         "id": "incidents",
+         "props": {
+          "label": "Incidents"
+         },
+         "children": [
+          {
+           "kind": "heading",
+           "id": "incidents-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Incidents"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "incidents-value",
+           "props": {
+            "tone": "danger"
+           },
+           "children": [
+            "1"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "stack",
+       "id": "notices",
+       "props": {
+        "align": "stretch"
+       },
+       "children": [
+        {
+         "kind": "alert",
+         "id": "release",
+         "props": {
+          "tone": "info"
+         },
+         "children": [
+          "Release 2.4 ships on Friday."
+         ]
+        },
+        {
+         "kind": "alert",
+         "id": "backup",
+         "props": {
+          "tone": "success"
+         },
+         "children": [
+          "Last backup finished at 03:00."
+         ]
+        },
+        {
+         "kind": "alert",
+         "id": "quota",
+         "props": {
+          "tone": "warning"
+         },
+         "children": [
+          {
+           "kind": "text",
+           "id": "quota-text",
+           "children": [
+            "Storage is 90% full."
+           ]
+          },
+          {
+           "kind": "link",
+           "id": "quota-link",
+           "props": {
+            "href": "https://example.com/storage"
+           },
+           "children": [
+            "Manage storage"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "stack",
+       "id": "footer",
+       "props": {
+        "align": "end"
+       },
+       "children": [
+        {
+         "kind": "text",
+         "id": "owner",
+         "props": {
+          "tone": "default"
+         },
+         "children": [
+          "Owned by the platform team"
+         ]
+        },
+        {
+         "kind": "stack",
+         "id": "footer-links",
+         "props": {
+          "align": "start",
+          "direction": "row"
+         },
+         "children": [
+          {
+           "kind": "link",
+           "id": "docs",
+           "props": {
+            "href": "/docs"
+           },
+           "children": [
+            "Docs"
+           ]
+          },
+          {
+           "kind": "link",
+           "id": "status",
+           "props": {
+            "href": "https://status.example.com"
+           },
+           "children": [
+            "Status page"
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#dashboard",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#dashboard",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#dashboard",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#dashboard",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#dashboard",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#dashboard/stack#header",
+     "note": "gap var(--weft-space-xl) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#dashboard/grid#stats",
+     "note": "gap var(--weft-space-lg) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#dashboard/stack#notices",
+     "note": "gap var(--weft-space-sm) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#dashboard/stack#footer",
+     "note": "gap var(--weft-space-xs) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#dashboard/stack#footer/stack#footer-links",
+     "note": "gap var(--weft-space-md) cannot be mapped back to a design token"
     }
    ],
    "diagnostics": []
@@ -774,6 +1318,440 @@
   }
  },
  {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"inbox\" data-state=\"loading\" aria-busy=\"true\" aria-label=\"Inbox\"><div data-weft-tabs=\"\"><div data-weft-id=\"folders\" role=\"tablist\"><button data-weft-id=\"tab-inbox\" type=\"button\" role=\"tab\" id=\"weft-tab-inbox-tab\" aria-selected=\"true\" aria-controls=\"weft-tab-inbox-panel\" tabindex=\"0\">Inbox</button><button data-weft-id=\"tab-drafts\" type=\"button\" role=\"tab\" id=\"weft-tab-drafts-tab\" aria-selected=\"false\" aria-controls=\"weft-tab-drafts-panel\" tabindex=\"-1\">Drafts</button><button data-weft-id=\"tab-sent\" type=\"button\" role=\"tab\" id=\"weft-tab-sent-tab\" aria-selected=\"false\" aria-controls=\"weft-tab-sent-panel\" tabindex=\"-1\">Sent</button></div><div role=\"tabpanel\" id=\"weft-tab-inbox-panel\" aria-labelledby=\"weft-tab-inbox-tab\" tabindex=\"0\"><ol data-weft-id=\"messages\" data-state=\"ready\"><li data-weft-id=\"message[0]\" tabindex=\"0\">Quarterly report</li><li data-weft-id=\"message[1]\" tabindex=\"0\">Lunch on Thursday?</li></ol></div><div role=\"tabpanel\" id=\"weft-tab-drafts-panel\" aria-labelledby=\"weft-tab-drafts-tab\" hidden=\"\" tabindex=\"0\"><ul data-weft-id=\"drafts\" data-state=\"empty\"><li role=\"none\" data-weft-slot=\"empty\"><div data-weft-id=\"no-drafts\">No drafts.</div></li></ul></div><div role=\"tabpanel\" id=\"weft-tab-sent-panel\" aria-labelledby=\"weft-tab-sent-tab\" hidden=\"\" tabindex=\"0\"><ul data-weft-id=\"sent\" data-state=\"loading\" aria-busy=\"true\"><li data-weft-id=\"sent-loading\">Loading…</li></ul></div></div><div data-weft-id=\"message-actions\" aria-label=\"Message actions\" role=\"menu\"><button data-weft-id=\"archive\" type=\"button\" role=\"menuitem\">Archive</button><button data-weft-id=\"delete\" type=\"button\" role=\"menuitem\" disabled=\"\">Delete</button></div><dialog data-weft-id=\"compose\" aria-label=\"New message\" open=\"\"><form data-weft-id=\"compose-form\" data-state=\"submitting\" aria-busy=\"true\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">To</span><input data-weft-id=\"to\" aria-label=\"To\" type=\"email\" value=\"grace@example.com\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Message</span><textarea data-weft-id=\"body\" aria-label=\"Message\">See you there.</textarea></label></div></form><div data-weft-slot=\"actions\"><button data-weft-id=\"send\" type=\"button\" data-variant=\"primary\">Send</button></div></dialog></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "inbox",
+     "props": {
+      "label": "Inbox",
+      "state": "loading"
+     },
+     "children": [
+      {
+       "kind": "tabs",
+       "id": "folders",
+       "props": {
+        "selected": "tab-inbox"
+       },
+       "children": [
+        {
+         "kind": "tab",
+         "id": "tab-inbox",
+         "props": {
+          "label": "Inbox"
+         },
+         "children": [
+          {
+           "kind": "list",
+           "id": "messages",
+           "props": {
+            "ordered": true,
+            "state": "ready"
+           },
+           "children": [
+            {
+             "kind": "item",
+             "id": "message-0",
+             "children": [
+              "Quarterly report"
+             ]
+            },
+            {
+             "kind": "item",
+             "id": "message-1",
+             "children": [
+              "Lunch on Thursday?"
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "tab",
+         "id": "tab-drafts",
+         "props": {
+          "label": "Drafts"
+         },
+         "children": [
+          {
+           "kind": "list",
+           "id": "drafts",
+           "props": {
+            "state": "empty"
+           },
+           "slots": {
+            "empty": [
+             {
+              "kind": "text",
+              "id": "no-drafts",
+              "children": [
+               "No drafts."
+              ]
+             }
+            ]
+           }
+          }
+         ]
+        },
+        {
+         "kind": "tab",
+         "id": "tab-sent",
+         "props": {
+          "label": "Sent"
+         },
+         "children": [
+          {
+           "kind": "list",
+           "id": "sent",
+           "props": {
+            "state": "loading"
+           },
+           "children": [
+            {
+             "kind": "item",
+             "id": "sent-loading",
+             "children": [
+              "Loading…"
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "menu",
+       "id": "message-actions",
+       "props": {
+        "label": "Message actions"
+       },
+       "children": [
+        {
+         "kind": "menu-item",
+         "id": "archive",
+         "children": [
+          "Archive"
+         ]
+        },
+        {
+         "kind": "menu-item",
+         "id": "delete",
+         "props": {
+          "disabled": true
+         },
+         "children": [
+          "Delete"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "dialog",
+       "id": "compose",
+       "props": {
+        "label": "New message",
+        "open": true
+       },
+       "children": [
+        {
+         "kind": "form",
+         "id": "compose-form",
+         "props": {
+          "state": "submitting"
+         },
+         "children": [
+          {
+           "kind": "field",
+           "id": "to",
+           "props": {
+            "label": "To",
+            "type": "email",
+            "value": "grace@example.com"
+           }
+          },
+          {
+           "kind": "field",
+           "id": "body",
+           "props": {
+            "label": "Message",
+            "type": "multiline",
+            "value": "See you there."
+           }
+          }
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "send",
+         "props": {
+          "variant": "primary"
+         },
+         "children": [
+          "Send"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#inbox",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#inbox",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#inbox",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#inbox",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#inbox",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#inbox/tabs#folders/tab#tab-inbox/list#messages/item#message-0",
+     "note": "instance message[0] of a repeated element is imported as the static element message-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#inbox/tabs#folders/tab#tab-inbox/list#messages/item#message-1",
+     "note": "instance message[1] of a repeated element is imported as the static element message-1"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#inbox/tabs#folders/tab#tab-drafts/list#drafts/slot[empty]",
+     "note": "content <list> does not hold by default is placed in its empty slot"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"leaderboard\" aria-label=\"Leaderboard\"><h1 data-weft-id=\"title\">Leaderboard</h1><div data-weft-id=\"leader\" style=\"gap:var(--weft-space-xs);display:flex;flex-direction:row\"><div data-weft-id=\"leader-label\">In the lead:</div><div data-weft-id=\"leader-name\">Grace</div></div><ol data-weft-id=\"players\"><li data-weft-id=\"player[0]\"><div data-weft-id=\"player-name[0]\">Grace</div><div data-weft-id=\"player-score[0]\" data-tone=\"muted\">1280</div></li><li data-weft-id=\"player[1]\"><div data-weft-id=\"player-name[1]\">Alan</div><div data-weft-id=\"player-score[1]\" data-tone=\"muted\">1105</div></li><li data-weft-id=\"player[2]\"><div data-weft-id=\"player-name[2]\">Ada</div><div data-weft-id=\"player-score[2]\" data-tone=\"muted\">990</div></li></ol></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "leaderboard",
+     "props": {
+      "label": "Leaderboard"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "title",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Leaderboard"
+       ]
+      },
+      {
+       "kind": "stack",
+       "id": "leader",
+       "props": {
+        "direction": "row"
+       },
+       "children": [
+        {
+         "kind": "text",
+         "id": "leader-label",
+         "children": [
+          "In the lead:"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "leader-name",
+         "children": [
+          "Grace"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "list",
+       "id": "players",
+       "props": {
+        "ordered": true
+       },
+       "children": [
+        {
+         "kind": "item",
+         "id": "player-0",
+         "children": [
+          {
+           "kind": "text",
+           "id": "player-name-0",
+           "children": [
+            "Grace"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "player-score-0",
+           "props": {
+            "tone": "muted"
+           },
+           "children": [
+            "1280"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "item",
+         "id": "player-1",
+         "children": [
+          {
+           "kind": "text",
+           "id": "player-name-1",
+           "children": [
+            "Alan"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "player-score-1",
+           "props": {
+            "tone": "muted"
+           },
+           "children": [
+            "1105"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "item",
+         "id": "player-2",
+         "children": [
+          {
+           "kind": "text",
+           "id": "player-name-2",
+           "children": [
+            "Ada"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "player-score-2",
+           "props": {
+            "tone": "muted"
+           },
+           "children": [
+            "990"
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#leaderboard",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#leaderboard",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#leaderboard",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#leaderboard",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#leaderboard",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#leaderboard/stack#leader",
+     "note": "gap var(--weft-space-xs) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-0",
+     "note": "instance player[0] of a repeated element is imported as the static element player-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-0/text#player-name-0",
+     "note": "instance player-name[0] of a repeated element is imported as the static element player-name-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-0/text#player-score-0",
+     "note": "instance player-score[0] of a repeated element is imported as the static element player-score-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-1",
+     "note": "instance player[1] of a repeated element is imported as the static element player-1"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-1/text#player-name-1",
+     "note": "instance player-name[1] of a repeated element is imported as the static element player-name-1"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-1/text#player-score-1",
+     "note": "instance player-score[1] of a repeated element is imported as the static element player-score-1"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-2",
+     "note": "instance player[2] of a repeated element is imported as the static element player-2"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-2/text#player-name-2",
+     "note": "instance player-name[2] of a repeated element is imported as the static element player-name-2"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#leaderboard/list#players/item#player-2/text#player-score-2",
+     "note": "instance player-score[2] of a repeated element is imported as the static element player-score-2"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
   "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"login\" aria-label=\"Sign in\"><form data-weft-id=\"form\" data-state=\"idle\"><h1 data-weft-id=\"title\">Sign in</h1><div data-weft-id=\"fields\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:column\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Email</span><input data-weft-id=\"email\" aria-label=\"Email\" type=\"email\" required=\"\" value=\"ada@example.com\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Password</span><input data-weft-id=\"password\" aria-label=\"Password\" type=\"password\" required=\"\" value=\"\"/></label></div></div><button data-weft-id=\"submit\" type=\"submit\" data-variant=\"primary\">Sign in</button><div data-weft-slot=\"footer\"><a data-weft-id=\"reset\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Forgot password?</a><a data-weft-id=\"signup\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Create an account</a></div></form></main></body></html>\n",
   "result": {
    "document": {
@@ -1179,6 +2157,255 @@
      "kind": "hidden",
      "path": "/screen#screen-account-menu",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"orders\" aria-label=\"Orders\"><h2 data-weft-id=\"title\">Orders</h2><table data-weft-id=\"open-orders\" data-state=\"ready\" aria-label=\"Open orders\"><thead><tr><th data-weft-id=\"col-id\" scope=\"col\" aria-sort=\"descending\" tabindex=\"0\">Order</th><th data-weft-id=\"col-total\" scope=\"col\" aria-sort=\"none\">Total</th></tr></thead><tbody><tr data-weft-id=\"order[0]\" aria-selected=\"true\" tabindex=\"0\"><td data-weft-id=\"order-id[0]\">A-1002</td><td data-weft-id=\"order-total[0]\"><div data-weft-id=\"order-amount[0]\">$120.00</div></td></tr><tr data-weft-id=\"order[1]\" aria-selected=\"false\" tabindex=\"0\"><td data-weft-id=\"order-id[1]\">A-1001</td><td data-weft-id=\"order-total[1]\"><div data-weft-id=\"order-amount[1]\">$35.50</div></td></tr></tbody></table><table data-weft-id=\"archived\" data-state=\"empty\" aria-label=\"Archived orders\"><thead><tr><th data-weft-id=\"col-archived\" scope=\"col\">Order</th></tr></thead><tbody><tr data-weft-slot=\"empty\"><td colSpan=\"1\"><div data-weft-id=\"archived-empty\">Nothing archived yet.</div></td></tr></tbody></table><table data-weft-id=\"pending\" data-state=\"loading\" aria-busy=\"true\" aria-label=\"Pending orders\"><thead><tr><th data-weft-id=\"col-pending\" scope=\"col\">Order</th></tr></thead><tbody><tr data-weft-id=\"pending-row\" aria-selected=\"true\"><td data-weft-id=\"pending-cell\">Fetching…</td></tr></tbody></table></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "orders",
+     "props": {
+      "label": "Orders"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "title",
+       "props": {
+        "level": 2
+       },
+       "children": [
+        "Orders"
+       ]
+      },
+      {
+       "kind": "table",
+       "id": "open-orders",
+       "props": {
+        "label": "Open orders",
+        "state": "ready"
+       },
+       "children": [
+        {
+         "kind": "column",
+         "id": "col-id",
+         "props": {
+          "sort": "descending"
+         },
+         "children": [
+          "Order"
+         ]
+        },
+        {
+         "kind": "column",
+         "id": "col-total",
+         "props": {
+          "sort": "none"
+         },
+         "children": [
+          "Total"
+         ]
+        },
+        {
+         "kind": "row",
+         "id": "order-0",
+         "props": {
+          "selected": true
+         },
+         "children": [
+          {
+           "kind": "cell",
+           "id": "order-id-0",
+           "children": [
+            "A-1002"
+           ]
+          },
+          {
+           "kind": "cell",
+           "id": "order-total-0",
+           "children": [
+            {
+             "kind": "text",
+             "id": "order-amount-0",
+             "children": [
+              "$120.00"
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "row",
+         "id": "order-1",
+         "children": [
+          {
+           "kind": "cell",
+           "id": "order-id-1",
+           "children": [
+            "A-1001"
+           ]
+          },
+          {
+           "kind": "cell",
+           "id": "order-total-1",
+           "children": [
+            {
+             "kind": "text",
+             "id": "order-amount-1",
+             "children": [
+              "$35.50"
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "table",
+       "id": "archived",
+       "props": {
+        "label": "Archived orders",
+        "state": "empty"
+       },
+       "children": [
+        {
+         "kind": "column",
+         "id": "col-archived",
+         "children": [
+          "Order"
+         ]
+        },
+        {
+         "kind": "row",
+         "id": "row-1",
+         "children": [
+          {
+           "kind": "cell",
+           "id": "cell-1",
+           "children": [
+            {
+             "kind": "text",
+             "id": "archived-empty",
+             "children": [
+              "Nothing archived yet."
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "table",
+       "id": "pending",
+       "props": {
+        "label": "Pending orders",
+        "state": "loading"
+       },
+       "children": [
+        {
+         "kind": "column",
+         "id": "col-pending",
+         "children": [
+          "Order"
+         ]
+        },
+        {
+         "kind": "row",
+         "id": "pending-row",
+         "props": {
+          "selected": true
+         },
+         "children": [
+          {
+           "kind": "cell",
+           "id": "pending-cell",
+           "children": [
+            "Fetching…"
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#orders",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#orders",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#orders",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#orders",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#orders",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#orders/table#open-orders/row#order-0",
+     "note": "instance order[0] of a repeated element is imported as the static element order-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#orders/table#open-orders/row#order-0/cell#order-id-0",
+     "note": "instance order-id[0] of a repeated element is imported as the static element order-id-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#orders/table#open-orders/row#order-0/cell#order-total-0",
+     "note": "instance order-total[0] of a repeated element is imported as the static element order-total-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#orders/table#open-orders/row#order-0/cell#order-total-0/text#order-amount-0",
+     "note": "instance order-amount[0] of a repeated element is imported as the static element order-amount-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#orders/table#open-orders/row#order-1",
+     "note": "instance order[1] of a repeated element is imported as the static element order-1"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#orders/table#open-orders/row#order-1/cell#order-id-1",
+     "note": "instance order-id[1] of a repeated element is imported as the static element order-id-1"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#orders/table#open-orders/row#order-1/cell#order-total-1",
+     "note": "instance order-total[1] of a repeated element is imported as the static element order-total-1"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#orders/table#open-orders/row#order-1/cell#order-total-1/text#order-amount-1",
+     "note": "instance order-amount[1] of a repeated element is imported as the static element order-amount-1"
     }
    ],
    "diagnostics": []

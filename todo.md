@@ -5,6 +5,5 @@
 - T14. Figma round trip and plugin
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
-- T36. Examples, snapshots, screenshots and comparisons
 - T39. Context in the document
 - T42. Xcode plugins

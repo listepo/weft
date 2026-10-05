@@ -1,0 +1,30 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-switch as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Notifications"
+    },
+    "children": [
+      {
+        "kind": "switch",
+        "id": "push",
+        "props": {
+          "checked": {
+            "bind": "$.pushEnabled"
+          },
+          "disabled": false,
+          "label": "Push notifications"
+        },
+        "on": {
+          "change": "settings.update"
+        }
+      }
+    ]
+  }
+}

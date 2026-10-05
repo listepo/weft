@@ -1,0 +1,112 @@
+FRAME "screen#account" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#account)
+  | weft.source = {"kind":"screen","id":"account","props":{"label":"Edit account"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Edit account"],"shown":{"text":"Edit account"}}
+    TEXT "text" chars="Edit account" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "form#account-form" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+    | weft.origin = layer(form#account-form)
+    | weft.source = {"kind":"form","id":"account-form","props":{"label":"Account","state":"invalid"},"on":{"submit":"account.save"}}
+    | weft.style = [[],[],0,[0,0,0,0],8]
+    INSTANCE "field#name" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=text, state=valid>"
+      | weft.origin = layer(field#name)
+      | weft.source = {"kind":"field","id":"name","props":{"label":"Full name","placeholder":"Ada Lovelace","state":"valid","type":"text","value":{"bind":"$.account.name"}},"on":{"change":"account.edit"},"shown":{"text":"","label":"Full name"}}
+      TEXT "label" chars="Full name"
+      FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+    INSTANCE "field#age" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=number, state=invalid>"
+      | weft.origin = layer(field#age)
+      | weft.source = {"kind":"field","id":"age","props":{"error":{"bind":"$.errors.age"},"label":"Age","state":"invalid","type":"number","value":{"bind":"$.account.age"}},"shown":{"text":"","label":"Age"}}
+      TEXT "label" chars="Age"
+      FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+    INSTANCE "field#handle" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=text, state=(unset)>"
+      | weft.origin = layer(field#handle)
+      | weft.source = {"kind":"field","id":"handle","props":{"disabled":{"bind":"$.account.locked"},"label":"Handle","placeholder":"{handle}","value":{"bind":"$.account.handle"}},"shown":{"text":"","label":"Handle"}}
+      TEXT "label" chars="Handle"
+      FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+    INSTANCE "field#bio" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=multiline, state=(unset)>"
+      | weft.origin = layer(field#bio)
+      | weft.source = {"kind":"field","id":"bio","props":{"label":"Bio","type":"multiline","value":{"bind":"$.account.bio"}},"shown":{"text":"","label":"Bio"}}
+      TEXT "label" chars="Bio"
+      FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+    INSTANCE "field#email" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=email, state=(unset)>"
+      | weft.origin = layer(field#email)
+      | weft.source = {"kind":"field","id":"email","props":{"disabled":true,"label":"Email","type":"email","value":{"bind":"$.account.email"}},"shown":{"text":"","label":"Email"}}
+      TEXT "label" chars="Email"
+      FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+    INSTANCE "checkbox#newsletter" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<checkbox>"
+      | weft.origin = layer(checkbox#newsletter)
+      | weft.source = {"kind":"checkbox","id":"newsletter","props":{"checked":{"bind":"$.account.newsletter"},"label":"Send me the newsletter"},"on":{"change":"account.edit"},"shown":{"text":"","label":"Send me the newsletter"}}
+      RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4
+      TEXT "label" chars="Send me the newsletter" size=14
+    INSTANCE "checkbox#terms" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<checkbox>"
+      | weft.origin = layer(checkbox#terms)
+      | weft.source = {"kind":"checkbox","id":"terms","props":{"checked":true,"disabled":true,"label":"Terms accepted"},"shown":{"text":"","label":"Terms accepted"}}
+      RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4
+      TEXT "label" chars="Terms accepted" size=14
+    INSTANCE "switch#public" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<switch>"
+      | weft.origin = layer(switch#public)
+      | weft.source = {"kind":"switch","id":"public","props":{"checked":{"bind":"$.account.public"},"disabled":{"bind":"$.account.verified","not":true},"label":"Public profile"},"on":{"change":"account.edit"},"shown":{"text":"","label":"Public profile"}}
+      RECTANGLE "mark" width=32 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=999
+      TEXT "label" chars="Public profile" size=14
+    FRAME "radio-group#plan" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(radio-group#plan)
+      | weft.source = {"kind":"radio-group","id":"plan","props":{"label":"Plan","value":{"bind":"$.account.plan"}},"on":{"change":"account.edit"},"shown":{"label":"Plan"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Plan" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      INSTANCE "radio#plan-free" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<radio>"
+        | weft.origin = layer(radio#plan-free)
+        | weft.source = {"kind":"radio","id":"plan-free","props":{"value":"free"},"children":["Free"],"shown":{"text":"Free"}}
+        RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=999
+        TEXT "text" chars="Free" size=14
+      INSTANCE "radio#plan-pro" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<radio>"
+        | weft.origin = layer(radio#plan-pro)
+        | weft.source = {"kind":"radio","id":"plan-pro","props":{"text":{"bind":"$.labels.pro"},"value":"pro"},"shown":{"text":"{$.labels.pro}"}}
+        RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=999
+        TEXT "text" chars="{$.labels.pro}" size=14
+      INSTANCE "radio#plan-team" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<radio>"
+        | weft.origin = layer(radio#plan-team)
+        | weft.source = {"kind":"radio","id":"plan-team","props":{"disabled":true,"value":"team"},"children":["Team"],"shown":{"text":"Team"}}
+        RECTANGLE "mark" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=999
+        TEXT "text" chars="Team" size=14
+    FRAME "select#language" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(select#language)
+      | weft.source = {"kind":"select","id":"language","props":{"disabled":{"bind":"$.account.locked"},"label":"Language","value":{"bind":"$.account.language"}},"on":{"change":"account.edit"},"shown":{"label":"Language"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Language" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      INSTANCE "option#language-en" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<option>"
+        | weft.origin = layer(option#language-en)
+        | weft.source = {"kind":"option","id":"language-en","props":{"value":"en"},"children":["English"],"shown":{"text":"English"}}
+        TEXT "text" chars="English" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "option#language-fr" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<option>"
+        | weft.origin = layer(option#language-fr)
+        | weft.source = {"kind":"option","id":"language-fr","props":{"text":{"bind":"$.labels.french"},"value":"fr"},"shown":{"text":"{$.labels.french}"}}
+        TEXT "text" chars="{$.labels.french}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "text#internal" visible=false layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#internal)
+      | weft.source = {"kind":"text","id":"internal","props":{"hidden":true},"children":["Internal note: never shown."],"shown":{"text":"Internal note: never shown."}}
+      TEXT "text" chars="Internal note: never shown." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "alert#saved" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(alert#saved)
+      | weft.source = {"kind":"alert","id":"saved","props":{"hidden":{"bind":"$.saved","not":true},"tone":"success"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      TEXT "text" chars="Your changes were saved." size=14
+        | weft.text = 1
+    FRAME "slot:footer" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.slot = footer
+      INSTANCE "button#save" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=busy>"
+        | weft.origin = layer(button#save)
+        | weft.source = {"kind":"button","id":"save","props":{"state":"busy","submit":true,"variant":"primary"},"children":["Save"],"shown":{"text":"Save"}}
+        TEXT "text" chars="Save" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+      INSTANCE "button#cancel" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=secondary, state=idle>"
+        | weft.origin = layer(button#cancel)
+        | weft.source = {"kind":"button","id":"cancel","props":{"state":"idle","text":{"bind":"$.labels.cancel"},"variant":"secondary"},"on":{"press":"account.cancel"},"shown":{"text":"{$.labels.cancel}"}}
+        TEXT "text" chars="{$.labels.cancel}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "link#help" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+        | weft.origin = layer(link#help)
+        | weft.source = {"kind":"link","id":"help","props":{"href":"https://example.com/help","text":{"bind":"$.labels.help"}},"shown":{"text":"{$.labels.help}"}}
+        TEXT "text" chars="{$.labels.help}" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]

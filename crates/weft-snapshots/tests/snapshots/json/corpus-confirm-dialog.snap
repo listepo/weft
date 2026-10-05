@@ -1,0 +1,97 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-confirm-dialog as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "files",
+    "props": {
+      "label": "File"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Quarterly report"
+        ]
+      },
+      {
+        "kind": "button",
+        "id": "delete-file",
+        "props": {
+          "variant": "danger"
+        },
+        "on": {
+          "press": "dialog.open"
+        },
+        "children": [
+          "Delete file"
+        ]
+      },
+      {
+        "kind": "dialog",
+        "id": "confirm",
+        "props": {
+          "label": "Delete file?",
+          "open": {
+            "bind": "$.confirmOpen"
+          }
+        },
+        "on": {
+          "close": "dialog.close"
+        },
+        "slots": {
+          "actions": [
+            {
+              "kind": "button",
+              "id": "cancel",
+              "on": {
+                "press": "dialog.close"
+              },
+              "children": [
+                "Cancel"
+              ]
+            },
+            {
+              "kind": "button",
+              "id": "confirm-delete",
+              "props": {
+                "variant": "danger"
+              },
+              "on": {
+                "press": "file.delete"
+              },
+              "children": [
+                "Delete"
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "text",
+            "id": "warning",
+            "children": [
+              "This cannot be undone."
+            ]
+          },
+          {
+            "kind": "text",
+            "id": "filename",
+            "props": {
+              "text": {
+                "bind": "$.file.name"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
