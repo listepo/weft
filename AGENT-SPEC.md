@@ -109,7 +109,7 @@ An attribute value is exactly one of:
 
 Props are strings unless a type is given; `*` marks a required prop; "label" means the accessible `label` is required; events follow `;`. Every `text` or `mixed` component also takes `text`.
 
-- Layout: `stack` (`direction` column|row, `gap` token, `align` start|center|end|stretch, `wrap` boolean), `grid` (`columns`* integer ≥ 1, `gap` token), `section` (label; slot `header`).
+- Layout: `stack` (`direction` column|row, `gap` token, `align` start|center|end|stretch, `wrap` boolean; a `row` without `align` centres its children, so leave `align` out for the default), `grid` (`columns`* integer ≥ 1, `gap` token), `section` (label; slot `header`).
 - Text: `heading` (`level`* integer 1–6), `text` (`tone` default|muted|success|warning|danger), `image` (`src`*, label), `link` (`href`; press), `alert` (`tone` info|success|warning|danger; mixed).
 - Actions: `button` (`variant` primary|secondary|danger, `disabled` boolean, `submit` boolean literal; states idle|busy; press), `menu` (label) holding `menu-item` (`disabled`; press).
 - Forms: `form` (slot `footer`; states idle|submitting|invalid; submit), `field` (label, `type` text|email|password|number|search|multiline, `value` writable, `placeholder`, `required`, `disabled`, `error`; states valid|invalid; change), `checkbox` and `switch` (label, `checked` writable, `disabled`; change), `radio-group` (label, `value` writable; change) holding `radio` (`value`*, `disabled`), `select` (label, `value` writable, `disabled`; change) holding `option` (`value`*).
