@@ -39,6 +39,15 @@ A napi-rs addon of the same Rust core for Node and Bun, chosen at load time with
 
 Run the binding tests in Node, Deno, Bun and a headless browser through moon. Done when all four pass from one command.
 
+Execution plan:
+
+1. One Vitest config, `runtimes/vitest.config.ts`, over the `@weft/core` and `@weft/catalog` suites. `WEFT_RUNTIME` picks the leg; the launcher picks the executable (`vitest` on Node, `deno run -A` and `bun --bun` on the same `vitest.mjs`), so Deno and Bun run the very same test files and no test logic is copied. Vitest 5 runs under both (tried).
+2. Browser leg: Vitest browser mode on Playwright Chromium, as in `@weft/visual`. The suites that read files stay on the three runtimes with a file system (an exclude list, so a new file-reading suite fails loudly). `node:assert/strict` is aliased to a small Chai-backed shim there.
+3. `runtimes/setup.ts` fails a leg that did not land on its runtime, so a launcher that falls back to Node cannot report a green Deno or Bun.
+4. moon: `root:runtimes` aggregates `root:runtimes-node`, `-deno`, `-bun` and `-browser`; each depends on `root:wasm` only, so whichever build `@weft/core` loads (the T23 native addon with WebAssembly as the fallback) is the one exercised. Decide `moon ci` membership and record why.
+5. Add the two browser dependencies to the root package (same pins as `@weft/visual`), `toolchain.md` rows, README note.
+6. Verify: `moon run root:runtimes`, then the full check (`pnpm install --frozen-lockfile`, `moon run :test root:typecheck root:lint root:rust-test root:rust-lint`).
+
 ### T28. Binding readback against inverted conditions
 
 In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in while `$.busy` is true. It changed `{!$.email}` to `{!$.busy}` and kept the `!`. The markup is valid, but the condition is inverted. The HTML and JSX baselines got it right. Validation cannot see intent. The model can, if the core tells it in plain words what a binding means. Depends on T20.
