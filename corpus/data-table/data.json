@@ -1,6 +1,16 @@
 {
   "users": [
-    { "name": "Ada Lovelace", "email": "ada@example.com", "role": "Admin" },
-    { "name": "Alan Turing", "email": "alan@example.com", "role": "Editor" }
+    {
+      "name": "Ada Lovelace",
+      "email": "ada@example.com",
+      "role": "Admin",
+      "deleteLabel": "Delete Ada Lovelace"
+    },
+    {
+      "name": "Alan Turing",
+      "email": "alan@example.com",
+      "role": "Editor",
+      "deleteLabel": "Delete Alan Turing"
+    }
   ]
 }

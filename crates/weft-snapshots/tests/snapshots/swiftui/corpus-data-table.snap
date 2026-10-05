@@ -18,6 +18,7 @@ final class UsersModel {
         var name: String = ""
         var email: String = ""
         var role: String = ""
+        var deleteLabel: String = ""
     }
 }
 
@@ -97,7 +98,7 @@ struct UsersScreen: View {
                             Button(role: .destructive) {
                                 send(.usersDelete, "delete", item: "$.users.\(userIndex)")
                             } label: {
-                                Text("Delete")
+                                Text(user.deleteLabel)
                             }
                             .buttonStyle(.borderedProminent)
                             .accessibilityIdentifier("delete")

@@ -25,6 +25,7 @@ final class UsersModel {
         var name: String = ""
         var email: String = ""
         var role: String = ""
+        var deleteLabel: String = ""
     }
 }
 
@@ -36,12 +37,14 @@ extension UsersModel {
                 UsersItemData(
                     name: "Ada Lovelace",
                     email: "ada@example.com",
-                    role: "Admin"
+                    role: "Admin",
+                    deleteLabel: "Delete Ada Lovelace"
                 ),
                 UsersItemData(
                     name: "Alan Turing",
                     email: "alan@example.com",
-                    role: "Editor"
+                    role: "Editor",
+                    deleteLabel: "Delete Alan Turing"
                 )
             ]
         )
@@ -124,7 +127,7 @@ struct UsersScreen: View {
                             Button(role: .destructive) {
                                 send(.usersDelete, "delete", item: "$.users.\(userIndex)")
                             } label: {
-                                Text("Delete")
+                                Text(user.deleteLabel)
                             }
                             .buttonStyle(.borderedProminent)
                             .accessibilityIdentifier("delete")

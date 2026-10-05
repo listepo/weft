@@ -135,7 +135,9 @@
         {
           "id": "delete-label",
           "component": "Text",
-          "text": "Delete"
+          "text": {
+            "path": "deleteLabel"
+          }
         }
       ]
     }

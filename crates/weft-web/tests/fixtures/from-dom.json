@@ -2645,16 +2645,10 @@
        "slots": {
         "empty": [
          {
-          "kind": "cell",
-          "id": "cell-1",
+          "kind": "text",
+          "id": "archived-empty",
           "children": [
-           {
-            "kind": "text",
-            "id": "archived-empty",
-            "children": [
-             "Nothing archived yet."
-            ]
-           }
+           "Nothing archived yet."
           ]
          }
         ]
@@ -2767,16 +2761,7 @@
      "note": "instance order-amount[1] of a repeated element is imported as the static element order-amount-1"
     }
    ],
-   "diagnostics": [
-    {
-     "code": "W303",
-     "severity": "error",
-     "message": "<cell> cannot be placed in <table>.",
-     "path": "/screen#orders/table#archived/slot[empty]/cell#cell-1",
-     "expected": "a parent one of: \"row\"",
-     "got": "table"
-    }
-   ]
+   "diagnostics": []
   }
  },
  {
@@ -6690,23 +6675,17 @@
        "slots": {
         "empty": [
          {
-          "kind": "cell",
-          "id": "cell-1",
+          "kind": "text",
+          "id": "orders-empty",
           "children": [
-           {
-            "kind": "text",
-            "id": "orders-empty",
-            "children": [
-             "No orders yet."
-            ]
-           },
-           {
-            "kind": "button",
-            "id": "orders-shop",
-            "children": [
-             "Start shopping"
-            ]
-           }
+           "No orders yet."
+          ]
+         },
+         {
+          "kind": "button",
+          "id": "orders-shop",
+          "children": [
+           "Start shopping"
           ]
          }
         ]
@@ -6756,16 +6735,7 @@
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
     }
    ],
-   "diagnostics": [
-    {
-     "code": "W303",
-     "severity": "error",
-     "message": "<cell> cannot be placed in <table>.",
-     "path": "/screen#root/table#orders/slot[empty]/cell#cell-1",
-     "expected": "a parent one of: \"row\"",
-     "got": "table"
-    }
-   ]
+   "diagnostics": []
   }
  },
  {

@@ -264,10 +264,7 @@ a { display: inline-block; }
       </li>
     </template>
   </ul>
-  <div data-weft-id="summary" class="weft-row" style="gap: var(--weft-space-xs)">
-    <div data-weft-id="remaining" data-weft-kind="text" data-bind="text:$.remaining"></div>
-    <div data-weft-id="remaining-label" data-weft-kind="text">items left</div>
-  </div>
+  <div data-weft-id="remaining" data-weft-kind="text" data-bind="text:$.remainingLabel"></div>
 </main>
 </body>
 </html>

@@ -24,7 +24,7 @@ export default function Users({ data, actions }) {
                 <p>{user.role}</p>
               </td>
               <td>
-                <button type="button" data-variant="danger" onClick={() => actions.users.delete()}>Delete</button>
+                <button type="button" data-variant="danger" onClick={() => actions.users.delete()}>{user.deleteLabel}</button>
               </td>
             </tr>
           ))}

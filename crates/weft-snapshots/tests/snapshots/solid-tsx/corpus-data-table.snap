@@ -90,7 +90,9 @@ export default function WeftScreen(props: WeftProps) {
                   </div>
                 </td>
                 <td data-weft-id={"cell-actions[" + _i0() + "]"}>
-                  <button data-weft-id={"delete[" + _i0() + "]"} type="button" data-variant="danger" onClick={(_e) => _act(props.actions, { id: "delete[" + _i0() + "]", action: "users.delete", item: "$.users." + _i0() })}>Delete</button>
+                  <button data-weft-id={"delete[" + _i0() + "]"} type="button" data-variant="danger" onClick={(_e) => _act(props.actions, { id: "delete[" + _i0() + "]", action: "users.delete", item: "$.users." + _i0() })}>
+                    {!(_text(user?.deleteLabel).trim() === "") ? _squash(_text(user?.deleteLabel)) : ""}
+                  </button>
                 </td>
               </tr>
             ),

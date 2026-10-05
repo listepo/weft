@@ -15,8 +15,5 @@
       </item>
     </each>
   </list>
-  <stack id="stack-2" direction="row" gap="{token.space.xs}">
-    <text id="text-2" text="{$.remaining}"/>
-    <text id="text-items-left">items left</text>
-  </stack>
+  <text id="text-2" text="{$.remainingLabel}"/>
 </screen>
