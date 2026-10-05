@@ -37,8 +37,7 @@ description: corpus-confirm-dialog as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,11 +46,10 @@ description: corpus-confirm-dialog as html-data
   <h1 data-weft-id="title">Quarterly report</h1>
   <button data-weft-id="delete-file" type="button" data-variant="danger" data-action="press:dialog.open">Delete file</button>
   <dialog data-weft-id="confirm" aria-label="Delete file?" aria-modal="true" data-action="close:dialog.close">
-    <p data-weft-id="warning">This cannot be undone.</p>
-    <p data-weft-id="filename">q3-report.pdf</p>
+    <div data-weft-id="warning" data-weft-kind="text">This cannot be undone.</div>
+    <div data-weft-id="filename" data-weft-kind="text">q3-report.pdf</div>
     <footer data-weft-slot="actions">
-      <button data-weft-id="cancel" type="button" data-action="press:dialog.close">Cancel</button>
-      <button data-weft-id="confirm-delete" type="button" data-variant="danger" data-action="press:file.delete">Delete</button>
+      <button data-weft-id="cancel" type="button" data-action="press:dialog.close">Cancel</button><button data-weft-id="confirm-delete" type="button" data-variant="danger" data-action="press:file.delete">Delete</button>
     </footer>
   </dialog>
 </main>

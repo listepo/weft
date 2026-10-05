@@ -37,8 +37,7 @@ description: example-item as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,8 +45,8 @@ description: example-item as html
 <main data-weft-id="root" aria-label="Inbox">
   <ol data-weft-id="inbox">
     <li data-weft-id="msg-1" data-action="press:inbox.open">
-      <p data-weft-id="msg-1-from" data-tone="muted">Ana</p>
-      <p data-weft-id="msg-1-subject">Welcome aboard</p>
+      <div data-weft-id="msg-1-from" data-tone="muted" data-weft-kind="text">Ana</div>
+      <div data-weft-id="msg-1-subject" data-weft-kind="text">Welcome aboard</div>
     </li>
   </ol>
 </main>

@@ -99,6 +99,7 @@ pub fn to_html_with_data(
     let mut w = Writer {
         catalog: options.catalog,
         out: String::new(),
+        inline_end: false,
         sample: data.is_some(),
     };
     w.node(&document.root, &Ctx::default(), 0);
@@ -109,7 +110,10 @@ pub fn to_html_with_data(
 
 // ---- CSS ----
 
-/// The layout every page shares; the classes and data attributes are the ones `Writer` emits.
+/// The layout every page shares; the classes and data attributes are the ones `Writer` emits. It
+/// holds only what the generated components also carry as inline styles (stacks, rows, grids,
+/// inline-block links): a rule they lack, such as a caption stacked above its control, would make
+/// the page look different from them.
 const LAYOUT_CSS: &str = "\
 .weft-stack { display: flex; flex-direction: column; }
 .weft-row { display: flex; flex-direction: row; }
@@ -119,8 +123,7 @@ const LAYOUT_CSS: &str = "\
 [data-align=\"end\"] { align-items: flex-end; }
 [data-align=\"stretch\"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 ";
 
@@ -434,36 +437,58 @@ struct Base {
 
 const VOID: &[&str] = &["input", "img"];
 
+/// The elements that flow inside a line of text, where a line break between two of them is a
+/// visible space (the components never write one).
+const INLINE: &[&str] = &[
+    "a", "button", "img", "input", "label", "select", "span", "textarea",
+];
+
 struct Writer<'a> {
     catalog: &'a Catalog,
     out: String,
+    /// What was written last ends inside a line of text (inline content, or the start of an
+    /// inline element), so the next inline piece joins it instead of starting a line.
+    inline_end: bool,
     /// The document was filled in with sample data: show the `empty` slot instead of templating it.
     sample: bool,
 }
 
 impl Writer<'_> {
-    fn line(&mut self, depth: usize, text: &str) {
-        for _ in 0..depth {
-            self.out.push_str("  ");
+    /// One line of the page. An inline piece that follows inline content continues its line:
+    /// the page shows the whitespace between two inline pieces, and the components write none.
+    fn line(&mut self, depth: usize, text: &str, inline: bool) {
+        if inline && self.inline_end {
+            self.out.pop();
+        } else {
+            for _ in 0..depth {
+                self.out.push_str("  ");
+            }
         }
         self.out.push_str(text);
         self.out.push('\n');
+        self.inline_end = inline;
     }
 
     fn open(&mut self, depth: usize, tag: &str, attrs: &Attrs) {
-        self.line(depth, &format!("<{tag}{}>", attrs.print()));
+        self.line(
+            depth,
+            &format!("<{tag}{}>", attrs.print()),
+            INLINE.contains(&tag),
+        );
     }
 
     fn close(&mut self, depth: usize, tag: &str) {
-        self.line(depth, &format!("</{tag}>"));
+        self.line(depth, &format!("</{tag}>"), INLINE.contains(&tag));
     }
 
     /// An element whose only content is `text` (already escaped), on one line.
     fn inline(&mut self, depth: usize, tag: &str, attrs: &Attrs, text: &str) {
+        let inline = INLINE.contains(&tag);
         if VOID.contains(&tag) {
-            self.line(depth, &format!("<{tag}{}>", attrs.print()));
+            self.line(depth, &format!("<{tag}{}>", attrs.print()), inline);
         } else {
-            self.line(depth, &format!("<{tag}{}>{text}</{tag}>", attrs.print()));
+            let html = format!("<{tag}{}>{text}</{tag}>", attrs.print());
+            self.line(depth, &html, inline);
         }
     }
 
@@ -520,6 +545,10 @@ impl Writer<'_> {
 
     /// The text a text-content kind shows: its content, else its literal `text` prop.
     fn shown(n: &Node) -> String {
+        escape_text(&Self::own_text(n))
+    }
+
+    fn own_text(n: &Node) -> String {
         let mut s = String::new();
         for c in &n.children {
             if let Child::Text(t) = c {
@@ -529,11 +558,21 @@ impl Writer<'_> {
         if s.is_empty() {
             s = literal_text(n.props.get("text")).unwrap_or_default();
         }
-        escape_text(&s)
+        s
     }
 
     fn label(n: &Node) -> String {
         literal_text(n.props.get("label")).unwrap_or_default()
+    }
+
+    /// The caption a control shows beside it: hidden from the accessibility tree, because the
+    /// control's `aria-label` already names it. Nothing when there is no caption.
+    fn caption(&mut self, depth: usize, text: &str) {
+        if !text.is_empty() {
+            let mut a = Attrs::default();
+            a.set("aria-hidden", "true");
+            self.inline(depth, "span", &a, &escape_text(text));
+        }
     }
 
     fn node(&mut self, n: &Node, ctx: &Ctx, depth: usize) {
@@ -563,8 +602,11 @@ impl Writer<'_> {
                 if let Some(tone) = literal_text(n.props.get("tone")) {
                     b.attrs.set("data-tone", tone);
                 }
+                // A block with no role of its own, as the components write it: a paragraph would
+                // add a node to the accessibility tree and margins to the layout.
+                b.attrs.set("data-weft-kind", "text");
                 let a = Self::finish(n, b);
-                self.inline(depth, "p", &a, &Self::shown(n));
+                self.inline(depth, "div", &a, &Self::shown(n));
             }
             "image" => {
                 let mut b = self.base(n, &["src"], false);
@@ -577,10 +619,21 @@ impl Writer<'_> {
             }
             "link" => {
                 let mut b = self.base(n, &["href", "text"], true);
-                // A link needs an href to be a link; a bound or unsafe one stays in the page as
-                // `#` (the binding is in data-bind).
                 let href = literal_text(n.props.get("href")).and_then(|s| safe_url(&s));
-                b.attrs.set("href", href.unwrap_or_else(|| "#".into()));
+                match href {
+                    Some(href) => b.attrs.set("href", href),
+                    // A bound href stays in the page as `#` for the host to fill (the binding is
+                    // in data-bind).
+                    None if n.props.get("href").and_then(binding).is_some() => {
+                        b.attrs.set("href", "#");
+                    }
+                    // Without an href an `<a>` is neither a link nor focusable; both are restored
+                    // as the components do.
+                    None => {
+                        b.attrs.set("role", "link");
+                        b.attrs.set("tabindex", "0");
+                    }
+                }
                 let a = Self::finish(n, b);
                 self.inline(depth, "a", &a, &Self::shown(n));
             }
@@ -604,14 +657,12 @@ impl Writer<'_> {
             "field" => self.field(n, depth),
             "checkbox" | "switch" => self.toggle(n, depth),
             "radio-group" => {
-                let mut b = self.base(n, &["value"], false);
+                let mut b = self.base(n, &["value"], true);
                 b.attrs.set("role", "radiogroup");
                 let a = Self::finish(n, b);
-                self.open(depth, "fieldset", &a);
-                let label = Self::label(n);
-                if !label.is_empty() {
-                    self.inline(depth + 1, "legend", &Attrs::default(), &escape_text(&label));
-                }
+                // A `fieldset` would draw a border and padding the components do not.
+                self.open(depth, "div", &a);
+                self.caption(depth + 1, &Self::label(n));
                 let inner = Ctx {
                     group: Some((
                         n.id.clone().unwrap_or_default(),
@@ -620,22 +671,17 @@ impl Writer<'_> {
                     ..ctx.clone()
                 };
                 self.children(n, &inner, depth + 1);
-                self.close(depth, "fieldset");
+                self.close(depth, "div");
             }
             "radio" => self.radio(n, ctx, depth),
             "select" => {
-                let mut b = self.base(n, &["value", "disabled"], false);
+                let mut b = self.base(n, &["value", "disabled"], true);
                 if is_true(n.props.get("disabled")) {
                     b.attrs.flag("disabled");
                 }
                 let a = Self::finish(n, b);
                 self.open(depth, "label", &Attrs::default());
-                self.inline(
-                    depth + 1,
-                    "span",
-                    &Attrs::default(),
-                    &escape_text(&Self::label(n)),
-                );
+                self.caption(depth + 1, &Self::label(n));
                 self.open(depth + 1, "select", &a);
                 let inner = Ctx {
                     select: literal_text(n.props.get("value")),
@@ -819,7 +865,7 @@ impl Writer<'_> {
         for c in list {
             match c {
                 Child::Node(child) => self.node(child, ctx, depth),
-                Child::Text(t) => self.line(depth, &escape_text(t)),
+                Child::Text(t) => self.line(depth, &escape_text(t), true),
             }
         }
     }
@@ -905,7 +951,7 @@ impl Writer<'_> {
                 "disabled",
                 "error",
             ],
-            false,
+            true,
         );
         if !multiline {
             b.attrs.set("type", ty);
@@ -935,15 +981,10 @@ impl Writer<'_> {
         }
         let a = Self::finish(n, b);
         let mut wrapper = Attrs::default();
-        wrapper.set("class", "weft-field");
+        wrapper.flag("data-weft-field");
         self.open(depth, "div", &wrapper);
         self.open(depth + 1, "label", &Attrs::default());
-        self.inline(
-            depth + 2,
-            "span",
-            &Attrs::default(),
-            &escape_text(&Self::label(n)),
-        );
+        self.caption(depth + 2, &Self::label(n));
         if multiline {
             self.inline(
                 depth + 2,
@@ -960,14 +1001,13 @@ impl Writer<'_> {
             if let Some(eid) = error_id {
                 ea.set("id", eid);
             }
-            ea.set("class", "weft-error");
-            self.inline(depth + 1, "p", &ea, &escape_text(&e));
+            self.inline(depth + 1, "div", &ea, &escape_text(&e));
         }
         self.close(depth, "div");
     }
 
     fn toggle(&mut self, n: &Node, depth: usize) {
-        let mut b = self.base(n, &["checked", "disabled"], false);
+        let mut b = self.base(n, &["checked", "disabled"], true);
         b.attrs.set("type", "checkbox");
         if n.kind == "switch" {
             b.attrs.set("role", "switch");
@@ -979,16 +1019,9 @@ impl Writer<'_> {
             b.attrs.flag("disabled");
         }
         let a = Self::finish(n, b);
-        let mut wrapper = Attrs::default();
-        wrapper.set("class", "weft-toggle");
-        self.open(depth, "label", &wrapper);
+        self.open(depth, "label", &Attrs::default());
         self.inline(depth + 1, "input", &a, "");
-        self.inline(
-            depth + 1,
-            "span",
-            &Attrs::default(),
-            &escape_text(&Self::label(n)),
-        );
+        self.caption(depth + 1, &Self::label(n));
         self.close(depth, "label");
     }
 
@@ -1013,12 +1046,25 @@ impl Writer<'_> {
         if is_true(n.props.get("disabled")) {
             b.attrs.flag("disabled");
         }
+        // The visible text is the content; a `label` only overrides the accessible name. Either
+        // one names the control, since the visible text is hidden from the tree.
+        let own = Self::own_text(n);
+        let label_text = Self::label(n);
+        if Self::label(n).is_empty()
+            && !own.is_empty()
+            && !b.attrs.0.iter().any(|(k, _)| k == "aria-label")
+        {
+            b.attrs.set("aria-label", own.clone());
+        }
         let a = Self::finish(n, b);
-        let mut wrapper = Attrs::default();
-        wrapper.set("class", "weft-toggle");
-        self.open(depth, "label", &wrapper);
+        let shown = escape_text(if own.is_empty() { &label_text } else { &own });
+        self.open(depth, "label", &Attrs::default());
         self.inline(depth + 1, "input", &a, "");
-        self.inline(depth + 1, "span", &Attrs::default(), &Self::shown(n));
+        if !shown.is_empty() {
+            let mut caption = Attrs::default();
+            caption.set("aria-hidden", "true");
+            self.inline(depth + 1, "span", &caption, &shown);
+        }
         self.close(depth, "label");
     }
 

@@ -10,10 +10,10 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T47 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T50 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
+| T53 | todo | P1 | 3 | 0% | |
 
 ### T8. Evaluation
 
@@ -155,33 +155,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T47. Static page parity with the generated components
-
-`weft html` pages and the generated React and SolidJS components show the same data (T43), but `packages/visual` still lists every screen in `STATIC_PAGE_DIFFERS` and most in `STATIC_TREE_DIFFERS` (`packages/visual/test/web/screens.test.ts`).
-
-- **Accessibility tree:** close all three known differences in `crates/weft-web`:
-  - a `text` becomes a paragraph where React writes a text run;
-  - the caption of a field, checkbox, switch or radio is exposed as separate text instead of the control's label;
-  - a link without `href` gets the URL `#`.
-- **Pixels:** the static page has a layout stylesheet of its own (captions above controls, a toggle label as a flex row, stacks spaced with gap tokens), while the components render with none.
-  - Pick one layout for both sides and say why in this card before coding. The two options are one shared layout stylesheet, or matching the static page to the components.
-  - Do not loosen the comparison with a pixel tolerance.
-
-Done when:
-- every entry of `STATIC_TREE_DIFFERS` is gone;
-- `STATIC_PAGE_DIFFERS` keeps only screens with a stated, unavoidable reason;
-- changed baselines and snapshots are reviewed;
-- the full check exits 0.
-
-T45 lets a build request carry one token modifier and an export return the modes as a DTCG resolver document. The Figma and Penpot plugin UI (`packages/design-plugin`, `plugins/figma`, `plugins/penpot`) still has no way to use this: modes are sent only by a caller that sets `UiOptions.modifier`.
-- **Build:** the UI accepts a resolver document (pasted or picked as a file, next to the token input) and lets the user choose the modifier. The appearance modifier is the default choice.
-- **Export:** the UI shows the returned `resolver` and offers it as a downloadable `.resolver.json` file.
-- **Penpot:** the default context on export is the first theme of the group in creation order. Keep the order stable, or record which theme is the default, if Penpot's plugin API allows it.
-Done when:
-- UI tests over the existing fakes cover choosing a modifier and downloading the resolver;
-- the plugin bundles are rebuilt;
-- the plugin READMEs and skills are updated;
-- the full check exits 0.
 ### T50. Richer controls
 The catalog has `select`, `menu`, `radio-group`, `checkbox` and `switch`, but none of the controls richer screens need. Add these kinds, as the creator chose:
 - a slider (a range with min, max and step);
@@ -248,3 +221,23 @@ Two parts, as the creator chose.
    - Asset paths are untrusted: relative to the project, no URLs unless SPEC allows them, and size-bounded.
    - Add a small model asset under a compatible licence to the corpus.
 Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
+
+### T53. Shared base stylesheet for web targets
+
+T47 made the static page match the generated React and SolidJS components by dropping the page's own styling. Both now render unstyled: a caption sits flush against its control, fields have no spacing, and a link without `href` does not look like a link. The creator chose one Weft base stylesheet for every web target, so all of them look good and stay identical.
+
+- **The stylesheet.** One minimal, token-driven base stylesheet:
+  - captions above fields, with spacing between fields;
+  - checkbox, switch and radio rows;
+  - link appearance, including `role="link"`;
+  - buttons, stacks and the other kinds that need it.
+  - Values come from the project's tokens (spacing, colours, typography), with fallbacks when a token is absent, and follow light and dark modes (T45).
+- **Where it ships.** Written by `weft css-tokens` (or a sibling command, decided in the plan) for React and SolidJS hosts, and inlined by `weft html`.
+- **Where it applies.** The visual harness gives it to every web frame, as it now does with `weft-tokens.css`. The reference renderer and the Figma/Penpot round trips are adjusted wherever they are compared with the components.
+- **Accessibility.** The tree stays as T47 left it.
+
+Done when:
+- the static page and the components still match pixel for pixel and in the accessibility tree;
+- the reviewed baselines show captions above fields, spacing and visible links;
+- SPEC and docs describe the stylesheet;
+- the full check exits 0.

@@ -37,8 +37,7 @@ description: example-tab as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -49,11 +48,8 @@ description: example-tab as html
       <button data-weft-id="tab-profile" type="button" role="tab" id="weft-tab-profile-tab" aria-selected="true" aria-controls="weft-tab-profile-panel">Profile</button>
     </div>
     <div role="tabpanel" id="weft-tab-profile-panel" aria-labelledby="weft-tab-profile-tab">
-      <div class="weft-field">
-        <label>
-          <span>Display name</span>
-          <input data-weft-id="name" type="text" data-bind="value:$.name">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Display name</span><input data-weft-id="name" aria-label="Display name" type="text" data-bind="value:$.name"></label>
       </div>
     </div>
   </div>

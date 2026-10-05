@@ -37,8 +37,7 @@ description: corpus-dashboard as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,41 +45,40 @@ description: corpus-dashboard as html-data
 <main data-weft-id="dashboard" aria-label="Team dashboard" data-state="ready">
   <div data-weft-id="header" class="weft-row" data-align="center" data-wrap style="gap: var(--weft-space-xl)">
     <h1 data-weft-id="title">Platform</h1>
-    <p data-weft-id="updated" data-tone="muted">Updated 5 minutes ago</p>
+    <div data-weft-id="updated" data-tone="muted" data-weft-kind="text">Updated 5 minutes ago</div>
   </div>
   <div data-weft-id="stats" class="weft-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--weft-space-lg)">
     <section data-weft-id="velocity" aria-label="Velocity">
       <header data-weft-slot="header">
         <h2 data-weft-id="velocity-title">Velocity</h2>
       </header>
-      <p data-weft-id="velocity-value" data-tone="success">42</p>
+      <div data-weft-id="velocity-value" data-tone="success" data-weft-kind="text">42</div>
     </section>
     <section data-weft-id="bugs" aria-label="Open bugs">
       <header data-weft-slot="header">
         <h2 data-weft-id="bugs-title">Open bugs</h2>
       </header>
-      <p data-weft-id="bugs-value" data-tone="warning">7</p>
+      <div data-weft-id="bugs-value" data-tone="warning" data-weft-kind="text">7</div>
     </section>
     <section data-weft-id="incidents" aria-label="Incidents">
       <header data-weft-slot="header">
         <h2 data-weft-id="incidents-title">Incidents</h2>
       </header>
-      <p data-weft-id="incidents-value" data-tone="danger">1</p>
+      <div data-weft-id="incidents-value" data-tone="danger" data-weft-kind="text">1</div>
     </section>
   </div>
   <div data-weft-id="notices" class="weft-stack" data-align="stretch" style="gap: var(--weft-space-sm)">
     <div data-weft-id="release" role="alert" data-tone="info">Release 2.4 ships on Friday.</div>
     <div data-weft-id="backup" role="alert" data-tone="success">Last backup finished at 03:00.</div>
     <div data-weft-id="quota" role="alert" data-tone="warning">
-      <p data-weft-id="quota-text">Storage is 90% full.</p>
+      <div data-weft-id="quota-text" data-weft-kind="text">Storage is 90% full.</div>
       <a data-weft-id="quota-link" href="https://example.com/storage">Manage storage</a>
     </div>
   </div>
   <div data-weft-id="footer" class="weft-stack" data-align="end" style="gap: var(--weft-space-xs)">
-    <p data-weft-id="owner" data-tone="default">Owned by the platform team</p>
+    <div data-weft-id="owner" data-tone="default" data-weft-kind="text">Owned by the platform team</div>
     <div data-weft-id="footer-links" class="weft-row" data-align="start" style="gap: var(--weft-space-md)">
-      <a data-weft-id="docs" href="/docs">Docs</a>
-      <a data-weft-id="status" href="https://status.example.com">Status page</a>
+      <a data-weft-id="docs" href="/docs">Docs</a><a data-weft-id="status" href="https://status.example.com">Status page</a>
     </div>
   </div>
 </main>

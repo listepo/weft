@@ -37,22 +37,18 @@ description: example-option as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Sizes">
-  <label>
-    <span>Size</span>
-    <select data-weft-id="size" data-bind="value:$.size">
+  <label><span aria-hidden="true">Size</span><select data-weft-id="size" aria-label="Size" data-bind="value:$.size">
       <template data-weft-id="size-each" data-each="$.sizes" data-as="size">
         <option data-weft-id="size-option" value="" data-bind="value:$size.code">Size</option>
       </template>
       <option data-weft-id="size-other" value="other">Other</option>
-    </select>
-  </label>
+    </select></label>
 </main>
 </body>
 </html>

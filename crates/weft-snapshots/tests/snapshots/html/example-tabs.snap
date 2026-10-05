@@ -37,8 +37,7 @@ description: example-tabs as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,14 +45,13 @@ description: example-tabs as html
 <main data-weft-id="root" aria-label="Account">
   <div>
     <div data-weft-id="account-tabs" role="tablist" data-bind="selected:$.tab" data-action="change:tabs.change">
-      <button data-weft-id="tab-profile" type="button" role="tab" id="weft-tab-profile-tab" aria-selected="true" aria-controls="weft-tab-profile-panel">Profile</button>
-      <button data-weft-id="tab-security" type="button" role="tab" id="weft-tab-security-tab" aria-selected="false" aria-controls="weft-tab-security-panel">Security</button>
+      <button data-weft-id="tab-profile" type="button" role="tab" id="weft-tab-profile-tab" aria-selected="true" aria-controls="weft-tab-profile-panel">Profile</button><button data-weft-id="tab-security" type="button" role="tab" id="weft-tab-security-tab" aria-selected="false" aria-controls="weft-tab-security-panel">Security</button>
     </div>
     <div role="tabpanel" id="weft-tab-profile-panel" aria-labelledby="weft-tab-profile-tab">
-      <p data-weft-id="profile-text">Your public details.</p>
+      <div data-weft-id="profile-text" data-weft-kind="text">Your public details.</div>
     </div>
     <div role="tabpanel" id="weft-tab-security-panel" aria-labelledby="weft-tab-security-tab" hidden>
-      <p data-weft-id="security-text">Password and sessions.</p>
+      <div data-weft-id="security-text" data-weft-kind="text">Password and sessions.</div>
     </div>
   </div>
 </main>

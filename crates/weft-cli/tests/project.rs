@@ -519,9 +519,9 @@ fn sample_data_comes_from_the_flag_else_the_project_else_none() {
 
     let r = run(&[&"html", &screen]);
     assert_eq!(r.code, 0, "{}", r.stderr);
-    assert!(r.stdout.contains(">Ada</p>"), "{}", r.stdout);
+    assert!(r.stdout.contains(">Ada</div>"), "{}", r.stdout);
     let r = run(&[&"html", &screen, &"--data", &other]);
-    assert!(r.stdout.contains(">Grace</p>"), "{}", r.stdout);
+    assert!(r.stdout.contains(">Grace</div>"), "{}", r.stdout);
     let r = run(&[&"html", &screen, &"--no-project"]);
     assert!(!r.stdout.contains("Ada"), "{}", r.stdout);
 

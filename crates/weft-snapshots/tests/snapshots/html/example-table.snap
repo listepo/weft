@@ -37,8 +37,7 @@ description: example-table as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -55,15 +54,15 @@ description: example-table as html
       <template data-weft-id="order-each" data-each="$.orders" data-as="order">
         <tr data-weft-id="order-row" aria-selected="false">
           <td data-weft-id="order-id">
-            <p data-weft-id="order-id-text" data-bind="text:$order.id"></p>
+            <div data-weft-id="order-id-text" data-weft-kind="text" data-bind="text:$order.id"></div>
           </td>
           <td data-weft-id="order-total">
-            <p data-weft-id="order-total-text" data-bind="text:$order.total"></p>
+            <div data-weft-id="order-total-text" data-weft-kind="text" data-bind="text:$order.total"></div>
           </td>
         </tr>
       </template>
       <template data-empty>
-        <p data-weft-id="orders-empty">No orders yet.</p>
+        <div data-weft-id="orders-empty" data-weft-kind="text">No orders yet.</div>
         <button data-weft-id="orders-shop" type="button" data-action="press:nav.shop">Start shopping</button>
       </template>
     </tbody>

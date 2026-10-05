@@ -37,17 +37,13 @@ description: example-switch as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Notifications">
-  <label class="weft-toggle">
-    <input data-weft-id="push" type="checkbox" role="switch" data-bind="checked:$.pushEnabled" data-action="change:settings.update">
-    <span>Push notifications</span>
-  </label>
+  <label><input data-weft-id="push" aria-label="Push notifications" type="checkbox" role="switch" data-bind="checked:$.pushEnabled" data-action="change:settings.update"><span aria-hidden="true">Push notifications</span></label>
 </main>
 </body>
 </html>

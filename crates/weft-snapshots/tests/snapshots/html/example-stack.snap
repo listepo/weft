@@ -37,16 +37,14 @@ description: example-stack as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Actions">
   <div data-weft-id="actions" class="weft-row" data-align="center" style="gap: var(--weft-space-md)">
-    <button data-weft-id="save" type="button" data-variant="primary" data-action="press:doc.save">Save</button>
-    <button data-weft-id="discard" type="button" data-action="press:doc.discard">Discard</button>
+    <button data-weft-id="save" type="button" data-variant="primary" data-action="press:doc.save">Save</button><button data-weft-id="discard" type="button" data-action="press:doc.discard">Discard</button>
   </div>
 </main>
 </body>

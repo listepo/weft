@@ -37,15 +37,14 @@ description: example-text as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Status">
-  <p data-weft-id="saved" data-tone="success">All changes saved.</p>
-  <p data-weft-id="user" data-bind="text:$.user.name"></p>
+  <div data-weft-id="saved" data-tone="success" data-weft-kind="text">All changes saved.</div>
+  <div data-weft-id="user" data-weft-kind="text" data-bind="text:$.user.name"></div>
 </main>
 </body>
 </html>

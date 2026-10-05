@@ -37,8 +37,7 @@ description: example-cell as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -53,8 +52,8 @@ description: example-cell as html
     <tbody>
       <tr data-weft-id="row-ana">
         <td data-weft-id="cell-ana">
-          <p data-weft-id="ana-name">Ana</p>
-          <a data-weft-id="ana-link" href="#" data-action="press:users.open">View</a>
+          <div data-weft-id="ana-name" data-weft-kind="text">Ana</div>
+          <a data-weft-id="ana-link" role="link" tabindex="0" data-action="press:users.open">View</a>
         </td>
       </tr>
     </tbody>

@@ -37,24 +37,15 @@ description: example-radio-group as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Plan">
-  <fieldset data-weft-id="plan" role="radiogroup" data-bind="value:$.plan" data-action="change:plan.choose">
-    <legend>Plan</legend>
-    <label class="weft-toggle">
-      <input data-weft-id="plan-free" type="radio" name="weft-plan" value="free">
-      <span>Free</span>
-    </label>
-    <label class="weft-toggle">
-      <input data-weft-id="plan-pro" type="radio" name="weft-plan" value="pro">
-      <span>Pro</span>
-    </label>
-  </fieldset>
+  <div data-weft-id="plan" aria-label="Plan" role="radiogroup" data-bind="value:$.plan" data-action="change:plan.choose">
+    <span aria-hidden="true">Plan</span><label><input data-weft-id="plan-free" type="radio" name="weft-plan" value="free" aria-label="Free"><span aria-hidden="true">Free</span></label><label><input data-weft-id="plan-pro" type="radio" name="weft-plan" value="pro" aria-label="Pro"><span aria-hidden="true">Pro</span></label>
+  </div>
 </main>
 </body>
 </html>
