@@ -246,7 +246,21 @@ Checked on 2026-10-05 against the pinned tools: moon 2.5.6, Vitest 5.0.3, cargo 
 | The build reads no other file | No `.cargo/config.toml` or `rust-toolchain*` in the repository (the toolchain comes from `mise.toml`, a moon implicit input through `.moon/`), `weft-node/build.rs` only calls `napi_build::setup()`, and the other crates have no build script (`ls crates/*/build.rs`) | repository files, 2026-10-05 |
 | Measured: the WebAssembly task after a change in a crate outside the closure | `moon run root:wasm` with a line appended to `weft-swiftui/src/lib.rs` and to `weft-cli/src/main.rs`: cached (7 ms, same hash 8c5b857e); the same on a line in `weft-core/src/lib.rs`: rebuilt (15.9 s, new hash); reverted: cached. `root:native` likewise: cached after a `weft-swiftui` change, rebuilt after a `weft-web` change | moon 2.5.6 in the worktree |
 
-## 17. Glass material tokens (T51)
+## 17. Streaming and incremental generation (T11)
+
+Checked on 2026-10-06. "Measured" rows are experiments in the T11 worktree (Apple Silicon, other agents running, so the numbers are an upper bound); the other rows cite the vendors' documentation.
+
+| Decision or fact | Basis | Source (checked) |
+| --- | --- | --- |
+| A2UI streams by flat component lists | v0.9 has four messages (`createSurface`, `updateComponents`, `updateDataModel`, `deleteSurface`); components carry ids and arrive in any order; the client keeps a component map and rebuilds the tree; rendering can begin once `root` is defined | https://a2ui.org/specification/v0.9-a2ui/ (2026-10-06) |
+| json-render streams as JSON patches | `@json-render/core` has `createSpecStreamCompiler()`; `compiler.push(chunk)` returns the accumulated spec and the new patches, and the page renders the partial spec; `@json-render/yaml` adds a streaming YAML parser | https://github.com/vercel-labs/json-render (2026-10-06) |
+| Nested markup streams as a prefix, so no id list is needed | Markup is written front to back, so the text received so far is a prefix; the tokenizer already closed every open element at the end of the input, and partial mode keeps that tree and reports the closing as `pending` (SPEC §6.3) | `crates/weft-core/src/syntax.rs`, `crates/weft-core/src/parse.rs` |
+| The cost is paid by the model and the reader, not by the format | A flat id list lets elements arrive in any order and be replaced one by one; a prefix grows only at the end and an element cannot be changed once written. Patches (SPEC §7) cover the changes after the first pass | decision |
+| Measured: re-parsing the whole text on every chunk is cheap | All 19 corpus screens (982 characters on average, 2136 at most), strict mode with the core catalog: one full `parse` takes 0.20 ms on the native addon and 0.25 ms on WebAssembly. Re-parsing a growing prefix after every 16 characters (about 60 chunks per screen, 134 for the largest) takes 10.3 ms per screen on the native addon and 12.4 ms on WebAssembly, 33 ms and 39 ms for the largest, so 0.1 to 0.3 ms per chunk | script in the T11 session, `partial: true`, 5 repetitions after a warm-up |
+| So no incremental parser is built | The work per chunk is quadratic in the text length, but a model writing at tens of tokens per second gives a chunk every 20 to 100 ms against 0.3 ms of parsing; an incremental tokenizer would add state to both engines for no visible gain. Revisit for documents hundreds of times larger than the corpus | decision |
+| Every cut of every screen is covered by a test | `crates/weft-catalog/tests/partial.rs` cuts the 19 corpus screens and the catalog examples after every character and checks: no error in `diagnostics`, only the listed codes in `pending`, a document from the root start tag on, never fewer elements than the shorter prefix, and the full text equals `parse`. `packages/render-react/test/stream.test.ts` repeats it through the engines at every UTF-16 unit and renders every 11th prefix | the tests |
+
+## 18. Glass material tokens (T51)
 
 Checked on 2026-10-05. Apple pages were read as their documentation JSON (`developer.apple.com/tutorials/data/documentation/...`); the Figma and Penpot rows are the type declarations of the pinned packages, not the web pages.
 

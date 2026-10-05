@@ -44,6 +44,11 @@ pub struct SyntaxResult {
     pub elements: Vec<RawElement>,
     pub root: Option<usize>,
     pub diagnostics: Vec<Diagnostic>,
+    /// Partial mode only: what the end of the input left unfinished (SPEC §6.3). These are not
+    /// errors of the text read so far, so they stay out of `diagnostics`.
+    pub pending: Vec<Diagnostic>,
+    /// Partial mode only: the elements still open at the end of the input, outermost first.
+    pub open: Vec<usize>,
 }
 
 const PREDEFINED: [(&str, &str); 5] = [
@@ -103,6 +108,10 @@ struct Tokenizer {
     root: Option<usize>,
     text: Vec<u16>,
     text_start: Option<usize>,
+    /// The input may end anywhere, because the model is still writing it.
+    partial: bool,
+    pending: Vec<Diagnostic>,
+    open: Vec<usize>,
 }
 
 struct Report<'a> {
@@ -193,9 +202,26 @@ impl Tokenizer {
         self.diagnostics.push(d);
     }
 
+    /// A consequence of the input ending here: pending in partial mode, an error otherwise.
+    fn tail(&mut self, d: Diagnostic) {
+        if self.partial {
+            self.pending.push(d);
+        } else {
+            self.diagnostics.push(d);
+        }
+    }
+
     /// A reference that cannot be decoded is kept verbatim so that tokenizing continues.
     fn read_reference(&mut self, at: usize) -> (Vec<u16>, usize) {
         let Some((kind, body, end)) = self.match_reference(at) else {
+            // `&am` at the end of a stream is a reference still being written, not a bare `&`.
+            if self.partial
+                && self.src[at + 1..]
+                    .iter()
+                    .all(|&u| u8::try_from(u).is_ok_and(|b| b.is_ascii_alphanumeric() || b == b'#'))
+            {
+                return (vec![], self.len());
+            }
             self.report(
                 Code::W112,
                 at,
@@ -422,6 +448,11 @@ impl Tokenizer {
     /// Returns the offset after the start tag, or `None` when parsing must stop.
     fn read_start_tag(&mut self, at: usize) -> Option<usize> {
         let name = self.read_name(at + 1);
+        if name.is_empty() && self.partial && at + 1 == self.len() {
+            // A lone `<` at the end of a stream is the start of a tag not yet written.
+            return Some(self.len());
+        }
+        let mark = self.diagnostics.len();
         if name.is_empty() {
             self.report(
                 Code::W101,
@@ -480,17 +511,23 @@ impl Tokenizer {
             let before = k;
             k = self.skip_whitespace(k);
             if k >= n {
-                self.report(
-                    Code::W110,
-                    at,
-                    report(
-                        format!("Start tag <{name}> is never closed."),
-                        "\">\" or \"/>\"",
-                    )
-                    .hint("end it with \">\" or \"/>\""),
-                    None,
-                );
+                let path = self.path_of(None);
                 self.stack.pop();
+                if self.partial {
+                    // Attributes cut short would build a wrong element, so the whole tag waits for
+                    // the next chunk; what the cut made look wrong is no error either.
+                    self.diagnostics.truncate(mark);
+                    self.forget(index);
+                }
+                let d = Diagnostic::new(
+                    Code::W110,
+                    path,
+                    format!("Start tag <{name}> is never closed."),
+                    "\">\" or \"/>\"",
+                )
+                .pos(Some(self.pos_at(at)))
+                .hint("end it with \">\" or \"/>\"");
+                self.tail(d);
                 return Some(n);
             }
             if self.starts_with(k, "/>") {
@@ -592,11 +629,24 @@ impl Tokenizer {
         }
     }
 
+    /// Takes back an element whose start tag turned out to be unfinished.
+    fn forget(&mut self, index: usize) {
+        match self.stack.last().copied() {
+            Some(parent) => {
+                self.elements[parent].children.pop();
+            }
+            None if self.root == Some(index) => self.root = None,
+            None => {}
+        }
+    }
+
     fn read_end_tag(&mut self, at: usize) -> usize {
         let name = self.read_name(at + 2);
         let mut k = self.skip_whitespace(at + 2 + Self::name_len(&name));
         if self.is(k, '>') {
             k += 1;
+        } else if self.partial && self.find(k, ">").is_none() {
+            return self.len();
         } else {
             self.report(
                 Code::W101,
@@ -675,15 +725,27 @@ impl Tokenizer {
         let mut i = 0;
         while i < n {
             if self.is(i, '<') {
+                if self.partial
+                    && n - i < 4
+                    && "<!--"
+                        .encode_utf16()
+                        .collect::<Vec<_>>()
+                        .starts_with(&self.src[i..])
+                {
+                    break;
+                }
                 if self.starts_with(i, "<!--") {
                     // Comments are not part of the model, so text on both sides forms one run.
                     let Some(end) = self.find(i + 4, "-->") else {
-                        self.report(
+                        let d = Diagnostic::new(
                             Code::W115,
-                            i,
-                            report("Comment is never closed.", "-->").hint("end it with \"-->\""),
-                            None,
-                        );
+                            self.path_of(None),
+                            "Comment is never closed.",
+                            "-->",
+                        )
+                        .pos(Some(self.pos_at(i)))
+                        .hint("end it with \"-->\"");
+                        self.tail(d);
                         i = n;
                         continue;
                     };
@@ -782,6 +844,7 @@ impl Tokenizer {
             i = end;
         }
         self.flush_text();
+        self.open = self.stack.clone();
         while let Some(&top) = self.stack.last() {
             let el = &self.elements[top];
             let expected = format!("</{}>", el.name);
@@ -793,7 +856,7 @@ impl Tokenizer {
             )
             .pos(Some(el.pos))
             .hint(format!("add </{}>", el.name));
-            self.diagnostics.push(d);
+            self.tail(d);
             self.stack.pop();
         }
         if self.root.is_none() {
@@ -804,7 +867,7 @@ impl Tokenizer {
                 "<screen id=\"…\" weft=\"0.1\">",
             )
             .pos(Some(self.pos_at(n)));
-            self.diagnostics.push(d);
+            self.tail(d);
         }
         true
     }
@@ -858,6 +921,11 @@ fn suggest_name(name: &str) -> String {
 }
 
 pub fn tokenize(input: &str) -> SyntaxResult {
+    tokenize_with(input, false)
+}
+
+/// With `partial`, input that stops inside a construct is read as far as it goes (SPEC §6.3).
+pub fn tokenize_with(input: &str, partial: bool) -> SyntaxResult {
     // XML end-of-line handling, so that positions and values agree with any conforming parser.
     let src = input
         .strip_prefix(BOM)
@@ -881,13 +949,19 @@ pub fn tokenize(input: &str) -> SyntaxResult {
         root: None,
         text: vec![],
         text_start: None,
+        partial,
+        pending: vec![],
+        open: vec![],
     };
     let complete = t.run();
     sort_by_position(&mut t.diagnostics);
+    sort_by_position(&mut t.pending);
     SyntaxResult {
         elements: t.elements,
         root: if complete { t.root } else { None },
         diagnostics: t.diagnostics,
+        pending: t.pending,
+        open: t.open,
     }
 }
 

@@ -36,7 +36,7 @@ pub use model::{
     Catalog, Child, ComponentDef, Content, Document, Map, Node, PropDef, PropDefault, PropType,
     SlotDef, Value, WEFT_VERSION,
 };
-pub use parse::{ParseOptions, ParseResult, parse};
+pub use parse::{ParseOptions, ParseResult, parse, parse_partial};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};
 /// The catalog-independent props every element takes (`hidden`, `label`, `state`, …).
 pub use rules::universal_prop;

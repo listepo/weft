@@ -5,5 +5,4 @@
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
 - T52. 3D transforms and models
-- T11. Streaming and incremental generation
 - T18. Follow-ups from the prototype

@@ -11,7 +11,7 @@ use crate::diagnostics::{Code, Diagnostic, Mode, Position, has_errors, sort_by_p
 use crate::model::{Catalog, Child, Document, Node, PropType};
 use crate::rules::{EACH, SLOT, is_name, universal_prop};
 use crate::source::{ListSource, NodeSource, Source};
-use crate::syntax::{RawChild, RawElement, SyntaxResult, tokenize};
+use crate::syntax::{RawChild, RawElement, SyntaxResult, tokenize, tokenize_with};
 use crate::validate::{ValidateOptions, validate_document};
 use crate::values::read_value;
 
@@ -28,28 +28,56 @@ pub struct ParseResult {
     /// Absent when the markup has syntax errors. Nodes carry their markup positions.
     pub document: Option<Document>,
     pub diagnostics: Vec<Diagnostic>,
+    /// Partial mode only: problems that the rest of the stream can still fix, such as an element
+    /// that is not closed yet. Empty for a document that is complete.
+    pub pending: Vec<Diagnostic>,
+}
+
+/// Checks that need more of the document than has arrived, so the cut explains them.
+fn waits_for_more(d: &Diagnostic, open: &HashSet<String>) -> bool {
+    match d.code {
+        // The target may come later in the stream.
+        Code::W309 => true,
+        // The slot or the repeated element may be the next thing written inside it.
+        Code::W208 | Code::W314 => open.contains(&d.path),
+        _ => false,
+    }
 }
 
 pub fn parse(markup: &str, options: &ParseOptions<'_>) -> ParseResult {
-    let syntax = tokenize(markup);
+    parse_with(markup, options, false)
+}
+
+/// `parse` for markup that may stop anywhere, because a model is still writing it (SPEC §6.3):
+/// what is finished becomes the document, and what the cut leaves open is reported in `pending`.
+pub fn parse_partial(markup: &str, options: &ParseOptions<'_>) -> ParseResult {
+    parse_with(markup, options, true)
+}
+
+fn parse_with(markup: &str, options: &ParseOptions<'_>, partial: bool) -> ParseResult {
+    let mut syntax = tokenize_with(markup, partial);
+    let mut pending = std::mem::take(&mut syntax.pending);
     let Some(root) = syntax.root.filter(|_| !has_errors(&syntax.diagnostics)) else {
         return ParseResult {
             document: None,
             diagnostics: syntax.diagnostics,
+            pending,
         };
     };
-    let (document, mut diagnostics) = build(&syntax, root, options.catalog);
+    let (document, mut diagnostics, open) = build_open(&syntax, root, options.catalog);
     if has_errors(&diagnostics) {
         sort_by_position(&mut diagnostics);
         return ParseResult {
             document: None,
             diagnostics,
+            pending,
         };
     }
     if options.catalog.is_none() {
         return ParseResult {
             document: Some(document),
             diagnostics: vec![],
+            pending,
         };
     }
     let validate = ValidateOptions {
@@ -58,10 +86,19 @@ pub fn parse(markup: &str, options: &ParseOptions<'_>) -> ParseResult {
         tokens: options.tokens,
         actions: options.actions,
     };
-    let diagnostics = validate_document(&document, &validate);
+    let mut diagnostics = validate_document(&document, &validate);
+    if partial {
+        let (wait, rest): (Vec<_>, Vec<_>) = diagnostics
+            .into_iter()
+            .partition(|d| waits_for_more(d, &open));
+        diagnostics = rest;
+        pending.extend(wait);
+        sort_by_position(&mut pending);
+    }
     ParseResult {
         document: Some(document),
         diagnostics,
+        pending,
     }
 }
 
@@ -120,12 +157,17 @@ struct Builder<'a> {
     catalog: Option<&'a Catalog>,
     diagnostics: Vec<Diagnostic>,
     weft: String,
+    /// Paths of the elements the end of a partial input left open.
+    open: HashSet<String>,
 }
 
 impl Builder<'_> {
     fn element(&mut self, index: usize, path: &str, is_root: bool) -> Node {
         let syntax = self.syntax;
         let raw = &syntax.elements[index];
+        if syntax.open.contains(&index) {
+            self.open.insert(path.to_owned());
+        }
         let kind = raw.name.clone();
         let mut id = None;
         let mut props = Vec::new();
@@ -320,11 +362,22 @@ fn build(
     root: usize,
     catalog: Option<&Catalog>,
 ) -> (Document, Vec<Diagnostic>) {
+    let (document, diagnostics, _) = build_open(syntax, root, catalog);
+    (document, diagnostics)
+}
+
+/// `build`, plus the paths of the elements still open at the end of a partial input.
+fn build_open(
+    syntax: &SyntaxResult,
+    root: usize,
+    catalog: Option<&Catalog>,
+) -> (Document, Vec<Diagnostic>, HashSet<String>) {
     let mut b = Builder {
         syntax,
         catalog,
         diagnostics: vec![],
         weft: String::new(),
+        open: HashSet::new(),
     };
     let raw_root = &syntax.elements[root];
     let root = if raw_root.name == SLOT {
@@ -334,7 +387,7 @@ fn build(
         let path = format!("/{}", raw_root.segment());
         b.element(root, &path, true)
     };
-    (Document { weft: b.weft, root }, b.diagnostics)
+    (Document { weft: b.weft, root }, b.diagnostics, b.open)
 }
 
 #[cfg(test)]

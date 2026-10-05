@@ -33,6 +33,8 @@ pub struct Options {
     pub mode: Mode,
     pub tokens: Option<IndexMap<String, String>>,
     pub actions: Option<Vec<String>>,
+    /// `parse` only: the markup may stop anywhere (SPEC §6.3).
+    pub partial: bool,
 }
 
 #[derive(Default, Deserialize)]
@@ -40,6 +42,8 @@ pub struct Options {
 struct WireOptions {
     #[serde(default)]
     strict: bool,
+    #[serde(default)]
+    partial: bool,
     /// Map entries, so that the order of the TypeScript `Map` survives.
     tokens: Option<Vec<(String, String)>>,
     actions: Option<Vec<String>>,
@@ -60,6 +64,7 @@ impl Options {
             },
             tokens: wire.tokens.map(|entries| entries.into_iter().collect()),
             actions: wire.actions,
+            partial: wire.partial,
         })
     }
 }
