@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T46 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T47 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T49 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
@@ -153,24 +152,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
-
-### T46. Simulator sharing for the SwiftUI screenshot suite
-
-The SwiftUI screenshot suite (`packages/visual/test/swiftui.test.ts`, T36) installs one app id on one shared iOS Simulator, so two worktrees running it at once overwrite each other's screenshots and fail with false pixel diffs. The creator approved both remedies, chosen by a setting:
-
-- **shared** (default): one simulator for everyone, with a machine-wide lock so runs from different worktrees take turns; a run waits for the lock with a bounded timeout and a clear message, and a stale lock left by a dead process is taken over.
-- **own:** each worktree gets its own simulator device, created on first use from the same device type and runtime and named after the worktree, so runs never share state; the suite says how to delete these devices.
-
-The setting is an environment variable read by the suite (a test-harness choice, not a Weft tool option, so no `weft.json` key), documented in the suite's README and `AGENTS.md`. Done when two runs started at once in two worktrees pass in both modes, the lock and the device naming have tests, and the default run on one worktree behaves as before.
-
-Execution plan:
-
-1. `packages/visual/src/simulator.ts` (new, Node only, no Vitest import so it is unit-testable): `simulatorMode` reads `WEFT_SIMULATOR` (`shared` by default, `own`, anything else is an error), `deviceName` makes `weft-visual-<worktree folder>` (the shared prefix lets shared mode skip these devices and the README list them), `findDevice` picks a device from `simctl list -j`, and `acquireLock` is the machine-wide lock.
-2. The lock uses only Node's fs: the holder's pid and a token go into a temp file that is hard-linked to the lock path (atomic, complete content, fails if held); waiters poll, warn once with the holder's pid and the lock path, and fail after a bounded wait with a message saying how to clear it; a lock whose pid is dead is taken over by renaming it away and checking that what was renamed is the stale content seen. It lives under `~/Library/Caches/weft-visual/`, not `os.tmpdir()`, because the simulators are per user and `TMPDIR` differs between sessions and sandboxes, which would give two runs two locks.
-3. `swiftui.test.ts`: the collection-time check only proves the device type and runtime exist (no side effects); `beforeAll` builds the app, takes the lock (shared: one lock for the machine; own: one lock per device, so two runs of one worktree also take turns), creates the own device with `xcrun simctl create` on first use, boots and installs; `afterAll` shuts down what it booted and releases the lock.
-4. `test/simulator.test.ts` (added to the Node project of `vitest.config.ts`): mode parsing, device naming, device selection, and the lock (acquire and release, wait, timeout, stale takeover, no takeover of a live holder, release leaves another holder's lock).
-5. Document the setting, the lock and how to list and delete the devices in `packages/visual/README.md` and `AGENTS.md`.
-6. Verify: two simultaneous runs from two worktrees in `own` mode and in `shared` mode, then the full check from the task; close T46 into `done.md`.
 
 ### T47. Static page parity with the generated components
 
