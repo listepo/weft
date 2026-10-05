@@ -118,16 +118,22 @@ fn a_row_without_align_is_a_plain_hstack_both_ways() {
         "<stack id=\"r\" direction=\"row\">\n    <field id=\"f\" label=\"F\"/>\n    <button id=\"b\">Go</button>\n  </stack>",
     );
     let out = swift(&row, None);
-    assert!(out.contains("HStack {") && !out.contains("HStack(alignment"), "{out}");
+    assert!(
+        out.contains("HStack {") && !out.contains("HStack(alignment"),
+        "{out}"
+    );
     let catalog = common::catalog();
-    let back = weft_core::serialize(&import_swiftui(&out, &ImportOptions { catalog: &catalog }).document);
+    let back =
+        weft_core::serialize(&import_swiftui(&out, &ImportOptions { catalog: &catalog }).document);
     assert_eq!(back, row);
 }
 
 #[test]
 fn an_explicit_row_alignment_is_kept() {
     let out = swift(
-        &screen("<stack id=\"r\" align=\"end\" direction=\"row\"><button id=\"b\">Go</button></stack>"),
+        &screen(
+            "<stack id=\"r\" align=\"end\" direction=\"row\"><button id=\"b\">Go</button></stack>",
+        ),
         None,
     );
     assert!(out.contains("HStack(alignment: .bottom)"), "{out}");
