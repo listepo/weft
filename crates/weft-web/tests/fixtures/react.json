@@ -1305,6 +1305,95 @@
    "weft": "0.1",
    "root": {
     "kind": "screen",
+    "id": "glass",
+    "props": {
+     "label": "Glass"
+    },
+    "children": [
+     {
+      "kind": "stack",
+      "id": "card",
+      "props": {
+       "direction": "column",
+       "gap": {
+        "token": "space.md"
+       },
+       "material": {
+        "token": "material.glass"
+       }
+      },
+      "children": [
+       {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+         "level": 2,
+         "text": {
+          "bind": "$.title"
+         }
+        }
+       },
+       {
+        "kind": "text",
+        "id": "body",
+        "children": [
+         "The panel blurs what is behind it."
+        ]
+       },
+       {
+        "kind": "button",
+        "id": "close",
+        "props": {
+         "variant": "primary"
+        },
+        "on": {
+         "press": "glass.close"
+        },
+        "children": [
+         "Got it"
+        ]
+       }
+      ]
+     },
+     {
+      "kind": "grid",
+      "id": "tiles",
+      "props": {
+       "columns": 2,
+       "gap": {
+        "token": "space.sm"
+       },
+       "material": {
+        "token": "material.glass"
+       }
+      },
+      "children": [
+       {
+        "kind": "text",
+        "id": "tile-light",
+        "children": [
+         "Light"
+        ]
+       },
+       {
+        "kind": "text",
+        "id": "tile-dark",
+        "children": [
+         "Dark"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"glass\" aria-label=\"Glass\">\n      <div data-weft-id=\"card\" style={{ gap: \"var(--weft-space-md)\", \"--_weft-material-tint\": \"var(--weft-material-glass-tint)\", \"--_weft-material-solid\": \"var(--weft-material-glass-solid)\", \"--_weft-material-blur\": \"var(--weft-material-glass-blur)\", display: \"flex\", flexDirection: \"column\" }} data-weft-material=\"\">\n        <h2 data-weft-id=\"title\">\n          {!(_text(data?.title).trim() === \"\") ? _squash(_text(data?.title)) : \"\"}\n        </h2>\n        <div data-weft-id=\"body\">The panel blurs what is behind it.</div>\n        <button data-weft-id=\"close\" type=\"button\" data-variant=\"primary\" onClick={(_e) => _act(actions, { id: \"close\", action: \"glass.close\" })}>Got it</button>\n      </div>\n      <div data-weft-id=\"tiles\" style={{ gap: \"var(--weft-space-sm)\", \"--_weft-material-tint\": \"var(--weft-material-glass-tint)\", \"--_weft-material-solid\": \"var(--weft-material-glass-solid)\", \"--_weft-material-blur\": \"var(--weft-material-glass-blur)\", display: \"grid\", gridTemplateColumns: \"repeat(2, minmax(0, 1fr))\" }} data-weft-material=\"\">\n        <div data-weft-id=\"tile-light\">Light</div>\n        <div data-weft-id=\"tile-dark\">Dark</div>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
     "id": "inbox",
     "props": {
      "label": "Inbox",
