@@ -6,9 +6,24 @@ tasks:
     command: 'vitest run --config $workspaceRoot/vitest.config.ts'
     # Every package reaches @weft/core, which loads the generated WebAssembly module.
     deps: ['root:wasm']
+    # Generated files are no inputs, or the first run would change the hash of the second:
+    # - node_modules: Vitest writes its results cache to node_modules/.vite on every run. A dependency
+    #   change still reaches the hash through the lockfile.
+    # - packages/core/native: the addon is built while the suites run, so only the ones that start after
+    #   it would hash it. The core suite depends on root:native, whose hash covers its sources; the
+    #   other suites get the same results from the addon and from the module (the engines are tested
+    #   against each other in packages/core).
+    # - packages/visual/diffs: the images the visual suite writes when a screenshot differs.
     inputs:
       - '**/*'
+      - '!**/node_modules/**'
+      - '!native/**'
+      - '!diffs/**'
       - '/packages/**/*'
+      - '!/packages/**/node_modules/**'
+      - '!/packages/core/native/**'
+      - '!/packages/visual/diffs/**'
+      - '/pnpm-lock.yaml'
       - '/corpus/**/*'
       - '/examples/**/*'
       - '/schemas/**/*'

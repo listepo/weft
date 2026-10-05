@@ -15,7 +15,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52 | todo | P2 | 5 | 0% | |
 | T55 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T56 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
-| T57 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -236,21 +235,3 @@ Execution plan:
 2. `moon.yml`: a file group per task (`wasm-sources`, `native-sources`) naming those crate folders, the root `Cargo.toml`, `Cargo.lock` and every file the sources include from outside their crate; the `wasm` and `native` inputs use the groups. `tooling/select.ts`: drop the two `TASK_CRATE` entries the narrowed inputs make dead.
 3. `tooling/closure.ts` (pure, `cargo metadata` JSON in, crate folders and external includes out) and `tooling/test/inputs.test.ts`: a unit test over a fixture, and a test against the real workspace that compares both tasks' declared inputs (`moon query tasks`) with the closure and with the includes read from the sources, and fails when a dependency or an include is added without updating the list. The `tooling` task's inputs gain the files the test reads.
 4. Demo: build `root:wasm`, touch a `weft-swiftui` file (cached), touch a `weft-core` file (rebuilds); record in `research.md` with the sources (moon inputs docs, cargo metadata docs).
-
-### T57. Cache the mcp test task
-
-The `mcp` package's `test` task is never served from moon's cache. Vitest writes `node_modules/.vite/.../results.json`, which falls inside the task's `**/*` input, so the hash changes after every run and `moon ci` always re-runs the tests. Found in T54.
-
-- Find the cause in the inherited `test` task (`.moon/tasks/all.yml`) or the package's own config, and exclude Vitest's cache output from the inputs. Alternatively, move Vitest's cache out of the input tree, using the documented `cacheDir` option.
-- Check every other package for the same problem.
-
-Done when:
-- a second `moon run :test` with no changes is fully cached;
-- a source change still re-runs the affected tests;
-- the full check exits 0.
-
-Execution plan:
-1. Reproduce: two `moon run mcp:test` runs hash differently; compare the two hash manifests under `.moon/cache/hashes` to confirm that `node_modules/.vite/vitest/*/results.json` is the only difference and that `/packages/**/*` makes it every package's cache, not only mcp's.
-2. `.moon/tasks/all.yml`: exclude `node_modules` from the inherited inputs (`!**/node_modules/**`, `!/packages/**/node_modules/**`), the group `runtime-suites` already does for packages; add `/pnpm-lock.yaml`, so that a dependency change still invalidates (moon also hashes the project's own resolved dependencies). Prefer this over Vitest's `cacheDir`: it fixes every package and every tool that writes under `node_modules`.
-3. Check the other packages: run `moon run :test` twice, and for each task that is not cached the second time, diff the hash manifests and fix the cause (generated output such as `packages/visual/diffs/`, `dist/`).
-4. Source change demo: touch a file in one package and show that its test re-runs; record the sources (moon inputs docs, Vitest `cacheDir`) in `research.md`.

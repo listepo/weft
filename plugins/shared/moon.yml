@@ -4,6 +4,8 @@ tasks:
   test:
     inputs:
       - "/plugins/*/**/*"
+      # Each plugin's Vitest results cache, written by its own run.
+      - "!/plugins/**/node_modules/**"
       - "/.claude-plugin/**/*"
       - "/.cursor-plugin/**/*"
   # Regenerates the committed dist/ and AGENT-SPEC.md copy of every plugin from one build. dist/
