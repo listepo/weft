@@ -17,6 +17,12 @@ pub enum JsonError {
     TooDeep,
 }
 
+/// `Math.round`: halves round up, toward positive infinity.
+pub fn js_round(x: f64) -> f64 {
+    let floor = x.floor();
+    if x - floor >= 0.5 { floor + 1.0 } else { floor }
+}
+
 /// `Number.prototype.toString`: `1` for 1.0, `1e+21`, `-0` printed as `0`.
 pub fn js_number(n: f64) -> String {
     ryu_js::Buffer::new().format(n).to_owned()
