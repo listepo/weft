@@ -14,10 +14,11 @@ const GOOD = `<screen id="s" label="Demo" weft="0.1">
 type Diagnostics = { valid?: boolean; diagnostics: { code: string; hint?: string }[] };
 const json = (text: string | undefined) => JSON.parse(text ?? "null") as Diagnostics;
 
-test("lists exactly the six tools, each written for a model", async () => {
+test("lists exactly the seven tools, each written for a model", async () => {
   const { client, close } = await connect();
   const { tools } = await client.listTools();
   assert.deepEqual(tools.map((t) => t.name).toSorted(), [
+    "weft_capabilities",
     "weft_catalog",
     "weft_format",
     "weft_patch",
@@ -41,7 +42,14 @@ test("weft_primer returns the primer and mentions every tool", async () => {
   const result = await call(client, "weft_primer", {});
   assert.equal(result.isError, false);
   assert.equal(result.blocks[0], PRIMER);
-  for (const name of ["weft_catalog", "weft_validate", "weft_format", "weft_patch", "weft_render"])
+  for (const name of [
+    "weft_capabilities",
+    "weft_catalog",
+    "weft_validate",
+    "weft_format",
+    "weft_patch",
+    "weft_render",
+  ])
     assert.ok(PRIMER.includes(name), name);
   await close();
 });

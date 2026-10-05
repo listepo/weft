@@ -23,7 +23,7 @@ export function createServer(
     {
       maxToolInputElements: settings.limits.inputElements,
       instructions:
-        "Weft is a UI description format. Call weft_primer first, then use weft_catalog, weft_validate, weft_format, weft_patch and weft_render. The server only works on markup you pass in; it reads no files.",
+        "Weft is a UI description format. Call weft_primer first, then weft_capabilities to see which catalogs, tokens and actions this host accepts, and use weft_catalog, weft_validate, weft_format, weft_patch and weft_render. The server only works on markup you pass in; it reads no files.",
     },
   );
   for (const register of TOOLS) register(server, context, settings);
