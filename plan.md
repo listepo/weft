@@ -177,3 +177,13 @@ Bring Weft into Xcode for SwiftUI projects, on top of the T34 generator and impo
 
 The plugins get the `weft` program as an artifact bundle (`binaryTarget`), arm64 macOS only. Until the repository has a remote, the bundle is built locally and referenced by path; publishing it on GitHub Releases waits for the remote. Done when a sample SwiftUI app builds with a `.weft` screen through the build tool plugin, the command plugin round-trips a corpus screen, the editor extension commands work on a corpus screen, each part has automated tests where it can be tested headless, and the manual checks that need Xcode's UI are listed.
 
+Execution plan:
+
+1. **Artifact bundle.** `plugins/xcode/scripts/artifactbundle.ts` plus the moon task `xcode-plugin:bundle` build `weft` in release mode for `aarch64-apple-darwin` and write `plugins/xcode/Artifacts/weft.artifactbundle` (`info.json` schema 1.0, one `arm64-apple-macosx` variant). Gitignored. On other hosts the task prints a skip message and writes nothing.
+2. **SwiftPM package** `plugins/xcode` (`Package.swift`, tools 6.0): `binaryTarget(path:)` for the bundle, one build tool plugin (`BuildToolPlugin` and `XcodeBuildToolPlugin`) and one command plugin (`CommandPlugin` and `XcodeCommandPlugin`). The nearest `weft.json` and the catalog and tokens it names are declared as inputs next to each `.weft` file, so incremental builds regenerate only what changed. Code shared by both plugins is one file linked into each target.
+3. **Command plugin:** `swift package weft export|import`, permission `writeToPackageDirectory`.
+4. **Samples** `plugins/xcode/Examples/` (a SwiftPM package and an XcodeGen Xcode project), each building a corpus screen through the plugin for iOS 17 and macOS 14.
+5. **Source Editor Extension** `plugins/xcode/editor-extension` (XcodeGen project, `swift test` core package). The extension runs the embedded `weft` binary signed with the sandbox-inherit entitlement. The WebAssembly core cannot do it, because it has no SwiftUI generator or importer. Ad-hoc signing only.
+6. **Xcode agents:** research with sources in `research.md`, then the config and docs the facts allow.
+7. **Tests** in `plugins/xcode/test` (vitest, skipped without Xcode) and `swift test` of the editor core, all inside the moon `test` task of `xcode-plugin`; docs in `docs/xcode-plugin.md`, SPEC §10.6, `docs/projects.md`, `toolchain.md`.
+
