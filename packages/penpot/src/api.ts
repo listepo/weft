@@ -184,7 +184,7 @@ export interface PVariants {
   variantComponents(): PLibraryComponent[];
 }
 
-export interface PLibrary {
+export interface PLibrary extends PSharedData {
   readonly components: readonly PLibraryComponent[];
   readonly tokens: PTokenCatalog;
   createComponent(shapes: PShape[]): PLibraryComponent;

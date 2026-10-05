@@ -770,10 +770,16 @@ export class FakePage {
 export class FakePenpot {
   readonly flags = { naturalChildOrdering: false };
   readonly pages: FakePage[] = [];
+  private readonly libraryData = new Map<string, string>();
   currentPage: FakePage;
   readonly library = {
     local: {
       components: [] as FakeComponent[],
+      getSharedPluginData: (namespace: string, key: string): string =>
+        this.libraryData.get(`${namespace}/${key}`) as string,
+      setSharedPluginData: (namespace: string, key: string, value: string): void => {
+        this.libraryData.set(`${namespace}/${key}`, value);
+      },
       tokens: new FakeTokenCatalog(),
       createComponent: (shapes: FakeShape[]): FakeComponent => {
         const [main] = shapes;

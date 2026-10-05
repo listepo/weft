@@ -1,5 +1,5 @@
 // Runs a built plugin the way Figma splits it, in a process of its own so the UI half can lose
-// Node's globals: `node test/harness.ts <dist> <screen.weft>` prints one JSON line of results.
+// Node's globals: `node test/harness.ts <dist> <screen.weft> [<resolver.json>]` prints one JSON line of results.
 //
 // - Main thread: `code.js` in a VM context without WebAssembly or fetch, over the fake file.
 // - UI: the module script of `ui.html` in this realm (`@weft/design-plugin`'s UI harness).
@@ -10,7 +10,7 @@ import { createContext, runInContext } from "node:vm";
 import { loadUi, runUi } from "../../../packages/design-plugin/test/ui-harness.ts";
 import { FakeFigma, type FakeNode } from "../../../packages/figma/test/fake-figma.ts";
 
-const [dist = "", markupPath = ""] = process.argv.slice(2);
+const [dist = "", markupPath = "", resolverPath] = process.argv.slice(2);
 const print = process.stdout.write.bind(process.stdout);
 
 // The main thread.
@@ -52,14 +52,20 @@ const settle = async () => {
   while (pending.length > 0) await pending.shift();
 };
 let selected = 0;
-const result = await runUi(byId, readFileSync(markupPath, "utf8"), async () => {
-  await settle();
-  selected ||= page.selection.length;
-});
+const result = await runUi(
+  byId,
+  readFileSync(markupPath, "utf8"),
+  async () => {
+    await settle();
+    selected ||= page.selection.length;
+  },
+  resolverPath === undefined ? undefined : readFileSync(resolverPath, "utf8"),
+);
 
 print(
   `${JSON.stringify({
     mainHasWasm,
+    loaded: result.loaded,
     built: { status: result.built, selected },
     exported: result.exported,
     broken: result.broken,

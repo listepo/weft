@@ -1,5 +1,5 @@
 // Runs a built plugin the way Penpot splits it, in a process of its own so the UI half can lose
-// Node's globals: `node test/harness.ts <dist> <screen.weft>` prints one JSON line of results.
+// Node's globals: `node test/harness.ts <dist> <screen.weft> [<resolver.json>]` prints one JSON line of results.
 //
 // - Sandbox: `plugin.js` evaluated as a script in an SES compartment of a locked-down realm, with
 //   the endowments Penpot gives a plugin (plugins-runtime `create-sandbox.ts`), over the fake file
@@ -13,7 +13,7 @@ import { createContext, runInContext } from "node:vm";
 import { loadUi, runUi } from "../../../packages/design-plugin/test/ui-harness.ts";
 import { FakePenpot, type FakeShape } from "../../../packages/penpot/test/fake-penpot.ts";
 
-const [dist = "", markupPath = ""] = process.argv.slice(2);
+const [dist = "", markupPath = "", resolverPath] = process.argv.slice(2);
 const print = process.stdout.write.bind(process.stdout);
 
 // The sandbox.
@@ -84,16 +84,22 @@ const byId = await loadUi(dist, {
 });
 
 let selected = 0;
-const result = await runUi(byId, readFileSync(markupPath, "utf8"), async () => {
-  while (pending.length > 0) await pending.shift();
-  selected ||= penpot.selection.length;
-});
+const result = await runUi(
+  byId,
+  readFileSync(markupPath, "utf8"),
+  async () => {
+    while (pending.length > 0) await pending.shift();
+    selected ||= penpot.selection.length;
+  },
+  resolverPath === undefined ? undefined : readFileSync(resolverPath, "utf8"),
+);
 
 print(
   `${JSON.stringify({
     lockedDown,
     sandboxHasWasm,
     opened,
+    loaded: result.loaded,
     built: { status: result.built, selected },
     exported: result.exported,
     broken: result.broken,

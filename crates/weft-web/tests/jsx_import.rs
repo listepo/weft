@@ -103,17 +103,12 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
         "account",
         "explicit type=\"text\" is dropped; a bound field error comes back as a text element; \
          radio-group on-change is lost; a radio's bound text comes back as label; a literal \
-         hidden element is lost; a bound number value comes back wrapped in _float",
+         hidden element is lost",
     ),
     ("dashboard", "an explicit direction=\"column\" is dropped"),
     (
         "inbox",
-        "the tabs selected binding and on-change are lost; a bound tab label comes back empty; \
-         dialog modal=\"false\" is dropped",
-    ),
-    (
-        "leaderboard",
-        "an array-index binding comes back as a _get expression",
+        "the tabs on-change is lost; dialog modal=\"false\" is dropped",
     ),
     (
         "orders",

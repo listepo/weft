@@ -85,6 +85,8 @@ pub(crate) struct Lower<'a> {
     binds: HashMap<usize, Vec<(String, String)>>,
     /// The data path a radio button inside the current group compares against.
     radio: Option<String>,
+    /// The data path the tabs inside the current tablist choose their selected tab by.
+    chosen: Option<String>,
     truncated: bool,
 }
 
@@ -103,6 +105,7 @@ pub(crate) fn lower<'a>(source: &'a str, root: &'a Expression<'a>, env: &Rc<Env<
         notes: HashMap::new(),
         binds: HashMap::new(),
         radio: None,
+        chosen: None,
         truncated: false,
     };
     let mut top = Vec::new();
@@ -669,6 +672,7 @@ impl<'a> Lower<'a> {
             *slot = attrs;
         }
         let outer = self.radio.take();
+        let outer_chosen = self.chosen.take();
         let mut inner = Vec::new();
         self.children(&el.children, env, node, &mut inner);
         // In JSX, text written beside a bound value is shown with it; Weft binds the whole text.
@@ -698,6 +702,14 @@ impl<'a> Lower<'a> {
                 self.radio = outer;
             }
             radio => self.radio = outer.or(radio),
+        }
+        let chosen = self.chosen.take();
+        match chosen {
+            Some(path) if self.dom.attr(node, "role") == Some("tablist") => {
+                self.bind(node, "selected", path);
+                self.chosen = outer_chosen;
+            }
+            chosen => self.chosen = outer_chosen.or(chosen),
         }
     }
 
@@ -931,6 +943,8 @@ impl<'a> Lower<'a> {
                 }
                 Sv::Bool(true) => attrs.push((name, String::new())),
                 Sv::Bool(false) | Sv::Undef => {}
+                // Which tab is selected is the tablist's binding, not an attribute of the tab.
+                Sv::Chosen(path) if name == "aria-selected" => self.chosen = Some(path),
                 Sv::Prefix(p) if name == "data-weft-id" => {
                     // `"row[" + index + "]"`: the id of a repeated element.
                     let base = p.strip_suffix('[').unwrap_or(&p).to_owned();

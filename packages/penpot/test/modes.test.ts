@@ -14,10 +14,13 @@ import {
   MODES_GROUP,
   readThemes,
 } from "../src/index.ts";
+import { dataOf } from "../src/layer.ts";
 import { FakePenpot, type FakeShape } from "./fake-penpot.ts";
 import { corpusMarkup } from "./helpers.ts";
 
 const { tokens, modifier } = exampleModes();
+
+type ModesDocument = { modifiers: { theme: { default: string } } };
 
 describe("token themes", () => {
   test("each context is a theme of the modifier's group, the default one on", async () => {
@@ -45,7 +48,10 @@ describe("token themes", () => {
     await ensureLibrary(penpot, coreCatalog, tokens, modifier);
     assert.equal(penpot.library.local.tokens.themes.length, 2);
     assert.equal(penpot.library.local.tokens.sets.length, 2);
-    assertSameModes(readThemes(penpot.library.local.tokens, tokens), modifier);
+    assertSameModes(
+      readThemes(penpot.library.local.tokens, tokens, dataOf(penpot.library.local)),
+      modifier,
+    );
   });
 
   test("a designer's change in a context's set reads back in that context only", async () => {
@@ -56,7 +62,7 @@ describe("token themes", () => {
     const brand = dark?.tokens.find((t) => t.name === "color.brand");
     assert.ok(brand !== undefined);
     brand.value = "rgba(255, 0, 0, 0.5)";
-    const document = readThemes(catalog, tokens) as {
+    const document = readThemes(catalog, tokens, dataOf(penpot.library.local)) as {
       modifiers: {
         theme: {
           contexts: { light: unknown[]; dark: [{ color: { brand: { $value: unknown } } }] };
@@ -73,6 +79,22 @@ describe("token themes", () => {
     });
   });
 
+  test("the default context is the recorded one, not the first theme", async () => {
+    const penpot = new FakePenpot();
+    await ensureLibrary(penpot, coreCatalog, tokens, modifier);
+    const catalog = penpot.library.local.tokens;
+    const defaultOf = () =>
+      (readThemes(catalog, tokens, dataOf(penpot.library.local)) as ModesDocument).modifiers.theme
+        .default;
+    // A designer may reorder the themes; the recorded default does not move with them.
+    (catalog.themes as unknown[]).reverse();
+    assert.equal(catalog.themes[0]?.name, "dark");
+    assert.equal(defaultOf(), modifier.default);
+    // A recorded theme that is gone falls back to the first one that is left.
+    dataOf(penpot.library.local).setPluginData("weft.default-context/theme", "deleted");
+    assert.equal(defaultOf(), "dark");
+  });
+
   test("an alias or a formula in a token is left out, not guessed", async () => {
     const penpot = new FakePenpot();
     await ensureLibrary(penpot, coreCatalog, tokens, modifier);
@@ -81,7 +103,7 @@ describe("token themes", () => {
     const brand = set?.tokens.find((t) => t.name === "color.brand");
     assert.ok(brand !== undefined);
     brand.value = "{color.ink}";
-    const back = readThemes(catalog, tokens) as {
+    const back = readThemes(catalog, tokens, dataOf(penpot.library.local)) as {
       modifiers: { theme: { contexts: Record<string, unknown[]> } };
     };
     // The brand colour falls back to the base set; the star colour still differs.
@@ -93,7 +115,10 @@ describe("token themes", () => {
     const penpot = new FakePenpot();
     await ensureLibrary(penpot, coreCatalog, tokens);
     assert.deepEqual(penpot.library.local.tokens.themes, []);
-    assert.equal(readThemes(penpot.library.local.tokens, tokens), undefined);
+    assert.equal(
+      readThemes(penpot.library.local.tokens, tokens, dataOf(penpot.library.local)),
+      undefined,
+    );
   });
 
   test("the plugin builds the themes and returns them with the export", async () => {

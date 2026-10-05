@@ -30,6 +30,9 @@
         border-radius: 4px;
         padding: 6px;
       }
+      textarea.small {
+        min-height: 80px;
+      }
       .row {
         display: flex;
         gap: 6px;
@@ -50,6 +53,23 @@
       <input id="file" type="file" accept=".weft,text/plain" />
     </div>
     <textarea id="source" placeholder="Paste a .weft screen" spellcheck="false"></textarea>
+    <strong>Token modes (optional)</strong>
+    <div class="row">
+      <input id="resolver-file" type="file" accept=".json,application/json" />
+    </div>
+    <textarea
+      id="resolver"
+      class="small"
+      placeholder="Paste a DTCG resolver document with its sets inline"
+      spellcheck="false"
+    ></textarea>
+    <div class="row">
+      <button id="load-resolver">Load resolver</button>
+      <label
+        >Modes from
+        <select id="modifier"></select
+      ></label>
+    </div>
     <div class="row"><button id="build">Build {{layer}}s</button></div>
     <strong>{{tool}} → Weft</strong>
     <div class="row">
@@ -58,6 +78,11 @@
       <button id="download" disabled>Download</button>
     </div>
     <textarea id="result" readonly spellcheck="false"></textarea>
+    <strong>Token modes of the file</strong>
+    <textarea id="resolver-out" class="small" readonly spellcheck="false"></textarea>
+    <div class="row">
+      <button id="download-resolver" disabled>Download tokens.resolver.json</button>
+    </div>
     <div id="status" role="status"></div>
     <ul id="notes"></ul>
     <!-- The build puts the bundled UI entry here as a module script (src/build.ts). -->
