@@ -7,3 +7,4 @@
 - T32. Claude Code plugin from GitHub
 - T36. Examples, snapshots, screenshots and comparisons
 - T39. Context in the document
+- T42. Xcode plugins

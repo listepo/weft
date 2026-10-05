@@ -13,6 +13,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T36 | todo | P1 | 4 | 0% | |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
+| T42 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -164,3 +165,15 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
+
+### T42. Xcode plugins
+
+Bring Weft into Xcode for SwiftUI projects, on top of the T34 generator and importer (`crates/weft-swiftui`, `weft swiftui`, `weft import-swiftui`). Approved scope, four parts:
+
+- **Build tool plugin** (SwiftPM and Xcode projects): every `.weft` file in a target becomes generated SwiftUI at build time, so the generated code is never committed and always matches its screen. It reads the project's `weft.json`.
+- **Command plugin:** `swift package` commands that convert once between SwiftUI and `.weft` (import a view, export a screen), writing into the package with the permission SwiftPM asks for.
+- **Source Editor Extension** (XcodeKit): Editor menu commands that turn the selected SwiftUI into `.weft`, turn a `.weft` buffer into SwiftUI, and validate a `.weft` buffer.
+- **Xcode's agents through MCP:** the weft MCP server registered for the coding agents built into Xcode, if Xcode supports MCP servers; the guide (AGENT-SPEC) made available to them. Facts come from Apple's documentation with the version and date checked.
+
+The plugins get the `weft` program as an artifact bundle (`binaryTarget`), arm64 macOS only. Until the repository has a remote, the bundle is built locally and referenced by path; publishing it on GitHub Releases waits for the remote. Done when a sample SwiftUI app builds with a `.weft` screen through the build tool plugin, the command plugin round-trips a corpus screen, the editor extension commands work on a corpus screen, each part has automated tests where it can be tested headless, and the manual checks that need Xcode's UI are listed.
+
