@@ -969,6 +969,8 @@ fn left_out_style(s: &mut Sem, style: Option<&str>) {
         .into_iter()
         .filter(|(k, _)| !(layout && LAYOUT.contains(&k.as_str())))
         .filter(|(k, v)| !(k == "transform" && tilt::parse(v).is_some()))
+        // A material's properties are read back as its token by `layout`.
+        .filter(|(k, _)| !(layout && k.starts_with("--_weft-material-")))
         // How an element flows is the renderer's choice (the JSX generator sets links inline-block).
         .filter(|(k, v)| {
             !(k == "display" && matches!(v.as_str(), "block" | "inline" | "inline-block"))
@@ -1058,6 +1060,25 @@ fn layout(s: &mut Sem, dom: &Dom, el: usize, conventions: Option<&Conventions>) 
         }
     } else {
         s.kind = Some("text".into());
+    }
+    if let Some(tint) = get("--_weft-material-tint") {
+        // The element points at the token's own `<var>-tint`; the token is the var without it.
+        let token = conventions.and_then(|c| {
+            let var = tint.strip_prefix("var(")?.strip_suffix(')')?;
+            c.vars.get(js_trim(var).strip_suffix("-tint")?).cloned()
+        });
+        match token {
+            Some(token) => {
+                s.values.insert("material".into(), Value::Token(token));
+            }
+            None => s.notes.push(Note {
+                kind: LossKind::Tokens,
+                note: format!(
+                    "material {} cannot be mapped back to a design token",
+                    js_prefix(tint, 80)
+                ),
+            }),
+        }
     }
     let gap_class = conventions.and_then(|c| {
         split_ws(dom.attr(el, "class").unwrap_or(""))

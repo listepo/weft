@@ -54,9 +54,23 @@ function host(el: HTMLIFrameElement): HTMLElement {
   return div;
 }
 
-/** A whole page, as the static HTML generator writes it. */
-export async function showPage(id: string, html: string): Promise<void> {
-  await settle(await frame(id, html));
+/**
+ * What a frosted-glass screen (T51) is shown over: a glass material blurs what is behind it, and
+ * plain white has nothing to blur. Diagonal stripes in three colours turn into a visible smear
+ * under a 16 to 24 px blur and stay sharp where no glass covers them; the dark scheme gets darker
+ * stripes, so its tint is judged against a dark backdrop too.
+ */
+export const BACKDROP = `<style>
+html { background: repeating-linear-gradient(135deg, #e11d48 0 28px, #2563eb 28px 56px, #facc15 56px 84px); }
+body { padding: 24px; }
+@media (prefers-color-scheme: dark) {
+  html { background: repeating-linear-gradient(135deg, #881337 0 28px, #1e3a8a 28px 56px, #854d0e 56px 84px); }
+}
+</style>`;
+
+/** A whole page, as the static HTML generator writes it, with `head` added to its head. */
+export async function showPage(id: string, html: string, head = ""): Promise<void> {
+  await settle(await frame(id, head === "" ? html : html.replace("</head>", `${head}</head>`)));
 }
 
 /** Server-rendered markup, as the reference renderer writes it. */

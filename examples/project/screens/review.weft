@@ -1,7 +1,7 @@
 <screen id="review" label="Review" weft="0.1">
   <heading id="title" level="1">Review your order</heading>
   <each id="lines" as="line" in="{$.cart.items}">
-    <stack id="line" direction="row" gap="{token.space.sm}">
+    <stack id="line" direction="row" gap="{token.space.sm}" material="{token.material.glass}">
       <text id="line-name" text="{$line.name}"/>
       <rating id="line-score" label="Customer score" value="{$line.score}" color="{token.color.star}"/>
     </stack>

@@ -45,7 +45,7 @@ import {
   type InstChild,
 } from "./expand.ts";
 import { exposedRole, fallbackRole, TRANSPARENT } from "./roles.ts";
-import { isRecord, safeUrl, tiltCss, tokenCss } from "./values.ts";
+import { isRecord, materialStyle, safeUrl, tiltCss, tokenCss } from "./values.ts";
 
 export type ActionEvent = { id: string; action: string; item?: string };
 export type Action = (event: ActionEvent) => void;
@@ -165,6 +165,7 @@ function layoutStyle(n: Inst, ctx: Ctx): CSSProperties {
   const style: CSSProperties = {};
   const gap = tokenCss(n.props["gap"], ctx.o.tokens);
   if (gap !== undefined) style.gap = gap;
+  Object.assign(style, materialStyle(n.props["material"], ctx.o.tokens));
   if (n.kind === "grid") {
     style.display = "grid";
     const columns = prop(n, "columns").value;
@@ -205,7 +206,15 @@ function renderKind(n: Inst, ctx: Ctx): ReactNode {
       return h("main", base(n), ...content(n, ctx));
     case "stack":
     case "grid":
-      return h("div", { ...base(n, false), style: layoutStyle(n, ctx) }, ...content(n, ctx));
+      return h(
+        "div",
+        {
+          ...base(n, false),
+          style: layoutStyle(n, ctx),
+          "data-weft-material": materialStyle(n.props["material"], undefined) ? "" : undefined,
+        },
+        ...content(n, ctx),
+      );
     case "section":
       return h("section", base(n), ...content(n, ctx));
     case "heading":

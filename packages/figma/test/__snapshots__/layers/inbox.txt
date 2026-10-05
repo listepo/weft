@@ -43,10 +43,18 @@ FRAME "screen#inbox" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
         | weft.style = [[],[],0,[8,8,8,8],8]
         FRAME "slot:empty" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
           | weft.slot = empty
-          INSTANCE "text#no-drafts" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
-            | weft.origin = layer(text#no-drafts)
-            | weft.source = {"kind":"text","id":"no-drafts","children":["No drafts."],"shown":{"text":"No drafts."}}
-            TEXT "text" chars="No drafts." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          FRAME "stack#drafts-empty" layoutMode="VERTICAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+            | weft.origin = layer(stack#drafts-empty)
+            | weft.source = {"kind":"stack","id":"drafts-empty","props":{"align":"center","direction":"column","gap":{"token":"space.sm"}}}
+            | weft.style = [[],[],0,[0,0,0,0],null]
+            INSTANCE "text#no-drafts" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+              | weft.origin = layer(text#no-drafts)
+              | weft.source = {"kind":"text","id":"no-drafts","children":["No drafts."],"shown":{"text":"No drafts."}}
+              TEXT "text" chars="No drafts." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+            INSTANCE "text#no-drafts-hint" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+              | weft.origin = layer(text#no-drafts-hint)
+              | weft.source = {"kind":"text","id":"no-drafts-hint","children":["Messages you start appear here."],"shown":{"text":"Messages you start appear here."}}
+              TEXT "text" chars="Messages you start appear here." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
     FRAME "tab#tab-sent" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
       | weft.origin = layer(tab#tab-sent)
       | weft.source = {"kind":"tab","id":"tab-sent","props":{"label":"Sent"},"shown":{"label":"Sent"}}

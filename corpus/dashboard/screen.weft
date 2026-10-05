@@ -23,7 +23,7 @@
       </slot>
     </section>
   </grid>
-  <stack id="notices" align="center" direction="column" gap="{token.space.sm}">
+  <stack id="notices" direction="column" gap="{token.space.sm}">
     <alert id="release" tone="info">Release 2.4 ships on Friday.</alert>
     <alert id="backup" text="{$.backupStatus}" tone="success"/>
     <alert id="quota" tone="warning">

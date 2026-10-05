@@ -73,7 +73,9 @@ export {
   REM_PX,
   tokenColor,
   tokenGroup,
+  tokenMaterial,
   tokenPx,
+  type Material,
   type RGB,
   type RGBA,
 } from "./tokens.ts";

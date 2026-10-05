@@ -13,6 +13,9 @@ description: example-review with light and dark tokens
   color-scheme: light dark;
   --weft-color-brand: #d97706;
   --weft-color-star: #d97706;
+  --weft-material-glass-tint: #ffffff4d;
+  --weft-material-glass-solid: #ffffff;
+  --weft-material-glass-blur: 16px;
   --weft-space-sm: 8px;
   --weft-space-md: 16px;
   --weft-font-body: 400 16px/1.5 system-ui;
@@ -22,6 +25,9 @@ description: example-review with light and dark tokens
   :root {
     --weft-color-brand: #fbbf24;
     --weft-color-star: #fbbf24;
+    --weft-material-glass-tint: #11172180;
+    --weft-material-glass-solid: #111721;
+    --weft-material-glass-blur: 24px;
   }
 }
 /* Weft base stylesheet: the least a screen needs to read as a form, not a theme. Every value is a
@@ -38,6 +44,18 @@ main, form, section, dialog[open] {
 dialog { padding: var(--weft-space-md, 16px); }
 h1, h2, h3, h4, h5, h6 { margin: 0; }
 img { max-width: 100%; }
+
+/* A stack or grid with a material: a solid surface, and where the browser can blur what is behind
+   it (Baseline since 2024-09-16, not yet everywhere) the tint over that blur. The properties are
+   set on the element, from the material token's own. */
+[data-weft-material] { background-color: var(--_weft-material-solid); }
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  [data-weft-material] {
+    background-color: var(--_weft-material-tint);
+    -webkit-backdrop-filter: blur(var(--_weft-material-blur));
+    backdrop-filter: blur(var(--_weft-material-blur));
+  }
+}
 
 /* A field: its caption above the control, then the error. */
 label:has(> :is(input:not([type="checkbox"], [type="radio"]), select, textarea, [data-weft-stepper])) {
@@ -245,7 +263,7 @@ a { display: inline-block; }
 <main data-weft-id="review" aria-label="Review">
   <h1 data-weft-id="title">Review your order</h1>
   <template data-weft-id="lines" data-each="$.cart.items" data-as="line">
-    <div data-weft-id="line" class="weft-row" style="gap: var(--weft-space-sm)">
+    <div data-weft-id="line" class="weft-row" data-weft-material style="gap: var(--weft-space-sm); --_weft-material-tint: var(--weft-material-glass-tint); --_weft-material-solid: var(--weft-material-glass-solid); --_weft-material-blur: var(--weft-material-glass-blur)">
       <div data-weft-id="line-name" data-weft-kind="text" data-bind="text:$line.name"></div>
       <div data-weft-id="line-score" data-prop-color="{token.color.star}" aria-label="Customer score" data-weft-kind="rating" role="img" data-bind="value:$line.score">
       </div>

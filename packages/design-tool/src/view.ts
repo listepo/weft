@@ -3,7 +3,7 @@
 // view, the source is kept exactly as written, and only a difference counts as a designer's edit.
 import type { ComponentDef, Node, Value } from "@weft/core";
 import type { Token } from "@weft/catalog";
-import { tokenPx } from "./tokens.ts";
+import { tokenMaterial, tokenPx, type Material } from "./tokens.ts";
 
 /** The variant value of an enum prop or `state` that is not set and has no default. */
 export const UNSET = "(unset)";
@@ -108,6 +108,8 @@ export type LayoutView = {
   columns: number;
   gap: { token?: string | undefined; px: number };
   padding: number;
+  /** The surface a `stack` or `grid` takes from its `material` token: a tint over a blur. */
+  material?: ({ token: string } & Material) | undefined;
 };
 
 const ALIGN: Readonly<Record<string, Align>> = {
@@ -144,6 +146,12 @@ export function layoutView(
       return { token: gap.token, px: tokenPx(tokens?.get(gap.token)) ?? 0 };
     return { px: 0 };
   };
+  const materialOf = () => {
+    const ref = props?.["material"];
+    if (typeof ref !== "object" || !("token" in ref)) return undefined;
+    const material = tokenMaterial(tokens?.get(ref.token));
+    return material === undefined ? undefined : { token: ref.token, ...material };
+  };
   const padding = PADDING[kind] ?? 8;
   if (kind === "stack") {
     const mode: Mode = props?.["direction"] === "row" ? "row" : "column";
@@ -158,6 +166,7 @@ export function layoutView(
       columns: 1,
       gap: gapOf(),
       padding,
+      material: materialOf(),
     };
   }
   if (kind === "grid") {
@@ -170,6 +179,7 @@ export function layoutView(
         typeof columns === "number" && Number.isInteger(columns) && columns >= 1 ? columns : 1,
       gap: gapOf(),
       padding,
+      material: materialOf(),
     };
   }
   const inherit = parentMode === "row" ? "row" : "column";

@@ -44,11 +44,20 @@ board "screen#inbox" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
         | weft/weft.style = [[],[],0,[8,8,8,8],8]
         board "slot:empty" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:empty>","dir":"column","wrap":"nowrap"}
           | weft/weft.slot = empty
-          board "text#no-drafts" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#no-drafts>","dir":"column"}
-            | weft/weft.kind = text
-            | weft/weft.origin = shape(text#no-drafts)
-            | weft/weft.source = {"kind":"text","id":"no-drafts","children":["No drafts."],"shown":{"text":"No drafts."}}
-            text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="No drafts."
+          board "stack#drafts-empty" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#drafts-empty>","dir":"column","wrap":"nowrap"}
+            | weft/weft.origin = shape(stack#drafts-empty)
+            | weft/weft.source = {"kind":"stack","id":"drafts-empty","props":{"align":"center","direction":"column","gap":{"token":"space.sm"}}}
+            | weft/weft.style = [[],[],0,[0,0,0,0],null]
+            board "text#no-drafts" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#no-drafts>","dir":"column"}
+              | weft/weft.kind = text
+              | weft/weft.origin = shape(text#no-drafts)
+              | weft/weft.source = {"kind":"text","id":"no-drafts","children":["No drafts."],"shown":{"text":"No drafts."}}
+              text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="No drafts."
+            board "text#no-drafts-hint" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#no-drafts-hint>","dir":"column"}
+              | weft/weft.kind = text
+              | weft/weft.origin = shape(text#no-drafts-hint)
+              | weft/weft.source = {"kind":"text","id":"no-drafts-hint","children":["Messages you start appear here."],"shown":{"text":"Messages you start appear here."}}
+              text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Messages you start appear here."
     board "tab#tab-sent" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<tab#tab-sent>","dir":"column","wrap":"nowrap"}
       | weft/weft.origin = shape(tab#tab-sent)
       | weft/weft.source = {"kind":"tab","id":"tab-sent","props":{"label":"Sent"},"shown":{"label":"Sent"}}

@@ -4,8 +4,9 @@
 //!
 //! Supported: groups and tokens (`$value`), `$type` on a token or inherited from the nearest
 //! ancestor group, the `$root` token name, and whole-value aliases written `{group.token}` (chains
-//! allowed; an untyped token takes the type of the token it aliases). Other `$`-properties are
-//! ignored. Not supported: `$extends`, JSON-pointer `$ref` and the resolver module (the project
+//! allowed; an untyped token takes the type of the token it aliases). A `color` token that carries
+//! the `dev.weft.material` extension is a `material` token (see `material`). Other `$`-properties
+//! are ignored. Not supported: `$extends`, JSON-pointer `$ref` and the resolver module (the project
 //! loader reads resolvers, `resolver.rs`), and aliases nested inside composite values, which
 //! `composite_part` resolves for the generators. Bad input is reported as problems, never as an error.
 
@@ -31,6 +32,7 @@ pub enum TokenCode {
     T004,
     T005,
     T006,
+    T007,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -49,6 +51,8 @@ pub struct Tokens {
 struct Raw {
     kind: Option<String>,
     value: Json,
+    /// The token's `dev.weft.material` extension, the only extension Weft reads.
+    material: Option<Json>,
 }
 
 enum State {
@@ -104,11 +108,16 @@ fn walk(
             Json::Object(group) if group.contains_key("$value") => {
                 let own = group.get("$type").and_then(Json::as_str);
                 let value = group.get("$value").cloned().unwrap_or(Json::Null);
+                let material = group
+                    .get("$extensions")
+                    .and_then(|e| e.get(MATERIAL_EXTENSION))
+                    .cloned();
                 raw.insert(
                     joined,
                     Raw {
                         kind: own.or(kind).map(str::to_owned),
                         value,
+                        material,
                     },
                 );
             }
@@ -152,10 +161,26 @@ fn resolve(
         };
         match alias_target(&token.value) {
             None => {
-                let result = token.kind.as_ref().map(|kind| Token {
-                    kind: kind.clone(),
-                    value: token.value.clone(),
-                });
+                let result = match (&token.kind, &token.material) {
+                    (Some(kind), Some(extension)) if kind == "color" => {
+                        match material(&token.value, extension) {
+                            Ok(value) => Some(Token {
+                                kind: MATERIAL.to_owned(),
+                                value,
+                            }),
+                            Err(message) => {
+                                problem(problems, TokenCode::T007, current, message);
+                                state.insert(current.to_owned(), State::Failed);
+                                break None;
+                            }
+                        }
+                    }
+                    (Some(kind), _) => Some(Token {
+                        kind: kind.clone(),
+                        value: token.value.clone(),
+                    }),
+                    (None, _) => None,
+                };
                 if result.is_none() {
                     let message =
                         "Token has no `$type` and none is inherited from a group.".to_owned();
@@ -202,6 +227,73 @@ fn resolve(
         state.insert(path.to_owned(), done);
     }
     inner
+}
+
+/// The `$type` Weft gives a colour token that carries `MATERIAL_EXTENSION`.
+pub const MATERIAL: &str = "material";
+
+/// The vendor key of the `$extensions` entry that makes a `color` token a material (DTCG 2025.10
+/// §5.2.3: vendor keys, reverse domain notation recommended). The DTCG format has no material
+/// type and requires `$type` to be one of its own, so the file stays a valid colour file that any
+/// tool reads, with the blur radius in an extension every tool must keep.
+pub const MATERIAL_EXTENSION: &str = "dev.weft.material";
+
+/// The largest background blur, in px. Figma's blur radius is open ended and a browser accepts any
+/// length, so this bound is Weft's: a token file is untrusted, and a radius in the thousands only
+/// costs a renderer time.
+pub const MAX_BLUR_PX: f64 = 100.0;
+
+/// The value of a material token: `{ "tint": <the colour value>, "blur": <the dimension value> }`.
+/// The tint's alpha is the material's opacity, so there is one way to say it; it must be in
+/// `0..=1` as the Color Module requires. The blur is a DTCG dimension, `0..=MAX_BLUR_PX` px
+/// (`rem` at 16 px, as the generators read it); anything else is an error and the token is left
+/// out, never half used.
+fn material(color: &Json, extension: &Json) -> Result<Json, String> {
+    let bad = |what: &str| format!("A material token {what}.");
+    if !(color.is_object() || color.is_string()) {
+        return Err(bad("needs a colour as its value"));
+    }
+    if let Some(alpha) = color.get("alpha")
+        && !alpha
+            .as_f64()
+            .is_some_and(|a| a.is_finite() && (0.0..=1.0).contains(&a))
+    {
+        return Err(bad("has a tint opacity (`alpha`) outside 0 to 1"));
+    }
+    let Some(blur) = extension.get("blur") else {
+        return Err(bad("needs a `blur` in its `dev.weft.material` extension"));
+    };
+    let number = blur
+        .get("value")
+        .and_then(Json::as_f64)
+        .filter(|n| n.is_finite());
+    let px = match (number, blur.get("unit").and_then(Json::as_str)) {
+        (Some(n), Some("px")) => n,
+        (Some(n), Some("rem")) => n * 16.0,
+        _ => return Err(bad("needs a `blur` that is a dimension in px or rem")),
+    };
+    if !(0.0..=MAX_BLUR_PX).contains(&px) {
+        return Err(bad(&format!(
+            "has a blur of {px} px; it must be between 0 and {MAX_BLUR_PX} px"
+        )));
+    }
+    Ok(serde_json::json!({ "tint": color, "blur": blur }))
+}
+
+/// The tint colour and the blur radius in px of a loaded `material` token, `None` for anything
+/// else. The loader has already bounded both, so a generator never re-checks them.
+pub fn material_parts(token: &Token) -> Option<(&Json, f64)> {
+    if token.kind != MATERIAL {
+        return None;
+    }
+    let blur = token.value.get("blur")?;
+    let n = blur.get("value")?.as_f64()?;
+    let px = if blur.get("unit")?.as_str()? == "rem" {
+        n * 16.0
+    } else {
+        n
+    };
+    Some((token.value.get("tint")?, px))
 }
 
 pub fn load_tokens(json: &Json) -> Tokens {
@@ -376,5 +468,57 @@ mod tests {
             &json!({ "$type": "number", "b": { "$value": 1 }, "10": { "$value": 2 }, "2": { "$value": 3 } }),
         );
         assert_eq!(loaded.tokens.keys().collect::<Vec<_>>(), ["2", "10", "b"]);
+    }
+
+    fn glass(color: Json, blur: Json) -> Json {
+        json!({ "g": {
+            "$type": "color",
+            "$value": color,
+            "$extensions": { "dev.weft.material": { "blur": blur } }
+        } })
+    }
+
+    #[test]
+    fn a_color_with_the_material_extension_is_a_material() {
+        let tint = json!({ "colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.28 });
+        let loaded = load_tokens(&glass(tint.clone(), json!({ "value": 1, "unit": "rem" })));
+        assert!(loaded.problems.is_empty());
+        let (got, px) = material_parts(&loaded.tokens["g"]).unwrap();
+        assert_eq!((got, px), (&tint, 16.0));
+        // A plain colour is not a material, and an alias to a material is one.
+        let both = load_tokens(&json!({
+            "plain": { "$type": "color", "$value": "#fff" },
+            "g": glass(json!("#fff"), json!({ "value": 8, "unit": "px" }))["g"],
+            "again": { "$value": "{g}" }
+        }));
+        assert!(material_parts(&both.tokens["plain"]).is_none());
+        assert_eq!(both.tokens["again"].kind, MATERIAL);
+    }
+
+    #[test]
+    fn a_material_outside_its_bounds_is_dropped_with_t007() {
+        let px = |n: f64| json!({ "value": n, "unit": "px" });
+        let white =
+            |alpha: f64| json!({ "colorSpace": "srgb", "components": [1, 1, 1], "alpha": alpha });
+        for (color, blur) in [
+            (white(1.0), px(100.1)),
+            (white(1.0), px(-1.0)),
+            (white(1.5), px(10.0)),
+            (white(-0.1), px(10.0)),
+            (white(0.5), json!({ "value": 10, "unit": "em" })),
+            (white(0.5), json!(10)),
+            (white(0.5), json!({ "value": 1e308, "unit": "rem" })),
+            (json!(5), px(10.0)),
+        ] {
+            let loaded = load_tokens(&glass(color, blur));
+            assert!(loaded.tokens.is_empty());
+            assert_eq!(codes(&loaded), [(TokenCode::T007, "g")]);
+        }
+        let none = load_tokens(&json!({ "g": {
+            "$type": "color", "$value": "#fff", "$extensions": { "dev.weft.material": {} }
+        } }));
+        assert_eq!(codes(&none), [(TokenCode::T007, "g")]);
+        let edge = load_tokens(&glass(white(1.0), px(100.0)));
+        assert!(edge.problems.is_empty());
     }
 }

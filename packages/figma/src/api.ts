@@ -3,6 +3,7 @@
 // in-memory fake of the tests. `test/api-types.test.ts` checks at compile time that the official
 // types (`@figma/plugin-typings`) satisfy it, so the subset cannot drift from the real API.
 import type {
+  Effect,
   Paint,
   SceneNode,
   VariableResolvedDataType,
@@ -22,6 +23,11 @@ export type FSolid = {
   readonly opacity?: number | undefined;
   readonly boundVariables?: { readonly color?: FAlias | undefined } | undefined;
 };
+/** A background blur, the one effect Weft draws (a `material` token); others are only read. */
+export type FEffect =
+  | { readonly type: "BACKGROUND_BLUR"; readonly radius: number; readonly visible: boolean }
+  | { readonly type: Exclude<Effect["type"], "BACKGROUND_BLUR"> };
+
 export type FPaint = FSolid | { readonly type: Exclude<Paint["type"], "SOLID"> };
 
 /** Node fields a variable can be bound to that this package binds. */
@@ -91,6 +97,7 @@ export interface FLayout extends FScene, FParent {
   gridColumnGap: number;
   fills: readonly FPaint[] | FMixed;
   strokes: readonly FPaint[];
+  effects: readonly FEffect[];
   strokeWeight: number | FMixed;
   cornerRadius: number | FMixed;
   resize(width: number, height: number): void;

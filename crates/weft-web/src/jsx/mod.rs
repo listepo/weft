@@ -1254,6 +1254,9 @@ impl<'a> Gen<'a> {
                 let mut a = self.base(n, false);
                 let style = self.layout_style(n);
                 a.push(attr_js("style", style));
+                if n.raw("material").is_some_and(|m| m.get("token").is_some()) {
+                    a.push(attr_s("data-weft-material", ""));
+                }
                 C::J(el("div", a, self.content(n, ctx)))
             }
             "section" => {
@@ -1451,6 +1454,18 @@ impl<'a> Gen<'a> {
         {
             let value = format!("var(--weft-{})", token.replace('.', "-"));
             entries.push(format!("gap: {}", quote(&value)));
+        }
+        if let Some(token) = n
+            .raw("material")
+            .and_then(Json::as_object)
+            .and_then(|g| g.get("token"))
+            .and_then(Json::as_str)
+            .filter(|t| is_token(t))
+        {
+            for prop in crate::html::MATERIAL_PROPS {
+                let value = format!("var(--weft-{}-{prop})", token.replace('.', "-"));
+                entries.push(format!("\"--_weft-material-{prop}\": {}", quote(&value)));
+            }
         }
         if n.kind == "grid" {
             entries.push("display: \"grid\"".to_owned());

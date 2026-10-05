@@ -6,6 +6,9 @@ description: example-tokens-css with light and dark tokens
   color-scheme: light dark;
   --weft-color-brand: #d97706;
   --weft-color-star: #d97706;
+  --weft-material-glass-tint: #ffffff4d;
+  --weft-material-glass-solid: #ffffff;
+  --weft-material-glass-blur: 16px;
   --weft-space-sm: 8px;
   --weft-space-md: 16px;
   --weft-font-body: 400 16px/1.5 system-ui;
@@ -15,5 +18,8 @@ description: example-tokens-css with light and dark tokens
   :root {
     --weft-color-brand: #fbbf24;
     --weft-color-star: #fbbf24;
+    --weft-material-glass-tint: #11172180;
+    --weft-material-glass-solid: #111721;
+    --weft-material-glass-blur: 24px;
   }
 }

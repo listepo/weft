@@ -188,6 +188,15 @@ fn indent(lines: Vec<String>) -> impl Iterator<Item = String> {
         .map(|l| if l.is_empty() { l } else { format!("    {l}") })
 }
 
+/// A stack's or grid's `material` token as the token's own view modifier (`theme.<path>` is a
+/// `Surface`, see `theme`).
+fn material(v: &mut V, props: &mut IndexMap<String, Value>) {
+    if let Some(Value::Token(t)) = props.get("material") {
+        v.modifier(format!(".modifier({})", token_expr(t)));
+        props.shift_remove("material");
+    }
+}
+
 /// `head {` body `}` with the body indented.
 fn block(head: &str, body: Vec<String>) -> Vec<String> {
     let mut out = vec![format!("{head} {{")];
@@ -989,6 +998,7 @@ impl<'a> Gen<'a> {
                 let body = self.children(&node.children, loops, ctx, path);
                 let mut v = V::new(block(&head, body));
                 v.container = true;
+                material(&mut v, props);
                 v
             }
             "grid" => {
@@ -1014,6 +1024,7 @@ impl<'a> Gen<'a> {
                 let body = self.children(&node.children, loops, ctx, path);
                 let mut v = V::new(block(&head, body));
                 v.container = true;
+                material(&mut v, props);
                 v
             }
             "section" => {
