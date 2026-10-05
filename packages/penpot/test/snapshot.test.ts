@@ -25,6 +25,7 @@ function tree(root: FakeBoard): string {
       width: 100,
       height: 100,
       hidden: false,
+      rotation: 0,
       borderRadius: 0,
       strokes: [],
       layoutCell: undefined,

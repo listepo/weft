@@ -1,4 +1,4 @@
-export { buildScreen, type BuildHost, type BuildOptions, type Marks } from "./build.ts";
+export { buildScreen, planeTurn, type BuildHost, type BuildOptions, type Marks } from "./build.ts";
 export { displayTexts, finishRead, readScreen } from "./finish.ts";
 export {
   KEY,

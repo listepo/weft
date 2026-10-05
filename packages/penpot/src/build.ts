@@ -112,6 +112,9 @@ function penpotHost(api: PenpotApi, library: Library): BuildHost<PShape, PLibrar
       }
       return board;
     },
+    turn(layer, degrees) {
+      layer.rotation = degrees;
+    },
     text: (drawing) => drawText(api, library, drawing),
     async setText(layer, name, value) {
       const text = findText(layer, name);

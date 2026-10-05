@@ -10,6 +10,7 @@ import {
   handleRequest,
   layoutView,
   MAX_TOKENS,
+  planeTurn,
   modeToken,
   resolverDocument,
   tokenColor,
@@ -184,5 +185,18 @@ describe("token modes", () => {
     assert.deepEqual([...(modifier?.contexts.get("one")?.keys() ?? [])], ["n"]);
     assert.deepEqual(modifier?.contexts.get("__proto__")?.get("n"), { type: "number", value: 2 });
     assert.equal(({} as Record<string, unknown>)["n"], undefined);
+  });
+});
+
+describe("the flat part of a tilt", () => {
+  test("rotate-z is a clockwise turn in (-180, 180], and no other tilt is drawn", () => {
+    const turn = (props: Record<string, number>) => planeTurn(props as never);
+    assert.equal(turn({ "rotate-z": -6 }), -6);
+    assert.equal(turn({ "rotate-z": 190 }), -170);
+    assert.equal(turn({ "rotate-z": 180 }), 180);
+    assert.equal(turn({ "rotate-z": -180 }), 180);
+    assert.equal(turn({ "rotate-z": 0 }), 0);
+    assert.equal(turn({ "rotate-x": 40, "rotate-y": 30, perspective: 500 }), 0);
+    assert.equal(planeTurn(undefined), 0);
   });
 });

@@ -36,6 +36,7 @@ abstract class FakeBase {
   visible = true;
   x = 0;
   y = 0;
+  rotation = 0;
   width = 100;
   height = 100;
   parent: Owner | undefined;
@@ -59,6 +60,7 @@ abstract class FakeBase {
     to.visible = this.visible;
     to.x = this.x;
     to.y = this.y;
+    to.rotation = this.rotation;
     to.width = this.width;
     to.height = this.height;
     for (const [k, v] of this.data) to.data.set(k, v);

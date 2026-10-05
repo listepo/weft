@@ -25,6 +25,8 @@ export function styleKey(layer: FLayout, withSpacing: boolean): string {
     typeof layer.cornerRadius === "symbol" ? "mixed" : layer.cornerRadius,
     [layer.paddingLeft, layer.paddingRight, layer.paddingTop, layer.paddingBottom],
     withSpacing ? layer.itemSpacing : null,
+    // Only when turned, so the key of every upright layer stays as it was.
+    ...(layer.rotation === 0 ? [] : [layer.rotation]),
   ]);
 }
 

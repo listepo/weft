@@ -31,6 +31,7 @@ abstract class FakeBase {
   width = 100;
   height = 100;
   hidden = false;
+  rotation = 0;
   borderRadius = 0;
   strokes: PStroke[] = [];
   layoutCell: { row?: number; column?: number } | undefined;
@@ -176,6 +177,7 @@ abstract class FakeBase {
     to.width = this.width;
     to.height = this.height;
     to.hidden = this.hidden;
+    to.rotation = this.rotation;
     to.borderRadius = this.borderRadius;
     to.fillList = structuredClone(this.fillList);
     to.strokes = structuredClone(this.strokes);

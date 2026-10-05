@@ -102,6 +102,8 @@ export interface PShapeBase extends PSharedData {
   readonly width: number;
   readonly height: number;
   hidden: boolean;
+  /** Degrees about the shape's center. */
+  rotation: number;
   fills: PFill[] | "mixed";
   strokes: PStroke[];
   borderRadius: number;

@@ -1,0 +1,68 @@
+FRAME "screen#tilt" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#tilt)
+  | weft.source = {"kind":"screen","id":"tilt","props":{"label":"Card flips"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Card flips"],"shown":{"text":"Card flips"}}
+    TEXT "text" chars="Card flips" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "stack#deck" layoutMode="VERTICAL" itemSpacing=24 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/lg)"}
+    | weft.origin = layer(stack#deck)
+    | weft.source = {"kind":"stack","id":"deck","props":{"gap":{"token":"space.lg"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    FRAME "section#front" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(section#front)
+      | weft.source = {"kind":"section","id":"front","props":{"label":"Front side","perspective":800,"rotate-y":25}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      INSTANCE "text#front-text" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#front-text)
+        | weft.source = {"kind":"text","id":"front-text","props":{"text":{"bind":"$.front"}},"shown":{"text":"{$.front}"}}
+        TEXT "text" chars="{$.front}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "button#front-flip" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+        | weft.origin = layer(button#front-flip)
+        | weft.source = {"kind":"button","id":"front-flip","props":{"variant":"primary"},"on":{"press":"card.flip"},"children":["Flip"],"shown":{"text":"Flip"}}
+        TEXT "text" chars="Flip" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+      FRAME "slot:header" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.slot = header
+        INSTANCE "heading#front-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#front-title)
+          | weft.source = {"kind":"heading","id":"front-title","props":{"level":2},"children":["Front"],"shown":{"text":"Front"}}
+          TEXT "text" chars="Front" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "section#back" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(section#back)
+      | weft.source = {"kind":"section","id":"back","props":{"label":"Back side","perspective":800,"rotate-y":180}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      INSTANCE "text#back-text" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#back-text)
+        | weft.source = {"kind":"text","id":"back-text","props":{"text":{"bind":"$.back"}},"shown":{"text":"{$.back}"}}
+        TEXT "text" chars="{$.back}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "button#back-flip" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=secondary, state=(unset)>"
+        | weft.origin = layer(button#back-flip)
+        | weft.source = {"kind":"button","id":"back-flip","on":{"press":"card.flip"},"children":["Flip"],"shown":{"text":"Flip"}}
+        TEXT "text" chars="Flip" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      FRAME "slot:header" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.slot = header
+        INSTANCE "heading#back-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#back-title)
+          | weft.source = {"kind":"heading","id":"back-title","props":{"level":2},"children":["Back"],"shown":{"text":"Back"}}
+          TEXT "text" chars="Back" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "section#lean" rotation=6 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(section#lean)
+      | weft.source = {"kind":"section","id":"lean","props":{"label":"Leaning card","perspective":600,"rotate-x":20,"rotate-z":-6}}
+      | weft.style = [[],[],0,[12,12,12,12],8,6]
+      INSTANCE "text#lean-text" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#lean-text)
+        | weft.source = {"kind":"text","id":"lean-text","children":["Tilted back and turned a little in the plane."],"shown":{"text":"Tilted back and turned a little in the plane."}}
+        TEXT "text" chars="Tilted back and turned a little in the plane." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "field#lean-note" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=text, state=(unset)>"
+        | weft.origin = layer(field#lean-note)
+        | weft.source = {"kind":"field","id":"lean-note","props":{"label":"Note","placeholder":"Add a note","value":{"bind":"$.note"}},"on":{"change":"note.edit"},"shown":{"text":"","label":"Note"}}
+        TEXT "label" chars="Note"
+        FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+      FRAME "slot:header" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.slot = header
+        INSTANCE "heading#lean-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#lean-title)
+          | weft.source = {"kind":"heading","id":"lean-title","props":{"level":2},"children":["Leaning"],"shown":{"text":"Leaning"}}
+          TEXT "text" chars="Leaning" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

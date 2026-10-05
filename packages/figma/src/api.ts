@@ -56,6 +56,8 @@ export interface FScene extends FBase {
   y: number;
   readonly width: number;
   readonly height: number;
+  /** Degrees counterclockwise (the Plugin API reads and writes -180 to 180). */
+  rotation: number;
 }
 
 export interface FParent {

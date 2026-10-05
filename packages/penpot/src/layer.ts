@@ -70,6 +70,8 @@ export function styleKey(shape: PShape, withSpacing: boolean): string {
     withSpacing && isBoard(shape) && layout !== undefined
       ? layout[gapField(shape, shape.grid !== undefined)]
       : null,
+    // Only when turned, so the key of every upright layer stays as it was.
+    ...(shape.rotation === 0 ? [] : [shape.rotation]),
   ]);
 }
 
