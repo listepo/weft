@@ -1457,7 +1457,10 @@ impl<'a> Gen<'a> {
         // SPEC §5.1: a row without a valid `align` centres its children across the row.
         let row_default = match &direction.lit {
             Some(v) => (*v == str_v("row")).then(|| "center".to_owned()),
-            None => Some(format!("{} === \"row\" ? \"center\" : undefined", direction.js)),
+            None => Some(format!(
+                "{} === \"row\" ? \"center\" : undefined",
+                direction.js
+            )),
         };
         match &align.lit {
             Some(v) => {

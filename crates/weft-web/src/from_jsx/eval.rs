@@ -90,8 +90,8 @@ impl<'a> Env<'a> {
 /// Helpers of the generated components that pass their argument through, as far as Weft is
 /// concerned: they only coerce or guard it.
 const PASS_THROUGH: &[&str] = &[
-    "_text", "_on", "_squash", "_list", "_keyed", "_ix", "_float", "_numeric", "_slide", "_count",
-    "_color", "String", "Boolean", "Number",
+    "_text", "_on", "_squash", "_list", "_keyed", "_ix", "_float", "_numeric", "_num", "_slide",
+    "_count", "_color", "String", "Boolean", "Number",
 ];
 
 /// Calls of a value that leave it a value of the same path (`.trim()`, `.toString()`).
