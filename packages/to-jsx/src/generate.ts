@@ -1,4 +1,4 @@
-// Weft document → a self-contained React or SolidJS component (SPEC §9, "To JSX"), generated in
+// Weft document → a self-contained React or SolidJS component or Lit element (SPEC §9, "To JSX"), generated in
 // Rust (crates/weft-web/src/jsx) through the web WebAssembly module. This file keeps the package's
 // API; the mapping, its safety rules and the runtime helpers live in the crate.
 import { catalogHandle, toJson, wasm } from "@weft/core/web";
@@ -7,8 +7,8 @@ import type { Catalog, Document } from "@weft/core";
 export type ToJsxOptions = {
   catalog: Catalog;
   componentName?: string;
-  /** React (the default) or SolidJS. */
-  framework?: "react" | "solid";
+  /** React (the default), SolidJS, or a Lit element (JavaScript only, no `source`). */
+  framework?: "react" | "solid" | "lit";
   /** TSX: typed props and helpers. */
   typescript?: boolean;
   /**

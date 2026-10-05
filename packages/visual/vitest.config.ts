@@ -16,7 +16,16 @@ const web: TestProjectInlineConfiguration = hasChromium
       // Found up front, so Vite does not reload the page halfway through to bundle a dependency
       // a compiled screen imports.
       optimizeDeps: {
-        include: ["react", "react/jsx-runtime", "react-dom/client", "solid-js", "solid-js/web"],
+        include: [
+          "react",
+          "react/jsx-runtime",
+          "react-dom/client",
+          "solid-js",
+          "solid-js/web",
+          "lit",
+          "lit/static-html.js",
+          "lit/directives/style-map.js",
+        ],
       },
       test: {
         name: "web",
