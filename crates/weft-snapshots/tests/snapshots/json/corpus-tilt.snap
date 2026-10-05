@@ -1,0 +1,175 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-tilt as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "tilt",
+    "props": {
+      "label": "Card flips"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Card flips"
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "deck",
+        "props": {
+          "gap": {
+            "token": "space.lg"
+          }
+        },
+        "children": [
+          {
+            "kind": "section",
+            "id": "front",
+            "props": {
+              "label": "Front side",
+              "perspective": 800,
+              "rotate-y": 25
+            },
+            "slots": {
+              "header": [
+                {
+                  "kind": "heading",
+                  "id": "front-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "children": [
+                    "Front"
+                  ]
+                }
+              ]
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "front-text",
+                "props": {
+                  "text": {
+                    "bind": "$.front"
+                  }
+                }
+              },
+              {
+                "kind": "button",
+                "id": "front-flip",
+                "props": {
+                  "variant": "primary"
+                },
+                "on": {
+                  "press": "card.flip"
+                },
+                "children": [
+                  "Flip"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "section",
+            "id": "back",
+            "props": {
+              "label": "Back side",
+              "perspective": 800,
+              "rotate-y": 180
+            },
+            "slots": {
+              "header": [
+                {
+                  "kind": "heading",
+                  "id": "back-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "children": [
+                    "Back"
+                  ]
+                }
+              ]
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "back-text",
+                "props": {
+                  "text": {
+                    "bind": "$.back"
+                  }
+                }
+              },
+              {
+                "kind": "button",
+                "id": "back-flip",
+                "on": {
+                  "press": "card.flip"
+                },
+                "children": [
+                  "Flip"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "section",
+            "id": "lean",
+            "props": {
+              "label": "Leaning card",
+              "perspective": 600,
+              "rotate-x": 20,
+              "rotate-z": -6
+            },
+            "slots": {
+              "header": [
+                {
+                  "kind": "heading",
+                  "id": "lean-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "children": [
+                    "Leaning"
+                  ]
+                }
+              ]
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "lean-text",
+                "children": [
+                  "Tilted back and turned a little in the plane."
+                ]
+              },
+              {
+                "kind": "field",
+                "id": "lean-note",
+                "props": {
+                  "label": "Note",
+                  "placeholder": "Add a note",
+                  "value": {
+                    "bind": "$.note"
+                  }
+                },
+                "on": {
+                  "change": "note.edit"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
