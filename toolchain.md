@@ -17,6 +17,7 @@
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 | cargo-insta | `cargo install cargo-insta` (optional) | Reviews changed snapshots (`cargo insta review`); the tests run without it | https://github.com/mitsuhiko/insta |
 | Xcode (`xcrun swiftc`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14; those tests skip without it | https://developer.apple.com/xcode/ |
+| iOS Simulator (`xcrun simctl`) | Xcode, with the iOS 27.0 runtime and an iPhone 17 simulator | `@weft/visual` builds the generated SwiftUI screens into an app and screenshots them; skipped without it | https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device |
 | Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode; skipped without it | https://github.com/microsoft/playwright |
 
 ## mise
