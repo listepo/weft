@@ -108,3 +108,27 @@ fn explicit_and_absent_values_read_back_apart() {
         assert_eq!(weft_core::serialize(&result.document), markup, "{body}");
     }
 }
+
+// SPEC §5.1: a row without `align` centres its children, which is what `HStack` does on its own.
+// The generator must therefore print no alignment for it, and an `HStack` must read back without
+// one, or the two targets would stop agreeing the day SwiftUI's default changes.
+#[test]
+fn a_row_without_align_is_a_plain_hstack_both_ways() {
+    let row = screen(
+        "<stack id=\"r\" direction=\"row\">\n    <field id=\"f\" label=\"F\"/>\n    <button id=\"b\">Go</button>\n  </stack>",
+    );
+    let out = swift(&row, None);
+    assert!(out.contains("HStack {") && !out.contains("HStack(alignment"), "{out}");
+    let catalog = common::catalog();
+    let back = weft_core::serialize(&import_swiftui(&out, &ImportOptions { catalog: &catalog }).document);
+    assert_eq!(back, row);
+}
+
+#[test]
+fn an_explicit_row_alignment_is_kept() {
+    let out = swift(
+        &screen("<stack id=\"r\" align=\"end\" direction=\"row\"><button id=\"b\">Go</button></stack>"),
+        None,
+    );
+    assert!(out.contains("HStack(alignment: .bottom)"), "{out}");
+}
