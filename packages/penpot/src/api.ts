@@ -94,6 +94,9 @@ export interface PTokenCatalog {
   addSet(set: { name: string; active?: boolean }): PTokenSet;
 }
 
+/** A blur, as Penpot types it (`Blur`): its intensity, and whether it is hidden. */
+export type PBlur = { id?: string | undefined; value?: number | undefined; hidden?: boolean };
+
 export interface PShapeBase extends PSharedData {
   readonly id: string;
   name: string;
@@ -105,6 +108,8 @@ export interface PShapeBase extends PSharedData {
   fills: PFill[] | "mixed";
   strokes: PStroke[];
   borderRadius: number;
+  /** The blur of what is behind the shape, which Weft draws for a `material` token. */
+  backgroundBlur?: PBlur | undefined;
   readonly layoutCell?: { readonly row?: number; readonly column?: number } | undefined;
   /** Token names applied to the shape, by property (`rowGap`, `fill`). */
   readonly tokens: { readonly [property: string]: string | undefined };

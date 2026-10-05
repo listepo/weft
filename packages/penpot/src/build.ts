@@ -6,6 +6,7 @@ import type { Catalog, Document } from "@weft/core";
 import {
   buildScreen as buildShared,
   findBelow,
+  hexOf,
   type BuildHost,
   type Display,
   type Marks,
@@ -91,6 +92,13 @@ function penpotHost(api: PenpotApi, library: Library): BuildHost<PShape, PLibrar
     frame(view, fill) {
       const board = api.createBoard();
       paintFill(board, library, fill);
+      if (view.material !== undefined) {
+        // The tint is the fill and its opacity; the blur is Penpot's own background blur.
+        board.fills = [
+          { fillColor: hexOf(view.material.color), fillOpacity: view.material.opacity },
+        ];
+        board.backgroundBlur = { value: view.material.blur, hidden: false };
+      }
       const token = view.gap.token === undefined ? undefined : library.tokens.get(view.gap.token);
       if (view.mode === "grid") {
         const grid = board.addGridLayout();

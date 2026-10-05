@@ -43,6 +43,15 @@ function figmaHost(api: FigmaApi, library: Library): BuildHost<Built, FComponent
       const frame = api.createFrame();
       autoLayout(frame, view.mode === "row" ? "HORIZONTAL" : "VERTICAL", view.gap.px, view.padding);
       frame.fills = fill === undefined ? [] : [paint(api, library, fill)];
+      if (view.material !== undefined) {
+        // The tint is the fill, its opacity the paint's; the blur is Figma's own background blur.
+        frame.fills = [
+          { type: "SOLID", color: view.material.color, opacity: view.material.opacity },
+        ];
+        frame.effects = [
+          { type: "BACKGROUND_BLUR", radius: view.material.blur, visible: true },
+        ];
+      }
       if (view.mode === "grid") {
         frame.layoutMode = "GRID";
         frame.gridColumnCount = view.columns;
