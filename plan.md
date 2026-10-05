@@ -161,3 +161,12 @@ The SwiftUI screenshot suite (`packages/visual/test/swiftui.test.ts`, T36) insta
 
 The setting is an environment variable read by the suite (a test-harness choice, not a Weft tool option, so no `weft.json` key), documented in the suite's README and `AGENTS.md`. Done when two runs started at once in two worktrees pass in both modes, the lock and the device naming have tests, and the default run on one worktree behaves as before.
 
+Execution plan:
+
+1. `packages/visual/src/simulator.ts` (new, Node only, no Vitest import so it is unit-testable): `simulatorMode` reads `WEFT_SIMULATOR` (`shared` by default, `own`, anything else is an error), `deviceName` makes `weft-visual-<worktree folder>` (the shared prefix lets shared mode skip these devices and the README list them), `findDevice` picks a device from `simctl list -j`, and `acquireLock` is the machine-wide lock.
+2. The lock uses only Node's fs: the holder's pid and a token go into a temp file that is hard-linked to the lock path (atomic, complete content, fails if held); waiters poll, warn once with the holder's pid and the lock path, and fail after a bounded wait with a message saying how to clear it; a lock whose pid is dead is taken over by renaming it away and checking that what was renamed is the stale content seen. It lives under `~/Library/Caches/weft-visual/`, not `os.tmpdir()`, because the simulators are per user and `TMPDIR` differs between sessions and sandboxes, which would give two runs two locks.
+3. `swiftui.test.ts`: the collection-time check only proves the device type and runtime exist (no side effects); `beforeAll` builds the app, takes the lock (shared: one lock for the machine; own: one lock per device, so two runs of one worktree also take turns), creates the own device with `xcrun simctl create` on first use, boots and installs; `afterAll` shuts down what it booted and releases the lock.
+4. `test/simulator.test.ts` (added to the Node project of `vitest.config.ts`): mode parsing, device naming, device selection, and the lock (acquire and release, wait, timeout, stale takeover, no takeover of a live holder, release leaves another holder's lock).
+5. Document the setting, the lock and how to list and delete the devices in `packages/visual/README.md` and `AGENTS.md`.
+6. Verify: two simultaneous runs from two worktrees in `own` mode and in `shared` mode, then the full check from the task; close T46 into `done.md`.
+
