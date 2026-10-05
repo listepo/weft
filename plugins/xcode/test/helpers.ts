@@ -71,7 +71,9 @@ export const remove = (dir: string) => rmSync(dir, { recursive: true, force: tru
  * replaced by their files, because the copy no longer sits next to `corpus/`). The samples name
  * the package by the relative path `../..`, so the layout must stay.
  */
-export const workspace = (sample: string): { root: string; sample: string; cleanup: () => void } => {
+export const workspace = (
+  sample: string,
+): { root: string; sample: string; cleanup: () => void } => {
   const root = tempDir(sample);
   const pkg = join(root, "xcode");
   mkdirSync(join(pkg, "Examples"), { recursive: true });

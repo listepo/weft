@@ -19,12 +19,18 @@ const outDir = resolve(process.argv[2] ?? join(here, "../Artifacts"));
 // Intel macOS is not supported, and the target cannot be linked elsewhere without an SDK, so any
 // other host skips with a message rather than failing a workspace-wide run.
 if (process.platform !== "darwin" || process.arch !== "arm64") {
-  console.log(`skipped: the artifact bundle is built on Apple Silicon macOS only (this host is ${process.platform}/${process.arch})`);
+  console.log(
+    `skipped: the artifact bundle is built on Apple Silicon macOS only (this host is ${process.platform}/${process.arch})`,
+  );
   process.exit(0);
 }
 
 const run = (command: string, args: string[]) => {
-  const result = spawnSync(command, args, { cwd: root, encoding: "utf8", stdio: ["ignore", "inherit", "inherit"] });
+  const result = spawnSync(command, args, {
+    cwd: root,
+    encoding: "utf8",
+    stdio: ["ignore", "inherit", "inherit"],
+  });
   if (result.status !== 0) {
     throw new Error(`${command} ${args.join(" ")} failed with ${result.status ?? result.signal}`);
   }

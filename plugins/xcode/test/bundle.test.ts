@@ -13,7 +13,10 @@ describe.skipIf(skipReason)("artifact bundle", () => {
     const weft = info.artifacts.weft;
     expect(weft.type).toBe("executable");
     expect(weft.variants).toEqual([
-      { path: expect.stringMatching(/^weft-.+-macosx\/bin\/weft$/), supportedTriples: ["arm64-apple-macosx"] },
+      {
+        path: expect.stringMatching(/^weft-.+-macosx\/bin\/weft$/),
+        supportedTriples: ["arm64-apple-macosx"],
+      },
     ]);
     expect(weft.variants[0].path).toBe(`weft-${weft.version}-macosx/bin/weft`);
   });
