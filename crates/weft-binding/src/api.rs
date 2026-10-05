@@ -1,5 +1,5 @@
 //! The functions behind the exports, as plain Rust over JSON text so that native tests reach
-//! them; `lib.rs` only adapts them to wasm-bindgen. Each mirrors one TypeScript function of
+//! them; the host crates adapt them to wasm-bindgen and napi-rs. Each mirrors one TypeScript function of
 //! `@weft/core` or `@weft/catalog` and returns what that function returned, as JSON text.
 
 use std::cell::RefCell;

@@ -55,8 +55,8 @@ fn the_catalog_depends_only_on_the_core_and_pure_crates() {
 }
 
 #[test]
-fn only_the_wasm_bindings_add_wasm_bindgen_to_the_pure_crates() {
-    let mut deps = dependencies("weft-wasm");
+fn the_binding_layer_depends_only_on_pure_crates() {
+    let mut deps = dependencies("weft-binding");
     deps.sort();
     assert_eq!(
         deps,
@@ -65,14 +65,27 @@ fn only_the_wasm_bindings_add_wasm_bindgen_to_the_pure_crates() {
             "serde",
             "serde_json",
             "thiserror",
-            "wasm-bindgen",
             "weft-catalog",
             "weft-core",
-            // Optional: only the `web` build of the module carries the web importers.
+            // Optional: only the `web` feature carries the web importers.
             "weft-import",
             "weft-web"
         ]
     );
+}
+
+#[test]
+fn only_the_wasm_bindings_add_wasm_bindgen_to_the_binding_layer() {
+    let mut deps = dependencies("weft-wasm");
+    deps.sort();
+    assert_eq!(deps, ["wasm-bindgen", "weft-binding", "weft-core"]);
+}
+
+#[test]
+fn only_the_native_addon_adds_napi_to_the_binding_layer() {
+    let mut deps = dependencies("weft-node");
+    deps.sort();
+    assert_eq!(deps, ["napi", "napi-derive", "weft-binding", "weft-core"]);
 }
 
 #[test]
