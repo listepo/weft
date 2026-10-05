@@ -11,7 +11,7 @@ Works on `.weft` files from Claude Code, including Claude Code Desktop.
 
 The plugin also registers the `weft` MCP server (`@weft/mcp`: `weft_primer`, `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch`, `weft_render`). The server never touches files; reading and writing them belongs to the three skills' scripts (sources in `plugins/shared/scripts/`, shared with the Cursor plugin and bundled into `dist/`). A script refuses to replace an existing file unless `--force` is given. Exit codes: 0 done, 1 the input or its project has errors (printed as `file:line:col code message`, or `weft.json:#/pointer code message`), 2 usage or file problem.
 
-Each script works in the project of its input (SPEC section 10): the first `weft.json` in the input's folder or above it, another one with `--project <file>`, or none with `--no-project`. The project brings the catalog, tokens, actions and data schema, and its settings (SPEC section 10.6) stand in for arguments that are not given: `render.data`, `render.tokens` and `render.outDir` for render, `export.react.outDir` for export, `import.html.outDir` for import. Arguments always win.
+Each script works in the project of its input (SPEC section 10): the first `weft.json` in the input's folder or above it, another one with `--project <file>`, or none with `--no-project`. The project brings the catalog, tokens, actions and data schema, and its settings (SPEC section 10.6) stand in for arguments that are not given: `render.data`, `render.tokens` and `render.outDir` for render, `export.react.outDir`, `typescript` and `source` for export, `import.html.outDir` for import. Arguments always win.
 
 ## Install
 

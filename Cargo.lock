@@ -1397,7 +1397,9 @@ dependencies = [
  "serde_json",
  "weft-catalog",
  "weft-core",
+ "weft-import",
  "weft-swiftui",
+ "weft-web",
 ]
 
 [[package]]

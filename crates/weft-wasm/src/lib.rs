@@ -80,6 +80,47 @@ impl Catalog {
         Ok(web::to_jsx(document.as_deref(), options, &self.0)?)
     }
 
+    /// A static HTML page from a screen: `{code}` or `{diagnostics}`.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = toHtml)]
+    pub fn to_html(
+        &self,
+        document: Option<String>,
+        tokens: Option<String>,
+        options: &str,
+    ) -> Result<String, JsError> {
+        Ok(web::to_html(
+            document.as_deref(),
+            tokens.as_deref(),
+            options,
+            &self.0,
+        )?)
+    }
+
+    /// A screen from an HTML page, with its losses.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = importHtml)]
+    pub fn import_html(&self, html: &str, tokens: Option<String>) -> Result<String, JsError> {
+        Ok(web::import_html(html, tokens.as_deref(), &self.0)?)
+    }
+
+    /// A screen from a React or SolidJS component (TSX when `typescript`), with its losses.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = importJsx)]
+    pub fn import_jsx(
+        &self,
+        source: &str,
+        typescript: bool,
+        tokens: Option<String>,
+    ) -> Result<String, JsError> {
+        Ok(web::import_jsx(
+            source,
+            typescript,
+            tokens.as_deref(),
+            &self.0,
+        )?)
+    }
+
     #[wasm_bindgen(js_name = checkData)]
     pub fn check_data(
         &self,

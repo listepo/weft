@@ -11,6 +11,11 @@ export type ToJsxOptions = {
   framework?: "react" | "solid";
   /** TSX: typed props and helpers. */
   typescript?: boolean;
+  /**
+   * Keep the canonical screen in a leading comment, so `weft import-react`/`import-solid` give it
+   * back exactly instead of reading the code by convention.
+   */
+  source?: boolean;
 };
 
 type Tables = { maxDepth: number; runtime: Record<string, string> };
@@ -33,6 +38,7 @@ export function toJsx(document: Document | unknown, options: ToJsxOptions): stri
         componentName: name,
         framework: options.framework,
         typescript: options.typescript,
+        source: options.source,
       }),
     ),
   ) as { code: string } | { error: string };

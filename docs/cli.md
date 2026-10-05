@@ -17,7 +17,7 @@ The examples assume you have also made the scratch folder from the [tour](tour.m
 $ mkdir -p weft-tour
 $ cp corpus/login/screen.weft weft-tour/login.weft
 $ weft --help
-Validate, format and explain Weft documents, and convert them to and from SwiftUI
+Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React and SolidJS
 
 Usage: weft <COMMAND>
 
@@ -27,6 +27,12 @@ Commands:
   explain         Read back what each binding, token, event and loop of a markup document means, one per line, so the meaning can be compared with the instruction behind an edit
   swiftui         Generate a SwiftUI view (iOS 17, macOS 14) from a markup document
   import-swiftui  Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses
+  html            Generate a static HTML page with CSS and no script from a markup document
+  react           Generate a React component (JSX or TSX) from a markup document
+  solid           Generate a SolidJS component (JSX or TSX) from a markup document
+  import-html     Read an HTML page back into markup; what Weft cannot hold is listed on stderr as losses
+  import-react    Read a React component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
+  import-solid    Read a SolidJS component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
   help            Print this message or the help of the given subcommand(s)
 
 Options:
@@ -166,10 +172,37 @@ weft-tour/Hello.swift:/screen#screen-1/text#text-hi loss layout: `.padding` not 
 
 Both commands use the project's catalog and tokens, or `--catalog` and `--tokens` when you give them. `--out-dir` writes `<name>.swift` or `<name>.weft` instead of printing. Without it, the project's `export.swiftui.outDir` or `import.swiftui.outDir` decides ([Projects](projects.md)). The mapping table and every loss are listed in `crates/weft-swiftui/README.md`.
 
+## `weft html`, `weft react`, `weft solid` and their importers
+
+`weft html` prints a static page: semantic HTML, the tokens as CSS custom properties, and no script. Bindings, events and repetition are kept as inert `data-` attributes and `<template>` elements. `weft react` and `weft solid` print one self-contained component, JSX by default or TSX with `--typescript`. With `--source`, the output keeps the screen in a leading comment, and the matching importer gives it back unchanged:
+
+```console
+$ weft react weft-tour/login.weft --source --out-dir weft-tour/web
+$ weft import-react weft-tour/web/login.jsx | diff - <(weft fmt weft-tour/login.weft) && echo same
+same
+```
+
+Without the comment, generated code still reads back by its conventions; only the ids of `<each>` are generated again. Hand-written pages and components import too, with their losses on stderr:
+
+```console
+$ printf 'export default function Hello({ data }) {\n  const [open, setOpen] = useState(false);\n  return <main aria-label="Hello"><p style={{ padding: 8 }}>Hi {data.name}</p><button onClick={() => setOpen(!open)}>Toggle</button></main>;\n}\n' > weft-tour/Hello.jsx
+$ weft import-react weft-tour/Hello.jsx
+weft-tour/Hello.jsx:/screen#screen-hello loss ids: 3 elements carry no data-weft-id; their ids are generated
+weft-tour/Hello.jsx:/screen#screen-hello/text#text-hi loss text: the text written beside the bound value is left out
+weft-tour/Hello.jsx:/screen#screen-hello/text#text-hi loss layout: style padding: 8px is left out
+weft-tour/Hello.jsx:/screen#screen-hello/button#button-toggle loss actions: onClick={() => setOpen(!open)} calls no action Weft can read; it is left out
+<screen id="screen-hello" label="Hello" weft="0.1">
+  <text id="text-hi" text="{$.name}"/>
+  <button id="button-toggle">Toggle</button>
+</screen>
+```
+
+The source is parsed, never run. `import-react` and `import-solid` read `.tsx` (and `.ts`) files as TypeScript. `--source`/`--no-source`, `--typescript`/`--javascript` and `--out-dir` override the project's `export.<target>` and `import.<target>` settings ([Projects](projects.md)); `--catalog` and `--tokens` replace the project's catalog and tokens. The parsers and the mapping are described in `crates/weft-web/README.md` and SPEC §9.
+
 ## What `weft` does not do
 
 - It does not check token names, action names or bindings without a project: those checks need your app's tokens, actions and data schema, which a `weft.json` declares ([Projects](projects.md)).
-- It does not render, and it does not import or export anything but SwiftUI. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
+- It does not render pages with sample data, and it does not convert to or from Figma or Penpot. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
 - It does not apply patches. [Patches](patches.md) go through the MCP server or the library.
 
 ## The Node version

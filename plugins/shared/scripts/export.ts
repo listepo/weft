@@ -3,7 +3,8 @@
 //   node export.ts <screen.weft> [out.jsx] [--name Component] [--force]
 //     [--project weft.json | --no-project]
 // The project above the screen (SPEC §10.1) supplies the catalog, tokens, actions and data schema
-// the screen is checked against, and `export.react.outDir` (SPEC §10.6) where the file goes.
+// the screen is checked against, and `export.react` (SPEC §10.6) where the file goes (`outDir`),
+// whether it is TSX (`typescript`) and whether it keeps its source comment (`source`).
 import { parseArgs } from "node:util";
 import { LIMITS } from "@weft/mcp";
 import { toJsx } from "@weft/to-jsx";
@@ -45,10 +46,14 @@ export function main(argv: readonly string[], io: Io = defaultIo): number {
   const document = readScreen(input, LIMITS.markupChars, io, { context });
   if (typeof document === "number") return document;
 
+  const settings = workspace.project?.settings.export?.react;
+  const typescript = settings?.typescript === true;
   let jsx: string;
   try {
     jsx = toJsx(document, {
       catalog: context.catalog,
+      typescript,
+      source: settings?.source === true,
       ...(parsed.values.name === undefined ? {} : { componentName: parsed.values.name }),
     });
   } catch (error) {
@@ -56,8 +61,14 @@ export function main(argv: readonly string[], io: Io = defaultIo): number {
     io.stderr(`weft: ${(error as Error).message}\n`);
     return EXIT.failure;
   }
-  const outDir = workspace.project?.settings.export?.react?.outDir;
-  const target = targetPath(input, ".jsx", output, workspace, outDir, io);
+  const target = targetPath(
+    input,
+    typescript ? ".tsx" : ".jsx",
+    output,
+    workspace,
+    settings?.outDir,
+    io,
+  );
   if (target === undefined) return EXIT.failure;
   if (!writeOutput(target, jsx, parsed.values.force === true, io)) return EXIT.failure;
   io.stdout(`Wrote ${target}\n`);

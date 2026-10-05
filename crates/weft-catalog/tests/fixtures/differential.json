@@ -17759,7 +17759,7 @@
       "severity": "warning",
       "message": "Unknown key \"cobol\" in \"export\".",
       "path": "#/export/cobol",
-      "expected": "one of: \"react\", \"swiftui\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\"",
       "got": "cobol"
      },
      {
@@ -17767,7 +17767,7 @@
       "severity": "warning",
       "message": "Unknown key \"outdir\" in \"export.react\".",
       "path": "#/export/react/outdir",
-      "expected": "one of: \"outDir\"",
+      "expected": "one of: \"outDir\", \"typescript\", \"source\"",
       "got": "outdir",
       "hint": "did you mean \"outDir\"?"
      },
@@ -17776,7 +17776,7 @@
       "severity": "warning",
       "message": "Unknown key \"figma\" in \"import\".",
       "path": "#/import/figma",
-      "expected": "one of: \"html\", \"swiftui\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\"",
       "got": "figma"
      },
      {

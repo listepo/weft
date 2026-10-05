@@ -1,5 +1,6 @@
-//! `weft validate`, `weft swiftui` and `weft import-swiftui` with a project file (SPEC §10):
-//! discovery, explicit arguments and what the project adds to the checks and the output.
+//! `weft validate`, the generators (`weft swiftui`, `html`, `react`, `solid`) and the importers
+//! with a project file (SPEC §10): discovery, explicit arguments and what the project adds to the
+//! checks and the output.
 
 // A test crate: a failed unwrap or panic is a failed test, which is the point.
 #![allow(clippy::unwrap_used, clippy::panic)]
@@ -350,4 +351,117 @@ fn import_swiftui_lists_losses_on_stderr() {
     let r = run(&[&"import-swiftui", &none, &"--no-project"]);
     assert_eq!(r.code, 1, "{}", r.stderr);
     assert!(r.stderr.contains("W601"), "{}", r.stderr);
+}
+
+/// The example project with every web target's output directory set; Solid writes TSX, and every
+/// generator keeps its source so the importers give the screen back exactly.
+fn web_project(name: &str) -> Scratch {
+    let s = Scratch::new(name);
+    s.write(
+        "weft.json",
+        r#"{
+  "tokens": ["tokens/base.tokens.json"],
+  "catalog": "catalog.json",
+  "export": {
+    "html": { "outDir": "out/html", "source": true },
+    "react": { "outDir": "out/react", "source": true },
+    "solid": { "outDir": "out/solid", "source": true, "typescript": true }
+  },
+  "import": {
+    "html": { "outDir": "back/html" },
+    "react": { "outDir": "back/react" },
+    "solid": { "outDir": "back/solid" }
+  }
+}"#,
+    );
+    s
+}
+
+#[test]
+fn web_targets_write_where_the_project_says_and_read_back_exactly() {
+    let s = web_project("web");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    for (target, file) in [
+        ("html", "out/html/plain.html"),
+        ("react", "out/react/plain.jsx"),
+        ("solid", "out/solid/plain.tsx"),
+    ] {
+        let r = run(&[&target, &screen]);
+        assert_eq!(
+            (r.code, r.stdout.as_str(), r.stderr.as_str()),
+            (0, "", ""),
+            "{target}"
+        );
+        let r = run(&[&format!("import-{target}"), &s.path(file)]);
+        assert_eq!(
+            (r.code, r.stdout.as_str(), r.stderr.as_str()),
+            (0, "", ""),
+            "{target}"
+        );
+        let back = std::fs::read_to_string(s.path(&format!("back/{target}/plain.weft"))).unwrap();
+        assert_eq!(back, PLAIN, "{target}");
+    }
+}
+
+#[test]
+fn web_arguments_override_the_project() {
+    let s = web_project("web-args");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let r = run(&[
+        &"solid",
+        &screen,
+        &"--javascript",
+        &"--no-source",
+        &"--out-dir",
+        &s.path("js"),
+    ]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    let jsx = std::fs::read_to_string(s.path("js/plain.jsx")).unwrap();
+    assert!(
+        !jsx.contains("weft:source") && jsx.contains("function WeftScreen(props)"),
+        "{jsx}"
+    );
+
+    let r = run(&[&"react", &screen, &"--no-project", &"--typescript"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stdout.contains("export default function WeftScreen("),
+        "{}",
+        r.stdout
+    );
+    assert!(r.stdout.contains(": WeftProps"), "{}", r.stdout);
+
+    let r = run(&[&"html", &screen, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.starts_with("<!doctype html>\n"), "{}", r.stdout);
+    assert!(!r.stdout.contains("<script"), "{}", r.stdout);
+}
+
+#[test]
+fn web_importers_list_losses_and_refuse_what_they_cannot_read() {
+    let s = Scratch::new("web-losses");
+    let source = s.write(
+        "Hello.tsx",
+        "export default function Hello(props: { data: { n: number } }) {\n  return <main aria-label=\"Hi\"><p style={{ color: \"red\" }}>{`n=${props.data.n}`}</p></main>;\n}\n",
+    );
+    let r = run(&[&"import-react", &source, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.starts_with("<screen "), "{}", r.stdout);
+    assert!(r.stderr.contains(" loss bindings: "), "{}", r.stderr);
+
+    let broken = s.write(
+        "Broken.jsx",
+        "export default function () { return <main>; }\n",
+    );
+    let r = run(&[&"import-solid", &broken, &"--no-project"]);
+    assert_eq!(r.code, 1, "{}", r.stderr);
+    assert!(r.stderr.contains("W601"), "{}", r.stderr);
+
+    let page = s.write(
+        "page.html",
+        "<main aria-label=\"P\"><marquee>Hi</marquee></main>",
+    );
+    let r = run(&[&"import-html", &page, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.contains("label=\"P\""), "{}", r.stdout);
 }

@@ -93,8 +93,14 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `render.data` | none | Sample data for rendered pages (`--data` overrides it). |
 | `render.tokens` | the project's `tokens` | Token files for rendered pages, layered the same way (`--tokens` overrides it). |
 | `render.outDir` | next to the screen | Where rendered pages go (an output path overrides it). |
-| `export.react.outDir` | next to the screen | Where exported React components go. |
-| `import.html.outDir` | next to the page | Where screens imported from HTML go. |
+| `export.html.outDir` | standard output | Where `weft html` writes `<screen>.html` (`--out-dir` overrides it). |
+| `export.html.source` | `false` | The page keeps the screen in a leading comment, so `weft import-html` gives it back exactly (`--no-source` overrides it). Off by default: a deployed page would publish it. |
+| `export.react.outDir` | next to the screen | Where exported React components go; `weft react` prints when it is absent (`--out-dir` overrides it). |
+| `export.react.typescript`, `export.solid.typescript` | `false` | Write TSX with typed props (`--javascript` overrides it). |
+| `export.react.source`, `export.solid.source` | `false` | The component keeps the screen in a leading comment, so `weft import-react` and `weft import-solid` give it back exactly (`--no-source` overrides it). |
+| `export.solid.outDir` | standard output | Where `weft solid` writes `<screen>.jsx` or `.tsx` (`--out-dir` overrides it). |
+| `import.html.outDir` | next to the page | Where screens imported from HTML go; `weft import-html` prints when it is absent (`--out-dir` overrides it). |
+| `import.react.outDir`, `import.solid.outDir` | standard output | Where `weft import-react` and `weft import-solid` write `<file>.weft` (`--out-dir` overrides it). |
 | `export.swiftui.outDir` | standard output | Where `weft swiftui` writes `<screen>.swift` (`--out-dir` overrides it). |
 | `import.swiftui.outDir` | standard output | Where `weft import-swiftui` writes `<file>.weft` (`--out-dir` overrides it). |
 | `mcp.limits.*` | see `packages/mcp/README.md` | The MCP server's bounds on one call: `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`. |

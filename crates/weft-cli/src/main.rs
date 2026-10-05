@@ -1,12 +1,15 @@
-//! `weft validate`, `weft fmt`, `weft explain`, and the SwiftUI generator and importer
-//! (`weft swiftui`, `weft import-swiftui`, in `swiftui.rs`). The project file (`weft.json`, SPEC §10) found
+//! `weft validate`, `weft fmt`, `weft explain`, and the generators and importers of SPEC §9:
+//! SwiftUI (`weft swiftui`, `weft import-swiftui`, in `swiftui.rs`) and the web targets (`weft
+//! html|react|solid`, `weft import-html|import-react|import-solid`, in `web.rs`). The project file (`weft.json`, SPEC §10) found
 //! above the document, or given with `--project`, supplies the catalog, tokens, actions and data
 //! schema, and the settings of §10.6 (`validate.mode`, `format.write`); a flag overrides the
 //! project, which overrides the default. `--catalog` replaces the project's catalog. Without
 //! either, `validate` checks only the syntax layer. Exit codes: 0 ok, 1 diagnostics with errors,
 //! 2 usage or I/O failure.
 
+mod convert;
 mod swiftui;
+mod web;
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -25,7 +28,7 @@ use weft_core::{
 #[command(
     name = "weft",
     version,
-    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI"
+    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React and SolidJS"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -41,6 +44,60 @@ struct ProjectArgs {
     /// Ignore any project file.
     #[arg(long)]
     no_project: bool,
+}
+
+/// A generator of a web target.
+#[derive(Args)]
+struct WebExport {
+    file: PathBuf,
+    /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+    #[arg(long)]
+    catalog: Option<PathBuf>,
+    #[command(flatten)]
+    project: ProjectArgs,
+    /// Write `<file stem>.<extension>` here instead of printing (default: the project's
+    /// `export.<target>.outDir`, else print).
+    #[arg(long)]
+    out_dir: Option<PathBuf>,
+    /// Keep the canonical screen in a leading comment, so the importer gives it back exactly
+    /// (default: the project's `export.<target>.source`, else off).
+    #[arg(long, conflicts_with = "no_source")]
+    source: bool,
+    /// Leave the source comment out, whatever the project says.
+    #[arg(long)]
+    no_source: bool,
+}
+
+/// What the React and SolidJS generators add.
+#[derive(Args)]
+struct JsxExport {
+    #[command(flatten)]
+    common: WebExport,
+    /// TSX with typed props (default: the project's `export.<target>.typescript`, else JSX).
+    #[arg(long, conflicts_with = "javascript")]
+    typescript: bool,
+    /// JSX, whatever the project says.
+    #[arg(long)]
+    javascript: bool,
+}
+
+/// An importer of a web target.
+#[derive(Args)]
+struct WebImport {
+    file: PathBuf,
+    /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+    #[arg(long)]
+    catalog: Option<PathBuf>,
+    /// Token JSON the page's custom properties are matched against; replaces the project's tokens
+    /// (default: the default tokens).
+    #[arg(long)]
+    tokens: Option<PathBuf>,
+    #[command(flatten)]
+    project: ProjectArgs,
+    /// Write `<file stem>.weft` here instead of printing (default: the project's
+    /// `import.<target>.outDir`, else print).
+    #[arg(long)]
+    out_dir: Option<PathBuf>,
 }
 
 #[derive(Subcommand)]
@@ -117,6 +174,25 @@ enum Command {
         #[arg(long)]
         out_dir: Option<PathBuf>,
     },
+    /// Generate a static HTML page with CSS and no script from a markup document.
+    Html {
+        #[command(flatten)]
+        common: WebExport,
+        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        #[arg(long)]
+        tokens: Option<PathBuf>,
+    },
+    /// Generate a React component (JSX or TSX) from a markup document.
+    React(JsxExport),
+    /// Generate a SolidJS component (JSX or TSX) from a markup document.
+    Solid(JsxExport),
+    /// Read an HTML page back into markup; what Weft cannot hold is listed on stderr as losses.
+    ImportHtml(WebImport),
+    /// Read a React component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr.
+    ImportReact(WebImport),
+    /// Read a SolidJS component (.jsx, or .tsx as TypeScript) back into markup; losses go to
+    /// stderr.
+    ImportSolid(WebImport),
 }
 
 const USAGE_ERROR: u8 = 2;
@@ -397,7 +473,72 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             },
             out,
         ),
+        Command::Html { common, tokens } => {
+            web_export(web::Target::Html, common, tokens, None, out)
+        }
+        Command::React(args) => {
+            let target = web::Target::React;
+            web_export(
+                target,
+                args.common,
+                None,
+                Some((args.typescript, args.javascript)),
+                out,
+            )
+        }
+        Command::Solid(args) => {
+            let target = web::Target::Solid;
+            web_export(
+                target,
+                args.common,
+                None,
+                Some((args.typescript, args.javascript)),
+                out,
+            )
+        }
+        Command::ImportHtml(args) => web_import(web::Target::Html, args, out),
+        Command::ImportReact(args) => web_import(web::Target::React, args, out),
+        Command::ImportSolid(args) => web_import(web::Target::Solid, args, out),
     }
+}
+
+fn web_export(
+    target: web::Target,
+    common: WebExport,
+    tokens: Option<PathBuf>,
+    jsx: Option<(bool, bool)>,
+    out: &mut dyn Write,
+) -> Result<u8> {
+    let (typescript, javascript) = jsx.unwrap_or_default();
+    web::export(
+        web::ExportArgs {
+            target,
+            file: common.file,
+            catalog: common.catalog,
+            tokens,
+            project: common.project,
+            out_dir: common.out_dir,
+            typescript,
+            javascript,
+            source: common.source,
+            no_source: common.no_source,
+        },
+        out,
+    )
+}
+
+fn web_import(target: web::Target, args: WebImport, out: &mut dyn Write) -> Result<u8> {
+    web::import(
+        web::ImportArgs {
+            target,
+            file: args.file,
+            catalog: args.catalog,
+            tokens: args.tokens,
+            project: args.project,
+            out_dir: args.out_dir,
+        },
+        out,
+    )
 }
 
 /// A document with errors has no reliable meaning to read back, so its diagnostics are printed as

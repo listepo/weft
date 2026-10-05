@@ -3,11 +3,13 @@
 
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
+use weft_catalog::{DEFAULT_TOKENS_JSON, Token, load_tokens};
+use weft_core::to_document;
 use weft_core::{Catalog, Code, Diagnostic};
 use weft_import::{
     BuildOptions, DISSOLVED_ROLES, ROLE_REFINEMENTS, Sem, build_document, empty_result,
 };
-use weft_web::{Framework, JsxOptions};
+use weft_web::{Framework, HtmlOptions, ImportOptions, JsxOptions};
 
 use crate::boundary::{BindingError, Result, read_input, read_list, write};
 
@@ -145,6 +147,100 @@ pub fn to_jsx(document: Option<&str>, options: &str, catalog: &Catalog) -> Resul
     })
 }
 
+/// A DTCG token tree as JSON text, resolved; the default tokens when absent. Token problems are
+/// the caller's to report (`loadTokens`): the generators and importers use what resolves.
+fn tokens(json: Option<&str>) -> Result<IndexMap<String, Token>> {
+    let json = match json {
+        Some(text) => read_input(Some(text))?,
+        None => read_input(Some(DEFAULT_TOKENS_JSON))?,
+    };
+    Ok(load_tokens(&json).tokens)
+}
+
+#[derive(Default, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct HtmlWire {
+    #[serde(default)]
+    source: bool,
+}
+
+/// What the HTML generator returns: the page, or the diagnostics of a screen it refused.
+#[derive(Serialize)]
+#[serde(untagged)]
+enum Page {
+    Code { code: String },
+    Invalid { diagnostics: Vec<Diagnostic> },
+}
+
+/// `toHtml`: `{code}`, or `{diagnostics}` when the screen is not strictly valid.
+pub fn to_html(
+    document: Option<&str>,
+    tokens_json: Option<&str>,
+    options: &str,
+    catalog: &Catalog,
+) -> Result<String> {
+    let json = read_input(document)?;
+    let wire: HtmlWire = serde_json::from_str(options).map_err(|source| BindingError::Wire {
+        what: "HTML options",
+        source,
+    })?;
+    let tokens = tokens(tokens_json)?;
+    // The model reads any JSON leniently; a malformed shape must stop here, as the parser would.
+    let shape = weft_core::validate(
+        &json,
+        &weft_core::ValidateOptions {
+            catalog: Some(catalog),
+            mode: weft_core::Mode::Strict,
+            ..Default::default()
+        },
+    );
+    if weft_core::has_errors(&shape) {
+        return write(&Page::Invalid { diagnostics: shape });
+    }
+    let document = to_document(&json);
+    let options = HtmlOptions {
+        catalog,
+        tokens: &tokens,
+        source: wire.source,
+    };
+    write(&match weft_web::to_html(&document, &options) {
+        Ok(code) => Page::Code { code },
+        Err(invalid) => Page::Invalid {
+            diagnostics: invalid.0,
+        },
+    })
+}
+
+/// `importHtml`: `{document, losses, diagnostics}` of a page.
+pub fn import_html(html: &str, tokens_json: Option<&str>, catalog: &Catalog) -> Result<String> {
+    let tokens = tokens(tokens_json)?;
+    write(&weft_web::import_html(
+        html,
+        &ImportOptions {
+            catalog,
+            tokens: &tokens,
+        },
+    ))
+}
+
+/// `importJsx`: `{document, losses, diagnostics}` of a React or SolidJS component.
+pub fn import_jsx(
+    source: &str,
+    typescript: bool,
+    tokens_json: Option<&str>,
+    catalog: &Catalog,
+) -> Result<String> {
+    let tokens = tokens(tokens_json)?;
+    write(&weft_web::import_jsx(
+        source,
+        typescript,
+        &ImportOptions {
+            catalog,
+            tokens: &tokens,
+        },
+    ))
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct JsxTables {
@@ -188,6 +284,25 @@ mod tests {
             out.contains("export default function WeftScreen(props)"),
             "{out}"
         );
+    }
+
+    #[test]
+    fn pages_and_components_come_back_through_the_wire() {
+        let catalog = weft_catalog::core_catalog().unwrap();
+        let screen = r#"{"weft":"0.1","root":{"kind":"screen","id":"s","props":{"label":"S"},"children":[{"kind":"button","id":"go","props":{},"on":{"press":"run"},"children":["Go"]}]}}"#;
+        let page = to_html(Some(screen), None, r#"{"source":true}"#, &catalog).unwrap();
+        let code: serde_json::Value = serde_json::from_str(&page).unwrap();
+        let html = code["code"].as_str().unwrap();
+        let back: serde_json::Value =
+            serde_json::from_str(&import_html(html, None, &catalog).unwrap()).unwrap();
+        assert_eq!(back["losses"], serde_json::json!([]), "{back}");
+        assert_eq!(back["document"]["root"]["id"], "s");
+        let jsx = r#"export default function S({ actions }) { return <main aria-label="S"><button onClick={() => actions.run()}>Go</button></main>; }"#;
+        let back: serde_json::Value =
+            serde_json::from_str(&import_jsx(jsx, false, None, &catalog).unwrap()).unwrap();
+        assert_eq!(back["document"]["root"]["kind"], "screen", "{back}");
+        let refused = to_html(Some(r#"{"weft":"0.1"}"#), None, "{}", &catalog).unwrap();
+        assert!(refused.starts_with(r#"{"diagnostics":"#), "{refused}");
     }
 
     #[test]
