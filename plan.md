@@ -14,7 +14,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 | T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
-| T10 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T11 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
@@ -206,16 +205,6 @@ Done when:
 - the suite passes repeatedly (at least three consecutive runs);
 - baselines are retaken only if the visible area changes, and are then reviewed;
 - the full check exits 0.
-
-### T10. Host capabilities
-
-SPEC §8 says a host advertises `{ weft, catalogs }` and an agent writes only what is advertised; no code does this. The MCP server reports its capabilities, loads catalogs, tokens and actions from configuration, and turns token and action checks on when they are given.
-
-Execution plan. Loading catalogs, tokens, actions and a data schema from a project file, and checking them when given, already exist (T31: `weft-mcp --project`, the `project` argument); what is missing is the advertisement.
-1. `packages/mcp/src/tools/capabilities.ts`: a read-only tool `weft_capabilities` answers `{ weft, catalogs: [{ name, version }], tokens?, actions?, data? }` for the host's context or a `project` argument, reusing `scope` and `Context`; the lists are bounded and say when they were cut. Registered in `tools/index.ts`; the server `instructions` and the primer point to it.
-2. Tests in `packages/mcp/test` (core only, extended catalog, tokens and actions, `project` argument, broken project, list cut) and the tool lists of `plugins/shared/test/mcp-stdio.ts`.
-3. Docs: SPEC §8 (how an MCP host advertises), `docs/mcp.md`, `packages/mcp/README.md`, `research.md` row; rebuild the plugin bundles (`moon run shared:build`).
-4. Verify with `moon run root:changed`, then the full check once.
 
 ### T11. Streaming and incremental generation
 
