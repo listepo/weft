@@ -1,0 +1,216 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-booking as solid-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _num(v, integer, min, max) {
+  if (typeof v !== "number") return v;
+  if (!Number.isFinite(v)) return undefined;
+  if (integer) v = Math.round(v);
+  if (min !== undefined) v = Math.max(v, min);
+  if (max !== undefined) v = Math.min(v, max);
+  return v;
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _numeric(v) {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(v.trim())) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+function _tidy(x, ...inputs) {
+  const d = (y) => {
+    const [m = "", e] = String(y).split("e");
+    return Math.max(0, (m.split(".")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));
+  };
+  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));
+}
+
+function _span(min, max, step) {
+  const lo = _numeric(min) ?? 0;
+  const st = _numeric(step);
+  return { min: lo, max: Math.max(_numeric(max) ?? 100, lo), step: st !== undefined && st > 0 ? st : 1 };
+}
+
+function _slide(value, s) {
+  const v = Math.min(Math.max(_numeric(value) ?? s.min, s.min), s.max);
+  let on = s.min + Math.floor((v - s.min) / s.step + 0.5) * s.step;
+  if (on > s.max) on -= s.step;
+  return String(_tidy(Math.max(on, s.min), s.min, s.step));
+}
+
+function _bounds(min, max, step) {
+  const lo = _numeric(min);
+  const hi = _numeric(max);
+  const st = _numeric(step);
+  const b = { step: st !== undefined && st > 0 ? st : 1 };
+  if (lo !== undefined) b.min = lo;
+  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);
+  return b;
+}
+
+function _clamp(v, b) {
+  if (b.min !== undefined) v = Math.max(v, b.min);
+  if (b.max !== undefined) v = Math.min(v, b.max);
+  return v;
+}
+
+function _count(value, b) {
+  return _clamp(_numeric(value) ?? 0, b);
+}
+
+function _step(current, direction, b) {
+  return _tidy(_clamp(current + direction * b.step, b), current, b.step);
+}
+
+function _dateType(v) {
+  return v === "time" || v === "datetime" ? v : "date";
+}
+
+function _dateText(type, value) {
+  const day = (s) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return false;
+    const [year, month, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    if (year < 1 || month < 1 || month > 12 || d < 1) return false;
+    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    return d <= [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];
+  };
+  const time = (s) => /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
+  if (type === "date") return day(value) ? value : "";
+  if (type === "time") return time(value) ? value : "";
+  const [d = "", t = "", ...rest] = value.split("T");
+  return rest.length === 0 && day(d) && time(t) ? value : "";
+}
+
+function _color(v) {
+  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : "#000000";
+}
+
+function _ix(list) {
+  return list.map((v, i) => [v, () => i]);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="booking" aria-label="Book a trip">
+      <h1 data-weft-id="title">Book a trip</h1>
+      <form data-weft-id="trip" aria-label="Trip" onSubmit={(_e) => { _e.preventDefault(); _act(props.actions, { id: "trip", action: "trip.book" }); }}>
+        {(() => {
+          const _o = [
+            ..._ix(_list(props.data?.cities)).flatMap(([city, _i0]) => [
+              { value: city?.name, el: (
+                <option data-weft-id={"city-option[" + _i0() + "]"} value={_text(city?.name)}>
+                  {!(_text(city?.name).trim() === "") ? _squash(_text(city?.name)) : ""}
+                </option>
+              ) },
+            ]),
+          ];
+          return (
+            <label>
+              <span aria-hidden="true">Destination</span>
+              <input data-weft-id="city" aria-label="Destination" list={"weft-city-options"} placeholder="Search a city" value={_text(props.data?.trip?.city)} onInput={(_e) => { const _v = _e.currentTarget.value; if (_v !== undefined) props.onChange?.("$.trip.city", _v); _act(props.actions, { id: "city", action: "trip.edit" }); }} />
+              <datalist id={"weft-city-options"}>
+                {_o.map((_x) => _x.el)}
+              </datalist>
+            </label>
+          );
+        })()}
+        <label>
+          <span aria-hidden="true">Departure</span>
+          {(() => {
+            const _t = _dateType("");
+            return (
+              <input data-weft-id="depart" type={_t === "datetime" ? "datetime-local" : _t} aria-label="Departure" min={_dateText(_t, "2026-01-01") || undefined} max={_dateText(_t, "2026-12-31") || undefined} value={_dateText(_t, _text(props.data?.trip?.depart))} onInput={(_e) => { const _v = _dateText(_t, _e.currentTarget.value); if (_v !== undefined) props.onChange?.("$.trip.depart", _v); _act(props.actions, { id: "depart", action: "trip.edit" }); }} />
+            );
+          })()}
+        </label>
+        <label>
+          <span aria-hidden="true">Check-in time</span>
+          {(() => {
+            const _t = _dateType("time");
+            return (
+              <input data-weft-id="checkin" type={_t === "datetime" ? "datetime-local" : _t} aria-label="Check-in time" min={_dateText(_t, "") || undefined} max={_dateText(_t, "") || undefined} value={_dateText(_t, _text(props.data?.trip?.checkin))} onInput={(_e) => { const _v = _dateText(_t, _e.currentTarget.value); if (_v !== undefined) props.onChange?.("$.trip.checkin", _v); }} />
+            );
+          })()}
+        </label>
+        <label>
+          <span aria-hidden="true">Reminder</span>
+          {(() => {
+            const _t = _dateType("datetime");
+            return (
+              <input data-weft-id="reminder" type={_t === "datetime" ? "datetime-local" : _t} aria-label="Reminder" min={_dateText(_t, "") || undefined} max={_dateText(_t, "") || undefined} value={_dateText(_t, _text(props.data?.trip?.reminder))} onInput={(_e) => { const _v = _dateText(_t, _e.currentTarget.value); if (_v !== undefined) props.onChange?.("$.trip.reminder", _v); }} />
+            );
+          })()}
+        </label>
+        <label>
+          <span aria-hidden="true">Guests</span>
+          {(() => {
+            const _b = _bounds(1, 8, undefined);
+            return (
+              <span data-weft-stepper="">
+                <button type="button" tabindex={-1} aria-hidden="true" data-weft-step="down" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector("input"); const _n = _step(_numeric(_i?.value) ?? _count(_num(props.data?.trip?.guests, false, undefined, undefined), _b), -1, _b); props.onChange?.("$.trip.guests", _n); _act(props.actions, { id: "guests", action: "trip.edit" }); }}>{"−"}</button>
+                <input data-weft-id="guests" type="number" aria-label="Guests" min={_b.min} max={_b.max} step={_b.step} value={String(_count(_num(props.data?.trip?.guests, false, undefined, undefined), _b))} onInput={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) props.onChange?.("$.trip.guests", _v); _act(props.actions, { id: "guests", action: "trip.edit" }); }} />
+                <button type="button" tabindex={-1} aria-hidden="true" data-weft-step="up" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector("input"); const _n = _step(_numeric(_i?.value) ?? _count(_num(props.data?.trip?.guests, false, undefined, undefined), _b), 1, _b); props.onChange?.("$.trip.guests", _n); _act(props.actions, { id: "guests", action: "trip.edit" }); }}>+</button>
+              </span>
+            );
+          })()}
+        </label>
+        <label>
+          <span aria-hidden="true">Budget per night</span>
+          {(() => {
+            const _s = _span(50, 500, 10);
+            return (
+              <input data-weft-id="budget" type="range" aria-label="Budget per night" min={_s.min} max={_s.max} step={_s.step} value={_slide(_num(props.data?.trip?.budget, false, undefined, undefined), _s)} onInput={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) props.onChange?.("$.trip.budget", _v); _act(props.actions, { id: "budget", action: "trip.edit" }); }} />
+            );
+          })()}
+        </label>
+        <div data-weft-id="cabin" aria-label="Cabin" role="radiogroup" data-weft-segmented="">
+          <span aria-hidden="true">Cabin</span>
+          <label>
+            <input data-weft-id="cabin-economy" type="radio" name={"weft-cabin"} value="economy" aria-label="Economy" checked={_text(props.data?.trip?.cabin) !== "" && "economy" === _text(props.data?.trip?.cabin)} onChange={() => { props.onChange?.("$.trip.cabin", "economy"); _act(props.actions, { id: "cabin", action: "trip.edit" }); }} />
+            <span aria-hidden="true">Economy</span>
+          </label>
+          <label>
+            <input data-weft-id="cabin-business" type="radio" name={"weft-cabin"} value="business" aria-label="Business" checked={_text(props.data?.trip?.cabin) !== "" && "business" === _text(props.data?.trip?.cabin)} onChange={() => { props.onChange?.("$.trip.cabin", "business"); _act(props.actions, { id: "cabin", action: "trip.edit" }); }} />
+            <span aria-hidden="true">Business</span>
+          </label>
+          <label>
+            <input data-weft-id="cabin-first" type="radio" name={"weft-cabin"} value="first" aria-label="First" checked={_text(props.data?.trip?.cabin) !== "" && "first" === _text(props.data?.trip?.cabin)} onChange={() => { props.onChange?.("$.trip.cabin", "first"); _act(props.actions, { id: "cabin", action: "trip.edit" }); }} />
+            <span aria-hidden="true">First</span>
+          </label>
+        </div>
+        <label>
+          <span aria-hidden="true">Trip colour</span>
+          <input data-weft-id="tag" type="color" aria-label="Trip colour" value={_color(_text(props.data?.trip?.colour))} onInput={(_e) => { const _v = _e.currentTarget.value; if (_v !== undefined) props.onChange?.("$.trip.colour", _v); _act(props.actions, { id: "tag", action: "trip.edit" }); }} />
+        </label>
+        <div data-weft-slot="footer">
+          <button data-weft-id="book" type="submit" data-variant="primary" onClick={(_e) => { _e.preventDefault(); _act(props.actions, { id: "trip", action: "trip.book" }); }}>Book</button>
+        </div>
+      </form>
+    </main>
+  );
+}

@@ -456,6 +456,683 @@
   "sems": [
    {
     "role": "main",
+    "name": "Appearance",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "heading",
+      "name": "Appearance",
+      "states": {
+       "level": 1
+      },
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "radiogroup",
+      "name": "Theme",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "radio",
+        "name": "Light",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "radio",
+        "name": "Dark",
+        "states": {
+         "disabled": true
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "radio",
+        "name": "Automatic",
+        "states": {
+         "checked": true
+        },
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "slider",
+      "name": "Text size",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "16",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "slider",
+      "name": "Contrast",
+      "states": {
+       "disabled": true
+      },
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "60",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "spinbutton",
+      "name": "Columns",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "2",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "spinbutton",
+      "name": "Zoom",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "1.5",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "textbox",
+      "name": "Accent colour",
+      "states": {
+       "disabled": true
+      },
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "#d946ef",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "textbox",
+      "name": "Member since",
+      "states": {
+       "disabled": true
+      },
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "2024-05-17",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "combobox",
+      "name": "Font",
+      "states": {
+       "disabled": true
+      },
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "Inter",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-appearance",
+     "props": {
+      "label": "Appearance"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "heading-appearance",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Appearance"
+       ]
+      },
+      {
+       "kind": "radio-group",
+       "id": "radio-group-theme",
+       "props": {
+        "label": "Theme",
+        "value": "automatic"
+       },
+       "children": [
+        {
+         "kind": "radio",
+         "id": "radio-light",
+         "props": {
+          "value": "light"
+         },
+         "children": [
+          "Light"
+         ]
+        },
+        {
+         "kind": "radio",
+         "id": "radio-dark",
+         "props": {
+          "disabled": true,
+          "value": "dark"
+         },
+         "children": [
+          "Dark"
+         ]
+        },
+        {
+         "kind": "radio",
+         "id": "radio-automatic",
+         "props": {
+          "value": "automatic"
+         },
+         "children": [
+          "Automatic"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "slider",
+       "id": "slider-text-size",
+       "props": {
+        "label": "Text size",
+        "value": 16
+       }
+      },
+      {
+       "kind": "slider",
+       "id": "slider-contrast",
+       "props": {
+        "disabled": true,
+        "label": "Contrast",
+        "value": 60
+       }
+      },
+      {
+       "kind": "field",
+       "id": "field-columns",
+       "props": {
+        "label": "Columns",
+        "type": "number",
+        "value": "2"
+       }
+      },
+      {
+       "kind": "field",
+       "id": "field-zoom",
+       "props": {
+        "label": "Zoom",
+        "type": "number",
+        "value": "1.5"
+       }
+      },
+      {
+       "kind": "field",
+       "id": "field-accent-colour",
+       "props": {
+        "disabled": true,
+        "label": "Accent colour",
+        "value": "#d946ef"
+       }
+      },
+      {
+       "kind": "field",
+       "id": "field-member-since",
+       "props": {
+        "disabled": true,
+        "label": "Member since",
+        "value": "2024-05-17"
+       }
+      },
+      {
+       "kind": "select",
+       "id": "select-font",
+       "props": {
+        "disabled": true,
+        "label": "Font"
+       },
+       "children": [
+        {
+         "kind": "x-aria-paragraph",
+         "id": "paragraph-inter",
+         "props": {
+          "label": "Inter",
+          "role": "paragraph"
+         },
+         "children": [
+          "Inter"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "values",
+     "path": "/screen#screen-appearance/radio-group#radio-group-theme/radio#radio-light",
+     "note": "required value is not in the input; \"light\" stands in"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-appearance/radio-group#radio-group-theme/radio#radio-dark",
+     "note": "required value is not in the input; \"dark\" stands in"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-appearance/radio-group#radio-group-theme/radio#radio-automatic",
+     "note": "required value is not in the input; \"automatic\" stands in"
+    },
+    {
+     "kind": "kinds",
+     "path": "/screen#screen-appearance/select#select-font/x-aria-paragraph#paragraph-inter",
+     "note": "<select> does not hold <text>"
+    }
+   ],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-appearance"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
+    "name": "Book a trip",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "heading",
+      "name": "Book a trip",
+      "states": {
+       "level": 1
+      },
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "form",
+      "name": "Trip",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "combobox",
+        "name": "Destination",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "Lisbon",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "textbox",
+        "name": "Departure",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "2026-06-14",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "textbox",
+        "name": "Check-in time",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "15:30",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "textbox",
+        "name": "Reminder",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "2026-06-12T09:00",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "spinbutton",
+        "name": "Guests",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "2",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "slider",
+        "name": "Budget per night",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "180",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "radiogroup",
+        "name": "Cabin",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "radio",
+          "name": "Economy",
+          "states": {},
+          "props": {},
+          "children": []
+         },
+         {
+          "role": "radio",
+          "name": "Business",
+          "states": {
+           "checked": true
+          },
+          "props": {},
+          "children": []
+         },
+         {
+          "role": "radio",
+          "name": "First",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "textbox",
+        "name": "Trip colour",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "#3b82f6",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       },
+       {
+        "role": "button",
+        "name": "Book",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-book-a-trip",
+     "props": {
+      "label": "Book a trip"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "heading-book-a-trip",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Book a trip"
+       ]
+      },
+      {
+       "kind": "form",
+       "id": "form-trip",
+       "props": {
+        "label": "Trip"
+       },
+       "children": [
+        {
+         "kind": "select",
+         "id": "select-destination",
+         "props": {
+          "label": "Destination"
+         },
+         "children": [
+          {
+           "kind": "x-aria-paragraph",
+           "id": "paragraph-lisbon",
+           "props": {
+            "label": "Lisbon",
+            "role": "paragraph"
+           },
+           "children": [
+            "Lisbon"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "field",
+         "id": "field-departure",
+         "props": {
+          "label": "Departure",
+          "value": "2026-06-14"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "field-check-in-time",
+         "props": {
+          "label": "Check-in time",
+          "value": "15:30"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "field-reminder",
+         "props": {
+          "label": "Reminder",
+          "value": "2026-06-12T09:00"
+         }
+        },
+        {
+         "kind": "field",
+         "id": "field-guests",
+         "props": {
+          "label": "Guests",
+          "type": "number",
+          "value": "2"
+         }
+        },
+        {
+         "kind": "slider",
+         "id": "slider-budget-per-night",
+         "props": {
+          "label": "Budget per night",
+          "value": 180
+         }
+        },
+        {
+         "kind": "radio-group",
+         "id": "radio-group-cabin",
+         "props": {
+          "label": "Cabin",
+          "value": "business"
+         },
+         "children": [
+          {
+           "kind": "radio",
+           "id": "radio-economy",
+           "props": {
+            "value": "economy"
+           },
+           "children": [
+            "Economy"
+           ]
+          },
+          {
+           "kind": "radio",
+           "id": "radio-business",
+           "props": {
+            "value": "business"
+           },
+           "children": [
+            "Business"
+           ]
+          },
+          {
+           "kind": "radio",
+           "id": "radio-first",
+           "props": {
+            "value": "first"
+           },
+           "children": [
+            "First"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "field",
+         "id": "field-trip-colour",
+         "props": {
+          "label": "Trip colour",
+          "value": "#3b82f6"
+         }
+        },
+        {
+         "kind": "button",
+         "id": "button-book",
+         "children": [
+          "Book"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "kinds",
+     "path": "/screen#screen-book-a-trip/form#form-trip/select#select-destination/x-aria-paragraph#paragraph-lisbon",
+     "note": "<select> does not hold <text>"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-book-a-trip/form#form-trip/radio-group#radio-group-cabin/radio#radio-economy",
+     "note": "required value is not in the input; \"economy\" stands in"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-book-a-trip/form#form-trip/radio-group#radio-group-cabin/radio#radio-business",
+     "note": "required value is not in the input; \"business\" stands in"
+    },
+    {
+     "kind": "values",
+     "path": "/screen#screen-book-a-trip/form#form-trip/radio-group#radio-group-cabin/radio#radio-first",
+     "note": "required value is not in the input; \"first\" stands in"
+    }
+   ],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-book-a-trip"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
     "name": "File",
     "states": {},
     "props": {},

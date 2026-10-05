@@ -242,6 +242,430 @@
   }
  },
  {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"appearance\" aria-label=\"Appearance\"><h1 data-weft-id=\"title\">Appearance</h1><div data-weft-id=\"options\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:column;align-items:stretch\"><div data-weft-id=\"theme\" aria-label=\"Theme\" role=\"radiogroup\" data-weft-segmented=\"\"><span aria-hidden=\"true\">Theme</span><label><input data-weft-id=\"theme-light\" type=\"radio\" aria-label=\"Light\" name=\"weft-theme\" value=\"light\"/><span aria-hidden=\"true\">Light</span></label><label><input data-weft-id=\"theme-dark\" type=\"radio\" aria-label=\"Dark\" disabled=\"\" name=\"weft-theme\" value=\"dark\"/><span aria-hidden=\"true\">Dark</span></label><label><input data-weft-id=\"theme-auto\" type=\"radio\" aria-label=\"Automatic\" name=\"weft-theme\" checked=\"\" value=\"auto\"/><span aria-hidden=\"true\">Automatic</span></label></div><label><span aria-hidden=\"true\">Text size</span><input data-weft-id=\"size\" type=\"range\" aria-label=\"Text size\" min=\"12\" max=\"24\" step=\"1\" value=\"16\"/></label><label><span aria-hidden=\"true\">Contrast</span><input data-weft-id=\"contrast\" type=\"range\" aria-label=\"Contrast\" min=\"0\" max=\"100\" step=\"1\" disabled=\"\" value=\"60\"/></label><label><span aria-hidden=\"true\">Columns</span><span data-weft-stepper=\"\"><button type=\"button\" tabindex=\"-1\" aria-hidden=\"true\" data-weft-step=\"down\">−</button><input data-weft-id=\"columns\" type=\"number\" aria-label=\"Columns\" step=\"1\" value=\"2\"/><button type=\"button\" tabindex=\"-1\" aria-hidden=\"true\" data-weft-step=\"up\">+</button></span></label><label><span aria-hidden=\"true\">Zoom</span><span data-weft-stepper=\"\"><button type=\"button\" tabindex=\"-1\" aria-hidden=\"true\" data-weft-step=\"down\">−</button><input data-weft-id=\"zoom\" type=\"number\" aria-label=\"Zoom\" max=\"3\" step=\"0.5\" value=\"1.5\"/><button type=\"button\" tabindex=\"-1\" aria-hidden=\"true\" data-weft-step=\"up\">+</button></span></label><label><span aria-hidden=\"true\">Accent colour</span><input data-weft-id=\"accent\" type=\"color\" aria-label=\"Accent colour\" disabled=\"\" value=\"#d946ef\"/></label><label><span aria-hidden=\"true\">Member since</span><input data-weft-id=\"since\" type=\"date\" aria-label=\"Member since\" disabled=\"\" value=\"2024-05-17\"/></label><label><span aria-hidden=\"true\">Font</span><input data-weft-id=\"font\" aria-label=\"Font\" list=\"weft-font-options\" disabled=\"\" value=\"Inter\"/><datalist id=\"weft-font-options\"><option data-weft-id=\"font-inter\" value=\"Inter\">Inter</option><option data-weft-id=\"font-mono\" value=\"Menlo\">Menlo</option></datalist></label></div></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "appearance",
+     "props": {
+      "label": "Appearance"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "title",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Appearance"
+       ]
+      },
+      {
+       "kind": "stack",
+       "id": "options",
+       "props": {
+        "align": "stretch"
+       },
+       "children": [
+        {
+         "kind": "segmented-control",
+         "id": "theme",
+         "props": {
+          "label": "Theme",
+          "value": "auto"
+         },
+         "children": [
+          {
+           "kind": "segment",
+           "id": "theme-light",
+           "props": {
+            "value": "light"
+           },
+           "children": [
+            "Light"
+           ]
+          },
+          {
+           "kind": "segment",
+           "id": "theme-dark",
+           "props": {
+            "disabled": true,
+            "value": "dark"
+           },
+           "children": [
+            "Dark"
+           ]
+          },
+          {
+           "kind": "segment",
+           "id": "theme-auto",
+           "props": {
+            "value": "auto"
+           },
+           "children": [
+            "Automatic"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "slider",
+         "id": "size",
+         "props": {
+          "label": "Text size",
+          "max": 24,
+          "min": 12,
+          "value": 16
+         }
+        },
+        {
+         "kind": "slider",
+         "id": "contrast",
+         "props": {
+          "disabled": true,
+          "label": "Contrast",
+          "value": 60
+         }
+        },
+        {
+         "kind": "stepper",
+         "id": "columns",
+         "props": {
+          "label": "Columns",
+          "value": 2
+         }
+        },
+        {
+         "kind": "stepper",
+         "id": "zoom",
+         "props": {
+          "label": "Zoom",
+          "max": 3,
+          "step": 0.5,
+          "value": 1.5
+         }
+        },
+        {
+         "kind": "color-picker",
+         "id": "accent",
+         "props": {
+          "disabled": true,
+          "label": "Accent colour",
+          "value": "#d946ef"
+         }
+        },
+        {
+         "kind": "date-picker",
+         "id": "since",
+         "props": {
+          "disabled": true,
+          "label": "Member since",
+          "value": "2024-05-17"
+         }
+        },
+        {
+         "kind": "combobox",
+         "id": "font",
+         "props": {
+          "disabled": true,
+          "label": "Font",
+          "value": "Inter"
+         },
+         "children": [
+          {
+           "kind": "option",
+           "id": "font-inter",
+           "props": {
+            "value": "Inter"
+           },
+           "children": [
+            "Inter"
+           ]
+          },
+          {
+           "kind": "option",
+           "id": "font-mono",
+           "props": {
+            "value": "Menlo"
+           },
+           "children": [
+            "Menlo"
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#appearance",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#appearance",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#appearance",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#appearance",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#appearance",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#appearance/stack#options",
+     "note": "gap var(--weft-space-md) cannot be mapped back to a design token"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"booking\" aria-label=\"Book a trip\"><h1 data-weft-id=\"title\">Book a trip</h1><form data-weft-id=\"trip\" aria-label=\"Trip\"><label><span aria-hidden=\"true\">Destination</span><input data-weft-id=\"city\" aria-label=\"Destination\" list=\"weft-city-options\" placeholder=\"Search a city\" value=\"Lisbon\"/><datalist id=\"weft-city-options\"><option data-weft-id=\"city-option[0]\" value=\"Lisbon\">Lisbon</option><option data-weft-id=\"city-option[1]\" value=\"Porto\">Porto</option><option data-weft-id=\"city-option[2]\" value=\"Faro\">Faro</option></datalist></label><label><span aria-hidden=\"true\">Departure</span><input data-weft-id=\"depart\" type=\"date\" aria-label=\"Departure\" min=\"2026-01-01\" max=\"2026-12-31\" value=\"2026-06-14\"/></label><label><span aria-hidden=\"true\">Check-in time</span><input data-weft-id=\"checkin\" type=\"time\" aria-label=\"Check-in time\" value=\"15:30\"/></label><label><span aria-hidden=\"true\">Reminder</span><input data-weft-id=\"reminder\" type=\"datetime-local\" aria-label=\"Reminder\" value=\"2026-06-12T09:00\"/></label><label><span aria-hidden=\"true\">Guests</span><span data-weft-stepper=\"\"><button type=\"button\" tabindex=\"-1\" aria-hidden=\"true\" data-weft-step=\"down\">−</button><input data-weft-id=\"guests\" type=\"number\" aria-label=\"Guests\" min=\"1\" max=\"8\" step=\"1\" value=\"2\"/><button type=\"button\" tabindex=\"-1\" aria-hidden=\"true\" data-weft-step=\"up\">+</button></span></label><label><span aria-hidden=\"true\">Budget per night</span><input data-weft-id=\"budget\" type=\"range\" aria-label=\"Budget per night\" min=\"50\" max=\"500\" step=\"10\" value=\"180\"/></label><div data-weft-id=\"cabin\" aria-label=\"Cabin\" role=\"radiogroup\" data-weft-segmented=\"\"><span aria-hidden=\"true\">Cabin</span><label><input data-weft-id=\"cabin-economy\" type=\"radio\" aria-label=\"Economy\" name=\"weft-cabin\" value=\"economy\"/><span aria-hidden=\"true\">Economy</span></label><label><input data-weft-id=\"cabin-business\" type=\"radio\" aria-label=\"Business\" name=\"weft-cabin\" checked=\"\" value=\"business\"/><span aria-hidden=\"true\">Business</span></label><label><input data-weft-id=\"cabin-first\" type=\"radio\" aria-label=\"First\" name=\"weft-cabin\" value=\"first\"/><span aria-hidden=\"true\">First</span></label></div><label><span aria-hidden=\"true\">Trip colour</span><input data-weft-id=\"tag\" type=\"color\" aria-label=\"Trip colour\" value=\"#3b82f6\"/></label><div data-weft-slot=\"footer\"><button data-weft-id=\"book\" type=\"submit\" data-variant=\"primary\">Book</button></div></form></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "booking",
+     "props": {
+      "label": "Book a trip"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "title",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Book a trip"
+       ]
+      },
+      {
+       "kind": "form",
+       "id": "trip",
+       "props": {
+        "label": "Trip"
+       },
+       "children": [
+        {
+         "kind": "combobox",
+         "id": "city",
+         "props": {
+          "label": "Destination",
+          "placeholder": "Search a city",
+          "value": "Lisbon"
+         },
+         "children": [
+          {
+           "kind": "option",
+           "id": "city-option-0",
+           "props": {
+            "value": "Lisbon"
+           },
+           "children": [
+            "Lisbon"
+           ]
+          },
+          {
+           "kind": "option",
+           "id": "city-option-1",
+           "props": {
+            "value": "Porto"
+           },
+           "children": [
+            "Porto"
+           ]
+          },
+          {
+           "kind": "option",
+           "id": "city-option-2",
+           "props": {
+            "value": "Faro"
+           },
+           "children": [
+            "Faro"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "date-picker",
+         "id": "depart",
+         "props": {
+          "label": "Departure",
+          "max": "2026-12-31",
+          "min": "2026-01-01",
+          "value": "2026-06-14"
+         }
+        },
+        {
+         "kind": "date-picker",
+         "id": "checkin",
+         "props": {
+          "label": "Check-in time",
+          "type": "time",
+          "value": "15:30"
+         }
+        },
+        {
+         "kind": "date-picker",
+         "id": "reminder",
+         "props": {
+          "label": "Reminder",
+          "type": "datetime",
+          "value": "2026-06-12T09:00"
+         }
+        },
+        {
+         "kind": "stepper",
+         "id": "guests",
+         "props": {
+          "label": "Guests",
+          "max": 8,
+          "min": 1,
+          "value": 2
+         }
+        },
+        {
+         "kind": "slider",
+         "id": "budget",
+         "props": {
+          "label": "Budget per night",
+          "max": 500,
+          "min": 50,
+          "step": 10,
+          "value": 180
+         }
+        },
+        {
+         "kind": "segmented-control",
+         "id": "cabin",
+         "props": {
+          "label": "Cabin",
+          "value": "business"
+         },
+         "children": [
+          {
+           "kind": "segment",
+           "id": "cabin-economy",
+           "props": {
+            "value": "economy"
+           },
+           "children": [
+            "Economy"
+           ]
+          },
+          {
+           "kind": "segment",
+           "id": "cabin-business",
+           "props": {
+            "value": "business"
+           },
+           "children": [
+            "Business"
+           ]
+          },
+          {
+           "kind": "segment",
+           "id": "cabin-first",
+           "props": {
+            "value": "first"
+           },
+           "children": [
+            "First"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "color-picker",
+         "id": "tag",
+         "props": {
+          "label": "Trip colour",
+          "value": "#3b82f6"
+         }
+        },
+        {
+         "kind": "button",
+         "id": "book",
+         "props": {
+          "submit": true,
+          "variant": "primary"
+         },
+         "children": [
+          "Book"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#booking",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#booking",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#booking",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#booking",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#booking",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#booking/form#trip/combobox#city/option#city-option-0",
+     "note": "instance city-option[0] of a repeated element is imported as the static element city-option-0"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#booking/form#trip/combobox#city/option#city-option-1",
+     "note": "instance city-option[1] of a repeated element is imported as the static element city-option-1"
+    },
+    {
+     "kind": "repetition",
+     "path": "/screen#booking/form#trip/combobox#city/option#city-option-2",
+     "note": "instance city-option[2] of a repeated element is imported as the static element city-option-2"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
   "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"files\" aria-label=\"File\"><h1 data-weft-id=\"title\">Quarterly report</h1><button data-weft-id=\"delete-file\" type=\"button\" data-variant=\"danger\">Delete file</button></main></body></html>\n",
   "result": {
    "document": {

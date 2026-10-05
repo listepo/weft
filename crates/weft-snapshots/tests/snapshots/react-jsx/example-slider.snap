@@ -1,0 +1,64 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-slider as react-jsx
+---
+function _num(v, integer, min, max) {
+  if (typeof v !== "number") return v;
+  if (!Number.isFinite(v)) return undefined;
+  if (integer) v = Math.round(v);
+  if (min !== undefined) v = Math.max(v, min);
+  if (max !== undefined) v = Math.min(v, max);
+  return v;
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _numeric(v) {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(v.trim())) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+function _tidy(x, ...inputs) {
+  const d = (y) => {
+    const [m = "", e] = String(y).split("e");
+    return Math.max(0, (m.split(".")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));
+  };
+  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));
+}
+
+function _span(min, max, step) {
+  const lo = _numeric(min) ?? 0;
+  const st = _numeric(step);
+  return { min: lo, max: Math.max(_numeric(max) ?? 100, lo), step: st !== undefined && st > 0 ? st : 1 };
+}
+
+function _slide(value, s) {
+  const v = Math.min(Math.max(_numeric(value) ?? s.min, s.min), s.max);
+  let on = s.min + Math.floor((v - s.min) / s.step + 0.5) * s.step;
+  if (on > s.max) on -= s.step;
+  return String(_tidy(Math.max(on, s.min), s.min, s.step));
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Sound">
+      <label>
+        <span aria-hidden="true">Volume</span>
+        {(() => {
+          const _s = _span(0, 100, 5);
+          return (
+            <input data-weft-id="volume" type="range" aria-label="Volume" min={_s.min} max={_s.max} step={_s.step} value={_slide(_num(data?.volume, false, undefined, undefined), _s)} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.("$.volume", _v); _act(actions, { id: "volume", action: "sound.update" }); }} />
+          );
+        })()}
+      </label>
+    </main>
+  );
+}

@@ -96,6 +96,10 @@ const HTML_CONVENTION_GAPS: &[(&str, &str)] = &[
         "account",
         "explicit type=\"text\" is dropped; a radio's bound text also comes back as a bound label",
     ),
+    (
+        "appearance",
+        "explicit type=\"date\" is dropped; a segment's bound text also comes back as a bound label",
+    ),
     ("dashboard", "an explicit direction=\"column\" is dropped"),
     (
         "inbox",

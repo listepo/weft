@@ -1,0 +1,115 @@
+board "screen#booking" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#booking>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#booking)
+  | weft/weft.source = {"kind":"screen","id":"booking","props":{"label":"Book a trip"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "heading#title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#title>","dir":"column"}
+    | weft/weft.kind = heading
+    | weft/weft.origin = shape(heading#title)
+    | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Book a trip"],"shown":{"text":"Book a trip"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Book a trip"
+  board "form#trip" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<form#trip>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(form#trip)
+    | weft/weft.source = {"kind":"form","id":"trip","props":{"label":"Trip"},"on":{"submit":"trip.book"}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],8]
+    board "combobox#city" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<combobox#city>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(combobox#city)
+      | weft/weft.source = {"kind":"combobox","id":"city","props":{"label":"Destination","placeholder":"Search a city","value":{"bind":"$.trip.city"}},"on":{"change":"trip.edit"},"shown":{"label":"Destination"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]
+      text "label" fontWeight="700" growType="auto-width" text="Destination"
+        | weft/weft.label = 1
+      board "each#city-each" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<each#city-each>","dir":"column","wrap":"nowrap"}
+        | weft/weft.origin = shape(each#city-each)
+        | weft/weft.source = {"kind":"each","id":"city-each","props":{"as":"city","in":{"bind":"$.cities"}}}
+        | weft/weft.style = [[],[],0,[0,0,0,0],0]
+        board "option#city-option" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<option>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<option#city-option>","dir":"column"}
+          | weft/weft.kind = option
+          | weft/weft.origin = shape(option#city-option)
+          | weft/weft.source = {"kind":"option","id":"city-option","props":{"text":{"bind":"$city.name"},"value":{"bind":"$city.name"}},"shown":{"text":"{$city.name}"}}
+          text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$city.name}"
+    board "date-picker#depart" inCopy=true head=true componentOf="<type=date>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<date-picker#depart>","dir":"column"}
+      | weft/weft.kind = date-picker
+      | weft/weft.origin = shape(date-picker#depart)
+      | weft/weft.source = {"kind":"date-picker","id":"depart","props":{"label":"Departure","max":"2026-12-31","min":"2026-01-01","value":{"bind":"$.trip.depart"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Departure"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Departure"
+      board "picker" width=240 height=36 inCopy=true flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<picker>","dir":"row"}
+        board "date" width=200 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<date>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="yyyy-mm-dd"
+        board "calendar" width=40 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<calendar>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="31"
+    board "date-picker#checkin" inCopy=true head=true componentOf="<type=time>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<date-picker#checkin>","dir":"column"}
+      | weft/weft.kind = date-picker
+      | weft/weft.origin = shape(date-picker#checkin)
+      | weft/weft.source = {"kind":"date-picker","id":"checkin","props":{"label":"Check-in time","type":"time","value":{"bind":"$.trip.checkin"}},"shown":{"text":"","label":"Check-in time"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Check-in time"
+      board "picker" width=240 height=36 inCopy=true flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<picker>","dir":"row"}
+        board "date" width=200 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<date>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="yyyy-mm-dd"
+        board "calendar" width=40 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<calendar>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="31"
+    board "date-picker#reminder" inCopy=true head=true componentOf="<type=datetime>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<date-picker#reminder>","dir":"column"}
+      | weft/weft.kind = date-picker
+      | weft/weft.origin = shape(date-picker#reminder)
+      | weft/weft.source = {"kind":"date-picker","id":"reminder","props":{"label":"Reminder","type":"datetime","value":{"bind":"$.trip.reminder"}},"shown":{"text":"","label":"Reminder"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Reminder"
+      board "picker" width=240 height=36 inCopy=true flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<picker>","dir":"row"}
+        board "date" width=200 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<date>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="yyyy-mm-dd"
+        board "calendar" width=40 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<calendar>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="31"
+    board "stepper#guests" inCopy=true head=true componentOf="<stepper>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stepper#guests>","dir":"column"}
+      | weft/weft.kind = stepper
+      | weft/weft.origin = shape(stepper#guests)
+      | weft/weft.source = {"kind":"stepper","id":"guests","props":{"label":"Guests","max":8,"min":1,"step":1,"value":{"bind":"$.trip.guests"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Guests"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Guests"
+      board "stepper" width=160 height=36 inCopy=true flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stepper>","dir":"row"}
+        board "down" width=40 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<down>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="-"
+        board "value" width=80 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<value>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="1"
+        board "up" width=40 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<up>","dir":"row"}
+          text "symbol" inCopy=true growType="auto-width" text="+"
+    board "slider#budget" inCopy=true head=true componentOf="<slider>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slider#budget>","dir":"column"}
+      | weft/weft.kind = slider
+      | weft/weft.origin = shape(slider#budget)
+      | weft/weft.source = {"kind":"slider","id":"budget","props":{"label":"Budget per night","max":500,"min":50,"step":10,"value":{"bind":"$.trip.budget"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Budget per night"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Budget per night"
+      board "slider" width=240 height=16 inCopy=true flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slider>","dir":"row"}
+        rectangle "filled" width=104 height=16 borderRadius=8 tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}]
+        rectangle "thumb" width=16 height=16 borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
+        rectangle "rest" width=120 height=16 borderRadius=8 inCopy=true fillList=[{"fillColor":"#e6e8eb","fillOpacity":1}]
+    board "segmented-control#cabin" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<segmented-control#cabin>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(segmented-control#cabin)
+      | weft/weft.source = {"kind":"segmented-control","id":"cabin","props":{"label":"Cabin","value":{"bind":"$.trip.cabin"}},"on":{"change":"trip.edit"},"shown":{"label":"Cabin"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]
+      text "label" fontWeight="700" growType="auto-width" text="Cabin"
+        | weft/weft.label = 1
+      board "segment#cabin-economy" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<segment>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<segment#cabin-economy>","dir":"column"}
+        | weft/weft.kind = segment
+        | weft/weft.origin = shape(segment#cabin-economy)
+        | weft/weft.source = {"kind":"segment","id":"cabin-economy","props":{"value":"economy"},"children":["Economy"],"shown":{"text":"Economy"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Economy"
+      board "segment#cabin-business" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<segment>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<segment#cabin-business>","dir":"column"}
+        | weft/weft.kind = segment
+        | weft/weft.origin = shape(segment#cabin-business)
+        | weft/weft.source = {"kind":"segment","id":"cabin-business","props":{"value":"business"},"children":["Business"],"shown":{"text":"Business"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Business"
+      board "segment#cabin-first" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<segment>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<segment#cabin-first>","dir":"column"}
+        | weft/weft.kind = segment
+        | weft/weft.origin = shape(segment#cabin-first)
+        | weft/weft.source = {"kind":"segment","id":"cabin-first","props":{"value":"first"},"children":["First"],"shown":{"text":"First"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="First"
+    board "color-picker#tag" inCopy=true head=true componentOf="<color-picker>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<color-picker#tag>","dir":"column"}
+      | weft/weft.kind = color-picker
+      | weft/weft.origin = shape(color-picker#tag)
+      | weft/weft.source = {"kind":"color-picker","id":"tag","props":{"label":"Trip colour","value":{"bind":"$.trip.colour"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Trip colour"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Trip colour"
+      board "swatch" width=36 height=36 inCopy=true flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<swatch>","dir":"row"}
+        rectangle "color" width=36 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#3b82f5","fillOpacity":1}]
+    board "slot:footer" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:footer>","dir":"column","wrap":"nowrap"}
+      | weft/weft.slot = footer
+      board "button#book" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.primary"} inCopy=true head=true componentOf="<variant=primary, state=(unset)>" fillList=[{"fillColor":"#2663eb","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#book>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#book)
+        | weft/weft.source = {"kind":"button","id":"book","props":{"submit":true,"variant":"primary"},"children":["Book"],"shown":{"text":"Book"}}
+        text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Book"

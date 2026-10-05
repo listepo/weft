@@ -1,0 +1,33 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-date-picker as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Delivery"
+    },
+    "children": [
+      {
+        "kind": "date-picker",
+        "id": "day",
+        "props": {
+          "disabled": false,
+          "label": "Delivery date",
+          "max": "2026-12-31",
+          "min": "2026-01-01",
+          "type": "date",
+          "value": {
+            "bind": "$.day"
+          }
+        },
+        "on": {
+          "change": "delivery.update"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-segment as react-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Sort">
+      <div data-weft-id="order" aria-label="Order" role="radiogroup" data-weft-segmented="">
+        <span aria-hidden="true">Order</span>
+        <label>
+          <input data-weft-id="order-new" type="radio" name={"weft-order"} value="new" aria-label="Newest" checked={_text(data?.order) !== "" && "new" === _text(data?.order)} onChange={() => onChange?.("$.order", "new")} />
+          <span aria-hidden="true">Newest</span>
+        </label>
+        <label>
+          <input data-weft-id="order-top" type="radio" name={"weft-order"} value="top" aria-label="Top" checked={_text(data?.order) !== "" && "top" === _text(data?.order)} onChange={() => onChange?.("$.order", "top")} />
+          <span aria-hidden="true">Top</span>
+        </label>
+      </div>
+    </main>
+  );
+}

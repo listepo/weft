@@ -297,6 +297,402 @@
    "weft": "0.1",
    "root": {
     "kind": "screen",
+    "id": "appearance",
+    "props": {
+     "label": "Appearance"
+    },
+    "children": [
+     {
+      "kind": "heading",
+      "id": "title",
+      "props": {
+       "level": 1
+      },
+      "children": [
+       "Appearance"
+      ]
+     },
+     {
+      "kind": "stack",
+      "id": "options",
+      "props": {
+       "align": "stretch",
+       "gap": {
+        "token": "space.md"
+       }
+      },
+      "children": [
+       {
+        "kind": "segmented-control",
+        "id": "theme",
+        "props": {
+         "label": "Theme",
+         "value": {
+          "bind": "$.theme"
+         }
+        },
+        "children": [
+         {
+          "kind": "segment",
+          "id": "theme-light",
+          "props": {
+           "value": "light"
+          },
+          "children": [
+           "Light"
+          ]
+         },
+         {
+          "kind": "segment",
+          "id": "theme-dark",
+          "props": {
+           "disabled": true,
+           "value": "dark"
+          },
+          "children": [
+           "Dark"
+          ]
+         },
+         {
+          "kind": "segment",
+          "id": "theme-auto",
+          "props": {
+           "text": {
+            "bind": "$.automatic"
+           },
+           "value": "auto"
+          }
+         }
+        ]
+       },
+       {
+        "kind": "slider",
+        "id": "size",
+        "props": {
+         "label": "Text size",
+         "max": 24,
+         "min": 12,
+         "value": {
+          "bind": "$.size"
+         }
+        }
+       },
+       {
+        "kind": "slider",
+        "id": "contrast",
+        "props": {
+         "disabled": true,
+         "label": "Contrast",
+         "value": {
+          "bind": "$.contrast"
+         }
+        }
+       },
+       {
+        "kind": "stepper",
+        "id": "columns",
+        "props": {
+         "label": "Columns",
+         "value": {
+          "bind": "$.columns"
+         }
+        }
+       },
+       {
+        "kind": "stepper",
+        "id": "zoom",
+        "props": {
+         "disabled": {
+          "bind": "$.locked"
+         },
+         "label": "Zoom",
+         "max": 3,
+         "step": 0.5,
+         "value": {
+          "bind": "$.zoom"
+         }
+        }
+       },
+       {
+        "kind": "color-picker",
+        "id": "accent",
+        "props": {
+         "disabled": true,
+         "label": "Accent colour",
+         "value": "#d946ef"
+        }
+       },
+       {
+        "kind": "date-picker",
+        "id": "since",
+        "props": {
+         "disabled": true,
+         "label": "Member since",
+         "type": "date",
+         "value": "2024-05-17"
+        }
+       },
+       {
+        "kind": "combobox",
+        "id": "font",
+        "props": {
+         "disabled": true,
+         "label": "Font",
+         "value": "Inter"
+        },
+        "children": [
+         {
+          "kind": "option",
+          "id": "font-inter",
+          "props": {
+           "value": "Inter"
+          },
+          "children": [
+           "Inter"
+          ]
+         },
+         {
+          "kind": "option",
+          "id": "font-mono",
+          "props": {
+           "value": "Menlo"
+          },
+          "children": [
+           "Menlo"
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _on(v) {\n  return v === \"false\" ? false : Boolean(v);\n}\n\nfunction _num(v, integer, min, max) {\n  if (typeof v !== \"number\") return v;\n  if (!Number.isFinite(v)) return undefined;\n  if (integer) v = Math.round(v);\n  if (min !== undefined) v = Math.max(v, min);\n  if (max !== undefined) v = Math.min(v, max);\n  return v;\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nfunction _numeric(v) {\n  if (typeof v === \"number\") return Number.isFinite(v) ? v : undefined;\n  if (typeof v === \"string\" && /^-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[eE][-+]?\\d+)?$/.test(v.trim())) {\n    const n = Number(v);\n    return Number.isFinite(n) ? n : undefined;\n  }\n  return undefined;\n}\n\nfunction _tidy(x, ...inputs) {\n  const d = (y) => {\n    const [m = \"\", e] = String(y).split(\"e\");\n    return Math.max(0, (m.split(\".\")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));\n  };\n  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));\n}\n\nfunction _span(min, max, step) {\n  const lo = _numeric(min) ?? 0;\n  const st = _numeric(step);\n  return { min: lo, max: Math.max(_numeric(max) ?? 100, lo), step: st !== undefined && st > 0 ? st : 1 };\n}\n\nfunction _slide(value, s) {\n  const v = Math.min(Math.max(_numeric(value) ?? s.min, s.min), s.max);\n  let on = s.min + Math.floor((v - s.min) / s.step + 0.5) * s.step;\n  if (on > s.max) on -= s.step;\n  return String(_tidy(Math.max(on, s.min), s.min, s.step));\n}\n\nfunction _bounds(min, max, step) {\n  const lo = _numeric(min);\n  const hi = _numeric(max);\n  const st = _numeric(step);\n  const b = { step: st !== undefined && st > 0 ? st : 1 };\n  if (lo !== undefined) b.min = lo;\n  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);\n  return b;\n}\n\nfunction _clamp(v, b) {\n  if (b.min !== undefined) v = Math.max(v, b.min);\n  if (b.max !== undefined) v = Math.min(v, b.max);\n  return v;\n}\n\nfunction _count(value, b) {\n  return _clamp(_numeric(value) ?? 0, b);\n}\n\nfunction _step(current, direction, b) {\n  return _tidy(_clamp(current + direction * b.step, b), current, b.step);\n}\n\nfunction _dateType(v) {\n  return v === \"time\" || v === \"datetime\" ? v : \"date\";\n}\n\nfunction _dateText(type, value) {\n  const day = (s) => {\n    const m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(s);\n    if (!m) return false;\n    const [year, month, d] = [Number(m[1]), Number(m[2]), Number(m[3])];\n    if (year < 1 || month < 1 || month > 12 || d < 1) return false;\n    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;\n    return d <= [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];\n  };\n  const time = (s) => /^([01]\\d|2[0-3]):[0-5]\\d$/.test(s);\n  if (type === \"date\") return day(value) ? value : \"\";\n  if (type === \"time\") return time(value) ? value : \"\";\n  const [d = \"\", t = \"\", ...rest] = value.split(\"T\");\n  return rest.length === 0 && day(d) && time(t) ? value : \"\";\n}\n\nfunction _color(v) {\n  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : \"#000000\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"appearance\" aria-label=\"Appearance\">\n      <h1 data-weft-id=\"title\">Appearance</h1>\n      <div data-weft-id=\"options\" style={{ gap: \"var(--weft-space-md)\", display: \"flex\", flexDirection: \"column\", alignItems: \"stretch\" }}>\n        <div data-weft-id=\"theme\" aria-label=\"Theme\" role=\"radiogroup\" data-weft-segmented=\"\">\n          <span aria-hidden=\"true\">Theme</span>\n          <label>\n            <input data-weft-id=\"theme-light\" type=\"radio\" name={\"weft-theme\"} value=\"light\" aria-label=\"Light\" checked={_text(data?.theme) !== \"\" && \"light\" === _text(data?.theme)} onChange={() => onChange?.(\"$.theme\", \"light\")} />\n            <span aria-hidden=\"true\">Light</span>\n          </label>\n          <label>\n            <input data-weft-id=\"theme-dark\" type=\"radio\" name={\"weft-theme\"} value=\"dark\" aria-label=\"Dark\" disabled checked={_text(data?.theme) !== \"\" && \"dark\" === _text(data?.theme)} onChange={() => onChange?.(\"$.theme\", \"dark\")} />\n            <span aria-hidden=\"true\">Dark</span>\n          </label>\n          <label>\n            <input data-weft-id=\"theme-auto\" type=\"radio\" name={\"weft-theme\"} value=\"auto\" aria-label={\"\" || !(_text(data?.automatic).trim() === \"\") ? _squash(_text(data?.automatic)) : \"\"} checked={_text(data?.theme) !== \"\" && \"auto\" === _text(data?.theme)} onChange={() => onChange?.(\"$.theme\", \"auto\")} />\n            <span aria-hidden=\"true\">\n              {!(_text(data?.automatic).trim() === \"\") ? _squash(_text(data?.automatic)) : \"\" || \"\"}\n            </span>\n          </label>\n        </div>\n        <label>\n          <span aria-hidden=\"true\">Text size</span>\n          {(() => {\n            const _s = _span(12, 24, undefined);\n            return (\n              <input data-weft-id=\"size\" type=\"range\" aria-label=\"Text size\" min={_s.min} max={_s.max} step={_s.step} value={_slide(_num(data?.size, false, undefined, undefined), _s)} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.size\", _v); }} />\n            );\n          })()}\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Contrast</span>\n          {(() => {\n            const _s = _span(undefined, undefined, undefined);\n            return (\n              <input data-weft-id=\"contrast\" type=\"range\" aria-label=\"Contrast\" min={_s.min} max={_s.max} step={_s.step} disabled value={_slide(_num(data?.contrast, false, undefined, undefined), _s)} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.contrast\", _v); }} />\n            );\n          })()}\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Columns</span>\n          {(() => {\n            const _b = _bounds(undefined, undefined, undefined);\n            return (\n              <span data-weft-stepper=\"\">\n                <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"down\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.columns, false, undefined, undefined), _b), -1, _b); onChange?.(\"$.columns\", _n); }}>{\"−\"}</button>\n                <input data-weft-id=\"columns\" type=\"number\" aria-label=\"Columns\" min={_b.min} max={_b.max} step={_b.step} value={String(_count(_num(data?.columns, false, undefined, undefined), _b))} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.columns\", _v); }} />\n                <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"up\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.columns, false, undefined, undefined), _b), 1, _b); onChange?.(\"$.columns\", _n); }}>+</button>\n              </span>\n            );\n          })()}\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Zoom</span>\n          {(() => {\n            const _b = _bounds(undefined, 3, 0.5);\n            return (\n              <span data-weft-stepper=\"\">\n                <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"down\" disabled={_on(data?.locked)} onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.zoom, false, undefined, undefined), _b), -1, _b); onChange?.(\"$.zoom\", _n); }}>{\"−\"}</button>\n                <input data-weft-id=\"zoom\" type=\"number\" aria-label=\"Zoom\" min={_b.min} max={_b.max} step={_b.step} disabled={_on(data?.locked)} value={String(_count(_num(data?.zoom, false, undefined, undefined), _b))} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.zoom\", _v); }} />\n                <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"up\" disabled={_on(data?.locked)} onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.zoom, false, undefined, undefined), _b), 1, _b); onChange?.(\"$.zoom\", _n); }}>+</button>\n              </span>\n            );\n          })()}\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Accent colour</span>\n          <input data-weft-id=\"accent\" type=\"color\" aria-label=\"Accent colour\" disabled defaultValue={_color(\"#d946ef\")} />\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Member since</span>\n          {(() => {\n            const _t = _dateType(\"date\");\n            return (\n              <input data-weft-id=\"since\" type={_t === \"datetime\" ? \"datetime-local\" : _t} aria-label=\"Member since\" min={_dateText(_t, \"\") || undefined} max={_dateText(_t, \"\") || undefined} disabled defaultValue={_dateText(_t, \"2024-05-17\")} />\n            );\n          })()}\n        </label>\n        {(() => {\n          const _o = [\n            { value: \"Inter\", el: (\n              <option data-weft-id=\"font-inter\" value=\"Inter\">Inter</option>\n            ) },\n            { value: \"Menlo\", el: (\n              <option data-weft-id=\"font-mono\" value=\"Menlo\">Menlo</option>\n            ) },\n          ];\n          return (\n            <label>\n              <span aria-hidden=\"true\">Font</span>\n              <input data-weft-id=\"font\" aria-label=\"Font\" list={\"weft-font-options\"} disabled defaultValue={\"Inter\"} />\n              <datalist id={\"weft-font-options\"}>\n                {_keyed(_o.map((_x) => _x.el))}\n              </datalist>\n            </label>\n          );\n        })()}\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "booking",
+    "props": {
+     "label": "Book a trip"
+    },
+    "children": [
+     {
+      "kind": "heading",
+      "id": "title",
+      "props": {
+       "level": 1
+      },
+      "children": [
+       "Book a trip"
+      ]
+     },
+     {
+      "kind": "form",
+      "id": "trip",
+      "props": {
+       "label": "Trip"
+      },
+      "on": {
+       "submit": "trip.book"
+      },
+      "slots": {
+       "footer": [
+        {
+         "kind": "button",
+         "id": "book",
+         "props": {
+          "submit": true,
+          "variant": "primary"
+         },
+         "children": [
+          "Book"
+         ]
+        }
+       ]
+      },
+      "children": [
+       {
+        "kind": "combobox",
+        "id": "city",
+        "props": {
+         "label": "Destination",
+         "placeholder": "Search a city",
+         "value": {
+          "bind": "$.trip.city"
+         }
+        },
+        "on": {
+         "change": "trip.edit"
+        },
+        "children": [
+         {
+          "kind": "each",
+          "id": "city-each",
+          "props": {
+           "as": "city",
+           "in": {
+            "bind": "$.cities"
+           }
+          },
+          "children": [
+           {
+            "kind": "option",
+            "id": "city-option",
+            "props": {
+             "text": {
+              "bind": "$city.name"
+             },
+             "value": {
+              "bind": "$city.name"
+             }
+            }
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "kind": "date-picker",
+        "id": "depart",
+        "props": {
+         "label": "Departure",
+         "max": "2026-12-31",
+         "min": "2026-01-01",
+         "value": {
+          "bind": "$.trip.depart"
+         }
+        },
+        "on": {
+         "change": "trip.edit"
+        }
+       },
+       {
+        "kind": "date-picker",
+        "id": "checkin",
+        "props": {
+         "label": "Check-in time",
+         "type": "time",
+         "value": {
+          "bind": "$.trip.checkin"
+         }
+        }
+       },
+       {
+        "kind": "date-picker",
+        "id": "reminder",
+        "props": {
+         "label": "Reminder",
+         "type": "datetime",
+         "value": {
+          "bind": "$.trip.reminder"
+         }
+        }
+       },
+       {
+        "kind": "stepper",
+        "id": "guests",
+        "props": {
+         "label": "Guests",
+         "max": 8,
+         "min": 1,
+         "value": {
+          "bind": "$.trip.guests"
+         }
+        },
+        "on": {
+         "change": "trip.edit"
+        }
+       },
+       {
+        "kind": "slider",
+        "id": "budget",
+        "props": {
+         "label": "Budget per night",
+         "max": 500,
+         "min": 50,
+         "step": 10,
+         "value": {
+          "bind": "$.trip.budget"
+         }
+        },
+        "on": {
+         "change": "trip.edit"
+        }
+       },
+       {
+        "kind": "segmented-control",
+        "id": "cabin",
+        "props": {
+         "label": "Cabin",
+         "value": {
+          "bind": "$.trip.cabin"
+         }
+        },
+        "on": {
+         "change": "trip.edit"
+        },
+        "children": [
+         {
+          "kind": "segment",
+          "id": "cabin-economy",
+          "props": {
+           "value": "economy"
+          },
+          "children": [
+           "Economy"
+          ]
+         },
+         {
+          "kind": "segment",
+          "id": "cabin-business",
+          "props": {
+           "value": "business"
+          },
+          "children": [
+           "Business"
+          ]
+         },
+         {
+          "kind": "segment",
+          "id": "cabin-first",
+          "props": {
+           "value": "first"
+          },
+          "children": [
+           "First"
+          ]
+         }
+        ]
+       },
+       {
+        "kind": "color-picker",
+        "id": "tag",
+        "props": {
+         "label": "Trip colour",
+         "value": {
+          "bind": "$.trip.colour"
+         }
+        },
+        "on": {
+         "change": "trip.edit"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _num(v, integer, min, max) {\n  if (typeof v !== \"number\") return v;\n  if (!Number.isFinite(v)) return undefined;\n  if (integer) v = Math.round(v);\n  if (min !== undefined) v = Math.max(v, min);\n  if (max !== undefined) v = Math.min(v, max);\n  return v;\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _list(v) {\n  return Array.isArray(v) ? v : [];\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nfunction _numeric(v) {\n  if (typeof v === \"number\") return Number.isFinite(v) ? v : undefined;\n  if (typeof v === \"string\" && /^-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[eE][-+]?\\d+)?$/.test(v.trim())) {\n    const n = Number(v);\n    return Number.isFinite(n) ? n : undefined;\n  }\n  return undefined;\n}\n\nfunction _tidy(x, ...inputs) {\n  const d = (y) => {\n    const [m = \"\", e] = String(y).split(\"e\");\n    return Math.max(0, (m.split(\".\")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));\n  };\n  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));\n}\n\nfunction _span(min, max, step) {\n  const lo = _numeric(min) ?? 0;\n  const st = _numeric(step);\n  return { min: lo, max: Math.max(_numeric(max) ?? 100, lo), step: st !== undefined && st > 0 ? st : 1 };\n}\n\nfunction _slide(value, s) {\n  const v = Math.min(Math.max(_numeric(value) ?? s.min, s.min), s.max);\n  let on = s.min + Math.floor((v - s.min) / s.step + 0.5) * s.step;\n  if (on > s.max) on -= s.step;\n  return String(_tidy(Math.max(on, s.min), s.min, s.step));\n}\n\nfunction _bounds(min, max, step) {\n  const lo = _numeric(min);\n  const hi = _numeric(max);\n  const st = _numeric(step);\n  const b = { step: st !== undefined && st > 0 ? st : 1 };\n  if (lo !== undefined) b.min = lo;\n  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);\n  return b;\n}\n\nfunction _clamp(v, b) {\n  if (b.min !== undefined) v = Math.max(v, b.min);\n  if (b.max !== undefined) v = Math.min(v, b.max);\n  return v;\n}\n\nfunction _count(value, b) {\n  return _clamp(_numeric(value) ?? 0, b);\n}\n\nfunction _step(current, direction, b) {\n  return _tidy(_clamp(current + direction * b.step, b), current, b.step);\n}\n\nfunction _dateType(v) {\n  return v === \"time\" || v === \"datetime\" ? v : \"date\";\n}\n\nfunction _dateText(type, value) {\n  const day = (s) => {\n    const m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(s);\n    if (!m) return false;\n    const [year, month, d] = [Number(m[1]), Number(m[2]), Number(m[3])];\n    if (year < 1 || month < 1 || month > 12 || d < 1) return false;\n    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;\n    return d <= [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];\n  };\n  const time = (s) => /^([01]\\d|2[0-3]):[0-5]\\d$/.test(s);\n  if (type === \"date\") return day(value) ? value : \"\";\n  if (type === \"time\") return time(value) ? value : \"\";\n  const [d = \"\", t = \"\", ...rest] = value.split(\"T\");\n  return rest.length === 0 && day(d) && time(t) ? value : \"\";\n}\n\nfunction _color(v) {\n  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : \"#000000\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"booking\" aria-label=\"Book a trip\">\n      <h1 data-weft-id=\"title\">Book a trip</h1>\n      <form data-weft-id=\"trip\" aria-label=\"Trip\" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: \"trip\", action: \"trip.book\" }); }}>\n        {(() => {\n          const _o = [\n            ..._list(data?.cities).flatMap((city, _i0) => [\n              { value: city?.name, el: (\n                <option data-weft-id={\"city-option[\" + _i0 + \"]\"} value={_text(city?.name)}>\n                  {!(_text(city?.name).trim() === \"\") ? _squash(_text(city?.name)) : \"\"}\n                </option>\n              ) },\n            ]),\n          ];\n          return (\n            <label>\n              <span aria-hidden=\"true\">Destination</span>\n              <input data-weft-id=\"city\" aria-label=\"Destination\" list={\"weft-city-options\"} placeholder=\"Search a city\" value={_text(data?.trip?.city)} onChange={(_e) => { const _v = _e.currentTarget.value; if (_v !== undefined) onChange?.(\"$.trip.city\", _v); _act(actions, { id: \"city\", action: \"trip.edit\" }); }} />\n              <datalist id={\"weft-city-options\"}>\n                {_keyed(_o.map((_x) => _x.el))}\n              </datalist>\n            </label>\n          );\n        })()}\n        <label>\n          <span aria-hidden=\"true\">Departure</span>\n          {(() => {\n            const _t = _dateType(\"\");\n            return (\n              <input data-weft-id=\"depart\" type={_t === \"datetime\" ? \"datetime-local\" : _t} aria-label=\"Departure\" min={_dateText(_t, \"2026-01-01\") || undefined} max={_dateText(_t, \"2026-12-31\") || undefined} value={_dateText(_t, _text(data?.trip?.depart))} onChange={(_e) => { const _v = _dateText(_t, _e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.trip.depart\", _v); _act(actions, { id: \"depart\", action: \"trip.edit\" }); }} />\n            );\n          })()}\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Check-in time</span>\n          {(() => {\n            const _t = _dateType(\"time\");\n            return (\n              <input data-weft-id=\"checkin\" type={_t === \"datetime\" ? \"datetime-local\" : _t} aria-label=\"Check-in time\" min={_dateText(_t, \"\") || undefined} max={_dateText(_t, \"\") || undefined} value={_dateText(_t, _text(data?.trip?.checkin))} onChange={(_e) => { const _v = _dateText(_t, _e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.trip.checkin\", _v); }} />\n            );\n          })()}\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Reminder</span>\n          {(() => {\n            const _t = _dateType(\"datetime\");\n            return (\n              <input data-weft-id=\"reminder\" type={_t === \"datetime\" ? \"datetime-local\" : _t} aria-label=\"Reminder\" min={_dateText(_t, \"\") || undefined} max={_dateText(_t, \"\") || undefined} value={_dateText(_t, _text(data?.trip?.reminder))} onChange={(_e) => { const _v = _dateText(_t, _e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.trip.reminder\", _v); }} />\n            );\n          })()}\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Guests</span>\n          {(() => {\n            const _b = _bounds(1, 8, undefined);\n            return (\n              <span data-weft-stepper=\"\">\n                <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"down\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.trip?.guests, false, undefined, undefined), _b), -1, _b); onChange?.(\"$.trip.guests\", _n); _act(actions, { id: \"guests\", action: \"trip.edit\" }); }}>{\"−\"}</button>\n                <input data-weft-id=\"guests\" type=\"number\" aria-label=\"Guests\" min={_b.min} max={_b.max} step={_b.step} value={String(_count(_num(data?.trip?.guests, false, undefined, undefined), _b))} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.trip.guests\", _v); _act(actions, { id: \"guests\", action: \"trip.edit\" }); }} />\n                <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"up\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.trip?.guests, false, undefined, undefined), _b), 1, _b); onChange?.(\"$.trip.guests\", _n); _act(actions, { id: \"guests\", action: \"trip.edit\" }); }}>+</button>\n              </span>\n            );\n          })()}\n        </label>\n        <label>\n          <span aria-hidden=\"true\">Budget per night</span>\n          {(() => {\n            const _s = _span(50, 500, 10);\n            return (\n              <input data-weft-id=\"budget\" type=\"range\" aria-label=\"Budget per night\" min={_s.min} max={_s.max} step={_s.step} value={_slide(_num(data?.trip?.budget, false, undefined, undefined), _s)} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.trip.budget\", _v); _act(actions, { id: \"budget\", action: \"trip.edit\" }); }} />\n            );\n          })()}\n        </label>\n        <div data-weft-id=\"cabin\" aria-label=\"Cabin\" role=\"radiogroup\" data-weft-segmented=\"\">\n          <span aria-hidden=\"true\">Cabin</span>\n          <label>\n            <input data-weft-id=\"cabin-economy\" type=\"radio\" name={\"weft-cabin\"} value=\"economy\" aria-label=\"Economy\" checked={_text(data?.trip?.cabin) !== \"\" && \"economy\" === _text(data?.trip?.cabin)} onChange={() => { onChange?.(\"$.trip.cabin\", \"economy\"); _act(actions, { id: \"cabin\", action: \"trip.edit\" }); }} />\n            <span aria-hidden=\"true\">Economy</span>\n          </label>\n          <label>\n            <input data-weft-id=\"cabin-business\" type=\"radio\" name={\"weft-cabin\"} value=\"business\" aria-label=\"Business\" checked={_text(data?.trip?.cabin) !== \"\" && \"business\" === _text(data?.trip?.cabin)} onChange={() => { onChange?.(\"$.trip.cabin\", \"business\"); _act(actions, { id: \"cabin\", action: \"trip.edit\" }); }} />\n            <span aria-hidden=\"true\">Business</span>\n          </label>\n          <label>\n            <input data-weft-id=\"cabin-first\" type=\"radio\" name={\"weft-cabin\"} value=\"first\" aria-label=\"First\" checked={_text(data?.trip?.cabin) !== \"\" && \"first\" === _text(data?.trip?.cabin)} onChange={() => { onChange?.(\"$.trip.cabin\", \"first\"); _act(actions, { id: \"cabin\", action: \"trip.edit\" }); }} />\n            <span aria-hidden=\"true\">First</span>\n          </label>\n        </div>\n        <label>\n          <span aria-hidden=\"true\">Trip colour</span>\n          <input data-weft-id=\"tag\" type=\"color\" aria-label=\"Trip colour\" value={_color(_text(data?.trip?.colour))} onChange={(_e) => { const _v = _e.currentTarget.value; if (_v !== undefined) onChange?.(\"$.trip.colour\", _v); _act(actions, { id: \"tag\", action: \"trip.edit\" }); }} />\n        </label>\n        <div data-weft-slot=\"footer\">\n          <button data-weft-id=\"book\" type=\"submit\" data-variant=\"primary\" onClick={(_e) => { _e.preventDefault(); _act(actions, { id: \"trip\", action: \"trip.book\" }); }}>Book</button>\n        </div>\n      </form>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
     "id": "files",
     "props": {
      "label": "File"
