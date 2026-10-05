@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T47 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T50 | todo | P2 | 4 | 0% | |
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
@@ -155,49 +154,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T47. Static page parity with the generated components
-
-`weft html` pages and the generated React and SolidJS components show the same data (T43), but `packages/visual` still lists every screen in `STATIC_PAGE_DIFFERS` and most in `STATIC_TREE_DIFFERS` (`packages/visual/test/web/screens.test.ts`).
-
-- **Accessibility tree:** close all three known differences in `crates/weft-web`:
-  - a `text` becomes a paragraph where React writes a text run;
-  - the caption of a field, checkbox, switch or radio is exposed as separate text instead of the control's label;
-  - a link without `href` gets the URL `#`.
-- **Pixels:** the static page has a layout stylesheet of its own (captions above controls, a toggle label as a flex row, stacks spaced with gap tokens), while the components render with none.
-  - Pick one layout for both sides and say why in this card before coding. The two options are one shared layout stylesheet, or matching the static page to the components.
-  - Do not loosen the comparison with a pixel tolerance.
-
-Execution plan:
-
-- **Layout direction: match the static page to the components, not a shared stylesheet.**
-  - The components, the reference renderer, and the Figma and Penpot round trips are already pixel-compared with each other, and only the static page is the outlier.
-  - A shared stylesheet would restyle React, SolidJS and the reference renderer together and move every web baseline.
-  - SPEC already says the page has "the accessible structure of the reference renderer".
-  - So the static page drops what the components do not have, and keeps only the layout rules the components also carry as inline styles.
-- **Steps:**
-  - In `crates/weft-web/src/html.rs`: write a `text` as a block `div`, a link without a usable `href` as `role="link" tabindex="0"` with no `href`, and an inline-block link as the components do.
-  - Same file, controls: give the control `aria-label` and the visible caption `aria-hidden="true"`.
-  - Same file, wrappers: drop the `weft-field` and `weft-toggle` classes and their CSS rules, and write the error as a `div`.
-  - Chase any remaining pixel difference per screen (radio group, select, tabs) by comparing the DOM of the static page and the components.
-  - Make sure the HTML importer still reads what the generator now writes. Fix it only for what T47 changes, and keep T48's binding work out.
-- **Verify:** `cargo insta` review of the weft-web and weft-snapshots changes, then `vitest run` in `packages/visual`; shrink `STATIC_PAGE_DIFFERS` and `STATIC_TREE_DIFFERS` until they pass; then the full check.
-- **Docs:** update SPEC §To HTML and `crates/weft-web/README.md` where they describe the page.
-
-Done when:
-- every entry of `STATIC_TREE_DIFFERS` is gone;
-- `STATIC_PAGE_DIFFERS` keeps only screens with a stated, unavoidable reason;
-- changed baselines and snapshots are reviewed;
-- the full check exits 0.
-
-T45 lets a build request carry one token modifier and an export return the modes as a DTCG resolver document. The Figma and Penpot plugin UI (`packages/design-plugin`, `plugins/figma`, `plugins/penpot`) still has no way to use this: modes are sent only by a caller that sets `UiOptions.modifier`.
-- **Build:** the UI accepts a resolver document (pasted or picked as a file, next to the token input) and lets the user choose the modifier. The appearance modifier is the default choice.
-- **Export:** the UI shows the returned `resolver` and offers it as a downloadable `.resolver.json` file.
-- **Penpot:** the default context on export is the first theme of the group in creation order. Keep the order stable, or record which theme is the default, if Penpot's plugin API allows it.
-Done when:
-- UI tests over the existing fakes cover choosing a modifier and downloading the resolver;
-- the plugin bundles are rebuilt;
-- the plugin READMEs and skills are updated;
-- the full check exits 0.
 ### T50. Richer controls
 The catalog has `select`, `menu`, `radio-group`, `checkbox` and `switch`, but none of the controls richer screens need. Add these kinds, as the creator chose:
 - a slider (a range with min, max and step);
