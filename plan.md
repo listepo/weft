@@ -14,6 +14,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
 | T53 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T54 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -217,3 +218,21 @@ Done when:
 - the reviewed baselines show captions above fields, spacing and visible links;
 - SPEC and docs describe the stylesheet;
 - the full check exits 0.
+
+### T54. Run only the checks a change affects
+
+The full check (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`) takes 5–7 minutes, and agents run it many times while they iterate. Rust tests already run on cargo-nextest (`root:rust-test`), but always the whole workspace. The creator asked for nextest and for runs of only what the changed files affect.
+
+- **Rust:** run only the crates the changed files belong to and the crates that depend on them. Use nextest's `rdeps()` filterset, or a maintained tool that maps changed files to workspace packages; pick in the plan and cite it.
+- **TypeScript:** run only the affected moon projects (moon's affected mode against the base branch plus uncommitted changes), and inside a project only the tests related to the changed files where Vitest can tell (`--changed`). A change to the Rust core, the WebAssembly module or shared inputs must still reach the packages that load them.
+- **One command:** a moon task or script that runs the affected subset (e.g. `moon run root:changed`), documented in `AGENTS.md` and the README as the iteration loop.
+- **The merge gate stays full:** the full check stays the required run before a merge.
+- **Safety:** when the change set cannot be computed (no git, no merge base, a changed lockfile, toolchain or workspace config), fall back to the full run and say why.
+
+Done when the command runs the expected subset for:
+- a Rust-only change in a leaf crate;
+- a change in `weft-core` (reaches every dependent);
+- a TypeScript-only change;
+- a docs-only change (runs nothing or only lint).
+
+The selection logic also needs tests, and the full check must exit 0.
