@@ -12,7 +12,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T46 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T47 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T49 | in progress | P2 | 2 | 90% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -180,25 +179,3 @@ Done when:
 - `STATIC_PAGE_DIFFERS` keeps only screens with a stated, unavoidable reason;
 - changed baselines and snapshots are reviewed;
 - the full check exits 0.
-
-### T49. Token modes in the design plugin UI
-
-T45 lets a build request carry one token modifier and an export return the modes as a DTCG resolver document. The Figma and Penpot plugin UI (`packages/design-plugin`, `plugins/figma`, `plugins/penpot`) still has no way to use this: modes are sent only by a caller that sets `UiOptions.modifier`.
-
-- **Build:** the UI accepts a resolver document (pasted or picked as a file, next to the token input) and lets the user choose the modifier. The appearance modifier is the default choice.
-- **Export:** the UI shows the returned `resolver` and offers it as a downloadable `.resolver.json` file.
-- **Penpot:** the default context on export is the first theme of the group in creation order. Keep the order stable, or record which theme is the default, if Penpot's plugin API allows it.
-
-Done when:
-- UI tests over the existing fakes cover choosing a modifier and downloading the resolver;
-- the plugin bundles are rebuilt;
-- the plugin READMEs and skills are updated;
-- the full check exits 0.
-
-Execution plan (Claude Code / claude-sonnet-5-5):
-
-1. `packages/design-plugin`: add a resolver input beside the screen input (file picker, paste box, Load button). The text is bounded by `MAX_MARKUP`, parsed with `JSON.parse`, and loaded through `loadProject({ tokens })` of `@weft/catalog` (the Rust resolver loader through WebAssembly, no new TS parser), so every breach shows as a `W705` note. A modifier `<select>` lists the resolver's modifiers plus "No modes"; the appearance modifier is preselected. The chosen modifier goes into `UiOptions.modifier`, and the resolver's default context becomes the token set of build and export.
-2. Export: a second read-only box shows the reply's `resolver`, with a Download button for `tokens.resolver.json`. The existing download code becomes one helper.
-3. Penpot: record the default context on the library's plugin data (`Library extends PluginData`) when themes are written, and read it back before falling back to creation order.
-4. Tests: `ui.test.ts` over the fake DOM (choose modifier, default, `W705`, size guard, download), the Figma and Penpot bundle tests with a resolver, a Penpot `modes.test.ts` case for the recorded default.
-5. Update the READMEs and plugin skills, rebuild the bundles, run the full check, close T49 into `done.md`.

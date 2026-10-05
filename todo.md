@@ -6,4 +6,3 @@
 - T39. Context in the document
 - T46. Simulator sharing for the SwiftUI screenshot suite
 - T47. Static page parity with the generated components
-- T49. Token modes in the design plugin UI
