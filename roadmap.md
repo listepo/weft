@@ -35,3 +35,7 @@ Load several catalogs at once with namespaced kinds, and define how an extension
 - `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
 - Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
 - Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.
+
+### T41. Hosted Penpot plugin
+
+Penpot installs a plugin only from the URL of its `manifest.json`, so users need a hosted copy of `plugins/penpot/dist`. Once the repository is on GitHub, CI builds the plugin and deploys `dist/` to GitHub Pages, which serves the right content types and `Access-Control-Allow-Origin: *`. Done when Penpot installs the plugin from the Pages URL and the README gives that URL.
