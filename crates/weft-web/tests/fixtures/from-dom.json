@@ -1125,7 +1125,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"users\" aria-label=\"Users\"><h1 data-weft-id=\"title\">Users</h1><table data-weft-id=\"table\" aria-label=\"Users\"><thead><tr><th data-weft-id=\"col-name\" scope=\"col\" aria-sort=\"ascending\" tabindex=\"0\">Name</th><th data-weft-id=\"col-email\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Email</th><th data-weft-id=\"col-role\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Role</th><th data-weft-id=\"col-actions\" scope=\"col\">Actions</th></tr></thead><tbody><tr data-weft-id=\"row[0]\"><td data-weft-id=\"cell-name[0]\"><div data-weft-id=\"user-name[0]\">Ada Lovelace</div></td><td data-weft-id=\"cell-email[0]\"><div data-weft-id=\"user-email[0]\">ada@example.com</div></td><td data-weft-id=\"cell-role[0]\"><div data-weft-id=\"user-role[0]\">Admin</div></td><td data-weft-id=\"cell-actions[0]\"><button data-weft-id=\"delete[0]\" type=\"button\" data-variant=\"danger\">Delete</button></td></tr><tr data-weft-id=\"row[1]\"><td data-weft-id=\"cell-name[1]\"><div data-weft-id=\"user-name[1]\">Alan Turing</div></td><td data-weft-id=\"cell-email[1]\"><div data-weft-id=\"user-email[1]\">alan@example.com</div></td><td data-weft-id=\"cell-role[1]\"><div data-weft-id=\"user-role[1]\">Editor</div></td><td data-weft-id=\"cell-actions[1]\"><button data-weft-id=\"delete[1]\" type=\"button\" data-variant=\"danger\">Delete</button></td></tr></tbody></table></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"users\" aria-label=\"Users\"><h1 data-weft-id=\"title\">Users</h1><table data-weft-id=\"table\" aria-label=\"Users\"><thead><tr><th data-weft-id=\"col-name\" scope=\"col\" aria-sort=\"ascending\" tabindex=\"0\">Name</th><th data-weft-id=\"col-email\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Email</th><th data-weft-id=\"col-role\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Role</th><th data-weft-id=\"col-actions\" scope=\"col\">Actions</th></tr></thead><tbody><tr data-weft-id=\"row[0]\"><td data-weft-id=\"cell-name[0]\"><div data-weft-id=\"user-name[0]\">Ada Lovelace</div></td><td data-weft-id=\"cell-email[0]\"><div data-weft-id=\"user-email[0]\">ada@example.com</div></td><td data-weft-id=\"cell-role[0]\"><div data-weft-id=\"user-role[0]\">Admin</div></td><td data-weft-id=\"cell-actions[0]\"><button data-weft-id=\"delete[0]\" type=\"button\" data-variant=\"danger\">Delete Ada Lovelace</button></td></tr><tr data-weft-id=\"row[1]\"><td data-weft-id=\"cell-name[1]\"><div data-weft-id=\"user-name[1]\">Alan Turing</div></td><td data-weft-id=\"cell-email[1]\"><div data-weft-id=\"user-email[1]\">alan@example.com</div></td><td data-weft-id=\"cell-role[1]\"><div data-weft-id=\"user-role[1]\">Editor</div></td><td data-weft-id=\"cell-actions[1]\"><button data-weft-id=\"delete[1]\" type=\"button\" data-variant=\"danger\">Delete Alan Turing</button></td></tr></tbody></table></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -1244,7 +1244,7 @@
               "variant": "danger"
              },
              "children": [
-              "Delete"
+              "Delete Ada Lovelace"
              ]
             }
            ]
@@ -1305,7 +1305,7 @@
               "variant": "danger"
              },
              "children": [
-              "Delete"
+              "Delete Alan Turing"
              ]
             }
            ]
@@ -1433,7 +1433,7 @@
   }
  },
  {
-  "html": "<main aria-label=\"Users\">\n  <h1>Users</h1>\n  <table aria-label=\"Users\">\n    <thead>\n      <tr>\n        <th aria-sort=\"ascending\"><button type=\"button\" data-action=\"press:users.sort\">Name</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Email</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Role</button></th>\n        <th>Actions</th>\n      </tr>\n    </thead>\n    <tbody>\n      <template data-each=\"$.users\" data-as=\"user\">\n        <tr>\n          <td>\n            <p data-bind=\"text:$user.name\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.email\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.role\"></p>\n          </td>\n          <td>\n            <button type=\"button\" data-variant=\"danger\" data-action=\"press:users.delete\">Delete</button>\n          </td>\n        </tr>\n      </template>\n    </tbody>\n  </table>\n</main>\n",
+  "html": "<main aria-label=\"Users\">\n  <h1>Users</h1>\n  <table aria-label=\"Users\">\n    <thead>\n      <tr>\n        <th aria-sort=\"ascending\"><button type=\"button\" data-action=\"press:users.sort\">Name</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Email</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Role</button></th>\n        <th>Actions</th>\n      </tr>\n    </thead>\n    <tbody>\n      <template data-each=\"$.users\" data-as=\"user\">\n        <tr>\n          <td>\n            <p data-bind=\"text:$user.name\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.email\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.role\"></p>\n          </td>\n          <td>\n            <button type=\"button\" data-variant=\"danger\" data-bind=\"text:$user.deleteLabel\" data-action=\"press:users.delete\"></button>\n          </td>\n        </tr>\n      </template>\n    </tbody>\n  </table>\n</main>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -4087,7 +4087,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"todos\" aria-label=\"Tasks\"><h1 data-weft-id=\"title\">Tasks</h1><form data-weft-id=\"add-form\"><div data-weft-id=\"add-row\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">New task</span><input data-weft-id=\"draft\" aria-label=\"New task\" type=\"text\" value=\"\"/></label></div><button data-weft-id=\"add\" type=\"submit\" disabled=\"\" data-variant=\"primary\">Add</button></div></form><ul data-weft-id=\"list\"><li data-weft-id=\"todo[0]\"><label><input data-weft-id=\"todo-done[0]\" type=\"checkbox\" aria-label=\"Write spec\" checked=\"\"/><span aria-hidden=\"true\">Write spec</span></label><button data-weft-id=\"todo-remove[0]\" type=\"button\">Remove</button></li><li data-weft-id=\"todo[1]\"><label><input data-weft-id=\"todo-done[1]\" type=\"checkbox\" aria-label=\"Build parser\"/><span aria-hidden=\"true\">Build parser</span></label><button data-weft-id=\"todo-remove[1]\" type=\"button\">Remove</button></li></ul><div data-weft-id=\"summary\" style=\"gap:var(--weft-space-xs);display:flex;flex-direction:row;align-items:center\"><div data-weft-id=\"remaining\">1</div><div data-weft-id=\"remaining-label\">items left</div></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"todos\" aria-label=\"Tasks\"><h1 data-weft-id=\"title\">Tasks</h1><form data-weft-id=\"add-form\"><div data-weft-id=\"add-row\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">New task</span><input data-weft-id=\"draft\" aria-label=\"New task\" type=\"text\" value=\"\"/></label></div><button data-weft-id=\"add\" type=\"submit\" disabled=\"\" data-variant=\"primary\">Add</button></div></form><ul data-weft-id=\"list\"><li data-weft-id=\"todo[0]\"><label><input data-weft-id=\"todo-done[0]\" type=\"checkbox\" aria-label=\"Write spec\" checked=\"\"/><span aria-hidden=\"true\">Write spec</span></label><button data-weft-id=\"todo-remove[0]\" type=\"button\">Remove</button></li><li data-weft-id=\"todo[1]\"><label><input data-weft-id=\"todo-done[1]\" type=\"checkbox\" aria-label=\"Build parser\"/><span aria-hidden=\"true\">Build parser</span></label><button data-weft-id=\"todo-remove[1]\" type=\"button\">Remove</button></li></ul><div data-weft-id=\"remaining\">1 item left</div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -4191,26 +4191,10 @@
        ]
       },
       {
-       "kind": "stack",
-       "id": "summary",
-       "props": {
-        "direction": "row"
-       },
+       "kind": "text",
+       "id": "remaining",
        "children": [
-        {
-         "kind": "text",
-         "id": "remaining",
-         "children": [
-          "1"
-         ]
-        },
-        {
-         "kind": "text",
-         "id": "remaining-label",
-         "children": [
-          "items left"
-         ]
-        }
+        "1 item left"
        ]
       }
      ]
@@ -4271,18 +4255,13 @@
      "kind": "repetition",
      "path": "/screen#todos/list#list/item#todo-1/button#todo-remove-1",
      "note": "instance todo-remove[1] of a repeated element is imported as the static element todo-remove-1"
-    },
-    {
-     "kind": "tokens",
-     "path": "/screen#todos/stack#summary",
-     "note": "gap var(--weft-space-xs) cannot be mapped back to a design token"
     }
    ],
    "diagnostics": []
   }
  },
  {
-  "html": "<main aria-label=\"Tasks\">\n  <h1>Tasks</h1>\n  <form data-action=\"submit:todo.add\">\n    <div class=\"row gap-sm\">\n      <label for=\"draft\">New task</label>\n      <input id=\"draft\" type=\"text\" data-bind=\"value:$.draft\">\n      <button type=\"submit\" data-variant=\"primary\" data-bind=\"disabled:!$.draft\">Add</button>\n    </div>\n  </form>\n  <ul>\n    <template data-each=\"$.todos\" data-as=\"todo\">\n      <li>\n        <label>\n          <input type=\"checkbox\" data-bind=\"checked:$todo.done\">\n          <span data-bind=\"text:$todo.title\"></span>\n        </label>\n        <button type=\"button\" data-action=\"press:todo.remove\">Remove</button>\n      </li>\n    </template>\n  </ul>\n  <div class=\"row gap-xs\">\n    <p data-bind=\"text:$.remaining\"></p>\n    <p>items left</p>\n  </div>\n</main>\n",
+  "html": "<main aria-label=\"Tasks\">\n  <h1>Tasks</h1>\n  <form data-action=\"submit:todo.add\">\n    <div class=\"row gap-sm\">\n      <label for=\"draft\">New task</label>\n      <input id=\"draft\" type=\"text\" data-bind=\"value:$.draft\">\n      <button type=\"submit\" data-variant=\"primary\" data-bind=\"disabled:!$.draft\">Add</button>\n    </div>\n  </form>\n  <ul>\n    <template data-each=\"$.todos\" data-as=\"todo\">\n      <li>\n        <label>\n          <input type=\"checkbox\" data-bind=\"checked:$todo.done\">\n          <span data-bind=\"text:$todo.title\"></span>\n        </label>\n        <button type=\"button\" data-action=\"press:todo.remove\">Remove</button>\n      </li>\n    </template>\n  </ul>\n  <p data-bind=\"text:$.remainingLabel\"></p>\n</main>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -4334,13 +4313,6 @@
       {
        "kind": "text",
        "id": "text-1"
-      },
-      {
-       "kind": "text",
-       "id": "text-items-left",
-       "children": [
-        "items left"
-       ]
       }
      ]
     }

@@ -1617,7 +1617,7 @@
         "children": [
          {
           "role": "row",
-          "name": "Ada Lovelace ada@example.com Admin Delete",
+          "name": "Ada Lovelace ada@example.com Admin Delete Ada Lovelace",
           "states": {},
           "props": {},
           "children": [
@@ -1644,13 +1644,13 @@
            },
            {
             "role": "cell",
-            "name": "Delete",
+            "name": "Delete Ada Lovelace",
             "states": {},
             "props": {},
             "children": [
              {
               "role": "button",
-              "name": "Delete",
+              "name": "Delete Ada Lovelace",
               "states": {},
               "props": {},
               "children": []
@@ -1661,7 +1661,7 @@
          },
          {
           "role": "row",
-          "name": "Alan Turing alan@example.com Editor Delete",
+          "name": "Alan Turing alan@example.com Editor Delete Alan Turing",
           "states": {},
           "props": {},
           "children": [
@@ -1688,13 +1688,13 @@
            },
            {
             "role": "cell",
-            "name": "Delete",
+            "name": "Delete Alan Turing",
             "states": {},
             "props": {},
             "children": [
              {
               "role": "button",
-              "name": "Delete",
+              "name": "Delete Alan Turing",
               "states": {},
               "props": {},
               "children": []
@@ -1793,13 +1793,13 @@
           },
           {
            "kind": "cell",
-           "id": "cell-delete",
+           "id": "cell-delete-ada-lovelace",
            "children": [
             {
              "kind": "button",
-             "id": "button-delete",
+             "id": "button-delete-ada-lovelace",
              "children": [
-              "Delete"
+              "Delete Ada Lovelace"
              ]
             }
            ]
@@ -1833,13 +1833,13 @@
           },
           {
            "kind": "cell",
-           "id": "cell-delete-2",
+           "id": "cell-delete-alan-turing",
            "children": [
             {
              "kind": "button",
-             "id": "button-delete-2",
+             "id": "button-delete-alan-turing",
              "children": [
-              "Delete"
+              "Delete Alan Turing"
              ]
             }
            ]
@@ -4048,7 +4048,7 @@
      },
      {
       "role": "text",
-      "name": "1 items left",
+      "name": "1 item left",
       "states": {},
       "props": {},
       "children": []
@@ -4143,9 +4143,9 @@
       },
       {
        "kind": "text",
-       "id": "text-1-items-left",
+       "id": "text-1-item-left",
        "children": [
-        "1 items left"
+        "1 item left"
        ]
       }
      ]
