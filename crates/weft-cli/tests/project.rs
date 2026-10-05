@@ -606,6 +606,39 @@ fn a_resolver_makes_colours_follow_the_appearance() {
 }
 
 #[test]
+fn css_base_is_the_same_everywhere_and_goes_where_the_project_says() {
+    let s = Scratch::new("css-base");
+    let printed = run_in(&s.path("screens"), &[&"css-base"]);
+    assert_eq!((printed.code, printed.stderr.as_str()), (0, ""));
+    // Its values come from the tokens' custom properties, so it does not read the project's own.
+    assert!(
+        printed.stdout.contains("var(--weft-space-md, 16px)"),
+        "{}",
+        printed.stdout
+    );
+    let alone = run(&[&"css-base", &"--no-project"]);
+    assert_eq!(alone.stdout, printed.stdout);
+
+    with_settings(
+        &s,
+        serde_json::json!({ "export": { "css": { "outDir": "web" } } }),
+    );
+    let r = run_in(&s.path("screens"), &[&"css-base"]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    assert_eq!(
+        std::fs::read_to_string(s.path("web/weft-base.css")).unwrap(),
+        printed.stdout
+    );
+    let elsewhere = s.path("elsewhere");
+    let r = run_in(&s.path("screens"), &[&"css-base", &"--out-dir", &elsewhere]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert_eq!(
+        std::fs::read_to_string(elsewhere.join("weft-base.css")).unwrap(),
+        printed.stdout
+    );
+}
+
+#[test]
 fn css_tokens_follow_the_appearance_and_go_where_the_project_says() {
     let s = Scratch::new("css-tokens");
     let r = run_in(&s.path("screens"), &[&"css-tokens"]);
