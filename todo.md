@@ -8,3 +8,4 @@
 - T52. 3D transforms and models
 - T56. Narrow the WebAssembly task's inputs
 - T57. Cache the mcp test task
+- T58. Natural `align="center"` coverage in the corpus

@@ -14,6 +14,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52 | todo | P2 | 5 | 0% | |
 | T56 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T57 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
+| T58 | todo | P3 | 1 | 0% | |
 
 ### T8. Evaluation
 
@@ -202,4 +203,17 @@ The `mcp` package's `test` task is never served from moon's cache. Vitest writes
 Done when:
 - a second `moon run :test` with no changes is fully cached;
 - a source change still re-runs the affected tests;
+- the full check exits 0.
+
+### T58. Natural `align="center"` coverage in the corpus
+
+T55 made `center` the default for a row, so T50 moved the corpus's explicit `center` onto the dashboard's `notices` column. The alerts there now sit centred at different widths, which looks odd.
+
+- Restore the `notices` column to its earlier layout, without `align`.
+- Cover `center` where centring is natural: a column in a coverage-only screen (dashboard, account, orders, inbox, leaderboard, booking or appearance), for example an empty-state message.
+- Leave the twelve benchmark screens alone: they have HTML, JSX and A2UI versions and tasks in `corpus/tasks.json`.
+
+Done when:
+- the coverage test still sees `center`;
+- the affected snapshots, screenshots and Figma/Penpot layer trees are retaken and reviewed;
 - the full check exits 0.
