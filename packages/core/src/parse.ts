@@ -9,16 +9,31 @@ import { catalogHandle, options as wireOptions, wasm, wellFormed } from "./wasm.
 /** Without a catalog only the syntax layer runs and every literal stays a string. */
 export type ParseOptions = Omit<ValidateOptions, "source" | "catalog"> & {
   catalog?: Catalog | undefined;
+  /**
+   * The markup may stop anywhere, because a model is still writing it (SPEC §6.3). What is
+   * finished becomes `document`; what the cut leaves open is in `pending`, not `diagnostics`.
+   */
+  partial?: boolean | undefined;
 };
 
 export type ParseResult = {
   /** Absent when the markup has syntax errors. */
   document?: Document | undefined;
   diagnostics: Diagnostic[];
+  /**
+   * Only with `partial`: what the rest of the stream can still fix, such as an element that is
+   * not closed yet. Empty once the document is complete.
+   */
+  pending?: Diagnostic[] | undefined;
   source?: SourceMap | undefined;
 };
 
-type Parsed = { document?: Document; diagnostics: Diagnostic[]; sources?: (WireSource | null)[] };
+type Parsed = {
+  document?: Document;
+  diagnostics: Diagnostic[];
+  pending?: Diagnostic[];
+  sources?: (WireSource | null)[];
+};
 
 export function parse(markup: string, options: ParseOptions = {}): ParseResult {
   const text = wellFormed(markup);
@@ -28,9 +43,10 @@ export function parse(markup: string, options: ParseOptions = {}): ParseResult {
       ? wasm.parse(text, wire)
       : catalogHandle(options.catalog).parse(text, wire),
   ) as Parsed;
-  const { document, diagnostics } = out;
-  if (document === undefined) return { diagnostics };
-  const result: ParseResult = { document, diagnostics };
+  const { document, diagnostics, pending } = out;
+  const base = pending === undefined ? { diagnostics } : { diagnostics, pending };
+  if (document === undefined) return base;
+  const result: ParseResult = { document, ...base };
   // Built on first read: most callers never look at positions.
   let source: SourceMap | undefined;
   Object.defineProperty(result, "source", {
