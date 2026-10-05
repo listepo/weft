@@ -202,6 +202,30 @@ Add one or more corpus screens that use every new kind, with data, and cover the
 - round trips;
 - Figma and Penpot builds over the fakes.
 The coverage test that every kind, prop and enum is used must still pass. Done when the full check exits 0 and new baselines are reviewed.
+
+**Execution plan** (Claude Code / claude-sonnet-5-5). Research is in `research.md` §14.
+
+Six kinds, written into SPEC §5.1 and `packages/catalog/src/core.ts` (the catalog data; `catalog.json` is generated). `*` is required. Every kind has the universal `label`* and the events `change`; `value` is the writable binding, written as the user changes it.
+
+| Kind | Role | Props | Bindings and events |
+| --- | --- | --- | --- |
+| `slider` | `slider` | `value` number writable, `min` number (default 0), `max` number (default 100), `step` number (default 1), `disabled` | `value` writable; `change` |
+| `stepper` | `spinbutton` | `value` number writable, `min`, `max` (both optional: no bound), `step` number (default 1), `disabled` | `value` writable; `change` |
+| `date-picker` | `textbox` | `type` enum `date`/`time`/`datetime` (default `date`), `value` writable (`yyyy-mm-dd`, `hh:mm`, `yyyy-mm-ddThh:mm`), `min`, `max` (same format), `disabled` | `value` writable; `change` |
+| `color-picker` | `textbox` | `value` writable (`#rrggbb`), `disabled` | `value` writable; `change` |
+| `segmented-control` | `radiogroup` | `value` writable (the `value` of the chosen `segment`); content `segment`, `each` | `value` writable; `change` |
+| `segment` | `radio` | `value`*, `disabled`; text content; `allowedParents` `segmented-control` | none |
+| `combobox` | `combobox` | `value` writable (the text), `placeholder`, `disabled`; content `option`, `each` | `value` writable; `change` |
+
+- **Combobox decision: a new kind, not a mode of `select`.** A `select` always has exactly one option selected and its `value` is one of the option values; a `combobox` takes free text, its `value` is that text, and the options only suggest. A mode prop would make `value` mean two things and give every target (HTML `select` against `input` and `datalist`, SwiftUI `Picker` against a text field) two code paths behind one name. `option` is allowed in both (`allowedParents` `select`, `combobox`); in a combobox the option's `value` is what picking it writes, and its text is the suggestion's label.
+- **Numbers.** A renderer reads `step` that is not a number above 0 as 1 and `max` below `min` as `min`; it shows a `value` outside `[min, max]` as the nearest bound, and an absent or non-numeric one as `min` (slider) or 0 within the bounds (stepper); it does not write the corrected value back. No new diagnostic: validation holds only the literals the catalog bounds already cover.
+- **Web markup, one for the reference renderer, React, SolidJS and the static page.** `slider`, `date-picker` and `color-picker`: `<label>` with the hidden caption and the native `<input type=range|date|time|datetime-local|color>` carrying `aria-label`. `stepper`: `<label>`, caption, then `<span data-weft-stepper>` with a `tabindex=-1` `aria-hidden` minus button, `<input type=number>`, and a plus button; the buttons write `clamp(value ± step)`. `segmented-control`: the markup of `radio-group` with `data-weft-segmented` on the group, a `segment` is a radio. `combobox`: `<label>`, caption, `<input list=weft-<id>-options>` and `<datalist>`; without a document `id` there is no list.
+- **SwiftUI.** `Slider(value:in:step:)`, `Stepper(_:value:in:step:)`, `DatePicker(_:selection:in:displayedComponents:)` over a string-to-`Date` binding in UTC, `ColorPicker(_:selection:supportsOpacity: false)` over a hex-to-`Color` binding, `Picker` with `.pickerStyle(.segmented)`, and a `TextField` with a trailing `Menu` for `combobox`. A non-integer `number` prop is a `Double` in the model. Ranges are built by a helper that never makes a lower bound above the upper one.
+- **Design tools.** `slider`, `stepper`, `date-picker` and `color-picker` are leaf kinds, so each gets a library drawing (track and thumb, minus and plus around a number, a field with a calendar mark, a swatch); `segmented-control` and `combobox` are frames with their children. The caption kinds gain the new control kinds.
+- **Importers.** HTML/ARIA: `input[type=range|date|time|datetime-local|color]`, `input[type=number]` inside `[data-weft-stepper]`, `input[list]` with its `datalist`, `radiogroup[data-weft-segmented]`. JSX and DOM importers read the same markup; the SwiftUI importer reads the constructs above back.
+- **Corpus.** Two coverage screens (`booking` with the date, time, stepper and slider; `appearance` with the colour picker, segmented control and combobox), each with `screen.weft` and `data.json`, in every test that walks the corpus.
+- **Steps (one commit each).** 1 SPEC, catalog, AGENT-SPEC, examples. 2 reference renderer and expected tree. 3 React and SolidJS generators and the JSX importers. 4 static page and the HTML and DOM importers. 5 SwiftUI generator and importer. 6 Figma and Penpot. 7 corpus screens, snapshots, baselines. 8 docs, plugin bundles, close.
+- **Verify.** Targeted `cargo test` and Vitest per step, then the full check once at the end; new baselines downscaled with `sips -Z 700` and looked at before accepting.
 ### T51. Glass material tokens
 A frosted-glass surface is expressed as a token, as the creator chose: a `material` token (background blur, tint colour and opacity) that an element takes through its style, like other tokens.
 - **Research:** the DTCG 2025.10 format has no material type, so the plan cites the format, says how the token is written (a Weft extension type or a composite of DTCG types), and keeps standard tools able to read the file.
