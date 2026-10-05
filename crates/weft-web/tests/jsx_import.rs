@@ -113,6 +113,7 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
         "the options of a bound <each> in a combobox are lost; the segmented-control on-change is lost",
     ),
     ("dashboard", "an explicit direction=\"column\" is dropped"),
+    ("glass", "an explicit direction=\"column\" is dropped"),
     (
         "inbox",
         "the tabs on-change is lost; dialog modal=\"false\" is dropped",

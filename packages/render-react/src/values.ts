@@ -129,3 +129,50 @@ export function tokenCss(
   const css = token ? tokenValueCss(token) : undefined;
   return css ?? `var(--weft-${path.replaceAll(".", "-").replaceAll("$", "_")})`;
 }
+
+const MATERIAL_PROPS = ["tint", "solid", "blur"] as const;
+const HEX6 = /^#[0-9a-fA-F]{6}$/;
+
+/** A material token's three CSS values, as `tokens_css` writes them; undefined if it has no form. */
+function materialValues(token: Token): Record<(typeof MATERIAL_PROPS)[number], string> | undefined {
+  const v = token.value;
+  if (token.type !== "material" || !isRecord(v) || !isRecord(v["tint"]) || !isRecord(v["blur"]))
+    return undefined;
+  const hex = v["tint"]["hex"];
+  const alpha = v["tint"]["alpha"] ?? 1;
+  const { value, unit } = v["blur"];
+  if (
+    typeof hex !== "string" ||
+    !HEX6.test(hex) ||
+    typeof alpha !== "number" ||
+    !(alpha >= 0 && alpha <= 1) ||
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    (unit !== "px" && unit !== "rem")
+  )
+    return undefined;
+  const byte = Math.round(alpha * 255)
+    .toString(16)
+    .padStart(2, "0");
+  return { tint: `${hex}${byte}`, solid: hex, blur: `${unit === "rem" ? value * 16 : value}px` };
+}
+
+/**
+ * The custom properties of an element that takes a material (`data-weft-material`): each the
+ * token's value when the host supplied it, otherwise a reference to the custom property
+ * `tokens_css` writes, as `tokenCss` does for the other token types.
+ */
+export function materialStyle(
+  raw: unknown,
+  tokens: ReadonlyMap<string, Token> | undefined,
+): Record<string, string> | undefined {
+  if (!isRecord(raw) || typeof raw["token"] !== "string") return undefined;
+  const path = raw["token"];
+  if (!TOKEN_PATH.test(path)) return undefined;
+  const token = tokens?.get(path);
+  const known = token === undefined ? undefined : materialValues(token);
+  const name = `--weft-${path.replaceAll(".", "-").replaceAll("$", "_")}`;
+  return Object.fromEntries(
+    MATERIAL_PROPS.map((p) => [`--_weft-material-${p}`, known?.[p] ?? `var(${name}-${p})`]),
+  );
+}

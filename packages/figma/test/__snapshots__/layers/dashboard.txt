@@ -61,9 +61,9 @@ FRAME "screen#dashboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAx
           | weft.origin = layer(heading#incidents-title)
           | weft.source = {"kind":"heading","id":"incidents-title","props":{"level":2},"children":["Incidents"],"shown":{"text":"Incidents"}}
           TEXT "text" chars="Incidents" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
-  FRAME "stack#notices" layoutMode="VERTICAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+  FRAME "stack#notices" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
     | weft.origin = layer(stack#notices)
-    | weft.source = {"kind":"stack","id":"notices","props":{"align":"center","direction":"column","gap":{"token":"space.sm"}}}
+    | weft.source = {"kind":"stack","id":"notices","props":{"direction":"column","gap":{"token":"space.sm"}}}
     | weft.style = [[],[],0,[0,0,0,0],null]
     FRAME "alert#release" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
       | weft.origin = layer(alert#release)

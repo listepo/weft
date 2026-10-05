@@ -1,0 +1,90 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-glass as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "glass",
+    "props": {
+      "label": "Glass"
+    },
+    "children": [
+      {
+        "kind": "stack",
+        "id": "card",
+        "props": {
+          "direction": "column",
+          "gap": {
+            "token": "space.md"
+          },
+          "material": {
+            "token": "material.glass"
+          }
+        },
+        "children": [
+          {
+            "kind": "heading",
+            "id": "title",
+            "props": {
+              "level": 2,
+              "text": {
+                "bind": "$.title"
+              }
+            }
+          },
+          {
+            "kind": "text",
+            "id": "body",
+            "children": [
+              "The panel blurs what is behind it."
+            ]
+          },
+          {
+            "kind": "button",
+            "id": "close",
+            "props": {
+              "variant": "primary"
+            },
+            "on": {
+              "press": "glass.close"
+            },
+            "children": [
+              "Got it"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "grid",
+        "id": "tiles",
+        "props": {
+          "columns": 2,
+          "gap": {
+            "token": "space.sm"
+          },
+          "material": {
+            "token": "material.glass"
+          }
+        },
+        "children": [
+          {
+            "kind": "text",
+            "id": "tile-light",
+            "children": [
+              "Light"
+            ]
+          },
+          {
+            "kind": "text",
+            "id": "tile-dark",
+            "children": [
+              "Dark"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

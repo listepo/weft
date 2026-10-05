@@ -943,7 +943,6 @@
       "kind": "stack",
       "id": "notices",
       "props": {
-       "align": "center",
        "direction": "column",
        "gap": {
         "token": "space.sm"
@@ -1058,7 +1057,7 @@
     ]
    }
   },
-  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _url(value) {\n  const url = value.replace(/[\\t\\n\\r]/g, \"\").replace(/^[\\u0000- ]+|[\\u0000- ]+$/g, \"\");\n  if (url === \"\") return undefined;\n  const colon = url.indexOf(\":\");\n  const delimiter = url.search(/[/?#]/);\n  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;\n  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();\n  return scheme === \"http\" || scheme === \"https\" || scheme === \"mailto\" ? url : undefined;\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"dashboard\" data-state=\"ready\" aria-label=\"Team dashboard\">\n      <div data-weft-id=\"header\" style={{ gap: \"var(--weft-space-xl)\", display: \"flex\", flexDirection: \"row\", alignItems: \"center\", flexWrap: \"wrap\" }}>\n        <h1 data-weft-id=\"title\">\n          {!(_text(data?.team?.name).trim() === \"\") ? _squash(_text(data?.team?.name)) : \"\"}\n        </h1>\n        <div data-weft-id=\"updated\" data-tone=\"muted\">\n          {!(_text(data?.updatedAt).trim() === \"\") ? _squash(_text(data?.updatedAt)) : \"\"}\n        </div>\n      </div>\n      <div data-weft-id=\"stats\" style={{ gap: \"var(--weft-space-lg)\", display: \"grid\", gridTemplateColumns: \"repeat(3, minmax(0, 1fr))\" }}>\n        <section data-weft-id=\"velocity\" aria-label=\"Velocity\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"velocity-title\">Velocity</h2>\n          </div>\n          <div data-weft-id=\"velocity-value\" data-tone=\"success\">\n            {!(_text(data?.stats?.velocity).trim() === \"\") ? _squash(_text(data?.stats?.velocity)) : \"\"}\n          </div>\n        </section>\n        <section data-weft-id=\"bugs\" aria-label=\"Open bugs\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"bugs-title\">Open bugs</h2>\n          </div>\n          <div data-weft-id=\"bugs-value\" data-tone=\"warning\">\n            {!(_text(data?.stats?.bugs).trim() === \"\") ? _squash(_text(data?.stats?.bugs)) : \"\"}\n          </div>\n        </section>\n        <section data-weft-id=\"incidents\" aria-label=\"Incidents\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"incidents-title\">Incidents</h2>\n          </div>\n          <div data-weft-id=\"incidents-value\" data-tone=\"danger\">\n            {!(_text(data?.stats?.incidents).trim() === \"\") ? _squash(_text(data?.stats?.incidents)) : \"\"}\n          </div>\n        </section>\n      </div>\n      <div data-weft-id=\"notices\" style={{ gap: \"var(--weft-space-sm)\", display: \"flex\", flexDirection: \"column\", alignItems: \"center\" }}>\n        <div data-weft-id=\"release\" role=\"alert\" data-tone=\"info\">Release 2.4 ships on Friday.</div>\n        <div data-weft-id=\"backup\" role=\"alert\" data-tone=\"success\">\n          {!(_text(data?.backupStatus).trim() === \"\") ? _text(data?.backupStatus) : null}\n        </div>\n        <div data-weft-id=\"quota\" role=\"alert\" data-tone=\"warning\">\n          <div data-weft-id=\"quota-text\">Storage is 90% full.</div>\n          {(() => {\n            const _href = _url(\"https://example.com/storage\");\n            return (\n              <a data-weft-id=\"quota-link\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Manage storage</a>\n            );\n          })()}\n        </div>\n      </div>\n      <div data-weft-id=\"footer\" style={{ gap: \"var(--weft-space-xs)\", display: \"flex\", flexDirection: \"column\", alignItems: \"flex-end\" }}>\n        <div data-weft-id=\"owner\" data-tone=\"default\">Owned by the platform team</div>\n        <div data-weft-id=\"footer-links\" style={{ gap: \"var(--weft-space-md)\", display: \"flex\", flexDirection: \"row\", alignItems: \"flex-start\" }}>\n          {(() => {\n            const _href = _url(\"/docs\");\n            return (\n              <a data-weft-id=\"docs\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Docs</a>\n            );\n          })()}\n          {(() => {\n            const _href = _url(_text(data?.statusUrl));\n            return (\n              <a data-weft-id=\"status\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Status page</a>\n            );\n          })()}\n        </div>\n      </div>\n    </main>\n  );\n}\n"
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _url(value) {\n  const url = value.replace(/[\\t\\n\\r]/g, \"\").replace(/^[\\u0000- ]+|[\\u0000- ]+$/g, \"\");\n  if (url === \"\") return undefined;\n  const colon = url.indexOf(\":\");\n  const delimiter = url.search(/[/?#]/);\n  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;\n  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();\n  return scheme === \"http\" || scheme === \"https\" || scheme === \"mailto\" ? url : undefined;\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"dashboard\" data-state=\"ready\" aria-label=\"Team dashboard\">\n      <div data-weft-id=\"header\" style={{ gap: \"var(--weft-space-xl)\", display: \"flex\", flexDirection: \"row\", alignItems: \"center\", flexWrap: \"wrap\" }}>\n        <h1 data-weft-id=\"title\">\n          {!(_text(data?.team?.name).trim() === \"\") ? _squash(_text(data?.team?.name)) : \"\"}\n        </h1>\n        <div data-weft-id=\"updated\" data-tone=\"muted\">\n          {!(_text(data?.updatedAt).trim() === \"\") ? _squash(_text(data?.updatedAt)) : \"\"}\n        </div>\n      </div>\n      <div data-weft-id=\"stats\" style={{ gap: \"var(--weft-space-lg)\", display: \"grid\", gridTemplateColumns: \"repeat(3, minmax(0, 1fr))\" }}>\n        <section data-weft-id=\"velocity\" aria-label=\"Velocity\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"velocity-title\">Velocity</h2>\n          </div>\n          <div data-weft-id=\"velocity-value\" data-tone=\"success\">\n            {!(_text(data?.stats?.velocity).trim() === \"\") ? _squash(_text(data?.stats?.velocity)) : \"\"}\n          </div>\n        </section>\n        <section data-weft-id=\"bugs\" aria-label=\"Open bugs\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"bugs-title\">Open bugs</h2>\n          </div>\n          <div data-weft-id=\"bugs-value\" data-tone=\"warning\">\n            {!(_text(data?.stats?.bugs).trim() === \"\") ? _squash(_text(data?.stats?.bugs)) : \"\"}\n          </div>\n        </section>\n        <section data-weft-id=\"incidents\" aria-label=\"Incidents\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"incidents-title\">Incidents</h2>\n          </div>\n          <div data-weft-id=\"incidents-value\" data-tone=\"danger\">\n            {!(_text(data?.stats?.incidents).trim() === \"\") ? _squash(_text(data?.stats?.incidents)) : \"\"}\n          </div>\n        </section>\n      </div>\n      <div data-weft-id=\"notices\" style={{ gap: \"var(--weft-space-sm)\", display: \"flex\", flexDirection: \"column\" }}>\n        <div data-weft-id=\"release\" role=\"alert\" data-tone=\"info\">Release 2.4 ships on Friday.</div>\n        <div data-weft-id=\"backup\" role=\"alert\" data-tone=\"success\">\n          {!(_text(data?.backupStatus).trim() === \"\") ? _text(data?.backupStatus) : null}\n        </div>\n        <div data-weft-id=\"quota\" role=\"alert\" data-tone=\"warning\">\n          <div data-weft-id=\"quota-text\">Storage is 90% full.</div>\n          {(() => {\n            const _href = _url(\"https://example.com/storage\");\n            return (\n              <a data-weft-id=\"quota-link\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Manage storage</a>\n            );\n          })()}\n        </div>\n      </div>\n      <div data-weft-id=\"footer\" style={{ gap: \"var(--weft-space-xs)\", display: \"flex\", flexDirection: \"column\", alignItems: \"flex-end\" }}>\n        <div data-weft-id=\"owner\" data-tone=\"default\">Owned by the platform team</div>\n        <div data-weft-id=\"footer-links\" style={{ gap: \"var(--weft-space-md)\", display: \"flex\", flexDirection: \"row\", alignItems: \"flex-start\" }}>\n          {(() => {\n            const _href = _url(\"/docs\");\n            return (\n              <a data-weft-id=\"docs\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Docs</a>\n            );\n          })()}\n          {(() => {\n            const _href = _url(_text(data?.statusUrl));\n            return (\n              <a data-weft-id=\"status\" href={_href} role={_href === undefined ? \"link\" : undefined} tabIndex={_href === undefined ? 0 : undefined} style={{ display: \"inline-block\" }}>Status page</a>\n            );\n          })()}\n        </div>\n      </div>\n    </main>\n  );\n}\n"
  },
  {
   "document": {
@@ -1306,6 +1305,95 @@
    "weft": "0.1",
    "root": {
     "kind": "screen",
+    "id": "glass",
+    "props": {
+     "label": "Glass"
+    },
+    "children": [
+     {
+      "kind": "stack",
+      "id": "card",
+      "props": {
+       "direction": "column",
+       "gap": {
+        "token": "space.md"
+       },
+       "material": {
+        "token": "material.glass"
+       }
+      },
+      "children": [
+       {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+         "level": 2,
+         "text": {
+          "bind": "$.title"
+         }
+        }
+       },
+       {
+        "kind": "text",
+        "id": "body",
+        "children": [
+         "The panel blurs what is behind it."
+        ]
+       },
+       {
+        "kind": "button",
+        "id": "close",
+        "props": {
+         "variant": "primary"
+        },
+        "on": {
+         "press": "glass.close"
+        },
+        "children": [
+         "Got it"
+        ]
+       }
+      ]
+     },
+     {
+      "kind": "grid",
+      "id": "tiles",
+      "props": {
+       "columns": 2,
+       "gap": {
+        "token": "space.sm"
+       },
+       "material": {
+        "token": "material.glass"
+       }
+      },
+      "children": [
+       {
+        "kind": "text",
+        "id": "tile-light",
+        "children": [
+         "Light"
+        ]
+       },
+       {
+        "kind": "text",
+        "id": "tile-dark",
+        "children": [
+         "Dark"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"glass\" aria-label=\"Glass\">\n      <div data-weft-id=\"card\" style={{ gap: \"var(--weft-space-md)\", \"--_weft-material-tint\": \"var(--weft-material-glass-tint)\", \"--_weft-material-solid\": \"var(--weft-material-glass-solid)\", \"--_weft-material-blur\": \"var(--weft-material-glass-blur)\", display: \"flex\", flexDirection: \"column\" }} data-weft-material=\"\">\n        <h2 data-weft-id=\"title\">\n          {!(_text(data?.title).trim() === \"\") ? _squash(_text(data?.title)) : \"\"}\n        </h2>\n        <div data-weft-id=\"body\">The panel blurs what is behind it.</div>\n        <button data-weft-id=\"close\" type=\"button\" data-variant=\"primary\" onClick={(_e) => _act(actions, { id: \"close\", action: \"glass.close\" })}>Got it</button>\n      </div>\n      <div data-weft-id=\"tiles\" style={{ gap: \"var(--weft-space-sm)\", \"--_weft-material-tint\": \"var(--weft-material-glass-tint)\", \"--_weft-material-solid\": \"var(--weft-material-glass-solid)\", \"--_weft-material-blur\": \"var(--weft-material-glass-blur)\", display: \"grid\", gridTemplateColumns: \"repeat(2, minmax(0, 1fr))\" }} data-weft-material=\"\">\n        <div data-weft-id=\"tile-light\">Light</div>\n        <div data-weft-id=\"tile-dark\">Dark</div>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
     "id": "inbox",
     "props": {
      "label": "Inbox",
@@ -1396,10 +1484,30 @@
           "slots": {
            "empty": [
             {
-             "kind": "text",
-             "id": "no-drafts",
+             "kind": "stack",
+             "id": "drafts-empty",
+             "props": {
+              "align": "center",
+              "direction": "column",
+              "gap": {
+               "token": "space.sm"
+              }
+             },
              "children": [
-              "No drafts."
+              {
+               "kind": "text",
+               "id": "no-drafts",
+               "children": [
+                "No drafts."
+               ]
+              },
+              {
+               "kind": "text",
+               "id": "no-drafts-hint",
+               "children": [
+                "Messages you start appear here."
+               ]
+              }
              ]
             }
            ]
@@ -1541,7 +1649,7 @@
     ]
    }
   },
-  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _on(v) {\n  return v === \"false\" ? false : Boolean(v);\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _list(v) {\n  return Array.isArray(v) ? v : [];\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _busy(state) {\n  return state === \"loading\" || state === \"busy\" || state === \"submitting\" ? \"true\" : undefined;\n}\n\nfunction _press(e, fire) {\n  if (e.target !== e.currentTarget || (e.key !== \"Enter\" && e.key !== \" \")) return;\n  e.preventDefault();\n  fire();\n}\n\nfunction _tabKey(e, i, count, choose) {\n  const step = e.key === \"ArrowRight\" ? 1 : e.key === \"ArrowLeft\" ? -1 : 0;\n  if (step === 0 || count === 0) return;\n  e.preventDefault();\n  const next = (i + step + count) % count;\n  choose(next);\n  e.currentTarget.parentElement?.querySelectorAll('[role=\"tab\"]')[next]?.focus();\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"inbox\" data-state=\"loading\" aria-busy=\"true\" aria-label=\"Inbox\">\n      {(() => {\n        const _t = [\n          { id: \"tab-inbox\", doc: \"tab-inbox\", state: \"\", label: \"Inbox\", panel: (\n            <>\n              <ol data-weft-id=\"messages\" data-state=\"ready\">\n                {!(_list(data?.messages).length > 0) ? (\n                  <li role=\"none\" data-weft-slot=\"empty\">\n                    <div data-weft-id=\"no-messages\">No messages.</div>\n                  </li>\n                ) : (\n                  <>\n                    {_list(data?.messages).map((message, _i0) => (\n                      <Fragment key={_i0}>\n                        <li data-weft-id={\"message[\" + _i0 + \"]\"} tabIndex={0} onClick={() => _act(actions, { id: \"message[\" + _i0 + \"]\", action: \"inbox.open\", item: \"$.messages.\" + _i0 })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: \"message[\" + _i0 + \"]\", action: \"inbox.open\", item: \"$.messages.\" + _i0 }))}>\n                          {!(_text(message?.subject).trim() === \"\") ? _text(message?.subject) : null}\n                        </li>\n                      </Fragment>\n                    ))}\n                  </>\n                )}\n              </ol>\n            </>\n          ) },\n          { id: \"tab-drafts\", doc: \"tab-drafts\", state: \"\", label: _text(data?.labels?.drafts).trim(), panel: (\n            <>\n              <ul data-weft-id=\"drafts\" data-state=\"empty\">\n                <li role=\"none\" data-weft-slot=\"empty\">\n                  <div data-weft-id=\"no-drafts\">No drafts.</div>\n                </li>\n              </ul>\n            </>\n          ) },\n          { id: \"tab-sent\", doc: \"tab-sent\", state: \"\", label: \"Sent\", panel: (\n            <>\n              <ul data-weft-id=\"sent\" data-state=\"loading\" aria-busy=\"true\">\n                <li data-weft-id=\"sent-loading\">{\"Loading…\"}</li>\n              </ul>\n            </>\n          ) },\n        ];\n        const _s = Math.max(0, _t.findIndex((_x) => _x.doc === _text(data?.folder) || _x.id === _text(data?.folder)));\n        const _choose = (_k) => { const _x = _t[_k]; if (!_x || _k === _s) return; onChange?.(\"$.folder\", _x.doc); _act(actions, { id: \"folders\", action: \"inbox.folder\" }); };\n        return (\n          <div data-weft-tabs=\"\">\n            <div data-weft-id=\"folders\" role=\"tablist\">\n              {_t.map((_x, _k) => (\n                <button key={_k} data-weft-id={_x.id || undefined} data-state={_x.state || undefined} aria-busy={_busy(_x.state)} type=\"button\" role=\"tab\" id={\"weft-\" + _x.id + \"-tab\"} aria-selected={String(_k === _s)} aria-controls={\"weft-\" + _x.id + \"-panel\"} tabIndex={_k === _s ? 0 : -1} onClick={() => _choose(_k)} onKeyDown={(_e) => _tabKey(_e, _k, _t.length, _choose)}>\n                  {_x.label}\n                </button>\n              ))}\n            </div>\n            {_t.map((_x, _k) => (\n              <div key={_k} role=\"tabpanel\" id={\"weft-\" + _x.id + \"-panel\"} aria-labelledby={\"weft-\" + _x.id + \"-tab\"} hidden={_k !== _s} tabIndex={0}>\n                {_x.panel}\n              </div>\n            ))}\n          </div>\n        );\n      })()}\n      <div data-weft-id=\"message-actions\" aria-label=\"Message actions\" role=\"menu\">\n        <button data-weft-id=\"archive\" type=\"button\" role=\"menuitem\" onClick={() => _act(actions, { id: \"archive\", action: \"inbox.archive\" })}>\n          {!(_text(data?.labels?.archive).trim() === \"\") ? _squash(_text(data?.labels?.archive)) : \"\"}\n        </button>\n        <button data-weft-id=\"delete\" type=\"button\" role=\"menuitem\" disabled={!_on(data?.selection)} onClick={() => _act(actions, { id: \"delete\", action: \"inbox.delete\" })}>Delete</button>\n      </div>\n      {_on(data?.composing) && (\n        <dialog data-weft-id=\"compose\" aria-label=\"New message\" open onKeyDown={(_e) => { if (_e.key !== \"Escape\") return; _e.preventDefault(); onChange?.(\"$.composing\", false); _act(actions, { id: \"compose\", action: \"inbox.closeCompose\" }); }}>\n          <form data-weft-id=\"compose-form\" data-state=\"submitting\" aria-busy=\"true\" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: \"compose-form\", action: \"inbox.send\" }); }}>\n            <div data-weft-field=\"\">\n              <label>\n                <span aria-hidden=\"true\">To</span>\n                <input data-weft-id=\"to\" aria-label=\"To\" type=\"email\" value={_text(data?.draft?.to)} onChange={(_e) => onChange?.(\"$.draft.to\", _e.currentTarget.value)} />\n              </label>\n            </div>\n            <div data-weft-field=\"\">\n              <label>\n                <span aria-hidden=\"true\">Message</span>\n                <textarea data-weft-id=\"body\" aria-label=\"Message\" value={_text(data?.draft?.body)} onChange={(_e) => onChange?.(\"$.draft.body\", _e.currentTarget.value)} />\n              </label>\n            </div>\n          </form>\n          <div data-weft-slot=\"actions\">\n            <button data-weft-id=\"send\" type=\"button\" data-variant=\"primary\" onClick={(_e) => _act(actions, { id: \"send\", action: \"inbox.send\" })}>Send</button>\n          </div>\n        </dialog>\n      )}\n    </main>\n  );\n}\n"
+  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _on(v) {\n  return v === \"false\" ? false : Boolean(v);\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _list(v) {\n  return Array.isArray(v) ? v : [];\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _busy(state) {\n  return state === \"loading\" || state === \"busy\" || state === \"submitting\" ? \"true\" : undefined;\n}\n\nfunction _press(e, fire) {\n  if (e.target !== e.currentTarget || (e.key !== \"Enter\" && e.key !== \" \")) return;\n  e.preventDefault();\n  fire();\n}\n\nfunction _tabKey(e, i, count, choose) {\n  const step = e.key === \"ArrowRight\" ? 1 : e.key === \"ArrowLeft\" ? -1 : 0;\n  if (step === 0 || count === 0) return;\n  e.preventDefault();\n  const next = (i + step + count) % count;\n  choose(next);\n  e.currentTarget.parentElement?.querySelectorAll('[role=\"tab\"]')[next]?.focus();\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"inbox\" data-state=\"loading\" aria-busy=\"true\" aria-label=\"Inbox\">\n      {(() => {\n        const _t = [\n          { id: \"tab-inbox\", doc: \"tab-inbox\", state: \"\", label: \"Inbox\", panel: (\n            <>\n              <ol data-weft-id=\"messages\" data-state=\"ready\">\n                {!(_list(data?.messages).length > 0) ? (\n                  <li role=\"none\" data-weft-slot=\"empty\">\n                    <div data-weft-id=\"no-messages\">No messages.</div>\n                  </li>\n                ) : (\n                  <>\n                    {_list(data?.messages).map((message, _i0) => (\n                      <Fragment key={_i0}>\n                        <li data-weft-id={\"message[\" + _i0 + \"]\"} tabIndex={0} onClick={() => _act(actions, { id: \"message[\" + _i0 + \"]\", action: \"inbox.open\", item: \"$.messages.\" + _i0 })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: \"message[\" + _i0 + \"]\", action: \"inbox.open\", item: \"$.messages.\" + _i0 }))}>\n                          {!(_text(message?.subject).trim() === \"\") ? _text(message?.subject) : null}\n                        </li>\n                      </Fragment>\n                    ))}\n                  </>\n                )}\n              </ol>\n            </>\n          ) },\n          { id: \"tab-drafts\", doc: \"tab-drafts\", state: \"\", label: _text(data?.labels?.drafts).trim(), panel: (\n            <>\n              <ul data-weft-id=\"drafts\" data-state=\"empty\">\n                <li role=\"none\" data-weft-slot=\"empty\">\n                  <div data-weft-id=\"drafts-empty\" style={{ gap: \"var(--weft-space-sm)\", display: \"flex\", flexDirection: \"column\", alignItems: \"center\" }}>\n                    <div data-weft-id=\"no-drafts\">No drafts.</div>\n                    <div data-weft-id=\"no-drafts-hint\">Messages you start appear here.</div>\n                  </div>\n                </li>\n              </ul>\n            </>\n          ) },\n          { id: \"tab-sent\", doc: \"tab-sent\", state: \"\", label: \"Sent\", panel: (\n            <>\n              <ul data-weft-id=\"sent\" data-state=\"loading\" aria-busy=\"true\">\n                <li data-weft-id=\"sent-loading\">{\"Loading…\"}</li>\n              </ul>\n            </>\n          ) },\n        ];\n        const _s = Math.max(0, _t.findIndex((_x) => _x.doc === _text(data?.folder) || _x.id === _text(data?.folder)));\n        const _choose = (_k) => { const _x = _t[_k]; if (!_x || _k === _s) return; onChange?.(\"$.folder\", _x.doc); _act(actions, { id: \"folders\", action: \"inbox.folder\" }); };\n        return (\n          <div data-weft-tabs=\"\">\n            <div data-weft-id=\"folders\" role=\"tablist\">\n              {_t.map((_x, _k) => (\n                <button key={_k} data-weft-id={_x.id || undefined} data-state={_x.state || undefined} aria-busy={_busy(_x.state)} type=\"button\" role=\"tab\" id={\"weft-\" + _x.id + \"-tab\"} aria-selected={String(_k === _s)} aria-controls={\"weft-\" + _x.id + \"-panel\"} tabIndex={_k === _s ? 0 : -1} onClick={() => _choose(_k)} onKeyDown={(_e) => _tabKey(_e, _k, _t.length, _choose)}>\n                  {_x.label}\n                </button>\n              ))}\n            </div>\n            {_t.map((_x, _k) => (\n              <div key={_k} role=\"tabpanel\" id={\"weft-\" + _x.id + \"-panel\"} aria-labelledby={\"weft-\" + _x.id + \"-tab\"} hidden={_k !== _s} tabIndex={0}>\n                {_x.panel}\n              </div>\n            ))}\n          </div>\n        );\n      })()}\n      <div data-weft-id=\"message-actions\" aria-label=\"Message actions\" role=\"menu\">\n        <button data-weft-id=\"archive\" type=\"button\" role=\"menuitem\" onClick={() => _act(actions, { id: \"archive\", action: \"inbox.archive\" })}>\n          {!(_text(data?.labels?.archive).trim() === \"\") ? _squash(_text(data?.labels?.archive)) : \"\"}\n        </button>\n        <button data-weft-id=\"delete\" type=\"button\" role=\"menuitem\" disabled={!_on(data?.selection)} onClick={() => _act(actions, { id: \"delete\", action: \"inbox.delete\" })}>Delete</button>\n      </div>\n      {_on(data?.composing) && (\n        <dialog data-weft-id=\"compose\" aria-label=\"New message\" open onKeyDown={(_e) => { if (_e.key !== \"Escape\") return; _e.preventDefault(); onChange?.(\"$.composing\", false); _act(actions, { id: \"compose\", action: \"inbox.closeCompose\" }); }}>\n          <form data-weft-id=\"compose-form\" data-state=\"submitting\" aria-busy=\"true\" onSubmit={(_e) => { _e.preventDefault(); _act(actions, { id: \"compose-form\", action: \"inbox.send\" }); }}>\n            <div data-weft-field=\"\">\n              <label>\n                <span aria-hidden=\"true\">To</span>\n                <input data-weft-id=\"to\" aria-label=\"To\" type=\"email\" value={_text(data?.draft?.to)} onChange={(_e) => onChange?.(\"$.draft.to\", _e.currentTarget.value)} />\n              </label>\n            </div>\n            <div data-weft-field=\"\">\n              <label>\n                <span aria-hidden=\"true\">Message</span>\n                <textarea data-weft-id=\"body\" aria-label=\"Message\" value={_text(data?.draft?.body)} onChange={(_e) => onChange?.(\"$.draft.body\", _e.currentTarget.value)} />\n              </label>\n            </div>\n          </form>\n          <div data-weft-slot=\"actions\">\n            <button data-weft-id=\"send\" type=\"button\" data-variant=\"primary\" onClick={(_e) => _act(actions, { id: \"send\", action: \"inbox.send\" })}>Send</button>\n          </div>\n        </dialog>\n      )}\n    </main>\n  );\n}\n"
  },
  {
   "document": {

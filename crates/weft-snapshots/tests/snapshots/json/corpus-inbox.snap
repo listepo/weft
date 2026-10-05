@@ -96,10 +96,30 @@ description: corpus-inbox as json
                 "slots": {
                   "empty": [
                     {
-                      "kind": "text",
-                      "id": "no-drafts",
+                      "kind": "stack",
+                      "id": "drafts-empty",
+                      "props": {
+                        "align": "center",
+                        "direction": "column",
+                        "gap": {
+                          "token": "space.sm"
+                        }
+                      },
                       "children": [
-                        "No drafts."
+                        {
+                          "kind": "text",
+                          "id": "no-drafts",
+                          "children": [
+                            "No drafts."
+                          ]
+                        },
+                        {
+                          "kind": "text",
+                          "id": "no-drafts-hint",
+                          "children": [
+                            "Messages you start appear here."
+                          ]
+                        }
                       ]
                     }
                   ]

@@ -79,6 +79,7 @@ An attribute value is exactly one of:
 | Negated binding | `disabled="{!$.email}"` | `!` is NOT: disabled while `$.email` is empty. Boolean props only, never on a writable prop. |
 | Token | `gap="{token.space.md}"` | Every design value: spacing, color, size. Never `gap="16px"`. |
 
+- A frosted-glass surface is a token, not a style: `<stack material="{token.material.glass}">` (also on `grid`). The token must be a `material` token of the project; do not invent one in markup, and do not write blur or opacity values on the element.
 - Read `!` as NOT, not as part of the brace. "Disabled while busy" is `disabled="{$.busy}"`; "disabled until an email is entered" is `disabled="{!$.email}"`. When an edit changes the condition, decide the `!` again; do not copy it from the old value.
 - Never mix text and a reference: `text="Hello {$.name}"` is an error. Bind the whole value, and put fixed text in its own element.
 - A literal that starts with `{` is written `{{`: `text="{{curly}"` reads as `{curly}`.

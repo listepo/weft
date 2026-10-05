@@ -4,7 +4,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { compare, type Comparison } from "./compare.ts";
+import { compare, type CompareOptions, type Comparison } from "./compare.ts";
 
 export const PLATFORM = `${process.platform}-${process.arch}`;
 export const BASELINES = fileURLToPath(new URL(`../baselines/${PLATFORM}/`, import.meta.url));
@@ -18,7 +18,7 @@ export type BaselineResult =
 
 const updating = () => process.env["WEFT_UPDATE_SCREENSHOTS"] === "1";
 
-export type MatchOptions = {
+export type MatchOptions = CompareOptions & {
   /** Never rewrite the baseline, even while updating: for a deliberately changed screen. */
   readOnly?: boolean;
   /** Names the diff images instead of `name`. */
@@ -29,7 +29,7 @@ export type MatchOptions = {
 export function matchBaseline(
   png: Uint8Array,
   name: string,
-  { readOnly = false, label = name }: MatchOptions = {},
+  { readOnly = false, label = name, ignoreBottom }: MatchOptions = {},
 ): BaselineResult {
   const path = join(BASELINES, `${name}.png`);
   if (updating() && !readOnly) {
@@ -40,6 +40,11 @@ export function matchBaseline(
   if (!existsSync(path)) {
     return { status: "missing", platform: PLATFORM, reviewed: existsSync(BASELINES) };
   }
-  const comparison = compare(readFileSync(path), png, `${PLATFORM}/${label}`);
+  const comparison = compare(
+    readFileSync(path),
+    png,
+    `${PLATFORM}/${label}`,
+    ignoreBottom === undefined ? {} : { ignoreBottom },
+  );
   return { status: comparison.differing === 0 ? "match" : "differ", comparison };
 }

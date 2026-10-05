@@ -1,7 +1,7 @@
 // Figma layers as the shared read-back sees them (`Layer` of @weft/design-tool). The wrapper reads
 // the node lazily, so a large file costs only what the read visits.
 import { KEY, readMark, type Layer, type LayerLayout } from "@weft/design-tool";
-import type { FigmaApi, FLayout, FNode, FPaint } from "./api.ts";
+import type { FEffect, FigmaApi, FLayout, FNode, FPaint } from "./api.ts";
 import { isContainer } from "./api.ts";
 import { tokenPathOf } from "./tokens.ts";
 
@@ -14,18 +14,26 @@ function paints(list: readonly FPaint[] | symbol): unknown {
   );
 }
 
+const effects = (list: readonly FEffect[]): unknown =>
+  list.map((e) => (e.type === "BACKGROUND_BLUR" ? [e.type, e.radius, e.visible] : e.type));
+
 /**
  * The visual properties Weft has no prop for, as one comparable string: fills, strokes, corner
- * radius and padding, plus spacing on frames whose spacing is not a prop.
+ * radius and padding, plus spacing on frames whose spacing is not a prop, and the effects (a
+ * material's background blur) when there are any.
  */
 export function styleKey(layer: FLayout, withSpacing: boolean): string {
-  return JSON.stringify([
+  const key = [
     paints(layer.fills),
     paints(layer.strokes),
     typeof layer.cornerRadius === "symbol" ? "mixed" : layer.cornerRadius,
     [layer.paddingLeft, layer.paddingRight, layer.paddingTop, layer.paddingBottom],
     withSpacing ? layer.itemSpacing : null,
-  ]);
+  ];
+  // Appended only when there is one, so a frame built before effects were read keeps the
+  // fingerprint stored in its plugin data and does not read back as edited.
+  if (layer.effects.length > 0) key.push(effects(layer.effects));
+  return JSON.stringify(key);
 }
 
 const MODE = { HORIZONTAL: "row", VERTICAL: "column", GRID: "grid", NONE: "none" } as const;

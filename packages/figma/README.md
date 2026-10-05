@@ -19,6 +19,10 @@ The mapping itself is not here. It lives in `@weft/design-tool`, which `@weft/pe
 | Plugin, main thread | `handleRequest(api, selection, message, options)` | Validates a message from the plugin UI, then builds a parsed screen or reads the selected frame. |
 | Plugin, UI | `buildRequest`, `exportRequest`, `finishExport` | Parse pasted markup into a build request, and turn a read into `.weft` markup. |
 
+## Glass
+
+A `stack` or `grid` with a `material` token (`material="{token.material.glass}"`, SPEC §10.3) is drawn as a solid fill of the tint colour at the tint's opacity plus a `BACKGROUND_BLUR` effect of the token's radius (`effects` of `FLayout`; the radius is Figma's own unit, taken as px). The `material` prop itself comes back from the plugin data, like every prop; the style fingerprint includes the effects, so a blur or tint a designer changed by hand is reported as a `tokens` loss, not silently dropped. The library has no variable for a material token, since one variable holds one value and a material is a colour and a blur.
+
 ## Token modes
 
 A project whose `tokens` is a DTCG resolver (SPEC §10.3) has modifiers, such as `theme` with the contexts `light` and `dark`. When the build request carries one (`UiOptions.modifier`), `ensureLibrary` makes each context a mode of the `Weft tokens` collection:

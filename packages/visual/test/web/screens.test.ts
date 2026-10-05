@@ -6,6 +6,7 @@ import { commands } from "vitest/browser";
 import type { ComponentType } from "react";
 import { components, screens } from "virtual:weft-screens";
 import {
+  BACKDROP,
   expectBaseline,
   expectSameLook,
   showMarkup,
@@ -25,13 +26,14 @@ for (const screen of screens) {
     beforeAll(async () => {
       // What a host adds beside the components: the static page carries its tokens in its own
       // stylesheet, so a component without `weft-tokens.css` would lose every token it reads.
-      const head = `<style>${screen.css}</style>`;
+      const backdrop = name === "glass" ? BACKDROP : "";
+      const head = `<style>${screen.css}</style>${backdrop}`;
       const props = { data };
       await showReact("react", (await load("react")) as ComponentType<Props>, props, head);
       await showSolid("solid", (await load("solid")) as (p: Props) => unknown, props, head);
       await showMarkup("reference", screen.reference, head);
-      await showPage("html", screen.html);
-      await showPage("html-back", screen.back.html);
+      await showPage("html", screen.html, backdrop);
+      await showPage("html-back", screen.back.html, backdrop);
       await showReact(
         "react-back",
         (await load("react-back")) as ComponentType<Props>,

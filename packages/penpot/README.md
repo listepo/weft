@@ -45,6 +45,10 @@ On export, `readThemes` reads the first theme group that turns the base set on. 
 - **Pages.** Penpot refuses changes to a page that is not active, and `createPage` does not open the new page. `ensureLibrary` opens the library page, then opens the designer's page again.
 - **Copies.** A component copy's structure cannot change, so containers are boards, not copies, as in Figma.
 
+## Glass
+
+A `stack` or `grid` with a `material` token (SPEC §10.3) is a board with a fill of the tint colour and opacity and a `backgroundBlur` of the token's radius (`Shape.backgroundBlur`, a `Blur` in `@penpot/plugin-types`; read as optional, since a shape may have none). The `material` prop comes back from the plugin data, and the style fingerprint includes the blur, so a hand-edited blur or tint is a `tokens` loss. A material token has no Penpot token of its own.
+
 ## Limits of this stage
 
 - Visual edits with no Weft prop (fills, strokes, radius, padding) are reported as `tokens` losses. Style overrides are excluded until `docs/figma-style-overrides-design.md` is approved.

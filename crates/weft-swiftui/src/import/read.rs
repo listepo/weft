@@ -1367,6 +1367,19 @@ impl<'a> Reader<'a> {
         }
     }
 
+    /// A stack's or grid's `.modifier(theme.<path>)`: the token is its material. Any other use of
+    /// `modifier` stays for `ignored` to report.
+    fn material(&mut self, node: &mut Node, mods: &mut Mods) {
+        for m in mods.take_all("modifier") {
+            match first_arg(&m.args).and_then(|e| self.token(e)) {
+                Some(t) => {
+                    node.props.insert("material".to_owned(), Value::Token(t));
+                }
+                None => mods.0.push(m),
+            }
+        }
+    }
+
     fn finish(&mut self, mut node: Node, mods: Mods, path: &str) -> Vec<Child> {
         self.common(&mut node, mods, path);
         vec![Child::Node(Box::new(node))]
@@ -1494,6 +1507,7 @@ impl<'a> Reader<'a> {
             .unwrap_or_default();
         let children = self.nested(|r| r.views(&body, Place::Nodes, &here));
         node.children = self.elements_only(children, &here);
+        self.material(&mut node, &mut mods);
         self.finish(node, mods, &here)
     }
 
@@ -1536,6 +1550,7 @@ impl<'a> Reader<'a> {
             .unwrap_or_default();
         let children = self.nested(|r| r.views(&body, Place::Nodes, &here));
         node.children = self.elements_only(children, &here);
+        self.material(&mut node, &mut mods);
         self.finish(node, mods, &here)
     }
 

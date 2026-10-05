@@ -172,6 +172,7 @@ fn token_expected(code: TokenCode) -> &'static str {
         TokenCode::T004 => "an alias to a token that exists",
         TokenCode::T005 => "aliases that end at a value",
         TokenCode::T006 => "a JSON object for every token and group, with a string $type",
+        TokenCode::T007 => "a material colour with an alpha of 0 to 1 and a blur of 0 to 100 px",
     }
 }
 

@@ -1,0 +1,46 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-glass as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="glass" aria-label="Glass">
+      <div data-weft-id="card" style={{ gap: "var(--weft-space-md)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "flex", flexDirection: "column" }} data-weft-material="">
+        <h2 data-weft-id="title">
+          {!(_text(data?.title).trim() === "") ? _squash(_text(data?.title)) : ""}
+        </h2>
+        <div data-weft-id="body">The panel blurs what is behind it.</div>
+        <button data-weft-id="close" type="button" data-variant="primary" onClick={(_e) => _act(actions, { id: "close", action: "glass.close" })}>Got it</button>
+      </div>
+      <div data-weft-id="tiles" style={{ gap: "var(--weft-space-sm)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }} data-weft-material="">
+        <div data-weft-id="tile-light">Light</div>
+        <div data-weft-id="tile-dark">Dark</div>
+      </div>
+    </main>
+  );
+}

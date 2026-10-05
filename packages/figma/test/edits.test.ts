@@ -289,6 +289,30 @@ for (const c of cases) {
   });
 }
 
+describe("a glass surface (T51)", () => {
+  const glass = corpusMarkup("glass");
+
+  test("comes back unchanged, still taking its material token", async () => {
+    const { figma, frame } = await built(glass);
+    const result = await read(figma, frame);
+    assert.equal(serialize(result.document), serialize(parseStrict(glass)));
+    assert.deepEqual(result.losses, []);
+  });
+
+  test("a blur a designer changed is reported, and the prop stays", async () => {
+    const { figma, frame } = await built(glass);
+    figma.find<FakeFrame>(frame, "stack#card").effects = [
+      { type: "BACKGROUND_BLUR", radius: 4, visible: true },
+    ];
+    const result = await read(figma, frame);
+    assert.equal(serialize(result.document), serialize(parseStrict(glass)));
+    assert.deepEqual(
+      result.losses.map((l) => l.kind),
+      ["tokens"],
+    );
+  });
+});
+
 describe("a screen whose library was built twice", () => {
   test("reuses the components and variables", async () => {
     const { figma } = await built(login);

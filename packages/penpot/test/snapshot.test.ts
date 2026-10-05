@@ -26,6 +26,7 @@ function tree(root: FakeBoard): string {
       height: 100,
       hidden: false,
       borderRadius: 0,
+      backgroundBlur: undefined,
       strokes: [],
       layoutCell: undefined,
       tokens: {},
