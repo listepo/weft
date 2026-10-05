@@ -14,7 +14,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
 | T55 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
-| T56 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -216,22 +215,3 @@ Done when:
 - the affected baselines and snapshots are retaken and reviewed;
 - todo-list's button no longer stretches;
 - the full check exits 0.
-
-### T56. Narrow the WebAssembly task's inputs
-
-`root:wasm` lists `/crates/**/*` as its input, so any crate change rebuilds both WebAssembly modules (about 45 s), even a change to a crate the modules do not contain, such as `weft-swiftui` or `weft-cli`. Found in T54.
-
-- Make the inputs exactly the crates the two modules are built from: `weft-wasm` with and without the `web` feature, and their dependency closure from `cargo metadata`, plus the workspace `Cargo.toml` and `Cargo.lock` and the files the build reads.
-- The list must not go stale silently. A test compares the declared inputs with the crate closure and fails when a dependency is added without updating them.
-- Do the same for `root:native` if it has the same coarse input.
-
-Done when:
-- a change in `weft-swiftui` no longer rebuilds the modules;
-- a change in `weft-core` still does;
-- the full check exits 0.
-
-Execution plan:
-1. Read the build: `cargo tree` and `cargo metadata` give the workspace crates each module is built from (`weft-wasm`, `weft-binding`, `weft-catalog`, `weft-core`, plus `weft-import` and `weft-web` for the `web` feature; `weft-node` adds nothing new); search the closure's sources and build scripts for files read outside the crate folders (`include_str!`).
-2. `moon.yml`: a file group per task (`wasm-sources`, `native-sources`) naming those crate folders, the root `Cargo.toml`, `Cargo.lock` and every file the sources include from outside their crate; the `wasm` and `native` inputs use the groups. `tooling/select.ts`: drop the two `TASK_CRATE` entries the narrowed inputs make dead.
-3. `tooling/closure.ts` (pure, `cargo metadata` JSON in, crate folders and external includes out) and `tooling/test/inputs.test.ts`: a unit test over a fixture, and a test against the real workspace that compares both tasks' declared inputs (`moon query tasks`) with the closure and with the includes read from the sources, and fails when a dependency or an include is added without updating the list. The `tooling` task's inputs gain the files the test reads.
-4. Demo: build `root:wasm`, touch a `weft-swiftui` file (cached), touch a `weft-core` file (rebuilds); record in `research.md` with the sources (moon inputs docs, cargo metadata docs).

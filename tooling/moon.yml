@@ -5,5 +5,13 @@ tasks:
   test:
     # Pure functions over fixtures: no WebAssembly module in sight, so the suite does not wait for one.
     deps: []
+    # The input-list test reads the workspace's task definitions and Rust sources.
+    inputs:
+      - "/moon.yml"
+      - "/Cargo.toml"
+      - "/Cargo.lock"
+      - "/crates/*/Cargo.toml"
+      - "/crates/*/build.rs"
+      - "/crates/*/src/**/*.rs"
     options:
       mergeDeps: "replace"

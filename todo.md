@@ -8,4 +8,3 @@
 - T51. Glass material tokens
 - T52. 3D transforms and models
 - T55. Default cross-axis alignment of a row stack
-- T56. Narrow the WebAssembly task's inputs

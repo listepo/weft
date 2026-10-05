@@ -58,11 +58,15 @@ const test_ = (id: string, over: Partial<Task> = {}): Task => {
 };
 
 const tasks: Task[] = [
+  // The build tasks list the crates they are made of, not `crates/**/*` (T56).
   task("root:wasm", {
-    globs: ["crates/**/*"],
+    globs: ["crates/weft-wasm/**/*", "crates/weft-core/**/*", "crates/weft-catalog/**/*"],
     files: ["packages/catalog/catalog.json"],
   }),
-  task("root:native", { globs: ["crates/**/*"], files: ["packages/catalog/catalog.json"] }),
+  task("root:native", {
+    globs: ["crates/weft-node/**/*", "crates/weft-core/**/*", "crates/weft-catalog/**/*"],
+    files: ["packages/catalog/catalog.json"],
+  }),
   task("root:cli", {}),
   task("root:typecheck", {
     globs: ["packages/**/*", "plugins/**/*", "bench/**/*", "runtimes/**/*", "tooling/**/*"],
@@ -191,6 +195,19 @@ describe("a change in a binding stub", () => {
       ["core:test", "mcp:test", "visual:test", "root:typecheck"].every((t) =>
         result.whole.includes(t),
       ),
+    );
+  });
+
+  test("a crate the module is not built from leaves the module and its suites alone", () => {
+    const result = plan(["crates/weft-swiftui/src/lib.rs"]);
+    assert.ok(!result.whole.includes("core:test") && !result.whole.includes("root:typecheck"));
+    assert.ok(!result.narrowed.includes("mcp:test"));
+  });
+
+  test("a crate the module is built from rebuilds it and reaches its suites", () => {
+    const result = plan(["crates/weft-catalog/src/lib.rs"]);
+    assert.ok(
+      ["core:test", "catalog:test", "root:typecheck"].every((t) => result.whole.includes(t)),
     );
   });
 
