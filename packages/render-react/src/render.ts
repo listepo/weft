@@ -172,9 +172,12 @@ function layoutStyle(n: Inst, ctx: Ctx): CSSProperties {
     return style;
   }
   style.display = "flex";
-  style.flexDirection = text(n, "direction") === "row" ? "row" : "column";
+  const row = text(n, "direction") === "row";
+  style.flexDirection = row ? "row" : "column";
   const align = text(n, "align");
+  // SPEC §5.1: a row without a valid `align` centres its children across the row.
   if (Object.hasOwn(ALIGN, align)) style.alignItems = ALIGN[align];
+  else if (row) style.alignItems = "center";
   if (flag(n, "wrap")) style.flexWrap = "wrap";
   return style;
 }

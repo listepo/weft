@@ -598,6 +598,14 @@ impl<'d> Ctx<'d> {
         {
             layout(&mut s, dom, el, self.conventions);
         }
+        // SPEC §5.1: a row centres its children by default, and the renderers write that default
+        // out as markup, so reading it back as `align="center"` would add what the source lacks.
+        if s.kind.as_deref() == Some("stack")
+            && s.props.get("direction").is_some_and(|d| d == "row")
+            && s.props.get("align").is_some_and(|a| a == "center")
+        {
+            s.props.shift_remove("align");
+        }
         if self.conventions.is_some() {
             left_out_style(&mut s, attr("style"));
         }

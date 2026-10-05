@@ -157,11 +157,11 @@ pub const RUNTIME: &[Helper] = &[
     },
     Helper {
         name: "_align",
-        js: r#"function _align(v) {
-  return v === "start" ? "flex-start" : v === "end" ? "flex-end" : v === "center" || v === "stretch" ? v : undefined;
+        js: r#"function _align(v, direction) {
+  return v === "start" ? "flex-start" : v === "end" ? "flex-end" : v === "center" || v === "stretch" ? v : direction === "row" ? "center" : undefined;
 }"#,
-        ts: r#"function _align(v: string): string | undefined {
-  return v === "start" ? "flex-start" : v === "end" ? "flex-end" : v === "center" || v === "stretch" ? v : undefined;
+        ts: r#"function _align(v: string, direction: string): string | undefined {
+  return v === "start" ? "flex-start" : v === "end" ? "flex-end" : v === "center" || v === "stretch" ? v : direction === "row" ? "center" : undefined;
 }"#,
     },
     Helper {

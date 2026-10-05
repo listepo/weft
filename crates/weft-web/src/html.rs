@@ -118,7 +118,7 @@ pub fn to_html_with_data(
 /// the page look different from them.
 const LAYOUT_CSS: &str = "\
 .weft-stack { display: flex; flex-direction: column; }
-.weft-row { display: flex; flex-direction: row; }
+.weft-row { display: flex; flex-direction: row; align-items: center; }
 .weft-grid { display: grid; }
 [data-align=\"start\"] { align-items: flex-start; }
 [data-align=\"center\"] { align-items: center; }

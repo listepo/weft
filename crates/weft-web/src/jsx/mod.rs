@@ -1454,16 +1454,24 @@ impl<'a> Gen<'a> {
         });
         let align = self.text_of(n, "align");
         let key = self.css("alignItems", "align-items");
+        // SPEC §5.1: a row without a valid `align` centres its children across the row.
+        let row_default = match &direction.lit {
+            Some(v) => (*v == str_v("row")).then(|| "center".to_owned()),
+            None => Some(format!("{} === \"row\" ? \"center\" : undefined", direction.js)),
+        };
         match &align.lit {
             Some(v) => {
                 let k = v.string();
                 if let Some((_, value)) = ALIGN.iter().find(|(name, _)| *name == k) {
                     entries.push(format!("{key}: {}", quote(value)));
+                } else if let Some(d) = row_default {
+                    let d = if d == "center" { quote(&d) } else { d };
+                    entries.push(format!("{key}: {d}"));
                 }
             }
             None => {
                 let f = self.use_("_align");
-                entries.push(format!("{key}: {f}({})", align.js));
+                entries.push(format!("{key}: {f}({}, {})", align.js, direction.js));
             }
         }
         let wrap = self.flag_of(n, "wrap");
