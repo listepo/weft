@@ -8,3 +8,4 @@
 - T51. Glass material tokens
 - T52. 3D transforms and models
 - T54. Run only the checks a change affects
+- T55. Default cross-axis alignment of a row stack
