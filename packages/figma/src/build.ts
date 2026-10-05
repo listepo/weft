@@ -48,9 +48,7 @@ function figmaHost(api: FigmaApi, library: Library): BuildHost<Built, FComponent
         frame.fills = [
           { type: "SOLID", color: view.material.color, opacity: view.material.opacity },
         ];
-        frame.effects = [
-          { type: "BACKGROUND_BLUR", radius: view.material.blur, visible: true },
-        ];
+        frame.effects = [{ type: "BACKGROUND_BLUR", radius: view.material.blur, visible: true }];
       }
       if (view.mode === "grid") {
         frame.layoutMode = "GRID";

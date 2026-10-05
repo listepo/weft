@@ -151,7 +151,9 @@ function materialValues(token: Token): Record<(typeof MATERIAL_PROPS)[number], s
     (unit !== "px" && unit !== "rem")
   )
     return undefined;
-  const byte = Math.round(alpha * 255).toString(16).padStart(2, "0");
+  const byte = Math.round(alpha * 255)
+    .toString(16)
+    .padStart(2, "0");
   return { tint: `${hex}${byte}`, solid: hex, blur: `${unit === "rem" ? value * 16 : value}px` };
 }
 

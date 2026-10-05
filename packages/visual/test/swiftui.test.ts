@@ -245,11 +245,10 @@ struct InsetProbe: View {
 `;
 
 function dispatcher(types: Map<string, string>): string {
-  const cases = [...types].map(
-    ([name, type]) =>
-      OVER_BACKDROP.has(name)
-        ? `        case "${name}": GlassBackdrop { ${type}Screen(model: .sample) }`
-        : `        case "${name}": ${type}Screen(model: .sample)`,
+  const cases = [...types].map(([name, type]) =>
+    OVER_BACKDROP.has(name)
+      ? `        case "${name}": GlassBackdrop { ${type}Screen(model: .sample) }`
+      : `        case "${name}": ${type}Screen(model: .sample)`,
   );
   return `import SwiftUI
 

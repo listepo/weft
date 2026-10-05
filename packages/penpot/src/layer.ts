@@ -1,15 +1,7 @@
 // Penpot shapes as the shared read-back sees them (`Layer` of @weft/design-tool), and the pieces of
 // a shape both the build and the read need: plugin data, the style fingerprint, the layout.
 import { KEY, readMark, type Layer, type LayerLayout, type PluginData } from "@weft/design-tool";
-import type {
-  PBlur,
-  PBoard,
-  PCommonLayout,
-  PFill,
-  PSharedData,
-  PShape,
-  PStroke,
-} from "./api.ts";
+import type { PBlur, PBoard, PCommonLayout, PFill, PSharedData, PShape, PStroke } from "./api.ts";
 import { childrenOf, isBoard } from "./api.ts";
 
 /**
@@ -59,7 +51,8 @@ function fills(list: readonly PFill[] | "mixed"): unknown {
 const strokes = (list: readonly PStroke[]): unknown =>
   list.map((s) => [hex(s.strokeColor), s.strokeOpacity ?? 1, s.strokeWidth ?? 1]);
 
-const blur = (b: PBlur | undefined): unknown => (b === undefined ? null : [b.value, b.hidden ?? false]);
+const blur = (b: PBlur | undefined): unknown =>
+  b === undefined ? null : [b.value, b.hidden ?? false];
 
 /**
  * The visual properties Weft has no prop for, as one comparable string: fills, strokes, the
