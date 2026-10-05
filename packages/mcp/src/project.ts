@@ -10,7 +10,7 @@ export const projectSchema = (limits: Limits = LIMITS) =>
     .unknown()
     .optional()
     .describe(
-      `The project's weft.json with each file name replaced by that file's JSON content: {"tokens":[DTCG token trees, later layers win],"catalog":{catalog extension},"actions":["name",…],"data":{JSON Schema of the data model}}, every member optional. It replaces the server's catalog, tokens, actions and data schema for this call; its tool settings are ignored. At most ${limits.projectChars} characters of JSON.`,
+      `The project's weft.json with each file name replaced by that file's JSON content: {"tokens":[DTCG token trees, later layers win] or one DTCG resolver document with inline sources,"catalog":{catalog extension},"actions":["name",…],"data":{JSON Schema of the data model}}, every member optional. It replaces the server's catalog, tokens, actions and data schema for this call; its tool settings are ignored. At most ${limits.projectChars} characters of JSON.`,
     );
 
 /** What a loaded project gives a tool to judge markup with. */
