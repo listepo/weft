@@ -1,0 +1,101 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-inbox as html
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inbox</title>
+<style>
+:root {
+  --weft-space-xs: 4px;
+  --weft-space-sm: 8px;
+  --weft-space-md: 16px;
+  --weft-space-lg: 24px;
+  --weft-space-xl: 32px;
+  --weft-radius-sm: 4px;
+  --weft-radius-md: 8px;
+  --weft-radius-pill: 999px;
+  --weft-font-size-sm: 0.875rem;
+  --weft-font-size-md: 1rem;
+  --weft-font-size-lg: 1.25rem;
+  --weft-font-size-xl: 1.75rem;
+  --weft-color-white: #ffffff;
+  --weft-color-ink: #1a1c21;
+  --weft-color-blue-_root: #2563eb;
+  --weft-color-red: #dc2626;
+  --weft-color-action-primary: #2563eb;
+  --weft-color-action-danger: #dc2626;
+}
+.weft-stack { display: flex; flex-direction: column; }
+.weft-row { display: flex; flex-direction: row; }
+.weft-grid { display: grid; }
+[data-align="start"] { align-items: flex-start; }
+[data-align="center"] { align-items: center; }
+[data-align="end"] { align-items: flex-end; }
+[data-align="stretch"] { align-items: stretch; }
+[data-wrap] { flex-wrap: wrap; }
+.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
+.weft-field label { flex-direction: column; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main data-weft-id="inbox" aria-label="Inbox" data-state="loading">
+  <div>
+    <div data-weft-id="folders" role="tablist" data-bind="selected:$.folder" data-action="change:inbox.folder">
+      <button data-weft-id="tab-inbox" type="button" role="tab" id="weft-tab-inbox-tab" aria-selected="true" aria-controls="weft-tab-inbox-panel">Inbox</button>
+      <button data-weft-id="tab-drafts" type="button" role="tab" id="weft-tab-drafts-tab" aria-selected="false" aria-controls="weft-tab-drafts-panel" data-bind="label:$.labels.drafts"></button>
+      <button data-weft-id="tab-sent" type="button" role="tab" id="weft-tab-sent-tab" aria-selected="false" aria-controls="weft-tab-sent-panel">Sent</button>
+    </div>
+    <div role="tabpanel" id="weft-tab-inbox-panel" aria-labelledby="weft-tab-inbox-tab">
+      <ol data-weft-id="messages" data-state="ready">
+        <template data-weft-id="message-each" data-each="$.messages" data-as="message">
+          <li data-weft-id="message" data-bind="text:$message.subject" data-action="press:inbox.open"></li>
+        </template>
+        <template data-empty>
+          <p data-weft-id="no-messages">No messages.</p>
+        </template>
+      </ol>
+    </div>
+    <div role="tabpanel" id="weft-tab-drafts-panel" aria-labelledby="weft-tab-drafts-tab" hidden>
+      <ul data-weft-id="drafts" data-state="empty">
+        <template data-empty>
+          <p data-weft-id="no-drafts">No drafts.</p>
+        </template>
+      </ul>
+    </div>
+    <div role="tabpanel" id="weft-tab-sent-panel" aria-labelledby="weft-tab-sent-tab" hidden>
+      <ul data-weft-id="sent" data-state="loading">
+        <li data-weft-id="sent-loading">Loading…</li>
+      </ul>
+    </div>
+  </div>
+  <div data-weft-id="message-actions" aria-label="Message actions" role="menu">
+    <button data-weft-id="archive" type="button" role="menuitem" data-bind="text:$.labels.archive" data-action="press:inbox.archive"></button>
+    <button data-weft-id="delete" type="button" role="menuitem" data-bind="disabled:!$.selection" data-action="press:inbox.delete">Delete</button>
+  </div>
+  <dialog data-weft-id="compose" aria-label="New message" data-bind="open:$.composing" data-action="close:inbox.closeCompose">
+    <form data-weft-id="compose-form" data-state="submitting" data-action="submit:inbox.send">
+      <div class="weft-field">
+        <label>
+          <span>To</span>
+          <input data-weft-id="to" type="email" data-bind="value:$.draft.to">
+        </label>
+      </div>
+      <div class="weft-field">
+        <label>
+          <span>Message</span>
+          <textarea data-weft-id="body" data-bind="value:$.draft.body"></textarea>
+        </label>
+      </div>
+    </form>
+    <footer data-weft-slot="actions">
+      <button data-weft-id="send" type="button" data-variant="primary" data-action="press:inbox.send">Send</button>
+    </footer>
+  </dialog>
+</main>
+</body>
+</html>

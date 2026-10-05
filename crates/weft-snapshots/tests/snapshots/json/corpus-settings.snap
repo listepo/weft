@@ -1,0 +1,153 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-settings as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "settings",
+    "props": {
+      "label": "Settings"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Settings"
+        ]
+      },
+      {
+        "kind": "section",
+        "id": "notifications",
+        "props": {
+          "label": "Notifications"
+        },
+        "children": [
+          {
+            "kind": "heading",
+            "id": "notifications-title",
+            "props": {
+              "level": 2
+            },
+            "children": [
+              "Notifications"
+            ]
+          },
+          {
+            "kind": "switch",
+            "id": "email-alerts",
+            "props": {
+              "checked": {
+                "bind": "$.emailAlerts"
+              },
+              "label": "Email alerts"
+            }
+          },
+          {
+            "kind": "switch",
+            "id": "push-alerts",
+            "props": {
+              "checked": {
+                "bind": "$.pushAlerts"
+              },
+              "label": "Push notifications"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "section",
+        "id": "appearance",
+        "props": {
+          "label": "Appearance"
+        },
+        "children": [
+          {
+            "kind": "heading",
+            "id": "appearance-title",
+            "props": {
+              "level": 2
+            },
+            "children": [
+              "Appearance"
+            ]
+          },
+          {
+            "kind": "select",
+            "id": "language",
+            "props": {
+              "label": "Language",
+              "value": {
+                "bind": "$.language"
+              }
+            },
+            "children": [
+              {
+                "kind": "option",
+                "id": "lang-en",
+                "props": {
+                  "value": "en"
+                },
+                "children": [
+                  "English"
+                ]
+              },
+              {
+                "kind": "option",
+                "id": "lang-de",
+                "props": {
+                  "value": "de"
+                },
+                "children": [
+                  "Deutsch"
+                ]
+              },
+              {
+                "kind": "option",
+                "id": "lang-fr",
+                "props": {
+                  "value": "fr"
+                },
+                "children": [
+                  "Français"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "switch",
+            "id": "dark-mode",
+            "props": {
+              "checked": {
+                "bind": "$.darkMode"
+              },
+              "label": "Dark mode"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "button",
+        "id": "save",
+        "props": {
+          "disabled": {
+            "bind": "$.dirty",
+            "not": true
+          },
+          "variant": "primary"
+        },
+        "on": {
+          "press": "settings.save"
+        },
+        "children": [
+          "Save changes"
+        ]
+      }
+    ]
+  }
+}

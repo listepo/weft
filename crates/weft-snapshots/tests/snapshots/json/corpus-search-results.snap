@@ -1,0 +1,123 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-search-results as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "search",
+    "props": {
+      "label": "Search"
+    },
+    "children": [
+      {
+        "kind": "form",
+        "id": "form",
+        "on": {
+          "submit": "search.run"
+        },
+        "children": [
+          {
+            "kind": "stack",
+            "id": "bar",
+            "props": {
+              "direction": "row",
+              "gap": {
+                "token": "space.sm"
+              }
+            },
+            "children": [
+              {
+                "kind": "field",
+                "id": "query",
+                "props": {
+                  "label": "Search",
+                  "type": "search",
+                  "value": {
+                    "bind": "$.query"
+                  }
+                }
+              },
+              {
+                "kind": "button",
+                "id": "go",
+                "props": {
+                  "submit": true,
+                  "variant": "primary"
+                },
+                "children": [
+                  "Search"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "list",
+        "id": "results",
+        "slots": {
+          "empty": [
+            {
+              "kind": "text",
+              "id": "empty",
+              "children": [
+                "No results found"
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "each",
+            "id": "results-each",
+            "props": {
+              "as": "result",
+              "in": {
+                "bind": "$.results"
+              }
+            },
+            "children": [
+              {
+                "kind": "item",
+                "id": "result",
+                "children": [
+                  {
+                    "kind": "heading",
+                    "id": "result-title",
+                    "props": {
+                      "level": 3,
+                      "text": {
+                        "bind": "$result.title"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "text",
+                    "id": "result-snippet",
+                    "props": {
+                      "text": {
+                        "bind": "$result.snippet"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "link",
+                    "id": "result-open",
+                    "on": {
+                      "press": "results.open"
+                    },
+                    "children": [
+                      "Open"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

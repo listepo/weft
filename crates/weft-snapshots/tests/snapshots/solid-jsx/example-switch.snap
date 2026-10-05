@@ -1,0 +1,24 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-switch as solid-jsx
+---
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="root" aria-label="Notifications">
+      <label>
+        <input data-weft-id="push" type="checkbox" role="switch" aria-label="Push notifications" checked={_on(props.data?.pushEnabled)} onChange={(_e) => { props.onChange?.("$.pushEnabled", _e.currentTarget.checked); _act(props.actions, { id: "push", action: "settings.update" }); }} />
+        <span aria-hidden="true">Push notifications</span>
+      </label>
+    </main>
+  );
+}

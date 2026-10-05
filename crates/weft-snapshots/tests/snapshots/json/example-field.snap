@@ -1,0 +1,37 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-field as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Sign up"
+    },
+    "children": [
+      {
+        "kind": "field",
+        "id": "email",
+        "props": {
+          "disabled": false,
+          "error": {
+            "bind": "$.errors.email"
+          },
+          "label": "Email",
+          "placeholder": "you@example.com",
+          "required": true,
+          "state": "valid",
+          "type": "email",
+          "value": {
+            "bind": "$.email"
+          }
+        },
+        "on": {
+          "change": "form.edit"
+        }
+      }
+    ]
+  }
+}

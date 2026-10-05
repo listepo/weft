@@ -1,0 +1,79 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-signup as solid-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="signup" aria-label="Create account">
+      <form data-weft-id="form" data-state="idle" onSubmit={(_e) => { _e.preventDefault(); _act(props.actions, { id: "form", action: "auth.signup" }); }}>
+        <h1 data-weft-id="title">Create your account</h1>
+        <div data-weft-id="fields" style={{ gap: "var(--weft-space-md)", display: "flex", "flex-direction": "column" }}>
+          <div data-weft-field="">
+            <label>
+              <span aria-hidden="true">Full name</span>
+              <input data-weft-id="name" aria-label="Full name" type="text" required value={_text(props.data?.name)} onInput={(_e) => props.onChange?.("$.name", _e.currentTarget.value)} />
+            </label>
+          </div>
+          <div data-weft-field="">
+            <label>
+              <span aria-hidden="true">Email</span>
+              <input data-weft-id="email" aria-label="Email" type="email" required value={_text(props.data?.email)} onInput={(_e) => props.onChange?.("$.email", _e.currentTarget.value)} />
+            </label>
+          </div>
+          <div data-weft-field="">
+            <label>
+              <span aria-hidden="true">Password</span>
+              <input data-weft-id="password" aria-label="Password" type="password" required value={_text(props.data?.password)} onInput={(_e) => props.onChange?.("$.password", _e.currentTarget.value)} />
+            </label>
+          </div>
+          <div data-weft-field="">
+            <label>
+              <span aria-hidden="true">Confirm password</span>
+              <input data-weft-id="confirm" aria-label="Confirm password" type="password" required value={_text(props.data?.confirm)} onInput={(_e) => props.onChange?.("$.confirm", _e.currentTarget.value)} />
+            </label>
+          </div>
+          <label>
+            <input data-weft-id="terms" type="checkbox" aria-label="I accept the terms of service" checked={_on(props.data?.acceptTerms)} onChange={(_e) => props.onChange?.("$.acceptTerms", _e.currentTarget.checked)} />
+            <span aria-hidden="true">I accept the terms of service</span>
+          </label>
+        </div>
+        <button data-weft-id="submit" type="submit" disabled={!_on(props.data?.acceptTerms)} data-variant="primary" onClick={(_e) => { _e.preventDefault(); _act(props.actions, { id: "form", action: "auth.signup" }); }}>Create account</button>
+        <div data-weft-slot="footer">
+          {(() => {
+            const _href = _url("");
+            return (
+              <a data-weft-id="signin" href={_href} role={_href === undefined ? "link" : undefined} tabindex={_href === undefined ? 0 : undefined} onKeyDown={_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(props.actions, { id: "signin", action: "nav.signin" }); } : undefined} onClick={() => _act(props.actions, { id: "signin", action: "nav.signin" })} style={{ display: "inline-block" }}>Already have an account? Sign in</a>
+            );
+          })()}
+        </div>
+      </form>
+    </main>
+  );
+}

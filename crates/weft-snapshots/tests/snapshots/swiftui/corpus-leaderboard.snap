@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-leaderboard as swiftui
+---
+refused: cannot generate SwiftUI: $.players.0.name: binding paths with an array index are not generated; iterate with <each>

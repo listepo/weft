@@ -1,6 +1,6 @@
 [package]
 name = "weft-snapshots"
-description = "Corpus coverage tests of Weft"
+description = "Corpus coverage and reviewed per-target snapshots of every Weft generator"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,8 +11,12 @@ publish.workspace = true
 
 [dev-dependencies]
 indexmap = { workspace = true }
+insta = { workspace = true }
+serde_json = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
+weft-swiftui = { workspace = true }
+weft-web = { workspace = true }
 
 [lints]
 workspace = true

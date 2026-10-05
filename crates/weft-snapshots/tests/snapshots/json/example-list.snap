@@ -1,0 +1,67 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-list as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Todos"
+    },
+    "children": [
+      {
+        "kind": "list",
+        "id": "todos",
+        "props": {
+          "ordered": false,
+          "state": "ready"
+        },
+        "slots": {
+          "empty": [
+            {
+              "kind": "text",
+              "id": "todos-empty",
+              "props": {
+                "tone": "muted"
+              },
+              "children": [
+                "Nothing to do."
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "each",
+            "id": "todo-each",
+            "props": {
+              "as": "todo",
+              "in": {
+                "bind": "$.todos"
+              }
+            },
+            "children": [
+              {
+                "kind": "item",
+                "id": "todo-item",
+                "children": [
+                  {
+                    "kind": "text",
+                    "id": "todo-title",
+                    "props": {
+                      "text": {
+                        "bind": "$todo.title"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

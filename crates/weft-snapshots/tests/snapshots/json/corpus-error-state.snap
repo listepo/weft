@@ -1,0 +1,80 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-error-state as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "load-error",
+    "props": {
+      "label": "Load error",
+      "state": "error"
+    },
+    "children": [
+      {
+        "kind": "alert",
+        "id": "alert",
+        "props": {
+          "tone": "danger"
+        },
+        "children": [
+          {
+            "kind": "heading",
+            "id": "error-title",
+            "props": {
+              "level": 2
+            },
+            "children": [
+              "Could not load your data"
+            ]
+          },
+          {
+            "kind": "text",
+            "id": "error-message",
+            "props": {
+              "text": {
+                "bind": "$.error.message"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "actions",
+        "props": {
+          "direction": "row",
+          "gap": {
+            "token": "space.sm"
+          }
+        },
+        "children": [
+          {
+            "kind": "button",
+            "id": "retry",
+            "props": {
+              "variant": "primary"
+            },
+            "on": {
+              "press": "load.retry"
+            },
+            "children": [
+              "Retry"
+            ]
+          },
+          {
+            "kind": "link",
+            "id": "support",
+            "on": {
+              "press": "nav.support"
+            },
+            "children": [
+              "Contact support"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

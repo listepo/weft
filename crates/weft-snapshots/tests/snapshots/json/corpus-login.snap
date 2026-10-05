@@ -1,0 +1,112 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-login as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "login",
+    "props": {
+      "label": "Sign in"
+    },
+    "children": [
+      {
+        "kind": "form",
+        "id": "form",
+        "props": {
+          "state": "idle"
+        },
+        "on": {
+          "submit": "auth.submit"
+        },
+        "slots": {
+          "footer": [
+            {
+              "kind": "link",
+              "id": "reset",
+              "on": {
+                "press": "nav.reset"
+              },
+              "children": [
+                "Forgot password?"
+              ]
+            },
+            {
+              "kind": "link",
+              "id": "signup",
+              "on": {
+                "press": "nav.signup"
+              },
+              "children": [
+                "Create an account"
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "heading",
+            "id": "title",
+            "props": {
+              "level": 1
+            },
+            "children": [
+              "Sign in"
+            ]
+          },
+          {
+            "kind": "stack",
+            "id": "fields",
+            "props": {
+              "gap": {
+                "token": "space.md"
+              }
+            },
+            "children": [
+              {
+                "kind": "field",
+                "id": "email",
+                "props": {
+                  "label": "Email",
+                  "required": true,
+                  "type": "email",
+                  "value": {
+                    "bind": "$.email"
+                  }
+                }
+              },
+              {
+                "kind": "field",
+                "id": "password",
+                "props": {
+                  "label": "Password",
+                  "required": true,
+                  "type": "password",
+                  "value": {
+                    "bind": "$.password"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "kind": "button",
+            "id": "submit",
+            "props": {
+              "disabled": {
+                "bind": "$.email",
+                "not": true
+              },
+              "submit": true,
+              "variant": "primary"
+            },
+            "children": [
+              "Sign in"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

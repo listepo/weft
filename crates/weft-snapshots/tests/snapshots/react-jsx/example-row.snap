@@ -1,0 +1,62 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-row as react-jsx
+---
+import { Fragment } from "react";
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _keyed(list) {
+  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);
+}
+
+function _press(e, fire) {
+  if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  fire();
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Users">
+      {(() => {
+        const _cols = [
+          (
+            <th data-weft-id="col-name" scope="col">Name</th>
+          ),
+        ];
+        const _rows = [
+          (
+            <tr data-weft-id="row-ana" aria-selected={String(_on(data?.anaSelected))} tabIndex={0} onClick={() => _act(actions, { id: "row-ana", action: "users.select" })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: "row-ana", action: "users.select" }))}>
+              <td data-weft-id="cell-ana">Ana</td>
+            </tr>
+          ),
+        ];
+        return (
+          <table data-weft-id="users" aria-label="Users">
+            {_cols.length > 0 ? (
+              <thead>
+                <tr>
+                  {_keyed(_cols)}
+                </tr>
+              </thead>
+            ) : null}
+            {_rows.length > 0 ? (
+              <tbody>
+                {_keyed(_rows)}
+              </tbody>
+            ) : null}
+          </table>
+        );
+      })()}
+    </main>
+  );
+}

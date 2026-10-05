@@ -1,0 +1,51 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-item as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Inbox"
+    },
+    "children": [
+      {
+        "kind": "list",
+        "id": "inbox",
+        "props": {
+          "ordered": true
+        },
+        "children": [
+          {
+            "kind": "item",
+            "id": "msg-1",
+            "on": {
+              "press": "inbox.open"
+            },
+            "children": [
+              {
+                "kind": "text",
+                "id": "msg-1-from",
+                "props": {
+                  "tone": "muted"
+                },
+                "children": [
+                  "Ana"
+                ]
+              },
+              {
+                "kind": "text",
+                "id": "msg-1-subject",
+                "children": [
+                  "Welcome aboard"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

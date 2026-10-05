@@ -1,0 +1,181 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-orders as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "orders",
+    "props": {
+      "label": "Orders"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 2
+        },
+        "children": [
+          "Orders"
+        ]
+      },
+      {
+        "kind": "table",
+        "id": "open-orders",
+        "props": {
+          "label": "Open orders",
+          "state": "ready"
+        },
+        "slots": {
+          "empty": [
+            {
+              "kind": "text",
+              "id": "no-orders",
+              "children": [
+                "No open orders."
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "column",
+            "id": "col-id",
+            "props": {
+              "sort": "descending"
+            },
+            "on": {
+              "press": "orders.sortById"
+            },
+            "children": [
+              "Order"
+            ]
+          },
+          {
+            "kind": "column",
+            "id": "col-total",
+            "props": {
+              "sort": "none",
+              "text": {
+                "bind": "$.labels.total"
+              }
+            }
+          },
+          {
+            "kind": "each",
+            "id": "order-each",
+            "props": {
+              "as": "order",
+              "in": {
+                "bind": "$.orders"
+              }
+            },
+            "children": [
+              {
+                "kind": "row",
+                "id": "order",
+                "props": {
+                  "selected": {
+                    "bind": "$order.selected"
+                  }
+                },
+                "on": {
+                  "press": "orders.open"
+                },
+                "children": [
+                  {
+                    "kind": "cell",
+                    "id": "order-id",
+                    "props": {
+                      "text": {
+                        "bind": "$order.id"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "cell",
+                    "id": "order-total",
+                    "children": [
+                      {
+                        "kind": "text",
+                        "id": "order-amount",
+                        "props": {
+                          "text": {
+                            "bind": "$order.total"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "id": "archived",
+        "props": {
+          "label": "Archived orders",
+          "state": "empty"
+        },
+        "slots": {
+          "empty": [
+            {
+              "kind": "text",
+              "id": "archived-empty",
+              "children": [
+                "Nothing archived yet."
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "column",
+            "id": "col-archived",
+            "children": [
+              "Order"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "id": "pending",
+        "props": {
+          "label": "Pending orders",
+          "state": "loading"
+        },
+        "children": [
+          {
+            "kind": "column",
+            "id": "col-pending",
+            "children": [
+              "Order"
+            ]
+          },
+          {
+            "kind": "row",
+            "id": "pending-row",
+            "props": {
+              "selected": true
+            },
+            "children": [
+              {
+                "kind": "cell",
+                "id": "pending-cell",
+                "children": [
+                  "Fetching…"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

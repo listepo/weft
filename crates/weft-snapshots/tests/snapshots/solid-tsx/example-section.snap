@@ -1,0 +1,24 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-section as solid-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+export default function WeftScreen(props: WeftProps) {
+  return (
+    <main data-weft-id="root" aria-label="Account">
+      <section data-weft-id="profile" aria-label="Profile">
+        <div data-weft-slot="header">
+          <h2 data-weft-id="profile-title">Profile</h2>
+        </div>
+        <div data-weft-id="bio">Product designer based in Lisbon.</div>
+      </section>
+    </main>
+  );
+}

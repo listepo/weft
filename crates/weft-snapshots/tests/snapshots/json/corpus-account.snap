@@ -1,0 +1,294 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-account as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "account",
+    "props": {
+      "label": "Edit account"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Edit account"
+        ]
+      },
+      {
+        "kind": "form",
+        "id": "account-form",
+        "props": {
+          "label": "Account",
+          "state": "invalid"
+        },
+        "on": {
+          "submit": "account.save"
+        },
+        "slots": {
+          "footer": [
+            {
+              "kind": "button",
+              "id": "save",
+              "props": {
+                "state": "busy",
+                "submit": true,
+                "variant": "primary"
+              },
+              "children": [
+                "Save"
+              ]
+            },
+            {
+              "kind": "button",
+              "id": "cancel",
+              "props": {
+                "state": "idle",
+                "text": {
+                  "bind": "$.labels.cancel"
+                },
+                "variant": "secondary"
+              },
+              "on": {
+                "press": "account.cancel"
+              }
+            },
+            {
+              "kind": "link",
+              "id": "help",
+              "props": {
+                "href": "https://example.com/help",
+                "text": {
+                  "bind": "$.labels.help"
+                }
+              }
+            }
+          ]
+        },
+        "children": [
+          {
+            "kind": "field",
+            "id": "name",
+            "props": {
+              "label": "Full name",
+              "placeholder": "Ada Lovelace",
+              "state": "valid",
+              "type": "text",
+              "value": {
+                "bind": "$.account.name"
+              }
+            },
+            "on": {
+              "change": "account.edit"
+            }
+          },
+          {
+            "kind": "field",
+            "id": "age",
+            "props": {
+              "error": {
+                "bind": "$.errors.age"
+              },
+              "label": "Age",
+              "state": "invalid",
+              "type": "number",
+              "value": {
+                "bind": "$.account.age"
+              }
+            }
+          },
+          {
+            "kind": "field",
+            "id": "handle",
+            "props": {
+              "disabled": {
+                "bind": "$.account.locked"
+              },
+              "label": "Handle",
+              "placeholder": "{handle}",
+              "value": {
+                "bind": "$.account.handle"
+              }
+            }
+          },
+          {
+            "kind": "field",
+            "id": "bio",
+            "props": {
+              "label": "Bio",
+              "type": "multiline",
+              "value": {
+                "bind": "$.account.bio"
+              }
+            }
+          },
+          {
+            "kind": "field",
+            "id": "email",
+            "props": {
+              "disabled": true,
+              "label": "Email",
+              "type": "email",
+              "value": {
+                "bind": "$.account.email"
+              }
+            }
+          },
+          {
+            "kind": "checkbox",
+            "id": "newsletter",
+            "props": {
+              "checked": {
+                "bind": "$.account.newsletter"
+              },
+              "label": "Send me the newsletter"
+            },
+            "on": {
+              "change": "account.edit"
+            }
+          },
+          {
+            "kind": "checkbox",
+            "id": "terms",
+            "props": {
+              "checked": true,
+              "disabled": true,
+              "label": "Terms accepted"
+            }
+          },
+          {
+            "kind": "switch",
+            "id": "public",
+            "props": {
+              "checked": {
+                "bind": "$.account.public"
+              },
+              "disabled": {
+                "bind": "$.account.verified",
+                "not": true
+              },
+              "label": "Public profile"
+            },
+            "on": {
+              "change": "account.edit"
+            }
+          },
+          {
+            "kind": "radio-group",
+            "id": "plan",
+            "props": {
+              "label": "Plan",
+              "value": {
+                "bind": "$.account.plan"
+              }
+            },
+            "on": {
+              "change": "account.edit"
+            },
+            "children": [
+              {
+                "kind": "radio",
+                "id": "plan-free",
+                "props": {
+                  "value": "free"
+                },
+                "children": [
+                  "Free"
+                ]
+              },
+              {
+                "kind": "radio",
+                "id": "plan-pro",
+                "props": {
+                  "text": {
+                    "bind": "$.labels.pro"
+                  },
+                  "value": "pro"
+                }
+              },
+              {
+                "kind": "radio",
+                "id": "plan-team",
+                "props": {
+                  "disabled": true,
+                  "value": "team"
+                },
+                "children": [
+                  "Team"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "select",
+            "id": "language",
+            "props": {
+              "disabled": {
+                "bind": "$.account.locked"
+              },
+              "label": "Language",
+              "value": {
+                "bind": "$.account.language"
+              }
+            },
+            "on": {
+              "change": "account.edit"
+            },
+            "children": [
+              {
+                "kind": "option",
+                "id": "language-en",
+                "props": {
+                  "value": "en"
+                },
+                "children": [
+                  "English"
+                ]
+              },
+              {
+                "kind": "option",
+                "id": "language-fr",
+                "props": {
+                  "text": {
+                    "bind": "$.labels.french"
+                  },
+                  "value": "fr"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "text",
+            "id": "internal",
+            "props": {
+              "hidden": true
+            },
+            "children": [
+              "Internal note: never shown."
+            ]
+          },
+          {
+            "kind": "alert",
+            "id": "saved",
+            "props": {
+              "hidden": {
+                "bind": "$.saved",
+                "not": true
+              },
+              "tone": "success"
+            },
+            "children": [
+              "Your changes were saved."
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

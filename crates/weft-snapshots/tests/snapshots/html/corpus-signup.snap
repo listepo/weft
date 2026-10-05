@@ -1,0 +1,86 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-signup as html
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create account</title>
+<style>
+:root {
+  --weft-space-xs: 4px;
+  --weft-space-sm: 8px;
+  --weft-space-md: 16px;
+  --weft-space-lg: 24px;
+  --weft-space-xl: 32px;
+  --weft-radius-sm: 4px;
+  --weft-radius-md: 8px;
+  --weft-radius-pill: 999px;
+  --weft-font-size-sm: 0.875rem;
+  --weft-font-size-md: 1rem;
+  --weft-font-size-lg: 1.25rem;
+  --weft-font-size-xl: 1.75rem;
+  --weft-color-white: #ffffff;
+  --weft-color-ink: #1a1c21;
+  --weft-color-blue-_root: #2563eb;
+  --weft-color-red: #dc2626;
+  --weft-color-action-primary: #2563eb;
+  --weft-color-action-danger: #dc2626;
+}
+.weft-stack { display: flex; flex-direction: column; }
+.weft-row { display: flex; flex-direction: row; }
+.weft-grid { display: grid; }
+[data-align="start"] { align-items: flex-start; }
+[data-align="center"] { align-items: center; }
+[data-align="end"] { align-items: flex-end; }
+[data-align="stretch"] { align-items: stretch; }
+[data-wrap] { flex-wrap: wrap; }
+.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
+.weft-field label { flex-direction: column; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main data-weft-id="signup" aria-label="Create account">
+  <form data-weft-id="form" data-state="idle" data-action="submit:auth.signup">
+    <h1 data-weft-id="title">Create your account</h1>
+    <div data-weft-id="fields" class="weft-stack" style="gap: var(--weft-space-md)">
+      <div class="weft-field">
+        <label>
+          <span>Full name</span>
+          <input data-weft-id="name" type="text" required data-bind="value:$.name">
+        </label>
+      </div>
+      <div class="weft-field">
+        <label>
+          <span>Email</span>
+          <input data-weft-id="email" type="email" required data-bind="value:$.email">
+        </label>
+      </div>
+      <div class="weft-field">
+        <label>
+          <span>Password</span>
+          <input data-weft-id="password" type="password" required data-bind="value:$.password">
+        </label>
+      </div>
+      <div class="weft-field">
+        <label>
+          <span>Confirm password</span>
+          <input data-weft-id="confirm" type="password" required data-bind="value:$.confirm">
+        </label>
+      </div>
+      <label class="weft-toggle">
+        <input data-weft-id="terms" type="checkbox" data-bind="checked:$.acceptTerms">
+        <span>I accept the terms of service</span>
+      </label>
+    </div>
+    <button data-weft-id="submit" type="submit" data-variant="primary" data-bind="disabled:!$.acceptTerms">Create account</button>
+    <footer data-weft-slot="footer">
+      <a data-weft-id="signin" href="#" data-action="press:nav.signin">Already have an account? Sign in</a>
+    </footer>
+  </form>
+</main>
+</body>
+</html>

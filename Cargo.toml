@@ -39,6 +39,8 @@ oxc_parser = { version = "0.152.0", default-features = false }
 oxc_span = "0.152.0"
 # tests: weft-core, weft-catalog
 proptest = "1.11.0"
+# tests: weft-snapshots, reviewed per-target output snapshots.
+insta = "1.49.0"
 # weft-cli
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
