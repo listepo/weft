@@ -1,0 +1,94 @@
+# Generate the project with `xcodegen generate`; the .xcodeproj and Generated/ are not committed.
+# The app only hosts the Source Editor Extension, which is what Xcode loads. It is signed ad hoc,
+# which is enough to run on this Mac; distributing it needs a Developer ID and notarization (see
+# docs/xcode-plugin.md).
+name: WeftEditor
+options:
+  bundleIdPrefix: dev.weft
+  deploymentTarget:
+    macOS: '14.0'
+packages:
+  WeftEditorCore:
+    path: Core
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: '-'
+    DEVELOPMENT_TEAM: ''
+    ENABLE_HARDENED_RUNTIME: YES
+    # The inherit entitlement of the helper conflicts with the debug entitlement Xcode adds.
+    CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
+targets:
+  WeftEditor:
+    type: application
+    platform: macOS
+    sources: [App]
+    dependencies:
+      - target: WeftEditorExtension
+        embed: true
+      - package: WeftEditorCore
+    entitlements:
+      path: Generated/App.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+    info:
+      path: Generated/App-Info.plist
+      properties:
+        CFBundleDisplayName: Weft Editor
+        LSApplicationCategoryType: public.app-category.developer-tools
+        # Declares what a .weft file is, so Xcode can name its type. Whether it reports this type
+        # as a buffer's contentUTI is one of the manual checks.
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: dev.weft.screen
+            UTTypeDescription: Weft screen
+            UTTypeConformsTo: [public.text]
+            UTTypeTagSpecification:
+              public.filename-extension: [weft]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.weft.editor
+        GENERATE_INFOPLIST_FILE: NO
+  WeftEditorExtension:
+    type: xcode-extension
+    platform: macOS
+    sources:
+      - Extension
+      # The core catalog, which `validate` checks a screen against.
+      - path: ../../../packages/catalog/catalog.json
+        buildPhase: resources
+    dependencies:
+      - sdk: XcodeKit.framework
+      - package: WeftEditorCore
+    entitlements:
+      path: Generated/Extension.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+    info:
+      path: Generated/Extension-Info.plist
+      properties:
+        CFBundleDisplayName: Weft
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.dt.Xcode.extension.source-editor
+          NSExtensionAttributes:
+            XCSourceEditorExtensionPrincipalClass: WeftSourceEditorExtension
+            XCSourceEditorCommandDefinitions:
+              - XCSourceEditorCommandIdentifier: dev.weft.editor.import-selection
+                XCSourceEditorCommandName: SwiftUI Selection to Weft
+                XCSourceEditorCommandClassName: WeftSourceEditorCommand
+              - XCSourceEditorCommandIdentifier: dev.weft.editor.generate-swiftui
+                XCSourceEditorCommandName: Weft Screen to SwiftUI
+                XCSourceEditorCommandClassName: WeftSourceEditorCommand
+              - XCSourceEditorCommandIdentifier: dev.weft.editor.validate
+                XCSourceEditorCommandName: Validate Weft Screen
+                XCSourceEditorCommandClassName: WeftSourceEditorCommand
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.weft.editor.extension
+        GENERATE_INFOPLIST_FILE: NO
+    # Runs after the sources compile and before the bundle is signed.
+    postCompileScripts:
+      - name: Embed weft
+        script: |
+          "$SRCROOT/scripts/embed-weft.sh"
+        basedOnDependencyAnalysis: false

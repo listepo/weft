@@ -17,6 +17,7 @@ This guide is for people who use Weft: developers who wire it into an app or an 
 | [The Claude Code plugin](claude-code-plugin.md) | Import, export and render from Claude Code, with the agent guide built in. |
 | [The Cursor plugin](cursor-plugin.md) | The same from Cursor: skills, a rule and the MCP server. |
 | [The Open Design plugin](open-design-plugin.md) | The same from Open Design, and design systems (`DESIGN.md`, `tokens.css`) as Weft tokens. |
+| [Weft in Xcode](xcode-plugin.md) | SwiftUI generated from `.weft` files at build time, convert commands, an Editor menu extension, and the MCP server for Xcode's agents. |
 | [Rendering](rendering.md) | Turn a screen into an HTML page, an accessibility tree or a React tree. |
 | [Importing HTML](importing.md) | Start a screen from an existing page and see what the import lost. |
 | [Exporting to React](exporting-jsx.md) | Turn a screen into a React component. |
