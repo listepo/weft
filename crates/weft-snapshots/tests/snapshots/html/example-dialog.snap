@@ -37,18 +37,16 @@ description: example-dialog as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Files">
   <dialog data-weft-id="confirm" aria-label="Delete file?" aria-modal="true" data-bind="open:$.confirmOpen" data-action="close:dialog.close">
-    <p data-weft-id="warn">This cannot be undone.</p>
+    <div data-weft-id="warn" data-weft-kind="text">This cannot be undone.</div>
     <footer data-weft-slot="actions">
-      <button data-weft-id="cancel" type="button" data-action="press:dialog.close">Cancel</button>
-      <button data-weft-id="ok" type="button" data-variant="danger" data-action="press:file.delete">Delete</button>
+      <button data-weft-id="cancel" type="button" data-action="press:dialog.close">Cancel</button><button data-weft-id="ok" type="button" data-variant="danger" data-action="press:file.delete">Delete</button>
     </footer>
   </dialog>
 </main>

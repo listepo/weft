@@ -37,16 +37,15 @@ description: example-alert as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Payment">
   <div data-weft-id="failed" role="alert" data-tone="danger">
-    <p data-weft-id="failed-text">Your card was declined.</p>
-    <a data-weft-id="retry" href="#" data-action="press:payment.retry">Try again</a>
+    <div data-weft-id="failed-text" data-weft-kind="text">Your card was declined.</div>
+    <a data-weft-id="retry" role="link" tabindex="0" data-action="press:payment.retry">Try again</a>
   </div>
 </main>
 </body>

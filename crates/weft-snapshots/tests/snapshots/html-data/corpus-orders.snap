@@ -37,8 +37,7 @@ description: corpus-orders as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -56,13 +55,13 @@ description: corpus-orders as html-data
       <tr data-weft-id="order[0]" aria-selected="true" data-action="press:orders.open">
         <td data-weft-id="order-id[0]">A-1002</td>
         <td data-weft-id="order-total[0]">
-          <p data-weft-id="order-amount[0]">$120.00</p>
+          <div data-weft-id="order-amount[0]" data-weft-kind="text">$120.00</div>
         </td>
       </tr>
       <tr data-weft-id="order[1]" aria-selected="false" data-action="press:orders.open">
         <td data-weft-id="order-id[1]">A-1001</td>
         <td data-weft-id="order-total[1]">
-          <p data-weft-id="order-amount[1]">$35.50</p>
+          <div data-weft-id="order-amount[1]" data-weft-kind="text">$35.50</div>
         </td>
       </tr>
     </tbody>
@@ -76,7 +75,7 @@ description: corpus-orders as html-data
     <tbody>
       <tr data-weft-slot="empty">
         <td colspan="1">
-          <p data-weft-id="archived-empty">Nothing archived yet.</p>
+          <div data-weft-id="archived-empty" data-weft-kind="text">Nothing archived yet.</div>
         </td>
       </tr>
     </tbody>

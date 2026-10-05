@@ -32,8 +32,7 @@ description: example-review with light and dark tokens
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -42,12 +41,12 @@ description: example-review with light and dark tokens
   <h1 data-weft-id="title">Review your order</h1>
   <template data-weft-id="lines" data-each="$.cart.items" data-as="line">
     <div data-weft-id="line" class="weft-row" style="gap: var(--weft-space-sm)">
-      <p data-weft-id="line-name" data-bind="text:$line.name"></p>
+      <div data-weft-id="line-name" data-weft-kind="text" data-bind="text:$line.name"></div>
       <div data-weft-id="line-score" data-prop-color="{token.color.star}" aria-label="Customer score" data-weft-kind="rating" role="img" data-bind="value:$line.score">
       </div>
     </div>
   </template>
-  <p data-weft-id="empty" data-tone="muted" data-bind="hidden:!$.cart.empty">Nothing to review.</p>
+  <div data-weft-id="empty" data-tone="muted" data-weft-kind="text" data-bind="hidden:!$.cart.empty">Nothing to review.</div>
   <button data-weft-id="checkout" type="button" data-variant="primary" data-bind="disabled:$.busy" data-action="press:cart.checkout">Place order</button>
 </main>
 </body>

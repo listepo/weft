@@ -37,24 +37,15 @@ description: example-radio as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Delivery">
-  <fieldset data-weft-id="speed" role="radiogroup" data-bind="value:$.speed">
-    <legend>Delivery speed</legend>
-    <label class="weft-toggle">
-      <input data-weft-id="speed-std" type="radio" name="weft-speed" value="standard">
-      <span>Standard</span>
-    </label>
-    <label class="weft-toggle">
-      <input data-weft-id="speed-fast" type="radio" name="weft-speed" value="express" data-bind="disabled:!$.expressAvailable">
-      <span>Express</span>
-    </label>
-  </fieldset>
+  <div data-weft-id="speed" aria-label="Delivery speed" role="radiogroup" data-bind="value:$.speed">
+    <span aria-hidden="true">Delivery speed</span><label><input data-weft-id="speed-std" type="radio" name="weft-speed" value="standard" aria-label="Standard"><span aria-hidden="true">Standard</span></label><label><input data-weft-id="speed-fast" type="radio" name="weft-speed" value="express" aria-label="Express" data-bind="disabled:!$.expressAvailable"><span aria-hidden="true">Express</span></label>
+  </div>
 </main>
 </body>
 </html>

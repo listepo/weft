@@ -37,20 +37,16 @@ description: example-select as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Locale">
-  <label>
-    <span>Country</span>
-    <select data-weft-id="country" data-bind="value:$.country" data-action="change:profile.update">
+  <label><span aria-hidden="true">Country</span><select data-weft-id="country" aria-label="Country" data-bind="value:$.country" data-action="change:profile.update">
       <option data-weft-id="c-pt" value="pt">Portugal</option>
       <option data-weft-id="c-es" value="es">Spain</option>
-    </select>
-  </label>
+    </select></label>
 </main>
 </body>
 </html>

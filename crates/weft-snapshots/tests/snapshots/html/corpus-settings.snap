@@ -37,8 +37,7 @@ description: corpus-settings as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,29 +46,15 @@ description: corpus-settings as html
   <h1 data-weft-id="title">Settings</h1>
   <section data-weft-id="notifications" aria-label="Notifications">
     <h2 data-weft-id="notifications-title">Notifications</h2>
-    <label class="weft-toggle">
-      <input data-weft-id="email-alerts" type="checkbox" role="switch" data-bind="checked:$.emailAlerts">
-      <span>Email alerts</span>
-    </label>
-    <label class="weft-toggle">
-      <input data-weft-id="push-alerts" type="checkbox" role="switch" data-bind="checked:$.pushAlerts">
-      <span>Push notifications</span>
-    </label>
+    <label><input data-weft-id="email-alerts" aria-label="Email alerts" type="checkbox" role="switch" data-bind="checked:$.emailAlerts"><span aria-hidden="true">Email alerts</span></label><label><input data-weft-id="push-alerts" aria-label="Push notifications" type="checkbox" role="switch" data-bind="checked:$.pushAlerts"><span aria-hidden="true">Push notifications</span></label>
   </section>
   <section data-weft-id="appearance" aria-label="Appearance">
     <h2 data-weft-id="appearance-title">Appearance</h2>
-    <label>
-      <span>Language</span>
-      <select data-weft-id="language" data-bind="value:$.language">
+    <label><span aria-hidden="true">Language</span><select data-weft-id="language" aria-label="Language" data-bind="value:$.language">
         <option data-weft-id="lang-en" value="en">English</option>
         <option data-weft-id="lang-de" value="de">Deutsch</option>
         <option data-weft-id="lang-fr" value="fr">Français</option>
-      </select>
-    </label>
-    <label class="weft-toggle">
-      <input data-weft-id="dark-mode" type="checkbox" role="switch" data-bind="checked:$.darkMode">
-      <span>Dark mode</span>
-    </label>
+      </select></label><label><input data-weft-id="dark-mode" aria-label="Dark mode" type="checkbox" role="switch" data-bind="checked:$.darkMode"><span aria-hidden="true">Dark mode</span></label>
   </section>
   <button data-weft-id="save" type="button" data-variant="primary" data-bind="disabled:!$.dirty" data-action="press:settings.save">Save changes</button>
 </main>

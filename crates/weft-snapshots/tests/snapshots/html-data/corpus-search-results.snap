@@ -37,8 +37,7 @@ description: corpus-search-results as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,11 +45,8 @@ description: corpus-search-results as html-data
 <main data-weft-id="search" aria-label="Search">
   <form data-weft-id="form" data-action="submit:search.run">
     <div data-weft-id="bar" class="weft-row" style="gap: var(--weft-space-sm)">
-      <div class="weft-field">
-        <label>
-          <span>Search</span>
-          <input data-weft-id="query" type="search" value="weft">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Search</span><input data-weft-id="query" aria-label="Search" type="search" value="weft"></label>
       </div>
       <button data-weft-id="go" type="submit" data-variant="primary">Search</button>
     </div>
@@ -58,13 +54,13 @@ description: corpus-search-results as html-data
   <ul data-weft-id="results">
     <li data-weft-id="result[0]">
       <h3 data-weft-id="result-title[0]">Weft specification</h3>
-      <p data-weft-id="result-snippet[0]">An open format for describing UI.</p>
-      <a data-weft-id="result-open[0]" href="#" data-action="press:results.open">Open</a>
+      <div data-weft-id="result-snippet[0]" data-weft-kind="text">An open format for describing UI.</div>
+      <a data-weft-id="result-open[0]" role="link" tabindex="0" data-action="press:results.open">Open</a>
     </li>
     <li data-weft-id="result[1]">
       <h3 data-weft-id="result-title[1]">Weft benchmark</h3>
-      <p data-weft-id="result-snippet[1]">Token counts and edit success.</p>
-      <a data-weft-id="result-open[1]" href="#" data-action="press:results.open">Open</a>
+      <div data-weft-id="result-snippet[1]" data-weft-kind="text">Token counts and edit success.</div>
+      <a data-weft-id="result-open[1]" role="link" tabindex="0" data-action="press:results.open">Open</a>
     </li>
   </ul>
 </main>

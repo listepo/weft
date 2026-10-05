@@ -37,16 +37,14 @@ description: example-menu as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Document">
   <div data-weft-id="actions" aria-label="Document actions" role="menu">
-    <button data-weft-id="rename" type="button" role="menuitem" data-action="press:doc.rename">Rename</button>
-    <button data-weft-id="delete" type="button" role="menuitem" data-action="press:doc.delete">Delete</button>
+    <button data-weft-id="rename" type="button" role="menuitem" data-action="press:doc.rename">Rename</button><button data-weft-id="delete" type="button" role="menuitem" data-action="press:doc.delete">Delete</button>
   </div>
 </main>
 </body>

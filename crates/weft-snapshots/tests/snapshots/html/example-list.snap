@@ -37,8 +37,7 @@ description: example-list as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,11 +46,11 @@ description: example-list as html
   <ul data-weft-id="todos" data-state="ready">
     <template data-weft-id="todo-each" data-each="$.todos" data-as="todo">
       <li data-weft-id="todo-item">
-        <p data-weft-id="todo-title" data-bind="text:$todo.title"></p>
+        <div data-weft-id="todo-title" data-weft-kind="text" data-bind="text:$todo.title"></div>
       </li>
     </template>
     <template data-empty>
-      <p data-weft-id="todos-empty" data-tone="muted">Nothing to do.</p>
+      <div data-weft-id="todos-empty" data-tone="muted" data-weft-kind="text">Nothing to do.</div>
     </template>
   </ul>
 </main>

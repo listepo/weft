@@ -37,8 +37,7 @@ description: corpus-leaderboard as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,21 +45,21 @@ description: corpus-leaderboard as html-data
 <main data-weft-id="leaderboard" aria-label="Leaderboard">
   <h1 data-weft-id="title">Leaderboard</h1>
   <div data-weft-id="leader" class="weft-row" style="gap: var(--weft-space-xs)">
-    <p data-weft-id="leader-label">In the lead:</p>
-    <p data-weft-id="leader-name">Grace</p>
+    <div data-weft-id="leader-label" data-weft-kind="text">In the lead:</div>
+    <div data-weft-id="leader-name" data-weft-kind="text">Grace</div>
   </div>
   <ol data-weft-id="players">
     <li data-weft-id="player[0]">
-      <p data-weft-id="player-name[0]">Grace</p>
-      <p data-weft-id="player-score[0]" data-tone="muted">1280</p>
+      <div data-weft-id="player-name[0]" data-weft-kind="text">Grace</div>
+      <div data-weft-id="player-score[0]" data-tone="muted" data-weft-kind="text">1280</div>
     </li>
     <li data-weft-id="player[1]">
-      <p data-weft-id="player-name[1]">Alan</p>
-      <p data-weft-id="player-score[1]" data-tone="muted">1105</p>
+      <div data-weft-id="player-name[1]" data-weft-kind="text">Alan</div>
+      <div data-weft-id="player-score[1]" data-tone="muted" data-weft-kind="text">1105</div>
     </li>
     <li data-weft-id="player[2]">
-      <p data-weft-id="player-name[2]">Ada</p>
-      <p data-weft-id="player-score[2]" data-tone="muted">990</p>
+      <div data-weft-id="player-name[2]" data-weft-kind="text">Ada</div>
+      <div data-weft-id="player-score[2]" data-tone="muted" data-weft-kind="text">990</div>
     </li>
   </ol>
 </main>

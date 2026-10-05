@@ -37,8 +37,7 @@ description: corpus-error-state as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,11 +45,10 @@ description: corpus-error-state as html-data
 <main data-weft-id="load-error" aria-label="Load error" data-state="error">
   <div data-weft-id="alert" role="alert" data-tone="danger">
     <h2 data-weft-id="error-title">Could not load your data</h2>
-    <p data-weft-id="error-message">The server did not respond.</p>
+    <div data-weft-id="error-message" data-weft-kind="text">The server did not respond.</div>
   </div>
   <div data-weft-id="actions" class="weft-row" style="gap: var(--weft-space-sm)">
-    <button data-weft-id="retry" type="button" data-variant="primary" data-action="press:load.retry">Retry</button>
-    <a data-weft-id="support" href="#" data-action="press:nav.support">Contact support</a>
+    <button data-weft-id="retry" type="button" data-variant="primary" data-action="press:load.retry">Retry</button><a data-weft-id="support" role="link" tabindex="0" data-action="press:nav.support">Contact support</a>
   </div>
 </main>
 </body>

@@ -37,8 +37,7 @@ description: corpus-login as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,23 +46,16 @@ description: corpus-login as html
   <form data-weft-id="form" data-state="idle" data-action="submit:auth.submit">
     <h1 data-weft-id="title">Sign in</h1>
     <div data-weft-id="fields" class="weft-stack" style="gap: var(--weft-space-md)">
-      <div class="weft-field">
-        <label>
-          <span>Email</span>
-          <input data-weft-id="email" type="email" required data-bind="value:$.email">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Email</span><input data-weft-id="email" aria-label="Email" type="email" required data-bind="value:$.email"></label>
       </div>
-      <div class="weft-field">
-        <label>
-          <span>Password</span>
-          <input data-weft-id="password" type="password" required data-bind="value:$.password">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Password</span><input data-weft-id="password" aria-label="Password" type="password" required data-bind="value:$.password"></label>
       </div>
     </div>
     <button data-weft-id="submit" type="submit" data-variant="primary" data-bind="disabled:!$.email">Sign in</button>
     <footer data-weft-slot="footer">
-      <a data-weft-id="reset" href="#" data-action="press:nav.reset">Forgot password?</a>
-      <a data-weft-id="signup" href="#" data-action="press:nav.signup">Create an account</a>
+      <a data-weft-id="reset" role="link" tabindex="0" data-action="press:nav.reset">Forgot password?</a><a data-weft-id="signup" role="link" tabindex="0" data-action="press:nav.signup">Create an account</a>
     </footer>
   </form>
 </main>

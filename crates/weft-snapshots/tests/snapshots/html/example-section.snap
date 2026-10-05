@@ -37,8 +37,7 @@ description: example-section as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -48,7 +47,7 @@ description: example-section as html
     <header data-weft-slot="header">
       <h2 data-weft-id="profile-title">Profile</h2>
     </header>
-    <p data-weft-id="bio">Product designer based in Lisbon.</p>
+    <div data-weft-id="bio" data-weft-kind="text">Product designer based in Lisbon.</div>
   </section>
 </main>
 </body>

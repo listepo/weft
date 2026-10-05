@@ -37,8 +37,7 @@ description: corpus-data-table as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -57,13 +56,13 @@ description: corpus-data-table as html-data
     <tbody>
       <tr data-weft-id="row[0]">
         <td data-weft-id="cell-name[0]">
-          <p data-weft-id="user-name[0]">Ada Lovelace</p>
+          <div data-weft-id="user-name[0]" data-weft-kind="text">Ada Lovelace</div>
         </td>
         <td data-weft-id="cell-email[0]">
-          <p data-weft-id="user-email[0]">ada@example.com</p>
+          <div data-weft-id="user-email[0]" data-weft-kind="text">ada@example.com</div>
         </td>
         <td data-weft-id="cell-role[0]">
-          <p data-weft-id="user-role[0]">Admin</p>
+          <div data-weft-id="user-role[0]" data-weft-kind="text">Admin</div>
         </td>
         <td data-weft-id="cell-actions[0]">
           <button data-weft-id="delete[0]" type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
@@ -71,13 +70,13 @@ description: corpus-data-table as html-data
       </tr>
       <tr data-weft-id="row[1]">
         <td data-weft-id="cell-name[1]">
-          <p data-weft-id="user-name[1]">Alan Turing</p>
+          <div data-weft-id="user-name[1]" data-weft-kind="text">Alan Turing</div>
         </td>
         <td data-weft-id="cell-email[1]">
-          <p data-weft-id="user-email[1]">alan@example.com</p>
+          <div data-weft-id="user-email[1]" data-weft-kind="text">alan@example.com</div>
         </td>
         <td data-weft-id="cell-role[1]">
-          <p data-weft-id="user-role[1]">Editor</p>
+          <div data-weft-id="user-role[1]" data-weft-kind="text">Editor</div>
         </td>
         <td data-weft-id="cell-actions[1]">
           <button data-weft-id="delete[1]" type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
