@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T45 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
+| T45 | in progress | P1 | 4 | 40% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -179,4 +179,9 @@ Approved decisions (creator):
 
 - **Q1:** a `weft css-tokens` command writes `weft-tokens.css` (`:root` with every token, `color-scheme: light dark`, and an `@media (prefers-color-scheme: dark)` block with the tokens that differ) for the React and SolidJS components, which only reference `var(--weft-…)`. Its folder is the new key `export.css.outDir`.
 - **Q2:** "both ways" is the full round trip: resolver contexts → Figma variable modes or Penpot token themes (one set per context) → a resolver document with the same values per context, returned in a new reply field.
+
+Screenshot review (each copy downscaled with `sips -Z 700` and read):
+
+- `swiftui/example-review.png` (light): white background, black title and item names, the blue "Place order" button, amber stars (#d97706, the brand colour through `color.star`); 4 and 5 filled stars as the sample data says. Correct.
+- `swiftui/example-review-dark.png` (dark): black background, white text, the same blue button, the lighter amber of the dark theme (#fbbf24) on the stars; layout identical to the light shot. Correct.
 

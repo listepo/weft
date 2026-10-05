@@ -92,6 +92,8 @@ pub struct Project {
     pub dir: PathBuf,
     pub catalog: Catalog,
     pub tokens: IndexMap<String, Token>,
+    /// The modifiers of the project's resolver, empty for token files.
+    pub modifiers: Vec<weft_catalog::TokenModifier>,
 }
 
 pub fn project(dir: &str) -> Project {
@@ -107,6 +109,7 @@ pub fn project(dir: &str) -> Project {
     Project {
         catalog: load.project.catalog,
         tokens: load.project.tokens.unwrap(),
+        modifiers: load.project.modifiers,
         dir,
     }
 }

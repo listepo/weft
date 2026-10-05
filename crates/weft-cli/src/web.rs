@@ -70,7 +70,7 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
             let data = sample_data(args.data, project, project_dir.as_deref(), target)?;
             let options = HtmlOptions {
                 catalog: &catalog,
-                tokens: &tokens,
+                tokens: &tokens.tokens,
                 source,
             };
             match to_html_with_data(&document, &options, data.as_ref()) {
@@ -146,7 +146,7 @@ pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
     let text = read(&args.file)?;
     let options = ImportOptions {
         catalog: &catalog,
-        tokens: &tokens,
+        tokens: &tokens.tokens,
     };
     let result = match args.target {
         Target::Html => import_html(&text, &options),

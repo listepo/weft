@@ -17,7 +17,7 @@ $ weft swiftui-tokens --out-dir ios                     # writes ios/WeftTokens.
 $ weft import-swiftui Login.swift > login.weft          # losses go to stderr
 ```
 
-- **Catalog and tokens.** Both commands take the catalog from `--catalog`, then the project (`weft.json`), then the core catalog. `weft swiftui` takes tokens from `--tokens`, then the project, then `packages/catalog/tokens/default.tokens.json`.
+- **Catalog and tokens.** Both commands take the catalog from `--catalog`, then the project (`weft.json`), then the core catalog. `weft swiftui` and `weft swiftui-tokens` take tokens from `--tokens` (a token file or a resolver), then the project, then `packages/catalog/tokens/default.tokens.json`.
 - **Sample data.** It comes from `--data`, then the project's `export.swiftui.data`, then none.
 - **Output directory.** It comes from `--out-dir`, then the project's `export.swiftui.outDir` or `import.swiftui.outDir`, then standard output.
 - **Tokens.** In a project, a screen reads `WeftTokens`, which `weft swiftui-tokens` writes once for the whole token set (`export.swiftui.sharedTokens`, default `true`). Without a project, or with `--no-shared-tokens`, the screen file carries a `<Screen>Theme` with only the tokens it uses, so one file builds on its own.
@@ -26,8 +26,8 @@ $ weft import-swiftui Login.swift > login.weft          # losses go to stderr
 As a library:
 
 ```rust
-let swift = weft_swiftui::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None, shared_tokens: true, data: None })?;
-let (weft_tokens, skipped) = weft_swiftui::generate_tokens(&tokens);
+let swift = weft_swiftui::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None, shared_tokens: true, data: None, appearance: None })?;
+let (weft_tokens, skipped) = weft_swiftui::generate_tokens(&tokens, None);
 let result = weft_swiftui::import_swiftui(&swift, &ImportOptions { catalog: &catalog });
 ```
 
@@ -99,16 +99,24 @@ A prop SwiftUI has no form for keeps its value as `.weftProp("name", value)`, wh
 
 | DTCG type | Swift |
 | --- | --- |
-| `color` | `Color(.sRGB` / `.sRGBLinear` / `.displayP3, red:green:blue:opacity:)`; another colour space falls back to its `hex`, and so does a plain `#rrggbb` string |
+| `color` | `Color(.sRGB` / `.sRGBLinear` / `.displayP3, red:green:blue:opacity:)`; another colour space falls back to its `hex`, and so does a plain `#rrggbb` string. A colour whose dark value differs is `adaptive(light:dark:)` ([Light and dark](#light-and-dark)) |
 | `dimension` | `CGFloat` points: px, or rem × 16 |
 | `number` | `Double` |
 | `fontFamily` | `[String]` |
 | `fontWeight` | `Font.Weight` (`.regular`, `.bold`, …; 100–900 map to the nine weights) |
 | `duration` | `Double` seconds |
 | `cubicBezier` | `UnitCurve.bezier(startControlPoint:endControlPoint:)` |
-| `typography` | `Font`: `.system(size:weight:design:)` for a generic family, else `.custom(name, size:).weight(…)`; `letterSpacing` and `lineHeight` have no `Font` form and are dropped |
+| `typography` | `Font`: `.system(size:weight:design:)` for a generic family, else `.custom(name, size:).weight(…)`. With `letterSpacing` or `lineHeight`, a `Typography` view modifier instead ([Typography](#typography)) |
 
-Weft token sets have no modes, so a colour has one value for light and dark appearance. A token of another type (`border`, `shadow`, `gradient`, `transition`, `strokeStyle`) or a value with no form is left out of `WeftTokens.swift` with a warning, and a screen that references it is not generated.
+A token of another type (`border`, `shadow`, `gradient`, `transition`, `strokeStyle`) or a value with no form is left out of `WeftTokens.swift` with a warning, and a screen that references it is not generated.
+
+### Light and dark
+
+When the project's `tokens` is a DTCG resolver with a modifier whose contexts are `light` and `dark` (SPEC §10.3), a colour whose value differs between the two is built with the struct's own `static func adaptive(light:dark:)`. It wraps a `UIColor(dynamicProvider:)` on iOS and an `NSColor(name:dynamicProvider:)` on macOS, so the colour follows the system appearance and `.preferredColorScheme`; SwiftUI has no `Color` initialiser for that on iOS 17 and macOS 14. Every other token takes the resolver's default context: a dimension or font cannot change with the appearance in a stored property. `weft swiftui-tokens` and a screen's own theme both do this; token files without a resolver print as before.
+
+### Typography
+
+A typography token with `letterSpacing` or `lineHeight` is the struct's `Typography`, a `ViewModifier` that a view applies with `.modifier(theme.font.body)`; its `font` is the same `Font` as above. Letter spacing is `tracking(_:)` in points. SwiftUI before iOS 26 and macOS 26 has no line height, only `lineSpacing(_:)`, which adds space between lines; so the modifier adds `lineHeight × size` less the font's own line height (from `UIFont` or `NSFont` of the family, or the system font), and pads the first and last line by half of it, as CSS half-leading does. A token without either part stays a `Font`.
 
 ## Custom components
 

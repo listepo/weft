@@ -97,7 +97,7 @@ struct WebImport {
     /// Catalog JSON; replaces the project's catalog (default: the core catalog).
     #[arg(long)]
     catalog: Option<PathBuf>,
-    /// Token JSON the page's custom properties are matched against; replaces the project's tokens
+    /// Token JSON or a DTCG resolver the page's custom properties are matched against; replaces the project's tokens
     /// (default: the default tokens).
     #[arg(long)]
     tokens: Option<PathBuf>,
@@ -160,7 +160,7 @@ enum Command {
         /// Catalog JSON; replaces the project's catalog (default: the core catalog).
         #[arg(long)]
         catalog: Option<PathBuf>,
-        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
         #[command(flatten)]
@@ -182,7 +182,7 @@ enum Command {
     },
     /// Generate `WeftTokens.swift`, the design tokens every SwiftUI screen of a project shares.
     SwiftuiTokens {
-        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
         /// Project file; without it, the nearest `weft.json` in or above the working directory.
@@ -213,7 +213,7 @@ enum Command {
     Html {
         #[command(flatten)]
         common: WebExport,
-        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
         #[command(flatten)]

@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use indexmap::IndexMap;
-use weft_catalog::Token;
+use weft_catalog::{Appearance, Token, appearance};
 use weft_core::Catalog;
 use weft_swiftui::{GenerateOptions, TOKENS_FILE, generate, generate_tokens};
 
@@ -20,6 +20,7 @@ fn module(
     screens: &[common::Screen],
     catalog: &Catalog,
     tokens: &IndexMap<String, Token>,
+    appearance: Option<Appearance<'_>>,
 ) -> Vec<(String, String)> {
     let mut failures = vec![];
     let mut out = vec![];
@@ -42,6 +43,7 @@ fn module(
                 name: Some(&name),
                 shared_tokens,
                 data,
+                appearance,
             };
             match generate(&document, &options) {
                 Ok(swift) => out.push((name, swift)),
@@ -49,7 +51,7 @@ fn module(
             }
         }
     }
-    let (swift, problems) = generate_tokens(tokens);
+    let (swift, problems) = generate_tokens(tokens, appearance);
     assert!(problems.is_empty(), "{problems:?}");
     out.push(("WeftTokens".to_owned(), swift));
     assert!(failures.is_empty(), "{}", failures.join("\n"));
@@ -57,7 +59,12 @@ fn module(
 }
 
 fn core_module() -> Vec<(String, String)> {
-    module(&common::screens(), &common::catalog(), &common::tokens())
+    module(
+        &common::screens(),
+        &common::catalog(),
+        &common::tokens(),
+        None,
+    )
 }
 
 #[test]
@@ -77,6 +84,7 @@ fn refused_screens_are_refused_with_the_reason() {
             name: None,
             shared_tokens: false,
             data: screen.data.as_ref(),
+            appearance: None,
         };
         let error = generate(&document, &options).unwrap_err().to_string();
         assert!(error.contains("array index"), "{}: {error}", screen.name);
@@ -102,6 +110,7 @@ fn a_custom_kind_names_the_view_the_app_writes() {
         name: None,
         shared_tokens: true,
         data: None,
+        appearance: None,
     };
     let swift = generate(&document, &options).unwrap();
     assert!(swift.contains(
@@ -177,7 +186,12 @@ fn typecheck(sdk: &str, target: &str) {
         let dir = dir.join(format!("project-{i}"));
         let mut files = write(
             &dir,
-            module(&project.screens, &project.catalog, &project.tokens),
+            module(
+                &project.screens,
+                &project.catalog,
+                &project.tokens,
+                appearance(&project.modifiers),
+            ),
         );
         files.push(fixtures.join("project/Views.swift"));
         swiftc(sdk, target, &dir, &files);

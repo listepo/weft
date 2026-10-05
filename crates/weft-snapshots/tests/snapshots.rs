@@ -145,6 +145,7 @@ fn swiftui() {
             name: None,
             shared_tokens: false,
             data: None,
+            appearance: None,
         };
         // A refusal is an output too: pinning its message keeps the reason reviewed.
         weft_swiftui::generate(document, &options).unwrap_or_else(|e| format!("refused: {e}\n"))
@@ -162,6 +163,7 @@ fn swiftui_with_data() {
             name: None,
             shared_tokens: false,
             data: Some(data),
+            appearance: None,
         };
         weft_swiftui::generate(document, &options).unwrap_or_else(|e| format!("refused: {e}\n"))
     });
@@ -183,7 +185,7 @@ fn swiftui_shared_tokens() {
     };
     let catalog = common::catalog();
     let tokens = common::tokens();
-    snapshot("WeftTokens", weft_swiftui::generate_tokens(&tokens).0);
+    snapshot("WeftTokens", weft_swiftui::generate_tokens(&tokens, None).0);
     let login = screens()
         .into_iter()
         .find(|(n, _)| n == "corpus-login")
@@ -195,6 +197,7 @@ fn swiftui_shared_tokens() {
         name: None,
         shared_tokens: true,
         data: None,
+        appearance: None,
     };
     snapshot(
         "corpus-login",
@@ -202,7 +205,7 @@ fn swiftui_shared_tokens() {
     );
 
     let project = common::project("crates/weft-swiftui/tests/fixtures/project");
-    let (swift, skipped) = weft_swiftui::generate_tokens(&project.tokens);
+    let (swift, skipped) = weft_swiftui::generate_tokens(&project.tokens, None);
     assert!(skipped.is_empty(), "{skipped:?}");
     snapshot("project-WeftTokens", swift);
     let markup = std::fs::read_to_string(project.dir.join("screens/offers.weft")).unwrap();
@@ -217,9 +220,48 @@ fn swiftui_shared_tokens() {
         name: None,
         shared_tokens: true,
         data: Some(&data),
+        appearance: None,
     };
     snapshot(
         "project-offers",
+        weft_swiftui::generate(&document, &options).unwrap(),
+    );
+}
+
+/// A project whose resolver has a light and a dark theme (`examples/project`): the shared tokens
+/// and a screen's own theme build the colours that differ with `adaptive(light:dark:)`, and a
+/// typography token with letter spacing and line height is the `Typography` modifier.
+#[test]
+fn swiftui_appearance() {
+    let snapshot = |name: &str, output: String| {
+        insta::with_settings!({
+            snapshot_path => "snapshots/swiftui-appearance",
+            prepend_module_to_snapshot => false,
+            omit_expression => true,
+            description => format!("{name} as SwiftUI with light and dark tokens"),
+        }, {
+            insta::assert_snapshot!(name.to_owned(), output);
+        });
+    };
+    let project = common::project("examples/project");
+    let appearance = weft_catalog::appearance(&project.modifiers);
+    assert!(appearance.is_some());
+    let (swift, skipped) = weft_swiftui::generate_tokens(&project.tokens, appearance);
+    assert!(skipped.is_empty(), "{skipped:?}");
+    snapshot("example-WeftTokens", swift);
+    let markup = std::fs::read_to_string(project.dir.join("screens/review.weft")).unwrap();
+    let (document, diagnostics) = common::parse_strict(&markup, &project.catalog, &project.tokens);
+    let document = document.unwrap_or_else(|| panic!("{diagnostics:?}"));
+    let options = GenerateOptions {
+        catalog: &project.catalog,
+        tokens: &project.tokens,
+        name: None,
+        shared_tokens: false,
+        data: None,
+        appearance,
+    };
+    snapshot(
+        "example-review",
         weft_swiftui::generate(&document, &options).unwrap(),
     );
 }

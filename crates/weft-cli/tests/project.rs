@@ -567,3 +567,40 @@ fn web_importers_list_losses_and_refuse_what_they_cannot_read() {
     assert_eq!(r.code, 0, "{}", r.stderr);
     assert!(r.stdout.contains("label=\"P\""), "{}", r.stdout);
 }
+
+#[test]
+fn a_resolver_makes_colours_follow_the_appearance() {
+    let s = Scratch::new("resolver");
+    // The example project's resolver: the star colour differs in the dark theme.
+    let r = run_in(&s.path("screens"), &[&"swiftui-tokens"]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    assert!(
+        r.stdout
+            .contains("var star: Color = WeftTokens.adaptive(light: "),
+        "{}",
+        r.stdout
+    );
+    assert!(r.stdout.contains("var sm: CGFloat = 8"), "{}", r.stdout);
+
+    // The same resolver as `--tokens`, from elsewhere: its references are relative to it, and
+    // its problems point into it.
+    s.write(
+        "tokens/broken.resolver.json",
+        r##"{"version":"2025.10","resolutionOrder":[{"$ref":"#/sets/none"},{"$ref":"base.tokens.json"}]}"##,
+    );
+    let r = run(&[
+        &"swiftui-tokens",
+        &"--no-project",
+        &"--tokens",
+        &s.path("tokens/broken.resolver.json"),
+    ]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stderr
+            .contains("broken.resolver.json:#/resolutionOrder/0/$ref W705"),
+        "{}",
+        r.stderr
+    );
+    assert!(r.stdout.contains("var sm: CGFloat = 8"), "{}", r.stdout);
+    assert!(!r.stdout.contains("adaptive"), "{}", r.stdout);
+}
