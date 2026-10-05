@@ -12,7 +12,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
-| T15 | in progress | P3 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
+| T15 | in progress | P3 | 4 | 5% | Claude Code / claude-sonnet-5-5 |
+| T15.1 | todo | P3 | 3 | 0% | |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
@@ -175,6 +176,18 @@ Split from T52. A `model` element showing a 3D asset, with a still fallback imag
 
 Export a Weft document to A2UI v0.9 messages and to a json-render spec, and import from both, each with a loss table in SPEC §9. Done when every corpus screen converts both ways and the losses are listed.
 
-### T15. Second code target and catalog import
+### T15. Lit web components target
 
-A generator for Lit web components and an importer that turns a Custom Elements Manifest (schema 2.1.0) into a Weft catalog, to show that the format is not bound to React. Done when a corpus screen renders through the Lit target with the same accessibility tree as the React renderer.
+A generator for Lit web components, to show that the format is not bound to React (the importer from a Custom Elements Manifest is T15.1). Done when a corpus screen renders through the Lit target with the same accessibility tree as the React renderer.
+
+Plan (the 500-line limit splits the task: T15 is the generator, T15.1 the importer):
+
+1. `Framework::Lit` in `crates/weft-web/src/jsx` shares the render plan with React and SolidJS. The element tree is printed as a `html` template in `jsx/lit.rs` (a template keeps whitespace between elements, so line breaks are placed inside tags only), and the module is a `LitElement` subclass that renders into the light DOM, reads `data`, `actions` and `onChange` as properties and registers a custom element. Sites that differ per framework (attribute names, input events, keyless loops, dynamic tags, `hidden` guards) get a Lit branch.
+2. `lit` in the wire options of `weft-binding`, `weft lit` in the CLI, `framework: "lit"` in `@weft/to-jsx`; TypeScript output and the `source` comment are not offered for Lit and the generator says so.
+3. Tests: an insta snapshot per corpus screen and catalog example, a binding test, a parse check of every generated module in `@weft/to-jsx`, and in `@weft/visual` the real Chromium accessibility tree of the Lit element against React and the reference renderer on every corpus screen.
+4. Docs: SPEC §9 "To JSX" paragraph, `docs/cli.md`, `toolchain.md` rows (`lit`), and the project file keys in SPEC §10.
+5. Verify: `moon run root:changed`, then the full check once.
+
+### T15.1. Catalog import from a Custom Elements Manifest
+
+An importer that turns a Custom Elements Manifest (schema 2.1.0, https://github.com/webcomponents/custom-elements-manifest) into a Weft catalog: each custom element becomes a kind, its attributes and fields become props, its slots become slots, its events become events. Done when the manifest of a real component library imports into a catalog that validates, with the lost parts listed.
