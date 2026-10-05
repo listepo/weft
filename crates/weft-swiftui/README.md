@@ -54,7 +54,7 @@ A file for a screen whose id is `login` contains these parts, in order:
 | --- | --- |
 | `screen` | `VStack(alignment: .leading)`, the body of the view |
 | `stack` | `VStack` or `HStack` (`direction`); `align` gives `alignment:`, a `gap` token gives `spacing:`; a row without `align` is a plain `HStack`, which already centres its children as the SPEC default asks |
-| `grid` | `LazyVGrid` with `columns` flexible `GridItem`s |
+| `grid` | `LazyVGrid` with `columns` flexible `GridItem`s; a `material` token (below) is `.modifier(theme.<path>)` on it, as on a `stack` |
 | `section` | `Section`, with the `header` slot as its header |
 | `heading` | `Text` with a font for the `level` and `.accessibilityHeading(.hN)` |
 | `text` | `Text`; `tone` gives `.foregroundStyle` |
@@ -112,6 +112,7 @@ A prop SwiftUI has no form for keeps its value as `.weftProp("name", value)`, wh
 | `fontWeight` | `Font.Weight` (`.regular`, `.bold`, …; 100–900 map to the nine weights) |
 | `duration` | `Double` seconds |
 | `cubicBezier` | `UnitCurve.bezier(startControlPoint:endControlPoint:)` |
+| `color` with the `dev.weft.material` extension (a `material` token) | `Surface`, a `ViewModifier` nested in the token struct: `.modifier(theme.material.glass)`. Liquid Glass (`glassEffect` with the tint, in a rectangle) on iOS 26 and macOS 26 or later, built only by Swift 6.2 or later; before that the tint over a system `Material`. SwiftUI has no blur radius, so the radius only picks the thickness (below 10 `ultraThin`, 20 `thin`, 30 `regular`, 50 `thick`, else `ultraThick`), and it is the light context's: only the tint follows the appearance |
 | `typography` | `Font`: `.system(size:weight:design:)` for a generic family, else `.custom(name, size:).weight(…)`. With `letterSpacing` or `lineHeight`, a `Typography` view modifier instead ([Typography](#typography)) |
 
 A token of another type (`border`, `shadow`, `gradient`, `transition`, `strokeStyle`) or a value with no form is left out of `WeftTokens.swift` with a warning, and a screen that references it is not generated.
