@@ -4,6 +4,5 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T50. Richer controls
 - T51. Glass material tokens
 - T52. 3D transforms and models
