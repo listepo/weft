@@ -1,0 +1,52 @@
+{
+  "weft": "0.1",
+  "name": "custom-views",
+  "version": "1.0.0",
+  "components": {
+    "rating": {
+      "description": "Shows a score from 0 to 5 as stars.",
+      "role": "img",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The score, from 0 to 5.",
+          "type": "number",
+          "required": true,
+          "min": 0,
+          "max": 5
+        },
+        "color": {
+          "description": "Colour of the filled stars.",
+          "type": "token",
+          "tokenType": "color"
+        }
+      }
+    },
+    "promo-card": {
+      "description": "A dismissible offer with its own actions.",
+      "role": "group",
+      "content": "mixed",
+      "props": {
+        "title": { "description": "The offer's title.", "type": "string", "required": true },
+        "tone": {
+          "description": "How loud the card is.",
+          "type": "enum",
+          "values": ["quiet", "loud"],
+          "default": "quiet"
+        },
+        "pinned": { "description": "Keeps the card at the top.", "type": "boolean" },
+        "count": { "description": "How many offers it stands for.", "type": "number", "integer": true },
+        "accent": { "description": "The card's edge colour.", "type": "token", "tokenType": "color" },
+        "gap": { "description": "Space between its parts.", "type": "token", "tokenType": "dimension" },
+        "note": { "description": "A note the user writes on the card.", "type": "string", "writable": true }
+      },
+      "slots": {
+        "header-actions": { "description": "Buttons beside the title." },
+        "footer": { "description": "Actions under the body." }
+      },
+      "states": ["idle", "busy"],
+      "events": ["dismiss", "open-link"]
+    }
+  }
+}

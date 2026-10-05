@@ -3,11 +3,14 @@
 
 use std::collections::{HashMap, HashSet};
 
-use weft_core::{Catalog, Child, Diagnostic, Document, Node, Value, WEFT_VERSION};
+use weft_core::{
+    Catalog, Child, Content, Diagnostic, Document, Node, PropType, Value, WEFT_VERSION,
+};
 
 use super::syntax::{Arg, Call, Closure, Expr, Part, Source, Stmt, TypeDecl, plain_string};
 use super::{ImportResult, LossKind, MAX_DEPTH, MAX_NODES};
 use crate::data::{Leaf, prop_leaf};
+use crate::kinds::is_core_kind;
 use crate::swift;
 use weft_import::{IdState, Losses, limit_reached, literal};
 
@@ -191,6 +194,8 @@ enum Root {
 
 struct Reader<'a> {
     catalog: &'a Catalog,
+    /// The kinds of the project's own catalog, by the name of the view the app writes for each.
+    custom: HashMap<String, String>,
     actions: HashMap<String, String>,
     views: HashMap<String, &'a [Stmt]>,
     roots: HashMap<String, Root>,
@@ -267,8 +272,15 @@ pub fn read(
         .filter(|t| t.inherits.iter().any(|i| i == "View") && body(t).is_some())
         .collect();
     let main = pick_main(&views)?;
+    let custom = catalog
+        .components
+        .keys()
+        .filter(|k| !is_core_kind(k))
+        .map(|k| (swift::view_name(k), k.clone()))
+        .collect();
     let mut reader = Reader {
         catalog,
+        custom,
         actions: HashMap::new(),
         views: HashMap::new(),
         roots: HashMap::new(),
@@ -1154,6 +1166,9 @@ impl<'a> Reader<'a> {
             "TabView" => self.tabs(call, mods, path),
             "Menu" => self.menu(call, mods, path),
             _ => {
+                if let Some(kind) = self.custom.get(name).cloned() {
+                    return self.custom_view(&kind, call, mods, path);
+                }
                 if let Some(body) = self.views.get(name).copied()
                     && !self.inlining.iter().any(|v| v == name)
                 {
@@ -2215,6 +2230,140 @@ impl<'a> Reader<'a> {
                 ),
             }
         }
+        self.finish(node, mods, &here)
+    }
+
+    /// The call of a view the app writes for a kind of its own catalog: labelled arguments are
+    /// props and `on…` handlers, builders are the content and the slots (README, "Custom
+    /// components"). The first trailing builder is the first the view takes.
+    fn custom_view(&mut self, kind: &str, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
+        let Some(def) = self.catalog.components.get(kind) else {
+            return vec![];
+        };
+        let Some((mut node, here)) = self.element(kind, &mut mods, "", path) else {
+            return vec![];
+        };
+        let mut builders: Vec<String> = vec![];
+        if def.content != Content::None {
+            builders.push("content".to_owned());
+        }
+        builders.extend(
+            def.slots
+                .iter()
+                .flat_map(|s| s.keys())
+                .map(|n| swift::label(n)),
+        );
+        let mut bodies: Vec<(String, Vec<Stmt>)> = vec![];
+        for a in &call.args {
+            let Some(label) = a.label.as_deref() else {
+                self.lose(
+                    LossKind::Props,
+                    &here,
+                    format!(
+                        "an argument of `{}` without a label is not kept",
+                        swift::view_name(kind)
+                    ),
+                );
+                continue;
+            };
+            let prop = def
+                .props
+                .iter()
+                .flatten()
+                .find(|(name, _)| swift::label(name) == label || name.as_str() == label);
+            if let Some((name, prop)) = prop {
+                let value = match prop.kind {
+                    PropType::Token => self.token(&a.value).map(Value::Token),
+                    PropType::Number => self.value(&a.value, Leaf::Int, &here),
+                    PropType::Boolean => self.value(&a.value, Leaf::Bool, &here),
+                    PropType::String | PropType::Enum => self.value(&a.value, Leaf::Text, &here),
+                };
+                match value {
+                    Some(v) => {
+                        node.props.insert(name.clone(), v);
+                    }
+                    None => self.lose(
+                        if prop.kind == PropType::Token {
+                            LossKind::Tokens
+                        } else {
+                            LossKind::Bindings
+                        },
+                        &here,
+                        format!("the value of `{name}` is not a literal, a data path or a token"),
+                    ),
+                }
+                continue;
+            }
+            if label == "state" && def.states.is_some() {
+                if let Some(v) = self.value(&a.value, Leaf::Text, &here) {
+                    node.props.insert("state".to_owned(), v);
+                }
+                continue;
+            }
+            let event = def
+                .events
+                .iter()
+                .flatten()
+                .find(|e| swift::event_label(e) == label)
+                .cloned();
+            match (event, &a.value) {
+                (Some(event), Expr::Closure(c)) => {
+                    self.event(&mut node, &event, &c.body.clone(), &here);
+                }
+                (None, Expr::Closure(c)) if builders.iter().any(|b| b == label) => {
+                    bodies.push((label.to_owned(), c.body.clone()));
+                }
+                _ => self.lose(
+                    LossKind::Props,
+                    &here,
+                    format!(
+                        "`{}` has no `{label}` argument in Weft",
+                        swift::view_name(kind)
+                    ),
+                ),
+            }
+        }
+        for (i, c) in call.closures.iter().enumerate() {
+            let label = match (&c.label, i) {
+                (Some(l), _) => Some(l.clone()),
+                (None, 0) => builders
+                    .iter()
+                    .find(|b| !bodies.iter().any(|(l, _)| l == *b))
+                    .cloned(),
+                (None, _) => None,
+            };
+            match label.filter(|l| builders.contains(l)) {
+                Some(l) => bodies.push((l, c.body.clone())),
+                None => self.lose(
+                    LossKind::Slots,
+                    &here,
+                    format!(
+                        "a view builder of `{}` has no slot in Weft",
+                        swift::view_name(kind)
+                    ),
+                ),
+            }
+        }
+        let slots: Vec<String> = def.slots.iter().flat_map(|s| s.keys()).cloned().collect();
+        for (label, body) in bodies {
+            if label == "content" && def.content != Content::None {
+                let children = self.nested(|r| r.mixed_children(&body, &here));
+                node.children.extend(children);
+                continue;
+            }
+            let Some(name) = slots.iter().find(|n| swift::label(n) == label) else {
+                continue;
+            };
+            let slot_path = format!("{here}/slot[{name}]");
+            let views = self.nested(|r| r.views(&body, Place::Nodes, &slot_path));
+            let views = self.elements_only(views, &here);
+            if !views.is_empty() {
+                node.slots.insert(name.clone(), views);
+            }
+        }
+        // The canonical form orders slots and events by name.
+        node.slots.sort_keys();
+        node.on.sort_keys();
         self.finish(node, mods, &here)
     }
 

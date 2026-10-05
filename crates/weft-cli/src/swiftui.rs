@@ -34,6 +34,7 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
             catalog: &catalog,
             tokens: &tokens,
             name: None,
+            shared_tokens: false,
         },
     ) {
         Ok(swift) => swift,

@@ -163,6 +163,45 @@ pub fn action_case(action: &str) -> String {
     }
 }
 
+/// `rating` → `RatingView`: the view the app writes for a kind of its own catalog (SPEC §9).
+pub fn view_name(kind: &str) -> String {
+    format!("{}View", type_prefix(kind))
+}
+
+/// `max-length` → `maxLength`: an argument label for a prop, slot or event name. Names follow
+/// `[a-z][a-z0-9]*(-[a-z0-9]+)*` (SPEC §2), so only a keyword needs backticks.
+pub fn label(name: &str) -> String {
+    let mut out = String::new();
+    for (i, part) in name.split('-').enumerate() {
+        let mut chars = part.chars();
+        if let Some(first) = chars.next() {
+            if i == 0 {
+                out.push(first);
+            } else {
+                out.extend(first.to_uppercase());
+            }
+            out.push_str(chars.as_str());
+        }
+    }
+    member(&out)
+}
+
+/// `press` → `onPress`: the closure argument a custom view takes for an event.
+pub fn event_label(event: &str) -> String {
+    label(&format!("on-{event}"))
+}
+
+/// A token path segment as a member name. Swift reserves the `$` prefix, so the DTCG `$root`
+/// token is `_root`, and a token really named `_root` is written in backticks to stay apart
+/// from it when the importer reads the path back.
+pub fn token_member(segment: &str) -> String {
+    match segment {
+        "$root" => "_root".to_owned(),
+        "_root" => "`_root`".to_owned(),
+        _ => member(segment),
+    }
+}
+
 /// A Swift number literal for a finite value: integers without a fraction.
 pub fn number_literal(v: f64) -> String {
     if v.is_finite() && v.fract() == 0.0 && v.abs() < 1e15 {
@@ -197,5 +236,11 @@ mod tests {
         assert_eq!(member("email"), "email");
         assert_eq!(number_literal(16.0), "16");
         assert_eq!(number_literal(14.5), "14.5");
+        assert_eq!(view_name("rating-bar"), "RatingBarView");
+        assert_eq!(label("max-length"), "maxLength");
+        assert_eq!(label("default"), "`default`");
+        assert_eq!(event_label("press"), "onPress");
+        assert_eq!(token_member("$root"), "_root");
+        assert_eq!(token_member("_root"), "`_root`");
     }
 }
