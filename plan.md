@@ -197,6 +197,7 @@ Two parts, as the creator chose.
    - Asset paths are untrusted: relative to the project, no URLs unless SPEC allows them, and size-bounded.
    - Add a small model asset under a compatible licence to the corpus.
 Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
+
 ### T54. Run only the checks a change affects
 
 The full check (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`) takes 5–7 minutes, and agents run it many times while they iterate. Rust tests already run on cargo-nextest (`root:rust-test`), but always the whole workspace. The creator asked for nextest and for runs of only what the changed files affect.
