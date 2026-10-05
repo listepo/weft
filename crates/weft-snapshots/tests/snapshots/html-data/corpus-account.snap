@@ -1,0 +1,124 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-account as html-data
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit account</title>
+<style>
+:root {
+  --weft-space-xs: 4px;
+  --weft-space-sm: 8px;
+  --weft-space-md: 16px;
+  --weft-space-lg: 24px;
+  --weft-space-xl: 32px;
+  --weft-radius-sm: 4px;
+  --weft-radius-md: 8px;
+  --weft-radius-pill: 999px;
+  --weft-font-size-sm: 0.875rem;
+  --weft-font-size-md: 1rem;
+  --weft-font-size-lg: 1.25rem;
+  --weft-font-size-xl: 1.75rem;
+  --weft-color-white: #ffffff;
+  --weft-color-ink: #1a1c21;
+  --weft-color-blue-_root: #2563eb;
+  --weft-color-red: #dc2626;
+  --weft-color-action-primary: #2563eb;
+  --weft-color-action-danger: #dc2626;
+}
+.weft-stack { display: flex; flex-direction: column; }
+.weft-row { display: flex; flex-direction: row; }
+.weft-grid { display: grid; }
+[data-align="start"] { align-items: flex-start; }
+[data-align="center"] { align-items: center; }
+[data-align="end"] { align-items: flex-end; }
+[data-align="stretch"] { align-items: stretch; }
+[data-wrap] { flex-wrap: wrap; }
+.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
+.weft-field label { flex-direction: column; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main data-weft-id="account" aria-label="Edit account">
+  <h1 data-weft-id="title">Edit account</h1>
+  <form data-weft-id="account-form" aria-label="Account" data-state="invalid" data-action="submit:account.save">
+    <div class="weft-field">
+      <label>
+        <span>Full name</span>
+        <input data-weft-id="name" data-state="valid" type="text" placeholder="Ada Lovelace" value="Ada Lovelace" data-action="change:account.edit">
+      </label>
+    </div>
+    <div class="weft-field">
+      <label>
+        <span>Age</span>
+        <input data-weft-id="age" data-state="invalid" type="number" aria-invalid="true" aria-describedby="weft-age-error" value="17">
+      </label>
+      <p id="weft-age-error" class="weft-error">You must be 18 or older.</p>
+    </div>
+    <div class="weft-field">
+      <label>
+        <span>Handle</span>
+        <input data-weft-id="handle" type="text" placeholder="{handle}" value="ada">
+      </label>
+    </div>
+    <div class="weft-field">
+      <label>
+        <span>Bio</span>
+        <textarea data-weft-id="bio">Wrote the first program.</textarea>
+      </label>
+    </div>
+    <div class="weft-field">
+      <label>
+        <span>Email</span>
+        <input data-weft-id="email" type="email" disabled value="ada@example.com">
+      </label>
+    </div>
+    <label class="weft-toggle">
+      <input data-weft-id="newsletter" type="checkbox" checked data-action="change:account.edit">
+      <span>Send me the newsletter</span>
+    </label>
+    <label class="weft-toggle">
+      <input data-weft-id="terms" type="checkbox" checked disabled>
+      <span>Terms accepted</span>
+    </label>
+    <label class="weft-toggle">
+      <input data-weft-id="public" type="checkbox" role="switch" data-action="change:account.edit">
+      <span>Public profile</span>
+    </label>
+    <fieldset data-weft-id="plan" role="radiogroup" data-action="change:account.edit">
+      <legend>Plan</legend>
+      <label class="weft-toggle">
+        <input data-weft-id="plan-free" type="radio" name="weft-plan" value="free">
+        <span>Free</span>
+      </label>
+      <label class="weft-toggle">
+        <input data-weft-id="plan-pro" type="radio" name="weft-plan" checked value="pro">
+        <span>Pro</span>
+      </label>
+      <label class="weft-toggle">
+        <input data-weft-id="plan-team" type="radio" name="weft-plan" value="team" disabled>
+        <span>Team</span>
+      </label>
+    </fieldset>
+    <label>
+      <span>Language</span>
+      <select data-weft-id="language" data-action="change:account.edit">
+        <option data-weft-id="language-en" value="en">English</option>
+        <option data-weft-id="language-fr" selected value="fr">Français</option>
+      </select>
+    </label>
+    <p data-weft-id="internal" hidden>Internal note: never shown.</p>
+    <div data-weft-id="saved" hidden role="alert" data-tone="success">Your changes were saved.</div>
+    <footer data-weft-slot="footer">
+      <button data-weft-id="save" data-state="busy" type="submit" data-variant="primary">Save</button>
+      <button data-weft-id="cancel" data-state="idle" type="button" data-variant="secondary" data-action="press:account.cancel">Cancel</button>
+      <a data-weft-id="help" href="https://example.com/help">Help</a>
+    </footer>
+  </form>
+</main>
+</body>
+</html>

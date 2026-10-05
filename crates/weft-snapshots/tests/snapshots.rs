@@ -1,6 +1,8 @@
 //! What every generator writes for every corpus screen and catalog example, pinned as reviewed
 //! insta snapshots under `tests/snapshots/<target>/<screen>.snap`: canonical JSON, the static
-//! HTML page, React and SolidJS components as JSX and TSX, and SwiftUI. The differential and
+//! HTML page, React and SolidJS components as JSX and TSX, and SwiftUI; and for every corpus
+//! screen, the static page and SwiftUI generated with its sample data (`html-data`,
+//! `swiftui-data`). The differential and
 //! round-trip tests prove the outputs agree with each other; these make any change to an output a
 //! diff someone reviews (`cargo insta review`) instead of a silent drift.
 
@@ -9,9 +11,10 @@
 
 mod common;
 
-use weft_core::{Document, stringify};
+use serde_json::Value as Json;
+use weft_core::{Document, parse_json, stringify};
 use weft_swiftui::GenerateOptions;
-use weft_web::{Framework, HtmlOptions, JsxOptions, to_html, to_jsx};
+use weft_web::{Framework, HtmlOptions, JsxOptions, to_html, to_html_with_data, to_jsx};
 
 fn screens() -> Vec<(String, Document)> {
     let catalog = common::catalog();
@@ -40,6 +43,30 @@ fn snapshot_all(target: &str, output: impl Fn(&Document) -> String) {
     }
 }
 
+/// Snapshots `output` of every corpus screen with its `data.json` into
+/// `tests/snapshots/<target>/<screen>.snap`.
+fn snapshot_with_data(target: &str, output: impl Fn(&Document, &Json) -> String) {
+    let catalog = common::catalog();
+    let tokens = common::tokens();
+    let mut count = 0;
+    for screen in common::corpus() {
+        let data = screen.path.with_file_name("data.json");
+        let data = parse_json(&std::fs::read_to_string(&data).unwrap()).unwrap();
+        let (document, _) = common::parse_strict(&screen.markup, &catalog, &tokens);
+        let document = document.unwrap();
+        insta::with_settings!({
+            snapshot_path => format!("snapshots/{target}"),
+            prepend_module_to_snapshot => false,
+            omit_expression => true,
+            description => format!("{} as {target}", screen.name),
+        }, {
+            insta::assert_snapshot!(screen.name.clone(), output(&document, &data));
+        });
+        count += 1;
+    }
+    assert!(count > 10, "found only {count} corpus screens");
+}
+
 #[test]
 fn canonical_json() {
     snapshot_all("json", stringify);
@@ -56,6 +83,20 @@ fn static_html() {
             source: false,
         };
         to_html(document, &options).unwrap()
+    });
+}
+
+#[test]
+fn static_html_with_data() {
+    let catalog = common::catalog();
+    let tokens = common::tokens();
+    snapshot_with_data("html-data", |document, data| {
+        let options = HtmlOptions {
+            catalog: &catalog,
+            tokens: &tokens,
+            source: false,
+        };
+        to_html_with_data(document, &options, Some(data)).unwrap()
     });
 }
 
@@ -102,8 +143,24 @@ fn swiftui() {
             catalog: &catalog,
             tokens: &tokens,
             name: None,
+            data: None,
         };
         // A refusal is an output too: pinning its message keeps the reason reviewed.
+        weft_swiftui::generate(document, &options).unwrap_or_else(|e| format!("refused: {e}\n"))
+    });
+}
+
+#[test]
+fn swiftui_with_data() {
+    let catalog = common::catalog();
+    let tokens = common::tokens();
+    snapshot_with_data("swiftui-data", |document, data| {
+        let options = GenerateOptions {
+            catalog: &catalog,
+            tokens: &tokens,
+            name: None,
+            data: Some(data),
+        };
         weft_swiftui::generate(document, &options).unwrap_or_else(|e| format!("refused: {e}\n"))
     });
 }
