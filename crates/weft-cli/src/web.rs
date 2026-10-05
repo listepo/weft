@@ -2,17 +2,19 @@
 //! `weft import-react`, `weft import-solid` (SPEC §9). Catalog and tokens resolve as for SwiftUI;
 //! `--typescript` and `--source` fall back to the project's `export.<target>` settings, the output
 //! directory to `export.<target>.outDir` or `import.<target>.outDir`, else standard output.
+//! `weft html --data` falls back to `export.html.data`; without data the page is a template.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use weft_web::{
-    Framework, HtmlOptions, ImportOptions, JsxOptions, import_html, import_jsx, to_html, to_jsx,
+    Framework, HtmlOptions, ImportOptions, JsxOptions, import_html, import_jsx, to_html_with_data,
+    to_jsx,
 };
 
 use crate::convert::{
-    catalog, emit, finish_import, out_dir, project, strict_document, switch, tokens,
+    catalog, emit, finish_import, out_dir, project, sample_data, strict_document, switch, tokens,
 };
 use crate::{DIAGNOSTICS, ProjectArgs, print, read};
 
@@ -44,6 +46,8 @@ pub struct ExportArgs {
     pub javascript: bool,
     pub source: bool,
     pub no_source: bool,
+    /// Sample data for the static page; the component targets take data at run time.
+    pub data: Option<PathBuf>,
 }
 
 pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
@@ -63,12 +67,13 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     let (text, extension) = match args.target {
         Target::Html => {
             let tokens = tokens(args.tokens.as_deref(), project)?;
+            let data = sample_data(args.data, project, project_dir.as_deref(), target)?;
             let options = HtmlOptions {
                 catalog: &catalog,
                 tokens: &tokens,
                 source,
             };
-            match to_html(&document, &options) {
+            match to_html_with_data(&document, &options, data.as_ref()) {
                 Ok(html) => (html, "html"),
                 // The tokens can still refuse a screen the catalog alone accepts.
                 Err(invalid) => {

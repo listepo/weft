@@ -35,22 +35,28 @@ impl V {
     /// The renderer's `text`: strings as they are, finite numbers and booleans printed, the rest
     /// empty.
     pub(crate) fn text(&self) -> String {
-        match self {
-            V::Str(s) => s.clone(),
-            V::Num(n) if n.is_finite() => js_number(*n),
-            V::Bool(b) => b.to_string(),
-            _ => String::new(),
-        }
+        weft_core::text(self.json().as_ref())
     }
 
     /// The renderer's `flag`: JavaScript truthiness, except that the string `"false"` is false.
     pub(crate) fn truthy(&self) -> bool {
         match self {
-            V::Str(s) => s != "false" && !s.is_empty(),
-            V::Num(n) => *n != 0.0 && !n.is_nan(),
-            V::Bool(b) => *b,
-            V::Arr(_) => true,
-            V::Undef | V::Null => false,
+            // JSON has no infinities, so the shared reading never sees one.
+            V::Num(n) if n.is_infinite() => true,
+            _ => weft_core::truthy(self.json().as_ref()),
+        }
+    }
+
+    /// The value as JSON, where it is one; NaN and the infinities are not. The length of an
+    /// array is not part of either reading, so an empty array stands in for any.
+    fn json(&self) -> Option<Json> {
+        match self {
+            V::Undef => None,
+            V::Null => Some(Json::Null),
+            V::Bool(b) => Some(Json::Bool(*b)),
+            V::Num(n) => serde_json::Number::from_f64(*n).map(Json::Number),
+            V::Str(s) => Some(Json::String(s.clone())),
+            V::Arr(_) => Some(Json::Array(vec![])),
         }
     }
 
@@ -87,11 +93,7 @@ pub(crate) fn quote(s: &str) -> String {
     to_compact(s)
 }
 
-/// `Math.round`: halves round up, towards positive infinity.
-pub(crate) fn js_round(x: f64) -> f64 {
-    let floor = x.floor();
-    if x - floor >= 0.5 { floor + 1.0 } else { floor }
-}
+pub(crate) use weft_core::js_round;
 
 /// `Number.isInteger`.
 pub(crate) fn is_integer(x: f64) -> bool {

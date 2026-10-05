@@ -173,9 +173,11 @@ weft-tour/Hello.swift:/screen#screen-1/text#text-hi loss layout: `.padding` not 
 
 The commands use the project's catalog and tokens, or `--catalog` and `--tokens` when you give them; `weft swiftui-tokens` finds the project from the working directory. `--out-dir` writes `<name>.swift`, `WeftTokens.swift` or `<name>.weft` instead of printing. Without it, the project's `export.swiftui.outDir` or `import.swiftui.outDir` decides ([Projects](projects.md)). `--shared-tokens` and `--no-shared-tokens` override the project's `export.swiftui.sharedTokens`. A kind of the project's own catalog becomes a call of a view the app writes (`rating` → `RatingView`); the header comment of the screen file names them. The mapping table and every loss are listed in `crates/weft-swiftui/README.md`.
 
+With `--data <file>` (or the project's `export.swiftui.data`), the model also gets an initializer and a `sample` built from that JSON, and `#Preview` shows it. The importer ignores both.
+
 ## `weft html`, `weft react`, `weft solid` and their importers
 
-`weft html` prints a static page: semantic HTML, the tokens as CSS custom properties, and no script. Bindings, events and repetition are kept as inert `data-` attributes and `<template>` elements. `weft react` and `weft solid` print one self-contained component, JSX by default or TSX with `--typescript`. With `--source`, the output keeps the screen in a leading comment, and the matching importer gives it back unchanged:
+`weft html` prints a static page: semantic HTML, the tokens as CSS custom properties, and no script. Bindings, events and repetition are kept as inert `data-` attributes and `<template>` elements. With `--data <file>` (or the project's `export.html.data`), the page shows that data instead: bound values filled in, one copy per list item, empty slots shown. Such a page is a picture of the screen, not a template. `weft react` and `weft solid` print one self-contained component, JSX by default or TSX with `--typescript`. With `--source`, the output keeps the screen in a leading comment, and the matching importer gives it back unchanged:
 
 ```console
 $ weft react weft-tour/login.weft --source --out-dir weft-tour/web

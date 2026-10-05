@@ -14,6 +14,8 @@ pub struct Screen {
     /// A unique name: `corpus/login` or `examples/button`.
     pub name: String,
     pub markup: String,
+    /// The screen's sample data (`data.json` of a corpus screen).
+    pub data: Option<serde_json::Value>,
 }
 
 pub fn root() -> PathBuf {
@@ -39,6 +41,9 @@ pub fn all_screens() -> Vec<Screen> {
         out.push(Screen {
             name: format!("corpus/{name}"),
             markup: std::fs::read_to_string(dir.join("screen.weft")).unwrap(),
+            data: std::fs::read_to_string(dir.join("data.json"))
+                .ok()
+                .map(|text| parse_json(&text).unwrap()),
         });
     }
     let mut examples: Vec<_> = std::fs::read_dir(root().join("packages/catalog/examples"))
@@ -52,6 +57,7 @@ pub fn all_screens() -> Vec<Screen> {
         out.push(Screen {
             name: format!("examples/{name}"),
             markup: std::fs::read_to_string(&path).unwrap(),
+            data: None,
         });
     }
     let mut fixtures: Vec<_> =
@@ -66,6 +72,7 @@ pub fn all_screens() -> Vec<Screen> {
         out.push(Screen {
             name: format!("fixtures/{name}"),
             markup: std::fs::read_to_string(&path).unwrap(),
+            data: None,
         });
     }
     assert!(out.len() > 30, "found only {} screens", out.len());
@@ -142,6 +149,10 @@ fn project_at(dir: PathBuf, prefix: &str) -> Project {
     )
     .unwrap();
     assert!(load.diagnostics.is_empty(), "{:?}", load.diagnostics);
+    // One sample for every screen of the project, as `render.data` gives it.
+    let data = std::fs::read_to_string(dir.join("sample.data.json"))
+        .ok()
+        .map(|text| serde_json::from_str(&text).unwrap());
     let mut paths: Vec<_> = std::fs::read_dir(dir.join("screens"))
         .unwrap()
         .map(|e| e.unwrap().path())
@@ -152,6 +163,7 @@ fn project_at(dir: PathBuf, prefix: &str) -> Project {
         .map(|path| Screen {
             name: format!("{prefix}/{}", path.file_stem().unwrap().to_string_lossy()),
             markup: std::fs::read_to_string(path).unwrap(),
+            data: data.clone(),
         })
         .collect();
     Project {

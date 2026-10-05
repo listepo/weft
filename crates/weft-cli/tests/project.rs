@@ -497,6 +497,48 @@ fn web_arguments_override_the_project() {
     assert!(!r.stdout.contains("<script"), "{}", r.stdout);
 }
 
+const GREETING: &str = r#"<screen id="greeting" label="Greeting" weft="0.1">
+  <text id="name" text="{$.name}"/>
+</screen>
+"#;
+
+#[test]
+fn sample_data_comes_from_the_flag_else_the_project_else_none() {
+    let s = Scratch::new("sample-data");
+    s.write(
+        "weft.json",
+        r#"{
+  "tokens": ["tokens/base.tokens.json"],
+  "catalog": "catalog.json",
+  "export": { "html": { "data": "data/sample.json" }, "swiftui": { "data": "data/sample.json" } }
+}"#,
+    );
+    s.write("data/sample.json", r#"{ "name": "Ada" }"#);
+    let other = s.write("other.json", r#"{ "name": "Grace" }"#);
+    let screen = s.write("screens/greeting.weft", GREETING);
+
+    let r = run(&[&"html", &screen]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.contains(">Ada</p>"), "{}", r.stdout);
+    let r = run(&[&"html", &screen, &"--data", &other]);
+    assert!(r.stdout.contains(">Grace</p>"), "{}", r.stdout);
+    let r = run(&[&"html", &screen, &"--no-project"]);
+    assert!(!r.stdout.contains("Ada"), "{}", r.stdout);
+
+    let r = run(&[&"swiftui", &screen]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stdout.contains("name: \"Ada\"") && r.stdout.contains("(model: .sample)"),
+        "{}",
+        r.stdout
+    );
+    let r = run(&[&"swiftui", &screen, &"--no-project"]);
+    assert!(!r.stdout.contains("static var sample"), "{}", r.stdout);
+
+    let r = run(&[&"html", &screen, &"--data", &s.path("missing.json")]);
+    assert_ne!(r.code, 0);
+}
+
 #[test]
 fn web_importers_list_losses_and_refuse_what_they_cannot_read() {
     let s = Scratch::new("web-losses");

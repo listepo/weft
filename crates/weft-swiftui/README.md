@@ -12,11 +12,13 @@ What `generate` prints reads back to the same document with no losses. Other Swi
 ```console
 $ weft swiftui screens/login.weft > Login.swift
 $ weft swiftui screens/login.weft --out-dir ios        # writes ios/login.swift
+$ weft swiftui screens/login.weft --data login.json    # #Preview shows that data
 $ weft swiftui-tokens --out-dir ios                     # writes ios/WeftTokens.swift
 $ weft import-swiftui Login.swift > login.weft          # losses go to stderr
 ```
 
 - **Catalog and tokens.** Both commands take the catalog from `--catalog`, then the project (`weft.json`), then the core catalog. `weft swiftui` takes tokens from `--tokens`, then the project, then `packages/catalog/tokens/default.tokens.json`.
+- **Sample data.** It comes from `--data`, then the project's `export.swiftui.data`, then none.
 - **Output directory.** It comes from `--out-dir`, then the project's `export.swiftui.outDir` or `import.swiftui.outDir`, then standard output.
 - **Tokens.** In a project, a screen reads `WeftTokens`, which `weft swiftui-tokens` writes once for the whole token set (`export.swiftui.sharedTokens`, default `true`). Without a project, or with `--no-shared-tokens`, the screen file carries a `<Screen>Theme` with only the tokens it uses, so one file builds on its own.
 - **Exit codes.** A screen that is not strictly valid exits 1, and so does one the generator cannot express (`x-` content, a kind in neither catalog, a token SwiftUI has no form for). `weft swiftui-tokens` leaves such a token out with a warning and exits 0. For the importer, losses are not failures: it exits 1 only on an error diagnostic.
@@ -24,7 +26,7 @@ $ weft import-swiftui Login.swift > login.weft          # losses go to stderr
 As a library:
 
 ```rust
-let swift = weft_swiftui::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None, shared_tokens: true })?;
+let swift = weft_swiftui::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None, shared_tokens: true, data: None })?;
 let (weft_tokens, skipped) = weft_swiftui::generate_tokens(&tokens);
 let result = weft_swiftui::import_swiftui(&swift, &ImportOptions { catalog: &catalog });
 ```
@@ -42,7 +44,8 @@ A file for a screen whose id is `login` contains these parts, in order:
 | Events | `struct LoginEvent { action, id, item }`: what the handler receives. Inside `<each>`, `item` is the data path of the list item (`$.todos.2`). |
 | Theme | Only without shared tokens: `struct LoginTheme`, the tokens the screen references, nested by group ([Tokens](#tokens)). |
 | View | `struct LoginScreen: View` with `@Bindable var model`, `var theme` (`WeftTokens()` or `LoginTheme()`), and `var perform: (LoginEvent) -> Void`. |
-| Preview | `#Preview` with an empty model. |
+| Sample | With sample data only: a memberwise `init` on the model (every argument defaults to the declared value) and `extension LoginModel { static var sample }` built from the data. The importer ignores both. |
+| Preview | `#Preview` with an empty model, or with `.sample` when there is sample data. |
 | Helpers | `fileprivate` helpers named `weft…`. They carry what SwiftUI has no form for, so the importer can read it back. |
 
 ## Mapping
@@ -162,6 +165,6 @@ The source is untrusted: it is parsed, never compiled or run. It is limited to `
 
 ## Tests
 
-- **`swift`.** It checks that generation is deterministic. It also typechecks every corpus screen, catalog example and fixture with `xcrun swiftc -typecheck -swift-version 6`, for iOS 17 and for macOS 14, together with the hand-written sample. Each screen is checked in both token forms with its `WeftTokens.swift`; the project screens build with the views in `tests/fixtures/project/Views.swift`. Without Xcode this test is skipped and says so.
-- **`roundtrip`.** For every screen, with shared tokens and with a theme in the file, Weft → SwiftUI → Weft gives byte-identical output with no losses. `examples/project` and `tests/fixtures/project` add kinds of a catalog extension.
+- **`swift`.** It checks that generation is deterministic. It also typechecks every corpus screen (also generated with its `data.json`), catalog example and fixture with `xcrun swiftc -typecheck -swift-version 6`, for iOS 17 and for macOS 14, together with the hand-written sample. Each screen is checked in both token forms with its `WeftTokens.swift`; the project screens build with the views in `tests/fixtures/project/Views.swift`. Without Xcode this test is skipped and says so.
+- **`roundtrip`.** For every screen, with shared tokens and with a theme in the file, and with and without sample data, Weft → SwiftUI → Weft gives byte-identical output with no losses. `examples/project` and `tests/fixtures/project` add kinds of a catalog extension.
 - **`import`.** It pins the hand-written sample, and a property test checks that any source imports, without panicking, to a document that is valid in lenient mode.

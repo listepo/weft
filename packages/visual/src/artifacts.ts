@@ -27,7 +27,7 @@ export type Screen = {
   data: unknown;
   /** The reference renderer's static markup, with the screen's data. */
   reference: string;
-  /** The static HTML page: a template, so it shows no data. */
+  /** The static HTML page, generated with the screen's data. */
   html: string;
   /** The generated components, compiled for the browser. */
   react: string;
@@ -82,10 +82,14 @@ async function screen(name: string): Promise<Screen> {
   const markup = readFileSync(join(CORPUS, name, "screen.weft"), "utf8");
   const data: unknown = JSON.parse(readFileSync(join(CORPUS, name, "data.json"), "utf8"));
   const document = parseMarkup(markup, name);
-  const html = cli("html", "screen.weft", markup, "--no-source");
+  const dataFile = join(CORPUS, name, "data.json");
+  const page = (weft: string) =>
+    cli("html", "screen.weft", weft, "--no-source", "--data", dataFile);
   // Convention imports, without the source comment: what a hand-edited page or component reads
-  // back as.
-  const htmlBack = parseMarkup(cli("import-html", "screen.html", html), `${name} from HTML`);
+  // back as. A page with data is a picture, not a template, so the HTML round trip reads the
+  // template page and fills it with the same data again.
+  const template = cli("html", "screen.weft", markup, "--no-source");
+  const htmlBack = parseMarkup(cli("import-html", "screen.html", template), `${name} from HTML`);
   const jsxBack = (framework: Framework) =>
     parseMarkup(
       cli(`import-${framework}`, "screen.jsx", generate(document, framework)),
@@ -99,11 +103,11 @@ async function screen(name: string): Promise<Screen> {
     name,
     data,
     reference: referenceMarkup(document, data),
-    html,
+    html: page(markup),
     react: compile(generate(document, "react"), "react"),
     solid: compile(generate(document, "solid"), "solid"),
     back: {
-      html: cli("html", "screen.weft", serialize(htmlBack), "--no-source"),
+      html: page(serialize(htmlBack)),
       react: compile(generate(jsxBack("react"), "react"), "react"),
       solid: compile(generate(jsxBack("solid"), "solid"), "solid"),
       figma: referenceMarkup(fromFigma.document, data),

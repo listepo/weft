@@ -1,6 +1,8 @@
 //! Weft → SwiftUI → Weft is the identity for every corpus screen, catalog example and example
-//! project screen, with the tokens in the screen file and in the shared `WeftTokens`: the document
-//! reads back byte-identical after canonical formatting, with no losses.
+//! project screen, with the tokens in the screen file and in the shared `WeftTokens`, and with and
+//! without sample data: the document reads back byte-identical after canonical formatting, with
+//! no losses. What the generator adds for the data (initializer, `sample`, `#Preview`) is not
+//! part of the screen.
 
 #![allow(clippy::unwrap_used, clippy::panic)]
 
@@ -20,32 +22,43 @@ fn round_trip(
     let mut failures = vec![];
     for screen in screens {
         let document = common::parse_screen(&screen.markup, catalog, tokens);
-        let options = GenerateOptions {
-            catalog,
-            tokens,
-            name: None,
-            shared_tokens,
-        };
-        let swift = match generate(&document, &options) {
-            Ok(swift) => swift,
-            Err(e) => {
-                failures.push(format!("{} (shared {shared_tokens}): {e}", screen.name));
-                continue;
+        let mut variants = vec![None];
+        if let Some(data) = &screen.data {
+            variants.push(Some(data));
+        }
+        for data in variants {
+            let name = format!(
+                "{} (shared {shared_tokens}{})",
+                screen.name,
+                if data.is_some() { ", with data" } else { "" }
+            );
+            let options = GenerateOptions {
+                catalog,
+                tokens,
+                name: None,
+                shared_tokens,
+                data,
+            };
+            let swift = match generate(&document, &options) {
+                Ok(swift) => swift,
+                Err(e) => {
+                    failures.push(format!("{name}: {e}"));
+                    continue;
+                }
+            };
+            let result = import_swiftui(&swift, &ImportOptions { catalog });
+            let expected = serialize(&document);
+            let actual = serialize(&result.document);
+            if expected != actual {
+                failures.push(format!(
+                    "{name}:\n--- expected\n{expected}\n--- actual\n{actual}"
+                ));
+            } else if !result.losses.is_empty() || !result.diagnostics.is_empty() {
+                failures.push(format!(
+                    "{name}: losses {:?} diagnostics {:?}",
+                    result.losses, result.diagnostics
+                ));
             }
-        };
-        let result = import_swiftui(&swift, &ImportOptions { catalog });
-        let expected = serialize(&document);
-        let actual = serialize(&result.document);
-        if expected != actual {
-            failures.push(format!(
-                "{} (shared {shared_tokens}):\n--- expected\n{expected}\n--- actual\n{actual}",
-                screen.name
-            ));
-        } else if !result.losses.is_empty() || !result.diagnostics.is_empty() {
-            failures.push(format!(
-                "{} (shared {shared_tokens}): losses {:?} diagnostics {:?}",
-                screen.name, result.losses, result.diagnostics
-            ));
         }
     }
     failures

@@ -68,6 +68,15 @@ struct WebExport {
     no_source: bool,
 }
 
+/// Sample data a generator shows (SPEC §9).
+#[derive(Args)]
+struct SampleData {
+    /// JSON the bindings read, shown in the output (default: the project's
+    /// `export.<target>.data`, else none).
+    #[arg(long)]
+    data: Option<PathBuf>,
+}
+
 /// What the React and SolidJS generators add.
 #[derive(Args)]
 struct JsxExport {
@@ -160,6 +169,8 @@ enum Command {
         /// `export.swiftui.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        #[command(flatten)]
+        data: SampleData,
         /// Read the tokens from the shared `WeftTokens` that `weft swiftui-tokens` writes
         /// (default: the project's `export.swiftui.sharedTokens`, which is true; without a project,
         /// the screen carries its own tokens).
@@ -205,6 +216,8 @@ enum Command {
         /// Token JSON; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
+        #[command(flatten)]
+        data: SampleData,
     },
     /// Generate a React component (JSX or TSX) from a markup document.
     React(JsxExport),
@@ -473,6 +486,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             tokens,
             project,
             out_dir,
+            data,
             shared_tokens,
             no_shared_tokens,
         } => swiftui::export(
@@ -482,6 +496,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 tokens,
                 project,
                 out_dir,
+                data: data.data,
                 shared_tokens: (shared_tokens, no_shared_tokens),
             },
             out,
@@ -516,14 +531,17 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             },
             out,
         ),
-        Command::Html { common, tokens } => {
-            web_export(web::Target::Html, common, tokens, None, out)
-        }
+        Command::Html {
+            common,
+            tokens,
+            data,
+        } => web_export(web::Target::Html, common, tokens, data.data, None, out),
         Command::React(args) => {
             let target = web::Target::React;
             web_export(
                 target,
                 args.common,
+                None,
                 None,
                 Some((args.typescript, args.javascript)),
                 out,
@@ -534,6 +552,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             web_export(
                 target,
                 args.common,
+                None,
                 None,
                 Some((args.typescript, args.javascript)),
                 out,
@@ -549,6 +568,7 @@ fn web_export(
     target: web::Target,
     common: WebExport,
     tokens: Option<PathBuf>,
+    data: Option<PathBuf>,
     jsx: Option<(bool, bool)>,
     out: &mut dyn Write,
 ) -> Result<u8> {
@@ -565,6 +585,7 @@ fn web_export(
             javascript,
             source: common.source,
             no_source: common.no_source,
+            data,
         },
         out,
     )

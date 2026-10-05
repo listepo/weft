@@ -24,12 +24,14 @@ const JSX_ROUND_TRIP_GAPS: Record<string, string> = {
   leaderboard: "an array-index binding is written as `_get(...)`, which the importer drops",
 };
 
-// The static page is a template for a host to fill: it shows no data, and its own layout
-// stylesheet stacks field captions above full-width controls and spaces stacked children apart,
-// while the generated components render the data with no stylesheet at all. So the two look the
-// same only on a screen with no bound content and no stacked layout. Seen in the diff images
-// while writing T36; the same screens still differ from a component given no data. Each listed
-// screen must still differ, so one that starts matching fails here until it is removed.
+// The static page shows the screen's data like the components do (`weft html --data`, T43), but
+// it has a layout stylesheet of its own: field captions stack above their controls, a toggle's
+// label is a flex row that pushes the next control onto a new line, and stacks are spaced with
+// their gap tokens, while the generated components render with no stylesheet at all. So the two
+// look the same only on a screen with no field, toggle or stacked layout. No pixel tolerance helps:
+// a caption moved onto its own line shifts everything under it. With the data in, the accessibility
+// trees are the comparison that means something, and they are compared below. Each listed screen
+// must still differ, so one that starts matching fails here until it is removed.
 const STATIC_PAGE_DIFFERS = new Set([
   "account",
   "dashboard",
@@ -48,6 +50,39 @@ const STATIC_PAGE_DIFFERS = new Set([
   "todo-list",
   "wizard-step",
 ]);
+
+// Screens whose static page, filled with the same data, still exposes a different accessibility
+// tree from React's. Seen in these tests while writing T43; none of the differences is in the data.
+// The static page writes a `text` as a paragraph where React writes a text run (`P`), shows the
+// caption of a field, checkbox, switch or radio as text of its own beside the control (`CAPTION`),
+// and gives a link with no `href` the URL `#` (`HREF`). Each must still differ.
+const P = "a text is a paragraph";
+const CAPTION = "control captions are text of their own";
+const HREF = "a link without href gets #";
+const STATIC_TREE_DIFFERS: Record<string, string[]> = {
+  account: [P, CAPTION],
+  dashboard: [P],
+  "data-table": [P],
+  "error-state": [P, HREF],
+  inbox: [CAPTION],
+  leaderboard: [P],
+  login: [CAPTION, HREF],
+  menu: [P],
+  orders: [P],
+  profile: [P],
+  "search-results": [P, CAPTION, HREF],
+  settings: [CAPTION],
+  signup: [CAPTION, HREF],
+  tabs: [P],
+  "todo-list": [P, CAPTION],
+  "wizard-step": [P, CAPTION],
+};
+
+// Known gaps the HTML importer leaves visible once the page shows data. The round trip reads the
+// template page, then fills the document it gives back with the same data.
+const HTML_ROUND_TRIP_GAPS: Record<string, string> = {
+  inbox: "the tabs' `selected` and a tab's bound `label` are dropped by the tab inversion",
+};
 
 for (const screen of screens) {
   const { name, data } = screen;
@@ -86,15 +121,24 @@ for (const screen of screens) {
         await expectSameLook("#react", "#html", `web/${name}.html`);
       },
     );
+    (name in STATIC_TREE_DIFFERS ? test.fails : test)(
+      "the static page gives React's accessibility tree",
+      async () => {
+        expect(await commands.ariaSnapshot("#html")).toBe(await commands.ariaSnapshot("#react"));
+      },
+    );
     test("React, SolidJS and the reference renderer give the same accessibility tree", async () => {
       const react = await commands.ariaSnapshot("#react");
       expect(await commands.ariaSnapshot("#solid")).toBe(react);
       expect(await commands.ariaSnapshot("#reference")).toBe(react);
     });
 
-    test("round trip through the HTML importer looks the same", async () => {
-      await expectSameLook("#html", "#html-back", `roundtrip/${name}.html`);
-    });
+    (name in HTML_ROUND_TRIP_GAPS ? test.fails : test)(
+      "round trip through the HTML importer looks the same",
+      async () => {
+        await expectSameLook("#html", "#html-back", `roundtrip/${name}.html`);
+      },
+    );
     const jsxRoundTrip = name in JSX_ROUND_TRIP_GAPS ? test.fails : test;
     jsxRoundTrip("round trip through the React importer looks the same", async () => {
       await expectSameLook("#react", "#react-back", `roundtrip/${name}.react`);

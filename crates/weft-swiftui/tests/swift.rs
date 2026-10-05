@@ -1,6 +1,6 @@
-//! Every corpus screen, catalog example and example project screen generates, with the tokens in
-//! the screen file and in the shared `WeftTokens`, and the generated Swift typechecks with the
-//! installed Xcode for iOS 17 and macOS 14. Without `xcrun` (Linux, CI without Xcode) the
+//! Every corpus screen, catalog example and example project screen generates, without and with its
+//! sample data, with the tokens in the screen file and in the shared `WeftTokens`, and the
+//! generated Swift typechecks with the installed Xcode for iOS 17 and macOS 14. Without `xcrun` (Linux, CI without Xcode) the
 //! typecheck is skipped with a message; generation is still checked.
 
 #![allow(clippy::unwrap_used, clippy::panic)]
@@ -25,14 +25,23 @@ fn module(
     let mut out = vec![];
     for screen in screens {
         let document = common::parse_screen(&screen.markup, catalog, tokens);
-        for shared_tokens in [false, true] {
-            // The two forms of a screen get their own type names, so both fit in one module.
-            let name = common::type_name(&screen.name) + if shared_tokens { "-shared" } else { "" };
+        // Each form of a screen gets its own type names, so all fit in one module. The shared
+        // tokens are checked once, with the data when there is some, rather than in every
+        // combination: the two features touch different parts of the file.
+        let data = screen.data.as_ref();
+        let mut variants = vec![("", false, None)];
+        if data.is_some() {
+            variants.push(("-sample", false, data));
+        }
+        variants.push(("-shared", true, data));
+        for (suffix, shared_tokens, data) in variants {
+            let name = common::type_name(&screen.name) + suffix;
             let options = GenerateOptions {
                 catalog,
                 tokens,
                 name: Some(&name),
                 shared_tokens,
+                data,
             };
             match generate(&document, &options) {
                 Ok(swift) => out.push((name, swift)),
@@ -67,6 +76,7 @@ fn refused_screens_are_refused_with_the_reason() {
             tokens: &tokens,
             name: None,
             shared_tokens: false,
+            data: screen.data.as_ref(),
         };
         let error = generate(&document, &options).unwrap_err().to_string();
         assert!(error.contains("array index"), "{}: {error}", screen.name);
@@ -91,6 +101,7 @@ fn a_custom_kind_names_the_view_the_app_writes() {
         tokens: &project.tokens,
         name: None,
         shared_tokens: true,
+        data: None,
     };
     let swift = generate(&document, &options).unwrap();
     assert!(swift.contains(

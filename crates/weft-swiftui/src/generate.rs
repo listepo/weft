@@ -5,9 +5,10 @@
 //! The document is untrusted. Its strings reach the output only as escaped Swift string literals,
 //! and identifiers come from this module or from names that are checked against Swift's grammar.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use indexmap::IndexMap;
+use serde_json::Value as Json;
 use weft_catalog::{Token, token_types};
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, Mode, Node, PropType,
@@ -17,6 +18,7 @@ use weft_core::{
 use crate::Unsupported;
 use crate::data::{Leaf, Shapes, Ty, prop_leaf};
 use crate::kinds::{EACH, is_core_kind};
+use crate::sample;
 use crate::swift::{self, string_literal};
 use crate::theme::{TOKENS_TYPE, check_token, token_expr, tokens_struct};
 
@@ -30,6 +32,9 @@ pub struct GenerateOptions<'a> {
     /// The view reads its tokens from the project's shared `WeftTokens` (`generate_tokens`)
     /// instead of a theme struct of its own, which keeps the file self-contained.
     pub shared_tokens: bool,
+    /// Sample data: the model gets a memberwise initializer and a `sample` built from this data,
+    /// which `#Preview` shows. Without it the file is as before.
+    pub data: Option<&'a Json>,
 }
 
 #[derive(Debug)]
@@ -91,6 +96,7 @@ pub fn generate(
     );
     g.problems = problems;
     g.shared_tokens = options.shared_tokens;
+    g.data = options.data;
     let text = g.file(&document.root, options.tokens);
     if g.problems.is_empty() {
         Ok(text)
@@ -230,6 +236,7 @@ struct Gen<'a> {
     /// The views the app writes for the kinds of its own catalog, by view name.
     custom: IndexMap<String, String>,
     problems: Vec<Unsupported>,
+    data: Option<&'a Json>,
 }
 
 impl<'a> Gen<'a> {
@@ -247,6 +254,7 @@ impl<'a> Gen<'a> {
             shared_tokens: false,
             custom: IndexMap::new(),
             problems: vec![],
+            data: None,
         };
         g.survey(root);
         g
@@ -361,7 +369,11 @@ impl<'a> Gen<'a> {
         out.extend(view);
         out.push(String::new());
         out.push("#Preview {".to_owned());
-        out.push(format!("    {p}Screen(model: {p}Model())"));
+        if self.data.is_some() {
+            out.push(format!("    {p}Screen(model: .sample)"));
+        } else {
+            out.push(format!("    {p}Screen(model: {p}Model())"));
+        }
         out.push("}".to_owned());
         out.push(String::new());
         out.extend(HELPERS.lines().map(str::to_owned));
@@ -377,24 +389,55 @@ impl<'a> Gen<'a> {
             "@Observable".to_owned(),
             format!("final class {p}Model {{"),
         ];
-        out.extend(indent(self.fields(0)));
+        let mut names = HashMap::new();
+        out.extend(indent(self.fields(0, "", &mut names)));
         out.push("}".to_owned());
+        if let Some(data) = self.data {
+            out.push(String::new());
+            out.extend(sample::extension(
+                &format!("{p}Model"),
+                &self.shapes,
+                &names,
+                data,
+            ));
+        }
         out
     }
 
-    /// The stored properties of the struct at `at`, then the nested types they use.
-    fn fields(&self, at: usize) -> Vec<String> {
+    /// The stored properties of the struct at `at`, then the nested types they use. `scope` is the
+    /// struct's name inside the model class ("" for the class) and `names` collects every nested
+    /// struct's, for the sample.
+    fn fields(&self, at: usize, scope: &str, names: &mut HashMap<usize, String>) -> Vec<String> {
         let mut props = vec![];
         let mut nested: Vec<Vec<String>> = vec![];
         let mut taken: Vec<String> = vec![];
+        let mut members = vec![];
         let shape = &self.shapes.nodes[at];
         for (name, &child) in &shape.fields {
             let ty = self.shapes.type_at(child).clone();
-            let (swift_ty, default) = self.declare(&ty, name, &mut taken, &mut nested);
-            props.push(format!(
-                "var {}: {swift_ty} = {default}",
-                swift::member(name)
-            ));
+            let (swift_ty, default) =
+                self.declare(&ty, name, scope, &mut taken, &mut nested, names);
+            let member = swift::member(name);
+            props.push(format!("var {member}: {swift_ty} = {default}"));
+            members.push(format!("{member}: {swift_ty} = {default}"));
+        }
+        // A class has no memberwise initializer of its own; the structs get Swift's.
+        if at == 0 && self.data.is_some() && !members.is_empty() {
+            props.push(String::new());
+            props.push(
+                "/// Every property, defaulting to the value it is declared with.".to_owned(),
+            );
+            props.push("init(".to_owned());
+            let last = members.len() - 1;
+            for (i, m) in members.iter().enumerate() {
+                props.push(format!("    {m}{}", if i < last { "," } else { "" }));
+            }
+            props.push(") {".to_owned());
+            for name in shape.fields.keys() {
+                let member = swift::member(name);
+                props.push(format!("    self.{member} = {member}"));
+            }
+            props.push("}".to_owned());
         }
         for n in nested {
             props.push(String::new());
@@ -408,8 +451,10 @@ impl<'a> Gen<'a> {
         &self,
         ty: &Ty,
         name: &str,
+        scope: &str,
         taken: &mut Vec<String>,
         nested: &mut Vec<Vec<String>>,
+        names: &mut HashMap<usize, String>,
     ) -> (String, String) {
         match ty {
             Ty::String => ("String".to_owned(), "\"\"".to_owned()),
@@ -417,15 +462,21 @@ impl<'a> Gen<'a> {
             Ty::Int => ("Int".to_owned(), "0".to_owned()),
             Ty::Struct(at) => {
                 let type_name = unique_type(&format!("{}Data", upper_first(name)), taken);
+                let qualified = if scope.is_empty() {
+                    type_name.clone()
+                } else {
+                    format!("{scope}.{type_name}")
+                };
+                names.insert(*at, qualified.clone());
                 let mut lines = vec![format!("struct {type_name}: Hashable, Sendable {{")];
-                lines.extend(indent(self.fields(*at)));
+                lines.extend(indent(self.fields(*at, &qualified, names)));
                 lines.push("}".to_owned());
                 nested.push(lines);
                 (type_name.clone(), format!("{type_name}()"))
             }
             Ty::Array(item) => {
-                let (inner, _) =
-                    self.declare(item, &format!("{}Item", upper_first(name)), taken, nested);
+                let item_name = format!("{}Item", upper_first(name));
+                let (inner, _) = self.declare(item, &item_name, scope, taken, nested, names);
                 (format!("[{inner}]"), "[]".to_owned())
             }
         }

@@ -69,6 +69,21 @@ const TYPESCRIPT: &str = "Write TSX with typed props instead of JSX.";
 const HTML_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
     with_default("source", SOURCE, Kind::Bool, "false"),
+    setting(
+        "data",
+        "Sample data (a JSON file, relative to the project file) the page shows: bindings read it and `<each>` repeats over it. Default: none, the page is a template for a host to fill.",
+        Kind::File,
+    ),
+];
+const SHARED_TOKENS: &str = "Screens read the tokens from one shared `WeftTokens.swift` (`weft swiftui-tokens`) instead of each carrying the tokens it uses.";
+const SWIFTUI_EXPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    setting(
+        "data",
+        "Sample data (a JSON file, relative to the project file) the generated model is built from in a `sample` property that `#Preview` shows. Default: none, the preview shows the model's defaults.",
+        Kind::File,
+    ),
+    with_default("sharedTokens", SHARED_TOKENS, Kind::Bool, "true"),
 ];
 const JSX_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
@@ -76,11 +91,6 @@ const JSX_EXPORT: &[Setting] = &[
     with_default("source", SOURCE, Kind::Bool, "false"),
 ];
 const OUT_ONLY: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
-const SHARED_TOKENS: &str = "Screens read the tokens from one shared `WeftTokens.swift` (`weft swiftui-tokens`) instead of each carrying the tokens it uses.";
-const SWIFTUI_EXPORT: &[Setting] = &[
-    setting("outDir", OUT_DIR, Kind::File),
-    with_default("sharedTokens", SHARED_TOKENS, Kind::Bool, "true"),
-];
 
 /// One section per target (SPEC §10.6 lists the names reserved for targets in progress).
 const EXPORT: &[Setting] = &[

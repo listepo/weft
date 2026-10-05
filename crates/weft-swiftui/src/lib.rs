@@ -8,6 +8,7 @@ mod data;
 mod generate;
 #[cfg(feature = "import")]
 mod import;
+mod sample;
 mod swift;
 mod theme;
 

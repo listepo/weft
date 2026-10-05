@@ -95,6 +95,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `render.outDir` | next to the screen | Where rendered pages go (an output path overrides it). |
 | `export.html.outDir` | standard output | Where `weft html` writes `<screen>.html` (`--out-dir` overrides it). |
 | `export.html.source` | `false` | The page keeps the screen in a leading comment, so `weft import-html` gives it back exactly (`--no-source` overrides it). Off by default: a deployed page would publish it. |
+| `export.html.data` | none | Sample data `weft html` shows in the page instead of keeping bindings as a template (`--data` overrides it). |
 | `export.react.outDir` | next to the screen | Where exported React components go; `weft react` prints when it is absent (`--out-dir` overrides it). |
 | `export.react.typescript`, `export.solid.typescript` | `false` | Write TSX with typed props (`--javascript` overrides it). |
 | `export.react.source`, `export.solid.source` | `false` | The component keeps the screen in a leading comment, so `weft import-react` and `weft import-solid` give it back exactly (`--no-source` overrides it). |
@@ -103,6 +104,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `import.react.outDir`, `import.solid.outDir` | standard output | Where `weft import-react` and `weft import-solid` write `<file>.weft` (`--out-dir` overrides it). |
 | `export.swiftui.outDir` | standard output | Where `weft swiftui` writes `<screen>.swift` and `weft swiftui-tokens` writes `WeftTokens.swift`, and the Xcode command plugin's `export` (next to the screen when absent; `--out-dir` overrides it). The build tool plugin ignores it and writes into the build folder. |
 | `export.swiftui.sharedTokens` | `true` | Screens read the tokens from one shared `WeftTokens.swift` instead of each carrying a theme with the tokens it uses (`--shared-tokens` and `--no-shared-tokens` override it). The Xcode build tool plugin writes `WeftTokens.swift` once per target. |
+| `export.swiftui.data` | none | Sample data `weft swiftui` builds the model's `sample` from, for `#Preview` (`--data` overrides it). |
 | `import.swiftui.outDir` | standard output | Where `weft import-swiftui` writes `<file>.weft`, and the Xcode command plugin's `import` (next to the view when absent; `--out-dir` overrides it). |
 | `mcp.limits.*` | see `packages/mcp/README.md` | The MCP server's bounds on one call: `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`. |
 | `plugins.<name>` | none | Settings of a plugin or tool Weft does not know. Weft only checks that each is an object. |

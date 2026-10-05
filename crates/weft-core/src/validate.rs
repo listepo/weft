@@ -5,7 +5,7 @@ use indexmap::IndexMap;
 use serde_json::Value as Json;
 
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, did_you_mean, one_of, quote};
-use crate::json::{JSON_DEPTH_LIMIT, js_number};
+use crate::json::{JSON_DEPTH_LIMIT, js_number, js_round};
 use crate::model::{
     Catalog, Child, ComponentDef, Content, Document, Node, PropDef, PropType, Value, WEFT_VERSION,
 };
@@ -229,12 +229,6 @@ enum Category {
     Component,
     Extension,
     Unknown,
-}
-
-/// `Math.round`: halves round up, toward positive infinity.
-fn js_round(x: f64) -> f64 {
-    let floor = x.floor();
-    if x - floor >= 0.5 { floor + 1.0 } else { floor }
 }
 
 struct Validator<'a> {
