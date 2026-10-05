@@ -11,7 +11,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
-| T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T13 | in progress | P2 | 4 | 5% | Claude Code / claude-sonnet-5-5 |
+| T13.1 | todo | P2 | 3 | 0% | |
 | T15 | in progress | P3 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
@@ -171,9 +172,21 @@ Split from T52. A `model` element showing a 3D asset, with a still fallback imag
 - Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
 - Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.
 
-### T13. Interoperability with A2UI and json-render
+### T13. Interoperability with A2UI (and json-render in T13.1)
 
-Export a Weft document to A2UI v0.9 messages and to a json-render spec, and import from both, each with a loss table in SPEC §9. Done when every corpus screen converts both ways and the losses are listed.
+Export a Weft document to A2UI v0.9 messages and import A2UI messages back, with a loss table in SPEC §9. The json-render half is T13.1, split off when T13 was claimed because both directions of both formats do not fit the 500-line limit. Done when every corpus screen converts both ways and the losses are listed.
+
+Execution plan:
+
+1. Sources (checked 2026-10-06): A2UI `a2ui-project/a2ui` at `4787774` (2026-10-05), `specification/v0_9/` (envelope `json/server_to_client.json`, `json/common_types.json`, `catalogs/basic/catalog.json`, `docs/a2ui_protocol.md`), and json-render `vercel-labs/json-render` at `fc2a696` (2026-10-01), `@json-render/core` 0.21.0 (`src/types.ts`, `src/actions.ts`, `src/props.ts`). Reuse: the stand-in table of `corpus/README.md` (the hand-made `.a2ui.json` renditions) is the export mapping, and `weft-import` (`Sem`, `build_document`, `Loss`) builds the imported document, so the importer is only an A2UI reader that fills `Sem`. `bench/src/adapters/a2ui.ts` stays the benchmark's comparison reader.
+2. New crate `crates/weft-interop`: `a2ui::to_a2ui(&Document, &Catalog) -> Exported { messages, losses }` (`export.rs`) and `a2ui::from_a2ui(&str, &Catalog) -> ImportResult` (`import.rs`); JSON text in and out, bounded and never evaluating the input (`W601` unreadable, `W602` too large).
+3. CLI: `weft a2ui <file>` and `weft import-a2ui <file>` (losses on stderr, as the other importers), `export.a2ui` and `import.a2ui` sections in the settings table (`outDir`), `weft.schema.json` regenerated.
+4. SPEC §9: "To A2UI" and "From A2UI" with a loss table; `corpus/README.md` points to it.
+5. Tests: `crates/weft-snapshots` gains `tests/interop.rs` (every corpus screen and example exports, validates against the vendored A2UI v0.9 JSON Schemas, imports back to a document that validates in lenient mode, and exports again to the same messages; the twelve hand-made renditions import too) and an `a2ui` snapshot per screen. Verify with `moon run root:changed`, then the full check.
+
+### T13.1. json-render export and import
+
+The json-render half of T13: export a Weft document to a json-render spec (`{ root, elements, state }`, the Weft catalog as the json-render catalog) and import one back, with a loss table in SPEC §9, in `crates/weft-interop`. Done when every corpus screen converts both ways and the losses are listed.
 
 ### T15. Second code target and catalog import
 
