@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T51 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T52 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T52.1 | todo | P2 | 4 | 0% | |
 | T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
@@ -165,30 +164,6 @@ A frosted-glass surface is expressed as a token, as the creator chose: a `materi
 - **Figma and Penpot:** a background blur with the tint fill, read back on export.
 - **Modes:** dark and light modes (T45) may give the material different values.
 Add a corpus screen with glass surfaces over an image or gradient background, so the effect is visible in screenshots. Cover it like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Done when the full check exits 0 and new baselines are reviewed.
-### T52. 3D transforms
-
-Split from the original "3D transforms and models" by the task size rule (500 lines of code, 1000 of tests): the model element is T52.1.
-
-**3D transforms on any element:** rotation on each axis, perspective and depth, e.g. a flipped or tilted card.
-- Web: CSS `perspective` and `rotate3d` (as the `transform` list).
-- SwiftUI: `rotation3DEffect`.
-- Figma and Penpot: the nearest 2D projection, with a note when it is lossy.
-- Importers read the transforms back.
-
-Add a corpus screen with tilted cards, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed transform, no animation. Done when the full check exits 0 and new baselines are reviewed.
-
-**Decisions (research in `research.md`, section 18):**
-- **Four universal attributes** (SPEC section 2.2, so they work on any element): `rotate-x`, `rotate-y`, `rotate-z` (degrees, -360 to 360) and `perspective` (the viewer's distance in px, at least 1; absent means no perspective). All four are literals (`bindable: false`). Web draws `transform: perspective(p) rotateX(x) rotateY(y) rotateZ(z)`; SwiftUI draws `rotation3DEffect` (z first, then y, then x, so both compose the same matrix). Depth is the perspective distance; a separate z translation is not added (no SwiftUI form without `projectionEffect`).
-- **Design tools draw only the turn in the picture plane:** `rotate-z` becomes the layer's rotation (Figma counts counterclockwise, so its sign flips); `rotate-x`, `rotate-y` and `perspective` are not drawn, because a cosine scale would break auto layout sizes. The exact values stay in the layer's Weft source, so a round trip returns them. Turning a layer by hand is a `tokens` visual-edit loss, through the style fingerprint (no new loss on an unedited read, which the round trip tests require).
-
-**Execution plan:**
-1. Spec and core: SPEC 2.2, AGENT-SPEC; the four universal props in `weft-core`; tests in core (parse, validate ranges, canonical form).
-2. Web: static page (`weft-web` html.rs), React and SolidJS generators and runtime, `@weft/render-react`, importers (HTML, DOM, JSX conventions); tests beside each.
-3. SwiftUI: generate and import the transforms; tests in `crates/weft-swiftui`.
-4. Design tools: the turn in the picture plane on build, style fingerprint on read; Figma and Penpot fakes and layer snapshots.
-5. Corpus screen `tilt` (not one of the twelve benchmark screens); snapshots, differential fixtures, Chromium and simulator baselines (reviewed by eye).
-6. Docs, plugin bundles, merge `main`, full check.
-
 ### T52.1. 3D models
 
 Split from T52. A `model` element showing a 3D asset, with a still fallback image and an accessible label.

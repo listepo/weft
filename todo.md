@@ -5,7 +5,6 @@
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
 - T51. Glass material tokens
-- T52. 3D transforms
 - T52.1. 3D models
 - T58. Natural `align="center"` coverage in the corpus
 - T59. Deterministic home indicator in SwiftUI screenshots
