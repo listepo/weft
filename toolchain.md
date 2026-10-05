@@ -9,8 +9,8 @@
 | wasm-pack | mise | Builds `packages/core/wasm/` from `crates/weft-wasm` (`moon run root:wasm`) | https://github.com/rustwasm/wasm-pack |
 | wasm-bindgen | mise | JS glue for the WebAssembly build | https://github.com/wasm-bindgen/wasm-bindgen |
 | napi (`@napi-rs/cli`) | mise | Builds the native Node and Bun addon | https://github.com/napi-rs/napi-rs |
-| deno | mise | Runtime the bindings are tested on | https://github.com/denoland/deno |
-| bun | mise | Runtime the bindings are tested on | https://github.com/oven-sh/bun |
+| deno | mise | Runtime the bindings are tested on (`moon run root:runtimes`) | https://github.com/denoland/deno |
+| bun | mise | Runtime the bindings are tested on (`moon run root:runtimes`) | https://github.com/oven-sh/bun |
 | claude (Claude Code) | https://code.claude.com/docs/en/setup | Hosts the plugin (`plugins/claude-code`); `claude plugin validate` checks its manifests | https://github.com/anthropics/claude-code |
 | Cursor | https://cursor.com/download | Hosts the plugin (`plugins/cursor`); no test needs it | https://cursor.com |
 | Open Design | https://open-design.ai | Hosts the plugin (`plugins/open-design`); no test needs it | https://github.com/nexu-io/open-design |
@@ -18,7 +18,7 @@
 | cargo-insta | `cargo install cargo-insta` (optional) | Reviews changed snapshots (`cargo insta review`); the tests run without it | https://github.com/mitsuhiko/insta |
 | Xcode (`xcrun swiftc`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14; those tests skip without it | https://developer.apple.com/xcode/ |
 | iOS Simulator (`xcrun simctl`) | Xcode, with the iOS 27.0 runtime and an iPhone 17 simulator | `@weft/visual` builds the generated SwiftUI screens into an app and screenshots them; skipped without it | https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device |
-| Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode; skipped without it | https://github.com/microsoft/playwright |
+| Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode (skipped without it); the browser leg of `moon run root:runtimes` fails without it | https://github.com/microsoft/playwright |
 
 ## mise
 
@@ -76,8 +76,8 @@
 | @types/react-dom | local | https://github.com/DefinitelyTyped/DefinitelyTyped | React DOM type definitions |
 | vitest | local | https://github.com/vitest-dev/vitest | Test runner for every TypeScript suite (`vitest run`) |
 | vite | local | https://github.com/vitejs/vite | Required peer of Vitest; transforms the TypeScript sources and tests; its `build` API (rolldown) bundles the scripts and MCP server into `plugins/claude-code/dist`, `plugins/cursor/dist` and `plugins/open-design/dist`, and, through `@weft/design-plugin`, the Figma and Penpot plugins into `plugins/figma/dist` and `plugins/penpot/dist` |
-| playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages; drives Chromium for the screenshots in `@weft/visual` |
-| @vitest/browser-playwright | local | https://github.com/vitest-dev/vitest | Vitest browser mode on Playwright, for the web screenshots in `@weft/visual` |
+| playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages; drives Chromium for the screenshots in `@weft/visual` and the browser leg of the runtime matrix |
+| @vitest/browser-playwright | local | https://github.com/vitest-dev/vitest | Vitest browser mode on Playwright, for the web screenshots in `@weft/visual` and the browser leg of the runtime matrix (`runtimes/vitest.config.ts`) |
 | pixelmatch | local | https://github.com/mapbox/pixelmatch | Pixel comparison of screenshots, with a diff image, in `@weft/visual` |
 | fast-png | local | https://github.com/image-js/fast-png | Decodes and encodes the PNG screenshots and diff images in `@weft/visual`; pure JavaScript |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
