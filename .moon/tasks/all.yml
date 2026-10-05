@@ -4,15 +4,17 @@ tasks:
   test:
     description: 'Vitest suite of this package'
     command: 'vitest run --config $workspaceRoot/vitest.config.ts'
-    # Every package reaches @weft/core, which loads the generated WebAssembly module.
-    deps: ['root:wasm']
+    # Every package reaches @weft/core, which loads the generated WebAssembly module, or the native
+    # addon when one is built (WEFT_ENGINE=auto). The addon is a dependency of every suite for two
+    # reasons: it is built before any suite starts, and moon puts a dependency's hash (here the
+    # addon's crate closure) into the dependent's hash, so a change to the addon re-runs them all.
+    deps: ['root:wasm', 'root:native']
     # Generated files are no inputs, or the first run would change the hash of the second:
     # - node_modules: Vitest writes its results cache to node_modules/.vite on every run. A dependency
     #   change still reaches the hash through the lockfile.
-    # - packages/core/native: the addon is built while the suites run, so only the ones that start after
-    #   it would hash it. The core suite depends on root:native, whose hash covers its sources; the
-    #   other suites get the same results from the addon and from the module (the engines are tested
-    #   against each other in packages/core).
+    # - packages/core/native: the addon is a task dependency (above), so its hash reaches the suites
+    #   through `deps`; hashing the files as well would also make the first run's suites hash an
+    #   addon that did not exist when they were hashed.
     # - packages/visual/diffs: the images the visual suite writes when a screenshot differs.
     inputs:
       - '**/*'

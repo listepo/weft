@@ -51,7 +51,7 @@ const test_ = (id: string, over: Partial<Task> = {}): Task => {
   return task(`${id}:test`, {
     globs: [`${source}/**/*`, "packages/**/*", ...shared, "crates/*/tests/fixtures/**/*"],
     files: ["SPEC.md", "AGENT-SPEC.md"],
-    deps: ["root:wasm"],
+    deps: ["root:wasm", "root:native"],
     vitest: true,
     ...over,
   });
@@ -106,7 +106,7 @@ const tasks: Task[] = [
   test_("shared", { globs: ["plugins/shared/**/*", "packages/**/*", "plugins/*/**/*"] }),
   test_("visual", {
     globs: ["packages/visual/**/*", "packages/**/*", "crates/**/*"],
-    deps: ["root:wasm", "root:cli"],
+    deps: ["root:wasm", "root:native", "root:cli"],
   }),
 ];
 
@@ -211,9 +211,14 @@ describe("a change in a binding stub", () => {
     );
   });
 
-  test("the native addon reaches only the suites that load it", () => {
+  test("the native addon reaches every suite, which all depend on it", () => {
     const result = plan(["crates/weft-node/src/lib.rs"]);
-    assert.deepEqual(result.whole, ["catalog:test", "core:test"]);
+    assert.ok(
+      ["catalog:test", "core:test", "mcp:test", "visual:test"].every((t) =>
+        result.whole.includes(t),
+      ),
+    );
+    assert.ok(!result.whole.includes("root:typecheck"));
   });
 });
 
