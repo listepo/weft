@@ -169,7 +169,7 @@ function ensureTokens(
     else if (made.value !== value.text) made.value = value.text;
     out.set(path, { token: made, px: value.px, color: value.color });
   }
-  if (modifier !== undefined) writeThemes(catalog, set, tokens, modifier);
+  if (modifier !== undefined) writeThemes(catalog, set, tokens, modifier, api.library.local);
   return out;
 }
 

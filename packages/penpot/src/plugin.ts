@@ -31,7 +31,7 @@ export function handleRequest(
         return buildScreen(api, document, { catalog, library, tokens, display });
       },
       read: (shape, tokens) => readLayers(shape, { catalog, tokens }),
-      modes: async (tokens) => readThemes(api.library.local.tokens, tokens),
+      modes: async (tokens) => readThemes(api.library.local.tokens, tokens, api.library.local),
     },
     selection,
     message,
