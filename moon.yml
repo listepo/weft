@@ -6,6 +6,22 @@ workspace:
   inheritedTasks:
     exclude: ['test']
 
+fileGroups:
+  # What the binding suites read: the packages' sources and tests, the generated module they load,
+  # and the corpus, specification and fixtures the differential suites compare against.
+  runtime-suites:
+    - '/runtimes/**/*'
+    - '/packages/**/*'
+    - '!/packages/**/node_modules/**'
+    - '/pnpm-lock.yaml'
+    - '/corpus/**/*'
+    - '/examples/**/*'
+    - '/schemas/**/*'
+    - '/compat/**/*'
+    - '/SPEC.md'
+    - '/AGENT-SPEC.md'
+    - '/crates/*/tests/fixtures/**/*'
+
 tasks:
   # The Rust core compiled to WebAssembly for @weft/core and @weft/catalog. Generated and
   # gitignored: the module must always match the crates it came from.
@@ -27,13 +43,50 @@ tasks:
     command: 'cargo build -p weft-cli --target-dir target/visual'
     options:
       cache: false
+  # The @weft/core and @weft/catalog suites on Node, Deno, Bun and headless Chromium, which are the
+  # runtimes the WebAssembly module ships to. One Vitest config (runtimes/vitest.config.ts) for all
+  # four legs; they run in parallel and the task passes when every leg does. It belongs in `moon ci`:
+  # the legs cost seconds beyond `:test`, mise already pins Deno and Bun for CI, and a regression that
+  # only one runtime shows (a missing API, a different module loader) reaches nothing else. A leg
+  # depends on `root:wasm` only: `@weft/core` decides what it loads, so a native addon with WebAssembly
+  # as the fallback is exercised by the same legs without a change here.
+  runtimes:
+    command: 'noop'
+    deps: ['root:runtimes-node', 'root:runtimes-deno', 'root:runtimes-bun', 'root:runtimes-browser']
+  runtimes-node:
+    command: 'vitest run --config runtimes/vitest.config.ts'
+    env:
+      WEFT_RUNTIME: 'node'
+    deps: ['root:wasm']
+    inputs: ['@group(runtime-suites)']
+  # Deno and Bun run Vitest's own entry point, so the leg exercises the same test files and runner
+  # as Node. `--node-modules-dir=manual` makes Deno use the pnpm-installed node_modules; `--bun` makes
+  # Bun also run the worker processes Vitest spawns, which would otherwise start `node`.
+  runtimes-deno:
+    script: 'deno --version | head -1 && deno run -A --node-modules-dir=manual node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
+    env:
+      WEFT_RUNTIME: 'deno'
+    deps: ['root:wasm']
+    inputs: ['@group(runtime-suites)']
+  runtimes-bun:
+    script: 'echo "bun $(bun --version)" && bun --bun node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
+    env:
+      WEFT_RUNTIME: 'bun'
+    deps: ['root:wasm']
+    inputs: ['@group(runtime-suites)']
+  runtimes-browser:
+    command: 'vitest run --config runtimes/vitest.config.ts'
+    env:
+      WEFT_RUNTIME: 'browser'
+    deps: ['root:wasm']
+    inputs: ['@group(runtime-suites)']
   typecheck:
     command: 'tsc --noEmit -p .'
     deps: ['root:wasm']
-    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/tsconfig.json']
+    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/runtimes/**/*', '/tsconfig.json']
   lint:
     script: "oxlint --deny-warnings --ignore-pattern 'plugins/*/dist/**' . && oxfmt --check '**/*.{ts,tsx,json}'"
-    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/compat/**/*', '/*.json', '/.claude-plugin/*.json']
+    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/runtimes/**/*', '/compat/**/*', '/*.json', '/.claude-plugin/*.json']
   fmt:
     command: 'oxfmt "**/*.{ts,tsx,json}"'
     options:

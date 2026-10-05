@@ -15,6 +15,7 @@
   },
   "include": [
     "vitest.config.ts",
+    "runtimes",
     "packages/*/vitest.config.ts",
     "packages/*/src",
     "packages/*/test",
