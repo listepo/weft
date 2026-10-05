@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T45 | in progress | P1 | 4 | 40% | Claude Code / claude-opus-5-5 |
+| T45 | in progress | P1 | 4 | 65% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -184,4 +184,7 @@ Screenshot review (each copy downscaled with `sips -Z 700` and read):
 
 - `swiftui/example-review.png` (light): white background, black title and item names, the blue "Place order" button, amber stars (#d97706, the brand colour through `color.star`); 4 and 5 filled stars as the sample data says. Correct.
 - `swiftui/example-review-dark.png` (dark): black background, white text, the same blue button, the lighter amber of the dark theme (#fbbf24) on the stars; layout identical to the light shot. Correct.
+- `html/example-review.png` (static page, light scheme): white canvas, black serif title and item names ("Linen shirt", "Canvas tote" from the sample data), a light system button. The rating is the project's own kind, which the page keeps as an inert element, so the star colour has nothing to draw on the web. Correct.
+- `html/example-review-dark.png` (static page, dark scheme): the page's `color-scheme: light dark` turns the canvas near-black and the text white, and the button dark grey; layout identical to the light shot. Correct.
+- `web/example-review.png` and `web/example-review-dark.png` (React with `weft-tokens.css`): the same two looks, without the static page's layout stylesheet (each line a flex row with the `--weft-space-sm` gap); the dark one follows the stylesheet's `color-scheme`. The reference renderer drawn with each theme matches React pixel for pixel. Correct.
 
