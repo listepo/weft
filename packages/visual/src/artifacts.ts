@@ -30,7 +30,7 @@ export type Screen = {
   reference: string;
   /** The static HTML page, generated with the screen's data. */
   html: string;
-  /** `weft css-tokens`: the stylesheet a host gives the components, which read their tokens from it. */
+  /** What a host links for the components: `weft css-tokens` and `weft css-base`. */
   css: string;
   /** The generated components, compiled for the browser. */
   react: string;
@@ -120,8 +120,12 @@ async function screen(name: string, css: string): Promise<Screen> {
   };
 }
 
+/** The two stylesheets a host links beside the components: the tokens they read, then the rules. */
+const hostStylesheet = (...project: string[]) =>
+  weft("css-tokens", ...project) + weft("css-base", ...project);
+
 export async function screens(): Promise<Screen[]> {
-  const css = weft("css-tokens", "--no-project");
+  const css = hostStylesheet("--no-project");
   return Promise.all(corpusNames().map((name) => screen(name, css)));
 }
 
@@ -130,7 +134,7 @@ export type AppearanceScreen = {
   data: unknown;
   /** `weft html` with the project and its sample data: one page for both themes. */
   html: string;
-  /** `weft css-tokens`: the stylesheet the component reads its tokens from. */
+  /** The stylesheets a host links for the component: `weft css-tokens` and `weft css-base`. */
   css: string;
   /** The generated React component, compiled for the browser. */
   react: string;
@@ -149,11 +153,13 @@ export function appearanceScreen(): AppearanceScreen {
     catalog: project.catalog,
   });
   if (document === undefined) throw new Error(`review.weft: ${JSON.stringify(diagnostics)}`);
+  const base = weft("css-base", "--project", projectFile);
   const reference = (asked: ColorScheme) => {
     const { tokens, scheme } = withAppearance(project, asked);
     return renderPage(document, {
       catalog: project.catalog,
       data,
+      styles: base,
       ...(tokens ? { tokens } : {}),
       colorScheme: scheme,
     });
@@ -161,7 +167,7 @@ export function appearanceScreen(): AppearanceScreen {
   return {
     data,
     html: weft("html", screenFile, "--project", projectFile, "--no-source", "--data", dataFile),
-    css: weft("css-tokens", "--project", projectFile),
+    css: hostStylesheet("--project", projectFile),
     react: compile(toJsx(document, { catalog: project.catalog, framework: "react" }), "react"),
     reference: { light: reference("light"), dark: reference("dark") },
   };

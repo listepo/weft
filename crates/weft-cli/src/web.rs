@@ -3,7 +3,8 @@
 //! `--typescript` and `--source` fall back to the project's `export.<target>` settings, the output
 //! directory to `export.<target>.outDir` or `import.<target>.outDir`, else standard output.
 //! `weft html --data` falls back to `export.html.data`; without data the page is a template.
-//! `weft css-tokens` writes the token stylesheet the components read, to `export.css.outDir`.
+//! `weft css-tokens` writes the token stylesheet the components read, and `weft css-base` the base
+//! rules they share with the static page, both to `export.css.outDir`.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -11,8 +12,8 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use weft_catalog::{PROJECT_FILE, appearance};
 use weft_web::{
-    Framework, HtmlOptions, ImportOptions, JsxOptions, import_html, import_jsx, to_html_with_data,
-    to_jsx, tokens_css,
+    BASE_CSS, Framework, HtmlOptions, ImportOptions, JsxOptions, import_html, import_jsx,
+    to_html_with_data, to_jsx, tokens_css,
 };
 
 use crate::convert::{
@@ -21,8 +22,9 @@ use crate::convert::{
 use crate::swiftui::TokensArgs;
 use crate::{DIAGNOSTICS, ProjectArgs, print, read};
 
-/// The stylesheet's file name, which apps link to.
+/// The stylesheets' file names, which apps link to.
 const CSS_TOKENS_FILE: &str = "weft-tokens.css";
+const CSS_BASE_FILE: &str = "weft-base.css";
 
 /// The `--weft-…` custom properties that generated React and SolidJS components read (SPEC §9),
 /// following the system appearance when the tokens have one.
@@ -42,6 +44,25 @@ pub fn export_css(args: TokensArgs, out: &mut dyn Write) -> Result<u8> {
         "css",
     );
     emit(&css, Path::new(CSS_TOKENS_FILE), dir, "css", out)?;
+    Ok(0)
+}
+
+/// The rules every web target shares (SPEC §9). They do not depend on the project: its tokens
+/// reach them through the custom properties of `weft-tokens.css`.
+pub fn export_css_base(
+    project_args: ProjectArgs,
+    out_dir_arg: Option<PathBuf>,
+    out: &mut dyn Write,
+) -> Result<u8> {
+    let (project, project_dir) = project(Path::new(PROJECT_FILE), project_args)?;
+    let dir = out_dir(
+        out_dir_arg,
+        project.as_ref(),
+        project_dir.as_deref(),
+        "export",
+        "css",
+    );
+    emit(BASE_CSS, Path::new(CSS_BASE_FILE), dir, "css", out)?;
     Ok(0)
 }
 

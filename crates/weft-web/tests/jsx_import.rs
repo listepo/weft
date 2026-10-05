@@ -101,8 +101,7 @@ fn without_each_ids(markup: &str) -> String {
 const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
     (
         "account",
-        "explicit type=\"text\" is dropped; a bound field error comes back as a text element; \
-         radio-group on-change is lost; a radio's bound text comes back as label; a literal \
+        "explicit type=\"text\" is dropped; radio-group on-change is lost; a radio's bound text comes back as label; a literal \
          hidden element is lost",
     ),
     ("dashboard", "an explicit direction=\"column\" is dropped"),
@@ -146,4 +145,34 @@ fn generated_components_without_their_source_come_back_by_convention() {
         }
     }
     assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
+#[test]
+fn a_bound_field_error_comes_back_as_the_fields_error() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    let screen = r#"<screen id="s" weft="0.1">
+  <field id="age" error="{$.errors.age}" label="Age" value="{$.age}"/>
+</screen>"#;
+    let parsed = parse(
+        screen,
+        &ParseOptions {
+            catalog: Some(&catalog),
+            ..Default::default()
+        },
+    );
+    let document = parsed.document.unwrap();
+    for (framework, typescript) in FLAVOURS {
+        let code = generate(&document, framework, typescript, false);
+        let back = import_jsx(&code, typescript, &options);
+        let text = serialize(&back.document);
+        assert!(
+            text.contains(r#"error="{$.errors.age}""#) && !text.contains("<text"),
+            "{framework:?}: {text}"
+        );
+    }
 }

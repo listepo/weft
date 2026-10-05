@@ -467,3 +467,25 @@ Result: `WEFT_SIMULATOR` (`shared` by default, `own`; anything else is an error)
 `weft html` pages and the generated React and SolidJS components show the same data (T43), but `packages/visual` listed every screen in `STATIC_PAGE_DIFFERS` and most in `STATIC_TREE_DIFFERS`. Done when every entry of `STATIC_TREE_DIFFERS` is gone, `STATIC_PAGE_DIFFERS` keeps only screens with a stated, unavoidable reason, changed baselines and snapshots are reviewed, and the full check exits 0. No pixel tolerance may be added.
 
 Result: the static page now matches the components, not a shared stylesheet, because the components, the reference renderer and the Figma and Penpot round trips are already compared with each other and only the page was the outlier. In `crates/weft-web/src/html.rs` a `text` is a block `div` (`data-weft-kind="text"`), a control's caption is an `aria-hidden` span behind the control's `aria-label`, a link with no usable `href` is `role="link" tabindex="0"`, a radio group is a `div` instead of a `fieldset`, a field error is a `div`, the field and toggle wrappers lost their classes, and inline pieces join without whitespace, as JSX writes them. The page stylesheet keeps only layout the components carry inline, plus `a { display: inline-block }`. The visual suite also gives the component and reference frames the `weft css-tokens` stylesheet, as a host does; without it the page spaced stacks by gap tokens where React did not. Both `STATIC_*` lists are gone: all 16 screens match React pixel for pixel (same comparator, no tolerance) and in the accessibility tree. HTML snapshots (62) and the web and static page baselines of the changed screens were retaken and reviewed.
+
+### T53. Shared base stylesheet for web targets
+
+T47 made the static page match the generated React and SolidJS components by dropping the page's own styling. Both now render unstyled: a caption sits flush against its control, fields have no spacing, and a link without `href` does not look like a link. The creator chose one Weft base stylesheet for every web target, so all of them look good and stay identical.
+
+- **The stylesheet.** One minimal, token-driven base stylesheet:
+  - captions above fields, with spacing between fields;
+  - checkbox, switch and radio rows;
+  - link appearance, including `role="link"`;
+  - buttons, stacks and the other kinds that need it.
+  - Values come from the project's tokens (spacing, colours, typography), with fallbacks when a token is absent, and follow light and dark modes (T45).
+- **Where it ships.** Written by `weft css-tokens` (or a sibling command, decided in the plan) for React and SolidJS hosts, and inlined by `weft html`.
+- **Where it applies.** The visual harness gives it to every web frame, as it now does with `weft-tokens.css`. The reference renderer and the Figma/Penpot round trips are adjusted wherever they are compared with the components.
+- **Accessibility.** The tree stays as T47 left it.
+
+Done when:
+- the static page and the components still match pixel for pixel and in the accessibility tree;
+- the reviewed baselines show captions above fields, spacing and visible links;
+- SPEC and docs describe the stylesheet;
+- the full check exits 0.
+
+Result: one base stylesheet, `crates/weft-web/src/base.css`, shared by every web target. `weft html` inlines it in the page's `<style>` between the tokens and the layout, and `weft css-base` (a sibling of `weft css-tokens`, same `--out-dir` and `export.css.outDir`) writes it as `weft-base.css` for React and SolidJS hosts to link after `weft-tokens.css`. It does not depend on the project: every value is a `var(--weft-…, fallback)` with the default token's value as the fallback (a test checks that), and borders and muted text mix `currentColor`, so light and dark follow the page; it sets no page colour or font. It covers screen, form, section and dialog (a column with a gap), field captions above their controls with the error underneath, checkbox, switch (a track and thumb) and radio rows, radio groups, links including `role="link"`, buttons (`primary` and `danger` filled, disabled dimmed), tabs, alerts and tones, the footer and actions slots, tables, lists and menus. It selects only elements and attributes that the page, the components and the reference renderer all write, so nothing in the generated markup changed and the accessibility tree is as T47 left it. The visual suite gives every web frame `weft css-tokens` plus `weft css-base`; the reference renderer's whole page (`renderPage`) takes the sheet through a new `styles` option; the Figma and Penpot round trips and SwiftUI needed no change. The sheet showed one importer gap that unstyled pages hid: the React and SolidJS importers read a field's conditional error message as separate text outside the field, and now read it back as the field's bound `error`. Every corpus screen still matches React pixel for pixel (no tolerance) and in the accessibility tree; the web and static page baselines of all 19 screens (the corpus and the light and dark example) and the 64 changed HTML snapshots (each gains only the stylesheet) were retaken and reviewed.

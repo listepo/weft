@@ -476,8 +476,17 @@ impl<'d> Ctx<'d> {
             .filter_map(|r| self.by_html_id.get(r).copied())
             .collect();
         if !described.is_empty() && CONTROLS.contains(&tag) {
-            let texts: Vec<String> = described.iter().map(|&d| self.text_of(d, false)).collect();
-            set("error", &squash(&texts.join(" ")));
+            // A message that shows data is the control's bound `error`, as `data-bind` writes it.
+            match described.iter().find_map(|&d| self.bound_text(d, 0)) {
+                Some(bound) => {
+                    s.values.insert("error".to_owned(), bound);
+                }
+                None => {
+                    let texts: Vec<String> =
+                        described.iter().map(|&d| self.text_of(d, false)).collect();
+                    set("error", &squash(&texts.join(" ")));
+                }
+            }
             self.consumed.extend(described);
         }
         if attr("aria-invalid") == Some("true") && !s.props.contains_key("error") {

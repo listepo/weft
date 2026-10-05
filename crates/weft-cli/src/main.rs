@@ -243,6 +243,23 @@ enum Command {
         #[arg(long)]
         out_dir: Option<PathBuf>,
     },
+    /// Generate `weft-base.css`, the base stylesheet React and SolidJS components share with the
+    /// static page.
+    ///
+    /// Its rules read the custom properties of `weft css-tokens` and fall back to the default
+    /// tokens' values, so link it after `weft-tokens.css` (or alone).
+    CssBase {
+        /// Project file; without it, the nearest `weft.json` in or above the working directory.
+        #[arg(long, conflicts_with = "no_project")]
+        project: Option<PathBuf>,
+        /// Ignore any project file.
+        #[arg(long)]
+        no_project: bool,
+        /// Write `weft-base.css` here instead of printing (default: the project's
+        /// `export.css.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+    },
     /// Read an HTML page back into markup; what Weft cannot hold is listed on stderr as losses.
     ImportHtml(WebImport),
     /// Read a React component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr.
@@ -551,6 +568,18 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 },
                 out_dir,
             },
+            out,
+        ),
+        Command::CssBase {
+            project,
+            no_project,
+            out_dir,
+        } => web::export_css_base(
+            ProjectArgs {
+                project,
+                no_project,
+            },
+            out_dir,
             out,
         ),
         Command::ImportSwiftui {
