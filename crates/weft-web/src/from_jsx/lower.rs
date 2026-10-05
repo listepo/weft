@@ -902,6 +902,9 @@ impl<'a> Lower<'a> {
                         }
                         continue;
                     }
+                    // SolidJS components repeat the select's value on each option for server
+                    // rendering; the select's own value is what the document keeps.
+                    Some(_) if name == "selected" && tag == "option" => continue,
                     Some(x) if name == "checked" && is_radio(items) => {
                         if let Some(path) = self.radio_path(x, env) {
                             self.radio = Some(path);

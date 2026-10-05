@@ -1804,6 +1804,10 @@ impl<'a> Gen<'a> {
     /// Only options are rendered: the HTML parser drops anything else inside <select>.
     #[inline(never)]
     fn select(&mut self, n: &N<'a>) -> C<'a> {
+        let value = self.text_of(n, "value");
+        // SolidJS's server renderer writes a select's value as an attribute HTML ignores, so each
+        // option says whether it is the chosen one; the select's own value stays for the client.
+        let chosen = self.solid().then(|| value.clone());
         let pieces = self.pieces(n.children, &n.scope, n.depth + 1);
         let options = self.collect(&pieces, &mut |g, leaf| {
             let Leaf::Node(o) = leaf else {
@@ -1814,6 +1818,19 @@ impl<'a> Gen<'a> {
             }
             let mut a = g.base(o, true);
             let value = g.text_of(o, "value");
+            if let Some(chosen) = &chosen {
+                match (&value.lit, &chosen.lit) {
+                    (Some(mine), Some(theirs)) => {
+                        if mine.string() == theirs.string() {
+                            a.push(attr("selected", AttrV::True));
+                        }
+                    }
+                    _ => a.push(attr_js(
+                        "selected",
+                        format!("{} === {}", value.js, chosen.js),
+                    )),
+                }
+            }
             g.attr(&mut a, "value", value);
             let text = g.own_text(o);
             let option = el("option", a, g.text_kids(text));
@@ -1830,7 +1847,6 @@ impl<'a> Gen<'a> {
         self.attr(&mut a, "aria-label", label);
         let disabled = self.flag_of(n, "disabled");
         self.bool_attr(&mut a, "disabled", disabled);
-        let value = self.text_of(n, "value");
         let controlled = is_binding_raw(n.raw("value"));
         if controlled {
             a.push(attr_js("value", value.js));
