@@ -77,9 +77,13 @@ Allowed on every element:
 | `hidden` | boolean | Not rendered and not exposed to assistive technology. |
 | `state` | enum | One of the states the component declares (§5). |
 | `role` | ARIA role | Required on extension elements; an error on catalog components. |
+| `rotate-x`, `rotate-y`, `rotate-z` | number, -360 to 360 | A 3D tilt in degrees: about the horizontal axis, the vertical axis, and in the screen plane. Literal only. |
+| `perspective` | number, at least 1 | How far the viewer is from the element, in px; the nearer, the stronger the depth. Absent: no perspective, a flat projection. Literal only. |
 | `on-<event>` | action name | Binds an event the component declares to a named host action. |
 
 `label` is the element's accessible name, and it MAY be a binding. Components that present a caption (`field`, `checkbox`, `switch`, `radio-group`, `select`, `combobox`, `slider`, `stepper`, `date-picker`, `color-picker`, `segmented-control`) show it visibly as that caption, and `tab` shows it as the tab title; on `image` it is the text alternative; on containers (`screen`, `section`, `table`, `dialog`, `menu`, `tabs`, `form`, `list`) it names the region without being shown. On a component whose text is its content or `text` prop, `label` replaces that text as the accessible name and SHOULD be left out. Components with role `none` (`stack`, `grid`, `text`) add no node to the accessibility tree and so cannot carry a name; `label` on them has no effect.
+
+The 3D tilt is the transform `perspective(p) rotateX(x) rotateY(y) rotateZ(z)` (CSS Transforms, so `rotate-z` acts on the element first), about the element's centre; an absent value is 0, and an element with none of the four attributes is not transformed. It changes how the element is drawn, not where it sits in the layout or in the accessibility tree. A target that cannot tilt in 3D draws the nearest 2D projection and keeps the values: `rotate-z` as the rotation, a tilt about x or y as a scale by its cosine (mirrored past 90 degrees), `perspective` ignored. SwiftUI has no length for the viewer's distance, so it draws `perspective` as its own relative value; a card tilted with a perspective looks alike on the web and in SwiftUI, not pixel for pixel.
 
 Action names match `[a-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*)*`. Actions take no arguments in the document; the host receives the action name, the element id, and for elements inside `<each>` the current loop item path.
 

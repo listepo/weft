@@ -138,9 +138,20 @@ pub fn has_non_xml_char(s: &str) -> bool {
 
 /// Universal attributes of SPEC §2.2 other than `id` and `on-*`; `state` values come from the
 /// component.
-static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 4]> = LazyLock::new(|| {
+static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 8]> = LazyLock::new(|| {
     let mut role = PropDef::new("ARIA role of an extension element.", PropType::String);
     role.bindable = Some(false);
+    // Literal only: a renderer writes the matrix once, and a design tool draws one fixed projection.
+    let angle = |description: &str| {
+        let mut def = PropDef::new(description, PropType::Number);
+        def.min = Some(-360.0);
+        def.max = Some(360.0);
+        def.bindable = Some(false);
+        def
+    };
+    let mut perspective = PropDef::new("Viewer distance of a 3D tilt, in px.", PropType::Number);
+    perspective.min = Some(1.0);
+    perspective.bindable = Some(false);
     [
         ("label", PropDef::new("Accessible name.", PropType::String)),
         (
@@ -152,6 +163,10 @@ static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 4]> = LazyLock::new(|| {
             PropDef::new("One of the component's states.", PropType::Enum),
         ),
         ("role", role),
+        ("rotate-x", angle("Rotation about the horizontal axis, in degrees.")),
+        ("rotate-y", angle("Rotation about the vertical axis, in degrees.")),
+        ("rotate-z", angle("Rotation in the screen plane, in degrees.")),
+        ("perspective", perspective),
     ]
 });
 

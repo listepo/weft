@@ -11,7 +11,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T51 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
+| T52 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T52.1 | todo | P2 | 4 | 0% | |
 | T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T10 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
@@ -166,38 +167,40 @@ A frosted-glass surface is expressed as a token, as the creator chose: a `materi
 - **Figma and Penpot:** a background blur with the tint fill, read back on export.
 - **Modes:** dark and light modes (T45) may give the material different values.
 Add a corpus screen with glass surfaces over an image or gradient background, so the effect is visible in screenshots. Cover it like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Done when the full check exits 0 and new baselines are reviewed.
-### T52. 3D transforms and models
-Two parts, as the creator chose.
-1. **3D transforms on any element:** rotation on each axis, perspective and depth, e.g. a flipped or tilted card.
-   - Web: CSS `perspective` and `rotate3d`.
-   - SwiftUI: `rotation3DEffect`.
-   - Figma and Penpot: the nearest 2D projection, with a note when it is lossy.
-   - Importers read the transforms back.
-2. **A model element** showing a 3D asset (glTF and/or USDZ, chosen and cited in the plan) with a still fallback image and an accessible label.
-   - Web: a maintained viewer such as `<model-viewer>`, picked in the plan.
-   - SwiftUI: RealityKit `Model3D`.
-   - Design tools: the fallback image.
-   - Asset paths are untrusted: relative to the project, no URLs unless SPEC allows them, and size-bounded.
-   - Add a small model asset under a compatible licence to the corpus.
+### T52. 3D transforms
 
-Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
+Split from the original "3D transforms and models" by the task size rule (500 lines of code, 1000 of tests): the model element is T52.1.
 
-**Decisions (from research, cited in `research.md`):**
-- **Transforms are four universal attributes** (SPEC section 2.2, so they work on any element): `rotate-x`, `rotate-y`, `rotate-z` (degrees, -360 to 360) and `perspective` (the viewer's distance in px, at least 1; absent means no perspective). All four are literals (`bindable: false`). Web draws `transform: perspective(p) rotateX(x) rotateY(y) rotateZ(z)`, SwiftUI draws `rotation3DEffect` (z first, then y, then x, so both compose the same matrix). Depth is the perspective distance; a separate z translation is not added (no SwiftUI form without `projectionEffect`).
+**3D transforms on any element:** rotation on each axis, perspective and depth, e.g. a flipped or tilted card.
+- Web: CSS `perspective` and `rotate3d` (as the `transform` list).
+- SwiftUI: `rotation3DEffect`.
+- Figma and Penpot: the nearest 2D projection, with a note when it is lossy.
+- Importers read the transforms back.
+
+Add a corpus screen with tilted cards, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed transform, no animation. Done when the full check exits 0 and new baselines are reviewed.
+
+**Decisions (research in `research.md`, section 17):**
+- **Four universal attributes** (SPEC section 2.2, so they work on any element): `rotate-x`, `rotate-y`, `rotate-z` (degrees, -360 to 360) and `perspective` (the viewer's distance in px, at least 1; absent means no perspective). All four are literals (`bindable: false`). Web draws `transform: perspective(p) rotateX(x) rotateY(y) rotateZ(z)`; SwiftUI draws `rotation3DEffect` (z first, then y, then x, so both compose the same matrix). Depth is the perspective distance; a separate z translation is not added (no SwiftUI form without `projectionEffect`).
 - **Design tools draw the orthographic 2D projection:** `rotate-z` becomes the layer's rotation, a tilt about x or y scales the layer's height or width by the cosine (mirrored past 90 degrees), perspective is ignored. The element keeps the exact values in plugin data, so a round trip returns them; the lossy drawing is a `props` note in the read-back loss table.
-- **`model` is a new leaf kind** (role `img`, label required) with `src` (glTF binary or glTF, `.glb` or `.gltf`), `usdz` (optional, for Apple platforms) and `fallback` (a still image, required). glTF is what `<model-viewer>` loads and USDZ is what RealityKit loads, and neither reads the other's format, so the element names both.
-- **Web: `<model-viewer>`** (`@google/model-viewer`, Apache-2.0, maintained: 4.3.1 on npm). The markup is `<model-viewer src alt>` with the fallback `<img slot="poster">` as its child, so a page without the script, and every screenshot, shows the fallback image. The host page loads the script; Weft never injects one.
-- **SwiftUI:** `Model3D` is visionOS only (the SDK marks it `iOS unavailable`), so the helper `WeftModel` uses `Model3D` on visionOS and `RealityView` with the bundled USDZ on iOS 18 and macOS 15, and the fallback `AsyncImage` everywhere else and while loading. An environment value `weftStillModels` forces the fallback, and the screenshot host sets it so images are deterministic.
-- **Asset paths are untrusted:** the three paths are literals, validated by a new code `W317` (relative path without `..`, backslash, control characters or a scheme, or an `https` URL; the right extension; at most 2048 characters). Renderers and generators apply the existing `safe_url` / `safeUrl` guard again before writing a URL. The corpus asset is a single small licensed file, and a test bounds its size.
-- Design tools draw `model` as the library's image rectangle (a fallback image is not fetched, as for `image`).
 
 **Execution plan:**
-1. Spec and core: SPEC 2.2, 5.1, 6.2 (`W317`), AGENT-SPEC; universal props and the `W317` check in `weft-core`; the `model` kind in `packages/catalog/src/core.ts` (regenerate `catalog.json`, schema); tests in core and catalog.
-2. Web: static page (`weft-web` html.rs, base.css), React and SolidJS generators, `@weft/render-react`, importers (HTML, DOM, JSX conventions, `@weft/from-aria`); tests beside each.
-3. SwiftUI: generate and import the transforms and `model`, the `WeftModel` helper, sample data; tests in `crates/weft-swiftui`.
-4. Design tools: library drawing of `model`, 2D projection on build, loss note on read; Figma and Penpot fakes and layer snapshots.
-5. Corpus screen `viewer3d` (tilted card and a model, not one of the twelve benchmark screens), its asset and licence; snapshots, differential fixtures, Chromium and simulator baselines (reviewed by eye).
-6. Docs (`docs/`, READMEs, `research.md`, `toolchain.md`), plugin bundles, merge `main`, full check.
+1. Spec and core: SPEC 2.2, AGENT-SPEC; the four universal props in `weft-core`; tests in core (parse, validate ranges, canonical form).
+2. Web: static page (`weft-web` html.rs), React and SolidJS generators and runtime, `@weft/render-react`, importers (HTML, DOM, JSX conventions, `@weft/from-aria` loss note); tests beside each.
+3. SwiftUI: generate and import the transforms; tests in `crates/weft-swiftui`.
+4. Design tools: 2D projection on build, loss note on read; Figma and Penpot fakes and layer snapshots.
+5. Corpus screen `tilt` (not one of the twelve benchmark screens); snapshots, differential fixtures, Chromium and simulator baselines (reviewed by eye).
+6. Docs, plugin bundles, merge `main`, full check.
+
+### T52.1. 3D models
+
+Split from T52. A `model` element showing a 3D asset, with a still fallback image and an accessible label.
+
+- **A new leaf kind** `model` (role `img`, label required) with `src` (glTF, `.glb` or `.gltf`), `usdz` (optional, for Apple platforms) and `fallback` (a still image, required). glTF is what `<model-viewer>` loads and USDZ is what RealityKit loads, and neither reads the other's format, so the element names both.
+- **Web: `<model-viewer>`** (`@google/model-viewer`, Apache-2.0, 4.3.1 on npm). Markup `<model-viewer src alt>` with the fallback `<img slot="poster">` as its child, so a page without the script, and every screenshot, shows the fallback. The host page loads the script; Weft never injects one.
+- **SwiftUI:** `Model3D` is visionOS only (the SDK marks it `iOS unavailable`), so a helper uses `Model3D` on visionOS, `RealityView` with the bundled USDZ on iOS 18 and macOS 15, and the fallback `AsyncImage` elsewhere and while loading. An environment value forces the fallback, and the screenshot host sets it so images are deterministic.
+- **Asset paths are untrusted:** the three paths are literals validated by a new code `W317` (relative path without `..`, backslash, control characters or a scheme, or an `https` URL; the right extension; at most 2048 bytes), and renderers apply the existing `safe_url` / `safeUrl` guard again. One small properly licensed asset ships in the corpus with its licence noted; a test bounds its size. Design tools draw the library's image rectangle.
+- Start from `t52-model-core.patch`-style work already tried in T52: the `model` kind in `packages/catalog/src/core.ts`, `asset_problem` in `weft-core/src/rules.rs`, the `W317` check in `validate.rs`, cases in `packages/core/test/cases.ts` and `crates/weft-core/tests/codes.rs`, `model` in the fixture catalog `packages/core/test/catalog.ts`.
+- Add a corpus screen with a model, covered like the corpus. Screenshots are deterministic (the fallback). Done when the full check exits 0 and new baselines are reviewed.
 
 ### T58. Natural `align="center"` coverage in the corpus
 

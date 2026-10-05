@@ -89,6 +89,7 @@ An attribute value is exactly one of:
 
 - A component whose content is text (`heading`, `text`, `link`, `button`, `radio`, `segment`, `option`, `column`, `menu-item`) or mixed (`item`, `cell`, `alert`) takes its text as content: `<button id="b">Save</button>`.
 - Bound text goes in the `text` attribute: `<text id="t" text="{$.greeting}"/>`. Content or `text`, never both.
+- Any element may be tilted in 3D with the literal numbers `rotate-x`, `rotate-y`, `rotate-z` (degrees, -360 to 360) and `perspective` (px, at least 1): `<stack id="card" rotate-y="30" perspective="800">`. Leave `perspective` out for a flat tilt.
 - `label` is the accessible name. Components marked "label" below need one; on a component that shows its text, leave `label` out.
 
 ### 2.5 Events and actions
