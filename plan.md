@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T45 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -151,15 +150,3 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
-
-### T45. Token modes through the DTCG resolver
-
-Weft token sets have no modes, so a colour has one value in light and dark appearance (an open question of T44). Use the standard instead of a Weft-only scheme: the DTCG 2025.10 Resolver Module, where a resolver document names token sets and modifiers such as `theme` with the contexts `light` and `dark`. The exact format is taken from the specification and cited.
-
-- **Loading:** `tokens` in `weft.json` may name a resolver document instead of a list of token files; the loader resolves the default context for validation and keeps every context of each modifier for the generators. Plain token files keep working unchanged.
-- **SwiftUI:** a colour token whose `dark` value differs becomes a dynamic `Color` in `WeftTokens.swift` (and in a screen's own theme) that follows the system appearance; tokens without a difference stay as they are.
-- **Web:** the static HTML stylesheet and the React and SolidJS output follow the system appearance (`light-dark()` or `prefers-color-scheme`), and the reference renderer can show either context.
-- **Then Figma and Penpot:** the contexts become Figma variable modes and Penpot token themes, both ways, in the T14/T40 round trips.
-
-Done when the example project has a light and dark resolver, SwiftUI and the web targets render both appearances (screenshots of each, reviewed), Figma and Penpot round-trip the modes, and token files without a resolver behave exactly as before.
-

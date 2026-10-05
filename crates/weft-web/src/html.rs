@@ -15,7 +15,7 @@
 
 use indexmap::IndexMap;
 use serde_json::Value as Json;
-use weft_catalog::{Token, token_types};
+use weft_catalog::{Appearance, Token, composite_part, font_weight, token_types};
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, Mode, Node, ValidateOptions,
     Value, format_value, has_errors, js_number, serialize, validate_document,
@@ -30,6 +30,9 @@ pub struct HtmlOptions<'a> {
     pub tokens: &'a IndexMap<String, Token>,
     /// Leave the canonical source in a leading comment, so `import_html` gives the document back.
     pub source: bool,
+    /// The light and dark tokens of the project's resolver (`weft_catalog::appearance`): the page
+    /// follows the system appearance (`tokens_css`).
+    pub appearance: Option<Appearance<'a>>,
 }
 
 /// The document does not validate in strict mode against the catalog and tokens.
@@ -90,7 +93,8 @@ pub fn to_html_with_data(
     out.push_str("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
     out.push_str(&format!("<title>{}</title>\n", escape_text(&title)));
     out.push_str("<style>\n");
-    out.push_str(&stylesheet(options.tokens));
+    out.push_str(&tokens_css(options.tokens, options.appearance));
+    out.push_str(LAYOUT_CSS);
     out.push_str("</style>\n</head>\n<body>\n");
     let mut w = Writer {
         catalog: options.catalog,
@@ -135,13 +139,10 @@ pub(crate) fn token_var(path: &str) -> Option<String> {
 pub(crate) fn token_css(token: &Token) -> Option<String> {
     let v = &token.value;
     match token.kind.as_str() {
-        "dimension" => {
-            let n = v.get("value")?.as_f64().filter(|n| n.is_finite())?;
-            let unit = v.get("unit")?.as_str()?;
-            matches!(unit, "px" | "rem").then(|| format!("{}{unit}", js_number(n)))
-        }
+        "dimension" => dimension(v),
         "color" => {
-            let hex = v.get("hex")?.as_str()?;
+            // The string form of earlier DTCG drafts is still common (the example project's).
+            let hex = v.as_str().or_else(|| v.get("hex")?.as_str())?;
             let digits = hex.strip_prefix('#')?;
             ((3..=8).contains(&digits.len()) && digits.chars().all(|c| c.is_ascii_hexdigit()))
                 .then(|| hex.to_owned())
@@ -154,15 +155,158 @@ pub(crate) fn token_css(token: &Token) -> Option<String> {
     }
 }
 
-fn stylesheet(tokens: &IndexMap<String, Token>) -> String {
+fn dimension(v: &Json) -> Option<String> {
+    let n = v.get("value")?.as_f64().filter(|n| n.is_finite())?;
+    let unit = v.get("unit")?.as_str()?;
+    matches!(unit, "px" | "rem").then(|| format!("{}{unit}", js_number(n)))
+}
+
+/// The custom properties of one token: `--weft-<path>` with its value, and for a typography
+/// token the `font` shorthand (weight, size, line height, families) and, when it has letter
+/// spacing, `--weft-<path>-letter-spacing`, which the shorthand cannot hold.
+fn declarations(
+    path: &str,
+    token: &Token,
+    tokens: &IndexMap<String, Token>,
+) -> Vec<(String, String)> {
+    let Some(name) = token_var(path) else {
+        return vec![];
+    };
+    if token.kind != "typography" {
+        return token_css(token)
+            .map(|v| vec![(name, v)])
+            .unwrap_or_default();
+    }
+    let Some((font, spacing)) = typography(&token.value, tokens) else {
+        return vec![];
+    };
+    let mut out = vec![(name.clone(), font)];
+    if let Some(spacing) = spacing {
+        out.push((format!("{name}-letter-spacing"), spacing));
+    }
+    out
+}
+
+/// The CSS generic families (CSS Fonts 4) and the one vendor keyword browsers still read; any
+/// other family is quoted.
+const GENERIC_FAMILIES: &[&str] = &[
+    "serif",
+    "sans-serif",
+    "monospace",
+    "cursive",
+    "fantasy",
+    "system-ui",
+    "ui-serif",
+    "ui-sans-serif",
+    "ui-monospace",
+    "ui-rounded",
+    "math",
+    "emoji",
+    "fangsong",
+    "-apple-system",
+];
+
+/// A typography token as the `font` shorthand and its letter spacing, or `None` when a part has
+/// no CSS form. Families are CSS strings with every character that could end the string, the
+/// declaration or the `<style>` element escaped.
+fn typography(v: &Json, tokens: &IndexMap<String, Token>) -> Option<(String, Option<String>)> {
+    let part = |key: &str| composite_part(v, key, tokens);
+    let size = dimension(&part("fontSize")?)?;
+    let families: Vec<String> = match part("fontFamily")? {
+        Json::String(s) => vec![s],
+        Json::Array(list) => list
+            .iter()
+            .map(|f| f.as_str().map(str::to_owned))
+            .collect::<Option<_>>()?,
+        _ => return None,
+    };
+    if families.is_empty() || families.iter().any(String::is_empty) {
+        return None;
+    }
+    let families: Vec<String> = families
+        .iter()
+        .map(|f| {
+            if GENERIC_FAMILIES.contains(&f.as_str()) {
+                f.clone()
+            } else {
+                css_string(f)
+            }
+        })
+        .collect();
+    let mut font = vec![];
+    if v.get("fontWeight").is_some() {
+        font.push(js_number(font_weight(&part("fontWeight")?)?));
+    }
+    match v.get("lineHeight") {
+        Some(_) => {
+            let line = part("lineHeight")?
+                .as_f64()
+                .filter(|n| n.is_finite() && *n > 0.0)?;
+            font.push(format!("{size}/{}", js_number(line)));
+        }
+        None => font.push(size),
+    }
+    font.push(families.join(", "));
+    let spacing = match v.get("letterSpacing") {
+        Some(_) => Some(dimension(&part("letterSpacing")?)?),
+        None => None,
+    };
+    Some((font.join(" "), spacing))
+}
+
+fn css_string(s: &str) -> String {
+    let mut out = String::from("\"");
+    for c in s.chars() {
+        match c {
+            '"' | '\\' => {
+                out.push('\\');
+                out.push(c);
+            }
+            // A hex escape ends at the space; `<` would let `</style>` close the element.
+            c if c.is_control() || c == '<' => out.push_str(&format!("\\{:x} ", u32::from(c))),
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+    out
+}
+
+/// The tokens as CSS custom properties on `:root` (SPEC §9), the stylesheet of the static page
+/// and of `weft css-tokens`. With an appearance (SPEC §10.3) the page follows the system:
+/// `color-scheme: light dark`, the light values on `:root`, and the values that differ in the
+/// dark context in an `@media (prefers-color-scheme: dark)` block. Without one the output is as
+/// it always was.
+pub fn tokens_css(tokens: &IndexMap<String, Token>, appearance: Option<Appearance<'_>>) -> String {
     let mut css = String::from(":root {\n");
+    if appearance.is_some() {
+        css.push_str("  color-scheme: light dark;\n");
+    }
+    let mut dark = vec![];
     for (path, token) in tokens {
-        if let (Some(name), Some(value)) = (token_var(path), token_css(token)) {
+        // A context's token stands in only with the same type: the loader reports the others.
+        let in_context = |set: &'_ IndexMap<String, Token>| {
+            set.get(path)
+                .filter(|t| t.kind == token.kind)
+                .map(|t| declarations(path, t, set))
+        };
+        let light = appearance
+            .and_then(|a| in_context(a.light))
+            .unwrap_or_else(|| declarations(path, token, tokens));
+        if let Some(night) = appearance.and_then(|a| in_context(a.dark)) {
+            dark.extend(night.into_iter().filter(|d| !light.contains(d)));
+        }
+        for (name, value) in light {
             css.push_str(&format!("  {name}: {value};\n"));
         }
     }
     css.push_str("}\n");
-    css.push_str(LAYOUT_CSS);
+    if !dark.is_empty() {
+        css.push_str("@media (prefers-color-scheme: dark) {\n  :root {\n");
+        for (name, value) in dark {
+            css.push_str(&format!("    {name}: {value};\n"));
+        }
+        css.push_str("  }\n}\n");
+    }
     css
 }
 
@@ -1079,5 +1223,86 @@ mod tests {
             Some("--weft-color-blue-_root")
         );
         assert_eq!(token_var("a;b"), None);
+        assert_eq!(
+            token_css(&token("color", serde_json::json!("#d97706"))),
+            Some("#d97706".into())
+        );
+        assert_eq!(token_css(&token("color", serde_json::json!("red;x"))), None);
+    }
+
+    fn set(pairs: &[(&str, &str, Json)]) -> IndexMap<String, Token> {
+        pairs
+            .iter()
+            .map(|(path, kind, value)| {
+                let token = Token {
+                    kind: (*kind).into(),
+                    value: value.clone(),
+                };
+                ((*path).to_owned(), token)
+            })
+            .collect()
+    }
+
+    #[test]
+    fn typography_is_a_font_shorthand_and_its_letter_spacing() {
+        let tokens = set(&[
+            (
+                "size",
+                "dimension",
+                serde_json::json!({"value": 1, "unit": "rem"}),
+            ),
+            (
+                "body",
+                "typography",
+                serde_json::json!({
+                    "fontFamily": ["Inter\"</style>", "system-ui"],
+                    "fontSize": "{size}",
+                    "fontWeight": "semi-bold",
+                    "letterSpacing": {"value": 0.2, "unit": "px"},
+                    "lineHeight": 1.5
+                }),
+            ),
+            (
+                "bad",
+                "typography",
+                serde_json::json!({"fontFamily": "x", "fontSize": {"value": 1, "unit": "vw"}}),
+            ),
+        ]);
+        assert_eq!(
+            tokens_css(&tokens, None),
+            ":root {\n  --weft-size: 1rem;\n  --weft-body: 600 1rem/1.5 \"Inter\\\"\\3c /style>\", system-ui;\n  --weft-body-letter-spacing: 0.2px;\n}\n"
+        );
+    }
+
+    #[test]
+    fn an_appearance_overrides_what_differs_in_the_dark() {
+        let light = set(&[
+            ("ink", "color", serde_json::json!("#000000")),
+            (
+                "gap",
+                "dimension",
+                serde_json::json!({"value": 8, "unit": "px"}),
+            ),
+        ]);
+        let dark = set(&[
+            ("ink", "color", serde_json::json!("#ffffff")),
+            (
+                "gap",
+                "dimension",
+                serde_json::json!({"value": 8, "unit": "px"}),
+            ),
+        ]);
+        let appearance = Appearance {
+            modifier: "theme",
+            light_context: "light",
+            dark_context: "dark",
+            light: &light,
+            dark: &dark,
+        };
+        // The default context is dark here; `:root` still holds the light values.
+        assert_eq!(
+            tokens_css(&dark, Some(appearance)),
+            ":root {\n  color-scheme: light dark;\n  --weft-ink: #000000;\n  --weft-gap: 8px;\n}\n@media (prefers-color-scheme: dark) {\n  :root {\n    --weft-ink: #ffffff;\n  }\n}\n"
+        );
     }
 }

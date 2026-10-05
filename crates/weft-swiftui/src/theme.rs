@@ -2,12 +2,18 @@
 //! `{token.space.md}` reads `theme.space.md`. A project shares one `WeftTokens` struct holding
 //! every token it can express (`generate_tokens`); a screen generated without one carries its own
 //! `<Screen>Theme` with the tokens it references, so the file stays self-contained.
+//!
+//! With an appearance (SPEC §10.3), a colour whose dark value differs is built by the struct's
+//! `adaptive(light:dark:)`, which follows the system appearance; a typography token with letter
+//! spacing or line height is the struct's `Typography` view modifier rather than a `Font`. Both
+//! are nested in the struct, so neither the shared tokens nor any number of screen themes clash
+//! in one module, and token sets without them print exactly as before.
 
 use std::collections::BTreeMap;
 
 use indexmap::IndexMap;
 use serde_json::Value as Json;
-use weft_catalog::Token;
+use weft_catalog::{Appearance, Token, composite_part, font_weight};
 
 use crate::Unsupported;
 use crate::swift::{self, number_literal, string_literal};
@@ -23,9 +29,66 @@ const POINTS_PER_REM: f64 = 16.0;
 
 /// A token as a stored property: its Swift type and initial value.
 struct Leaf {
-    ty: &'static str,
+    ty: String,
     value: String,
 }
+
+/// What the leaves of one struct need declared at its root.
+#[derive(Default)]
+struct Needs {
+    adaptive: bool,
+    typography: bool,
+}
+
+/// The adaptive colour helper, nested in the root struct. UIKit and AppKit resolve a dynamic
+/// colour per trait collection or appearance; SwiftUI on iOS 17 and macOS 14 has no `Color`
+/// initialiser of its own for that.
+const ADAPTIVE: &str = r#"/// A colour that follows the system's light or dark appearance.
+static func adaptive(light: Color, dark: Color) -> Color {
+    #if canImport(UIKit)
+    Color(uiColor: UIColor { traits in
+        UIColor(traits.userInterfaceStyle == .dark ? dark : light)
+    })
+    #else
+    Color(nsColor: NSColor(name: nil) { appearance in
+        NSColor(appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light)
+    })
+    #endif
+}"#;
+
+/// The typography modifier, nested in the root struct. `tracking(_:)` is the letter spacing.
+/// SwiftUI before iOS 26 and macOS 26 has no line height, only `lineSpacing(_:)`, the space added
+/// between lines; so the space is the CSS line box (`lineHeight` × size) less the font's own
+/// line height, and half of it pads the first and last line as CSS half-leading does.
+const TYPOGRAPHY: &str = r#"/// A typography token: apply it with `.modifier(theme.<path>)`.
+struct Typography: ViewModifier, Sendable {
+    var font: Font
+    var size: CGFloat
+    /// The font's family, for its line height; `nil` for the system font.
+    var family: String?
+    /// Letter spacing in points.
+    var tracking: CGFloat = 0
+    /// Line height as a multiple of `size`; `nil` keeps the font's own.
+    var lineHeight: Double?
+
+    func body(content: Content) -> some View {
+        let extra = lineHeight.map { max(0, CGFloat($0) * size - naturalLineHeight) } ?? 0
+        content
+            .font(font)
+            .tracking(tracking)
+            .lineSpacing(extra)
+            .padding(.vertical, extra / 2)
+    }
+
+    private var naturalLineHeight: CGFloat {
+        #if canImport(UIKit)
+        (family.flatMap { UIFont(name: $0, size: size) } ?? .systemFont(ofSize: size)).lineHeight
+        #else
+        let font = family.flatMap { NSFont(name: $0, size: size) } ?? .systemFont(ofSize: size)
+        return font.ascender - font.descender + font.leading
+        #endif
+    }
+}"#;
 
 #[derive(Default)]
 struct Group {
@@ -45,12 +108,16 @@ pub fn token_expr(path: &str) -> String {
 
 /// The whole token set as `WeftTokens.swift`, and the tokens left out because SwiftUI has no
 /// form for their type or value.
-pub fn generate_tokens(tokens: &IndexMap<String, Token>) -> (String, Vec<Unsupported>) {
+pub fn generate_tokens(
+    tokens: &IndexMap<String, Token>,
+    appearance: Option<Appearance<'_>>,
+) -> (String, Vec<Unsupported>) {
     let mut skipped = vec![];
     let lines = tokens_struct(
         TOKENS_TYPE,
         tokens.keys().map(String::as_str),
         tokens,
+        appearance,
         &mut skipped,
     );
     let mut out = vec![
@@ -71,7 +138,7 @@ pub fn generate_tokens(tokens: &IndexMap<String, Token>) -> (String, Vec<Unsuppo
 /// Whether a screen can refer to `path` in the shared tokens: the reason when it cannot.
 pub fn check_token(path: &str, tokens: &IndexMap<String, Token>) -> Option<Unsupported> {
     let token = tokens.get(path);
-    let problem = match token.map(|t| swift_value(t, tokens)) {
+    let problem = match token.map(|t| swift_value(t, tokens, "")) {
         None => "the token is not in the token set".to_owned(),
         Some(Err(message)) => message,
         Some(Ok(_)) => return None,
@@ -85,17 +152,24 @@ pub fn tokens_struct<'p>(
     name: &str,
     paths: impl IntoIterator<Item = &'p str>,
     tokens: &IndexMap<String, Token>,
+    appearance: Option<Appearance<'_>>,
     problems: &mut Vec<Unsupported>,
 ) -> Vec<String> {
     let mut root = Group::default();
+    let mut needs = Needs::default();
     for path in paths {
         if let Some(problem) = check_token(path, tokens) {
             problems.push(problem);
             continue;
         }
-        let Some(Ok(leaf)) = tokens.get(path).map(|t| swift_value(t, tokens)) else {
+        let Some(Ok(mut leaf)) = tokens.get(path).map(|t| swift_value(t, tokens, name)) else {
             continue;
         };
+        needs.typography |= leaf.ty.ends_with(".Typography");
+        if let Some(value) = appearance.and_then(|a| adaptive(path, a, name)) {
+            leaf.value = value;
+            needs.adaptive = true;
+        }
         let segments: Vec<&str> = path.split('.').collect();
         let Some((last, groups)) = segments.split_last() else {
             continue;
@@ -106,9 +180,54 @@ pub fn tokens_struct<'p>(
         }
         group.leaves.insert((*last).to_owned(), leaf);
     }
+    // A member named like the nested type would clash with it.
+    if needs.typography
+        && (root.leaves.remove("Typography").is_some()
+            || root.groups.remove("Typography").is_some())
+    {
+        problems.push(Unsupported::new(
+            "{token.Typography}",
+            "`Typography` is the Swift name of the typography type of the tokens",
+        ));
+    }
     let mut lines = vec![];
     print_group(name, &root, &mut lines, "", "", problems);
+    // The helpers go last in the root struct, so token sets that need neither print as before.
+    let mut helpers = vec![];
+    if needs.adaptive {
+        helpers.push(ADAPTIVE);
+    }
+    if needs.typography {
+        helpers.push(TYPOGRAPHY);
+    }
+    if !helpers.is_empty() {
+        let close = lines.pop().unwrap_or_default();
+        for helper in helpers {
+            lines.push(String::new());
+            lines.extend(helper.lines().map(|l| {
+                if l.is_empty() {
+                    String::new()
+                } else {
+                    format!("    {l}")
+                }
+            }));
+        }
+        lines.push(close);
+    }
     lines
+}
+
+/// The adaptive colour for `path` when its light and dark values differ.
+fn adaptive(path: &str, appearance: Appearance<'_>, root: &str) -> Option<String> {
+    let value = |tokens: &IndexMap<String, Token>| {
+        tokens
+            .get(path)
+            .filter(|t| t.kind == "color")
+            .and_then(|t| color(&t.value))
+    };
+    let light = value(appearance.light)?;
+    let dark = value(appearance.dark)?;
+    (light != dark).then(|| format!("{root}.adaptive(light: {light}, dark: {dark})"))
 }
 
 fn print_group(
@@ -197,35 +316,29 @@ fn group_type_name<'a>(segment: &str, taken: impl Iterator<Item = &'a str> + Clo
 // ---- Values ----
 
 /// The Swift type and value of a token, or why SwiftUI has none.
-fn swift_value(token: &Token, tokens: &IndexMap<String, Token>) -> Result<Leaf, String> {
+/// `root` names the struct whose `Typography` a typography token with letter spacing or line
+/// height is built with.
+fn swift_value(
+    token: &Token,
+    tokens: &IndexMap<String, Token>,
+    root: &str,
+) -> Result<Leaf, String> {
     let v = &token.value;
+    let leaf = |ty: &str, value: String| Leaf {
+        ty: ty.to_owned(),
+        value,
+    };
     let leaf = match token.kind.as_str() {
-        "color" => color(v).map(|value| Leaf { ty: "Color", value }),
-        "dimension" => points(v).map(|n| Leaf {
-            ty: "CGFloat",
-            value: number_literal(n),
-        }),
-        "number" => finite(v).map(|n| Leaf {
-            ty: "Double",
-            value: number_literal(n),
-        }),
-        "fontFamily" => families(v).map(|names| Leaf {
-            ty: "[String]",
-            value: format!("[{}]", names.join(", ")),
-        }),
-        "fontWeight" => weight(v).map(|w| Leaf {
-            ty: "Font.Weight",
-            value: format!(".{w}"),
-        }),
-        "duration" => seconds(v).map(|s| Leaf {
-            ty: "Double",
-            value: number_literal(s),
-        }),
-        "cubicBezier" => bezier(v).map(|value| Leaf {
-            ty: "UnitCurve",
-            value,
-        }),
-        "typography" => font(v, tokens).map(|value| Leaf { ty: "Font", value }),
+        "color" => color(v).map(|value| leaf("Color", value)),
+        "dimension" => points(v).map(|n| leaf("CGFloat", number_literal(n))),
+        "number" => finite(v).map(|n| leaf("Double", number_literal(n))),
+        "fontFamily" => {
+            families(v).map(|names| leaf("[String]", format!("[{}]", names.join(", "))))
+        }
+        "fontWeight" => weight(v).map(|w| leaf("Font.Weight", format!(".{w}"))),
+        "duration" => seconds(v).map(|s| leaf("Double", number_literal(s))),
+        "cubicBezier" => bezier(v).map(|value| leaf("UnitCurve", value)),
+        "typography" => typography(v, tokens, root),
         other => return Err(format!("SwiftUI has no form for `{other}` tokens")),
     };
     leaf.ok_or_else(|| {
@@ -340,8 +453,8 @@ fn families(v: &Json) -> Option<Vec<String>> {
     }
 }
 
-/// The `Font.Weight` for a DTCG weight: a number from 1 to 1000 or one of its names. SwiftUI's
-/// nine weights stand for the hundreds, from `ultraLight` (100) to `black` (900).
+/// The `Font.Weight` for a DTCG weight. SwiftUI's nine weights stand for the hundreds, from
+/// `ultraLight` (100) to `black` (900).
 fn weight(v: &Json) -> Option<&'static str> {
     const WEIGHTS: [&str; 9] = [
         "ultraLight",
@@ -354,22 +467,7 @@ fn weight(v: &Json) -> Option<&'static str> {
         "heavy",
         "black",
     ];
-    let number = match v {
-        Json::String(name) => match name.as_str() {
-            "thin" | "hairline" => 100.0,
-            "extra-light" | "ultra-light" => 200.0,
-            "light" => 300.0,
-            "normal" | "regular" | "book" => 400.0,
-            "medium" => 500.0,
-            "semi-bold" | "demi-bold" => 600.0,
-            "bold" => 700.0,
-            "extra-bold" | "ultra-bold" => 800.0,
-            "black" | "heavy" | "extra-black" | "ultra-black" => 900.0,
-            _ => return None,
-        },
-        other => finite(other).filter(|n| (1.0..=1000.0).contains(n))?,
-    };
-    let step = (number / 100.0).round().clamp(1.0, 9.0) as usize;
+    let step = (font_weight(v)? / 100.0).round().clamp(1.0, 9.0) as usize;
     Some(WEIGHTS[step - 1])
 }
 
@@ -411,35 +509,65 @@ const GENERIC_FAMILIES: &[(&str, Option<&str>)] = &[
     ("ui-rounded", Some(".rounded")),
 ];
 
-/// A typography token as a `Font`. Letter spacing and line height are not part of a SwiftUI
-/// font, so they are left out (README: "Tokens").
-fn font(v: &Json, tokens: &IndexMap<String, Token>) -> Option<String> {
-    // The loader resolves whole-value aliases only; a typography part may still name a token.
-    let part = |key: &str| -> Option<Json> {
-        let value = v.get(key)?;
-        let alias = value
-            .as_str()
-            .and_then(|s| s.strip_prefix('{'))
-            .and_then(|s| s.strip_suffix('}'));
-        match alias {
-            Some(path) => tokens.get(path).map(|t| t.value.clone()),
-            None => Some(value.clone()),
-        }
+/// A typography token: a `Font`, or `<root>.Typography` when it has letter spacing (a dimension)
+/// or line height (a multiple of the font size, DTCG 2025.10 §9.7).
+fn typography(v: &Json, tokens: &IndexMap<String, Token>, root: &str) -> Option<Leaf> {
+    let font = font(v, tokens)?;
+    let tracking = match v.get("letterSpacing") {
+        Some(_) => Some(points(&composite_part(v, "letterSpacing", tokens)?)?),
+        None => None,
     };
+    let line_height = match v.get("lineHeight") {
+        Some(_) => Some(finite(&composite_part(v, "lineHeight", tokens)?).filter(|n| *n > 0.0)?),
+        None => None,
+    };
+    if tracking.is_none() && line_height.is_none() {
+        return Some(Leaf {
+            ty: "Font".to_owned(),
+            value: font,
+        });
+    }
+    let size = points(&composite_part(v, "fontSize", tokens)?)?;
+    let family = match family(&composite_part(v, "fontFamily", tokens)?)? {
+        name if GENERIC_FAMILIES.iter().any(|(g, _)| *g == name) => "nil".to_owned(),
+        name => string_literal(&name),
+    };
+    let mut args = vec![
+        format!("font: {font}"),
+        format!("size: {}", number_literal(size)),
+        format!("family: {family}"),
+    ];
+    if let Some(t) = tracking {
+        args.push(format!("tracking: {}", number_literal(t)));
+    }
+    if let Some(l) = line_height {
+        args.push(format!("lineHeight: {}", number_literal(l)));
+    }
+    Some(Leaf {
+        ty: format!("{root}.Typography"),
+        value: format!("{root}.Typography({})", args.join(", ")),
+    })
+}
+
+/// The first family of a `fontFamily` value.
+fn family(v: &Json) -> Option<String> {
+    let first = match v {
+        Json::String(s) => s.clone(),
+        Json::Array(list) => list.first()?.as_str()?.to_owned(),
+        _ => return None,
+    };
+    (!first.is_empty()).then_some(first)
+}
+
+/// A typography token as a `Font`; letter spacing and line height are `typography`'s.
+fn font(v: &Json, tokens: &IndexMap<String, Token>) -> Option<String> {
+    let part = |key: &str| composite_part(v, key, tokens);
     let size = number_literal(points(&part("fontSize")?)?);
     let weight = match part("fontWeight") {
         Some(w) => Some(weight(&w)?),
         None => None,
     };
-    let family = part("fontFamily")?;
-    let first = match &family {
-        Json::String(s) => s.clone(),
-        Json::Array(list) => list.first()?.as_str()?.to_owned(),
-        _ => return None,
-    };
-    if first.is_empty() {
-        return None;
-    }
+    let first = family(&part("fontFamily")?)?;
     if let Some((_, design)) = GENERIC_FAMILIES.iter().find(|(name, _)| *name == first) {
         let mut args = vec![format!("size: {size}")];
         if let Some(w) = weight {
@@ -468,7 +596,7 @@ mod tests {
             kind: kind.to_owned(),
             value,
         };
-        swift_value(&token, &IndexMap::new()).map(|l| format!("{}: {}", l.ty, l.value))
+        swift_value(&token, &IndexMap::new(), "T").map(|l| format!("{}: {}", l.ty, l.value))
     }
 
     #[test]
@@ -528,6 +656,79 @@ mod tests {
         );
         assert!(value("shadow", json!({})).is_err());
         assert!(value("dimension", json!({ "value": 1, "unit": "em" })).is_err());
+    }
+
+    #[test]
+    fn letter_spacing_and_line_height_make_a_typography_modifier() {
+        assert_eq!(
+            value(
+                "typography",
+                json!({
+                    "fontFamily": ["Inter", "sans-serif"],
+                    "fontSize": { "value": 1, "unit": "rem" },
+                    "letterSpacing": { "value": -0.5, "unit": "px" },
+                    "lineHeight": 1.25
+                })
+            ),
+            Ok("T.Typography: T.Typography(font: .custom(\"Inter\", size: 16), size: 16, family: \"Inter\", tracking: -0.5, lineHeight: 1.25)".to_owned())
+        );
+        assert_eq!(
+            value(
+                "typography",
+                json!({ "fontFamily": "system-ui", "fontSize": { "value": 12, "unit": "px" }, "lineHeight": 2 })
+            ),
+            Ok("T.Typography: T.Typography(font: .system(size: 12), size: 12, family: nil, lineHeight: 2)".to_owned())
+        );
+        // A line height that is not positive has no form, as any other bad value.
+        assert!(
+            value(
+                "typography",
+                json!({ "fontFamily": "x", "fontSize": { "value": 12, "unit": "px" }, "lineHeight": -1 })
+            )
+            .is_err()
+        );
+    }
+
+    fn tokens(pairs: &[(&str, &str)]) -> IndexMap<String, Token> {
+        pairs
+            .iter()
+            .map(|(path, hex)| {
+                let token = Token {
+                    kind: "color".to_owned(),
+                    value: json!(hex),
+                };
+                ((*path).to_owned(), token)
+            })
+            .collect()
+    }
+
+    #[test]
+    fn only_colours_that_differ_in_the_dark_adapt() {
+        let light = tokens(&[("ink", "#000000"), ("line", "#cccccc")]);
+        let dark = tokens(&[("ink", "#ffffff"), ("line", "#cccccc")]);
+        let appearance = Appearance {
+            modifier: "theme",
+            light_context: "light",
+            dark_context: "dark",
+            light: &light,
+            dark: &dark,
+        };
+        let mut problems = vec![];
+        let lines = tokens_struct(
+            "T",
+            ["ink", "line"],
+            &light,
+            Some(appearance),
+            &mut problems,
+        )
+        .join("\n");
+        assert!(problems.is_empty());
+        assert!(lines.contains("var ink: Color = T.adaptive(light: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 1), dark: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 1))"), "{lines}");
+        assert!(lines.contains("var line: Color = Color(.sRGB"), "{lines}");
+        assert!(lines.contains("static func adaptive(light: Color, dark: Color) -> Color {"));
+        // Without an appearance nothing is added, so token files print as before.
+        let plain = tokens_struct("T", ["ink"], &light, None, &mut problems).join("\n");
+        assert!(!plain.contains("adaptive"), "{plain}");
     }
 
     #[test]

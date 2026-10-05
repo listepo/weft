@@ -23,6 +23,14 @@ test("renderPage writes a complete document with an escaped title", () => {
   );
 });
 
+test("renderPage declares the colour scheme the tokens were picked for", () => {
+  const text = doc(el("stack", "s", { gap: { token: "space.sm" } }, []));
+  const tokens = new Map([["space.sm", { type: "dimension", value: { value: 6, unit: "px" } }]]);
+  const dark = renderPage(text, { catalog: coreCatalog, tokens, colorScheme: "dark" });
+  assert.match(dark, /<meta name="color-scheme" content="dark"\/><title>/);
+  assert.ok(!renderPage(text, { catalog: coreCatalog }).includes("color-scheme"));
+});
+
 test("write-page renders a fixture with its data and tokens to a file", () => {
   const out = join(mkdtempSync(join(tmpdir(), "weft-page-")), "page.html");
   const path = (p: string) => fileURLToPath(new URL(p, import.meta.url));

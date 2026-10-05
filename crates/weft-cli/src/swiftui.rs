@@ -8,7 +8,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
-use weft_catalog::PROJECT_FILE;
+use weft_catalog::{PROJECT_FILE, appearance};
 use weft_swiftui::{
     GenerateError, GenerateOptions, ImportOptions, TOKENS_FILE, generate, generate_tokens,
     import_swiftui,
@@ -57,10 +57,11 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
         &document,
         &GenerateOptions {
             catalog: &catalog,
-            tokens: &tokens,
+            tokens: &tokens.tokens,
             name: None,
             shared_tokens,
             data: data.as_ref(),
+            appearance: appearance(&tokens.modifiers),
         },
     ) {
         Ok(swift) => swift,
@@ -97,7 +98,7 @@ pub fn export_tokens(args: TokensArgs, out: &mut dyn Write) -> Result<u8> {
     // The project is found as for a document in the working directory.
     let (project, project_dir) = project(Path::new(PROJECT_FILE), args.project)?;
     let tokens = tokens(args.tokens.as_deref(), project.as_ref())?;
-    let (swift, skipped) = generate_tokens(&tokens);
+    let (swift, skipped) = generate_tokens(&tokens.tokens, appearance(&tokens.modifiers));
     let errors = &mut std::io::stderr();
     for p in skipped {
         writeln!(errors, "weft: token {p}; it is left out")?;

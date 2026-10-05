@@ -13,8 +13,9 @@ use weft_core::{
 
 use crate::core::{CORE_CATALOG_JSON, CatalogError, core_catalog};
 use crate::diff::{ChangeLevel, diff_catalogs};
+use crate::resolver::{Env, TokenModifier, read_resolver};
 use crate::settings::{SECTIONS, sanitize};
-use crate::tokens::{Token, TokenCode, load_tokens};
+use crate::tokens::{Token, TokenCode, TokenProblem, load_tokens};
 
 pub const PROJECT_FILE: &str = "weft.json";
 pub const MAX_TOKEN_FILES: usize = 64;
@@ -33,8 +34,11 @@ const CATALOG_MEMBERS: [&str; 4] = ["weft", "name", "version", "components"];
 pub struct Project {
     /// The core catalog, or the core catalog with the project's extension merged in.
     pub catalog: Catalog,
-    /// Present when the project declares `tokens`.
+    /// Present when the project declares `tokens`; with a resolver, the default context.
     pub tokens: Option<IndexMap<String, Token>>,
+    /// The modifiers of the project's resolver, each resolved for every context (SPEC §10.3);
+    /// empty for token files.
+    pub modifiers: Vec<TokenModifier>,
     /// Present when the project declares `actions`.
     pub actions: Option<Vec<String>>,
     /// Present when the project declares `data`.
@@ -107,7 +111,7 @@ fn is_token(v: &Object<String, Json>) -> bool {
 }
 
 /// DTCG trees merge group by group; a token replaces whatever was at its path (SPEC §10.3).
-fn merge_token_trees(earlier: Json, later: Json) -> Json {
+pub(crate) fn merge_token_trees(earlier: Json, later: Json) -> Json {
     match (earlier, later) {
         (Json::Object(mut merged), Json::Object(later))
             if !is_token(&merged) && !is_token(&later) =>
@@ -234,18 +238,158 @@ impl Loader<'_> {
         }
     }
 
+    /// The project's `tokens`: layered token files, or a resolver document (SPEC §10.3).
+    fn tokens(&mut self, member: &Json) -> (Option<IndexMap<String, Token>>, Vec<TokenModifier>) {
+        let resolver = match (self.options.read, member) {
+            (Some(_), Json::String(name)) => Some(name.as_str()),
+            (None, Json::Object(_)) => Some(""),
+            _ => None,
+        };
+        match resolver {
+            Some(name) => self.resolver(member, name, &self.at("/tokens")),
+            None => (self.token_layers(member), vec![]),
+        }
+    }
+
+    /// Tokens from a resolver document: `name` is its file, or `""` for project content.
+    pub(crate) fn resolver(
+        &mut self,
+        member: &Json,
+        name: &str,
+        pointer: &str,
+    ) -> (Option<IndexMap<String, Token>>, Vec<TokenModifier>) {
+        let Some(doc) = self.content(pointer, member, "\"tokens\"") else {
+            return (None, vec![]);
+        };
+        if !doc.is_object() {
+            self.report(Diagnostic::new(
+                Code::W705,
+                pointer,
+                "A resolver document must be a JSON object.",
+                "a DTCG resolver document",
+            ));
+            return (None, vec![]);
+        }
+        let read = self.options.read;
+        let mode = self.options.mode;
+        let mut found = Vec::new();
+        let mut fetch = |file: &str, at: &str| -> Option<Json> {
+            let read = read?;
+            let text = read(file);
+            match text.as_deref().map(parse_json) {
+                Some(Ok(json)) => Some(json),
+                _ => {
+                    let message = if text.is_none() {
+                        format!("The file {} cannot be read.", quote(file))
+                    } else {
+                        format!("The file {} is not JSON.", quote(file))
+                    };
+                    found.push(
+                        Diagnostic::new(Code::W704, at, message, "a readable JSON file").got(file),
+                    );
+                    None
+                }
+            }
+        };
+        let mut reported = Vec::new();
+        let mut report = |d: Diagnostic| reported.push(d.mode(mode));
+        // References are relative to the resolver; project content has no files to reference.
+        let dir = read.map(|_| {
+            name.rsplit_once('/')
+                .map_or(String::new(), |(d, _)| d.to_owned())
+        });
+        let resolver = read_resolver(
+            &doc,
+            &mut Env {
+                fetch: &mut fetch,
+                report: &mut report,
+                at: pointer.to_owned(),
+                dir,
+            },
+        );
+        for d in found.into_iter().chain(reported) {
+            self.report(d);
+        }
+        let mut seen: Vec<TokenProblem> = vec![];
+        let base = load_tokens(&order_keys(resolver.tree(&Default::default())));
+        self.token_problems(pointer, base.problems, None, &mut seen);
+        let mut modifiers = vec![];
+        for m in &resolver.modifiers {
+            let mut contexts = IndexMap::new();
+            for context in m.contexts.keys() {
+                let input = [(m.name.as_str(), context.as_str())].into_iter().collect();
+                let loaded = load_tokens(&order_keys(resolver.tree(&input)));
+                let label = format!("{}={context}", m.name);
+                self.token_problems(pointer, loaded.problems, Some(&label), &mut seen);
+                for (path, token) in &loaded.tokens {
+                    if let Some(base) = base.tokens.get(path)
+                        && base.kind != token.kind
+                    {
+                        self.report(
+                            Diagnostic::new(
+                                Code::W705,
+                                pointer,
+                                format!(
+                                    "{label}: {path}: The token is a {} here but a {} in the default context.",
+                                    token.kind, base.kind
+                                ),
+                                "one $type for a token in every context",
+                            )
+                            .got(path.clone()),
+                        );
+                    }
+                }
+                contexts.insert(context.clone(), loaded.tokens);
+            }
+            modifiers.push(TokenModifier {
+                name: m.name.clone(),
+                default: m.default.clone(),
+                contexts,
+            });
+        }
+        (Some(base.tokens), modifiers)
+    }
+
+    /// Reports token problems once: a context repeats the problems its tokens share with the
+    /// default context, which are said there.
+    fn token_problems(
+        &mut self,
+        pointer: &str,
+        problems: Vec<TokenProblem>,
+        context: Option<&str>,
+        seen: &mut Vec<TokenProblem>,
+    ) {
+        for p in problems {
+            if context.is_some() && seen.contains(&p) {
+                continue;
+            }
+            seen.push(p.clone());
+            let mut message = if p.path.is_empty() {
+                p.message
+            } else {
+                format!("{}: {}", p.path, p.message)
+            };
+            if let Some(context) = context {
+                message = format!("{context}: {message}");
+            }
+            self.report(
+                Diagnostic::new(Code::W705, pointer, message, token_expected(p.code)).got(p.path),
+            );
+        }
+    }
+
     fn token_layers(&mut self, member: &Json) -> Option<IndexMap<String, Token>> {
         let pointer = self.at("/tokens");
-        let what = if self.options.read.is_none() {
-            "token trees"
+        let (what, resolver) = if self.options.read.is_none() {
+            ("token trees", "a resolver document")
         } else {
-            "token file names"
+            ("token file names", "a resolver file name")
         };
         let Some(entries) = member.as_array() else {
             self.wrong_type(
                 pointer,
-                format!("\"tokens\" must be an array of {what}."),
-                &format!("an array of {what}"),
+                format!("\"tokens\" must be an array of {what} or {resolver}."),
+                &format!("an array of {what} or {resolver}"),
             );
             return None;
         };
@@ -279,17 +423,7 @@ impl Loader<'_> {
             tree = merge_token_trees(tree, found);
         }
         let loaded = load_tokens(&order_keys(tree));
-        for p in loaded.problems {
-            let message = if p.path.is_empty() {
-                p.message
-            } else {
-                format!("{}: {}", p.path, p.message)
-            };
-            self.report(
-                Diagnostic::new(Code::W705, pointer.clone(), message, token_expected(p.code))
-                    .got(p.path),
-            );
-        }
+        self.token_problems(&pointer, loaded.problems, None, &mut vec![]);
         Some(loaded.tokens)
     }
 
@@ -472,6 +606,7 @@ fn empty_project() -> Result<Project, CatalogError> {
     Ok(Project {
         catalog: core_catalog()?,
         tokens: None,
+        modifiers: vec![],
         actions: None,
         data: None,
         data_source: None,
@@ -526,7 +661,9 @@ pub fn load_project(
         );
     }
     if let Some(member) = members.get("tokens") {
-        project.tokens = loader.token_layers(member);
+        let (tokens, modifiers) = loader.tokens(member);
+        project.tokens = tokens;
+        project.modifiers = modifiers;
     }
     if let Some(member) = members.get("catalog")
         && let Some(found) = loader.content(&loader.at("/catalog"), member, "\"catalog\"")

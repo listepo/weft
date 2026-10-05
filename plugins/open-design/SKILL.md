@@ -39,7 +39,7 @@ Write screens into the project folder, not into the skill folder.
 node "<Skill root>/dist/render.js" <screen.weft> [out.html] [--data data.json] [--tokens tokens.json]
 ```
 
-`--data` is the sample data the bindings read; `--tokens` is a DTCG tokens file (default: the project's tokens, else the catalog's defaults). Without an output path the page is written next to the screen as `<name>.html`, so keep it in the project folder where Open Design lists and previews HTML files. The script prints the path and a `file://` URL. After the page is shown, look at it: if something is clearly off, say what and fix the screen instead of declaring success.
+`--data` is the sample data the bindings read; `--tokens` is a DTCG tokens file or resolver (default: the project's tokens, else the catalog's defaults); `--appearance light` or `dark` picks a side of a resolver's light and dark themes (default: `render.appearance`, else its default context). Without an output path the page is written next to the screen as `<name>.html`, so keep it in the project folder where Open Design lists and previews HTML files. The script prints the path and a `file://` URL. After the page is shown, look at it: if something is clearly off, say what and fix the screen instead of declaring success.
 
 ## Import an HTML page
 

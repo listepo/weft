@@ -12,7 +12,8 @@ The mapping itself is not here. It lives in `@weft/design-tool`, which `@weft/fi
 
 | Step | Function | Result |
 | --- | --- | --- |
-| Library | `ensureLibrary(api, catalog, tokens)` | A `Weft library` page with a `Weft components` board. Each catalog kind becomes a component; a kind with enum props or `state` gets one component per combination, combined into variants with one property per axis. Each token becomes a design token in a `Weft tokens` set, named by its Weft path: dimensions as `spacing` (px), numbers as `number`, colors as `color`. Calling it again reuses what is there and updates token values. |
+| Library | `ensureLibrary(api, catalog, tokens, modifier?)` | A `Weft library` page with a `Weft components` board. Each catalog kind becomes a component; a kind with enum props or `state` gets one component per combination, combined into variants with one property per axis. Each token becomes a design token in a `Weft tokens` set, named by its Weft path: dimensions as `spacing` (px), numbers as `number`, colors as `color`. Calling it again reuses what is there and updates token values. With a resolver `modifier`, its contexts become token themes (see "Token themes" below). |
+| Themes → resolver | `readThemes(catalog, tokens)` | The library's theme group as a DTCG resolver document. |
 | Weft → Penpot | `buildScreen(api, document, options)` | Text-only kinds become copies of their variant. Every other kind becomes a board with a flex layout, or a grid layout for `grid`. Each shape carries its Weft source in shared plugin data (namespace `weft`). A `gap` token is applied to the board's row and column gap. |
 | Penpot → Weft | `readScreen(shape, options)` | `{ document, losses, diagnostics }`, read as described in `@weft/design-tool` and `@weft/figma`: an unedited screen comes back byte-identical; edits come back as Weft changes; foreign shapes convert with a loss table. `readLayers` is the half that runs in the sandbox. |
 | Plugin, sandbox | `handleRequest(api, selection, message, options)` | Validates a message from the plugin UI, then builds a parsed screen or reads the selected board. |
@@ -23,6 +24,16 @@ The mapping itself is not here. It lives in `@weft/design-tool`, which `@weft/fi
 ## Where the code runs
 
 Penpot evaluates a plugin's code as a script in an SES compartment whose globals are the `penpot` API and a fixed list of endowments: timers, `fetch`, `console`, `structuredClone`, `atob`, `btoa` and the standard JavaScript built-ins. `WebAssembly` is not among them. The UI is a page in an iframe, loaded by URL, where browser APIs are available. So the split is the one `@weft/figma` uses: `buildScreen`, `readLayers`, `ensureLibrary` and `handleRequest` never call the core; parsing, value reading, canonicalizing and serializing run in the UI.
+
+## Token themes
+
+A Penpot theme turns a list of token sets on, and only one theme of a group is on at a time (`TokenTheme` in `@penpot/plugin-types` 1.5.0). So a resolver modifier (SPEC §10.3) is a theme group named after it, and each context a theme:
+
+- Every theme turns on the `Weft tokens` set. A context other than the default also turns on its own set, `Weft modes/<modifier>/<context>`, which holds the tokens whose value differs from the default. Among active sets the later one wins, and the context's set is made after the base set.
+- The default context's theme is made first and turned on. Turning a set on by hand turns every theme off, so the build only does that for the base set when it is off.
+- A token the context's set already has follows the context on later builds, so an override that no longer differs stops differing instead of staying stale.
+
+On export, `readThemes` reads the first theme group that turns the base set on. Each theme is the request's tokens with the values of its sets, later sets winning, and the first theme of the group is the default context. Token text is parsed as a number, a px length, a `#rrggbb[aa]` or an `rgb()`/`rgba()` colour; an alias (`{color.brand}`) or a formula is left out. The document goes back in the reply's `resolver` field, built as `@weft/figma` describes.
 
 ## Penpot specifics
 

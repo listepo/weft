@@ -38,6 +38,7 @@ fn round_trip(
                 name: None,
                 shared_tokens,
                 data,
+                appearance: None,
             };
             let swift = match generate(&document, &options) {
                 Ok(swift) => swift,

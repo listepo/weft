@@ -377,13 +377,33 @@ class FakeVariable extends FakeBase implements FVariable {
 
 class FakeCollection extends FakeBase implements FCollection {
   readonly defaultModeId = "mode:1";
+  readonly modes: { modeId: string; name: string }[] = [{ modeId: "mode:1", name: "Mode 1" }];
+  /** Figma's Starter plan allows one mode; paid plans allow more (`Infinity` here). */
+  private readonly modeLimit: number;
+  constructor(modeLimit: number) {
+    super();
+    this.modeLimit = modeLimit;
+  }
+  addMode(name: string): string {
+    if (this.modes.length >= this.modeLimit)
+      throw new Error(`in addMode: Limited to ${this.modeLimit} modes only`);
+    const modeId = `mode:${this.modes.length + 1}`;
+    this.modes.push({ modeId, name });
+    return modeId;
+  }
+  renameMode(modeId: string, newName: string): void {
+    const mode = this.modes.find((m) => m.modeId === modeId);
+    if (mode === undefined) throw new Error(`no mode ${modeId}`);
+    mode.name = newName;
+  }
 }
 
 class FakeVariables implements FVariables {
   readonly collections: FakeCollection[] = [];
   readonly all: FakeVariable[] = [];
+  modeLimit = Number.POSITIVE_INFINITY;
   createVariableCollection(name: string): FakeCollection {
-    const c = new FakeCollection();
+    const c = new FakeCollection(this.modeLimit);
     c.name = name;
     this.collections.push(c);
     return c;

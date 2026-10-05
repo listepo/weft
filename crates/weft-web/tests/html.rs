@@ -42,6 +42,7 @@ fn every_corpus_screen_becomes_a_static_page() {
             catalog: &catalog,
             tokens: &tokens,
             source: false,
+            appearance: None,
         };
         let html = to_html(&document, &options).unwrap();
         if std::env::var_os("WEFT_DUMP").is_some() {
@@ -79,6 +80,7 @@ fn generated_pages_come_back_exactly() {
             catalog: &catalog,
             tokens: &tokens,
             source: true,
+            appearance: None,
         };
         let html = to_html(&document, &options).unwrap();
         let back = import_html(&html, &import_options(&catalog, &tokens));
@@ -112,6 +114,7 @@ fn generated_pages_without_their_source_come_back_by_convention() {
             catalog: &catalog,
             tokens: &tokens,
             source: false,
+            appearance: None,
         };
         let html = to_html(&document, &options).unwrap();
         let back = import_html(&html, &import_options(&catalog, &tokens));

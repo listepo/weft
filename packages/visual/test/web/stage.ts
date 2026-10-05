@@ -28,6 +28,9 @@ async function settle(frame: HTMLIFrameElement): Promise<void> {
   await frames();
 }
 
+/** The empty page with `head` added to its head, such as a stylesheet a component reads. */
+const withHead = (head: string) => EMPTY.replace("</head>", `${head}</head>`);
+
 /** A fresh iframe `#id`, loaded with `html`; the previous one of that id is removed. */
 async function frame(id: string, html = EMPTY): Promise<HTMLIFrameElement> {
   document.getElementById(id)?.remove();
@@ -65,8 +68,13 @@ export async function showMarkup(id: string, markup: string): Promise<HTMLElemen
   return div;
 }
 
-export async function showReact(id: string, component: ComponentType<Props>, props: Props) {
-  const el = await frame(id);
+export async function showReact(
+  id: string,
+  component: ComponentType<Props>,
+  props: Props,
+  head = "",
+) {
+  const el = await frame(id, withHead(head));
   const div = host(el);
   flushSync(() => createRoot(div).render(createElement(component, props)));
   await settle(el);

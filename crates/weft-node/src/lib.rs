@@ -178,8 +178,8 @@ pub fn compile_data_schema(schema: Option<String>) -> Result<String> {
 }
 
 #[napi]
-pub fn project_files(text: String) -> Result<String> {
-    js(api::project_files(&text))
+pub fn project_files(text: String, files: Option<String>) -> Result<String> {
+    js(api::project_files(&text, files.as_deref()))
 }
 
 #[napi]

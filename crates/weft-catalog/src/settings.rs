@@ -13,13 +13,14 @@ use crate::project::{MAX_TOKEN_FILES, escape_pointer, is_project_file_name, quot
 pub(crate) enum Kind {
     /// Named settings; any other key is `W702`.
     Section(&'static [Setting]),
-    /// `"strict"` or `"lenient"`.
-    Mode,
+    /// One of these strings.
+    OneOf(&'static [&'static str]),
     Bool,
     /// A file or directory name relative to the project file (SPEC §10.2).
     File,
-    /// An array of such names, at most `MAX_TOKEN_FILES`.
-    Files,
+    /// Token files: an array of such names, at most `MAX_TOKEN_FILES`, or one resolver document's
+    /// name (SPEC §10.3).
+    TokenFiles,
     /// A whole number from 1 to `MAX_COUNT`.
     Count,
     /// An object of objects, one entry per plugin. A plugin the table lists is checked as a
@@ -114,6 +115,11 @@ const EXPORT: &[Setting] = &[
         "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`).",
         Kind::Section(SWIFTUI_EXPORT),
     ),
+    setting(
+        "css",
+        "The token stylesheet `weft-tokens.css` that React and SolidJS components read their `var(--weft-…)` from (`weft css-tokens`). Default folder: standard output.",
+        Kind::Section(OUT_ONLY),
+    ),
 ];
 const IMPORT: &[Setting] = &[
     setting(
@@ -202,7 +208,7 @@ pub(crate) const SECTIONS: &[Setting] = &[
         Kind::Section(&[with_default(
             "mode",
             "\"strict\" reports unknown elements and attributes as errors, \"lenient\" as warnings (SPEC §8). Used by `weft validate` and as the default of weft_validate's strict argument.",
-            Kind::Mode,
+            Kind::OneOf(&["strict", "lenient"]),
             "\"lenient\"",
         )]),
     ),
@@ -227,10 +233,15 @@ pub(crate) const SECTIONS: &[Setting] = &[
             ),
             setting(
                 "tokens",
-                "DTCG token files to render with, in layer order; they replace the project's tokens. Default: the project's tokens.",
-                Kind::Files,
+                "DTCG token files to render with, in layer order, or one DTCG resolver document; they replace the project's tokens. Default: the project's tokens.",
+                Kind::TokenFiles,
             ),
             setting("outDir", OUT_DIR, Kind::File),
+            setting(
+                "appearance",
+                "Which context of the resolver's light and dark modifier (SPEC §10.3) the page is rendered with, and the page's color-scheme. Default: the resolver's default context.",
+                Kind::OneOf(&["light", "dark"]),
+            ),
         ]),
     ),
     setting(
@@ -302,12 +313,14 @@ pub(crate) fn sanitize(
             }
             Some(Json::Object(kept))
         }
-        Kind::Mode => match value.as_str() {
-            Some("strict" | "lenient") => Some(value.clone()),
+        Kind::OneOf(values) => match value.as_str() {
+            Some(v) if values.contains(&v) => Some(value.clone()),
             _ => {
+                let quoted: Vec<String> = values.iter().map(|v| quote(v)).collect();
+                let choices = quoted.join(" or ");
                 report(wrong(
-                    format!("{} must be \"strict\" or \"lenient\".", quote(&dotted)),
-                    "\"strict\" or \"lenient\"",
+                    format!("{} must be {choices}.", quote(&dotted)),
+                    &choices,
                 ));
                 None
             }
@@ -337,14 +350,15 @@ pub(crate) fn sanitize(
             }
         },
         Kind::File => file_name(value, pointer, &dotted, report),
-        Kind::Files => {
+        Kind::TokenFiles if value.is_string() => file_name(value, pointer, &dotted, report),
+        Kind::TokenFiles => {
             let Some(entries) = value.as_array().filter(|e| e.len() <= MAX_TOKEN_FILES) else {
                 report(wrong(
                     format!(
-                        "{} must be an array of at most {MAX_TOKEN_FILES} file names.",
+                        "{} must be an array of at most {MAX_TOKEN_FILES} file names, or a resolver file name.",
                         quote(&dotted)
                     ),
-                    "an array of file names",
+                    "an array of file names or a resolver file name",
                 ));
                 return None;
             };
@@ -435,13 +449,18 @@ fn pointer_name(pointer: &str) -> String {
 fn schema_of(setting: &Setting) -> Json {
     let mut schema = match &setting.kind {
         Kind::Section(children) => section_schema(children),
-        Kind::Mode => json!({ "enum": ["strict", "lenient"] }),
+        Kind::OneOf(values) => json!({ "enum": values }),
         Kind::Bool => json!({ "type": "boolean" }),
         Kind::File => json!({ "$ref": "#/$defs/fileName" }),
-        Kind::Files => json!({
-            "type": "array",
-            "maxItems": MAX_TOKEN_FILES,
-            "items": { "$ref": "#/$defs/fileName" },
+        Kind::TokenFiles => json!({
+            "oneOf": [
+                {
+                    "type": "array",
+                    "maxItems": MAX_TOKEN_FILES,
+                    "items": { "$ref": "#/$defs/fileName" },
+                },
+                { "$ref": "#/$defs/fileName" },
+            ],
         }),
         Kind::Count => json!({ "type": "integer", "minimum": 1, "maximum": MAX_COUNT }),
         Kind::Plugins(known) => {
@@ -489,10 +508,15 @@ pub fn project_file_schema() -> Json {
         }),
     );
     properties.insert("tokens".to_owned(), json!({
-        "type": "array",
-        "maxItems": MAX_TOKEN_FILES,
-        "items": { "$ref": "#/$defs/fileName" },
-        "description": "DTCG token files, in layer order: a later file overrides an earlier one (SPEC §10.3).",
+        "oneOf": [
+            {
+                "type": "array",
+                "maxItems": MAX_TOKEN_FILES,
+                "items": { "$ref": "#/$defs/fileName" },
+            },
+            { "$ref": "#/$defs/fileName" },
+        ],
+        "description": "DTCG token files, in layer order: a later file overrides an earlier one; or one DTCG resolver document (`*.resolver.json`) whose modifiers give contexts such as light and dark (SPEC §10.3).",
     }));
     properties.insert("catalog".to_owned(), json!({
         "$ref": "#/$defs/fileName",

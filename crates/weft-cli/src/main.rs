@@ -97,7 +97,7 @@ struct WebImport {
     /// Catalog JSON; replaces the project's catalog (default: the core catalog).
     #[arg(long)]
     catalog: Option<PathBuf>,
-    /// Token JSON the page's custom properties are matched against; replaces the project's tokens
+    /// Token JSON or a DTCG resolver the page's custom properties are matched against; replaces the project's tokens
     /// (default: the default tokens).
     #[arg(long)]
     tokens: Option<PathBuf>,
@@ -160,7 +160,7 @@ enum Command {
         /// Catalog JSON; replaces the project's catalog (default: the core catalog).
         #[arg(long)]
         catalog: Option<PathBuf>,
-        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
         #[command(flatten)]
@@ -182,7 +182,7 @@ enum Command {
     },
     /// Generate `WeftTokens.swift`, the design tokens every SwiftUI screen of a project shares.
     SwiftuiTokens {
-        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
         /// Project file; without it, the nearest `weft.json` in or above the working directory.
@@ -213,7 +213,7 @@ enum Command {
     Html {
         #[command(flatten)]
         common: WebExport,
-        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
         #[command(flatten)]
@@ -223,6 +223,26 @@ enum Command {
     React(JsxExport),
     /// Generate a SolidJS component (JSX or TSX) from a markup document.
     Solid(JsxExport),
+    /// Generate `weft-tokens.css`, the design tokens React and SolidJS components read as CSS
+    /// custom properties.
+    ///
+    /// With light and dark themes (a DTCG resolver), the dark values apply under
+    /// `prefers-color-scheme: dark`.
+    CssTokens {
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
+        #[arg(long)]
+        tokens: Option<PathBuf>,
+        /// Project file; without it, the nearest `weft.json` in or above the working directory.
+        #[arg(long, conflicts_with = "no_project")]
+        project: Option<PathBuf>,
+        /// Ignore any project file.
+        #[arg(long)]
+        no_project: bool,
+        /// Write `weft-tokens.css` here instead of printing (default: the project's
+        /// `export.css.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+    },
     /// Read an HTML page back into markup; what Weft cannot hold is listed on stderr as losses.
     ImportHtml(WebImport),
     /// Read a React component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr.
@@ -507,6 +527,22 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             no_project,
             out_dir,
         } => swiftui::export_tokens(
+            swiftui::TokensArgs {
+                tokens,
+                project: ProjectArgs {
+                    project,
+                    no_project,
+                },
+                out_dir,
+            },
+            out,
+        ),
+        Command::CssTokens {
+            tokens,
+            project,
+            no_project,
+            out_dir,
+        } => web::export_css(
             swiftui::TokensArgs {
                 tokens,
                 project: ProjectArgs {

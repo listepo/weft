@@ -3,19 +3,18 @@
 // again finds what is there by plugin data and token name and adds only what is missing, so a
 // designer's changes to existing components survive. What each component draws is shared with the
 // other tools (`drawing` of @weft/design-tool); this file draws it with Penpot shapes.
-import type { Token } from "@weft/catalog";
+import type { Token, TokenModifier } from "@weft/catalog";
 import type { Catalog, ComponentDef } from "@weft/core";
 import {
   combinations,
   drawing,
+  hexOf,
   KEY,
   LIBRARY_BOARD,
   LIBRARY_PAGE,
   libraryTag,
   readMark,
   TOKEN_COLLECTION,
-  tokenColor,
-  tokenPx,
   variantAxes,
   variantName,
   type BoxDrawing,
@@ -23,7 +22,6 @@ import {
   type KindEntry as SharedKindEntry,
   type Length,
   type Paint,
-  type RGB,
   type RGBA,
   type TextDrawing,
 } from "@weft/design-tool";
@@ -39,11 +37,11 @@ import type {
   PStroke,
   PText,
   PToken,
-  PTokenType,
   PVariants,
 } from "./api.ts";
 import { childrenOf, isBoard } from "./api.ts";
 import { dataOf, EMPTY_TEXT } from "./layer.ts";
+import { tokenValue, writeThemes } from "./modes.ts";
 
 export type KindEntry = SharedKindEntry<PLibraryComponent>;
 
@@ -71,6 +69,7 @@ export async function ensureLibrary(
   api: PenpotApi,
   catalog: Catalog,
   tokens: ReadonlyMap<string, Token>,
+  modifier?: TokenModifier,
 ): Promise<Library> {
   // With natural ordering, a flex board lists and appends children in the order the layout shows
   // them, which is the order Weft children have.
@@ -86,7 +85,11 @@ export async function ensureLibrary(
   await api.openPage(page.id);
   try {
     dataOf(page).setPluginData(KEY.library, tag);
-    const library: Library = { page, tokens: ensureTokens(api, tokens), kinds: new Map() };
+    const library: Library = {
+      page,
+      tokens: ensureTokens(api, tokens, modifier),
+      kinds: new Map(),
+    };
     const board = libraryBoard(api, page, tag);
     for (const child of board.children) {
       const kind = readMark(dataOf(child), KEY.kind);
@@ -143,27 +146,10 @@ function existingKind(shape: PShape, axes: KindEntry["axes"]): KindEntry | undef
 
 // --- tokens --------------------------------------------------------------------------------
 
-function tokenValue(
-  token: Token,
-): { type: PTokenType; text: string; px?: number; color?: RGBA } | undefined {
-  const px = tokenPx(token);
-  if (px !== undefined)
-    return { type: token.type === "number" ? "number" : "spacing", text: String(px), px };
-  const color = tokenColor(token);
-  return color === undefined ? undefined : { type: "color", text: cssColor(color), color };
-}
-
-const channel = (c: number) => Math.round(c * 255);
-
-export const hexColor = (c: RGB): string =>
-  `#${[c.r, c.g, c.b].map((v) => channel(v).toString(16).padStart(2, "0")).join("")}`;
-
-const cssColor = (c: RGBA): string =>
-  c.a >= 1 ? hexColor(c) : `rgba(${channel(c.r)}, ${channel(c.g)}, ${channel(c.b)}, ${c.a})`;
-
 function ensureTokens(
   api: PenpotApi,
   tokens: ReadonlyMap<string, Token>,
+  modifier: TokenModifier | undefined,
 ): Map<string, LibraryToken> {
   const catalog = api.library.local.tokens;
   const set =
@@ -183,6 +169,7 @@ function ensureTokens(
     else if (made.value !== value.text) made.value = value.text;
     out.set(path, { token: made, px: value.px, color: value.color });
   }
+  if (modifier !== undefined) writeThemes(catalog, set, tokens, modifier);
   return out;
 }
 
@@ -237,10 +224,10 @@ function fillOf(
   library: Library,
   of: Paint,
 ): { color: string; opacity: number; token?: PToken | undefined } {
-  if ("color" in of) return { color: hexColor(of.color), opacity: 1 };
+  if ("color" in of) return { color: hexOf(of.color), opacity: 1 };
   const token = library.tokens.get(of.token);
   const color = token?.color ?? { ...of.fallback, a: 1 };
-  return { color: hexColor(color), opacity: color.a, token: token?.token };
+  return { color: hexOf(color), opacity: color.a, token: token?.token };
 }
 
 export function paintFill(shape: PShapeBase, library: Library, of: Paint | undefined): void {

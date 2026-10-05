@@ -16110,8 +16110,8 @@
    }
   },
   {
-   "name": "tokens that are not an array",
-   "project": "{\"tokens\":\"x\"}",
+   "name": "tokens that are neither an array nor a file name",
+   "project": "{\"tokens\":7}",
    "codes": [
     "W701"
    ],
@@ -16129,9 +16129,72 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a resolver file that cannot be read",
+   "project": "{\"tokens\":\"x\"}",
+   "codes": [
+    "W704"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {},
+    "diagnostics": [
+     {
+      "code": "W704",
+      "severity": "error",
+      "message": "The file \"x\" cannot be read.",
+      "path": "#/tokens",
+      "expected": "a readable JSON file",
+      "got": "x"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a token file named alone is read as a resolver",
+   "project": "{\"tokens\":\"tokens/base.tokens.json\"}",
+   "codes": [
+    "W705",
+    "W705"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.1.0",
+     "changed": []
+    },
+    "tokens": [],
+    "actions": null,
+    "data": false,
+    "settings": {},
+    "diagnostics": [
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -17611,7 +17674,7 @@
   },
   {
    "name": "tool settings of the wrong type are left out",
-   "project": "{\"validate\":{\"mode\":\"loose\"},\"format\":{\"write\":\"yes\"},\"render\":{\"data\":7,\"tokens\":\"a.json\",\"outDir\":\"../out\"},\"export\":[],\"mcp\":{\"limits\":{\"markupChars\":0,\"patches\":2.5,\"diagnostics\":-1}},\"plugins\":{\"a\":1}}",
+   "project": "{\"validate\":{\"mode\":\"loose\"},\"format\":{\"write\":\"yes\"},\"render\":{\"data\":7,\"tokens\":7,\"outDir\":\"../out\"},\"export\":[],\"mcp\":{\"limits\":{\"markupChars\":0,\"patches\":2.5,\"diagnostics\":-1}},\"plugins\":{\"a\":1}}",
    "codes": [
     "W701",
     "W701",
@@ -17667,9 +17730,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"render.tokens\" must be an array of at most 64 file names.",
+      "message": "\"render.tokens\" must be an array of at most 64 file names, or a resolver file name.",
       "path": "#/render/tokens",
-      "expected": "an array of file names"
+      "expected": "an array of file names or a resolver file name"
      },
      {
       "code": "W703",
@@ -17759,7 +17822,7 @@
       "severity": "warning",
       "message": "Unknown key \"cobol\" in \"export\".",
       "path": "#/export/cobol",
-      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\", \"css\"",
       "got": "cobol"
      },
      {
@@ -18571,11 +18634,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"broken.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "broken.json"
      },
      {
       "code": "W701",
@@ -18605,7 +18669,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -18619,11 +18683,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W706",
@@ -18695,7 +18766,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -18709,11 +18780,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -18861,17 +18939,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W708",
@@ -18943,17 +19028,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -19018,17 +19110,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -19416,11 +19515,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"missing.json\" cannot be read.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "missing.json"
      }
     ]
    }
@@ -19484,11 +19584,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"surrogate.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "surrogate.json"
      },
      {
       "code": "W706",
@@ -19570,7 +19671,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -19584,11 +19685,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W704",
@@ -19840,7 +19948,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -19854,11 +19962,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -20071,7 +20186,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -20085,11 +20200,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -20153,9 +20275,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W706",
@@ -20225,7 +20347,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": true,
     "settings": {},
@@ -20239,11 +20361,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -20335,11 +20464,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"surrogate.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "surrogate.json"
      },
      {
       "code": "W706",
@@ -20567,7 +20697,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -20581,11 +20711,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -20607,17 +20744,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W706",
@@ -20722,17 +20866,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -20761,11 +20912,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"surrogate.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "surrogate.json"
      },
      {
       "code": "W706",
@@ -20808,11 +20960,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"huge.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "huge.json"
      },
      {
       "code": "W701",
@@ -20948,9 +21101,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W701",
@@ -20972,7 +21125,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": false,
     "settings": {},
@@ -20986,11 +21139,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W704",
@@ -21218,11 +21378,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"huge.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "huge.json"
      },
      {
       "code": "W701",
@@ -21251,17 +21412,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": true,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -21332,11 +21500,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"huge.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "huge.json"
      },
      {
       "code": "W708",
@@ -21373,11 +21542,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"broken.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "broken.json"
      },
      {
       "code": "W709",
@@ -21439,11 +21609,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"broken.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "broken.json"
      },
      {
       "code": "W701",
@@ -21560,11 +21731,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"huge.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "huge.json"
      },
      {
       "code": "W706",
@@ -21592,11 +21764,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"deep.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "deep.json"
      },
      {
       "code": "W703",
@@ -21701,7 +21874,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [
      "x.y.z",
      "x.y.z"
@@ -21718,11 +21891,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -21744,17 +21924,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -21858,7 +22045,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -21872,11 +22059,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -22015,11 +22209,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"deep.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "deep.json"
      },
      {
       "code": "W701",
@@ -22131,17 +22326,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -22172,11 +22374,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"broken.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "broken.json"
      },
      {
       "code": "W708",
@@ -22236,11 +22439,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"missing.json\" cannot be read.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "missing.json"
      },
      {
       "code": "W708",
@@ -22271,7 +22475,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": true,
     "settings": {},
@@ -22285,11 +22489,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -22450,7 +22661,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": false,
     "settings": {},
@@ -22464,11 +22675,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W706",
@@ -22570,11 +22788,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W703",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file name \"../x.json\" is absolute, leaves the project directory or is malformed.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../x.json"
      },
      {
       "code": "W701",
@@ -22618,11 +22837,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W703",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file name \"../x.json\" is absolute, leaves the project directory or is malformed.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../x.json"
      }
     ]
    }
@@ -22637,7 +22857,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -22651,11 +22871,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -22687,11 +22914,11 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "A resolver document must be a JSON object.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a DTCG resolver document"
      },
      {
       "code": "W708",
@@ -22735,11 +22962,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"huge.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "huge.json"
      },
      {
       "code": "W701",
@@ -22768,7 +22996,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -22782,11 +23010,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W704",
@@ -23602,9 +23837,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W704",
@@ -23771,7 +24006,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -23785,11 +24020,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W706",
@@ -23811,7 +24053,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -23825,11 +24067,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W704",
@@ -24416,11 +24665,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W703",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file name \"../x.json\" is absolute, leaves the project directory or is malformed.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../x.json"
      },
      {
       "code": "W701",
@@ -24442,7 +24692,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [
      "x.y.z"
     ],
@@ -24450,11 +24700,18 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W708",
@@ -24734,11 +24991,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"surrogate.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "surrogate.json"
      },
      {
       "code": "W701",
@@ -24897,11 +25155,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W703",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file name \"../x.json\" is absolute, leaves the project directory or is malformed.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../x.json"
      },
      {
       "code": "W701",
@@ -25097,17 +25356,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -25163,11 +25429,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"deep.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "deep.json"
      }
     ]
    }
@@ -25196,11 +25463,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"missing.json\" cannot be read.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "missing.json"
      },
      {
       "code": "W701",
@@ -25298,17 +25566,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -25367,9 +25642,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W708",
@@ -25721,11 +25996,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"missing.json\" cannot be read.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "missing.json"
      },
      {
       "code": "W701",
@@ -25747,7 +26023,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": true,
     "settings": {},
@@ -25761,11 +26037,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W706",
@@ -25936,11 +26219,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"surrogate.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "surrogate.json"
      }
     ]
    }
@@ -26149,11 +26433,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"huge.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "huge.json"
      },
      {
       "code": "W701",
@@ -26634,7 +26919,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [
      "x.y.z",
      "cart.add"
@@ -26651,11 +26936,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W706",
@@ -26751,7 +27043,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -26765,11 +27057,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -26809,9 +27108,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W701",
@@ -26903,11 +27202,11 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "A resolver document must be a JSON object.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a DTCG resolver document"
      },
      {
       "code": "W701",
@@ -27187,9 +27486,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W706",
@@ -27218,7 +27517,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": true,
     "settings": {},
@@ -27232,11 +27531,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -27365,11 +27671,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"surrogate.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "surrogate.json"
      },
      {
       "code": "W706",
@@ -27459,11 +27766,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"huge.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "huge.json"
      },
      {
       "code": "W708",
@@ -27849,11 +28157,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"broken.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "broken.json"
      },
      {
       "code": "W706",
@@ -27926,9 +28235,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W701",
@@ -28156,7 +28465,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [
      "nav.home"
     ],
@@ -28172,11 +28481,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -28222,9 +28538,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W704",
@@ -28247,17 +28563,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -28340,11 +28663,11 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "A resolver document must be a JSON object.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a DTCG resolver document"
      },
      {
       "code": "W701",
@@ -28454,11 +28777,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"broken.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "broken.json"
      },
      {
       "code": "W701",
@@ -28590,11 +28914,11 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "A resolver document must be a JSON object.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a DTCG resolver document"
      },
      {
       "code": "W701",
@@ -28675,7 +28999,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [
      "nav.home"
     ],
@@ -28683,11 +29007,18 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -28887,7 +29218,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -28901,11 +29232,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -29016,11 +29354,11 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "A resolver document must be a JSON object.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a DTCG resolver document"
      },
      {
       "code": "W701",
@@ -29114,9 +29452,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W701",
@@ -29288,7 +29626,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -29302,11 +29640,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -29415,11 +29760,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"surrogate.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "surrogate.json"
      },
      {
       "code": "W706",
@@ -29473,11 +29819,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"broken.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "broken.json"
      },
      {
       "code": "W701",
@@ -29513,11 +29860,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"missing.json\" cannot be read.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "missing.json"
      },
      {
       "code": "W701",
@@ -29594,7 +29942,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [
      "x.y.z"
     ],
@@ -29610,11 +29958,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -29716,7 +30071,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -29730,11 +30085,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      }
     ]
    }
@@ -29823,11 +30185,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"deep.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "deep.json"
      },
      {
       "code": "W704",
@@ -29996,11 +30359,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"missing.json\" cannot be read.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "missing.json"
      },
      {
       "code": "W706",
@@ -30022,7 +30386,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": false,
     "settings": {},
@@ -30036,11 +30400,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W708",
@@ -30292,11 +30663,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W703",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file name \"../x.json\" is absolute, leaves the project directory or is malformed.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../x.json"
      },
      {
       "code": "W701",
@@ -30358,11 +30730,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"deep.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "deep.json"
      },
      {
       "code": "W701",
@@ -30818,7 +31191,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -30832,11 +31205,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -31037,17 +31417,24 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -31282,11 +31669,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W703",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file name \"../x.json\" is absolute, leaves the project directory or is malformed.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../x.json"
      },
      {
       "code": "W706",
@@ -31308,7 +31696,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": [],
     "data": true,
     "settings": {},
@@ -31322,11 +31710,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W706",
@@ -31547,11 +31942,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"missing.json\" cannot be read.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "missing.json"
      },
      {
       "code": "W706",
@@ -31573,7 +31969,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -31587,11 +31983,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W706",
@@ -31619,11 +32022,12 @@
     "settings": {},
     "diagnostics": [
      {
-      "code": "W701",
+      "code": "W703",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file name \"../x.json\" is absolute, leaves the project directory or is malformed.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a relative path inside the project directory, separated by \"/\"",
+      "got": "../x.json"
      },
      {
       "code": "W701",
@@ -31645,7 +32049,7 @@
      "version": "0.1.0",
      "changed": []
     },
-    "tokens": null,
+    "tokens": [],
     "actions": null,
     "data": false,
     "settings": {},
@@ -31659,11 +32063,18 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W705",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
-      "path": "#/tokens",
-      "expected": "an array of token file names"
+      "message": "A resolver document must have \"version\": \"2025.10\".",
+      "path": "#/tokens/version",
+      "expected": "\"version\": \"2025.10\""
+     },
+     {
+      "code": "W705",
+      "severity": "error",
+      "message": "A resolver document must have a `resolutionOrder` array.",
+      "path": "#/tokens/resolutionOrder",
+      "expected": "\"resolutionOrder\": [ … ]"
      },
      {
       "code": "W701",
@@ -32124,9 +32535,9 @@
      {
       "code": "W701",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "\"tokens\" must be an array of token file names or a resolver file name.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "an array of token file names or a resolver file name"
      },
      {
       "code": "W706",
@@ -32397,11 +32808,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"missing.json\" cannot be read.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "missing.json"
      }
     ]
    }
@@ -32512,11 +32924,12 @@
       "got": "extra"
      },
      {
-      "code": "W701",
+      "code": "W704",
       "severity": "error",
-      "message": "\"tokens\" must be an array of token file names.",
+      "message": "The file \"broken.json\" is not JSON.",
       "path": "#/tokens",
-      "expected": "an array of token file names"
+      "expected": "a readable JSON file",
+      "got": "broken.json"
      },
      {
       "code": "W701",

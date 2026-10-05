@@ -102,6 +102,8 @@ $ grep -o 'gap:[0-9a-z]*' weft-tour/wide.html
 gap:40px
 ```
 
+When the tokens come from a resolver with light and dark themes ([Projects](projects.md#light-and-dark-a-resolver)), the page is drawn with one of them: `--appearance dark` (or `render.appearance`) picks it, the default context applies otherwise, and the page declares that `color-scheme`, so the browser draws its own parts to match.
+
 More in [Catalog and tokens](catalog-and-tokens.md).
 
 ## Inside a React app

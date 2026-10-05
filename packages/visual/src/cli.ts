@@ -10,6 +10,8 @@ const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 export const CORPUS = join(ROOT, "corpus");
 /** The SwiftPM sample of the Xcode plugin: a project with shared tokens and a custom component. */
 export const SAMPLE = join(ROOT, "plugins/xcode/Examples/PackageSample");
+/** The example project: a resolver with a light and a dark theme. */
+export const EXAMPLE = join(ROOT, "examples/project");
 // Built by `moon run root:cli` into a target directory of its own (see moon.yml).
 const CLI = join(ROOT, "target/visual/debug/weft");
 

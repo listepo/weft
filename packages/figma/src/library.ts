@@ -3,7 +3,7 @@
 // the design tokens. Running it again finds what is there by plugin data and adds only what is
 // missing, so a designer's changes to existing components survive. What each component draws is
 // shared with the other tools (`drawing` of @weft/design-tool); this file draws it with Figma nodes.
-import type { Token } from "@weft/catalog";
+import type { Token, TokenModifier } from "@weft/catalog";
 import type { Catalog, ComponentDef } from "@weft/core";
 import {
   combinations,
@@ -14,8 +14,6 @@ import {
   libraryTag,
   readMark,
   TOKEN_COLLECTION,
-  tokenColor,
-  tokenPx,
   variantAxes,
   variantName,
   type BoxDrawing,
@@ -35,11 +33,11 @@ import type {
   FLayout,
   FNode,
   FPage,
-  FRGBA,
   FSolid,
   FText,
   FVariable,
 } from "./api.ts";
+import { variableValue, writeModes } from "./modes.ts";
 import { variableName } from "./tokens.ts";
 
 export type KindEntry = SharedKindEntry<FComponent>;
@@ -48,6 +46,8 @@ export type Library = {
   page: FPage;
   variables: Map<string, FVariable>;
   kinds: Map<string, KindEntry>;
+  /** What the build skipped without failing, such as modes the file's plan does not allow. */
+  notes: string[];
 };
 
 export const FONT: { regular: FFont; bold: FFont } = {
@@ -63,6 +63,7 @@ export async function ensureLibrary(
   api: FigmaApi,
   catalog: Catalog,
   tokens: ReadonlyMap<string, Token>,
+  modifier?: TokenModifier,
 ): Promise<Library> {
   await loadFonts(api);
   const tag = libraryTag(catalog);
@@ -73,10 +74,12 @@ export async function ensureLibrary(
   }
   page.setPluginData(KEY.library, tag);
   await page.loadAsync();
+  const notes: string[] = [];
   const library: Library = {
     page,
-    variables: await ensureVariables(api, tokens),
+    variables: await ensureVariables(api, tokens, modifier, notes),
     kinds: new Map(),
+    notes,
   };
 
   let board = page.children.find(
@@ -118,6 +121,8 @@ export async function ensureLibrary(
 async function ensureVariables(
   api: FigmaApi,
   tokens: ReadonlyMap<string, Token>,
+  modifier: TokenModifier | undefined,
+  notes: string[],
 ): Promise<Map<string, FVariable>> {
   const collections = await api.variables.getLocalVariableCollectionsAsync();
   let collection: FCollection | undefined = collections.find(
@@ -144,16 +149,8 @@ async function ensureVariables(
     }
     variable.setValueForMode(collection.defaultModeId, value.value);
   }
+  if (modifier !== undefined) writeModes(collection, variables, modifier, notes);
   return variables;
-}
-
-function variableValue(
-  token: Token,
-): { type: "FLOAT"; value: number } | { type: "COLOR"; value: FRGBA } | undefined {
-  const px = tokenPx(token);
-  if (px !== undefined) return { type: "FLOAT", value: px };
-  const color = tokenColor(token);
-  return color === undefined ? undefined : { type: "COLOR", value: color };
 }
 
 function createKind(

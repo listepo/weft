@@ -1,10 +1,9 @@
 // The file side of SPEC §10 for Node tools: finding the project above a screen and reading the
 // files it names. Kept apart from the pure loader so that browser and MCP code never pull in fs.
 import { readFileSync, statSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import type { Diagnostic, Mode } from "@weft/core";
-import { loadProjectText, PROJECT_FILE, type ProjectResult } from "./project.ts";
-import type { Token } from "./tokens.ts";
+import { loadProjectText, PROJECT_FILE, type Project, type ProjectResult } from "./project.ts";
 
 /** SPEC §10.1: the first `weft.json` in the screen's directory or one above it. */
 export function findProject(screen: string): string | undefined {
@@ -51,21 +50,39 @@ export function readProject(file: string, options: ReadOptions = {}): ProjectRes
 }
 
 /**
- * Token files named by a setting such as `render.tokens`, layered as the project's own `tokens`
+ * Token files named by a setting such as `render.tokens` (or one resolver document), layered as the project's own `tokens`
  * are (SPEC §10.3). The loader does the layering, so its diagnostics point at `pointer/tokens/…`.
  */
 export function readTokenLayers(
   projectFile: string,
-  names: readonly string[],
+  names: readonly string[] | string,
   pointer: string,
   options: ReadOptions = {},
-): { tokens?: Map<string, Token> | undefined; diagnostics: Diagnostic[] } {
+): Pick<Project, "tokens" | "modifiers" | "appearance"> & { diagnostics: Diagnostic[] } {
   const { project, diagnostics } = loadProjectText(JSON.stringify({ tokens: names }), {
     mode: options.mode,
     prefix: pointer,
     read: reader(projectFile, options.maxChars),
   });
-  return { tokens: project.tokens, diagnostics };
+  const { tokens, modifiers, appearance } = project;
+  return { tokens, modifiers, appearance, diagnostics };
+}
+
+/**
+ * A DTCG resolver named on the command line (`--tokens`): it loads as the `tokens` of a project
+ * beside it, so its references follow the same rules (SPEC §10.3), and its diagnostics point into
+ * the resolver file itself.
+ */
+export function readResolver(
+  file: string,
+  options: ReadOptions = {},
+): ReturnType<typeof readTokenLayers> {
+  const layers = readTokenLayers(file, basename(file), "#", options);
+  const diagnostics = layers.diagnostics.map((d) => ({
+    ...d,
+    path: d.path.replace(/^#\/tokens(?=\/|$)/, "#"),
+  }));
+  return { ...layers, diagnostics };
 }
 
 function reader(projectFile: string, maxChars: number | undefined) {

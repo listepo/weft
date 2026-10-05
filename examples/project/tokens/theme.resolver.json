@@ -1,0 +1,21 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/resolver.json",
+  "version": "2025.10",
+  "description": "The shop's tokens: the base and brand layers, then the light or dark theme.",
+  "sets": {
+    "foundation": {
+      "sources": [{ "$ref": "base.tokens.json" }, { "$ref": "brand.tokens.json" }]
+    }
+  },
+  "modifiers": {
+    "theme": {
+      "description": "The system appearance.",
+      "contexts": {
+        "light": [],
+        "dark": [{ "$ref": "dark.tokens.json" }]
+      },
+      "default": "light"
+    }
+  },
+  "resolutionOrder": [{ "$ref": "#/sets/foundation" }, { "$ref": "#/modifiers/theme" }]
+}

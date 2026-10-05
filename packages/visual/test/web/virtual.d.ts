@@ -1,4 +1,16 @@
 // The modules `src/plugin.ts` serves to the browser tests.
+declare module "virtual:weft-appearance" {
+  export const example: {
+    data: unknown;
+    html: string;
+    css: string;
+    reference: { light: string; dark: string };
+  };
+}
+declare module "virtual:weft-appearance-component" {
+  const component: unknown;
+  export default component;
+}
 declare module "virtual:weft-screens" {
   type Component = { default: unknown };
   export const screens: {

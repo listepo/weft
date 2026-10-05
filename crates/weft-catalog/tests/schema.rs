@@ -39,6 +39,9 @@ fn example(schema: &Json, defs: &Json) -> Json {
     if let Some(values) = schema.get("enum") {
         return values[0].clone();
     }
+    if let Some(choices) = schema.get("oneOf").and_then(Json::as_array) {
+        return example(&choices[0], defs);
+    }
     match schema.get("type").and_then(Json::as_str) {
         Some("object") => match schema.get("properties").and_then(Json::as_object) {
             Some(properties) => properties

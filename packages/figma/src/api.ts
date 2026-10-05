@@ -169,6 +169,10 @@ export interface FCollection extends FPluginData {
   readonly id: string;
   name: string;
   readonly defaultModeId: string;
+  readonly modes: ReadonlyArray<{ readonly modeId: string; readonly name: string }>;
+  /** Throws `in addMode: Limited to N modes only` when the file's plan allows no more modes. */
+  addMode(name: string): string;
+  renameMode(modeId: string, newName: string): void;
 }
 
 export interface FVariables {

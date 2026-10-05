@@ -3,7 +3,7 @@
   <each id="lines" as="line" in="{$.cart.items}">
     <stack id="line" direction="row" gap="{token.space.sm}">
       <text id="line-name" text="{$line.name}"/>
-      <rating id="line-score" label="Customer score" value="{$line.score}"/>
+      <rating id="line-score" label="Customer score" value="{$line.score}" color="{token.color.star}"/>
     </stack>
   </each>
   <text id="empty" tone="muted" hidden="{!$.cart.empty}">Nothing to review.</text>

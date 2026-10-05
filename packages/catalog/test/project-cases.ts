@@ -103,7 +103,15 @@ export const projectCases: Record<string, ProjectCase> = {
     project: project({ tokens: ["tokens/brand.tokens.json"] }),
     codes: ["W705", "W705"],
   },
-  "tokens that are not an array": { project: project({ tokens: "x" }), codes: ["W701"] },
+  "tokens that are neither an array nor a file name": {
+    project: project({ tokens: 7 }),
+    codes: ["W701"],
+  },
+  "a resolver file that cannot be read": { project: project({ tokens: "x" }), codes: ["W704"] },
+  "a token file named alone is read as a resolver": {
+    project: project({ tokens: "tokens/base.tokens.json" }),
+    codes: ["W705", "W705"],
+  },
   "too many token files": {
     project: project({ tokens: Array.from({ length: 65 }, () => "tokens/base.tokens.json") }),
     codes: ["W701"],
@@ -281,7 +289,7 @@ export const projectCases: Record<string, ProjectCase> = {
     project: project({
       validate: { mode: "loose" },
       format: { write: "yes" },
-      render: { data: 7, tokens: "a.json", outDir: "../out" },
+      render: { data: 7, tokens: 7, outDir: "../out" },
       export: [],
       mcp: { limits: { markupChars: 0, patches: 2.5, diagnostics: -1 } },
       plugins: { a: 1 },

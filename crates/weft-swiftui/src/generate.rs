@@ -9,7 +9,7 @@ use std::collections::{HashMap, HashSet};
 
 use indexmap::IndexMap;
 use serde_json::Value as Json;
-use weft_catalog::{Token, token_types};
+use weft_catalog::{Appearance, Token, token_types};
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, Mode, Node, PropType,
     ValidateOptions, Value, has_errors, validate_document,
@@ -35,6 +35,10 @@ pub struct GenerateOptions<'a> {
     /// Sample data: the model gets a memberwise initializer and a `sample` built from this data,
     /// which `#Preview` shows. Without it the file is as before.
     pub data: Option<&'a Json>,
+    /// The light and dark tokens of the project's resolver (`weft_catalog::appearance`): a colour
+    /// that differs follows the system appearance in the screen's own theme. The shared tokens
+    /// take it in `generate_tokens` instead.
+    pub appearance: Option<Appearance<'a>>,
 }
 
 #[derive(Debug)]
@@ -97,6 +101,7 @@ pub fn generate(
     g.problems = problems;
     g.shared_tokens = options.shared_tokens;
     g.data = options.data;
+    g.appearance = options.appearance;
     let text = g.file(&document.root, options.tokens);
     if g.problems.is_empty() {
         Ok(text)
@@ -237,6 +242,7 @@ struct Gen<'a> {
     custom: IndexMap<String, String>,
     problems: Vec<Unsupported>,
     data: Option<&'a Json>,
+    appearance: Option<Appearance<'a>>,
 }
 
 impl<'a> Gen<'a> {
@@ -255,6 +261,7 @@ impl<'a> Gen<'a> {
             custom: IndexMap::new(),
             problems: vec![],
             data: None,
+            appearance: None,
         };
         g.survey(root);
         g
@@ -362,6 +369,7 @@ impl<'a> Gen<'a> {
                 &format!("{p}Theme"),
                 used.iter().map(String::as_str),
                 tokens,
+                self.appearance,
                 &mut self.problems,
             ));
             out.push(String::new());

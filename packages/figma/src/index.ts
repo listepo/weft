@@ -1,6 +1,7 @@
 export type * from "./api.ts";
 export { buildScreen, type BuildOptions } from "./build.ts";
 export { ensureLibrary, type KindEntry, type Library } from "./library.ts";
+export { readModes } from "./modes.ts";
 export {
   isRawText,
   readLayers,

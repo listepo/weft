@@ -55,4 +55,10 @@ describe("the plugin UI", () => {
     reply({ type: "built", id: "1" });
     assert.equal(byId("status").textContent, "Built.");
   });
+
+  test("shows what a build skipped", () => {
+    reply({ type: "built", id: "1", notes: ['The theme context "dark" has no Figma mode'] });
+    assert.equal(byId("status").textContent, "Built.");
+    assert.ok(byId("notes").items.some((i) => i.textContent.includes('"dark"')));
+  });
 });

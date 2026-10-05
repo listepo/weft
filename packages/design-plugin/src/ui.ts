@@ -46,9 +46,9 @@ export function startUi(transport: Transport): void {
     element("status").textContent = text;
   };
   const describe = (d: Diagnostic) => `${d.severity} ${d.code}: ${d.message}`;
-  const showNotes = (items: readonly string[]) => {
+  const showNotes = (items: readonly string[], keep = false) => {
     const list = element("notes");
-    list.replaceChildren();
+    if (!keep) list.replaceChildren();
     for (const text of items) {
       const li = document.createElement("li");
       li.textContent = text;
@@ -96,6 +96,8 @@ export function startUi(transport: Transport): void {
     if (!isReply(reply)) return;
     if (reply.type === "built") {
       setStatus("Built.");
+      // Below the parse's warnings, which describe the same build.
+      showNotes(reply.notes ?? [], true);
     } else if (reply.type === "exported") {
       const file = finishExport(reply, options);
       fileName = file.fileName;

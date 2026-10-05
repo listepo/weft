@@ -173,8 +173,8 @@ pub fn compile_data_schema(schema: Option<String>) -> Result<String, JsError> {
 }
 
 #[wasm_bindgen(js_name = projectFiles)]
-pub fn project_files(text: &str) -> Result<String, JsError> {
-    Ok(api::project_files(text)?)
+pub fn project_files(text: &str, files: Option<String>) -> Result<String, JsError> {
+    Ok(api::project_files(text, files.as_deref())?)
 }
 
 #[wasm_bindgen(js_name = loadProject)]

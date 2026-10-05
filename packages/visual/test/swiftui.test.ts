@@ -6,7 +6,8 @@
 // `sample`, the data the React screenshots show, so the screenshot pins the layout, controls and
 // text with real content in them. One more screen comes from the Xcode plugin's sample project:
 // it reads the project's shared `WeftTokens` and calls `RatingView`, the view the app writes for
-// its own `rating` kind.
+// its own `rating` kind. The example project's review screen, whose resolver has a light and a
+// dark theme, is shot in both appearances: its star colour follows the system (T45).
 //
 // The simulator is pinned (device and runtime below), since a baseline is only meaningful on the
 // runtime that drew it. Without macOS, Xcode or that simulator the suite is skipped and says why.
@@ -16,7 +17,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { matchBaseline } from "../src/baseline.ts";
-import { CORPUS, SAMPLE, cli, weft } from "../src/cli.ts";
+import { CORPUS, EXAMPLE, SAMPLE, cli, weft } from "../src/cli.ts";
 import { compare } from "../src/compare.ts";
 
 const DEVICE_TYPE = "com.apple.CoreSimulator.SimDeviceType.iPhone-17";
@@ -28,6 +29,9 @@ const TARGET = "arm64-apple-ios17.0-simulator";
 const REFUSED = new Set(["leaderboard"]);
 // The sample project's screen, named apart from the corpus screens it is listed with.
 const SAMPLE_SCREEN = "sample-review";
+// The example project's review screen, with its own theme, in either appearance.
+const EXAMPLE_SCREEN = "example-review";
+const EXAMPLE_DARK = "example-review-dark";
 
 const run = (cmd: string, args: string[]) =>
   spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
@@ -91,8 +95,11 @@ struct WeftScreensApp: App {
     var body: some Scene {
         WindowGroup {
             WeftScreens.view(ProcessInfo.processInfo.environment["WEFT_SCREEN"] ?? "")
-                // Whatever the simulator is set to, every screenshot is drawn the same way.
-                .preferredColorScheme(.light)
+                // Whatever the simulator is set to, every screenshot is drawn the same way: light
+                // unless the test asks for dark.
+                .preferredColorScheme(
+                    ProcessInfo.processInfo.environment["WEFT_SCHEME"] == "dark" ? .dark : .light
+                )
                 .dynamicTypeSize(.large)
                 .environment(\\.locale, Locale(identifier: "en_US"))
                 .statusBarHidden(true)
@@ -159,6 +166,22 @@ function sampleSources(dir: string): { screen: string; support: Map<string, stri
   return { screen, support };
 }
 
+/**
+ * The example project's review screen with its sample data and a theme of its own, whose colours
+ * that differ in the dark theme follow the appearance. It calls the same `RatingView`.
+ */
+function exampleSource(): string {
+  return weft(
+    "swiftui",
+    join(EXAMPLE, "screens/review.weft"),
+    "--project",
+    join(EXAMPLE, "weft.json"),
+    "--no-shared-tokens",
+    "--data",
+    join(EXAMPLE, "sample.data.json"),
+  );
+}
+
 /** Writes and compiles the app with every screen in it; returns the `.app` path. */
 function buildApp(dir: string, sources: Map<string, string>, support: Map<string, string>): string {
   const swift = join(dir, "src");
@@ -205,6 +228,8 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
       .map((e) => e.name)
       .sort(),
     SAMPLE_SCREEN,
+    EXAMPLE_SCREEN,
+    EXAMPLE_DARK,
   ];
   let dir = "";
   let booted = false;
@@ -212,7 +237,8 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
   beforeAll(() => {
     dir = mkdtempSync(join(tmpdir(), "weft-swiftui-"));
     const sources = new Map<string, string>();
-    for (const name of names.filter((n) => n !== SAMPLE_SCREEN)) {
+    const own = new Set([SAMPLE_SCREEN, EXAMPLE_SCREEN, EXAMPLE_DARK]);
+    for (const name of names.filter((n) => !own.has(n))) {
       sources.set(
         name,
         cli(
@@ -226,6 +252,7 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     }
     const sample = sampleSources(dir);
     sources.set(SAMPLE_SCREEN, sample.screen);
+    sources.set(EXAMPLE_SCREEN, exampleSource());
     const login = sources.get("login")!;
     for (const [name, mutate] of Object.entries(MUTANTS)) sources.set(name, mutate(login));
     const app = buildApp(dir, sources, sample.support);
@@ -250,8 +277,10 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
 
   /** Launches `name` and screenshots it once two screenshots in a row agree. */
   async function shoot(name: string): Promise<Uint8Array> {
+    // The dark shot is the same screen in the other appearance, not another build of it.
+    const [screen, scheme] = name === EXAMPLE_DARK ? [EXAMPLE_SCREEN, "dark"] : [name, "light"];
     execFileSync("xcrun", ["simctl", "launch", "--terminate-running-process", udid, BUNDLE], {
-      env: { ...process.env, SIMCTL_CHILD_WEFT_SCREEN: name },
+      env: { ...process.env, SIMCTL_CHILD_WEFT_SCREEN: screen, SIMCTL_CHILD_WEFT_SCHEME: scheme },
       stdio: "ignore",
     });
     const path = join(dir, `${name}.png`);
@@ -299,6 +328,12 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
       }
     });
   }
+
+  test("the example screen follows the appearance", async () => {
+    const light = await shot(EXAMPLE_SCREEN);
+    const dark = await shot(EXAMPLE_DARK);
+    expect(compare(light, dark, "appearance/swiftui-example-review").differing).toBeGreaterThan(0);
+  });
 
   for (const mutant of Object.keys(MUTANTS)) {
     test(`${mutant} is caught against login and its baseline`, async () => {

@@ -27,7 +27,11 @@ export function tokenPx(token: Token | undefined): number | undefined {
 }
 
 export function tokenColor(token: Token | undefined): RGBA | undefined {
-  if (token?.type !== "color" || !isRecord(token.value)) return undefined;
+  if (token?.type !== "color") return undefined;
+  // The format's colour is an object, but hand-written token files often keep the older hex
+  // string, which the loader accepts; skipping it would leave such a colour out of the library.
+  if (typeof token.value === "string") return fromHex(HEX.exec(token.value));
+  if (!isRecord(token.value)) return undefined;
   const v = token.value;
   const alpha = typeof v["alpha"] === "number" ? v["alpha"] : 1;
   const c = v["components"];
@@ -40,11 +44,22 @@ export function tokenColor(token: Token | undefined): RGBA | undefined {
     const [r, g, b] = c as [number, number, number];
     return { r, g, b, a: alpha };
   }
-  const hex = typeof v["hex"] === "string" ? HEX.exec(v["hex"]) : null;
+  const hex = fromHex(typeof v["hex"] === "string" ? HEX.exec(v["hex"]) : null);
+  return hex === undefined ? undefined : { ...hex, a: alpha };
+}
+
+function fromHex(hex: RegExpExecArray | null): RGBA | undefined {
   if (hex === null) return undefined;
   const n = Number.parseInt(hex[1] ?? "", 16);
-  return { r: ((n >> 16) & 255) / 255, g: ((n >> 8) & 255) / 255, b: (n & 255) / 255, a: alpha };
+  const a = hex[2] === undefined ? 1 : Number.parseInt(hex[2], 16) / 255;
+  return { r: ((n >> 16) & 255) / 255, g: ((n >> 8) & 255) / 255, b: (n & 255) / 255, a };
 }
+
+const channel = (c: number) => Math.round(c * 255);
+
+/** `#rrggbb`, the 8-bit colour both tools show for channels from 0 to 1. */
+export const hexOf = (c: RGB): string =>
+  `#${[c.r, c.g, c.b].map((v) => channel(v).toString(16).padStart(2, "0")).join("")}`;
 
 /** The group of a token path: `space` for `space.md`. */
 export const tokenGroup = (path: string): string =>

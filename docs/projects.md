@@ -15,8 +15,10 @@ examples/project/
 ├── data.schema.json      the shape of the app's data
 ├── sample.data.json      data to preview the screens with
 ├── tokens/
-│   ├── base.tokens.json  colours and spacing
-│   └── brand.tokens.json the brand colour, layered over the base
+│   ├── theme.resolver.json the layers below, then a light or dark theme
+│   ├── base.tokens.json    colours, spacing and the body text
+│   ├── brand.tokens.json   the brand colour, layered over the base
+│   └── dark.tokens.json    the brand colour of the dark theme
 └── screens/
     ├── cart.weft
     └── review.weft
@@ -25,7 +27,7 @@ examples/project/
 ```json
 {
   "$schema": "../../schemas/weft.schema.json",
-  "tokens": ["tokens/base.tokens.json", "tokens/brand.tokens.json"],
+  "tokens": "tokens/theme.resolver.json",
   "catalog": "catalog.json",
   "actions": ["cart.checkout", "cart.remove", "nav.back"],
   "data": "data.schema.json",
@@ -38,7 +40,7 @@ The first five members are the shared resources:
 
 | Member | What it is |
 | --- | --- |
-| `tokens` | DTCG token files, in layer order: a later file overrides an earlier one, and aliases are resolved after the merge. |
+| `tokens` | DTCG token files, in layer order: a later file overrides an earlier one, and aliases are resolved after the merge. Or one DTCG resolver file, for tokens with modes such as light and dark ([below](#light-and-dark-a-resolver)). |
 | `catalog` | An extension of the core catalog: new components, and new values or props on core ones. It may widen the core catalog, never narrow it. |
 | `actions` | The action names the app handles. An `on-*` value outside the list is an error. |
 | `data` | A JSON Schema (a 2020-12 subset) of the app's data. Bindings are checked against it, names and types. |
@@ -72,6 +74,35 @@ exit 1
 $ rm examples/project/screens/typo.weft
 ```
 
+## Light and dark: a resolver
+
+Tokens that differ by mode (light and dark, compact and roomy, two brands) live in a [DTCG resolver](https://www.designtokens.org/TR/2025.10/resolver/) file, which `tokens` names instead of a list. The example project's `tokens/theme.resolver.json` layers the base and brand files as before, then adds the dark theme's file when the theme is dark:
+
+```json
+{
+  "version": "2025.10",
+  "sets": {
+    "foundation": {
+      "sources": [{ "$ref": "base.tokens.json" }, { "$ref": "brand.tokens.json" }]
+    }
+  },
+  "modifiers": {
+    "theme": {
+      "contexts": { "light": [], "dark": [{ "$ref": "dark.tokens.json" }] },
+      "default": "light"
+    }
+  },
+  "resolutionOrder": [{ "$ref": "#/sets/foundation" }, { "$ref": "#/modifiers/theme" }]
+}
+```
+
+- Validation uses the default of each modifier (its first context when it names none).
+- A modifier with `light` and `dark` contexts is the appearance: generated SwiftUI colours, pages and stylesheets follow the system's light or dark mode.
+- File references are relative to the resolver and stay inside the project. Every problem is `W705` (or `W703` and `W704` for files) with a pointer into the resolver, and the rest still loads.
+- A plain list of token files works as before.
+- In Figma the contexts of a modifier become variable modes, and in Penpot token themes, when the plugin is given that modifier; exporting from the file gives the modes back as a resolver document (`@weft/figma`, `@weft/penpot`).
+- React and SolidJS components read their tokens from CSS custom properties: `weft css-tokens` writes them as `weft-tokens.css`, light values first and the dark ones under `prefers-color-scheme: dark`. Link it once in the app.
+
 ## Choosing the project
 
 Every tool that reads a screen looks for the first `weft.json` in the screen's folder or above it.
@@ -91,8 +122,9 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `validate.mode` | `"lenient"` | `"strict"` makes unknown elements and attributes errors in `weft validate` (`--lenient` overrides it), and is the default of `strict` in the MCP server started with the project. |
 | `format.write` | `false` | `weft fmt` rewrites the file instead of printing it (`--print` overrides it). |
 | `render.data` | none | Sample data for rendered pages (`--data` overrides it). |
-| `render.tokens` | the project's `tokens` | Token files for rendered pages, layered the same way (`--tokens` overrides it). |
+| `render.tokens` | the project's `tokens` | Token files for rendered pages, layered the same way, or one resolver file (`--tokens` overrides it). |
 | `render.outDir` | next to the screen | Where rendered pages go (an output path overrides it). |
+| `render.appearance` | the default context | `"light"` or `"dark"`: which theme of a resolver's light and dark modifier rendered pages use (`--appearance` overrides it). |
 | `export.html.outDir` | standard output | Where `weft html` writes `<screen>.html` (`--out-dir` overrides it). |
 | `export.html.source` | `false` | The page keeps the screen in a leading comment, so `weft import-html` gives it back exactly (`--no-source` overrides it). Off by default: a deployed page would publish it. |
 | `export.html.data` | none | Sample data `weft html` shows in the page instead of keeping bindings as a template (`--data` overrides it). |
@@ -103,6 +135,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `import.html.outDir` | next to the page | Where screens imported from HTML go; `weft import-html` prints when it is absent (`--out-dir` overrides it). |
 | `import.react.outDir`, `import.solid.outDir` | standard output | Where `weft import-react` and `weft import-solid` write `<file>.weft` (`--out-dir` overrides it). |
 | `export.swiftui.outDir` | standard output | Where `weft swiftui` writes `<screen>.swift` and `weft swiftui-tokens` writes `WeftTokens.swift`, and the Xcode command plugin's `export` (next to the screen when absent; `--out-dir` overrides it). The build tool plugin ignores it and writes into the build folder. |
+| `export.css.outDir` | standard output | Where `weft css-tokens` writes `weft-tokens.css`, the stylesheet with the `--weft-…` properties that React and SolidJS components read (`--out-dir` overrides it). |
 | `export.swiftui.sharedTokens` | `true` | Screens read the tokens from one shared `WeftTokens.swift` instead of each carrying a theme with the tokens it uses (`--shared-tokens` and `--no-shared-tokens` override it). The Xcode build tool plugin writes `WeftTokens.swift` once per target. |
 | `export.swiftui.data` | none | Sample data `weft swiftui` builds the model's `sample` from, for `#Preview` (`--data` overrides it). |
 | `import.swiftui.outDir` | standard output | Where `weft import-swiftui` writes `<file>.weft`, and the Xcode command plugin's `import` (next to the view when absent; `--out-dir` overrides it). |

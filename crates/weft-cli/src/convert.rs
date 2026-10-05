@@ -7,11 +7,15 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
 use indexmap::IndexMap;
-use weft_catalog::{DEFAULT_TOKENS_JSON, Project, Token, core_catalog, load_tokens};
+use weft_catalog::{
+    DEFAULT_TOKENS_JSON, Project, ProjectOptions, Token, TokenModifier, core_catalog, is_resolver,
+    load_project, load_tokens,
+};
 use weft_core::{Catalog, Document, Mode, ParseOptions, has_errors, parse, parse_json, serialize};
 use weft_import::ImportResult;
 
-use crate::{DIAGNOSTICS, ProjectArgs, load_catalog, load_project, print, project_file, read};
+use crate::load_project as load_project_file;
+use crate::{DIAGNOSTICS, ProjectArgs, load_catalog, print, project_file, read};
 
 /// The project for `file`, with the directory its file names are relative to. Its diagnostics go
 /// to stderr: stdout carries the output.
@@ -19,7 +23,7 @@ pub fn project(file: &Path, args: ProjectArgs) -> Result<(Option<Project>, Optio
     let Some(project_path) = project_file(file, args) else {
         return Ok((None, None));
     };
-    let (project, diagnostics) = load_project(&project_path, Mode::Lenient)?;
+    let (project, diagnostics) = load_project_file(&project_path, Mode::Lenient)?;
     print(&project_path, &diagnostics, &mut std::io::stderr())?;
     let dir = project_path
         .parent()
@@ -35,24 +39,75 @@ pub fn catalog(explicit: Option<&Path>, project: Option<&Project>) -> Result<Cat
     }
 }
 
-pub fn tokens(
-    explicit: Option<&Path>,
-    project: Option<&Project>,
-) -> Result<IndexMap<String, Token>> {
+/// The tokens a generator works with: the default context, and every context of each modifier
+/// when they come from a resolver (SPEC §10.3).
+pub struct TokenSet {
+    pub tokens: IndexMap<String, Token>,
+    pub modifiers: Vec<TokenModifier>,
+}
+
+/// `--tokens` (a token file or a resolver), else the project's, else the default tokens.
+pub fn tokens(explicit: Option<&Path>, project: Option<&Project>) -> Result<TokenSet> {
     if let Some(file) = explicit {
         let json = parse_json(&read(file)?)
             .with_context(|| format!("tokens {} are not JSON", file.display()))?;
+        if is_resolver(&json) {
+            return resolver(file);
+        }
         let loaded = load_tokens(&json);
         for p in &loaded.problems {
             eprintln!("{}:{} {:?} {}", file.display(), p.path, p.code, p.message);
         }
-        return Ok(loaded.tokens);
+        return Ok(TokenSet {
+            tokens: loaded.tokens,
+            modifiers: vec![],
+        });
     }
-    if let Some(tokens) = project.and_then(|p| p.tokens.clone()) {
-        return Ok(tokens);
+    if let Some(project) = project
+        && let Some(tokens) = project.tokens.clone()
+    {
+        return Ok(TokenSet {
+            tokens,
+            modifiers: project.modifiers.clone(),
+        });
     }
     let json = parse_json(DEFAULT_TOKENS_JSON).context("the embedded default tokens are broken")?;
-    Ok(load_tokens(&json).tokens)
+    Ok(TokenSet {
+        tokens: load_tokens(&json).tokens,
+        modifiers: vec![],
+    })
+}
+
+/// A resolver given as `--tokens` loads as the `tokens` of a project beside it, so its references
+/// follow the same rules (SPEC §10.3); its diagnostics point into the resolver file itself.
+fn resolver(file: &Path) -> Result<TokenSet> {
+    let dir = file.parent().unwrap_or(Path::new("."));
+    let name = file
+        .file_name()
+        .and_then(|n| n.to_str())
+        .with_context(|| format!("{} has no file name", file.display()))?;
+    let read_member = |member: &str| std::fs::read_to_string(dir.join(member)).ok();
+    let loaded = load_project(
+        &serde_json::json!({ "tokens": name }),
+        &ProjectOptions {
+            read: Some(&read_member),
+            ..Default::default()
+        },
+    )
+    .context("the embedded core catalog is broken")?;
+    let diagnostics: Vec<_> = loaded
+        .diagnostics
+        .into_iter()
+        .map(|mut d| {
+            d.path = d.path.replacen("#/tokens", "#", 1);
+            d
+        })
+        .collect();
+    print(file, &diagnostics, &mut std::io::stderr())?;
+    Ok(TokenSet {
+        tokens: loaded.project.tokens.unwrap_or_default(),
+        modifiers: loaded.project.modifiers,
+    })
 }
 
 /// Sample data for a generator: `--data` (relative to the working directory), else the project's

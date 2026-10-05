@@ -10,9 +10,13 @@ import {
   handleRequest,
   layoutView,
   MAX_TOKENS,
+  modeToken,
+  resolverDocument,
+  tokenColor,
   variantAxes,
   type PluginTool,
 } from "../src/index.ts";
+import { loadResolver } from "./modes.ts";
 
 const document = { weft: "0.1", root: { kind: "screen", id: "s" } };
 
@@ -131,5 +135,54 @@ describe("a search below a layer", () => {
     let shallow: T = { name: "target" };
     for (let i = 0; i < 3; i++) shallow = { name: `level${i}`, children: [shallow] };
     assert.equal(find(shallow)?.name, "target");
+  });
+});
+
+describe("token modes", () => {
+  test("a hex string colour is read, with its alpha", () => {
+    assert.deepEqual(tokenColor({ type: "color", value: "#ff000080" }), {
+      r: 1,
+      g: 0,
+      b: 0,
+      a: 128 / 255,
+    });
+    assert.equal(tokenColor({ type: "color", value: "red" }), undefined);
+  });
+
+  test("a value from a file becomes a token only when it is well formed", () => {
+    const rem = { type: "dimension", value: { value: 1, unit: "rem" } };
+    assert.equal(modeToken(rem, 16), rem);
+    assert.deepEqual(modeToken(rem, 20), {
+      type: "dimension",
+      value: { value: 20, unit: "px" },
+    });
+    assert.deepEqual(modeToken({ type: "number", value: 1 }, 2), { type: "number", value: 2 });
+    for (const bad of [Number.NaN, "16", null, { r: 2, g: 0, b: 0 }, { r: 0, g: 0 }])
+      assert.equal(modeToken(rem, bad), undefined, JSON.stringify(bad));
+  });
+
+  test("names that are no DTCG names are left out; the modifier's pointer is escaped", () => {
+    const token = { type: "number", value: 1 };
+    const document = resolverDocument({
+      name: "a/b~c",
+      default: "one",
+      contexts: new Map([
+        [
+          "one",
+          new Map([
+            ["n", token],
+            ["$bad", token],
+            ["x.{y}", token],
+            ["n.deeper", token],
+          ]),
+        ],
+        ["__proto__", new Map([["n", { type: "number", value: 2 }]])],
+      ]),
+    });
+    const [modifier] = loadResolver(document);
+    assert.equal(modifier?.name, "a/b~c");
+    assert.deepEqual([...(modifier?.contexts.get("one")?.keys() ?? [])], ["n"]);
+    assert.deepEqual(modifier?.contexts.get("__proto__")?.get("n"), { type: "number", value: 2 });
+    assert.equal(({} as Record<string, unknown>)["n"], undefined);
   });
 });

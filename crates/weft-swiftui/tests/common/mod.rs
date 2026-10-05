@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use indexmap::IndexMap;
 use weft_catalog::{
-    ProjectOptions, Token, core_catalog, load_project_text, load_tokens, token_types,
+    ProjectOptions, Token, TokenModifier, core_catalog, load_project_text, load_tokens, token_types,
 };
 use weft_core::{Catalog, Document, Mode, ParseOptions, parse, parse_json};
 
@@ -119,6 +119,8 @@ pub fn type_name(name: &str) -> String {
 pub struct Project {
     pub catalog: Catalog,
     pub tokens: IndexMap<String, Token>,
+    /// The modifiers of the project's resolver; `examples/project` has a light and dark theme.
+    pub modifiers: Vec<TokenModifier>,
     pub screens: Vec<Screen>,
 }
 
@@ -169,6 +171,7 @@ fn project_at(dir: PathBuf, prefix: &str) -> Project {
     Project {
         catalog: load.project.catalog,
         tokens: load.project.tokens.unwrap(),
+        modifiers: load.project.modifiers,
         screens,
     }
 }

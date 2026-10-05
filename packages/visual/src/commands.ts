@@ -23,11 +23,16 @@ const compareElements: BrowserCommand<[expected: string, actual: string, label: 
 ): Promise<Comparison> =>
   compare(await shoot(context, expected), await shoot(context, actual), label);
 
+/** Emulates `prefers-color-scheme` for the whole page, iframes included. */
+const colorScheme: BrowserCommand<[scheme: "light" | "dark"]> = async (context, scheme) => {
+  await context.page.emulateMedia({ colorScheme: scheme });
+};
+
 /** The accessibility snapshot of the document inside the iframe `selector`. */
 const ariaSnapshot: BrowserCommand<[selector: string]> = async (context, selector) =>
   context.iframe.frameLocator(selector).locator("body").ariaSnapshot();
 
-export const commands = { matchScreenshot, compareElements, ariaSnapshot };
+export const commands = { matchScreenshot, compareElements, ariaSnapshot, colorScheme };
 
 declare module "vitest/browser" {
   interface BrowserCommands {
@@ -38,5 +43,6 @@ declare module "vitest/browser" {
     ) => Promise<BaselineResult>;
     compareElements: (expected: string, actual: string, label: string) => Promise<Comparison>;
     ariaSnapshot: (selector: string) => Promise<string>;
+    colorScheme: (scheme: "light" | "dark") => Promise<void>;
   }
 }

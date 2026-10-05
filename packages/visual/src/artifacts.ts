@@ -1,20 +1,21 @@
 // Everything the browser renders for a corpus screen, produced in Node before the tests run: the
 // reference renderer's markup, the generated React and SolidJS components compiled for the
 // browser, the static HTML page, and the same targets after a round trip through each importer
-// and design tool.
+// and design tool. And the example project's screen under its light and dark themes.
 import { transformSync as babel } from "@babel/core";
 import { readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
-import { coreCatalog } from "@weft/catalog";
+import { coreCatalog, withAppearance, type ColorScheme } from "@weft/catalog";
+import { readProject } from "@weft/catalog/node";
 import { parse, serialize, type Document } from "@weft/core";
-import { render } from "@weft/render-react";
+import { render, renderPage } from "@weft/render-react";
 import { toJsx } from "@weft/to-jsx";
 import { transformSync } from "oxc-transform";
 import { renderToStaticMarkup } from "react-dom/server";
 import { built as figmaBuilt, read as figmaRead } from "../../figma/test/helpers.ts";
 import { built as penpotBuilt, read as penpotRead } from "../../penpot/test/helpers.ts";
-import { CORPUS, cli } from "./cli.ts";
+import { CORPUS, EXAMPLE, cli, weft } from "./cli.ts";
 
 // Babel loads a preset from a path; the preset ships no types to import it by.
 const SOLID_PRESET = createRequire(import.meta.url).resolve("babel-preset-solid");
@@ -118,4 +119,46 @@ async function screen(name: string): Promise<Screen> {
 
 export async function screens(): Promise<Screen[]> {
   return Promise.all(corpusNames().map(screen));
+}
+
+/** A project screen whose tokens have a light and a dark theme, per target. */
+export type AppearanceScreen = {
+  data: unknown;
+  /** `weft html` with the project and its sample data: one page for both themes. */
+  html: string;
+  /** `weft css-tokens`: the stylesheet the component reads its tokens from. */
+  css: string;
+  /** The generated React component, compiled for the browser. */
+  react: string;
+  /** The reference renderer's page drawn with each theme. */
+  reference: Record<ColorScheme, string>;
+};
+
+/** The example project's review screen (T45). */
+export function appearanceScreen(): AppearanceScreen {
+  const projectFile = join(EXAMPLE, "weft.json");
+  const screenFile = join(EXAMPLE, "screens", "review.weft");
+  const dataFile = join(EXAMPLE, "sample.data.json");
+  const project = readProject(projectFile).project;
+  const data: unknown = JSON.parse(readFileSync(dataFile, "utf8"));
+  const { document, diagnostics } = parse(readFileSync(screenFile, "utf8"), {
+    catalog: project.catalog,
+  });
+  if (document === undefined) throw new Error(`review.weft: ${JSON.stringify(diagnostics)}`);
+  const reference = (asked: ColorScheme) => {
+    const { tokens, scheme } = withAppearance(project, asked);
+    return renderPage(document, {
+      catalog: project.catalog,
+      data,
+      ...(tokens ? { tokens } : {}),
+      colorScheme: scheme,
+    });
+  };
+  return {
+    data,
+    html: weft("html", screenFile, "--project", projectFile, "--no-source", "--data", dataFile),
+    css: weft("css-tokens", "--project", projectFile),
+    react: compile(toJsx(document, { catalog: project.catalog, framework: "react" }), "react"),
+    reference: { light: reference("light"), dark: reference("dark") },
+  };
 }
