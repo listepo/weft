@@ -671,6 +671,19 @@ impl<'d> Ctx<'d> {
                 .or((self.conventions.is_some() && tag == "footer").then_some("footer"));
             if let Some(slot) = slot {
                 s.role = "generic".into();
+                // The empty slot of a table is a row of one cell; the cell is markup, not content.
+                if tag == "tr" {
+                    s.children = std::mem::take(&mut s.children)
+                        .into_iter()
+                        .flat_map(|c| {
+                            if c.role == "cell" {
+                                c.children
+                            } else {
+                                vec![c]
+                            }
+                        })
+                        .collect();
+                }
                 for c in &mut s.children {
                     c.slot = Some(slot.to_owned());
                 }

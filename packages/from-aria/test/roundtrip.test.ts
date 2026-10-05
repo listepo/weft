@@ -150,8 +150,9 @@ function assertValid(result: ImportResult): void {
   );
 }
 
-// Known gap: the `empty` slot of a table whose state is `empty` is not read back, so its text
-// element is lost in both imports. Pinned with `test.fails` so a fix shows up as a failure here.
+// Known gap: the `empty` slot of a table whose state is `empty` is not read back from an
+// accessibility snapshot, so its text element is lost. The DOM import reads it from the
+// `data-weft-slot` wrapper. Pinned with `test.fails` so a fix shows up as a failure here.
 const TABLE_EMPTY_SLOT = new Set(["orders"]);
 
 // Known gap: an accessibility snapshot carries a role and a name, not the markup around it. A
@@ -171,7 +172,7 @@ for (const s of screens()) {
       result = fromDom(renderPage(s.document, { catalog, data: s.data }), { catalog });
     });
     test("valid", () => assertValid(result));
-    structure("structure, roles, states and ids", () => {
+    test("structure, roles, states and ids", () => {
       assert.deepEqual(
         skeletonOf(result.document, {}, "dom"),
         skeletonOf(s.document, s.data, "dom"),
