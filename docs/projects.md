@@ -15,8 +15,10 @@ examples/project/
 ├── data.schema.json      the shape of the app's data
 ├── sample.data.json      data to preview the screens with
 ├── tokens/
-│   ├── base.tokens.json  colours and spacing
-│   └── brand.tokens.json the brand colour, layered over the base
+│   ├── theme.resolver.json the layers below, then a light or dark theme
+│   ├── base.tokens.json    colours, spacing and the body text
+│   ├── brand.tokens.json   the brand colour, layered over the base
+│   └── dark.tokens.json    the brand colour of the dark theme
 └── screens/
     ├── cart.weft
     └── review.weft
@@ -25,7 +27,7 @@ examples/project/
 ```json
 {
   "$schema": "../../schemas/weft.schema.json",
-  "tokens": ["tokens/base.tokens.json", "tokens/brand.tokens.json"],
+  "tokens": "tokens/theme.resolver.json",
   "catalog": "catalog.json",
   "actions": ["cart.checkout", "cart.remove", "nav.back"],
   "data": "data.schema.json",
@@ -74,28 +76,23 @@ $ rm examples/project/screens/typo.weft
 
 ## Light and dark: a resolver
 
-Tokens that differ by mode (light and dark, compact and roomy, two brands) live in a [DTCG resolver](https://www.designtokens.org/TR/2025.10/resolver/) file. Name that one file instead of the list:
-
-```json
-{ "tokens": "tokens/theme.resolver.json" }
-```
-
-The resolver lists sets of token files and modifiers whose contexts each add their own files, in the order they merge:
+Tokens that differ by mode (light and dark, compact and roomy, two brands) live in a [DTCG resolver](https://www.designtokens.org/TR/2025.10/resolver/) file, which `tokens` names instead of a list. The example project's `tokens/theme.resolver.json` layers the base and brand files as before, then adds the dark theme's file when the theme is dark:
 
 ```json
 {
   "version": "2025.10",
-  "sets": { "base": { "sources": [{ "$ref": "base.tokens.json" }] } },
+  "sets": {
+    "foundation": {
+      "sources": [{ "$ref": "base.tokens.json" }, { "$ref": "brand.tokens.json" }]
+    }
+  },
   "modifiers": {
     "theme": {
-      "contexts": {
-        "light": [{ "$ref": "light.tokens.json" }],
-        "dark": [{ "$ref": "dark.tokens.json" }]
-      },
+      "contexts": { "light": [], "dark": [{ "$ref": "dark.tokens.json" }] },
       "default": "light"
     }
   },
-  "resolutionOrder": [{ "$ref": "#/sets/base" }, { "$ref": "#/modifiers/theme" }]
+  "resolutionOrder": [{ "$ref": "#/sets/foundation" }, { "$ref": "#/modifiers/theme" }]
 }
 ```
 
