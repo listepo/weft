@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
+export const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 export const CORPUS = join(ROOT, "corpus");
 /** The SwiftPM sample of the Xcode plugin: a project with shared tokens and a custom component. */
 export const SAMPLE = join(ROOT, "plugins/xcode/Examples/PackageSample");

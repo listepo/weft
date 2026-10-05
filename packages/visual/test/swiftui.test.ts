@@ -11,19 +11,37 @@
 //
 // The simulator is pinned (device and runtime below), since a baseline is only meaningful on the
 // runtime that drew it. Without macOS, Xcode or that simulator the suite is skipped and says why.
+//
+// Runs started at once in several worktrees would overwrite each other's app and screenshots on one
+// device, so `WEFT_SIMULATOR` chooses (see ../src/simulator.ts): `shared`, the default, takes a
+// machine-wide lock for the whole suite so runs take turns on one device; `own` gives each
+// worktree a device of its own, created on first use.
 import { execFileSync, spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { matchBaseline } from "../src/baseline.ts";
-import { CORPUS, EXAMPLE, SAMPLE, cli, weft } from "../src/cli.ts";
+import { CORPUS, EXAMPLE, ROOT, SAMPLE, cli, weft } from "../src/cli.ts";
 import { compare } from "../src/compare.ts";
+import {
+  LOCK_DIR,
+  acquireLock,
+  deviceName,
+  findDevice,
+  simulatorMode,
+  type SimulatorDevice,
+} from "../src/simulator.ts";
 
 const DEVICE_TYPE = "com.apple.CoreSimulator.SimDeviceType.iPhone-17";
 const RUNTIME = "com.apple.CoreSimulator.SimRuntime.iOS-27-0";
 const BUNDLE = "dev.weft.visual";
 const TARGET = "arm64-apple-ios17.0-simulator";
+// A queue of runs is the usual reason to wait for the lock; a run takes a few minutes on an idle
+// machine and over twenty when several agents load it, so the wait must outlast one such run.
+const LOCK_TIMEOUT_MS = 30 * 60_000;
+// Building the app comes on top of the wait for the lock, in the same hook.
+const SETUP_TIMEOUT_MS = LOCK_TIMEOUT_MS + 300_000;
 
 // The generator refuses these screens on purpose (array-index paths); its own tests pin why.
 const REFUSED = new Set(["leaderboard"]);
@@ -36,24 +54,67 @@ const EXAMPLE_DARK = "example-review-dark";
 const run = (cmd: string, args: string[]) =>
   spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
 
-/** The pinned simulator's UDID, or why the suite cannot run here. */
-function simulator(): { udid: string } | { reason: string } {
+type Found = { mode: "shared"; udid: string } | { mode: "own"; name: string } | { reason: string };
+
+type DeviceList = Record<string, SimulatorDevice[]>;
+
+const availableDevices = (): DeviceList =>
+  (
+    JSON.parse(run("xcrun", ["simctl", "list", "devices", "available", "-j"]).stdout) as {
+      devices: DeviceList;
+    }
+  ).devices;
+
+/** Whether `simctl list <what>` names `identifier`, e.g. the runtime an own device is made from. */
+function simctlKnows(what: "runtimes" | "devicetypes", identifier: string): boolean {
+  const args = ["simctl", "list", what, ...(what === "runtimes" ? ["available"] : []), "-j"];
+  const listed = run("xcrun", args);
+  if (listed.status !== 0) return false;
+  const entries = (JSON.parse(listed.stdout) as Record<string, { identifier: string }[]>)[what];
+  return entries?.some((e) => e.identifier === identifier) ?? false;
+}
+
+/**
+ * The simulator to use, or why the suite cannot run here. Own mode only checks that the pinned
+ * device type and runtime exist; the device itself is created once the lock is held.
+ */
+function simulator(): Found {
   if (process.platform !== "darwin") return { reason: "the iOS Simulator needs macOS" };
   if (run("xcrun", ["--find", "simctl"]).status !== 0) return { reason: "Xcode is not installed" };
+  // A mistyped setting is an error, not a skip: it would silently run in the other mode.
+  const mode = simulatorMode();
+  if (mode === "own") {
+    if (!simctlKnows("devicetypes", DEVICE_TYPE) || !simctlKnows("runtimes", RUNTIME)) {
+      return { reason: `no ${DEVICE_TYPE} on ${RUNTIME}; install the runtime in Xcode` };
+    }
+    return { mode, name: deviceName(basename(ROOT)) };
+  }
   const list = run("xcrun", ["simctl", "list", "devices", "available", "-j"]);
   if (list.status !== 0) return { reason: `simctl failed: ${list.stderr}` };
-  const devices = (
-    JSON.parse(list.stdout) as {
-      devices: Record<string, { udid: string; deviceTypeIdentifier: string }[]>;
-    }
-  ).devices[RUNTIME];
-  const device = devices?.find((d) => d.deviceTypeIdentifier === DEVICE_TYPE);
+  const device = findDevice(
+    (JSON.parse(list.stdout) as { devices: DeviceList }).devices,
+    RUNTIME,
+    DEVICE_TYPE,
+  );
   if (device === undefined) {
     return {
       reason: `no ${DEVICE_TYPE} simulator on ${RUNTIME}; install the runtime in Xcode and create one with \`xcrun simctl create weft ${DEVICE_TYPE} ${RUNTIME}\``,
     };
   }
-  return { udid: device.udid };
+  return { mode, udid: device.udid };
+}
+
+/** The worktree's own device, created the first time and reused afterwards. */
+function ownDevice(name: string): string {
+  const existing = findDevice(availableDevices(), RUNTIME, DEVICE_TYPE, name);
+  if (existing !== undefined) return existing.udid;
+  const created = run("xcrun", ["simctl", "create", name, DEVICE_TYPE, RUNTIME]);
+  if (created.status !== 0) throw new Error(`simctl create ${name} failed: ${created.stderr}`);
+  const udid = created.stdout.trim();
+  console.warn(
+    `Created the simulator ${name} (${udid}) for this worktree; delete it with \`xcrun simctl delete ${name}\`.`,
+  );
+  return udid;
 }
 
 const found = simulator();
@@ -221,7 +282,8 @@ function buildApp(dir: string, sources: Map<string, string>, support: Map<string
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
-  const udid = "udid" in found ? found.udid : "";
+  let udid = "";
+  let releaseLock = () => {};
   const names = [
     ...readdirSync(CORPUS, { withFileTypes: true })
       .filter((e) => e.isDirectory() && !REFUSED.has(e.name))
@@ -234,7 +296,9 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
   let dir = "";
   let booted = false;
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    // Unreachable, since the suite is skipped without a simulator; narrows the type for the compiler.
+    if ("reason" in found) return;
     dir = mkdtempSync(join(tmpdir(), "weft-swiftui-"));
     const sources = new Map<string, string>();
     const own = new Set([SAMPLE_SCREEN, EXAMPLE_SCREEN, EXAMPLE_DARK]);
@@ -257,21 +321,45 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     for (const [name, mutate] of Object.entries(MUTANTS)) sources.set(name, mutate(login));
     const app = buildApp(dir, sources, sample.support);
 
-    if (deviceState(udid) !== "Booted") {
-      execFileSync("xcrun", ["simctl", "boot", udid]);
-      booted = true;
+    // The lock is taken after the build, which needs no simulator, so a queue waits as little as
+    // possible. An own device is private to its worktree, but two runs of that worktree still
+    // share it, so it has a lock of its own.
+    const lock = join(LOCK_DIR, "name" in found ? `${found.name}.lock` : "simulator.lock");
+    releaseLock = await acquireLock(lock, {
+      timeoutMs: LOCK_TIMEOUT_MS,
+      onWait: (pid) =>
+        console.warn(
+          `Waiting for the iOS Simulator, which process ${pid} is using (lock ${lock}); ` +
+            `WEFT_SIMULATOR=own would use a simulator of this worktree's own.`,
+        ),
+    });
+    try {
+      udid = "udid" in found ? found.udid : ownDevice(found.name);
+      if (deviceState(udid) !== "Booted") {
+        execFileSync("xcrun", ["simctl", "boot", udid]);
+        booted = true;
+      }
+      execFileSync("xcrun", ["simctl", "bootstatus", udid, "-b"], { stdio: "ignore" });
+      execFileSync("xcrun", ["simctl", "install", udid, app]);
+    } catch (error) {
+      cleanUp();
+      throw error;
     }
-    execFileSync("xcrun", ["simctl", "bootstatus", udid, "-b"], { stdio: "ignore" });
-    execFileSync("xcrun", ["simctl", "install", udid, app]);
-  });
+  }, SETUP_TIMEOUT_MS);
 
-  afterAll(() => {
+  /** Leaves the simulator as it was found, then lets the next run in. */
+  function cleanUp() {
     if (udid !== "") {
       run("xcrun", ["simctl", "terminate", udid, BUNDLE]);
       run("xcrun", ["simctl", "uninstall", udid, BUNDLE]);
-      // Leaves the simulator as it was found.
       if (booted) run("xcrun", ["simctl", "shutdown", udid]);
+      udid = "";
     }
+    releaseLock();
+  }
+
+  afterAll(() => {
+    cleanUp();
     if (dir !== "") rmSync(dir, { recursive: true, force: true });
   });
 

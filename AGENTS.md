@@ -36,4 +36,6 @@ moon run core:test # one package
 moon run root:fmt  # format
 ```
 
+**SwiftUI screenshots and the simulator.** `packages/visual/test/swiftui.test.ts` drives one iOS Simulator app id, so concurrent runs must not share a device. `WEFT_SIMULATOR=shared` (default) serialises runs on one device with a lock in `~/Library/Caches/weft-visual/`; `WEFT_SIMULATOR=own` gives your worktree a device named `weft-visual-<worktree folder>`. When you work in a worktree while other agents may run the suite, use `own`, and delete the device with `xcrun simctl delete weft-visual-<folder>` when you remove the worktree (list them with `xcrun simctl list devices | grep weft-visual-`). Details in `packages/visual/README.md`.
+
 Tasks live in `moon.yml` (root checks) and `.moon/tasks/all.yml` (the `test` task every package inherits). A task's `inputs` must list every file it reads, or moon serves a stale cached result.

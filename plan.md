@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T46 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T47 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T50 | todo | P2 | 4 | 0% | |
 | T51 | todo | P2 | 3 | 0% | |
@@ -155,15 +154,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
-
-### T46. Simulator sharing for the SwiftUI screenshot suite
-
-The SwiftUI screenshot suite (`packages/visual/test/swiftui.test.ts`, T36) installs one app id on one shared iOS Simulator, so two worktrees running it at once overwrite each other's screenshots and fail with false pixel diffs. The creator approved both remedies, chosen by a setting:
-
-- **shared** (default): one simulator for everyone, with a machine-wide lock so runs from different worktrees take turns; a run waits for the lock with a bounded timeout and a clear message, and a stale lock left by a dead process is taken over.
-- **own:** each worktree gets its own simulator device, created on first use from the same device type and runtime and named after the worktree, so runs never share state; the suite says how to delete these devices.
-
-The setting is an environment variable read by the suite (a test-harness choice, not a Weft tool option, so no `weft.json` key), documented in the suite's README and `AGENTS.md`. Done when two runs started at once in two worktrees pass in both modes, the lock and the device naming have tests, and the default run on one worktree behaves as before.
 
 ### T47. Static page parity with the generated components
 
