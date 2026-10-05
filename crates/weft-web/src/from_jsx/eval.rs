@@ -6,11 +6,11 @@
 use std::rc::Rc;
 
 use oxc_ast::ast::{
-    Argument, ArrayExpressionElement, ArrowFunctionBody, BinaryExpression, BinaryOperator,
-    BindingPattern, CallExpression, ChainElement, Expression, FormalParameters, LogicalOperator,
-    ObjectPropertyKind, PropertyKey, Statement, UnaryOperator,
+    Argument, ArrayExpressionElement, ArrowFunctionBody, ArrowFunctionExpression, BinaryExpression,
+    BinaryOperator, BindingPattern, CallExpression, ChainElement, Expression, FormalParameters,
+    LogicalOperator, ObjectPropertyKind, PropertyKey, Statement, UnaryOperator,
 };
-use weft_core::{is_loop_variable, js_number};
+use weft_core::{is_binding, is_loop_variable, js_number};
 
 use crate::js::is_plain_segment;
 
@@ -30,6 +30,10 @@ pub(crate) enum Sv<'a> {
     Prefix(String),
     /// The index of a repetition.
     Index,
+    /// The index of the tab a data path selects (`Math.max(0, tabs.findIndex(…))`).
+    Choice(String),
+    /// Whether a tab is the one the path selects (`index === choice`).
+    Chosen(String),
     /// The whole props object of a component (`props` in SolidJS).
     Props,
     /// The `actions` prop, or a namespace inside it (`actions.todo`).
@@ -86,7 +90,7 @@ impl<'a> Env<'a> {
 /// Helpers of the generated components that pass their argument through, as far as Weft is
 /// concerned: they only coerce or guard it.
 const PASS_THROUGH: &[&str] = &[
-    "_text", "_on", "_squash", "_list", "_keyed", "_ix", "String", "Boolean", "Number",
+    "_text", "_on", "_squash", "_list", "_keyed", "_ix", "_float", "String", "Boolean", "Number",
 ];
 
 /// Calls of a value that leave it a value of the same path (`.trim()`, `.toString()`).
@@ -337,9 +341,11 @@ impl Eval {
                     },
                 },
             },
-            BinaryOperator::StrictEquality | BinaryOperator::Equality => {
-                same(&left, &right).map_or(Sv::Unknown, Sv::Bool)
-            }
+            BinaryOperator::StrictEquality | BinaryOperator::Equality => match (&left, &right) {
+                (Sv::Num(_) | Sv::Index, Sv::Choice(p))
+                | (Sv::Choice(p), Sv::Num(_) | Sv::Index) => Sv::Chosen(p.clone()),
+                _ => same(&left, &right).map_or(Sv::Unknown, Sv::Bool),
+            },
             BinaryOperator::StrictInequality | BinaryOperator::Inequality => {
                 same(&left, &right).map_or(Sv::Unknown, |s| Sv::Bool(!s))
             }
@@ -361,6 +367,9 @@ impl Eval {
                     Some(v) => v,
                     None => Sv::Undef,
                 };
+            }
+            if name == "_get" {
+                return self.get(call, env);
             }
         }
         // An immediately called function: its constants, then what it returns.
@@ -388,6 +397,26 @@ impl Eval {
         if SAME_VALUE.contains(&method) {
             return self.eval(object, env);
         }
+        if method == "max"
+            && matches!(object.get_inner_expression(), Expression::Identifier(m) if m.name == "Math")
+        {
+            // `Math.max(0, choice)` keeps a selection that matches no tab on the first tab.
+            if let [zero, choice] = &call.arguments[..]
+                && let (Some(zero), Some(choice)) = (zero.as_expression(), choice.as_expression())
+                && matches!(self.eval(zero, env), Sv::Num(n) if n == 0.0)
+                && let choice @ Sv::Choice(_) = self.eval(choice, env)
+            {
+                return choice;
+            }
+            return Sv::Unknown;
+        }
+        if method == "findIndex"
+            && matches!(self.eval(object, env), Sv::Arr(_))
+            && let Some(Expression::ArrowFunctionExpression(f)) =
+                first.map(Expression::get_inner_expression)
+        {
+            return self.tab_choice(f, env).map_or(Sv::Unknown, Sv::Choice);
+        }
         if method == "map" || method == "flatMap" {
             let list = self.eval(object, env);
             let Some(Expression::ArrowFunctionExpression(f)) =
@@ -398,6 +427,82 @@ impl Eval {
             return self.map(list, &f.params, &f.body, method == "flatMap", env);
         }
         Sv::Unknown
+    }
+
+    /// `_get(base, ["players", "0", "name"])`: the path a generated component reads when a
+    /// segment cannot follow `?.` (an index, or a name `Object.prototype` also has). Only
+    /// segments a binding can spell are read back.
+    fn get<'a>(&mut self, call: &'a CallExpression<'a>, env: &Rc<Env<'a>>) -> Sv<'a> {
+        let mut args = call.arguments.iter().filter_map(Argument::as_expression);
+        let (Some(base), Some(segments), None) = (args.next(), args.next(), args.next()) else {
+            return Sv::Unknown;
+        };
+        let (
+            Sv::Path {
+                mut path,
+                not: false,
+            },
+            Sv::Arr(segments),
+        ) = (self.eval(base, env), self.eval(segments, env))
+        else {
+            return Sv::Unknown;
+        };
+        for segment in segments.iter() {
+            match segment {
+                Item::One(Sv::Str(s)) if is_binding(&format!("$.{s}")) => {
+                    path.push('.');
+                    path.push_str(s);
+                }
+                _ => return Sv::Unknown,
+            }
+        }
+        Sv::Path { path, not: false }
+    }
+
+    /// `(x) => x.doc === path || x.id === path`: how generated tabs find the selected tab; the
+    /// one data path both sides compare with is the tablist's `selected` binding.
+    fn tab_choice<'a>(
+        &mut self,
+        f: &'a ArrowFunctionExpression<'a>,
+        env: &Rc<Env<'a>>,
+    ) -> Option<String> {
+        let BindingPattern::BindingIdentifier(param) = &f.params.items.first()?.pattern else {
+            return None;
+        };
+        let Expression::LogicalExpression(l) = f.body.as_expression()?.get_inner_expression()
+        else {
+            return None;
+        };
+        if l.operator != LogicalOperator::Or {
+            return None;
+        }
+        let by_doc = self.tab_match(&l.left, param.name.as_str(), "doc", env)?;
+        let by_id = self.tab_match(&l.right, param.name.as_str(), "id", env)?;
+        (by_doc == by_id).then_some(by_doc)
+    }
+
+    fn tab_match<'a>(
+        &mut self,
+        e: &'a Expression<'a>,
+        param: &str,
+        field: &str,
+        env: &Rc<Env<'a>>,
+    ) -> Option<String> {
+        let Expression::BinaryExpression(b) = e.get_inner_expression() else {
+            return None;
+        };
+        let Expression::StaticMemberExpression(m) = b.left.get_inner_expression() else {
+            return None;
+        };
+        let on_param =
+            matches!(m.object.get_inner_expression(), Expression::Identifier(i) if i.name == param);
+        if b.operator != BinaryOperator::StrictEquality || !on_param || m.property.name != field {
+            return None;
+        }
+        match self.eval(&b.right, env) {
+            Sv::Path { path, not: false } => Some(path),
+            _ => None,
+        }
     }
 
     /// `list.map(cb)` or `<For each={list}>{cb}</For>`: unrolled over a static array, a
