@@ -12,7 +12,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T46 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T47 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T48 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T49 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
@@ -180,19 +179,6 @@ Done when:
 - every entry of `STATIC_TREE_DIFFERS` is gone;
 - `STATIC_PAGE_DIFFERS` keeps only screens with a stated, unavoidable reason;
 - changed baselines and snapshots are reviewed;
-- the full check exits 0.
-
-### T48. Importer binding readback in round trips
-
-The HTML and JSX importers lose bindings that the generators write, so round trips in `packages/visual` stay pinned as expected failures (`HTML_ROUND_TRIP_GAPS`, `JSX_ROUND_TRIP_GAPS`).
-
-- **`inbox`:** the tabs' bound `selected` and a tab's bound `label` are dropped by the tab inversion. This happens in both the HTML and the JSX importer.
-- **`account`:** the number field's value is written through `_float(...)`, which the JSX importer drops.
-- **`leaderboard`:** an array-index binding is written as `_get(...)`, which the JSX importer drops.
-
-Fix them in `crates/weft-web` and `crates/weft-import`, reading back exactly what the generators write. Done when:
-- both gap lists are empty;
-- each fix has a Rust test or snapshot;
 - the full check exits 0.
 
 ### T49. Token modes in the design plugin UI
