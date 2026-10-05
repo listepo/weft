@@ -6,4 +6,3 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T42. Xcode plugins
