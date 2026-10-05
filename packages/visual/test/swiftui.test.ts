@@ -37,8 +37,9 @@ const DEVICE_TYPE = "com.apple.CoreSimulator.SimDeviceType.iPhone-17";
 const RUNTIME = "com.apple.CoreSimulator.SimRuntime.iOS-27-0";
 const BUNDLE = "dev.weft.visual";
 const TARGET = "arm64-apple-ios17.0-simulator";
-// A queue of runs, each a few minutes long, is the usual reason to wait for the lock.
-const LOCK_TIMEOUT_MS = 20 * 60_000;
+// A queue of runs is the usual reason to wait for the lock; a run takes a few minutes on an idle
+// machine and over twenty when several agents load it, so the wait must outlast one such run.
+const LOCK_TIMEOUT_MS = 30 * 60_000;
 // Building the app comes on top of the wait for the lock, in the same hook.
 const SETUP_TIMEOUT_MS = LOCK_TIMEOUT_MS + 300_000;
 
