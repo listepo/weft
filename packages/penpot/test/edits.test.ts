@@ -286,6 +286,28 @@ for (const c of cases) {
   });
 }
 
+describe("a glass surface (T51)", () => {
+  const glass = corpusMarkup("glass");
+
+  test("comes back unchanged, still taking its material token", async () => {
+    const { penpot, root } = await built(glass);
+    const result = await read(root);
+    assert.equal(serialize(result.document), serialize(parseStrict(glass)));
+    assert.deepEqual(result.losses, []);
+  });
+
+  test("a blur a designer changed is reported, and the prop stays", async () => {
+    const { penpot, root } = await built(glass);
+    penpot.find<FakeBoard>(root, "stack#card").backgroundBlur = { value: 4, hidden: false };
+    const result = await read(root);
+    assert.equal(serialize(result.document), serialize(parseStrict(glass)));
+    assert.deepEqual(
+      result.losses.map((l) => l.kind),
+      ["tokens"],
+    );
+  });
+});
+
 describe("the built screen", () => {
   test("shows the children in Weft order on the canvas", async () => {
     const { penpot, root } = await built(login);

@@ -64,10 +64,9 @@ const blur = (b: PBlur | undefined): unknown =>
 export function styleKey(shape: PShape, withSpacing: boolean): string {
   if (shape.type === "text") return "";
   const layout = layoutOf(shape);
-  return JSON.stringify([
+  const key: unknown[] = [
     fills(shape.fills),
     strokes(shape.strokes),
-    blur(shape.backgroundBlur),
     shape.borderRadius,
     layout === undefined
       ? [0, 0, 0, 0]
@@ -75,7 +74,11 @@ export function styleKey(shape: PShape, withSpacing: boolean): string {
     withSpacing && isBoard(shape) && layout !== undefined
       ? layout[gapField(shape, shape.grid !== undefined)]
       : null,
-  ]);
+  ];
+  // Appended only when there is one, so a board built before the blur was read keeps the
+  // fingerprint stored in its plugin data and does not read back as edited.
+  if (shape.backgroundBlur !== undefined) key.push(blur(shape.backgroundBlur));
+  return JSON.stringify(key);
 }
 
 const NO_LAYOUT: LayerLayout = {
