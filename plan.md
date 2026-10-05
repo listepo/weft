@@ -182,3 +182,13 @@ The T36 screenshots show that the static HTML generator (`weft html`) and the Sw
 
 Done when the T36 visual suite renders the static page and the SwiftUI screens with the corpus data, the new baselines are reviewed, the static page is compared with React where the comparison is now meaningful, and the snapshots and round trips stay green.
 
+Execution plan:
+
+1. `weft-core`: one reading of sample data for the Rust generators (SPEC §2.1): a path resolver over JSON (`$.a.0`, loop variables, own keys only), truthiness (an empty array or object is true, the string `"false"` is false) and the text a value shows. `weft-web`'s `js.rs` delegates to it where its values are JSON.
+2. SPEC §9 and §10.6 first: what the static page and the SwiftUI file look like with sample data; `export.html.data` and `export.swiftui.data` in `crates/weft-catalog/src/settings.rs`, the regenerated `schemas/weft.schema.json`, `docs/projects.md`, `docs/cli.md`; `--data <file>` on `weft html` and `weft swiftui` (argument > `weft.json` > none).
+3. Static HTML (`crates/weft-web/src/html.rs`): with data, the document is first filled in (bindings become the literals they read, typed by the catalog; `<each>` becomes one copy per item with `id[index]` ids; negation and truthiness as above), then written by the same writer; a declared `empty` slot is shown when its list has no items instead of a `<template data-empty>`. Without data the code path and output are unchanged. `HtmlOptions` stays as it is (the WASM bindings build it); data comes through a new entry point.
+4. SwiftUI (`crates/weft-swiftui`): with data, the model class gets a memberwise initializer with the defaults, an `extension <Model> { static var sample }` built from the data (values coerced to the inferred types with the same readings), and `#Preview` uses `.sample`. Without data nothing changes. The importer already reads only views and action enums; tests pin that a file generated with data imports to the same document.
+5. Snapshots (`crates/weft-snapshots`): new `html-data` and `swiftui-data` snapshots for every corpus screen with its `data.json`; the 322 existing ones must not change. Swift typecheck (`xcrun swiftc -typecheck -swift-version 6`, iOS 17 and macOS 14) covers the data variants.
+6. Visual suite (`packages/visual`): the static page and the SwiftUI app render with the corpus data (the app builds each model with `.sample`); the HTML round trip imports the template page and renders it back with data. Regenerate the `html/` and `swiftui/` baselines, review every changed image (downscaled copies), and compare the static page with React where it is now meaningful, recording the tolerance and the screens that still differ.
+7. Full check, then close the task into `done.md`.
+
