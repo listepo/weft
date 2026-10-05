@@ -246,7 +246,7 @@ Checked on 2026-10-05 against the pinned tools: moon 2.5.6, Vitest 5.0.3, cargo 
 | The build reads no other file | No `.cargo/config.toml` or `rust-toolchain*` in the repository (the toolchain comes from `mise.toml`, a moon implicit input through `.moon/`), `weft-node/build.rs` only calls `napi_build::setup()`, and the other crates have no build script (`ls crates/*/build.rs`) | repository files, 2026-10-05 |
 | Measured: the WebAssembly task after a change in a crate outside the closure | `moon run root:wasm` with a line appended to `weft-swiftui/src/lib.rs` and to `weft-cli/src/main.rs`: cached (7 ms, same hash 8c5b857e); the same on a line in `weft-core/src/lib.rs`: rebuilt (15.9 s, new hash); reverted: cached. `root:native` likewise: cached after a `weft-swiftui` change, rebuilt after a `weft-web` change | moon 2.5.6 in the worktree |
 
-## 17. 3D transforms and models (T52)
+## 17. 3D transforms and models (T52, T52.1)
 
 | Question | Finding | Source (checked) |
 | --- | --- | --- |
