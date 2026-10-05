@@ -1,0 +1,29 @@
+<screen id="account" label="Edit account" weft="0.1">
+  <heading id="title" level="1">Edit account</heading>
+  <form id="account-form" label="Account" state="invalid" on-submit="account.save">
+    <field id="name" label="Full name" placeholder="Ada Lovelace" state="valid" type="text" value="{$.account.name}" on-change="account.edit"/>
+    <field id="age" error="{$.errors.age}" label="Age" state="invalid" type="number" value="{$.account.age}"/>
+    <field id="handle" disabled="{$.account.locked}" label="Handle" placeholder="{{handle}" value="{$.account.handle}"/>
+    <field id="bio" label="Bio" type="multiline" value="{$.account.bio}"/>
+    <field id="email" disabled="true" label="Email" type="email" value="{$.account.email}"/>
+    <checkbox id="newsletter" checked="{$.account.newsletter}" label="Send me the newsletter" on-change="account.edit"/>
+    <checkbox id="terms" checked="true" disabled="true" label="Terms accepted"/>
+    <switch id="public" checked="{$.account.public}" disabled="{!$.account.verified}" label="Public profile" on-change="account.edit"/>
+    <radio-group id="plan" label="Plan" value="{$.account.plan}" on-change="account.edit">
+      <radio id="plan-free" value="free">Free</radio>
+      <radio id="plan-pro" text="{$.labels.pro}" value="pro"/>
+      <radio id="plan-team" disabled="true" value="team">Team</radio>
+    </radio-group>
+    <select id="language" disabled="{$.account.locked}" label="Language" value="{$.account.language}" on-change="account.edit">
+      <option id="language-en" value="en">English</option>
+      <option id="language-fr" text="{$.labels.french}" value="fr"/>
+    </select>
+    <text id="internal" hidden="true">Internal note: never shown.</text>
+    <alert id="saved" hidden="{!$.saved}" tone="success">Your changes were saved.</alert>
+    <slot name="footer">
+      <button id="save" state="busy" submit="true" variant="primary">Save</button>
+      <button id="cancel" state="idle" text="{$.labels.cancel}" variant="secondary" on-press="account.cancel"/>
+      <link id="help" href="https://example.com/help" text="{$.labels.help}"/>
+    </slot>
+  </form>
+</screen>

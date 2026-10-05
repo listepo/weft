@@ -1,0 +1,7 @@
+{
+  "team": { "name": "Platform" },
+  "updatedAt": "Updated 5 minutes ago",
+  "stats": { "velocity": 42, "bugs": 7, "incidents": 1 },
+  "backupStatus": "Last backup finished at 03:00.",
+  "statusUrl": "https://status.example.com"
+}

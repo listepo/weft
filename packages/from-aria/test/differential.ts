@@ -5,7 +5,7 @@
 // `@weft/figma` reuses without WebAssembly have a Rust twin in crates/weft-import, and
 // crates/weft-import/tests/helpers.rs checks the two agree. Random cases use a fixed seed, so the
 // fixtures only change with the code.
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import fc from "fast-check";
 import { coreCatalog } from "@weft/catalog";
 import { parse, type Document } from "@weft/core";
@@ -37,7 +37,8 @@ const repository = new URL("../../../", import.meta.url);
 /** Only what survives a JSON round trip reaches the Rust side, so expectations use the same. */
 const json = (value: unknown): unknown => JSON.parse(JSON.stringify(value) ?? "null");
 
-type Screen = { name: string; document: Document; data: unknown; html: string };
+// `html` is the hand-written page of a benchmark screen; the coverage screens have none (corpus/README.md).
+type Screen = { name: string; document: Document; data: unknown; html: string | undefined };
 
 function corpus(): Screen[] {
   const dir = new URL("corpus/", repository);
@@ -53,7 +54,9 @@ function corpus(): Screen[] {
         name,
         document: parsed.document,
         data: JSON.parse(readFileSync(new URL("data.json", at), "utf8")) as unknown,
-        html: readFileSync(new URL("screen.html", at), "utf8"),
+        html: existsSync(new URL("screen.html", at))
+          ? readFileSync(new URL("screen.html", at), "utf8")
+          : undefined,
       };
     });
 }
@@ -273,7 +276,7 @@ export function domCases(): DomCase[] {
   const inputs: string[] = [];
   for (const s of corpus()) {
     inputs.push(renderPage(s.document, { catalog, data: s.data }));
-    inputs.push(s.html);
+    if (s.html !== undefined) inputs.push(s.html);
   }
   for (const d of examples()) inputs.push(renderPage(d, { catalog, data: {} }));
   inputs.push(...HAND_WRITTEN);

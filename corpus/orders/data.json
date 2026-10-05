@@ -1,0 +1,7 @@
+{
+  "labels": { "total": "Total" },
+  "orders": [
+    { "id": "A-1002", "total": "$120.00", "selected": true },
+    { "id": "A-1001", "total": "$35.50", "selected": false }
+  ]
+}

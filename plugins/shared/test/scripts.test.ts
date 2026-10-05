@@ -92,7 +92,8 @@ describe.each(screens)("corpus screen %s", (name) => {
     );
   });
 
-  test("the corpus HTML imports", () => {
+  // Coverage screens have no hand-written page to import (corpus/README.md).
+  test.runIf(existsSync(join(CORPUS, name, "screen.html")))("the corpus HTML imports", () => {
     const out = join(work(), "from-corpus.weft");
     const result = run(importMain, join(CORPUS, name, "screen.html"), out);
     assert.equal(result.code, 0, result.stderr);

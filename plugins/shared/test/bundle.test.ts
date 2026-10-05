@@ -182,7 +182,8 @@ describe.each(NAMES)("the %s plugin folder alone", (plugin) => {
       assert.equal(readFileSync(bundled, "utf8"), readFileSync(sourced, "utf8"));
     });
 
-    test("import writes the screen the sources write", () => {
+    // Coverage screens have no hand-written page to import (corpus/README.md).
+    test.runIf(existsSync(join(CORPUS, name, "screen.html")))("import writes the screen the sources write", () => {
       mkdirSync(dir(), { recursive: true });
       const page = join(CORPUS, name, "screen.html");
       const bundled = join(dir(), "bundled.weft");

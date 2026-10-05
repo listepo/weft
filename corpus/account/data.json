@@ -1,0 +1,18 @@
+{
+  "account": {
+    "name": "Ada Lovelace",
+    "age": 17,
+    "handle": "ada",
+    "bio": "Wrote the first program.",
+    "email": "ada@example.com",
+    "locked": false,
+    "newsletter": true,
+    "public": false,
+    "verified": true,
+    "plan": "pro",
+    "language": "fr"
+  },
+  "errors": { "age": "You must be 18 or older." },
+  "labels": { "pro": "Pro", "french": "Français", "cancel": "Cancel", "help": "Help" },
+  "saved": false
+}

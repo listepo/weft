@@ -1,0 +1,41 @@
+<screen id="dashboard" label="Team dashboard" state="ready" weft="0.1">
+  <stack id="header" align="center" direction="row" gap="{token.space.xl}" wrap="true">
+    <heading id="title" level="1" text="{$.team.name}"/>
+    <text id="updated" text="{$.updatedAt}" tone="muted"/>
+  </stack>
+  <grid id="stats" columns="3" gap="{token.space.lg}">
+    <section id="velocity" label="Velocity">
+      <text id="velocity-value" text="{$.stats.velocity}" tone="success"/>
+      <slot name="header">
+        <heading id="velocity-title" level="2">Velocity</heading>
+      </slot>
+    </section>
+    <section id="bugs" label="Open bugs">
+      <text id="bugs-value" text="{$.stats.bugs}" tone="warning"/>
+      <slot name="header">
+        <heading id="bugs-title" level="2">Open bugs</heading>
+      </slot>
+    </section>
+    <section id="incidents" label="Incidents">
+      <text id="incidents-value" text="{$.stats.incidents}" tone="danger"/>
+      <slot name="header">
+        <heading id="incidents-title" level="2">Incidents</heading>
+      </slot>
+    </section>
+  </grid>
+  <stack id="notices" align="stretch" direction="column" gap="{token.space.sm}">
+    <alert id="release" tone="info">Release 2.4 ships on Friday.</alert>
+    <alert id="backup" text="{$.backupStatus}" tone="success"/>
+    <alert id="quota" tone="warning">
+      <text id="quota-text">Storage is 90% full.</text>
+      <link id="quota-link" href="https://example.com/storage">Manage storage</link>
+    </alert>
+  </stack>
+  <stack id="footer" align="end" gap="{token.space.xs}">
+    <text id="owner" tone="default">Owned by the platform team</text>
+    <stack id="footer-links" align="start" direction="row" gap="{token.space.md}">
+      <link id="docs" href="/docs">Docs</link>
+      <link id="status" href="{$.statusUrl}">Status page</link>
+    </stack>
+  </stack>
+</screen>

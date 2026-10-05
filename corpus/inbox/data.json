@@ -1,0 +1,11 @@
+{
+  "folder": "tab-inbox",
+  "labels": { "drafts": "Drafts", "archive": "Archive" },
+  "messages": [
+    { "subject": "Quarterly report" },
+    { "subject": "Lunch on Thursday?" }
+  ],
+  "selection": "",
+  "composing": true,
+  "draft": { "to": "grace@example.com", "body": "See you there." }
+}

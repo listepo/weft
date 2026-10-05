@@ -1,0 +1,30 @@
+<screen id="orders" label="Orders" weft="0.1">
+  <heading id="title" level="2">Orders</heading>
+  <table id="open-orders" label="Open orders" state="ready">
+    <column id="col-id" sort="descending" on-press="orders.sortById">Order</column>
+    <column id="col-total" sort="none" text="{$.labels.total}"/>
+    <each id="order-each" as="order" in="{$.orders}">
+      <row id="order" selected="{$order.selected}" on-press="orders.open">
+        <cell id="order-id" text="{$order.id}"/>
+        <cell id="order-total">
+          <text id="order-amount" text="{$order.total}"/>
+        </cell>
+      </row>
+    </each>
+    <slot name="empty">
+      <text id="no-orders">No open orders.</text>
+    </slot>
+  </table>
+  <table id="archived" label="Archived orders" state="empty">
+    <column id="col-archived">Order</column>
+    <slot name="empty">
+      <text id="archived-empty">Nothing archived yet.</text>
+    </slot>
+  </table>
+  <table id="pending" label="Pending orders" state="loading">
+    <column id="col-pending">Order</column>
+    <row id="pending-row" selected="true">
+      <cell id="pending-cell">Fetching…</cell>
+    </row>
+  </table>
+</screen>
