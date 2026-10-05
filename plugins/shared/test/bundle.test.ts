@@ -183,16 +183,19 @@ describe.each(NAMES)("the %s plugin folder alone", (plugin) => {
     });
 
     // Coverage screens have no hand-written page to import (corpus/README.md).
-    test.runIf(existsSync(join(CORPUS, name, "screen.html")))("import writes the screen the sources write", () => {
-      mkdirSync(dir(), { recursive: true });
-      const page = join(CORPUS, name, "screen.html");
-      const bundled = join(dir(), "bundled.weft");
-      const sourced = join(dir(), "sourced.weft");
-      const result = node("import.js", page, bundled);
-      assert.equal(result.status, 0, result.stderr);
-      inProcess(importMain, page, sourced);
-      assert.equal(readFileSync(bundled, "utf8"), readFileSync(sourced, "utf8"));
-    });
+    test.runIf(existsSync(join(CORPUS, name, "screen.html")))(
+      "import writes the screen the sources write",
+      () => {
+        mkdirSync(dir(), { recursive: true });
+        const page = join(CORPUS, name, "screen.html");
+        const bundled = join(dir(), "bundled.weft");
+        const sourced = join(dir(), "sourced.weft");
+        const result = node("import.js", page, bundled);
+        assert.equal(result.status, 0, result.stderr);
+        inProcess(importMain, page, sourced);
+        assert.equal(readFileSync(bundled, "utf8"), readFileSync(sourced, "utf8"));
+      },
+    );
   });
 
   test("a script reports a usage problem with exit code 2", () => {
