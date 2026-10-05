@@ -35,6 +35,14 @@ Execution plan:
 
 A napi-rs addon of the same Rust core for Node and Bun, chosen at load time with the WASM build as the fallback when no prebuilt binary fits the platform. Done when the test suite passes on both builds and a broken or missing addon falls back to WASM with a warning.
 
+Execution plan:
+
+1. Shared layer: `crates/weft-binding` takes `api`, `boundary`, `sources` and `web` out of `crates/weft-wasm`, so both engines call the same functions; `weft-wasm` keeps only the wasm-bindgen stubs. `crates/weft-node` (napi-rs, `cdylib`, `test = false`, own `unsafe_code = "deny"` because napi-derive expands to `allow(unsafe_code)` and `forbid` rejects it) holds the napi stubs, always with the `web` feature. `crates/weft-cli/tests/deps.rs` pins the new crate graphs.
+2. Build: `napi` config in `packages/core/package.json` (binary name `weft`, targets aarch64-apple-darwin, x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, x86_64-pc-windows-msvc); moon task `root:native` runs `napi build --platform --no-js` into the gitignored `packages/core/native/`. Only the host target is built here.
+3. Load time: `packages/core/src/native.ts` picks `native/weft.<platform>-<arch>[-gnu|-msvc].node`; `WEFT_ENGINE=auto|native|wasm` (default `auto`) is a load-time environment override, not a tool option, because weft.json is itself read through the engine. A missing file is silent in `auto` (bundled plugins and unsupported platforms never have it) and warned about under `native`; a file that fails to load is always warned about; either way the WebAssembly module takes over. `wasm.ts` and `web.ts` export the chosen engine and `engine` (`"native"` or `"wasm"`); the plugin bundles keep WebAssembly because their dist has no `native/` folder.
+4. Tests in `packages/core/test/engines.test.ts`: equal export lists on both engines; a broken addon file and a missing one fall back with a warning; a Node and Bun smoke run (Bun skipped with a message when it is not on PATH). `moon test` of core and catalog runs the suite under `WEFT_ENGINE=wasm` and `WEFT_ENGINE=native`, and the native run fails when the addon did not load.
+5. Verify: `mise exec -- pnpm install --frozen-lockfile && mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`; `moon run shared:build` if bundled sources change.
+
 ### T24. Runtime matrix
 
 Run the binding tests in Node, Deno, Bun and a headless browser through moon. Done when all four pass from one command.
