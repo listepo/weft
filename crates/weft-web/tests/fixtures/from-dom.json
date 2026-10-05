@@ -4607,6 +4607,59 @@
   }
  },
  {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Theme\"><label><span aria-hidden=\"true\">Accent colour</span><input data-weft-id=\"accent\" type=\"color\" aria-label=\"Accent colour\" value=\"#000000\"/></label></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "root",
+     "props": {
+      "label": "Theme"
+     },
+     "children": [
+      {
+       "kind": "color-picker",
+       "id": "accent",
+       "props": {
+        "label": "Accent colour",
+        "value": "#000000"
+       }
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#root",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#root",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#root",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#root",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
   "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Users\"><table data-weft-id=\"users\" aria-label=\"Users\"><thead><tr><th data-weft-id=\"col-name\" scope=\"col\" aria-sort=\"ascending\" tabindex=\"0\">Name</th><th data-weft-id=\"col-role\" scope=\"col\" aria-sort=\"none\">Role</th></tr></thead></table></main></body></html>\n",
   "result": {
    "document": {
@@ -4646,6 +4699,137 @@
          ]
         }
        ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#root",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#root",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#root",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#root",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Shipping\"><label><span aria-hidden=\"true\">City</span><input data-weft-id=\"city\" aria-label=\"City\" list=\"weft-city-options\" placeholder=\"Type a city\" value=\"\"/><datalist id=\"weft-city-options\"><option data-weft-id=\"city-lisbon\" value=\"Lisbon\">Portugal</option><option data-weft-id=\"city-madrid\" value=\"Madrid\">Spain</option></datalist></label></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "root",
+     "props": {
+      "label": "Shipping"
+     },
+     "children": [
+      {
+       "kind": "combobox",
+       "id": "city",
+       "props": {
+        "label": "City",
+        "placeholder": "Type a city",
+        "value": ""
+       },
+       "children": [
+        {
+         "kind": "option",
+         "id": "city-lisbon",
+         "props": {
+          "value": "Lisbon"
+         },
+         "children": [
+          "Portugal"
+         ]
+        },
+        {
+         "kind": "option",
+         "id": "city-madrid",
+         "props": {
+          "value": "Madrid"
+         },
+         "children": [
+          "Spain"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#root",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#root",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#root",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#root",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Delivery\"><label><span aria-hidden=\"true\">Delivery date</span><input data-weft-id=\"day\" type=\"date\" aria-label=\"Delivery date\" min=\"2026-01-01\" max=\"2026-12-31\" value=\"\"/></label></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "root",
+     "props": {
+      "label": "Delivery"
+     },
+     "children": [
+      {
+       "kind": "date-picker",
+       "id": "day",
+       "props": {
+        "label": "Delivery date",
+        "max": "2026-12-31",
+        "min": "2026-01-01",
+        "value": ""
+       }
       }
      ]
     }
@@ -5804,6 +5988,164 @@
   }
  },
  {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Sort\"><div data-weft-id=\"order\" aria-label=\"Order\" role=\"radiogroup\" data-weft-segmented=\"\"><span aria-hidden=\"true\">Order</span><label><input data-weft-id=\"order-new\" type=\"radio\" aria-label=\"Newest\" name=\"weft-order\" value=\"new\"/><span aria-hidden=\"true\">Newest</span></label><label><input data-weft-id=\"order-top\" type=\"radio\" aria-label=\"Top\" name=\"weft-order\" value=\"top\"/><span aria-hidden=\"true\">Top</span></label></div></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "root",
+     "props": {
+      "label": "Sort"
+     },
+     "children": [
+      {
+       "kind": "segmented-control",
+       "id": "order",
+       "props": {
+        "label": "Order"
+       },
+       "children": [
+        {
+         "kind": "segment",
+         "id": "order-new",
+         "props": {
+          "value": "new"
+         },
+         "children": [
+          "Newest"
+         ]
+        },
+        {
+         "kind": "segment",
+         "id": "order-top",
+         "props": {
+          "value": "top"
+         },
+         "children": [
+          "Top"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#root",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#root",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#root",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#root",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Calendar\"><div data-weft-id=\"view\" aria-label=\"View\" role=\"radiogroup\" data-weft-segmented=\"\"><span aria-hidden=\"true\">View</span><label><input data-weft-id=\"view-day\" type=\"radio\" aria-label=\"Day\" name=\"weft-view\" value=\"day\"/><span aria-hidden=\"true\">Day</span></label><label><input data-weft-id=\"view-week\" type=\"radio\" aria-label=\"Week\" name=\"weft-view\" value=\"week\"/><span aria-hidden=\"true\">Week</span></label><label><input data-weft-id=\"view-month\" type=\"radio\" aria-label=\"Month\" name=\"weft-view\" value=\"month\"/><span aria-hidden=\"true\">Month</span></label></div></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "root",
+     "props": {
+      "label": "Calendar"
+     },
+     "children": [
+      {
+       "kind": "segmented-control",
+       "id": "view",
+       "props": {
+        "label": "View"
+       },
+       "children": [
+        {
+         "kind": "segment",
+         "id": "view-day",
+         "props": {
+          "value": "day"
+         },
+         "children": [
+          "Day"
+         ]
+        },
+        {
+         "kind": "segment",
+         "id": "view-week",
+         "props": {
+          "value": "week"
+         },
+         "children": [
+          "Week"
+         ]
+        },
+        {
+         "kind": "segment",
+         "id": "view-month",
+         "props": {
+          "value": "month"
+         },
+         "children": [
+          "Month"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#root",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#root",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#root",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#root",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
   "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Locale\"><label><span aria-hidden=\"true\">Country</span><select data-weft-id=\"country\" aria-label=\"Country\"><option data-weft-id=\"c-pt\" value=\"pt\">Portugal</option><option data-weft-id=\"c-es\" value=\"es\">Spain</option></select></label></main></body></html>\n",
   "result": {
    "document": {
@@ -5843,6 +6185,60 @@
          ]
         }
        ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#root",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#root",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#root",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#root",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Sound\"><label><span aria-hidden=\"true\">Volume</span><input data-weft-id=\"volume\" type=\"range\" aria-label=\"Volume\" min=\"0\" max=\"100\" step=\"5\" value=\"0\"/></label></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "root",
+     "props": {
+      "label": "Sound"
+     },
+     "children": [
+      {
+       "kind": "slider",
+       "id": "volume",
+       "props": {
+        "label": "Volume",
+        "step": 5,
+        "value": 0
+       }
       }
      ]
     }
@@ -5949,6 +6345,61 @@
      "kind": "tokens",
      "path": "/screen#root/stack#actions",
      "note": "gap var(--weft-space-md) cannot be mapped back to a design token"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Order\"><label><span aria-hidden=\"true\">Quantity</span><span data-weft-stepper=\"\"><button type=\"button\" tabindex=\"-1\" aria-hidden=\"true\" data-weft-step=\"down\">−</button><input data-weft-id=\"quantity\" type=\"number\" aria-label=\"Quantity\" min=\"1\" max=\"10\" step=\"1\" value=\"1\"/><button type=\"button\" tabindex=\"-1\" aria-hidden=\"true\" data-weft-step=\"up\">+</button></span></label></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "root",
+     "props": {
+      "label": "Order"
+     },
+     "children": [
+      {
+       "kind": "stepper",
+       "id": "quantity",
+       "props": {
+        "label": "Quantity",
+        "max": 10,
+        "min": 1,
+        "value": 1
+       }
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#root",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#root",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#root",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#root",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
     }
    ],
    "diagnostics": []
@@ -9589,10 +10040,10 @@
          }
         },
         {
-         "kind": "x-aria-slider",
+         "kind": "slider",
          "id": "slider-1",
          "props": {
-          "role": "slider"
+          "label": ""
          }
         }
        ]
@@ -9777,9 +10228,9 @@
      "note": "<field> needs an accessible name and the input gives none"
     },
     {
-     "kind": "kinds",
-     "path": "/screen#screen-1/form#form-1/x-aria-slider#slider-1",
-     "note": "role slider has no kind in the catalog"
+     "kind": "names",
+     "path": "/screen#screen-1/form#form-1/slider#slider-1",
+     "note": "<slider> needs an accessible name and the input gives none"
     },
     {
      "kind": "tokens",
@@ -12749,12 +13200,12 @@
     {
      "kind": "kinds",
      "path": "/screen#screen/x-aria-option#option-1",
-     "note": "<option> belongs only in select"
+     "note": "<option> belongs only in select, combobox"
     },
     {
      "kind": "kinds",
      "path": "/screen#screen/x-aria-option#option-2",
-     "note": "<option> belongs only in select"
+     "note": "<option> belongs only in select, combobox"
     },
     {
      "kind": "props",
@@ -17111,7 +17562,7 @@
     {
      "kind": "kinds",
      "path": "/screen#screen/dialog#dialog-2/x-aria-option#tablist",
-     "note": "<option> belongs only in select"
+     "note": "<option> belongs only in select, combobox"
     },
     {
      "kind": "props",
@@ -21954,7 +22405,7 @@
     {
      "kind": "kinds",
      "path": "/screen#screen/x-aria-option#option-1",
-     "note": "<option> belongs only in select"
+     "note": "<option> belongs only in select, combobox"
     },
     {
      "kind": "structure",

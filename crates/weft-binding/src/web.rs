@@ -8,7 +8,8 @@ use weft_catalog::{DEFAULT_TOKENS_JSON, Token, load_tokens};
 use weft_core::to_document;
 use weft_core::{Catalog, Code, Diagnostic};
 use weft_import::{
-    BuildOptions, DISSOLVED_ROLES, ROLE_REFINEMENTS, Sem, build_document, empty_result,
+    BuildOptions, DISSOLVED_ROLES, ROLE_DEFAULTS, ROLE_REFINEMENTS, Sem, build_document,
+    empty_result,
 };
 use weft_web::{Framework, HtmlOptions, ImportOptions, JsxOptions};
 
@@ -68,6 +69,7 @@ struct Tables {
     max_html_length: usize,
     dissolved_roles: &'static [&'static str],
     role_refinements: IndexMap<&'static str, Refined>,
+    role_defaults: IndexMap<&'static str, &'static str>,
 }
 
 #[derive(Serialize)]
@@ -84,6 +86,7 @@ pub fn tables() -> Result<String> {
         input_roles: weft_web::INPUT_ROLES.iter().copied().collect(),
         max_html_length: weft_web::MAX_HTML_LENGTH,
         dissolved_roles: DISSOLVED_ROLES,
+        role_defaults: ROLE_DEFAULTS.iter().copied().collect(),
         role_refinements: ROLE_REFINEMENTS
             .iter()
             .map(|r| {

@@ -7,7 +7,7 @@ use std::collections::{HashMap, HashSet};
 use indexmap::IndexMap;
 use weft_catalog::Token;
 use weft_core::{
-    ARIA_ROLES, Catalog, Child, Diagnostic, Node, Value, is_action, is_id, read_value,
+    ARIA_ROLES, Catalog, Child, Diagnostic, Node, PropDefault, Value, is_action, is_id, read_value,
 };
 use weft_import::{
     BuildOptions, Built, ImportResult, LossKind, MAX_DEPTH, MAX_NODES, Note, Scalar, Sem,
@@ -71,8 +71,9 @@ pub const INPUT_ROLES: &[(&str, &str)] = &[
     ("submit", "button"),
 ];
 
+// A datalist is never shown on its own; the input that lists it reads its options.
 const SKIPPED: &[&str] = &[
-    "base", "head", "link", "meta", "noscript", "script", "style", "template", "title",
+    "base", "datalist", "head", "link", "meta", "noscript", "script", "style", "template", "title",
 ];
 const CONTROLS: &[&str] = &["input", "select", "textarea", "button"];
 const ALIGN: &[(&str, &str)] = &[
@@ -173,6 +174,7 @@ fn bind_value(raw: &str) -> Option<Value> {
 
 struct Ctx<'d> {
     dom: &'d Dom,
+    catalog: &'d Catalog,
     conventions: Option<&'d Conventions>,
     by_html_id: HashMap<&'d str, usize>,
     label_for: HashMap<&'d str, usize>,
@@ -183,6 +185,8 @@ struct Ctx<'d> {
     consumed: HashSet<usize>,
     /// Open <form> elements around the current one: only there does a submit button submit.
     forms: usize,
+    /// Open stepper wrappers around the current element: a number input there is a stepper.
+    steppers: usize,
     nodes: usize,
     truncated: bool,
 }
@@ -328,6 +332,63 @@ impl<'d> Ctx<'d> {
         squash(self.attr(el, "title").unwrap_or(""))
     }
 
+    /// The `datalist` an input lists its suggestions in.
+    fn datalist(&self, el: usize) -> Option<usize> {
+        let id = self.attr(el, "list")?;
+        let list = *self.by_html_id.get(id)?;
+        (self.dom.name(list) == Some("datalist")).then_some(list)
+    }
+
+    /// Whether `raw` is what a prop of `kind` already is when it is left out: a renderer writes
+    /// every bound and the type out, so keeping them would add values the document never had.
+    fn is_default(&self, kind: &str, prop: &str, raw: &str) -> bool {
+        let default = self
+            .catalog
+            .components
+            .get(kind)
+            .and_then(|def| def.prop(prop))
+            .and_then(|def| def.default.as_ref());
+        match default {
+            Some(PropDefault::Number(n)) => js_number_from(raw) == *n,
+            Some(PropDefault::String(text)) => raw == text,
+            _ => false,
+        }
+    }
+
+    /// What markup says beyond the role: the kinds that share a role with another are told apart
+    /// by the input type and by the marks the renderers leave (SPEC §9, "From a running UI"). A
+    /// kind the catalog does not have is not named, so the element keeps what its role gives.
+    fn refine(
+        &self,
+        el: usize,
+        tag: &str,
+        role: &'static str,
+    ) -> (&'static str, Option<&'static str>) {
+        let attr = |key: &str| self.attr(el, key);
+        let (role, kind) = match tag {
+            "input" if attr("role").is_none() => {
+                let ty = attr("type").unwrap_or("text").to_lowercase();
+                match ty.as_str() {
+                    "date" | "time" | "datetime-local" => (role, Some("date-picker")),
+                    "color" => (role, Some("color-picker")),
+                    "number" if self.steppers > 0 => (role, Some("stepper")),
+                    "text" | "search" | "email" | "url" | "tel" if self.datalist(el).is_some() => {
+                        ("combobox", Some("combobox"))
+                    }
+                    _ => (role, None),
+                }
+            }
+            _ if role == "radiogroup" && attr("data-weft-segmented").is_some() => {
+                (role, Some("segmented-control"))
+            }
+            _ => (role, None),
+        };
+        (
+            role,
+            kind.filter(|k| self.catalog.components.contains_key(*k)),
+        )
+    }
+
     fn element(&mut self, el: usize, depth: usize, label: Option<usize>) -> Option<Sem> {
         let dom = self.dom;
         let tag = dom.name(el)?.to_lowercase();
@@ -350,6 +411,7 @@ impl<'d> Ctx<'d> {
             return None;
         }
         let role = role_of(dom, el, tag, self.conventions.is_some());
+        let (role, named) = self.refine(el, tag, role);
         // Hidden content is not part of the UI, except inactive tab panels, which hold a tab's
         // content.
         let hidden = attr("hidden").is_some() && role != "tabpanel";
@@ -364,6 +426,7 @@ impl<'d> Ctx<'d> {
         }
 
         let mut s = Sem::new(role, self.acc_name(el, tag, role, label));
+        s.kind = named.map(str::to_owned);
         if hidden {
             s.values.insert("hidden".into(), Value::Bool(true));
         }
@@ -438,8 +501,32 @@ impl<'d> Ctx<'d> {
         }
         if tag == "input" {
             let kind = attr("type").unwrap_or("text").to_lowercase();
-            if matches!(role, "textbox" | "spinbutton" | "searchbox") && kind != "text" {
-                set("type", &kind);
+            match named {
+                Some("date-picker") => {
+                    if !self.is_default("date-picker", "type", date_type(&kind)) {
+                        set("type", date_type(&kind));
+                    }
+                }
+                Some("stepper" | "combobox" | "color-picker") => {}
+                _ => {
+                    if matches!(role, "textbox" | "spinbutton" | "searchbox") && kind != "text" {
+                        set("type", &kind);
+                    }
+                }
+            }
+            let ranged = if role == "slider" {
+                Some("slider")
+            } else {
+                named
+            };
+            if let Some(ranged @ ("slider" | "stepper" | "date-picker")) = ranged {
+                for bound in ["min", "max", "step"] {
+                    if let Some(v) = attr(bound)
+                        && !self.is_default(ranged, bound, v)
+                    {
+                        set(bound, v);
+                    }
+                }
             }
             if let Some(v) = attr("value")
                 && role != "checkbox"
@@ -506,9 +593,18 @@ impl<'d> Ctx<'d> {
             left_out_style(&mut s, attr("style"));
         }
 
+        if named == Some("combobox")
+            && let Some(list) = self.datalist(el)
+        {
+            s.children = self.children(list, depth, None);
+        }
         if !matches!(tag, "input" | "textarea" | "img") {
             if tag == "form" {
                 self.forms += 1;
+            }
+            let stepper = attr("data-weft-stepper").is_some();
+            if stepper {
+                self.steppers += 1;
             }
             // What a control holds (a select's options) is its own content, not the name a
             // wrapping label gives it.
@@ -522,6 +618,9 @@ impl<'d> Ctx<'d> {
             s.children = self.children(el, depth, within);
             if tag == "form" {
                 self.forms -= 1;
+            }
+            if stepper {
+                self.steppers -= 1;
             }
             if self.conventions.is_some() {
                 lift_bound_text(&mut s);
@@ -729,6 +828,15 @@ impl<'d> Ctx<'d> {
             }
         }
         out
+    }
+}
+
+/// The `type` of a `date-picker` an `<input type>` stands for.
+fn date_type(input: &str) -> &'static str {
+    match input {
+        "time" => "time",
+        "datetime-local" => "datetime",
+        _ => "date",
     }
 }
 
@@ -1023,6 +1131,7 @@ pub(crate) fn read_dom(
 ) -> Built {
     let mut ctx = Ctx {
         dom,
+        catalog,
         conventions,
         by_html_id: HashMap::new(),
         label_for: HashMap::new(),
@@ -1031,6 +1140,7 @@ pub(crate) fn read_dom(
         notes,
         consumed: HashSet::new(),
         forms: 0,
+        steppers: 0,
         nodes: 0,
         truncated: false,
     };
