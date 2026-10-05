@@ -33,6 +33,11 @@ const checkedProp = bool("Whether the control is on; bind it to a boolean to rea
 });
 const disabledProp = (what: string): PropDef =>
   bool(`Set to true to make ${what} non-interactive.`);
+const rangeProps = (what: string): Record<string, PropDef> => ({
+  min: num(`The smallest value ${what} allows; the default is 0.`, { default: 0 }),
+  max: num(`The largest value ${what} allows; the default is 100.`, { default: 100 }),
+  step: num(`The distance between values ${what} moves in; the default is 1.`, { default: 1 }),
+});
 const emptySlot = (what: string): SlotDef => ({
   description: `Content shown instead of the ${what} when there are none, such as "No results found".`,
 });
@@ -248,12 +253,117 @@ const components: Record<string, ComponentDef> = {
     events: ["change"],
   },
   option: {
-    description: "One choice inside a select; its content is the visible text.",
+    description:
+      "One choice inside a select or combobox; its content is the visible text.",
     role: "option",
     content: "text",
-    allowedParents: ["select"],
+    allowedParents: ["select", "combobox"],
     props: {
-      value: str("The value the select takes when this option is chosen.", { required: true }),
+      value: str("The value the select or combobox takes when this option is chosen.", {
+        required: true,
+      }),
+    },
+  },
+  combobox: {
+    description:
+      "A text input with suggested options, for a value the user may type or pick; use select when only the listed options are valid.",
+    role: "combobox",
+    content: "nodes",
+    allowedChildren: ["option", "each"],
+    requiresLabel: true,
+    props: {
+      value: str("The text of the input; bind it to read and write what the user typed or picked.", {
+        writable: true,
+      }),
+      placeholder: str("Hint text shown while the input is empty; it does not replace the label."),
+      disabled: disabledProp("the combobox"),
+    },
+    events: ["change"],
+  },
+  slider: {
+    description:
+      "A thumb the user drags along a range to choose a number; use it when the exact value matters less than the position.",
+    role: "slider",
+    content: "none",
+    requiresLabel: true,
+    props: {
+      value: num("The current number; bind it to read and write the choice.", { writable: true }),
+      ...rangeProps("the slider"),
+      disabled: disabledProp("the slider"),
+    },
+    events: ["change"],
+  },
+  stepper: {
+    description:
+      "A number the user raises or lowers by a fixed step with plus and minus buttons; use it for small counts such as a quantity.",
+    role: "spinbutton",
+    content: "none",
+    requiresLabel: true,
+    props: {
+      value: num("The current number; bind it to read and write the count.", { writable: true }),
+      min: num("The smallest value the stepper allows; without it the value has no lower bound."),
+      max: num("The largest value the stepper allows; without it the value has no upper bound."),
+      step: num("The amount one press adds or subtracts; the default is 1.", { default: 1 }),
+      disabled: disabledProp("the stepper"),
+    },
+    events: ["change"],
+  },
+  "date-picker": {
+    description:
+      "Chooses a date, a time or both; the value is written as text in a fixed format.",
+    role: "textbox",
+    content: "none",
+    requiresLabel: true,
+    props: {
+      type: oneOf(
+        "What is chosen: `date` as yyyy-mm-dd, `time` as hh:mm, `datetime` as yyyy-mm-ddThh:mm.",
+        ["date", "time", "datetime"],
+        { default: "date" },
+      ),
+      value: str("The chosen date or time in the format of `type`; bind it to read and write it.", {
+        writable: true,
+      }),
+      min: str("The earliest allowed value, in the format of `type`."),
+      max: str("The latest allowed value, in the format of `type`."),
+      disabled: disabledProp("the picker"),
+    },
+    events: ["change"],
+  },
+  "color-picker": {
+    description: "Chooses a colour; the value is written as a lowercase hex colour such as #3b82f6.",
+    role: "textbox",
+    content: "none",
+    requiresLabel: true,
+    props: {
+      value: str("The chosen colour as #rrggbb; bind it to read and write the choice.", {
+        writable: true,
+      }),
+      disabled: disabledProp("the colour picker"),
+    },
+    events: ["change"],
+  },
+  "segmented-control": {
+    description:
+      "A row of joined segments of which exactly one can be chosen; use it for a few short, mutually exclusive choices that switch a view or mode.",
+    role: "radiogroup",
+    content: "nodes",
+    allowedChildren: ["segment", "each"],
+    requiresLabel: true,
+    props: {
+      value: str("The `value` of the chosen segment; bind it to read and write the choice.", {
+        writable: true,
+      }),
+    },
+    events: ["change"],
+  },
+  segment: {
+    description: "One choice inside a segmented control; its content is the visible text.",
+    role: "radio",
+    content: "text",
+    allowedParents: ["segmented-control"],
+    props: {
+      value: str("The value the control takes when this segment is chosen.", { required: true }),
+      disabled: disabledProp("this segment"),
     },
   },
   list: {

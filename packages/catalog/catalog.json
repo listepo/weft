@@ -308,15 +308,188 @@
       "events": ["change"]
     },
     "option": {
-      "description": "One choice inside a select; its content is the visible text.",
+      "description": "One choice inside a select or combobox; its content is the visible text.",
       "role": "option",
       "content": "text",
-      "allowedParents": ["select"],
+      "allowedParents": ["select", "combobox"],
       "props": {
         "value": {
-          "description": "The value the select takes when this option is chosen.",
+          "description": "The value the select or combobox takes when this option is chosen.",
           "type": "string",
           "required": true
+        },
+        "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
+        }
+      }
+    },
+    "combobox": {
+      "description": "A text input with suggested options, for a value the user may type or pick; use select when only the listed options are valid.",
+      "role": "combobox",
+      "content": "nodes",
+      "allowedChildren": ["option", "each"],
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The text of the input; bind it to read and write what the user typed or picked.",
+          "type": "string",
+          "writable": true
+        },
+        "placeholder": {
+          "description": "Hint text shown while the input is empty; it does not replace the label.",
+          "type": "string"
+        },
+        "disabled": {
+          "description": "Set to true to make the combobox non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["change"]
+    },
+    "slider": {
+      "description": "A thumb the user drags along a range to choose a number; use it when the exact value matters less than the position.",
+      "role": "slider",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The current number; bind it to read and write the choice.",
+          "type": "number",
+          "writable": true
+        },
+        "min": {
+          "description": "The smallest value the slider allows; the default is 0.",
+          "type": "number",
+          "default": 0
+        },
+        "max": {
+          "description": "The largest value the slider allows; the default is 100.",
+          "type": "number",
+          "default": 100
+        },
+        "step": {
+          "description": "The distance between values the slider moves in; the default is 1.",
+          "type": "number",
+          "default": 1
+        },
+        "disabled": {
+          "description": "Set to true to make the slider non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["change"]
+    },
+    "stepper": {
+      "description": "A number the user raises or lowers by a fixed step with plus and minus buttons; use it for small counts such as a quantity.",
+      "role": "spinbutton",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The current number; bind it to read and write the count.",
+          "type": "number",
+          "writable": true
+        },
+        "min": {
+          "description": "The smallest value the stepper allows; without it the value has no lower bound.",
+          "type": "number"
+        },
+        "max": {
+          "description": "The largest value the stepper allows; without it the value has no upper bound.",
+          "type": "number"
+        },
+        "step": {
+          "description": "The amount one press adds or subtracts; the default is 1.",
+          "type": "number",
+          "default": 1
+        },
+        "disabled": {
+          "description": "Set to true to make the stepper non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["change"]
+    },
+    "date-picker": {
+      "description": "Chooses a date, a time or both; the value is written as text in a fixed format.",
+      "role": "textbox",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "type": {
+          "description": "What is chosen: `date` as yyyy-mm-dd, `time` as hh:mm, `datetime` as yyyy-mm-ddThh:mm.",
+          "type": "enum",
+          "values": ["date", "time", "datetime"],
+          "default": "date"
+        },
+        "value": {
+          "description": "The chosen date or time in the format of `type`; bind it to read and write it.",
+          "type": "string",
+          "writable": true
+        },
+        "min": {
+          "description": "The earliest allowed value, in the format of `type`.",
+          "type": "string"
+        },
+        "max": {
+          "description": "The latest allowed value, in the format of `type`.",
+          "type": "string"
+        },
+        "disabled": {
+          "description": "Set to true to make the picker non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["change"]
+    },
+    "color-picker": {
+      "description": "Chooses a colour; the value is written as a lowercase hex colour such as #3b82f6.",
+      "role": "textbox",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The chosen colour as #rrggbb; bind it to read and write the choice.",
+          "type": "string",
+          "writable": true
+        },
+        "disabled": {
+          "description": "Set to true to make the colour picker non-interactive.",
+          "type": "boolean"
+        }
+      },
+      "events": ["change"]
+    },
+    "segmented-control": {
+      "description": "A row of joined segments of which exactly one can be chosen; use it for a few short, mutually exclusive choices that switch a view or mode.",
+      "role": "radiogroup",
+      "content": "nodes",
+      "allowedChildren": ["segment", "each"],
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The `value` of the chosen segment; bind it to read and write the choice.",
+          "type": "string",
+          "writable": true
+        }
+      },
+      "events": ["change"]
+    },
+    "segment": {
+      "description": "One choice inside a segmented control; its content is the visible text.",
+      "role": "radio",
+      "content": "text",
+      "allowedParents": ["segmented-control"],
+      "props": {
+        "value": {
+          "description": "The value the control takes when this segment is chosen.",
+          "type": "string",
+          "required": true
+        },
+        "disabled": {
+          "description": "Set to true to make this segment non-interactive.",
+          "type": "boolean"
         },
         "text": {
           "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",

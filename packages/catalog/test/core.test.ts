@@ -79,7 +79,42 @@ const expected: Record<string, Row> = {
     label: true,
     events: ["change"],
   },
-  option: { role: "option", content: "text", parents: ["select"], required: ["value"] },
+  option: {
+    role: "option",
+    content: "text",
+    parents: ["select", "combobox"],
+    required: ["value"],
+  },
+  combobox: {
+    role: "combobox",
+    content: "nodes",
+    children: ["option", "each"],
+    label: true,
+    events: ["change"],
+  },
+  slider: { role: "slider", content: "none", label: true, events: ["change"] },
+  stepper: { role: "spinbutton", content: "none", label: true, events: ["change"] },
+  "date-picker": {
+    role: "textbox",
+    content: "none",
+    label: true,
+    enums: { type: ["date", "time", "datetime"] },
+    events: ["change"],
+  },
+  "color-picker": { role: "textbox", content: "none", label: true, events: ["change"] },
+  "segmented-control": {
+    role: "radiogroup",
+    content: "nodes",
+    children: ["segment", "each"],
+    label: true,
+    events: ["change"],
+  },
+  segment: {
+    role: "radio",
+    content: "text",
+    parents: ["segmented-control"],
+    required: ["value"],
+  },
   list: {
     role: "list",
     content: "nodes",
@@ -136,6 +171,21 @@ const propTypes: Record<string, string> = {
   "dialog.modal": "boolean",
   "dialog.open": "boolean",
   "menu-item.disabled": "boolean",
+  "slider.value": "number",
+  "slider.min": "number",
+  "slider.max": "number",
+  "slider.step": "number",
+  "stepper.value": "number",
+  "stepper.min": "number",
+  "stepper.max": "number",
+  "stepper.step": "number",
+  "date-picker.value": "string",
+  "date-picker.min": "string",
+  "date-picker.max": "string",
+  "color-picker.value": "string",
+  "combobox.value": "string",
+  "combobox.placeholder": "string",
+  "segmented-control.value": "string",
 };
 
 const writable = [
@@ -146,15 +196,26 @@ const writable = [
   "select.value",
   "tabs.selected",
   "dialog.open",
+  "slider.value",
+  "stepper.value",
+  "date-picker.value",
+  "color-picker.value",
+  "combobox.value",
+  "segmented-control.value",
 ];
 
-const defaults: Record<string, string | boolean> = {
+const defaults: Record<string, string | boolean | number> = {
   "stack.direction": "column",
   "button.variant": "secondary",
   "button.submit": false,
   "field.type": "text",
   "dialog.modal": true,
   "alert.tone": "info",
+  "slider.min": 0,
+  "slider.max": 100,
+  "slider.step": 1,
+  "stepper.step": 1,
+  "date-picker.type": "date",
 };
 
 const sorted = (a: readonly string[] | undefined) => [...(a ?? [])].sort();

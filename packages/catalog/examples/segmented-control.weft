@@ -1,0 +1,7 @@
+<screen id="root" label="Calendar" weft="0.1">
+  <segmented-control id="view" label="View" value="{$.view}" on-change="calendar.update">
+    <segment id="view-day" value="day">Day</segment>
+    <segment id="view-week" value="week">Week</segment>
+    <segment id="view-month" value="month">Month</segment>
+  </segmented-control>
+</screen>

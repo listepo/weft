@@ -1,0 +1,6 @@
+<screen id="root" label="Sort" weft="0.1">
+  <segmented-control id="order" label="Order" value="{$.order}">
+    <segment id="order-new" disabled="false" value="new">Newest</segment>
+    <segment id="order-top" value="top">Top</segment>
+  </segmented-control>
+</screen>
