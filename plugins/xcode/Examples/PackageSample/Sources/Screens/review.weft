@@ -1,0 +1,8 @@
+<screen id="review" label="Review" weft="0.1">
+  <heading id="title" level="1">Rate your visit</heading>
+  <stack id="score-row" direction="row" gap="{token.space.md}">
+    <text id="score-label">Your score</text>
+    <rating id="score" color="{token.color.accent}" label="Your score" value="{$.score}"/>
+  </stack>
+  <button id="send" variant="primary" on-press="review.send">Send</button>
+</screen>

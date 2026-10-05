@@ -33,6 +33,10 @@ targets: [
 
 (`package:` is the package's identity, which for a path dependency is its folder name; a dependency by URL uses the repository name.) With a `login.weft` in `Sources/Screens/`, the target gets `LoginScreen`, `LoginModel` and the rest of what `weft swiftui` writes, and `swift build` runs it. The plugin reads the nearest `weft.json` (in the file's folder or above it, up to the package), so the project's catalog and tokens apply. It declares the screen, the `weft.json` and the catalog and token files that names as inputs, and the generated file as the output, so an unchanged build runs nothing and a change to any of them regenerates that screen alone. A screen that does not validate fails the build with the validator's diagnostics (`login.weft:5:7 W401 …`). `export.swiftui.outDir` has no effect here, because the output goes into the build folder.
 
+**Shared tokens.** In a project, the screens read `WeftTokens` (`export.swiftui.sharedTokens`, default `true`), so the plugin adds one more command per target: `weft swiftui-tokens` writes `WeftTokens.swift` once, whatever the number of screens, and only the `weft.json` and its token and catalog files are its inputs. A target is one Swift module and holds one `WeftTokens`, so a target whose screens use two projects with shared tokens fails with a message naming both `weft.json` files; set `sharedTokens` to `false` in all but one, or split the target. A screen with no project carries its own theme.
+
+**Custom components.** A kind of the project's catalog extension becomes a call of a view the target must contain, such as `RatingView` for `rating` ([the generator's README](../crates/weft-swiftui/README.md#custom-components) lists the arguments). The generated file's header comment names the views it needs, and a missing one fails the build with `cannot find 'RatingView' in scope`. `Examples/PackageSample` has both: `login.weft` and `review.weft` share `WeftTokens.swift`, and `review.weft` uses `rating`, written in `RatingView.swift`.
+
 An Xcode project uses the same plugin: add the package, then under the target's Build Phases open "Run Build Tool Plug-ins" and add `WeftBuildTool`. `Examples/XcodeSample` does it with an XcodeGen spec (`xcodegen generate` writes the project, which is not committed). The `.weft` file must be in the target, where Xcode copies it as a resource. Xcode asks you to trust a package plugin the first time; a build without the UI passes `-skipPackagePluginValidation`.
 
 ## The command plugin
@@ -42,7 +46,7 @@ $ swift package --allow-writing-to-package-directory weft export Sources/Screens
 $ swift package --allow-writing-to-package-directory weft import Sources/Screens/Hosting.swift --out-dir Imported
 ```
 
-`export` writes `<screen>.swift`, `import` writes `<view>.weft`. Names are relative to the package. The output goes to `--out-dir`, else the project's `export.swiftui.outDir` or `import.swiftui.outDir`, else next to the input. The plugin declares the permission `writeToPackageDirectory`, so SwiftPM refuses without `--allow-writing-to-package-directory` and states why; Xcode asks in a dialog. It refuses to replace a file that exists unless you pass `--force`, so an import cannot silently overwrite the screen an export started from. Losses of an import are printed as the importer prints them.
+`export` writes `<screen>.swift`, and `WeftTokens.swift` next to it when the project shares tokens; `import` writes `<view>.weft`. Names are relative to the package. The output goes to `--out-dir`, else the project's `export.swiftui.outDir` or `import.swiftui.outDir`, else next to the input. The plugin declares the permission `writeToPackageDirectory`, so SwiftPM refuses without `--allow-writing-to-package-directory` and states why; Xcode asks in a dialog. It refuses to replace a file that exists unless you pass `--force`, so an import cannot silently overwrite the screen an export started from. `WeftTokens.swift` is the exception when `weft` wrote it: every screen exported to that folder needs the same one. Losses of an import are printed as the importer prints them.
 
 ## The Source Editor Extension
 
@@ -103,9 +107,9 @@ What is not known: whether an in-Xcode agent reads a project's `.mcp.json`, and 
 `moon run xcode-plugin:test` (also part of `moon ci`) runs, and skips with a message when `xcrun`, Xcode or the bundle is missing:
 
 - the bundle's `info.json` and its arm64 binary;
-- the SwiftPM sample builds through the build tool plugin, the generated file typechecks for iOS 17 and macOS 14, an unchanged build runs nothing, a token file change regenerates, and an invalid screen fails the build;
-- the Xcode project sample builds for iOS 17 and macOS 14 through the plugin;
-- the command plugin refuses without permission, round-trips a corpus screen, refuses to overwrite, and honours `weft.json`;
+- the SwiftPM sample builds through the build tool plugin with one `WeftTokens.swift` for its two screens, the generated files typecheck for iOS 17 and macOS 14, an unchanged build runs nothing, a token file change regenerates, a missing custom view, two shared-token projects in one target and an invalid screen fail the build;
+- the Xcode project sample, with the same two screens and custom view, builds for iOS 17 and macOS 14 through the plugin;
+- the command plugin refuses without permission, round-trips a corpus screen, writes `WeftTokens.swift` next to it, refuses to overwrite, and honours `weft.json`;
 - the editor extension's core passes `swift test`, the project builds with `xcodebuild`, the extension and its helper carry the right entitlements, and the sandboxed host app runs the embedded `weft`;
 - the agent script registers the server and the guide in a temporary folder.
 

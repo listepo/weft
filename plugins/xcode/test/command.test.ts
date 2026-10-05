@@ -35,7 +35,11 @@ describe.skipIf(skipReason)("command plugin", () => {
     const exported = swiftPackage(["export", screen, "--out-dir", "Generated"]);
     expect(exported.status, exported.output).toBe(0);
     const swift = join(ws.sample, "Generated/login.swift");
-    expect(readFileSync(swift, "utf8")).toContain("struct LoginScreen: View");
+    expect(readFileSync(swift, "utf8")).toContain("var theme = WeftTokens()");
+    // The screen reads the project's shared tokens, so they are written next to it.
+    expect(readFileSync(join(ws.sample, "Generated/WeftTokens.swift"), "utf8")).toContain(
+      "struct WeftTokens: Sendable",
+    );
 
     const imported = swiftPackage(["import", "Generated/login.swift", "--out-dir", "Imported"]);
     expect(imported.status, imported.output).toBe(0);
