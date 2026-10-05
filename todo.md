@@ -7,3 +7,6 @@
 - T46. Simulator sharing for the SwiftUI screenshot suite
 - T47. Static page parity with the generated components
 - T49. Token modes in the design plugin UI
+- T50. Richer controls
+- T51. Glass material tokens
+- T52. 3D transforms and models

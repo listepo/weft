@@ -13,6 +13,9 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T46 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T47 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T49 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
+| T50 | todo | P2 | 4 | 0% | |
+| T51 | todo | P2 | 3 | 0% | |
+| T52 | todo | P2 | 5 | 0% | |
 
 ### T8. Evaluation
 
@@ -194,3 +197,59 @@ Done when:
 - the plugin bundles are rebuilt;
 - the plugin READMEs and skills are updated;
 - the full check exits 0.
+
+### T50. Richer controls
+
+The catalog has `select`, `menu`, `radio-group`, `checkbox` and `switch`, but none of the controls richer screens need. Add these kinds, as the creator chose:
+
+- a slider (a range with min, max and step);
+- a stepper (a number with a step);
+- a date and time picker;
+- a colour picker;
+- a segmented control;
+- a combobox. Say in the plan whether it is a new kind or a mode of `select`, and why.
+
+For each kind:
+- **Research first:** the WAI-ARIA pattern, the HTML element, the SwiftUI view, and the Figma/Penpot drawing, cited in `research.md`.
+- **SPEC and catalog:** add them to SPEC (kinds, props, events and bindings) and to the catalog.
+- **Every target:** the reference renderer, React, SolidJS, the static page, SwiftUI and the design tools.
+- **Importers:** each importer that can read the kind back reads it.
+
+Add one or more corpus screens that use every new kind, with data, and cover them wherever the existing corpus is covered:
+- insta snapshots;
+- Chromium screenshots of React, SolidJS and the static page;
+- SwiftUI simulator screenshots;
+- round trips;
+- Figma and Penpot builds over the fakes.
+
+The coverage test that every kind, prop and enum is used must still pass. Done when the full check exits 0 and new baselines are reviewed.
+
+### T51. Glass material tokens
+
+A frosted-glass surface is expressed as a token, as the creator chose: a `material` token (background blur, tint colour and opacity) that an element takes through its style, like other tokens.
+
+- **Research:** the DTCG 2025.10 format has no material type, so the plan cites the format, says how the token is written (a Weft extension type or a composite of DTCG types), and keeps standard tools able to read the file.
+- **Web targets:** `backdrop-filter` with a solid fallback where it is unsupported.
+- **SwiftUI:** `glassEffect` on iOS 26 and later (or the current Liquid Glass API, cited), `Material` before it.
+- **Figma and Penpot:** a background blur with the tint fill, read back on export.
+- **Modes:** dark and light modes (T45) may give the material different values.
+
+Add a corpus screen with glass surfaces over an image or gradient background, so the effect is visible in screenshots. Cover it like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Done when the full check exits 0 and new baselines are reviewed.
+
+### T52. 3D transforms and models
+
+Two parts, as the creator chose.
+
+1. **3D transforms on any element:** rotation on each axis, perspective and depth, e.g. a flipped or tilted card.
+   - Web: CSS `perspective` and `rotate3d`.
+   - SwiftUI: `rotation3DEffect`.
+   - Figma and Penpot: the nearest 2D projection, with a note when it is lossy.
+   - Importers read the transforms back.
+2. **A model element** showing a 3D asset (glTF and/or USDZ, chosen and cited in the plan) with a still fallback image and an accessible label.
+   - Web: a maintained viewer such as `<model-viewer>`, picked in the plan.
+   - SwiftUI: RealityKit `Model3D`.
+   - Design tools: the fallback image.
+   - Asset paths are untrusted: relative to the project, no URLs unless SPEC allows them, and size-bounded.
+   - Add a small model asset under a compatible licence to the corpus.
+
+Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
