@@ -184,16 +184,7 @@ export interface PVariants {
   variantComponents(): PLibraryComponent[];
 }
 
-/**
- * Data private to this plugin on an object that has it (`PluginData` of the official type, which
- * `Library` extends). A key that was never set reads as an empty string.
- */
-export interface PPluginData {
-  getPluginData(key: string): string;
-  setPluginData(key: string, value: string): void;
-}
-
-export interface PLibrary extends PPluginData {
+export interface PLibrary extends PSharedData {
   readonly components: readonly PLibraryComponent[];
   readonly tokens: PTokenCatalog;
   createComponent(shapes: PShape[]): PLibraryComponent;

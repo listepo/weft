@@ -775,9 +775,10 @@ export class FakePenpot {
   readonly library = {
     local: {
       components: [] as FakeComponent[],
-      getPluginData: (key: string): string => this.libraryData.get(key) ?? "",
-      setPluginData: (key: string, value: string): void => {
-        this.libraryData.set(key, value);
+      getSharedPluginData: (namespace: string, key: string): string =>
+        this.libraryData.get(`${namespace}/${key}`) as string,
+      setSharedPluginData: (namespace: string, key: string, value: string): void => {
+        this.libraryData.set(`${namespace}/${key}`, value);
       },
       tokens: new FakeTokenCatalog(),
       createComponent: (shapes: FakeShape[]): FakeComponent => {
