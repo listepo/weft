@@ -13,7 +13,7 @@
 // group is on at a time, and turning a set on or off by hand turns every theme off.
 // Typing a value over a token detaches it, as Penpot's UI does; whether the plugin API does the
 // same is not documented, and the read-back handles both.
-import type { PFill, PStroke, PToken, PTokenType, PTrack } from "../src/api.ts";
+import type { PBlur, PFill, PStroke, PToken, PTokenType, PTrack } from "../src/api.ts";
 
 const STRUCTURE = "Cannot change the structure of a component copy";
 
@@ -32,6 +32,7 @@ abstract class FakeBase {
   height = 100;
   hidden = false;
   borderRadius = 0;
+  backgroundBlur: PBlur | undefined;
   strokes: PStroke[] = [];
   layoutCell: { row?: number; column?: number } | undefined;
   parent: Parent | undefined;
@@ -177,6 +178,7 @@ abstract class FakeBase {
     to.height = this.height;
     to.hidden = this.hidden;
     to.borderRadius = this.borderRadius;
+    to.backgroundBlur = this.backgroundBlur === undefined ? undefined : { ...this.backgroundBlur };
     to.fillList = structuredClone(this.fillList);
     to.strokes = structuredClone(this.strokes);
     Object.assign(to.tokens, this.tokens);
@@ -465,6 +467,7 @@ export class FakeBoard extends FakeBase {
     this.fills = from.fills;
     this.strokes = from.strokes;
     this.borderRadius = from.borderRadius;
+    this.backgroundBlur = from.backgroundBlur;
     for (const s of this.descendants()) s.inCopy = true;
   }
 

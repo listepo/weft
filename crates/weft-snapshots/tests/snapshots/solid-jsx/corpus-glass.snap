@@ -1,0 +1,38 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-glass as solid-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="glass" aria-label="Glass">
+      <div data-weft-id="card" style={{ gap: "var(--weft-space-md)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "flex", "flex-direction": "column" }} data-weft-material="">
+        <h2 data-weft-id="title">
+          {!(_text(props.data?.title).trim() === "") ? _squash(_text(props.data?.title)) : ""}
+        </h2>
+        <div data-weft-id="body">The panel blurs what is behind it.</div>
+        <button data-weft-id="close" type="button" data-variant="primary" onClick={(_e) => _act(props.actions, { id: "close", action: "glass.close" })}>Got it</button>
+      </div>
+      <div data-weft-id="tiles" style={{ gap: "var(--weft-space-sm)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "grid", "grid-template-columns": "repeat(2, minmax(0, 1fr))" }} data-weft-material="">
+        <div data-weft-id="tile-light">Light</div>
+        <div data-weft-id="tile-dark">Dark</div>
+      </div>
+    </main>
+  );
+}

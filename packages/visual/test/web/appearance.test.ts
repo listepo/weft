@@ -2,13 +2,14 @@
 // `prefers-color-scheme`: the static page follows it through its own stylesheet, the React
 // component through the `weft css-tokens` stylesheet, and the reference renderer draws the theme
 // it was asked for. Each is held to a reviewed baseline, and the reference renderer must look like
-// React in both themes.
+// React in both themes. The review lines are glass (T51), so the screen is shown over a backdrop
+// and the dark theme's own tint and blur are visible.
 import { afterAll, beforeAll, describe, test } from "vitest";
 import { commands } from "vitest/browser";
 import type { ComponentType } from "react";
 import { example } from "virtual:weft-appearance";
 import component from "virtual:weft-appearance-component";
-import { expectBaseline, expectSameLook, showPage, showReact } from "./stage.ts";
+import { BACKDROP, expectBaseline, expectSameLook, showPage, showReact } from "./stage.ts";
 
 const NAME = "example-review";
 
@@ -22,15 +23,15 @@ for (const scheme of ["light", "dark"] as const) {
   describe(scheme, () => {
     beforeAll(async () => {
       await commands.colorScheme(scheme);
-      await showPage("html", example.html);
+      await showPage("html", example.html, BACKDROP);
       // The stylesheet's comment cannot end the style element: it holds no `<`.
       await showReact(
         "react",
         component as ComponentType<{ data?: unknown }>,
         { data: example.data },
-        `<style>${example.css}</style>`,
+        `<style>${example.css}</style>${BACKDROP}`,
       );
-      await showPage("reference", example.reference[scheme]);
+      await showPage("reference", example.reference[scheme], BACKDROP);
     });
 
     test("the static page matches its reviewed baseline", async ({ skip }) => {

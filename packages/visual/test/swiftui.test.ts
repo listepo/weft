@@ -58,6 +58,16 @@ const SAMPLE_SCREEN = "sample-review";
 // The example project's review screen, with its own theme, in either appearance.
 const EXAMPLE_SCREEN = "example-review";
 const EXAMPLE_DARK = "example-review-dark";
+// The corpus glass screen in the dark appearance (T51): its glass is drawn by the system, which
+// adapts to the appearance by itself.
+const GLASS_DARK = "glass-dark";
+// The screens with a glass material, shown over a backdrop the glass can blur.
+const OVER_BACKDROP = new Set(["glass", EXAMPLE_SCREEN]);
+// A dark shot is its light screen again, in the other appearance.
+const DARK_OF = new Map([
+  [EXAMPLE_DARK, EXAMPLE_SCREEN],
+  [GLASS_DARK, "glass"],
+]);
 
 const run = (cmd: string, args: string[]) =>
   spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
@@ -177,6 +187,38 @@ struct WeftScreensApp: App {
     }
 }
 
+// What a glass screen is shown over, as in the Chromium stage: diagonal stripes in three colours,
+// darker in the dark appearance. Glass blurs what is behind it, and plain white has nothing to blur.
+struct GlassBackdrop<Content: View>: View {
+    @Environment(\\.colorScheme) private var scheme
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        content
+            .padding(24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(Canvas { context, size in
+                let colors: [Color] = scheme == .dark
+                    ? [Color(red: 0.533, green: 0.075, blue: 0.216), Color(red: 0.118, green: 0.227, blue: 0.541), Color(red: 0.522, green: 0.302, blue: 0.055)]
+                    : [Color(red: 0.882, green: 0.114, blue: 0.282), Color(red: 0.145, green: 0.388, blue: 0.922), Color(red: 0.98, green: 0.8, blue: 0.082)]
+                let step: CGFloat = 28
+                var x = -size.height
+                var i = 0
+                while x < size.width {
+                    var stripe = Path()
+                    stripe.move(to: CGPoint(x: x, y: 0))
+                    stripe.addLine(to: CGPoint(x: x + step, y: 0))
+                    stripe.addLine(to: CGPoint(x: x + step + size.height, y: size.height))
+                    stripe.addLine(to: CGPoint(x: x + size.height, y: size.height))
+                    stripe.closeSubpath()
+                    context.fill(stripe, with: .color(colors[i % 3]))
+                    x += step
+                    i += 1
+                }
+            }.ignoresSafeArea())
+    }
+}
+
 // The system draws the home indicator inside the bottom safe-area inset, in some screenshots and
 // not in others, and an app cannot switch it off: persistentSystemOverlays(.hidden) only asks the
 // system to hide it, and a run with it still showed the indicator in four screenshots. The suite
@@ -204,7 +246,10 @@ struct InsetProbe: View {
 
 function dispatcher(types: Map<string, string>): string {
   const cases = [...types].map(
-    ([name, type]) => `        case "${name}": ${type}Screen(model: .sample)`,
+    ([name, type]) =>
+      OVER_BACKDROP.has(name)
+        ? `        case "${name}": GlassBackdrop { ${type}Screen(model: .sample) }`
+        : `        case "${name}": ${type}Screen(model: .sample)`,
   );
   return `import SwiftUI
 
@@ -325,6 +370,7 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     SAMPLE_SCREEN,
     EXAMPLE_SCREEN,
     EXAMPLE_DARK,
+    GLASS_DARK,
   ];
   let dir = "";
   let booted = false;
@@ -334,7 +380,7 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     if ("reason" in found) return;
     dir = mkdtempSync(join(tmpdir(), "weft-swiftui-"));
     const sources = new Map<string, string>();
-    const own = new Set([SAMPLE_SCREEN, EXAMPLE_SCREEN, EXAMPLE_DARK]);
+    const own = new Set([SAMPLE_SCREEN, EXAMPLE_SCREEN, EXAMPLE_DARK, GLASS_DARK]);
     for (const name of names.filter((n) => !own.has(n))) {
       sources.set(
         name,
@@ -399,7 +445,8 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
   /** Launches `name` and screenshots it once two screenshots in a row agree. */
   async function shoot(name: string): Promise<Uint8Array> {
     // The dark shot is the same screen in the other appearance, not another build of it.
-    const [screen, scheme] = name === EXAMPLE_DARK ? [EXAMPLE_SCREEN, "dark"] : [name, "light"];
+    const lightScreen = DARK_OF.get(name);
+    const [screen, scheme] = lightScreen !== undefined ? [lightScreen, "dark"] : [name, "light"];
     execFileSync("xcrun", ["simctl", "launch", "--terminate-running-process", udid, BUNDLE], {
       env: { ...process.env, SIMCTL_CHILD_WEFT_SCREEN: screen, SIMCTL_CHILD_WEFT_SCHEME: scheme },
       stdio: "ignore",
