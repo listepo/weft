@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T45 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T45 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -170,8 +170,13 @@ Execution plan:
 2. SPEC first: §10.2 and §10.3 say `tokens` may be one resolver file (or a resolver document as project content); the input is each modifier's `default`, else its first context; the appearance modifier is the first one in `resolutionOrder` with `light` and `dark` contexts; resolver problems are `W705` with a pointer into the resolver.
 3. Loader (`crates/weft-catalog/src/resolver.rs`, `project.rs`): references in the same document and to project files relative to the resolver (no URLs); `resolutionOrder` flattened with the existing token-tree merge; the default input for validation and every context of each modifier (the others at their default) for the generators, as `Project.modifiers`, passed through the binding to `@weft/catalog`. `render.tokens` takes a resolver the same way; `weft.schema.json` regenerated.
 4. SwiftUI (`theme.rs`, CLI): a colour that differs in `dark` becomes a `Color` that follows the system appearance; a typography token with `letterSpacing` or `lineHeight` becomes `WeftTypography` with a `weftTypography(_:)` modifier. Snapshots for a resolver project, Swift typecheck, simulator screenshots in light and dark.
-5. Web: the static page's `:root` gets `color-scheme: light dark` and an `@media (prefers-color-scheme: dark)` override for the tokens that differ; typography tokens become custom properties (font, letter spacing, line height); React and SolidJS follow the same variables (asked the creator about a `weft css-tokens` stylesheet); the reference renderer takes either context (`render.appearance`). Snapshots and Chromium screenshots in both schemes.
+5. Web: the static page's `:root` gets `color-scheme: light dark` and an `@media (prefers-color-scheme: dark)` override for the tokens that differ; typography tokens become custom properties (font, letter spacing, line height); React and SolidJS follow the same variables through the approved `weft css-tokens` stylesheet; the reference renderer takes either context (`render.appearance`). Snapshots and Chromium screenshots in both schemes.
 6. Example project: `tokens/theme.resolver.json` with a `theme` modifier (`light`, `dark`).
 7. Figma and Penpot: contexts become variable modes and token themes when the library is built, and read back into a resolver document; fakes and round-trip tests extended; plugin dists rebuilt.
 8. Full check, review of every new screenshot recorded here, close into `done.md`.
+
+Approved decisions (creator):
+
+- **Q1:** a `weft css-tokens` command writes `weft-tokens.css` (`:root` with every token, `color-scheme: light dark`, and an `@media (prefers-color-scheme: dark)` block with the tokens that differ) for the React and SolidJS components, which only reference `var(--weft-…)`. Its folder is the new key `export.css.outDir`.
+- **Q2:** "both ways" is the full round trip: resolver contexts → Figma variable modes or Penpot token themes (one set per context) → a resolver document with the same values per context, returned in a new reply field.
 
