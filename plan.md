@@ -13,7 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T50 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
-| T53 | in progress | P1 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -197,33 +196,3 @@ Two parts, as the creator chose.
    - Asset paths are untrusted: relative to the project, no URLs unless SPEC allows them, and size-bounded.
    - Add a small model asset under a compatible licence to the corpus.
 Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
-
-### T53. Shared base stylesheet for web targets
-
-T47 made the static page match the generated React and SolidJS components by dropping the page's own styling. Both now render unstyled: a caption sits flush against its control, fields have no spacing, and a link without `href` does not look like a link. The creator chose one Weft base stylesheet for every web target, so all of them look good and stay identical.
-
-- **The stylesheet.** One minimal, token-driven base stylesheet:
-  - captions above fields, with spacing between fields;
-  - checkbox, switch and radio rows;
-  - link appearance, including `role="link"`;
-  - buttons, stacks and the other kinds that need it.
-  - Values come from the project's tokens (spacing, colours, typography), with fallbacks when a token is absent, and follow light and dark modes (T45).
-- **Where it ships.** Written by `weft css-tokens` (or a sibling command, decided in the plan) for React and SolidJS hosts, and inlined by `weft html`.
-- **Where it applies.** The visual harness gives it to every web frame, as it now does with `weft-tokens.css`. The reference renderer and the Figma/Penpot round trips are adjusted wherever they are compared with the components.
-- **Accessibility.** The tree stays as T47 left it.
-
-Execution plan:
-
-1. **File and command.** A sibling command, `weft css-base`, writes `weft-base.css` (prints unless `--out-dir` or `export.css.outDir` names a folder, as `css-tokens` does and through the same `emit` and `out_dir` helpers). The stylesheet is a constant `BASE_CSS` in `crates/weft-web` next to `tokens_css`, exported as `base_css()`. It does not depend on the project: every value is `var(--weft-…, fallback)`, so a host links `weft-tokens.css` (the project's values) and `weft-base.css` (the rules), in that order, and it still works without the first.
-2. **Inlined by `weft html`.** The page's single `<style>` becomes the tokens, then `BASE_CSS`, then the existing `LAYOUT_CSS` (the layout the components carry inline stays last). No change to the elements or attributes the page writes, so T47's accessibility tree is untouched.
-3. **Hooks.** Only elements and attributes the page, the components and the reference renderer already share: `main`, `form`, `section`, `label` that holds a control, `[data-weft-field]`, `[role="radiogroup"]`, `[role="switch"]`, `a` and `[role="link"]`, `button[data-variant]`, `[role="tab"]` and `[role="tablist"]`, `[role="alert"]`, `[data-tone]`, `[data-weft-slot]`, `table`, `ul` and `ol`. No tag-name rule on `footer` (the page writes `footer` where the components write `div`).
-4. **Kinds that get rules.** Screen, form and section (a column with a gap); field (caption above the control, input, textarea and select outline, invalid and error text); checkbox, switch (a small track and thumb) and radio (a row: control, then caption); radio group (caption, then rows); link (accent colour, underline); button (outline, `primary` and `danger` filled, disabled); tabs; alert and tone; slots `footer` and `actions` (a row); table; list and item. Stacks, rows and grids keep their own layout.
-5. **Tokens and fallbacks.** Fallbacks equal the default token values, and a test checks that. `--weft-space-xs` 4px, `--weft-space-sm` 8px, `--weft-space-md` 16px, `--weft-radius-sm` 4px, `--weft-radius-pill` 999px, `--weft-font-size-sm` 0.875rem, `--weft-color-white` #ffffff, `--weft-color-action-primary` #2563eb, `--weft-color-action-danger` #dc2626. Two optional tokens with fixed fallbacks: `--weft-color-success` #16a34a and `--weft-color-warning` #d97706. Borders and muted text are `color-mix` of `currentColor`, so they follow light and dark modes (T45) with or without tokens; the sheet sets no page colour or font.
-6. **Harness and comparisons.** `packages/visual` gives every frame the tokens and the base sheet together (`Screen.css` becomes both outputs), the same way a host links them: React, SolidJS, the reference renderer's markup and the Figma and Penpot round-trip markup are all rendered from the same DOM, so they stay pixel-equal. The reference renderer's page for the appearance test (`renderPage`) gets the base sheet through a new `styles` option, because it is a whole page. The Figma and Penpot builders draw design frames, not web pages, and are compared only through the markup they read back, so they need no change. SwiftUI is untouched.
-7. **Verify.** Unit tests for the stylesheet (the variables it names exist in the default tokens and fall back to their values; the CLI command), the web screens suite and the appearance suite, retake and review baselines (signup, settings, login, account, todo-list in light and one dark), review insta snapshots, rebuild the plugin bundles, run the full check.
-
-Done when:
-- the static page and the components still match pixel for pixel and in the accessibility tree;
-- the reviewed baselines show captions above fields, spacing and visible links;
-- SPEC and docs describe the stylesheet;
-- the full check exits 0.
