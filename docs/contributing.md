@@ -61,7 +61,9 @@ cd packages/core && pnpm exec vitest run --config ../../vitest.config.ts test/cl
 | `AGENT-SPEC.md` | The format written for a model: how to write, patch and repair. |
 | `crates/weft-core`, `crates/weft-catalog` | The rules in Rust: parser, validator, patches, `explain`, the core catalog, tokens. |
 | `crates/weft-cli` | The `weft` program. |
-| `crates/weft-wasm` | The WebAssembly binding of the two crates. |
+| `crates/weft-binding` | The JSON-text functions of the two crates that both bindings call. |
+| `crates/weft-wasm` | The WebAssembly binding. |
+| `crates/weft-node` | The native Node and Bun addon (napi-rs); `@weft/core` uses it when built, with WebAssembly as the fallback. |
 | `packages/core`, `packages/catalog` | TypeScript types and loaders over the Rust build; the catalog as data and the default tokens. |
 | `packages/render-react`, `from-aria`, `to-jsx`, `mcp` | Renderer, importer, React generator, MCP server. |
 | `plugins/claude-code`, `plugins/cursor`, `plugins/open-design` | The Claude Code, Cursor and Open Design plugins and the marketplace entries of the first two (`.claude-plugin/` and `.cursor-plugin/` at the root). |
