@@ -21,7 +21,7 @@
     "packages/*/test",
     "bench/src",
     "bench/test",
-    "scripts",
+    "tooling",
     "plugins/*/build.ts",
     "plugins/*/serve.config.ts",
     "plugins/*/scripts",

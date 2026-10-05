@@ -133,7 +133,7 @@ tasks:
         "/plugins/**/*",
         "/bench/**/*",
         "/runtimes/**/*",
-        "/scripts/**/*",
+        "/tooling/**/*",
         "/tsconfig.json",
       ]
   lint:
@@ -144,15 +144,15 @@ tasks:
         "/plugins/**/*",
         "/bench/**/*",
         "/runtimes/**/*",
-        "/scripts/**/*",
+        "/tooling/**/*",
         "/compat/**/*",
         "/*.json",
         "/.claude-plugin/*.json",
       ]
-  # The iteration loop: the checks the changed files affect (scripts/changed.ts). Not a check of its
+  # The iteration loop: the checks the changed files affect (tooling/changed.ts). Not a check of its
   # own, so it is neither cached nor part of `moon ci`; the full check stays the merge gate.
   changed:
-    command: "node scripts/changed.ts"
+    command: "node tooling/changed.ts"
     options:
       cache: false
       runInCI: false

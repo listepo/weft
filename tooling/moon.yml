@@ -1,4 +1,4 @@
-# The tooling scripts of the repository (the affected-checks selection) and their tests.
+# The repository tooling (the affected-checks selection) and their tests.
 language: "typescript"
 
 tasks:
