@@ -1,6 +1,5 @@
 - T8. Evaluation
 - T23. Native Node and Bun addon
-- T24. Runtime matrix
 - T28. Binding readback against inverted conditions
 - T14. Figma round trip and plugin
 - T31. Project file and shared resources

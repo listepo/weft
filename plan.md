@@ -6,7 +6,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
 | T23 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T24 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
@@ -34,19 +33,6 @@ Execution plan:
 ### T23. Native Node and Bun addon
 
 A napi-rs addon of the same Rust core for Node and Bun, chosen at load time with the WASM build as the fallback when no prebuilt binary fits the platform. Done when the test suite passes on both builds and a broken or missing addon falls back to WASM with a warning.
-
-### T24. Runtime matrix
-
-Run the binding tests in Node, Deno, Bun and a headless browser through moon. Done when all four pass from one command.
-
-Execution plan:
-
-1. One Vitest config, `runtimes/vitest.config.ts`, over the `@weft/core` and `@weft/catalog` suites. `WEFT_RUNTIME` picks the leg; the launcher picks the executable (`vitest` on Node, `deno run -A` and `bun --bun` on the same `vitest.mjs`), so Deno and Bun run the very same test files and no test logic is copied. Vitest 5 runs under both (tried).
-2. Browser leg: Vitest browser mode on Playwright Chromium, as in `@weft/visual`. The suites that read files stay on the three runtimes with a file system (an exclude list, so a new file-reading suite fails loudly). `node:assert/strict` is aliased to a small Chai-backed shim there.
-3. `runtimes/setup.ts` fails a leg that did not land on its runtime, so a launcher that falls back to Node cannot report a green Deno or Bun.
-4. moon: `root:runtimes` aggregates `root:runtimes-node`, `-deno`, `-bun` and `-browser`; each depends on `root:wasm` only, so whichever build `@weft/core` loads (the T23 native addon with WebAssembly as the fallback) is the one exercised. Decide `moon ci` membership and record why.
-5. Add the two browser dependencies to the root package (same pins as `@weft/visual`), `toolchain.md` rows, README note.
-6. Verify: `moon run root:runtimes`, then the full check (`pnpm install --frozen-lockfile`, `moon run :test root:typecheck root:lint root:rust-test root:rust-lint`).
 
 ### T28. Binding readback against inverted conditions
 
