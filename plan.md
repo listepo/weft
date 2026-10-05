@@ -212,6 +212,13 @@ T55 made `center` the default for a row, so T50 moved the corpus's explicit `cen
 - Cover `center` where centring is natural: a column in a coverage-only screen (dashboard, account, orders, inbox, leaderboard, booking or appearance), for example an empty-state message.
 - Leave the twelve benchmark screens alone: they have HTML, JSX and A2UI versions and tasks in `corpus/tasks.json`.
 
+Execution plan:
+
+1. `corpus/dashboard/screen.weft`: drop `align="center"` from the `notices` column (it was `stretch`, the column default, before T50).
+2. `corpus/inbox/screen.weft`: the drafts list's empty slot becomes a column with `align="center"` holding the existing `no-drafts` text and a second hint text, an empty state where centring is natural. Inbox is a coverage-only screen: no HTML, JSX or A2UI version and no task in `corpus/tasks.json`; the twelve benchmark screens are not touched.
+3. Check that `crates/weft-snapshots/tests/coverage.rs` still sees `center` (it walks the corpus, so nothing is listed by hand), then retake what changes with the usual update commands: insta snapshots, the Figma and Penpot layer trees, the Chromium and SwiftUI baselines of `dashboard` and `inbox`, and the two tests' fixtures if they carry the corpus text. Downscale each retaken baseline with `sips -Z 700` and look at it before accepting.
+4. Update `corpus/README.md` and any doc that names the centred `notices`.
+
 Done when:
 - the coverage test still sees `center`;
 - the affected snapshots, screenshots and Figma/Penpot layer trees are retaken and reviewed;
