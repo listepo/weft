@@ -19,10 +19,12 @@ tasks:
     script: 'export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(pwd -P)=/weft" && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm-web --out-name weft -- --features web'
     inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json']
     outputs: ['/packages/core/wasm/**/*', '/packages/core/wasm-web/**/*']
-  # The `weft` CLI, which @weft/visual runs for the targets that exist only in Rust. Not cached:
-  # cargo already skips an up-to-date build, and a cached run would not notice a deleted binary.
+  # The `weft` CLI, which @weft/visual runs for the targets that exist only in Rust. Its own
+  # target directory: rust-test builds `target/debug/weft` with every feature, and running in
+  # parallel it would replace the binary while the visual suite calls it. Not cached: cargo
+  # already skips an up-to-date build, and a cached run would not notice a deleted binary.
   cli:
-    command: 'cargo build -p weft-cli'
+    command: 'cargo build -p weft-cli --target-dir target/visual'
     options:
       cache: false
   typecheck:

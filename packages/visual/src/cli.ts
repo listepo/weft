@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 export const CORPUS = join(ROOT, "corpus");
-const CLI = join(ROOT, "target/debug/weft");
+// Built by `moon run root:cli` into a target directory of its own (see moon.yml).
+const CLI = join(ROOT, "target/visual/debug/weft");
 
 /** Runs the Rust CLI on `input` written to a scratch file named `file`. */
 export function cli(command: string, file: string, input: string, ...flags: string[]): string {
