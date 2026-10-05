@@ -502,6 +502,9 @@ impl<'d> Ctx<'d> {
         {
             layout(&mut s, dom, el, self.conventions);
         }
+        if self.conventions.is_some() {
+            left_out_style(&mut s, attr("style"));
+        }
 
         if !matches!(tag, "input" | "textarea" | "img") {
             if tag == "form" {
@@ -804,6 +807,38 @@ fn repeat_count(value: &str) -> Option<&str> {
 
 fn js_trim_start(s: &str) -> &str {
     s.trim_start_matches(is_js_space)
+}
+
+/// Inline style Weft has no prop for: what a stack or grid reads from it is its layout, the rest
+/// is a loss rather than silently gone.
+fn left_out_style(s: &mut Sem, style: Option<&str>) {
+    const LAYOUT: &[&str] = &[
+        "display",
+        "flex-direction",
+        "align-items",
+        "flex-wrap",
+        "gap",
+        "grid-template-columns",
+    ];
+    let layout = matches!(s.kind.as_deref(), Some("stack" | "grid"));
+    let mut left: Vec<String> = parse_style(style)
+        .into_iter()
+        .filter(|(k, _)| !(layout && LAYOUT.contains(&k.as_str())))
+        // How an element flows is the renderer's choice (the JSX generator sets links inline-block).
+        .filter(|(k, v)| {
+            !(k == "display" && matches!(v.as_str(), "block" | "inline" | "inline-block"))
+        })
+        .map(|(k, v)| format!("{k}: {v}"))
+        .collect();
+    if left.is_empty() {
+        return;
+    }
+    // Declarations come from a map; sorted, the note reads the same on every run.
+    left.sort();
+    s.notes.push(Note {
+        kind: LossKind::Layout,
+        note: format!("style {} is left out", left.join("; ")),
+    });
 }
 
 /// An element whose only content is one bound text run shows that binding itself.

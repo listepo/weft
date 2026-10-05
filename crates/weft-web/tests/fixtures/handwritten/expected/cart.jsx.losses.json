@@ -20,6 +20,11 @@
     "note": "<Price> is a component, not an element Weft knows; only its children are kept"
   },
   {
+    "kind": "layout",
+    "path": "/screen#screen-cart/list#list-1/each#each-1/item#item-1",
+    "note": "style opacity: 1; padding: 8px is left out"
+  },
+  {
     "kind": "bindings",
     "path": "/screen#screen-cart/text#text-2",
     "note": "{`Total: ${total}`} is not a data path or markup Weft can read; it is left out"

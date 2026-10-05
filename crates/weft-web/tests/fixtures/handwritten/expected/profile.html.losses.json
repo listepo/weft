@@ -5,6 +5,11 @@
     "note": "7 elements carry no data-weft-id; their ids are generated"
   },
   {
+    "kind": "layout",
+    "path": "/screen#profile/text#text-member-since-2020",
+    "note": "style color: rebeccapurple is left out"
+  },
+  {
     "kind": "actions",
     "path": "/screen#profile/button#button-broken",
     "note": "not an action is not an action name"
