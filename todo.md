@@ -6,3 +6,5 @@
 - T39. Context in the document
 - T51. Glass material tokens
 - T52. 3D transforms and models
+- T56. Narrow the WebAssembly task's inputs
+- T57. Cache the mcp test task
