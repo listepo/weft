@@ -1,0 +1,103 @@
+FRAME "screen#booking" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#booking)
+  | weft.source = {"kind":"screen","id":"booking","props":{"label":"Book a trip"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Book a trip"],"shown":{"text":"Book a trip"}}
+    TEXT "text" chars="Book a trip" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "form#trip" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+    | weft.origin = layer(form#trip)
+    | weft.source = {"kind":"form","id":"trip","props":{"label":"Trip"},"on":{"submit":"trip.book"}}
+    | weft.style = [[],[],0,[0,0,0,0],8]
+    FRAME "combobox#city" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(combobox#city)
+      | weft.source = {"kind":"combobox","id":"city","props":{"label":"Destination","placeholder":"Search a city","value":{"bind":"$.trip.city"}},"on":{"change":"trip.edit"},"shown":{"label":"Destination"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Destination" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      FRAME "each#city-each" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.origin = layer(each#city-each)
+        | weft.source = {"kind":"each","id":"city-each","props":{"as":"city","in":{"bind":"$.cities"}}}
+        | weft.style = [[],[],0,[0,0,0,0],0]
+        INSTANCE "option#city-option" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<option>"
+          | weft.origin = layer(option#city-option)
+          | weft.source = {"kind":"option","id":"city-option","props":{"text":{"bind":"$city.name"},"value":{"bind":"$city.name"}},"shown":{"text":"{$city.name}"}}
+          TEXT "text" chars="{$city.name}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "date-picker#depart" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=date>"
+      | weft.origin = layer(date-picker#depart)
+      | weft.source = {"kind":"date-picker","id":"depart","props":{"label":"Departure","max":"2026-12-31","min":"2026-01-01","value":{"bind":"$.trip.depart"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Departure"}}
+      TEXT "label" chars="Departure"
+      FRAME "picker" width=240 height=36 layoutMode="HORIZONTAL"
+        FRAME "date" width=200 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="yyyy-mm-dd" size=14
+        FRAME "calendar" width=40 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="31" size=14
+    INSTANCE "date-picker#checkin" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=time>"
+      | weft.origin = layer(date-picker#checkin)
+      | weft.source = {"kind":"date-picker","id":"checkin","props":{"label":"Check-in time","type":"time","value":{"bind":"$.trip.checkin"}},"shown":{"text":"","label":"Check-in time"}}
+      TEXT "label" chars="Check-in time"
+      FRAME "picker" width=240 height=36 layoutMode="HORIZONTAL"
+        FRAME "date" width=200 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="yyyy-mm-dd" size=14
+        FRAME "calendar" width=40 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="31" size=14
+    INSTANCE "date-picker#reminder" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=datetime>"
+      | weft.origin = layer(date-picker#reminder)
+      | weft.source = {"kind":"date-picker","id":"reminder","props":{"label":"Reminder","type":"datetime","value":{"bind":"$.trip.reminder"}},"shown":{"text":"","label":"Reminder"}}
+      TEXT "label" chars="Reminder"
+      FRAME "picker" width=240 height=36 layoutMode="HORIZONTAL"
+        FRAME "date" width=200 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="yyyy-mm-dd" size=14
+        FRAME "calendar" width=40 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="31" size=14
+    INSTANCE "stepper#guests" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<stepper>"
+      | weft.origin = layer(stepper#guests)
+      | weft.source = {"kind":"stepper","id":"guests","props":{"label":"Guests","max":8,"min":1,"value":{"bind":"$.trip.guests"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Guests"}}
+      TEXT "label" chars="Guests"
+      FRAME "stepper" width=160 height=36 layoutMode="HORIZONTAL"
+        FRAME "down" width=40 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="-" size=14
+        FRAME "value" width=80 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="1" size=14
+        FRAME "up" width=40 height=36 layoutMode="HORIZONTAL" paddingLeft=12 paddingRight=12 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+          TEXT "symbol" chars="+" size=14
+    INSTANCE "slider#budget" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<slider>"
+      | weft.origin = layer(slider#budget)
+      | weft.source = {"kind":"slider","id":"budget","props":{"label":"Budget per night","max":500,"min":50,"step":10,"value":{"bind":"$.trip.budget"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Budget per night"}}
+      TEXT "label" chars="Budget per night"
+      FRAME "slider" width=240 height=16 layoutMode="HORIZONTAL"
+        RECTANGLE "filled" width=104 height=16 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8
+        RECTANGLE "thumb" width=16 height=16 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8
+        RECTANGLE "rest" width=120 height=16 fills=[{"type":"SOLID","color":"#e6e8eb"}] cornerRadius=8
+    FRAME "segmented-control#cabin" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(segmented-control#cabin)
+      | weft.source = {"kind":"segmented-control","id":"cabin","props":{"label":"Cabin","value":{"bind":"$.trip.cabin"}},"on":{"change":"trip.edit"},"shown":{"label":"Cabin"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+      TEXT "label" chars="Cabin" font={"family":"Inter","style":"Bold"} size=14
+        | weft.label = 1
+      INSTANCE "segment#cabin-economy" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<segment>"
+        | weft.origin = layer(segment#cabin-economy)
+        | weft.source = {"kind":"segment","id":"cabin-economy","props":{"value":"economy"},"children":["Economy"],"shown":{"text":"Economy"}}
+        TEXT "text" chars="Economy" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "segment#cabin-business" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<segment>"
+        | weft.origin = layer(segment#cabin-business)
+        | weft.source = {"kind":"segment","id":"cabin-business","props":{"value":"business"},"children":["Business"],"shown":{"text":"Business"}}
+        TEXT "text" chars="Business" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "segment#cabin-first" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 bound={"paddingLeft":"var(space/sm)","paddingRight":"var(space/sm)"} main="<segment>"
+        | weft.origin = layer(segment#cabin-first)
+        | weft.source = {"kind":"segment","id":"cabin-first","props":{"value":"first"},"children":["First"],"shown":{"text":"First"}}
+        TEXT "text" chars="First" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "color-picker#tag" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<color-picker>"
+      | weft.origin = layer(color-picker#tag)
+      | weft.source = {"kind":"color-picker","id":"tag","props":{"label":"Trip colour","value":{"bind":"$.trip.colour"}},"on":{"change":"trip.edit"},"shown":{"text":"","label":"Trip colour"}}
+      TEXT "label" chars="Trip colour"
+      FRAME "swatch" width=36 height=36 layoutMode="HORIZONTAL"
+        RECTANGLE "color" width=36 height=36 fills=[{"type":"SOLID","color":"#3b82f5"}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4
+    FRAME "slot:footer" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.slot = footer
+      INSTANCE "button#book" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+        | weft.origin = layer(button#book)
+        | weft.source = {"kind":"button","id":"book","props":{"submit":true,"variant":"primary"},"children":["Book"],"shown":{"text":"Book"}}
+        TEXT "text" chars="Book" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]

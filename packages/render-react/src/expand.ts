@@ -250,6 +250,122 @@ export function fieldValue(n: Inst): string {
   return text(n, "type") === "number" && !FLOAT.test(value) ? "" : value;
 }
 
+// ---- Number, date and colour controls (SPEC §5.1 notes) ----
+
+// A number prop as a finite number: a number, or text written as one. Text such as "0x10" or
+// "Infinity" is data that does not fit the prop, so it reads as absent.
+export function numeric(v: unknown): number | undefined {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string" && FLOAT.test(v.trim())) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+const num = (n: Inst, name: string): number | undefined => numeric(prop(n, name).value);
+
+function decimals(x: number): number {
+  const [mantissa = "", exponent] = String(x).split("e");
+  const own = mantissa.split(".")[1]?.length ?? 0;
+  return Math.max(0, own - (exponent === undefined ? 0 : Number(exponent)));
+}
+
+// Sums and products of decimal steps carry binary error (0.1 × 3); rounding to the decimals the
+// inputs have gives back the number a person means.
+export function tidy(x: number, ...inputs: number[]): number {
+  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(decimals)))));
+}
+
+export type Span = { min: number; max: number; step: number };
+
+// A `slider`: both bounds always exist, `max` below `min` is `min`, and a step that is not above 0
+// is 1.
+export function sliderSpan(n: Inst): Span {
+  const min = num(n, "min") ?? 0;
+  const max = Math.max(num(n, "max") ?? 100, min);
+  const step = num(n, "step");
+  return { min, max, step: step !== undefined && step > 0 ? step : 1 };
+}
+
+// What a range input shows: the value inside the bounds on the grid of steps from `min`, a tie
+// going up and a point past the last step falling back to it.
+export function sliderValue(n: Inst): number {
+  const { min, max, step } = sliderSpan(n);
+  const v = Math.min(Math.max(num(n, "value") ?? min, min), max);
+  let on = min + Math.floor((v - min) / step + 0.5) * step;
+  if (on > max) on -= step;
+  return tidy(Math.max(on, min), min, step);
+}
+
+export type Bounds = { min?: number; max?: number; step: number };
+
+// A `stepper`: a side without a bound is open.
+export function stepperBounds(n: Inst): Bounds {
+  const min = num(n, "min");
+  const max = num(n, "max");
+  const step = num(n, "step");
+  const out: Bounds = { step: step !== undefined && step > 0 ? step : 1 };
+  if (min !== undefined) out.min = min;
+  if (max !== undefined) out.max = min === undefined ? max : Math.max(max, min);
+  return out;
+}
+
+export function clampTo(v: number, bounds: Bounds): number {
+  let out = v;
+  if (bounds.min !== undefined) out = Math.max(out, bounds.min);
+  if (bounds.max !== undefined) out = Math.min(out, bounds.max);
+  return out;
+}
+
+export function stepperValue(n: Inst): number {
+  return clampTo(num(n, "value") ?? 0, stepperBounds(n));
+}
+
+// One press of the plus or minus button: a step from the shown value, kept inside the bounds.
+export function stepped(current: number, direction: 1 | -1, bounds: Bounds): number {
+  return tidy(clampTo(current + direction * bounds.step, bounds), current, bounds.step);
+}
+
+export type DateType = "date" | "time" | "datetime";
+
+export function dateType(n: Inst): DateType {
+  const type = text(n, "type");
+  return type === "time" || type === "datetime" ? type : "date";
+}
+
+const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function validDate(s: string): boolean {
+  const m = DATE.exec(s);
+  if (!m) return false;
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  if (year < 1 || month < 1 || month > 12 || day < 1) return false;
+  const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  const length = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1] ?? 0;
+  return day <= length;
+}
+
+// The text of a date, time or both when it is written in the format of `type`, else "".
+export function dateText(type: DateType, value: string): string {
+  if (type === "date") return validDate(value) ? value : "";
+  if (type === "time") return TIME.test(value) ? value : "";
+  const [date = "", time = "", ...rest] = value.split("T");
+  return rest.length === 0 && validDate(date) && TIME.test(time) ? value : "";
+}
+
+export const dateValue = (n: Inst, name: "value" | "min" | "max"): string =>
+  dateText(dateType(n), text(n, name));
+
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
+// The colour a colour input shows: the value as lowercase `#rrggbb`, black when it is not one.
+export function colorValue(n: Inst): string {
+  const value = text(n, "value");
+  return HEX_COLOR.test(value) ? value.toLowerCase() : "#000000";
+}
+
 export function options(n: Inst): Inst[] {
   return nodes(n.children).filter((c) => c.kind === "option");
 }

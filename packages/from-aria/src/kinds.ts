@@ -9,6 +9,10 @@ export const ROLE_REFINEMENTS: Readonly<
   Record<string, { kind: string; props?: Readonly<Record<string, string>> }>
 > = Object.freeze(tables.roleRefinements);
 
+// Roles more than one kind has: the kind a bare element of that role is. The others are told apart
+// by what the element says (`<input type=date>`) or by the kind it sits in.
+export const ROLE_DEFAULTS: Readonly<Record<string, string>> = Object.freeze(tables.roleDefaults);
+
 // Roles that add no element of their own: ARIA's generic and presentational roles, and the
 // header and body row groups a renderer emits for a table (SPEC §5.1 notes).
 export const DISSOLVED_ROLES: ReadonlySet<string> = new Set(tables.dissolvedRoles);

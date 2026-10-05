@@ -15,7 +15,7 @@ description: example-stack as json
         "kind": "stack",
         "id": "actions",
         "props": {
-          "align": "center",
+          "align": "end",
           "direction": "row",
           "gap": {
             "token": "space.md"

@@ -1,0 +1,33 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-stepper as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Order"
+    },
+    "children": [
+      {
+        "kind": "stepper",
+        "id": "quantity",
+        "props": {
+          "disabled": false,
+          "label": "Quantity",
+          "max": 10,
+          "min": 1,
+          "step": 1,
+          "value": {
+            "bind": "$.quantity"
+          }
+        },
+        "on": {
+          "change": "order.update"
+        }
+      }
+    ]
+  }
+}

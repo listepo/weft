@@ -62,7 +62,7 @@ export default function WeftScreen(props) {
           </div>
         </section>
       </div>
-      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "column", "align-items": "stretch" }}>
+      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "column", "align-items": "center" }}>
         <div data-weft-id="release" role="alert" data-tone="info">Release 2.4 ships on Friday.</div>
         <div data-weft-id="backup" role="alert" data-tone="success">
           <Show when={!(_text(props.data?.backupStatus).trim() === "")}>

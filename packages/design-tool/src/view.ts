@@ -59,6 +59,12 @@ export const CAPTION_KINDS: ReadonlySet<string> = new Set([
   "radio-group",
   "select",
   "tab",
+  "slider",
+  "stepper",
+  "date-picker",
+  "color-picker",
+  "segmented-control",
+  "combobox",
 ]);
 
 /**
@@ -144,7 +150,10 @@ export function layoutView(
     const align = props?.["align"];
     return {
       mode,
-      align: (typeof align === "string" ? ALIGN[align] : undefined) ?? "start",
+      // SPEC §5.1: a row without `align` centres its children, a column keeps them at the start.
+      align:
+        (typeof align === "string" ? ALIGN[align] : undefined) ??
+        (mode === "row" ? "center" : "start"),
       wrap: mode === "row" && props?.["wrap"] === true,
       columns: 1,
       gap: gapOf(),

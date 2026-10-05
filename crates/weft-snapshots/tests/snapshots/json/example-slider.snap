@@ -1,0 +1,33 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-slider as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Sound"
+    },
+    "children": [
+      {
+        "kind": "slider",
+        "id": "volume",
+        "props": {
+          "disabled": false,
+          "label": "Volume",
+          "max": 100,
+          "min": 0,
+          "step": 5,
+          "value": {
+            "bind": "$.volume"
+          }
+        },
+        "on": {
+          "change": "sound.update"
+        }
+      }
+    ]
+  }
+}

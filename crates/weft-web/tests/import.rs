@@ -108,6 +108,25 @@ fn hand_written_sources_import_with_the_expected_losses() {
     }
 }
 
+// SPEC §5.1: a row centres its children by default and the renderers write that out, so reading
+// it back as `align="center"` would add a prop the source never had; any other alignment stays.
+#[test]
+fn a_rows_default_centring_is_not_read_back_as_align() {
+    let (catalog, tokens) = setup();
+    let options = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    let page = |style: &str| {
+        let html = format!(
+            "<main data-weft-id=\"m\" aria-label=\"M\"><div data-weft-id=\"r\" style=\"display:flex;flex-direction:row;{style}\"><button data-weft-id=\"b\">Go</button></div></main>"
+        );
+        serialize(&import_html(&html, &options).document)
+    };
+    assert!(!page("align-items:center").contains("align="));
+    assert!(page("align-items:flex-end").contains("align=\"end\""));
+}
+
 #[test]
 fn unreadable_sources_say_so() {
     let (catalog, tokens) = setup();

@@ -7,7 +7,7 @@ FRAME "screen#search" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisS
     | weft.origin = layer(form#form)
     | weft.source = {"kind":"form","id":"form","on":{"submit":"search.run"}}
     | weft.style = [[],[],0,[0,0,0,0],8]
-    FRAME "stack#bar" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+    FRAME "stack#bar" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
       | weft.origin = layer(stack#bar)
       | weft.source = {"kind":"stack","id":"bar","props":{"direction":"row","gap":{"token":"space.sm"}}}
       | weft.style = [[],[],0,[0,0,0,0],null]

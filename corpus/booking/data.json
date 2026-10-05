@@ -1,0 +1,13 @@
+{
+  "trip": {
+    "city": "Lisbon",
+    "depart": "2026-06-14",
+    "checkin": "15:30",
+    "reminder": "2026-06-12T09:00",
+    "guests": 2,
+    "budget": 180,
+    "cabin": "business",
+    "colour": "#3b82f6"
+  },
+  "cities": [{ "name": "Lisbon" }, { "name": "Porto" }, { "name": "Faro" }]
+}

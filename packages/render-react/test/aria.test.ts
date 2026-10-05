@@ -269,3 +269,40 @@ test("formatAriaSnapshot prints the YAML parseAriaSnapshot reads back", () => {
   );
   assert.deepEqual(parseAriaSnapshot(yaml), normalizeAria(tricky));
 });
+
+test("expectedTree gives the new controls their role, name and shown value", () => {
+  const d = doc(
+    el("slider", "s", { label: "Volume", value: 3, min: 0, max: 10, step: 2 }),
+    el("stepper", "t", { label: "Guests", value: 2 }),
+    el("date-picker", "d", { label: "Due", value: "2026-10-05" }),
+    el("color-picker", "c", { label: "Accent", value: "#3B82F6", disabled: true }),
+    el("combobox", "b", { label: "Fruit", value: "app" }, [
+      el("option", "o", { value: "apple" }, ["Apple"]),
+    ]),
+    el("segmented-control", "g", { label: "View", value: "day" }, [
+      el("segment", "a", { value: "day" }, ["Day"]),
+      el("segment", "w", { value: "week" }, ["Week"]),
+    ]),
+  );
+  const main = expected(d).children?.[0]?.children;
+  assert.deepEqual(main, [
+    { role: "slider", name: "Volume", children: [{ role: "text", name: "4" }] },
+    { role: "spinbutton", name: "Guests", children: [{ role: "text", name: "2" }] },
+    { role: "textbox", name: "Due", children: [{ role: "text", name: "2026-10-05" }] },
+    {
+      role: "textbox",
+      name: "Accent",
+      states: { disabled: true },
+      children: [{ role: "text", name: "#3b82f6" }],
+    },
+    { role: "combobox", name: "Fruit", children: [{ role: "text", name: "app" }] },
+    {
+      role: "radiogroup",
+      name: "View",
+      children: [
+        { role: "radio", name: "Day", states: { checked: true } },
+        { role: "radio", name: "Week" },
+      ],
+    },
+  ]);
+});

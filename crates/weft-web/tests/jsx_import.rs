@@ -104,6 +104,14 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
         "explicit type=\"text\" is dropped; radio-group on-change is lost; a radio's bound text comes back as label; a literal \
          hidden element is lost",
     ),
+    (
+        "appearance",
+        "explicit type=\"date\" is dropped; a segment's bound text comes back as label",
+    ),
+    (
+        "booking",
+        "the options of a bound <each> in a combobox are lost; the segmented-control on-change is lost",
+    ),
     ("dashboard", "an explicit direction=\"column\" is dropped"),
     (
         "inbox",

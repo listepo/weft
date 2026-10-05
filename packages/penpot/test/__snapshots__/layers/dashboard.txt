@@ -5,7 +5,7 @@ board "screen#dashboard" width=480 tokens={"fill":"color.white"} fillList=[{"fil
   | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
   board "stack#header" tokens={"rowGap":"space.xl","columnGap":"space.xl"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":32,"columnGap":32,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#header>","dir":"row","wrap":"wrap"}
     | weft/weft.origin = shape(stack#header)
-    | weft/weft.source = {"kind":"stack","id":"header","props":{"align":"center","direction":"row","gap":{"token":"space.xl"},"wrap":true}}
+    | weft/weft.source = {"kind":"stack","id":"header","props":{"direction":"row","gap":{"token":"space.xl"},"wrap":true}}
     | weft/weft.style = [[],[],0,[0,0,0,0],null]
     board "heading#title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#title>","dir":"column"}
       | weft/weft.kind = heading
@@ -69,9 +69,9 @@ board "screen#dashboard" width=480 tokens={"fill":"color.white"} fillList=[{"fil
           | weft/weft.origin = shape(heading#incidents-title)
           | weft/weft.source = {"kind":"heading","id":"incidents-title","props":{"level":2},"children":["Incidents"],"shown":{"text":"Incidents"}}
           text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Incidents"
-  board "stack#notices" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#notices>","dir":"column","wrap":"nowrap"}
+  board "stack#notices" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#notices>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#notices)
-    | weft/weft.source = {"kind":"stack","id":"notices","props":{"align":"stretch","direction":"column","gap":{"token":"space.sm"}}}
+    | weft/weft.source = {"kind":"stack","id":"notices","props":{"align":"center","direction":"column","gap":{"token":"space.sm"}}}
     | weft/weft.style = [[],[],0,[0,0,0,0],null]
     board "alert#release" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<alert#release>","dir":"column","wrap":"nowrap"}
       | weft/weft.origin = shape(alert#release)

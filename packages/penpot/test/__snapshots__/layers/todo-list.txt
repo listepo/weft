@@ -12,7 +12,7 @@ board "screen#todos" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
     | weft/weft.origin = shape(form#add-form)
     | weft/weft.source = {"kind":"form","id":"add-form","on":{"submit":"todo.add"}}
     | weft/weft.style = [[],[],0,[0,0,0,0],8]
-    board "stack#add-row" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#add-row>","dir":"row","wrap":"nowrap"}
+    board "stack#add-row" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#add-row>","dir":"row","wrap":"nowrap"}
       | weft/weft.origin = shape(stack#add-row)
       | weft/weft.source = {"kind":"stack","id":"add-row","props":{"direction":"row","gap":{"token":"space.sm"}}}
       | weft/weft.style = [[],[],0,[0,0,0,0],null]
@@ -50,7 +50,7 @@ board "screen#todos" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
           | weft/weft.origin = shape(button#todo-remove)
           | weft/weft.source = {"kind":"button","id":"todo-remove","on":{"press":"todo.remove"},"children":["Remove"],"shown":{"text":"Remove"}}
           text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Remove"
-  board "stack#summary" tokens={"rowGap":"space.xs","columnGap":"space.xs"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#summary>","dir":"row","wrap":"nowrap"}
+  board "stack#summary" tokens={"rowGap":"space.xs","columnGap":"space.xs"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#summary>","dir":"row","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#summary)
     | weft/weft.source = {"kind":"stack","id":"summary","props":{"direction":"row","gap":{"token":"space.xs"}}}
     | weft/weft.style = [[],[],0,[0,0,0,0],null]

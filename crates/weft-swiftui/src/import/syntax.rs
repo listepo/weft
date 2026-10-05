@@ -389,7 +389,8 @@ impl Reader<'_> {
             | "conjunction_expression"
             | "disjunction_expression"
             | "additive_expression"
-            | "multiplicative_expression" => self.binary(node, d),
+            | "multiplicative_expression"
+            | "range_expression" => self.binary(node, d),
             "key_path_expression" => Expr::KeyPath(self.text(node)),
             "array_literal" => {
                 let items = named(node);

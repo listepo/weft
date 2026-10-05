@@ -1,0 +1,3 @@
+<screen id="root" label="Delivery" weft="0.1">
+  <date-picker id="day" disabled="false" label="Delivery date" max="2026-12-31" min="2026-01-01" type="date" value="{$.day}" on-change="delivery.update"/>
+</screen>

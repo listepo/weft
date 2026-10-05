@@ -51,6 +51,10 @@ pub fn dissolved(role: &str) -> bool {
     DISSOLVED_ROLES.contains(&role)
 }
 
+/// Roles more than one kind has: the kind a bare element of that role is. The others are told
+/// apart by what the element says (`<input type=date>`) or by the kind it sits in.
+pub const ROLE_DEFAULTS: &[(&str, &str)] = &[("textbox", "field"), ("combobox", "select")];
+
 pub struct Resolved<'c> {
     pub kind: String,
     pub def: &'c ComponentDef,
@@ -59,14 +63,15 @@ pub struct Resolved<'c> {
 
 pub struct KindIndex<'c> {
     pub catalog: &'c Catalog,
-    pub by_role: HashMap<&'c str, &'c str>,
+    /// The kinds of each role, in catalog order.
+    pub by_role: HashMap<&'c str, Vec<&'c str>>,
     /// The role-less text kind that wraps loose text runs where only elements may go.
     pub text: Option<&'c str>,
 }
 
 impl<'c> KindIndex<'c> {
     pub fn new(catalog: &'c Catalog) -> Self {
-        let mut by_role = HashMap::new();
+        let mut by_role: HashMap<&str, Vec<&str>> = HashMap::new();
         let mut text = None;
         for (kind, def) in &catalog.components {
             if def.role == "none" {
@@ -75,7 +80,10 @@ impl<'c> KindIndex<'c> {
                 }
                 continue;
             }
-            by_role.entry(def.role.as_str()).or_insert(kind.as_str());
+            by_role
+                .entry(def.role.as_str())
+                .or_default()
+                .push(kind.as_str());
         }
         KindIndex {
             catalog,
@@ -88,11 +96,33 @@ impl<'c> KindIndex<'c> {
         self.catalog.components.get(kind)
     }
 
+    /// The kind a bare element of `role` is.
     pub fn kind_of(&self, role: &str) -> Option<&'c str> {
-        self.by_role.get(role).copied()
+        let kinds = self.by_role.get(role)?;
+        ROLE_DEFAULTS
+            .iter()
+            .find(|(r, _)| *r == role)
+            .and_then(|(_, kind)| kinds.iter().find(|k| *k == kind))
+            .or_else(|| kinds.first())
+            .copied()
     }
 
-    pub fn resolve(&self, role: &str, named: Option<&str>) -> Option<Resolved<'c>> {
+    /// Among the kinds of `role`, the one that belongs inside `parent` (a radio in a segmented
+    /// control is a segment), or else the bare kind.
+    fn kind_in(&self, role: &str, parent: &str) -> Option<&'c str> {
+        self.by_role
+            .get(role)?
+            .iter()
+            .find(|kind| {
+                self.component(kind)
+                    .and_then(|def| def.allowed_parents.as_ref())
+                    .is_some_and(|parents| parents.iter().any(|p| p == parent))
+            })
+            .copied()
+            .or_else(|| self.kind_of(role))
+    }
+
+    pub fn resolve(&self, role: &str, named: Option<&str>, parent: &str) -> Option<Resolved<'c>> {
         if let Some(named) = named {
             return self.component(named).map(|def| Resolved {
                 kind: named.to_owned(),
@@ -109,7 +139,7 @@ impl<'c> KindIndex<'c> {
                 preset: r.props,
             });
         }
-        let kind = self.kind_of(role)?;
+        let kind = self.kind_in(role, parent)?;
         self.component(kind).map(|def| Resolved {
             kind: kind.to_owned(),
             def,

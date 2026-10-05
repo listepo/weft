@@ -1,0 +1,49 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-segment as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Sort"
+    },
+    "children": [
+      {
+        "kind": "segmented-control",
+        "id": "order",
+        "props": {
+          "label": "Order",
+          "value": {
+            "bind": "$.order"
+          }
+        },
+        "children": [
+          {
+            "kind": "segment",
+            "id": "order-new",
+            "props": {
+              "disabled": false,
+              "value": "new"
+            },
+            "children": [
+              "Newest"
+            ]
+          },
+          {
+            "kind": "segment",
+            "id": "order-top",
+            "props": {
+              "value": "top"
+            },
+            "children": [
+              "Top"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 <screen id="root" label="Actions" weft="0.1">
-  <stack id="actions" align="center" direction="row" gap="{token.space.md}" wrap="false">
+  <stack id="actions" align="end" direction="row" gap="{token.space.md}" wrap="false">
     <button id="save" variant="primary" on-press="doc.save">Save</button>
     <button id="discard" on-press="doc.discard">Discard</button>
   </stack>

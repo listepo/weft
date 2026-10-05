@@ -1,0 +1,24 @@
+<screen id="booking" label="Book a trip" weft="0.1">
+  <heading id="title" level="1">Book a trip</heading>
+  <form id="trip" label="Trip" on-submit="trip.book">
+    <combobox id="city" label="Destination" placeholder="Search a city" value="{$.trip.city}" on-change="trip.edit">
+      <each id="city-each" as="city" in="{$.cities}">
+        <option id="city-option" text="{$city.name}" value="{$city.name}"/>
+      </each>
+    </combobox>
+    <date-picker id="depart" label="Departure" max="2026-12-31" min="2026-01-01" value="{$.trip.depart}" on-change="trip.edit"/>
+    <date-picker id="checkin" label="Check-in time" type="time" value="{$.trip.checkin}"/>
+    <date-picker id="reminder" label="Reminder" type="datetime" value="{$.trip.reminder}"/>
+    <stepper id="guests" label="Guests" max="8" min="1" value="{$.trip.guests}" on-change="trip.edit"/>
+    <slider id="budget" label="Budget per night" max="500" min="50" step="10" value="{$.trip.budget}" on-change="trip.edit"/>
+    <segmented-control id="cabin" label="Cabin" value="{$.trip.cabin}" on-change="trip.edit">
+      <segment id="cabin-economy" value="economy">Economy</segment>
+      <segment id="cabin-business" value="business">Business</segment>
+      <segment id="cabin-first" value="first">First</segment>
+    </segmented-control>
+    <color-picker id="tag" label="Trip colour" value="{$.trip.colour}" on-change="trip.edit"/>
+    <slot name="footer">
+      <button id="book" submit="true" variant="primary">Book</button>
+    </slot>
+  </form>
+</screen>

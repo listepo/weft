@@ -87,7 +87,7 @@ An attribute value is exactly one of:
 
 ### 2.4 Text
 
-- A component whose content is text (`heading`, `text`, `link`, `button`, `radio`, `option`, `column`, `menu-item`) or mixed (`item`, `cell`, `alert`) takes its text as content: `<button id="b">Save</button>`.
+- A component whose content is text (`heading`, `text`, `link`, `button`, `radio`, `segment`, `option`, `column`, `menu-item`) or mixed (`item`, `cell`, `alert`) takes its text as content: `<button id="b">Save</button>`.
 - Bound text goes in the `text` attribute: `<text id="t" text="{$.greeting}"/>`. Content or `text`, never both.
 - `label` is the accessible name. Components marked "label" below need one; on a component that shows its text, leave `label` out.
 
@@ -102,17 +102,18 @@ An attribute value is exactly one of:
 - Content placed inside an element is its default slot; the component's content model decides what it takes: `none`, `text`, `nodes` (elements) or `mixed`.
 - A named slot is `<slot name="…">` as a direct child of a component that declares it. It holds elements only, at most once per parent. Where it stands among the content does not matter; the component places it.
 - `<each id="…" in="{$.items}" as="item">` repeats its element children once per array item. `in` is a binding to an array; `as` is a new name (`[a-z][A-Za-z0-9]*`) that no enclosing `<each>` uses. `<each>` is transparent: its children follow the rules of its parent.
-- Kinds with a fixed parent stay in it: `radio` in `radio-group`, `option` in `select`, `item` in `list`, `column` and `row` in `table`, `cell` in `row`, `tab` in `tabs`, `menu-item` in `menu`.
+- Kinds with a fixed parent stay in it: `radio` in `radio-group`, `segment` in `segmented-control`, `option` in `select` or `combobox`, `item` in `list`, `column` and `row` in `table`, `cell` in `row`, `tab` in `tabs`, `menu-item` in `menu`.
 - `<screen>` is the root only. Nest at most 256 levels.
 
 ### 2.7 Components of `weft-core` 0.1
 
 Props are strings unless a type is given; `*` marks a required prop; "label" means the accessible `label` is required; events follow `;`. Every `text` or `mixed` component also takes `text`.
 
-- Layout: `stack` (`direction` column|row, `gap` token, `align` start|center|end|stretch, `wrap` boolean), `grid` (`columns`* integer ≥ 1, `gap` token), `section` (label; slot `header`).
+- Layout: `stack` (`direction` column|row, `gap` token, `align` start|center|end|stretch, `wrap` boolean; a `row` without `align` centres its children, so leave `align` out for the default), `grid` (`columns`* integer ≥ 1, `gap` token), `section` (label; slot `header`).
 - Text: `heading` (`level`* integer 1–6), `text` (`tone` default|muted|success|warning|danger), `image` (`src`*, label), `link` (`href`; press), `alert` (`tone` info|success|warning|danger; mixed).
 - Actions: `button` (`variant` primary|secondary|danger, `disabled` boolean, `submit` boolean literal; states idle|busy; press), `menu` (label) holding `menu-item` (`disabled`; press).
 - Forms: `form` (slot `footer`; states idle|submitting|invalid; submit), `field` (label, `type` text|email|password|number|search|multiline, `value` writable, `placeholder`, `required`, `disabled`, `error`; states valid|invalid; change), `checkbox` and `switch` (label, `checked` writable, `disabled`; change), `radio-group` (label, `value` writable; change) holding `radio` (`value`*, `disabled`), `select` (label, `value` writable, `disabled`; change) holding `option` (`value`*).
+- Rich controls: `slider` (label, `value` number writable, `min` number default 0, `max` number default 100, `step` number default 1, `disabled`; change), `stepper` (label, `value` number writable, `min`, `max`, `step` default 1, `disabled`; change), `date-picker` (label, `type` date|time|datetime, `value` writable as `yyyy-mm-dd`, `hh:mm` or `yyyy-mm-ddThh:mm`, `min`, `max`, `disabled`; change), `color-picker` (label, `value` writable as `#rrggbb`, `disabled`; change), `segmented-control` (label, `value` writable; change) holding `segment` (`value`*, `disabled`), and `combobox` (label, `value` writable text, `placeholder`, `disabled`; change) holding `option` (`value`*). Choose `combobox` over `select` when the user may type a value that is not an option.
 - Collections: `list` (`ordered`; slot `empty`; states ready|loading|empty) holding `item` (mixed; press), `table` (label; slot `empty`; states ready|loading|empty) holding `column` (`sort` none|ascending|descending; press) and `row` (`selected`; press) holding `cell` (mixed).
 - Containers: `tabs` (`selected` writable, the id of a `tab`; change) holding `tab` (label; holds its panel content), `dialog` (label, `modal`, `open` writable; slot `actions`; close).
 - Root: `screen` (states ready|loading|error).

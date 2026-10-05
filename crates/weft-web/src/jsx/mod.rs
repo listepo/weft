@@ -428,6 +428,15 @@ impl<'a> Gen<'a> {
 
     fn use_(&mut self, helper: &'static str) -> &'static str {
         self.used.insert(helper);
+        // A helper calls the ones it is built from, so using it brings them along.
+        let built_from: &[&'static str] = match helper {
+            "_span" | "_bounds" => &["_numeric"],
+            "_slide" => &["_numeric", "_tidy"],
+            "_count" => &["_numeric", "_clamp"],
+            "_step" => &["_tidy", "_clamp"],
+            _ => &[],
+        };
+        self.used.extend(built_from.iter().copied());
         if helper == "_keyed" {
             self.fragment = true;
         }
@@ -1255,9 +1264,12 @@ impl<'a> Gen<'a> {
             }
             "field" => self.field(n),
             "checkbox" | "switch" => self.toggle(n),
-            "radio-group" => {
+            "radio-group" | "segmented-control" => {
                 let mut a = self.base(n, true);
                 a.push(attr_s("role", "radiogroup"));
+                if n.kind == "segmented-control" {
+                    a.push(attr_s("data-weft-segmented", ""));
+                }
                 let label = self.label(n);
                 let mut kids = self.caption(label);
                 let inner = Ctx {
@@ -1267,8 +1279,13 @@ impl<'a> Gen<'a> {
                 kids.extend(self.content(n, &inner));
                 C::J(el("div", a, kids))
             }
-            "radio" => self.radio(n, ctx),
+            "radio" | "segment" => self.radio(n, ctx),
             "select" => self.select(n),
+            "slider" => self.slider(n),
+            "stepper" => self.stepper(n),
+            "date-picker" => self.date_picker(n),
+            "color-picker" => self.color_picker(n),
+            "combobox" => self.combobox(n),
             "option" => {
                 let a = self.base(n, false);
                 let text = self.own_text(n);
@@ -1437,16 +1454,27 @@ impl<'a> Gen<'a> {
         });
         let align = self.text_of(n, "align");
         let key = self.css("alignItems", "align-items");
+        // SPEC §5.1: a row without a valid `align` centres its children across the row.
+        let row_default = match &direction.lit {
+            Some(v) => (*v == str_v("row")).then(|| "center".to_owned()),
+            None => Some(format!(
+                "{} === \"row\" ? \"center\" : undefined",
+                direction.js
+            )),
+        };
         match &align.lit {
             Some(v) => {
                 let k = v.string();
                 if let Some((_, value)) = ALIGN.iter().find(|(name, _)| *name == k) {
                     entries.push(format!("{key}: {}", quote(value)));
+                } else if let Some(d) = row_default {
+                    let d = if d == "center" { quote(&d) } else { d };
+                    entries.push(format!("{key}: {d}"));
                 }
             }
             None => {
                 let f = self.use_("_align");
-                entries.push(format!("{key}: {f}({})", align.js));
+                entries.push(format!("{key}: {f}({}, {})", align.js, direction.js));
             }
         }
         let wrap = self.flag_of(n, "wrap");
@@ -1801,15 +1829,12 @@ impl<'a> Gen<'a> {
         ))
     }
 
-    /// Only options are rendered: the HTML parser drops anything else inside <select>.
+    /// The options of a `select` or `combobox` as the `{ value, el }` list the component reads:
+    /// anything else inside is dropped, as the HTML parser would. `chosen` marks the selected one.
     #[inline(never)]
-    fn select(&mut self, n: &N<'a>) -> C<'a> {
-        let value = self.text_of(n, "value");
-        // SolidJS's server renderer writes a select's value as an attribute HTML ignores, so each
-        // option says whether it is the chosen one; the select's own value stays for the client.
-        let chosen = self.solid().then(|| value.clone());
+    fn option_list(&mut self, n: &N<'a>, chosen: Option<E>) -> Code<'a> {
         let pieces = self.pieces(n.children, &n.scope, n.depth + 1);
-        let options = self.collect(&pieces, &mut |g, leaf| {
+        self.collect(&pieces, &mut |g, leaf| {
             let Leaf::Node(o) = leaf else {
                 return None;
             };
@@ -1841,7 +1866,17 @@ impl<'a> Gen<'a> {
                 expr(C::J(option)),
                 lit(" }"),
             ]))
-        });
+        })
+    }
+
+    /// Only options are rendered: the HTML parser drops anything else inside <select>.
+    #[inline(never)]
+    fn select(&mut self, n: &N<'a>) -> C<'a> {
+        let value = self.text_of(n, "value");
+        // SolidJS's server renderer writes a select's value as an attribute HTML ignores, so each
+        // option says whether it is the chosen one; the select's own value stays for the client.
+        let chosen = self.solid().then(|| value.clone());
+        let options = self.option_list(n, chosen);
         let mut a = self.base(n, false);
         let label = self.label(n);
         self.attr(&mut a, "aria-label", label);
@@ -1884,6 +1919,250 @@ impl<'a> Gen<'a> {
         let mut kids = self.caption(label);
         kids.push(control);
         C::J(el("label", vec![], kids))
+    }
+
+    /// The `value` of a number, date, colour or combobox control (render.ts `valued`): a bound
+    /// one is controlled and writes what the reader gives, a literal one only starts there.
+    /// `read` is the JavaScript that turns the DOM value into the data value; `undefined` means
+    /// the input holds nothing that fits, so nothing is written.
+    fn valued(&mut self, n: &N<'a>, a: &mut Vec<Attr<'a>>, shown: String, read: &str) {
+        let change = self.fire(n, "change");
+        // React's `onChange` on these controls fires on every input; SolidJS keeps the DOM's
+        // meaning, where that event is `input`.
+        let on_input = if self.solid() { "onInput" } else { "onChange" };
+        if is_binding_raw(n.raw("value")) {
+            a.push(attr_js("value", shown));
+            let write = self
+                .write(n, "value", "_v")
+                .map(|w| format!("if (_v !== undefined) {w}"));
+            a.push(attr_js(
+                on_input,
+                Self::handler(
+                    "(_e)",
+                    vec![Some(format!("const _v = {read}")), write, change],
+                ),
+            ));
+        } else {
+            a.push(attr_js(self.an("defaultValue"), shown));
+            if let Some(change) = change {
+                a.push(attr_js(on_input, format!("() => {change}")));
+            }
+        }
+    }
+
+    /// The control inside its label, with the visible caption before it.
+    fn labelled(&mut self, n: &N<'a>, control: C<'a>) -> C<'a> {
+        let name = self.label(n);
+        let mut kids = self.caption(name);
+        kids.push(control);
+        C::J(el("label", vec![], kids))
+    }
+
+    #[inline(never)]
+    fn slider(&mut self, n: &N<'a>) -> C<'a> {
+        let name = self.label(n);
+        let bounds: Vec<String> = ["min", "max", "step"]
+            .iter()
+            .map(|p| self.prop(n, p).0.js)
+            .collect();
+        let value = self.prop(n, "value").0.js;
+        let span = self.use_("_span");
+        let slide = self.use_("_slide");
+        let mut a = self.base(n, false);
+        a.push(attr_s("type", "range"));
+        self.attr(&mut a, "aria-label", name);
+        for p in ["min", "max", "step"] {
+            a.push(attr_js(p, format!("_s.{p}")));
+        }
+        let disabled = self.flag_of(n, "disabled");
+        self.bool_attr(&mut a, "disabled", disabled);
+        self.valued(
+            n,
+            &mut a,
+            format!("{slide}({value}, _s)"),
+            "_numeric(_e.currentTarget.value)",
+        );
+        let control = block(
+            vec![Code::lit(format!(
+                "const _s = {span}({});",
+                bounds.join(", ")
+            ))],
+            C::J(el("input", a, vec![])),
+        );
+        self.labelled(n, control)
+    }
+
+    #[inline(never)]
+    fn stepper(&mut self, n: &N<'a>) -> C<'a> {
+        let name = self.label(n);
+        let bounds: Vec<String> = ["min", "max", "step"]
+            .iter()
+            .map(|p| self.prop(n, p).0.js)
+            .collect();
+        let value = self.prop(n, "value").0.js;
+        let make = self.use_("_bounds");
+        let count = self.use_("_count");
+        let step = self.use_("_step");
+        let numeric = self.use_("_numeric");
+        let disabled = self.flag_of(n, "disabled");
+        let bound = is_binding_raw(n.raw("value"));
+        // The buttons are for the pointer; the number input steps with the arrow keys already,
+        // so they stay out of the tab order and the accessibility tree (APG spinbutton).
+        let button = |g: &mut Self, direction: i32, which: &str, sign: &str| {
+            let mut a = vec![
+                attr_s("type", "button"),
+                attr_js(g.an("tabIndex"), "-1"),
+                attr_s("aria-hidden", "true"),
+                attr_s("data-weft-step", which),
+            ];
+            g.bool_attr(&mut a, "disabled", disabled.clone());
+            let set = (!bound).then(|| "if (_i) _i.value = String(_n)".to_owned());
+            a.push(attr_js(
+                "onClick",
+                Self::handler(
+                    "(_e)",
+                    vec![
+                        Some("const _i = _e.currentTarget.parentElement?.querySelector(\"input\")".to_owned()),
+                        Some(format!(
+                            "const _n = {step}({numeric}(_i?.value) ?? {count}({value}, _b), {direction}, _b)"
+                        )),
+                        set,
+                        g.write(n, "value", "_n"),
+                        g.fire(n, "change"),
+                    ],
+                ),
+            ));
+            C::J(el("button", a, vec![C::Text(sign.to_owned())]))
+        };
+        let down = button(self, -1, "down", "\u{2212}");
+        let up = button(self, 1, "up", "+");
+        let mut a = self.base(n, false);
+        a.push(attr_s("type", "number"));
+        self.attr(&mut a, "aria-label", name);
+        for p in ["min", "max", "step"] {
+            a.push(attr_js(p, format!("_b.{p}")));
+        }
+        self.bool_attr(&mut a, "disabled", disabled);
+        self.valued(
+            n,
+            &mut a,
+            format!("String({count}({value}, _b))"),
+            &format!("{numeric}(_e.currentTarget.value)"),
+        );
+        let input = C::J(el("input", a, vec![]));
+        let group = C::J(el(
+            "span",
+            vec![attr_s("data-weft-stepper", "")],
+            vec![down, input, up],
+        ));
+        let control = block(
+            vec![Code::lit(format!(
+                "const _b = {make}({});",
+                bounds.join(", ")
+            ))],
+            group,
+        );
+        self.labelled(n, control)
+    }
+
+    #[inline(never)]
+    fn date_picker(&mut self, n: &N<'a>) -> C<'a> {
+        let name = self.label(n);
+        let ty = self.text_of(n, "type").js;
+        let kind = self.use_("_dateType");
+        let date = self.use_("_dateText");
+        let mut a = self.base(n, false);
+        a.push(attr_js(
+            "type",
+            "_t === \"datetime\" ? \"datetime-local\" : _t",
+        ));
+        self.attr(&mut a, "aria-label", name);
+        for p in ["min", "max"] {
+            let text = self.text_of(n, p).js;
+            a.push(attr_js(p, format!("{date}(_t, {text}) || undefined")));
+        }
+        let disabled = self.flag_of(n, "disabled");
+        self.bool_attr(&mut a, "disabled", disabled);
+        let value = self.text_of(n, "value").js;
+        self.valued(
+            n,
+            &mut a,
+            format!("{date}(_t, {value})"),
+            &format!("{date}(_t, _e.currentTarget.value)"),
+        );
+        let control = block(
+            vec![Code::lit(format!("const _t = {kind}({ty});"))],
+            C::J(el("input", a, vec![])),
+        );
+        self.labelled(n, control)
+    }
+
+    #[inline(never)]
+    fn color_picker(&mut self, n: &N<'a>) -> C<'a> {
+        let name = self.label(n);
+        let color = self.use_("_color");
+        let value = self.text_of(n, "value").js;
+        let mut a = self.base(n, false);
+        a.push(attr_s("type", "color"));
+        self.attr(&mut a, "aria-label", name);
+        let disabled = self.flag_of(n, "disabled");
+        self.bool_attr(&mut a, "disabled", disabled);
+        self.valued(
+            n,
+            &mut a,
+            format!("{color}({value})"),
+            "_e.currentTarget.value",
+        );
+        let control = C::J(el("input", a, vec![]));
+        self.labelled(n, control)
+    }
+
+    /// An editable combobox: the text input with a `datalist` of its options, linked by id.
+    #[inline(never)]
+    fn combobox(&mut self, n: &N<'a>) -> C<'a> {
+        let name = self.label(n);
+        let value = self.text_of(n, "value").js;
+        let options = self.option_list(n, None);
+        let list = (!n.doc_id.is_empty()).then(|| {
+            let mut parts = vec![s("weft-")];
+            parts.extend(n.id.iter().cloned());
+            parts.push(s("-options"));
+            str_js(&parts)
+        });
+        let mut a = self.base(n, false);
+        self.attr(&mut a, "aria-label", name.clone());
+        if let Some(list) = &list {
+            a.push(attr_js("list", list.clone()));
+        }
+        let placeholder = self.text_of(n, "placeholder");
+        let placeholder = self.or_undefined(placeholder);
+        self.attr(&mut a, "placeholder", placeholder);
+        let disabled = self.flag_of(n, "disabled");
+        self.bool_attr(&mut a, "disabled", disabled);
+        self.valued(n, &mut a, value, "_e.currentTarget.value");
+        let mut kids = self.caption(name);
+        kids.push(C::J(el("input", a, vec![])));
+        if let Some(list) = list {
+            let shown = if self.solid() {
+                "_o.map((_x) => _x.el)".to_owned()
+            } else {
+                let keyed = self.use_("_keyed");
+                format!("{keyed}(_o.map((_x) => _x.el))")
+            };
+            kids.push(C::J(el(
+                "datalist",
+                vec![attr_js("id", list)],
+                vec![C::Code(Code::lit(shown))],
+            )));
+        }
+        block(
+            vec![Code::of(vec![
+                lit("const _o = "),
+                Seg::Code(options),
+                lit(";"),
+            ])],
+            C::J(el("label", vec![], kids)),
+        )
     }
 
     /// SPEC §5.1: the `empty` slot is shown instead of the items when there are none, or when

@@ -46,7 +46,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
           {!(_text(data?.error?.message).trim() === "") ? _squash(_text(data?.error?.message)) : ""}
         </div>
       </div>
-      <div data-weft-id="actions" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row" }}>
+      <div data-weft-id="actions" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" }}>
         <button data-weft-id="retry" type="button" data-variant="primary" onClick={(_e) => _act(actions, { id: "retry", action: "load.retry" })}>Retry</button>
         {(() => {
           const _href = _url("");

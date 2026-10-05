@@ -35,6 +35,13 @@ test("every catalog kind is covered by this file", () => {
     "alert",
     "menu",
     "menu-item",
+    "combobox",
+    "slider",
+    "stepper",
+    "date-picker",
+    "color-picker",
+    "segmented-control",
+    "segment",
   ];
   assert.deepEqual([...covered].sort(), Object.keys(coreCatalog.components).sort());
 });
@@ -76,6 +83,29 @@ test("stack and grid are plain layout containers styled from tokens", () => {
     v.byId("g").attribs["style"],
     "gap:var(--weft-space-unknown);display:grid;grid-template-columns:repeat(3, minmax(0, 1fr))",
   );
+});
+
+test("a row without align centres its children, a column and an explicit align do not change", () => {
+  const d = doc(
+    el("stack", "row", { direction: "row" }),
+    el("stack", "end", { direction: "row", align: "end" }),
+    el("stack", "bad", { direction: "row", align: "middle" }),
+    el("stack", "column", {}),
+  );
+  const v = dom(d);
+  assert.equal(
+    v.byId("row").attribs["style"],
+    "display:flex;flex-direction:row;align-items:center",
+  );
+  assert.equal(
+    v.byId("end").attribs["style"],
+    "display:flex;flex-direction:row;align-items:flex-end",
+  );
+  assert.equal(
+    v.byId("bad").attribs["style"],
+    "display:flex;flex-direction:row;align-items:center",
+  );
+  assert.equal(v.byId("column").attribs["style"], "display:flex;flex-direction:column");
 });
 
 test("section is a region only when labelled, with its header slot first", () => {
@@ -429,4 +459,132 @@ test("text-bearing kinds take bound text from the text prop; label overrides the
   assert.equal(v.byId("x").attribs["aria-label"], "Close");
   assert.equal(v.text(v.byId("x")), "×");
   assert.equal(v.text(v.byId("both")), "content", "content wins when a lenient reader gets both");
+});
+
+test("slider is a range input whose value is clamped and snapped to its grid", () => {
+  const v = dom(
+    doc(
+      el("slider", "a", { label: "Volume", value: b("$.v"), min: 0, max: 10, step: 2 }),
+      el("slider", "b", { label: "Backwards", value: 5, min: 8, max: 2 }),
+    ),
+    { data: { v: 3 } },
+  );
+  const a = v.byId("a");
+  assert.equal(a.name, "input");
+  assert.equal(a.attribs["type"], "range");
+  assert.equal(a.attribs["aria-label"], "Volume");
+  assert.deepEqual(
+    [a.attribs["min"], a.attribs["max"], a.attribs["step"], a.attribs["value"]],
+    ["0", "10", "2", "4"],
+  );
+  const caption = v.find((e) => e.attribs["aria-hidden"] === "true");
+  assert.ok(caption && v.text(caption) === "Volume", "the label is also the visible caption");
+  const odd = v.byId("b");
+  assert.deepEqual([odd.attribs["min"], odd.attribs["max"], odd.attribs["value"]], ["8", "8", "8"]);
+});
+
+test("stepper is a number input with minus and plus buttons kept out of the tree", () => {
+  const v = dom(
+    doc(el("stepper", "q", { label: "Guests", value: b("$.n"), min: 1, max: 4, disabled: true })),
+    { data: { n: 9 } },
+  );
+  const q = v.byId("q");
+  assert.equal(q.attribs["type"], "number");
+  assert.equal(q.attribs["aria-label"], "Guests");
+  assert.deepEqual([q.attribs["min"], q.attribs["max"], q.attribs["step"]], ["1", "4", "1"]);
+  assert.equal(q.attribs["value"], "4", "a bound value outside the range is clamped");
+  assert.equal(q.attribs["disabled"], "");
+  const buttons = v.all((e) => e.name === "button");
+  assert.deepEqual(
+    buttons.map((e) => v.text(e)),
+    ["\u2212", "+"],
+  );
+  for (const e of buttons) {
+    assert.equal(e.attribs["aria-hidden"], "true");
+    assert.equal(e.attribs["tabindex"], "-1");
+    assert.equal(e.attribs["disabled"], "");
+  }
+  const free = dom(doc(el("stepper", "q", { label: "Free" }))).byId("q");
+  assert.equal(free.attribs["min"], undefined);
+  assert.equal(free.attribs["max"], undefined);
+  assert.equal(free.attribs["value"], "0");
+});
+
+test("date-picker maps its type to the input type and drops values that are not that type", () => {
+  const v = dom(
+    doc(
+      el("date-picker", "d", { label: "Due", value: "2026-10-05", min: "2026-01-01", max: "bad" }),
+      el("date-picker", "t", { label: "At", type: "time", value: "09:30" }),
+      el("date-picker", "dt", { label: "When", type: "datetime", value: "2026-10-05T09:30" }),
+      el("date-picker", "x", { label: "Bad", value: "2026-02-30" }),
+    ),
+  );
+  const d = v.byId("d");
+  assert.equal(d.attribs["type"], "date");
+  assert.deepEqual(
+    [d.attribs["value"], d.attribs["min"], d.attribs["max"]],
+    ["2026-10-05", "2026-01-01", undefined],
+  );
+  assert.equal(v.byId("t").attribs["type"], "time");
+  assert.equal(v.byId("dt").attribs["type"], "datetime-local");
+  assert.equal(v.byId("dt").attribs["value"], "2026-10-05T09:30");
+  assert.equal(v.byId("x").attribs["value"], "");
+});
+
+test("color-picker shows a #rrggbb colour and falls back to black", () => {
+  const v = dom(
+    doc(
+      el("color-picker", "a", { label: "Accent", value: "#3B82F6" }),
+      el("color-picker", "b", { label: "Other", value: "blue" }),
+    ),
+  );
+  assert.equal(v.byId("a").attribs["type"], "color");
+  assert.equal(v.byId("a").attribs["value"], "#3b82f6");
+  assert.equal(v.byId("b").attribs["value"], "#000000");
+});
+
+test("combobox is a text input linked to a datalist of its options", () => {
+  const v = dom(
+    doc(
+      el("combobox", "c", { label: "Fruit", value: b("$.f"), placeholder: "Pick" }, [
+        el("option", "o1", { value: "apple" }, ["Apple"]),
+        el("option", "o2", { value: "pear" }, ["Pear"]),
+      ]),
+    ),
+    { data: { f: "app" } },
+  );
+  const c = v.byId("c");
+  assert.equal(c.name, "input");
+  assert.equal(c.attribs["aria-label"], "Fruit");
+  assert.equal(c.attribs["value"], "app");
+  assert.equal(c.attribs["placeholder"], "Pick");
+  const list = v.find((e) => e.name === "datalist");
+  assert.ok(list);
+  assert.equal(c.attribs["list"], list.attribs["id"]);
+  assert.deepEqual(
+    v.all((e) => e.name === "option").map((e) => [e.attribs["value"], v.text(e)]),
+    [
+      ["apple", "Apple"],
+      ["pear", "Pear"],
+    ],
+  );
+});
+
+test("segmented-control is a radiogroup of segments sharing one name", () => {
+  const v = dom(
+    doc(
+      el("segmented-control", "g", { label: "View", value: "week" }, [
+        el("segment", "s1", { value: "day" }, ["Day"]),
+        el("segment", "s2", { value: "week" }, ["Week"]),
+      ]),
+    ),
+  );
+  assert.equal(v.byId("g").attribs["role"], "radiogroup");
+  assert.equal(v.byId("g").attribs["data-weft-segmented"], "");
+  const [s1, s2] = [v.byId("s1"), v.byId("s2")];
+  assert.equal(s1.attribs["type"], "radio");
+  assert.equal(s1.attribs["aria-label"], "Day");
+  assert.equal(s1.attribs["name"], s2.attribs["name"]);
+  assert.equal(s1.attribs["checked"], undefined);
+  assert.equal(s2.attribs["checked"], "");
 });

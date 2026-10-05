@@ -1,0 +1,48 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-combobox as react-jsx
+---
+import { Fragment } from "react";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _keyed(list) {
+  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);
+}
+
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Shipping">
+      {(() => {
+        const _o = [
+          { value: "Lisbon", el: (
+            <option data-weft-id="city-lisbon" value="Lisbon">Portugal</option>
+          ) },
+          { value: "Madrid", el: (
+            <option data-weft-id="city-madrid" value="Madrid">Spain</option>
+          ) },
+        ];
+        return (
+          <label>
+            <span aria-hidden="true">City</span>
+            <input data-weft-id="city" aria-label="City" list={"weft-city-options"} placeholder="Type a city" value={_text(data?.city)} onChange={(_e) => { const _v = _e.currentTarget.value; if (_v !== undefined) onChange?.("$.city", _v); _act(actions, { id: "city", action: "shipping.update" }); }} />
+            <datalist id={"weft-city-options"}>
+              {_keyed(_o.map((_x) => _x.el))}
+            </datalist>
+          </label>
+        );
+      })()}
+    </main>
+  );
+}

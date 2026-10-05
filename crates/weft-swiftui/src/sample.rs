@@ -7,10 +7,10 @@
 use std::collections::HashMap;
 
 use serde_json::Value as Json;
-use weft_core::{js_round, text, truthy};
+use weft_core::{controls, js_round, text, truthy};
 
 use crate::data::{Shapes, Ty};
-use crate::swift::{member, string_literal};
+use crate::swift::{self, member, string_literal};
 
 pub fn extension(
     model: &str,
@@ -57,6 +57,7 @@ impl Printer<'_> {
             Ty::String => vec![string_literal(&text(value))],
             Ty::Bool => vec![truthy(value).to_string()],
             Ty::Int => vec![int(value).to_string()],
+            Ty::Double => vec![swift::number_literal(double(value))],
             Ty::Struct(at) => {
                 let name = if *at == 0 {
                     self.model
@@ -117,6 +118,13 @@ fn wrap(open: &str, parts: Vec<Vec<String>>, close: &str) -> Vec<String> {
 
 /// A number as Swift's `Int`: rounded as the renderer rounds whole-number props, and held to
 /// `Int`'s range; anything but a number is 0.
+/// A number as the number controls read it: a number, or text written as one.
+fn double(value: Option<&Json>) -> f64 {
+    let number = value.and_then(Json::as_f64);
+    let text = value.and_then(Json::as_str);
+    controls::numeric(number, text).unwrap_or(0.0)
+}
+
 fn int(value: Option<&Json>) -> i64 {
     match value {
         Some(Json::Number(n)) => n.as_i64().unwrap_or_else(|| {
