@@ -109,6 +109,8 @@ function toHEl(n: Ast, scope: string[]): HEl {
       } else {
         const p = pathOf(x, scope);
         if (p && BOUND_ATTRS.has(name)) el.bind[name] = p;
+        // A bound aria-label is what the static page writes as `data-bind="label:path"`.
+        else if (p && name === "aria-label") el.bind["label"] = p;
       }
     }
   }
