@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T51 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 | T11 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
@@ -154,22 +153,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T51. Glass material tokens
-A frosted-glass surface is expressed as a token, as the creator chose: a `material` token (background blur, tint colour and opacity) that an element takes through its style, like other tokens.
-- **Research:** the DTCG 2025.10 format has no material type, so the plan cites the format, says how the token is written (a Weft extension type or a composite of DTCG types), and keeps standard tools able to read the file.
-- **Web targets:** `backdrop-filter` with a solid fallback where it is unsupported.
-- **SwiftUI:** `glassEffect` on iOS 26 and later (or the current Liquid Glass API, cited), `Material` before it.
-- **Figma and Penpot:** a background blur with the tint fill, read back on export.
-- **Modes:** dark and light modes (T45) may give the material different values.
-Add a corpus screen with glass surfaces over an image or gradient background, so the effect is visible in screenshots. Cover it like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Done when the full check exits 0 and new baselines are reviewed.
-
-Execution plan:
-
-1. **Token shape.** A `material` token is a DTCG `color` token (tint hex with `alpha`) carrying one vendor extension, `$extensions["dev.weft.material"] = { "blur": <dimension> }`. DTCG 2025.10 requires tools to preserve unknown `$extensions`, so Figma Tokens Studio, Style Dictionary and other readers see an ordinary colour and keep the blur. Weft's loader reads the extension and gives the token the kind `material` with value `{tint, blur}`. Bounds (the file is untrusted): alpha 0..1, blur 0..100 px, else the new diagnostic `T007` and the token is dropped, as for `T001` to `T006`. Modes (T45) work unchanged: each mode overrides the whole token, so dark may differ in tint and blur.
-2. **Element mechanism.** The existing token-reference prop: a token-typed prop `material` (`tokenType: "material"`) on `stack` and `grid`, written `material="{token.material.glass}"`. The validator's `W306` and `W307` already check unknown tokens and a wrong kind against `tokenType`, so no new validation code is needed. The default tokens gain `material.glass`; the catalog is regenerated.
-3. **Targets.** Web: tokens become `--weft-<path>-tint`, `-solid` and `-blur`; the element sets private `--_weft-material-*` properties and `data-weft-material`; `base.css` paints the solid colour and adds `backdrop-filter` inside `@supports`. SwiftUI: a `Surface` modifier, `glassEffect` on iOS 26 and later, `Material` plus the tint before it; the importer reads `.modifier(theme.x)` back. Figma and Penpot: a solid fill with the tint's opacity plus a background blur (`BACKGROUND_BLUR`; Penpot `backgroundBlur`), read back from the fill and the blur, with the `material` prop kept in the source plugin data. React and SolidJS generators and the HTML, DOM and JSX importers follow the web convention.
-4. **Corpus and visuals.** `corpus/glass` (a stack and a grid taking the token), snapshots for every generator, a coloured stripe backdrop behind the screen in the Chromium stage and the SwiftUI host so the blur is visible, light and dark baselines, Figma and Penpot fake coverage, and the T51 research in `research.md` §17.
-5. **Verify.** Unit tests for the loader bounds and the CSS and SwiftUI output, the corpus suites, then the full check.
 ### T52. 3D transforms and models
 Two parts, as the creator chose.
 1. **3D transforms on any element:** rotation on each axis, perspective and depth, e.g. a flipped or tilted card.
