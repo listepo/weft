@@ -9,6 +9,7 @@ The server works only on text passed in tool calls. It reads no files, and opens
 | Tool | Input | What you get back |
 | --- | --- | --- |
 | `weft_primer` | none | A short primer: the syntax rules, value forms, patch forms and how to use the other tools. An agent calls it first. |
+| `weft_capabilities` | none | What the host accepts: `{"weft", "catalogs": [{name, version}]}`, plus the token paths and action names when the host checks them. |
 | `weft_catalog` | `kind` (optional) | Without `kind`, one line per component. With `kind`, that component's full definition. |
 | `weft_validate` | `markup`, `strict` (optional) | `{"valid": true/false, "diagnostics": […]}`. |
 | `weft_format` | `markup` | The canonical markup, or the diagnostics when the markup has errors. |
@@ -118,7 +119,7 @@ An app started from the Dock or a launcher does not read your shell setup, so it
 
 The server's own instructions tell the agent to call `weft_primer` first. The loop that works is:
 
-1. `weft_catalog` to see the vocabulary that exists.
+1. `weft_capabilities` to see which catalogs, tokens and actions the host accepts, then `weft_catalog` to see the vocabulary that exists.
 2. Write or change the markup, preferably as a patch.
 3. `weft_validate` with `strict: true`, and fix every error using its hint.
 4. `weft_render` to check the result reads right, or `weft_patch` to apply an edit.

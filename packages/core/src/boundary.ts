@@ -57,6 +57,8 @@ export type CoreOptions = {
   mode?: Mode | undefined;
   tokens?: ReadonlyMap<string, string> | undefined;
   actions?: readonly string[] | undefined;
+  /** `parse` only: the markup may stop anywhere (SPEC §6.3). */
+  partial?: boolean | undefined;
 };
 
 export function options(o: CoreOptions): string {
@@ -65,6 +67,7 @@ export function options(o: CoreOptions): string {
       strict: o.mode === "strict",
       tokens: o.tokens === undefined ? undefined : [...o.tokens],
       actions: o.actions,
+      partial: o.partial === true ? true : undefined,
     }) ?? "{}"
   );
 }

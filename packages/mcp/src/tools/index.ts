@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Context, ServerSettings } from "../context.ts";
+import { registerCapabilities } from "./capabilities.ts";
 import { registerCatalog } from "./catalog.ts";
 import { registerFormat } from "./format.ts";
 import { registerPatch } from "./patch.ts";
@@ -14,6 +15,7 @@ export const TOOLS: readonly ((
   settings: ServerSettings,
 ) => void)[] = [
   registerPrimer,
+  registerCapabilities,
   registerCatalog,
   registerValidate,
   registerFormat,
