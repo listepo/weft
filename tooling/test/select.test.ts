@@ -51,18 +51,22 @@ const test_ = (id: string, over: Partial<Task> = {}): Task => {
   return task(`${id}:test`, {
     globs: [`${source}/**/*`, "packages/**/*", ...shared, "crates/*/tests/fixtures/**/*"],
     files: ["SPEC.md", "AGENT-SPEC.md"],
-    deps: ["root:wasm"],
+    deps: ["root:wasm", "root:native"],
     vitest: true,
     ...over,
   });
 };
 
 const tasks: Task[] = [
+  // The build tasks list the crates they are made of, not `crates/**/*` (T56).
   task("root:wasm", {
-    globs: ["crates/**/*"],
+    globs: ["crates/weft-wasm/**/*", "crates/weft-core/**/*", "crates/weft-catalog/**/*"],
     files: ["packages/catalog/catalog.json"],
   }),
-  task("root:native", { globs: ["crates/**/*"], files: ["packages/catalog/catalog.json"] }),
+  task("root:native", {
+    globs: ["crates/weft-node/**/*", "crates/weft-core/**/*", "crates/weft-catalog/**/*"],
+    files: ["packages/catalog/catalog.json"],
+  }),
   task("root:cli", {}),
   task("root:typecheck", {
     globs: ["packages/**/*", "plugins/**/*", "bench/**/*", "runtimes/**/*", "tooling/**/*"],
@@ -102,7 +106,7 @@ const tasks: Task[] = [
   test_("shared", { globs: ["plugins/shared/**/*", "packages/**/*", "plugins/*/**/*"] }),
   test_("visual", {
     globs: ["packages/visual/**/*", "packages/**/*", "crates/**/*"],
-    deps: ["root:wasm", "root:cli"],
+    deps: ["root:wasm", "root:native", "root:cli"],
   }),
 ];
 
@@ -194,9 +198,27 @@ describe("a change in a binding stub", () => {
     );
   });
 
-  test("the native addon reaches only the suites that load it", () => {
+  test("a crate the module is not built from leaves the module and its suites alone", () => {
+    const result = plan(["crates/weft-swiftui/src/lib.rs"]);
+    assert.ok(!result.whole.includes("core:test") && !result.whole.includes("root:typecheck"));
+    assert.ok(!result.narrowed.includes("mcp:test"));
+  });
+
+  test("a crate the module is built from rebuilds it and reaches its suites", () => {
+    const result = plan(["crates/weft-catalog/src/lib.rs"]);
+    assert.ok(
+      ["core:test", "catalog:test", "root:typecheck"].every((t) => result.whole.includes(t)),
+    );
+  });
+
+  test("the native addon reaches every suite, which all depend on it", () => {
     const result = plan(["crates/weft-node/src/lib.rs"]);
-    assert.deepEqual(result.whole, ["catalog:test", "core:test"]);
+    assert.ok(
+      ["catalog:test", "core:test", "mcp:test", "visual:test"].every((t) =>
+        result.whole.includes(t),
+      ),
+    );
+    assert.ok(!result.whole.includes("root:typecheck"));
   });
 });
 

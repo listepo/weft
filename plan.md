@@ -11,9 +11,9 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T51 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T52 | todo | P2 | 5 | 0% | |
-| T56 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
-| T57 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
+| T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
+| T11 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -168,7 +168,7 @@ Execution plan:
 1. **Token shape.** A `material` token is a DTCG `color` token (tint hex with `alpha`) carrying one vendor extension, `$extensions["dev.weft.material"] = { "blur": <dimension> }`. DTCG 2025.10 requires tools to preserve unknown `$extensions`, so Figma Tokens Studio, Style Dictionary and other readers see an ordinary colour and keep the blur. Weft's loader reads the extension and gives the token the kind `material` with value `{tint, blur}`. Bounds (the file is untrusted): alpha 0..1, blur 0..100 px, else the new diagnostic `T007` and the token is dropped, as for `T001` to `T006`. Modes (T45) work unchanged: each mode overrides the whole token, so dark may differ in tint and blur.
 2. **Element mechanism.** The existing token-reference prop: a token-typed prop `material` (`tokenType: "material"`) on `stack` and `grid`, written `material="{token.material.glass}"`. The validator's `W306` and `W307` already check unknown tokens and a wrong kind against `tokenType`, so no new validation code is needed. The default tokens gain `material.glass`; the catalog is regenerated.
 3. **Targets.** Web: tokens become `--weft-<path>-tint`, `-solid` and `-blur`; the element sets private `--_weft-material-*` properties and `data-weft-material`; `base.css` paints the solid colour and adds `backdrop-filter` inside `@supports`. SwiftUI: a `Surface` modifier, `glassEffect` on iOS 26 and later, `Material` plus the tint before it; the importer reads `.modifier(theme.x)` back. Figma and Penpot: a solid fill with the tint's opacity plus a background blur (`BACKGROUND_BLUR`; Penpot `backgroundBlur`), read back from the fill and the blur, with the `material` prop kept in the source plugin data. React and SolidJS generators and the HTML, DOM and JSX importers follow the web convention.
-4. **Corpus and visuals.** `corpus/glass` (a stack and a grid taking the token), snapshots for every generator, a coloured stripe backdrop behind the screen in the Chromium stage and the SwiftUI host so the blur is visible, light and dark baselines, Figma and Penpot fake coverage, and the T51 research in `research.md` §16.
+4. **Corpus and visuals.** `corpus/glass` (a stack and a grid taking the token), snapshots for every generator, a coloured stripe backdrop behind the screen in the Chromium stage and the SwiftUI host so the blur is visible, light and dark baselines, Figma and Penpot fake coverage, and the T51 research in `research.md` §17.
 5. **Verify.** Unit tests for the loader bounds and the CSS and SwiftUI output, the corpus suites, then the full check.
 ### T52. 3D transforms and models
 Two parts, as the creator chose.
@@ -186,27 +186,12 @@ Two parts, as the creator chose.
 
 Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
 
-### T56. Narrow the WebAssembly task's inputs
+### T11. Streaming and incremental generation
 
-`root:wasm` lists `/crates/**/*` as its input, so any crate change rebuilds both WebAssembly modules (about 45 s), even a change to a crate the modules do not contain, such as `weft-swiftui` or `weft-cli`. Found in T54.
+A2UI and json-render use flat id lists so that a UI can render while a model is still writing it. Weft must show the same for nested markup: a truncated document parses into a renderable prefix with diagnostics only for the unfinished tail, and the renderer shows it. If it cannot, the trade-off is measured and written into `research.md`.
 
-- Make the inputs exactly the crates the two modules are built from: `weft-wasm` with and without the `web` feature, and their dependency closure from `cargo metadata`, plus the workspace `Cargo.toml` and `Cargo.lock` and the files the build reads.
-- The list must not go stale silently. A test compares the declared inputs with the crate closure and fails when a dependency is added without updating them.
-- Do the same for `root:native` if it has the same coarse input.
+### T18. Follow-ups from the prototype
 
-Done when:
-- a change in `weft-swiftui` no longer rebuilds the modules;
-- a change in `weft-core` still does;
-- the full check exits 0.
-
-### T57. Cache the mcp test task
-
-The `mcp` package's `test` task is never served from moon's cache. Vitest writes `node_modules/.vite/.../results.json`, which falls inside the task's `**/*` input, so the hash changes after every run and `moon ci` always re-runs the tests. Found in T54.
-
-- Find the cause in the inherited `test` task (`.moon/tasks/all.yml`) or the package's own config, and exclude Vitest's cache output from the inputs. Alternatively, move Vitest's cache out of the input tree, using the documented `cacheDir` option.
-- Check every other package for the same problem.
-
-Done when:
-- a second `moon run :test` with no changes is fully cached;
-- a source change still re-runs the affected tests;
-- the full check exits 0.
+- `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
+- Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
+- Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.

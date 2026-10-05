@@ -89,10 +89,9 @@ const FULL_RUN_FILES: readonly [RegExp, string][] = [
 const COARSE_GLOBS = new Set(["packages/**/*", "crates/**/*"]);
 
 // The crate whose build output each task consumes. A task that lists `crates/**/*` without an entry
-// is treated as reading every crate.
+// is treated as reading every crate. The WebAssembly and native builds list the crates they are made
+// of instead, so their own globs select them.
 const TASK_CRATE: Readonly<Record<string, string>> = {
-  "root:wasm": "weft-wasm",
-  "root:native": "weft-node",
   "root:cli": "weft-cli",
   "xcode-plugin:bundle": "weft-cli",
   "visual:test": "weft-cli",
