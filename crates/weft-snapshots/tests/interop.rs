@@ -51,7 +51,7 @@ fn a2ui_export_snapshots() {
 }
 
 /// The A2UI v0.9 schemas of `tests/a2ui-schemas`, copied from `specification/v0_9` of
-/// `a2ui-project/a2ui` at commit `4787774` (2026-10-05, Apache-2.0): the message envelope, the
+/// `a2ui-project/a2ui` at commit `4787774` (2026-10-05, Apache-2.0; whitespace reformatted by the project's formatter): the message envelope, the
 /// common types and the basic catalog. The common types name their catalog `catalog.json`, which
 /// a client supplies; here it is the basic catalog.
 fn a2ui_registry() -> jsonschema::Registry<'static> {
