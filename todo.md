@@ -9,5 +9,4 @@
 - T58. Natural `align="center"` coverage in the corpus
 - T59. Deterministic home indicator in SwiftUI screenshots
 - T10. Host capabilities
-- T11. Streaming and incremental generation
 - T18. Follow-ups from the prototype

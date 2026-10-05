@@ -15,7 +15,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T10 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T11 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
@@ -210,19 +209,6 @@ Done when:
 ### T10. Host capabilities
 
 SPEC §8 says a host advertises `{ weft, catalogs }` and an agent writes only what is advertised; no code does this. The MCP server reports its capabilities, loads catalogs, tokens and actions from configuration, and turns token and action checks on when they are given.
-
-### T11. Streaming and incremental generation
-
-A2UI and json-render use flat id lists so that a UI can render while a model is still writing it. Weft must show the same for nested markup: a truncated document parses into a renderable prefix with diagnostics only for the unfinished tail, and the renderer shows it. If it cannot, the trade-off is measured and written into `research.md`.
-
-Execution plan:
-
-1. Rust `weft-core` tokenizer: a `partial` mode. Input that ends inside a construct is not a syntax error but an unfinished tail: an unfinished start tag, end tag, comment or trailing reference is dropped, and each element still open at the end is kept. The diagnostics the end of input causes (W110 for open elements, the missing root) are returned as `pending`, not as errors, so the document is built.
-2. `parse` takes `partial`: it builds the prefix document, validates it, and moves the checks a later chunk can still satisfy (W208 and W314 on an open element, W309 anywhere) from `diagnostics` to `pending`. `ParseResult` gains `pending`. The option travels in the existing options JSON, so both engines (wasm and native) need no new export.
-3. `@weft/core`: `ParseOptions.partial`, `ParseResult.pending`.
-4. Tests: Rust unit tests for each kind of cut; a vitest over every corpus screen truncated at every UTF-16 unit (valid prefix document, empty `diagnostics`, `pending` only for the tail, never a throw); a render-react test that renders partial documents.
-5. SPEC section "Streaming" (partial parsing) plus AGENT-SPEC note; `research.md` section with the sources (A2UI, json-render) and the measured cost of re-parsing the growing text on every chunk.
-6. Checks: `moon run root:changed` while iterating, the full check once at the end.
 
 ### T18. Follow-ups from the prototype
 
