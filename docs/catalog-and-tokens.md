@@ -28,7 +28,7 @@ $ node docs/examples/mcp-call.mjs weft_catalog kind=checkbox
 {"kind":"checkbox","description":"A box the user ticks or clears to turn one independent option on or off.","role":"checkbox","content":"none","requiresLabel":true,"props":{"checked":{"description":"Whether the control is on; bind it to a boolean to read and write it.","type":"boolean","writable":true},"disabled":{"description":"Set to true to make the checkbox non-interactive.","type":"boolean"}},"events":["change"]}
 ```
 
-Read the `props` carefully: `type` is a value type, `values` lists the allowed words of an `enum`, `writable` marks an input that writes back to your data, `bindable: false` means a literal only, and `required` means the validator will insist. Every component also takes the universal attributes of [SPEC §2.2](../SPEC.md#22-universal-attributes): `id`, `label`, `hidden`, `state` and `on-<event>`.
+Read the `props` carefully: `type` is a value type, `values` lists the allowed words of an `enum`, `writable` marks an input that writes back to your data, `bindable: false` means a literal only, `references` names the kind of element whose `id` the value must be (`tabs.selected` names a `tab`), and `required` means the validator will insist. Every component also takes the universal attributes of [SPEC §2.2](../SPEC.md#22-universal-attributes): `id`, `label`, `hidden`, `state` and `on-<event>`.
 
 ### Extending it
 

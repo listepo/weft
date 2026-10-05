@@ -182,6 +182,7 @@ type ComponentDef = {
   allowedChildren?: string[];              // kinds; absent = any
   allowedParents?: string[];               // kinds; absent = any
   requiresLabel?: boolean;                 // the universal `label` attribute is mandatory
+  root?: boolean;                          // the document root must be this kind, and it may stand nowhere else
   props?: Record<string, PropDef>;
   slots?: Record<string, SlotDef>;
   states?: string[];                       // values allowed for `state`
@@ -200,6 +201,7 @@ type PropDef = {
   default?: string | number | boolean;
   bindable?: boolean;                      // default true; false = literal only
   writable?: boolean;                      // true = two-way binding target
+  references?: string;                     // for string: a literal value is the id of an element of this kind
 };
 
 type SlotDef = { description: string; allowedChildren?: string[]; required?: boolean };
@@ -280,7 +282,7 @@ Validation has three layers, each reporting diagnostics rather than throwing:
 
 1. **Syntax** — §2. The document is well-formed restricted XML.
 2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, numbers within their declared `min`, `max` and `integer`, required props present, declared slots, states and events.
-3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), binding paths are declared, with a type the attribute takes, in the supplied data schema (when one is supplied, §10.5), `selected`/id references point at existing elements (`tabs.selected` names a `tab`), `<screen>` only at the root, a `submit` button inside a `form`, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
+3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), binding paths are declared, with a type the attribute takes, in the supplied data schema (when one is supplied, §10.5), a prop the catalog marks `references` holds the id of an element of that kind (`tabs.selected` names a `tab`), the root is the kind the catalog marks `root` (`screen`) and that kind stands nowhere else, a `submit` button inside a `form`, and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
 
 A document that does not have the JSON shape of §3 gets `W200` diagnostics only; the other checks need the shape.
 
@@ -330,7 +332,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W118 | `<slot>` misplaced (root, inside `<each>` or another `<slot>`) or malformed (no valid `name`, other attributes). |
 | W119 | The same slot name twice under one parent. |
 | W200 | Document does not have the JSON shape of §3 (or nests too deep, or the root's `props` holds `weft`). |
-| W201 | Root element is not `screen`. |
+| W201 | Root element is not the catalog's `root` kind (`screen`). |
 | W202 | Element without `id`. |
 | W203 | Value not one of the enum values or declared states. |
 | W204 | Value of the wrong type. |
@@ -362,10 +364,10 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W306 | Token not in the supplied token set. |
 | W307 | Token `$type` differs from the prop's `tokenType`. |
 | W308 | Action not in the supplied action list. |
-| W309 | Id reference points at no suitable element. |
+| W309 | Id reference points at no suitable element (a `references` prop that names none of its kind). |
 | W310 | Text given twice: a `text` or `mixed` component has both content and the `text` prop. |
 | W311 | Loop variable shadows an enclosing one. |
-| W312 | `screen` below the root. |
+| W312 | The `root` kind (`screen`) below the root. |
 | W313 | `button` with `submit="true"` outside a `form`. |
 | W314 | `<each>` without an element child. |
 | W315 | Binding path not declared in the supplied data schema (§10.5). |
@@ -429,9 +431,9 @@ type Patch =
 - A reader MUST NOT drop unknown content when it round-trips a document.
 - A catalog has its own semver. Removing a component, a prop, an enum value, a slot, a state or an event is a major change; adding one is minor.
 - The rule does not spell out every case, so the following are fixed. A change is **major** when a document valid against the previous catalog can become invalid or mean something else, **minor** when it only admits more documents, and **none** when no document is affected. The version bump of a catalog is the highest level among its changes.
-  - Major: a prop becomes required; a new prop or slot is required; a prop's `type` or `tokenType` changes; a prop's `default` changes, appears or disappears; a component's `role` changes; `requiresLabel` turns on; `bindable` turns off; `writable` turns off.
+  - Major: a prop becomes required; a new prop or slot is required; a prop's `type` or `tokenType` changes; a prop's `default` changes, appears or disappears; a component's `role` changes; `requiresLabel` turns on; a component becomes the `root`; a prop gains or changes `references`; `bindable` turns off; `writable` turns off.
   - Content narrowing is major and widening is minor. For `content`, `mixed` accepts everything `text` and `nodes` accept, and `none` accepts nothing; a change to a model that does not accept everything the old one did is narrowing. For `allowedChildren` and `allowedParents` (component or slot), an absent list means any: adding a list or removing a kind narrows, removing the list or adding a kind widens.
-  - Minor: a prop stops being required; a slot stops being required; `requiresLabel` turns off; `bindable` or `writable` turns on; a numeric range widens.
+  - Minor: a prop stops being required; a slot stops being required; `requiresLabel` turns off; a component stops being the `root`; a prop loses `references`; `bindable` or `writable` turns on; a numeric range widens.
   - A numeric range narrows when its lower bound rises, its upper bound falls, or a bound appears; the opposite is widening. A prop field the classifier does not know is major when it changes.
   - A change to a `description` only is none.
 - A host advertises `{ weft, catalogs: [{ name, version }] }`; an agent writes only what the host advertises.

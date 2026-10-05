@@ -500,6 +500,44 @@ fn a_submit_button_needs_a_form_among_its_ancestors() {
 }
 
 #[test]
+fn id_references_and_the_root_follow_the_catalog() {
+    let messages = |catalog: &weft_core::Catalog, markup: &str| -> Vec<String> {
+        let options = ParseOptions {
+            catalog: Some(catalog),
+            ..ParseOptions::default()
+        };
+        let result = parse(markup, &options);
+        result.diagnostics.into_iter().map(|d| d.message).collect()
+    };
+    let tabs = screen("<tabs id=\"t\" selected=\"nope\"><tab id=\"a\" label=\"A\"/></tabs>");
+    let stack = "<stack id=\"s\" weft=\"0.1\"/>";
+    let mut catalog = catalog();
+    assert_eq!(
+        messages(&catalog, &tabs),
+        ["\"nope\" is not the id of a <tab>."]
+    );
+    assert_eq!(
+        messages(&catalog, stack),
+        ["The root element must be <screen>."]
+    );
+
+    let selected = |catalog: &mut weft_core::Catalog, target: Option<&str>| {
+        let props = catalog.components.get_mut("tabs").unwrap().props.as_mut();
+        props.unwrap()["selected"].references = target.map(str::to_owned);
+    };
+    selected(&mut catalog, Some("button"));
+    assert_eq!(
+        messages(&catalog, &tabs),
+        ["\"nope\" is not the id of a <button>."]
+    );
+    selected(&mut catalog, None);
+    assert!(messages(&catalog, &tabs).is_empty());
+
+    catalog.components.get_mut("screen").unwrap().root = None;
+    assert!(messages(&catalog, stack).is_empty());
+}
+
+#[test]
 fn tabs_selected_must_name_a_tab() {
     assert!(only("<tabs id=\"t\" selected=\"a\"><tab id=\"a\" label=\"A\"/></tabs>").is_empty());
     assert_eq!(

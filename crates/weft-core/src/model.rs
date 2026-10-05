@@ -182,6 +182,9 @@ pub struct PropDef {
     pub bindable: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub writable: Option<bool>,
+    /// A string prop whose literal value is the id of an element of this kind (SPEC §6, `W309`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub references: Option<String>,
 }
 
 impl PropDef {
@@ -198,6 +201,7 @@ impl PropDef {
             default: None,
             bindable: None,
             writable: None,
+            references: None,
         }
     }
 }
@@ -224,6 +228,9 @@ pub struct ComponentDef {
     pub allowed_parents: Option<Vec<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub requires_label: Option<bool>,
+    /// True for the one kind the document root must be, and that may stand nowhere else.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub root: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub props: Option<Map<PropDef>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]

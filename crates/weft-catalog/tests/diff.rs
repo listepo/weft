@@ -584,6 +584,50 @@ fn writable_defaults_to_false_and_only_gaining_it_is_minor() {
 }
 
 #[test]
+fn naming_an_element_kind_is_major_and_dropping_it_is_minor() {
+    let (a, b) = edit(|j| prop(j, "count")["references"] = json!("card"));
+    assert_eq!(
+        summary(&a),
+        [(
+            Major,
+            "components.card.props.count.references",
+            "references changed from undefined to card."
+        )]
+    );
+    assert_eq!(
+        summary(&b),
+        [(
+            Minor,
+            "components.card.props.count.references",
+            "The prop no longer names an element."
+        )]
+    );
+}
+
+#[test]
+fn becoming_the_root_is_major_and_giving_it_up_is_minor() {
+    let (a, b) = edit(|j| j["components"]["card"]["root"] = json!(true));
+    assert_eq!(
+        summary(&a),
+        [(
+            Major,
+            "components.card.root",
+            "The component became the document root."
+        )]
+    );
+    assert_eq!(
+        summary(&b),
+        [(
+            Minor,
+            "components.card.root",
+            "The component is no longer the document root."
+        )]
+    );
+    let (a, _) = edit(|j| j["components"]["card"]["root"] = json!(false));
+    assert!(a.changes.is_empty());
+}
+
+#[test]
 fn a_raised_minimum_or_a_lowered_maximum_is_major_and_the_opposite_is_minor() {
     let (a, b) = edit(|j| prop(j, "count")["min"] = json!(2));
     assert_eq!(

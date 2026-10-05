@@ -57,6 +57,8 @@ export const PropDefSchema = z.strictObject({
   default: z.union([z.string(), z.number(), z.boolean()]).optional(),
   bindable: z.boolean().optional(),
   writable: z.boolean().optional(),
+  // A string prop whose literal value is the id of an element of this kind (SPEC §6, W309).
+  references: z.string().optional(),
 });
 export type PropDef = z.infer<typeof PropDefSchema>;
 
@@ -75,6 +77,8 @@ export const ComponentDefSchema = z.strictObject({
   allowedParents: z.array(z.string()).optional(),
   // SPEC §5.1 "needs label": the universal `label` attribute is mandatory for this component.
   requiresLabel: z.boolean().optional(),
+  // The one kind the document root must be, and that may stand nowhere else (SPEC §6, W201, W312).
+  root: z.boolean().optional(),
   props: z.record(z.string(), PropDefSchema).optional(),
   slots: z.record(z.string(), SlotDefSchema).optional(),
   states: z.array(z.string()).optional(),
