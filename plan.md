@@ -226,6 +226,14 @@ After T50 merged, one full check failed 21 SwiftUI screenshots by about 5,900 pi
 - Make it deterministic. Prefer hiding it in the host app with the documented SwiftUI API (`persistentSystemOverlays(.hidden)` or the current equivalent, cited), if a screenshot then never shows it. Otherwise exclude the home-indicator strip from the comparison, using the device's safe-area inset rather than a hard-coded size.
 - Keep both simulator modes (T46) working.
 
+Execution plan:
+
+1. Reproduce: shoot every screen right after launch on a freshly booted own device and look for the strip. Cause to confirm: the app only hides the status bar, and the screenshot loop accepts two equal frames 500 ms apart, which can both fall before the system hides the indicator.
+2. Add `.persistentSystemOverlays(.hidden)` next to `.statusBarHidden(true)` in the host app in `packages/visual/test/swiftui.test.ts`. Source: https://developer.apple.com/documentation/swiftui/view/persistentsystemoverlays(_:) (iOS 16 and later; "hides every persistent system overlay" in iOS, the home indicator among them, checked 2026-10-05). Apple says the system might not honour the preference, so step 3 decides.
+3. Prove it on a fresh device: a screenshot taken immediately after launch must equal the baseline area. If the indicator still shows, mask the strip instead: crop the bottom safe-area inset (read from the app's own `safeAreaInsets` at runtime, passed back through the screenshot, not a hard-coded size) from both images in `compare`.
+4. Run the suite three times in a row in own mode and once in shared mode (`WEFT_SIMULATOR=own` and `shared`); retake baselines only if the visible area changed.
+5. Document the rule in `packages/visual/README.md`; close into `done.md`.
+
 Done when:
 - the suite passes repeatedly (at least three consecutive runs);
 - baselines are retaken only if the visible area changes, and are then reviewed;
