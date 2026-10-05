@@ -31,6 +31,7 @@ abstract class FakeBase {
   width = 100;
   height = 100;
   hidden = false;
+  rotation = 0;
   borderRadius = 0;
   backgroundBlur: PBlur | undefined;
   strokes: PStroke[] = [];
@@ -177,6 +178,7 @@ abstract class FakeBase {
     to.width = this.width;
     to.height = this.height;
     to.hidden = this.hidden;
+    to.rotation = this.rotation;
     to.borderRadius = this.borderRadius;
     to.backgroundBlur = this.backgroundBlur === undefined ? undefined : { ...this.backgroundBlur };
     to.fillList = structuredClone(this.fillList);

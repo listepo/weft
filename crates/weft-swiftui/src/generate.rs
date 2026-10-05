@@ -800,6 +800,12 @@ impl<'a> Gen<'a> {
         let mut on = node.on.clone();
         let label = props.shift_remove("label");
         let hidden = props.shift_remove("hidden");
+        // A dialog is drawn into its own layer, so its tilt stays a marker (SPEC §2.2).
+        let tilt = if node.kind == "dialog" {
+            vec![]
+        } else {
+            tilt_modifiers(&mut props)
+        };
         let mut v = self.kind(
             node,
             &id,
@@ -834,6 +840,9 @@ impl<'a> Gen<'a> {
             };
             let expr = self.expr(&value, leaf, loops);
             v.modifier(format!(".weftProp({}, {expr})", string_literal(&name)));
+        }
+        for modifier in tilt {
+            v.modifier(modifier);
         }
         for event in on.keys() {
             self.problems.push(Unsupported::new(
@@ -1902,3 +1911,57 @@ const HEADING_FONTS: [&str; 6] = [
 
 /// Fixed helpers every generated file carries, `fileprivate` so several screens can share a module.
 const HELPERS: &str = include_str!("helpers.swift");
+
+/// SwiftUI takes a perspective relative to the view, where CSS takes pixels; a view of this many
+/// points is the one the two agree on. `generate` prints `NOMINAL / px` so the importer can read
+/// the pixels back exactly.
+pub(crate) const TILT_NOMINAL_VIEW: f64 = 400.0;
+
+/// The `rotation3DEffect` chain of a tilt, taking its props out of `props`. CSS applies
+/// `rotateX rotateY rotateZ` right to left and SwiftUI applies modifiers in order, so the chain
+/// runs z, y, x. Only the last effect carries the perspective, as in CSS the perspective is
+/// applied once to the whole transform.
+fn tilt_modifiers(props: &mut IndexMap<String, Value>) -> Vec<String> {
+    let mut number = |name: &str| match props.get(name) {
+        Some(Value::Number(n)) => {
+            let n = *n;
+            props.shift_remove(name);
+            Some(n)
+        }
+        _ => None,
+    };
+    let perspective = number("perspective");
+    let turns: Vec<(f64, &str)> = [
+        ("rotate-z", "x: 0, y: 0, z: 1"),
+        ("rotate-y", "x: 0, y: 1, z: 0"),
+        ("rotate-x", "x: 1, y: 0, z: 0"),
+    ]
+    .into_iter()
+    .filter_map(|(name, axis)| number(name).map(|degrees| (degrees, axis)))
+    .collect();
+    let projection = |last: bool| match perspective {
+        Some(p) if last => format!(
+            "{} / {}",
+            swift::number_literal(TILT_NOMINAL_VIEW),
+            swift::number_literal(p)
+        ),
+        _ => "0".to_owned(),
+    };
+    let effect = |degrees: f64, axis: &str, last: bool| {
+        format!(
+            ".rotation3DEffect(.degrees({}), axis: ({axis}), perspective: {})",
+            swift::number_literal(degrees),
+            projection(last)
+        )
+    };
+    match (turns.as_slice(), perspective) {
+        ([], None) => vec![],
+        // A perspective with nothing to turn: a zero axis carries it.
+        ([], Some(_)) => vec![effect(0.0, "x: 0, y: 0, z: 0", true)],
+        (turns, _) => turns
+            .iter()
+            .enumerate()
+            .map(|(i, (degrees, axis))| effect(*degrees, axis, i + 1 == turns.len()))
+            .collect(),
+    }
+}

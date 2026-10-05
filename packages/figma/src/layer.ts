@@ -33,6 +33,8 @@ export function styleKey(layer: FLayout, withSpacing: boolean): string {
   // Appended only when there is one, so a frame built before effects were read keeps the
   // fingerprint stored in its plugin data and does not read back as edited.
   if (layer.effects.length > 0) key.push(effects(layer.effects));
+  // Likewise only when turned, so the key of every upright layer stays as it was.
+  if (layer.rotation !== 0) key.push(layer.rotation);
   return JSON.stringify(key);
 }
 

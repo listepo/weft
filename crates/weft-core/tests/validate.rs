@@ -42,6 +42,28 @@ fn a_valid_screen_has_no_diagnostics() {
     assert!(only("<stack id=\"a\"><text id=\"t\">Hi</text></stack>").is_empty());
 }
 
+// ---- the 3D tilt, a universal attribute (SPEC §2.2) ---------------------------------------
+
+#[test]
+fn any_element_takes_a_tilt_and_a_perspective() {
+    assert!(
+        only("<stack id=\"a\" rotate-x=\"-20.5\" rotate-y=\"360\" rotate-z=\"0\" perspective=\"800\"><text id=\"t\" rotate-y=\"30\">Hi</text></stack>")
+            .is_empty()
+    );
+}
+
+#[test]
+fn a_tilt_is_a_number_in_range_and_a_perspective_is_at_least_one() {
+    assert_eq!(only("<stack id=\"a\" rotate-x=\"361\"/>"), ["W224"]);
+    assert_eq!(only("<stack id=\"a\" perspective=\"0\"/>"), ["W224"]);
+    assert_eq!(only("<stack id=\"a\" rotate-z=\"steep\"/>"), ["W204"]);
+}
+
+#[test]
+fn a_tilt_cannot_be_bound() {
+    assert_eq!(only("<stack id=\"a\" rotate-y=\"{$.angle}\"/>"), ["W217"]);
+}
+
 // ---- modes --------------------------------------------------------------------------------
 
 #[test]

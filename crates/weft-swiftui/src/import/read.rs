@@ -1261,6 +1261,9 @@ impl<'a> Reader<'a> {
                 }
             }
         }
+        for m in mods.take_all("rotation3DEffect") {
+            self.tilt(node, &m.args, path);
+        }
         if let Some(m) = mods.take("disabled")
             && let Some(v) = first_arg(&m.args).and_then(|e| self.value(e, Leaf::Bool, path))
         {
@@ -1319,6 +1322,72 @@ impl<'a> Reader<'a> {
         }
         self.ignored_quiet(&mut mods);
         self.ignored(mods, path);
+    }
+
+    /// One `rotation3DEffect` of a tilt: the turn about an axis, and the perspective in pixels.
+    fn tilt(&mut self, node: &mut Node, args: &[Arg], path: &str) {
+        let number = |e: &Expr| match e {
+            Expr::Num(n) => Some(*n),
+            Expr::Neg(inner) => match inner.as_ref() {
+                Expr::Num(n) => Some(-n),
+                _ => None,
+            },
+            _ => None,
+        };
+        let degrees = match first_arg(args) {
+            Some(Expr::Call(c)) if matches!(c.callee.as_ref(), Expr::Implicit(n) if n == "degrees") => {
+                first_arg(&c.args).and_then(number)
+            }
+            _ => None,
+        };
+        let axis = match arg(args, "axis") {
+            Some(Expr::Tuple(items)) => ["x", "y", "z"].map(|name| {
+                items
+                    .iter()
+                    .find(|a| a.label.as_deref() == Some(name))
+                    .and_then(|a| number(&a.value))
+            }),
+            _ => [None; 3],
+        };
+        let perspective = match arg(args, "perspective") {
+            Some(Expr::Num(n)) if *n == 0.0 => Some(None),
+            Some(Expr::Binary { left, op, right })
+                if op == "/"
+                    && matches!(left.as_ref(), Expr::Num(n) if *n == crate::generate::TILT_NOMINAL_VIEW) =>
+            {
+                number(right).map(Some)
+            }
+            _ => None,
+        };
+        let (Some(degrees), [Some(x), Some(y), Some(z)], Some(perspective)) =
+            (degrees, axis, perspective)
+        else {
+            self.lose(
+                LossKind::Props,
+                path,
+                "a rotation3DEffect is not a tilt Weft can read",
+            );
+            return;
+        };
+        if let Some(p) = perspective {
+            node.props
+                .insert("perspective".to_owned(), Value::Number(p));
+        }
+        let name = match (x, y, z) {
+            (0.0, 0.0, 0.0) => return,
+            (1.0, 0.0, 0.0) => "rotate-x",
+            (0.0, 1.0, 0.0) => "rotate-y",
+            (0.0, 0.0, 1.0) => "rotate-z",
+            _ => {
+                self.lose(
+                    LossKind::Props,
+                    path,
+                    "a rotation3DEffect turns about an axis Weft has no attribute for",
+                );
+                return;
+            }
+        };
+        node.props.insert(name.to_owned(), Value::Number(degrees));
     }
 
     /// Modifiers `generate` adds for SwiftUI's sake, which carry nothing more.

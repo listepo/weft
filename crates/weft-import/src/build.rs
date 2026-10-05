@@ -6,8 +6,8 @@ use std::collections::HashSet;
 
 use weft_core::{
     ARIA_ROLES, Catalog, Child, ComponentDef, Content, Diagnostic, Document, Map, Node, PropType,
-    ValidateOptions, Value, WEFT_VERSION, canonicalize, is_binding, is_id, is_loop_variable,
-    validate_document,
+    TILT_PROPS, ValidateOptions, Value, WEFT_VERSION, canonicalize, is_binding, is_id,
+    is_loop_variable, universal_prop, validate_document,
 };
 
 use crate::ids::IdState;
@@ -20,7 +20,15 @@ use crate::text::{clean, js_trim, literal, squash};
 
 const BUSY_STATES: &[&str] = &["busy", "loading", "submitting"];
 /// SPEC §2.2 attributes every element takes, besides `id`, `role` and `on-*`.
-const UNIVERSAL: &[&str] = &["label", "hidden", "state"];
+const UNIVERSAL: &[&str] = &[
+    "label",
+    "hidden",
+    "state",
+    "rotate-x",
+    "rotate-y",
+    "rotate-z",
+    "perspective",
+];
 /// The repetition construct (SPEC §4); not a catalog kind.
 const EACH: &str = "each";
 
@@ -237,7 +245,11 @@ fn set_prop(
         }
         return;
     }
-    let Some(pd) = def.prop(name) else {
+    // A tilt is a universal attribute with a definition of its own (SPEC §2.2).
+    let Some(pd) = def
+        .prop(name)
+        .or_else(|| universal_prop(name).filter(|_| TILT_PROPS.contains(&name)))
+    else {
         return;
     };
     if name == "text" {

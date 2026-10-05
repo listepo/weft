@@ -9,6 +9,7 @@ mod import;
 mod js;
 pub mod jsx;
 pub mod provenance;
+mod tilt;
 pub mod tree;
 
 pub use dom::{IMPLICIT_ROLES, INPUT_ROLES, MAX_HTML_LENGTH, from_dom, instance_id};

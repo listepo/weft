@@ -1,0 +1,68 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-tilt as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions: WeftProps["actions"], event: WeftEvent): void {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="tilt" aria-label="Card flips">
+      <h1 data-weft-id="title">Card flips</h1>
+      <div data-weft-id="deck" style={{ gap: "var(--weft-space-lg)", display: "flex", flexDirection: "column" }}>
+        <section data-weft-id="front" aria-label="Front side" style={{ transform: "perspective(800px) rotateY(25deg)" }}>
+          <div data-weft-slot="header">
+            <h2 data-weft-id="front-title">Front</h2>
+          </div>
+          <div data-weft-id="front-text">
+            {!(_text(data?.front).trim() === "") ? _squash(_text(data?.front)) : ""}
+          </div>
+          <button data-weft-id="front-flip" type="button" data-variant="primary" onClick={(_e) => _act(actions, { id: "front-flip", action: "card.flip" })}>Flip</button>
+        </section>
+        <section data-weft-id="back" aria-label="Back side" style={{ transform: "perspective(800px) rotateY(180deg)" }}>
+          <div data-weft-slot="header">
+            <h2 data-weft-id="back-title">Back</h2>
+          </div>
+          <div data-weft-id="back-text">
+            {!(_text(data?.back).trim() === "") ? _squash(_text(data?.back)) : ""}
+          </div>
+          <button data-weft-id="back-flip" type="button" onClick={(_e) => _act(actions, { id: "back-flip", action: "card.flip" })}>Flip</button>
+        </section>
+        <section data-weft-id="lean" aria-label="Leaning card" style={{ transform: "perspective(600px) rotateX(20deg) rotateZ(-6deg)" }}>
+          <div data-weft-slot="header">
+            <h2 data-weft-id="lean-title">Leaning</h2>
+          </div>
+          <div data-weft-id="lean-text">Tilted back and turned a little in the plane.</div>
+          <div data-weft-field="">
+            <label>
+              <span aria-hidden="true">Note</span>
+              <input data-weft-id="lean-note" aria-label="Note" type="text" placeholder="Add a note" value={_text(data?.note)} onChange={(_e) => { onChange?.("$.note", _e.currentTarget.value); _act(actions, { id: "lean-note", action: "note.edit" }); }} />
+            </label>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}

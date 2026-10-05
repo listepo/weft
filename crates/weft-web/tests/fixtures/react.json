@@ -2770,6 +2770,180 @@
    "weft": "0.1",
    "root": {
     "kind": "screen",
+    "id": "tilt",
+    "props": {
+     "label": "Card flips"
+    },
+    "children": [
+     {
+      "kind": "heading",
+      "id": "title",
+      "props": {
+       "level": 1
+      },
+      "children": [
+       "Card flips"
+      ]
+     },
+     {
+      "kind": "stack",
+      "id": "deck",
+      "props": {
+       "gap": {
+        "token": "space.lg"
+       }
+      },
+      "children": [
+       {
+        "kind": "section",
+        "id": "front",
+        "props": {
+         "label": "Front side",
+         "perspective": 800,
+         "rotate-y": 25
+        },
+        "slots": {
+         "header": [
+          {
+           "kind": "heading",
+           "id": "front-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Front"
+           ]
+          }
+         ]
+        },
+        "children": [
+         {
+          "kind": "text",
+          "id": "front-text",
+          "props": {
+           "text": {
+            "bind": "$.front"
+           }
+          }
+         },
+         {
+          "kind": "button",
+          "id": "front-flip",
+          "props": {
+           "variant": "primary"
+          },
+          "on": {
+           "press": "card.flip"
+          },
+          "children": [
+           "Flip"
+          ]
+         }
+        ]
+       },
+       {
+        "kind": "section",
+        "id": "back",
+        "props": {
+         "label": "Back side",
+         "perspective": 800,
+         "rotate-y": 180
+        },
+        "slots": {
+         "header": [
+          {
+           "kind": "heading",
+           "id": "back-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Back"
+           ]
+          }
+         ]
+        },
+        "children": [
+         {
+          "kind": "text",
+          "id": "back-text",
+          "props": {
+           "text": {
+            "bind": "$.back"
+           }
+          }
+         },
+         {
+          "kind": "button",
+          "id": "back-flip",
+          "on": {
+           "press": "card.flip"
+          },
+          "children": [
+           "Flip"
+          ]
+         }
+        ]
+       },
+       {
+        "kind": "section",
+        "id": "lean",
+        "props": {
+         "label": "Leaning card",
+         "perspective": 600,
+         "rotate-x": 20,
+         "rotate-z": -6
+        },
+        "slots": {
+         "header": [
+          {
+           "kind": "heading",
+           "id": "lean-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Leaning"
+           ]
+          }
+         ]
+        },
+        "children": [
+         {
+          "kind": "text",
+          "id": "lean-text",
+          "children": [
+           "Tilted back and turned a little in the plane."
+          ]
+         },
+         {
+          "kind": "field",
+          "id": "lean-note",
+          "props": {
+           "label": "Note",
+           "placeholder": "Add a note",
+           "value": {
+            "bind": "$.note"
+           }
+          },
+          "on": {
+           "change": "note.edit"
+          }
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"tilt\" aria-label=\"Card flips\">\n      <h1 data-weft-id=\"title\">Card flips</h1>\n      <div data-weft-id=\"deck\" style={{ gap: \"var(--weft-space-lg)\", display: \"flex\", flexDirection: \"column\" }}>\n        <section data-weft-id=\"front\" aria-label=\"Front side\" style={{ transform: \"perspective(800px) rotateY(25deg)\" }}>\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"front-title\">Front</h2>\n          </div>\n          <div data-weft-id=\"front-text\">\n            {!(_text(data?.front).trim() === \"\") ? _squash(_text(data?.front)) : \"\"}\n          </div>\n          <button data-weft-id=\"front-flip\" type=\"button\" data-variant=\"primary\" onClick={(_e) => _act(actions, { id: \"front-flip\", action: \"card.flip\" })}>Flip</button>\n        </section>\n        <section data-weft-id=\"back\" aria-label=\"Back side\" style={{ transform: \"perspective(800px) rotateY(180deg)\" }}>\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"back-title\">Back</h2>\n          </div>\n          <div data-weft-id=\"back-text\">\n            {!(_text(data?.back).trim() === \"\") ? _squash(_text(data?.back)) : \"\"}\n          </div>\n          <button data-weft-id=\"back-flip\" type=\"button\" onClick={(_e) => _act(actions, { id: \"back-flip\", action: \"card.flip\" })}>Flip</button>\n        </section>\n        <section data-weft-id=\"lean\" aria-label=\"Leaning card\" style={{ transform: \"perspective(600px) rotateX(20deg) rotateZ(-6deg)\" }}>\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"lean-title\">Leaning</h2>\n          </div>\n          <div data-weft-id=\"lean-text\">Tilted back and turned a little in the plane.</div>\n          <div data-weft-field=\"\">\n            <label>\n              <span aria-hidden=\"true\">Note</span>\n              <input data-weft-id=\"lean-note\" aria-label=\"Note\" type=\"text\" placeholder=\"Add a note\" value={_text(data?.note)} onChange={(_e) => { onChange?.(\"$.note\", _e.currentTarget.value); _act(actions, { id: \"lean-note\", action: \"note.edit\" }); }} />\n            </label>\n          </div>\n        </section>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
     "id": "todos",
     "props": {
      "label": "Tasks"

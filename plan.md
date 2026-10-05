@@ -10,7 +10,9 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
+| T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T15 | in progress | P3 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -151,18 +153,21 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T52. 3D transforms and models
-Two parts, as the creator chose.
-1. **3D transforms on any element:** rotation on each axis, perspective and depth, e.g. a flipped or tilted card.
-   - Web: CSS `perspective` and `rotate3d`.
-   - SwiftUI: `rotation3DEffect`.
-   - Figma and Penpot: the nearest 2D projection, with a note when it is lossy.
-   - Importers read the transforms back.
-2. **A model element** showing a 3D asset (glTF and/or USDZ, chosen and cited in the plan) with a still fallback image and an accessible label.
-   - Web: a maintained viewer such as `<model-viewer>`, picked in the plan.
-   - SwiftUI: RealityKit `Model3D`.
-   - Design tools: the fallback image.
-   - Asset paths are untrusted: relative to the project, no URLs unless SPEC allows them, and size-bounded.
-   - Add a small model asset under a compatible licence to the corpus.
+### T52.1. 3D models
 
-Add a corpus screen using both, covered like the corpus: snapshots, Chromium, simulator, and Figma/Penpot fakes. Screenshots must be deterministic: a fixed camera, no animation. Done when the full check exits 0 and new baselines are reviewed.
+Split from T52. A `model` element showing a 3D asset, with a still fallback image and an accessible label.
+
+- **A new leaf kind** `model` (role `img`, label required) with `src` (glTF, `.glb` or `.gltf`), `usdz` (optional, for Apple platforms) and `fallback` (a still image, required). glTF is what `<model-viewer>` loads and USDZ is what RealityKit loads, and neither reads the other's format, so the element names both.
+- **Web: `<model-viewer>`** (`@google/model-viewer`, Apache-2.0, 4.3.1 on npm). Markup `<model-viewer src alt>` with the fallback `<img slot="poster">` as its child, so a page without the script, and every screenshot, shows the fallback. The host page loads the script; Weft never injects one.
+- **SwiftUI:** `Model3D` is visionOS only (the SDK marks it `iOS unavailable`), so a helper uses `Model3D` on visionOS, `RealityView` with the bundled USDZ on iOS 18 and macOS 15, and the fallback `AsyncImage` elsewhere and while loading. An environment value forces the fallback, and the screenshot host sets it so images are deterministic.
+- **Asset paths are untrusted:** the three paths are literals validated by a new code `W317` (relative path without `..`, backslash, control characters or a scheme, or an `https` URL; the right extension; at most 2048 bytes), and renderers apply the existing `safe_url` / `safeUrl` guard again. One small properly licensed asset ships in the corpus with its licence noted; a test bounds its size. Design tools draw the library's image rectangle.
+- Groundwork tried in T52 and removed again: the `model` kind in `packages/catalog/src/core.ts`, `asset_problem` in `weft-core/src/rules.rs`, the `W317` check in `validate.rs`, cases in `packages/core/test/cases.ts` and `crates/weft-core/tests/codes.rs`, `model` in the fixture catalog `packages/core/test/catalog.ts`.
+- Add a corpus screen with a model, covered like the corpus. Screenshots are deterministic (the fallback). Done when the full check exits 0 and new baselines are reviewed.
+
+### T13. Interoperability with A2UI and json-render
+
+Export a Weft document to A2UI v0.9 messages and to a json-render spec, and import from both, each with a loss table in SPEC §9. Done when every corpus screen converts both ways and the losses are listed.
+
+### T15. Second code target and catalog import
+
+A generator for Lit web components and an importer that turns a Custom Elements Manifest (schema 2.1.0) into a Weft catalog, to show that the format is not bound to React. Done when a corpus screen renders through the Lit target with the same accessibility tree as the React renderer.

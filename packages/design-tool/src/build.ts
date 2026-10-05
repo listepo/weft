@@ -44,6 +44,11 @@ export interface BuildHost<L, C> {
   marks(layer: L): Marks;
   /** The same fingerprint `Layer.style` reads back. */
   style(layer: L, withSpacing: boolean): string;
+  /**
+   * Turns a layer in the picture plane, `degrees` clockwise from -180 to 180. A design tool has no
+   * 3D transform, so this is all it draws of a tilt (SPEC §2.2).
+   */
+  turn(layer: L, degrees: number): void;
   /** Places the finished root on the page; `screen` when the root is a `screen`. */
   place(root: L, screen: boolean): void;
 }
@@ -76,6 +81,13 @@ export async function buildScreen<L, C>(
   return root;
 }
 
+/** `rotate-z` as a clockwise turn in (-180, 180]; the other tilts have no drawing. */
+export function planeTurn(props: Node["props"]): number {
+  const z = props?.["rotate-z"];
+  if (typeof z !== "number") return 0;
+  return 180 - ((((180 - z) % 360) + 360) % 360);
+}
+
 function mark(marks: Marks, node: Node, leaf: boolean, shown: Shown): void {
   marks.name = node.id === undefined ? node.kind : `${node.kind}#${node.id}`;
   writeJson(marks, KEY.source, sourceOf(node, leaf, shown));
@@ -102,6 +114,7 @@ async function buildNode<L, C>(ctx: Ctx<L, C>, node: Node, parentMode: Mode): Pr
       await host.setText(instance, "label", shown.label);
     }
     mark(host.marks(instance), node, true, shown);
+    turn(host, instance, node);
     return instance;
   }
 
@@ -127,8 +140,14 @@ async function buildNode<L, C>(ctx: Ctx<L, C>, node: Node, parentMode: Mode): Pr
   }
   const marks = host.marks(frame);
   mark(marks, node, false, shown);
+  turn(host, frame, node);
   marks.setPluginData(KEY.style, host.style(frame, !LAYOUT_KINDS.has(node.kind)));
   return frame;
+}
+
+function turn<L, C>(host: BuildHost<L, C>, layer: L, node: Node): void {
+  const degrees = planeTurn(node.props);
+  if (degrees !== 0) host.turn(layer, degrees);
 }
 
 async function appendChildren<L, C>(

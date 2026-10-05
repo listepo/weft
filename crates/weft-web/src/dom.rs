@@ -7,7 +7,8 @@ use std::collections::{HashMap, HashSet};
 use indexmap::IndexMap;
 use weft_catalog::Token;
 use weft_core::{
-    ARIA_ROLES, Catalog, Child, Diagnostic, Node, PropDefault, Value, is_action, is_id, read_value,
+    ARIA_ROLES, Catalog, Child, Diagnostic, Node, PropDefault, Value, is_action, is_id, js_number,
+    read_value,
 };
 use weft_import::{
     BuildOptions, Built, ImportResult, LossKind, MAX_DEPTH, MAX_NODES, Note, Scalar, Sem,
@@ -16,6 +17,7 @@ use weft_import::{
 };
 
 use crate::html::token_var;
+use crate::tilt;
 
 use crate::tree::{DOCUMENT, Dom, HNode, parse_html};
 
@@ -607,6 +609,7 @@ impl<'d> Ctx<'d> {
             s.props.shift_remove("align");
         }
         if self.conventions.is_some() {
+            read_tilt(&mut s, attr("style"));
             left_out_style(&mut s, attr("style"));
         }
 
@@ -950,6 +953,22 @@ fn js_trim_start(s: &str) -> &str {
     s.trim_start_matches(is_js_space)
 }
 
+/// The 3D tilt a `transform` stands for (SPEC §2.2), unless the element's `data-prop-*` already
+/// gave it. A `transform` that is anything but our functions stays a loss (`left_out_style`).
+fn read_tilt(s: &mut Sem, style: Option<&str>) {
+    let Some(tilt) = parse_style(style)
+        .get("transform")
+        .and_then(|t| tilt::parse(t))
+    else {
+        return;
+    };
+    for (prop, value) in tilt {
+        s.props
+            .entry(prop.to_owned())
+            .or_insert_with(|| js_number(value));
+    }
+}
+
 /// Inline style Weft has no prop for: what a stack or grid reads from it is its layout, the rest
 /// is a loss rather than silently gone.
 fn left_out_style(s: &mut Sem, style: Option<&str>) {
@@ -965,6 +984,7 @@ fn left_out_style(s: &mut Sem, style: Option<&str>) {
     let mut left: Vec<String> = parse_style(style)
         .into_iter()
         .filter(|(k, _)| !(layout && LAYOUT.contains(&k.as_str())))
+        .filter(|(k, v)| !(k == "transform" && tilt::parse(v).is_some()))
         // A material's properties are read back as its token by `layout`.
         .filter(|(k, _)| !(layout && k.starts_with("--_weft-material-")))
         // How an element flows is the renderer's choice (the JSX generator sets links inline-block).

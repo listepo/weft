@@ -29,6 +29,7 @@ async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
     skip: new Set(["id", "type", "name", "parent", "figma", "children", "data", "x", "y"]),
     defaults: {
       visible: true,
+      rotation: 0,
       width: 100,
       height: 100,
       layoutMode: "NONE",

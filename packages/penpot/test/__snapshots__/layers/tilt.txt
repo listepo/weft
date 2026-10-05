@@ -1,0 +1,78 @@
+board "screen#tilt" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#tilt>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#tilt)
+  | weft/weft.source = {"kind":"screen","id":"tilt","props":{"label":"Card flips"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "heading#title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#title>","dir":"column"}
+    | weft/weft.kind = heading
+    | weft/weft.origin = shape(heading#title)
+    | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Card flips"],"shown":{"text":"Card flips"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Card flips"
+  board "stack#deck" tokens={"rowGap":"space.lg","columnGap":"space.lg"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":24,"columnGap":24,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#deck>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(stack#deck)
+    | weft/weft.source = {"kind":"stack","id":"deck","props":{"gap":{"token":"space.lg"}}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    board "section#front" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#front>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(section#front)
+      | weft/weft.source = {"kind":"section","id":"front","props":{"label":"Front side","perspective":800,"rotate-y":25}}
+      | weft/weft.style = [[],[],0,[12,12,12,12],8]
+      board "text#front-text" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#front-text>","dir":"column"}
+        | weft/weft.kind = text
+        | weft/weft.origin = shape(text#front-text)
+        | weft/weft.source = {"kind":"text","id":"front-text","props":{"text":{"bind":"$.front"}},"shown":{"text":"{$.front}"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.front}"
+      board "button#front-flip" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.primary"} inCopy=true head=true componentOf="<variant=primary, state=(unset)>" fillList=[{"fillColor":"#2663eb","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#front-flip>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#front-flip)
+        | weft/weft.source = {"kind":"button","id":"front-flip","props":{"variant":"primary"},"on":{"press":"card.flip"},"children":["Flip"],"shown":{"text":"Flip"}}
+        text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Flip"
+      board "slot:header" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
+        | weft/weft.slot = header
+        board "heading#front-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#front-title>","dir":"column"}
+          | weft/weft.kind = heading
+          | weft/weft.origin = shape(heading#front-title)
+          | weft/weft.source = {"kind":"heading","id":"front-title","props":{"level":2},"children":["Front"],"shown":{"text":"Front"}}
+          text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Front"
+    board "section#back" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#back>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(section#back)
+      | weft/weft.source = {"kind":"section","id":"back","props":{"label":"Back side","perspective":800,"rotate-y":180}}
+      | weft/weft.style = [[],[],0,[12,12,12,12],8]
+      board "text#back-text" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#back-text>","dir":"column"}
+        | weft/weft.kind = text
+        | weft/weft.origin = shape(text#back-text)
+        | weft/weft.source = {"kind":"text","id":"back-text","props":{"text":{"bind":"$.back"}},"shown":{"text":"{$.back}"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.back}"
+      board "button#back-flip" borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.white","strokeColor":"color.ink"} inCopy=true head=true componentOf="<variant=secondary, state=(unset)>" fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#back-flip>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#back-flip)
+        | weft/weft.source = {"kind":"button","id":"back-flip","on":{"press":"card.flip"},"children":["Flip"],"shown":{"text":"Flip"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Flip"
+      board "slot:header" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
+        | weft/weft.slot = header
+        board "heading#back-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#back-title>","dir":"column"}
+          | weft/weft.kind = heading
+          | weft/weft.origin = shape(heading#back-title)
+          | weft/weft.source = {"kind":"heading","id":"back-title","props":{"level":2},"children":["Back"],"shown":{"text":"Back"}}
+          text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Back"
+    board "section#lean" rotation=-6 flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#lean>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(section#lean)
+      | weft/weft.source = {"kind":"section","id":"lean","props":{"label":"Leaning card","perspective":600,"rotate-x":20,"rotate-z":-6}}
+      | weft/weft.style = [[],[],0,[12,12,12,12],8,-6]
+      board "text#lean-text" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#lean-text>","dir":"column"}
+        | weft/weft.kind = text
+        | weft/weft.origin = shape(text#lean-text)
+        | weft/weft.source = {"kind":"text","id":"lean-text","children":["Tilted back and turned a little in the plane."],"shown":{"text":"Tilted back and turned a little in the plane."}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Tilted back and turned a little in the plane."
+      board "field#lean-note" inCopy=true head=true componentOf="<type=text, state=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#lean-note>","dir":"column"}
+        | weft/weft.kind = field
+        | weft/weft.origin = shape(field#lean-note)
+        | weft/weft.source = {"kind":"field","id":"lean-note","props":{"label":"Note","placeholder":"Add a note","value":{"bind":"$.note"}},"on":{"change":"note.edit"},"shown":{"text":"","label":"Note"}}
+        text "label" inCopy=true fontSize="12" growType="auto-width" text="Note"
+        board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+      board "slot:header" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
+        | weft/weft.slot = header
+        board "heading#lean-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#lean-title>","dir":"column"}
+          | weft/weft.kind = heading
+          | weft/weft.origin = shape(heading#lean-title)
+          | weft/weft.source = {"kind":"heading","id":"lean-title","props":{"level":2},"children":["Leaning"],"shown":{"text":"Leaning"}}
+          text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Leaning"

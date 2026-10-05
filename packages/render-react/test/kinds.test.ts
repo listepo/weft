@@ -588,3 +588,22 @@ test("segmented-control is a radiogroup of segments sharing one name", () => {
   assert.equal(s1.attribs["checked"], undefined);
   assert.equal(s2.attribs["checked"], "");
 });
+
+test("a tilt is a transform in the order the generators write, and a dialog takes none", () => {
+  const tilted = doc(
+    el("section", "card", { "rotate-y": 25, perspective: 800, "rotate-z": -6 }),
+    el("text", "plain", {}, ["x"]),
+    el("dialog", "d", { open: true, label: "D", "rotate-x": 10 }),
+  );
+  const out = html(tilted);
+  assert.match(out, /transform:perspective\(800px\) rotateY\(25deg\) rotateZ\(-6deg\)/);
+  assert.doesNotMatch(out, /rotateX/);
+  assert.doesNotMatch(dom(tilted).byId("plain").attribs["style"] ?? "", /transform/);
+});
+
+test("a tilt keeps the layout style of the element", () => {
+  const d = doc(el("stack", "s", { direction: "row", "rotate-x": 20 }));
+  const style = dom(d).byId("s").attribs["style"] ?? "";
+  assert.match(style, /flex-direction/);
+  assert.match(style, /transform:rotateX\(20deg\)/);
+});
