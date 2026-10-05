@@ -30,6 +30,8 @@ export type Screen = {
   reference: string;
   /** The static HTML page, generated with the screen's data. */
   html: string;
+  /** `weft css-tokens`: the stylesheet a host gives the components, which read their tokens from it. */
+  css: string;
   /** The generated components, compiled for the browser. */
   react: string;
   solid: string;
@@ -79,7 +81,7 @@ export function compile(source: string, framework: Framework): string {
 const referenceMarkup = (document: Document, data: unknown) =>
   renderToStaticMarkup(render(document, { catalog: coreCatalog, data }));
 
-async function screen(name: string): Promise<Screen> {
+async function screen(name: string, css: string): Promise<Screen> {
   const markup = readFileSync(join(CORPUS, name, "screen.weft"), "utf8");
   const data: unknown = JSON.parse(readFileSync(join(CORPUS, name, "data.json"), "utf8"));
   const document = parseMarkup(markup, name);
@@ -105,6 +107,7 @@ async function screen(name: string): Promise<Screen> {
     data,
     reference: referenceMarkup(document, data),
     html: page(markup),
+    css,
     react: compile(generate(document, "react"), "react"),
     solid: compile(generate(document, "solid"), "solid"),
     back: {
@@ -118,7 +121,8 @@ async function screen(name: string): Promise<Screen> {
 }
 
 export async function screens(): Promise<Screen[]> {
-  return Promise.all(corpusNames().map(screen));
+  const css = weft("css-tokens", "--no-project");
+  return Promise.all(corpusNames().map((name) => screen(name, css)));
 }
 
 /** A project screen whose tokens have a light and a dark theme, per target. */

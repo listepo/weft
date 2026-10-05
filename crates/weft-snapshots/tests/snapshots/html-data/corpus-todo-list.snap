@@ -37,8 +37,7 @@ description: corpus-todo-list as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,34 +46,23 @@ description: corpus-todo-list as html-data
   <h1 data-weft-id="title">Tasks</h1>
   <form data-weft-id="add-form" data-action="submit:todo.add">
     <div data-weft-id="add-row" class="weft-row" style="gap: var(--weft-space-sm)">
-      <div class="weft-field">
-        <label>
-          <span>New task</span>
-          <input data-weft-id="draft" type="text" value="">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">New task</span><input data-weft-id="draft" aria-label="New task" type="text" value=""></label>
       </div>
       <button data-weft-id="add" type="submit" data-variant="primary" disabled>Add</button>
     </div>
   </form>
   <ul data-weft-id="list">
     <li data-weft-id="todo[0]">
-      <label class="weft-toggle">
-        <input data-weft-id="todo-done[0]" type="checkbox" checked>
-        <span>Write spec</span>
-      </label>
-      <button data-weft-id="todo-remove[0]" type="button" data-action="press:todo.remove">Remove</button>
+      <label><input data-weft-id="todo-done[0]" aria-label="Write spec" type="checkbox" checked><span aria-hidden="true">Write spec</span></label><button data-weft-id="todo-remove[0]" type="button" data-action="press:todo.remove">Remove</button>
     </li>
     <li data-weft-id="todo[1]">
-      <label class="weft-toggle">
-        <input data-weft-id="todo-done[1]" type="checkbox">
-        <span>Build parser</span>
-      </label>
-      <button data-weft-id="todo-remove[1]" type="button" data-action="press:todo.remove">Remove</button>
+      <label><input data-weft-id="todo-done[1]" aria-label="Build parser" type="checkbox"><span aria-hidden="true">Build parser</span></label><button data-weft-id="todo-remove[1]" type="button" data-action="press:todo.remove">Remove</button>
     </li>
   </ul>
   <div data-weft-id="summary" class="weft-row" style="gap: var(--weft-space-xs)">
-    <p data-weft-id="remaining">1</p>
-    <p data-weft-id="remaining-label">items left</p>
+    <div data-weft-id="remaining" data-weft-kind="text">1</div>
+    <div data-weft-id="remaining-label" data-weft-kind="text">items left</div>
   </div>
 </main>
 </body>

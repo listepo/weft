@@ -37,8 +37,7 @@ description: corpus-leaderboard as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,14 +45,14 @@ description: corpus-leaderboard as html
 <main data-weft-id="leaderboard" aria-label="Leaderboard">
   <h1 data-weft-id="title">Leaderboard</h1>
   <div data-weft-id="leader" class="weft-row" style="gap: var(--weft-space-xs)">
-    <p data-weft-id="leader-label">In the lead:</p>
-    <p data-weft-id="leader-name" data-bind="text:$.players.0.name"></p>
+    <div data-weft-id="leader-label" data-weft-kind="text">In the lead:</div>
+    <div data-weft-id="leader-name" data-weft-kind="text" data-bind="text:$.players.0.name"></div>
   </div>
   <ol data-weft-id="players">
     <template data-weft-id="player-each" data-each="$.players" data-as="player">
       <li data-weft-id="player">
-        <p data-weft-id="player-name" data-bind="text:$player.name"></p>
-        <p data-weft-id="player-score" data-tone="muted" data-bind="text:$player.score"></p>
+        <div data-weft-id="player-name" data-weft-kind="text" data-bind="text:$player.name"></div>
+        <div data-weft-id="player-score" data-tone="muted" data-weft-kind="text" data-bind="text:$player.score"></div>
       </li>
     </template>
   </ol>

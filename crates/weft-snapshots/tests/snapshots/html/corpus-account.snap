@@ -37,8 +37,7 @@ description: corpus-account as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,76 +45,33 @@ description: corpus-account as html
 <main data-weft-id="account" aria-label="Edit account">
   <h1 data-weft-id="title">Edit account</h1>
   <form data-weft-id="account-form" aria-label="Account" data-state="invalid" data-action="submit:account.save">
-    <div class="weft-field">
-      <label>
-        <span>Full name</span>
-        <input data-weft-id="name" data-state="valid" type="text" placeholder="Ada Lovelace" data-bind="value:$.account.name" data-action="change:account.edit">
-      </label>
+    <div data-weft-field>
+      <label><span aria-hidden="true">Full name</span><input data-weft-id="name" aria-label="Full name" data-state="valid" type="text" placeholder="Ada Lovelace" data-bind="value:$.account.name" data-action="change:account.edit"></label>
     </div>
-    <div class="weft-field">
-      <label>
-        <span>Age</span>
-        <input data-weft-id="age" data-state="invalid" type="number" aria-invalid="true" data-bind="error:$.errors.age; value:$.account.age">
-      </label>
+    <div data-weft-field>
+      <label><span aria-hidden="true">Age</span><input data-weft-id="age" aria-label="Age" data-state="invalid" type="number" aria-invalid="true" data-bind="error:$.errors.age; value:$.account.age"></label>
     </div>
-    <div class="weft-field">
-      <label>
-        <span>Handle</span>
-        <input data-weft-id="handle" type="text" placeholder="{handle}" data-bind="disabled:$.account.locked; value:$.account.handle">
-      </label>
+    <div data-weft-field>
+      <label><span aria-hidden="true">Handle</span><input data-weft-id="handle" aria-label="Handle" type="text" placeholder="{handle}" data-bind="disabled:$.account.locked; value:$.account.handle"></label>
     </div>
-    <div class="weft-field">
-      <label>
-        <span>Bio</span>
-        <textarea data-weft-id="bio" data-bind="value:$.account.bio"></textarea>
-      </label>
+    <div data-weft-field>
+      <label><span aria-hidden="true">Bio</span><textarea data-weft-id="bio" aria-label="Bio" data-bind="value:$.account.bio"></textarea></label>
     </div>
-    <div class="weft-field">
-      <label>
-        <span>Email</span>
-        <input data-weft-id="email" type="email" disabled data-bind="value:$.account.email">
-      </label>
+    <div data-weft-field>
+      <label><span aria-hidden="true">Email</span><input data-weft-id="email" aria-label="Email" type="email" disabled data-bind="value:$.account.email"></label>
     </div>
-    <label class="weft-toggle">
-      <input data-weft-id="newsletter" type="checkbox" data-bind="checked:$.account.newsletter" data-action="change:account.edit">
-      <span>Send me the newsletter</span>
-    </label>
-    <label class="weft-toggle">
-      <input data-weft-id="terms" type="checkbox" checked disabled>
-      <span>Terms accepted</span>
-    </label>
-    <label class="weft-toggle">
-      <input data-weft-id="public" type="checkbox" role="switch" data-bind="checked:$.account.public; disabled:!$.account.verified" data-action="change:account.edit">
-      <span>Public profile</span>
-    </label>
-    <fieldset data-weft-id="plan" role="radiogroup" data-bind="value:$.account.plan" data-action="change:account.edit">
-      <legend>Plan</legend>
-      <label class="weft-toggle">
-        <input data-weft-id="plan-free" type="radio" name="weft-plan" value="free">
-        <span>Free</span>
-      </label>
-      <label class="weft-toggle">
-        <input data-weft-id="plan-pro" type="radio" name="weft-plan" value="pro" data-bind="text:$.labels.pro">
-        <span></span>
-      </label>
-      <label class="weft-toggle">
-        <input data-weft-id="plan-team" type="radio" name="weft-plan" value="team" disabled>
-        <span>Team</span>
-      </label>
-    </fieldset>
-    <label>
-      <span>Language</span>
-      <select data-weft-id="language" data-bind="disabled:$.account.locked; value:$.account.language" data-action="change:account.edit">
+    <label><input data-weft-id="newsletter" aria-label="Send me the newsletter" type="checkbox" data-bind="checked:$.account.newsletter" data-action="change:account.edit"><span aria-hidden="true">Send me the newsletter</span></label><label><input data-weft-id="terms" aria-label="Terms accepted" type="checkbox" checked disabled><span aria-hidden="true">Terms accepted</span></label><label><input data-weft-id="public" aria-label="Public profile" type="checkbox" role="switch" data-bind="checked:$.account.public; disabled:!$.account.verified" data-action="change:account.edit"><span aria-hidden="true">Public profile</span></label>
+    <div data-weft-id="plan" aria-label="Plan" role="radiogroup" data-bind="value:$.account.plan" data-action="change:account.edit">
+      <span aria-hidden="true">Plan</span><label><input data-weft-id="plan-free" type="radio" name="weft-plan" value="free" aria-label="Free"><span aria-hidden="true">Free</span></label><label><input data-weft-id="plan-pro" type="radio" name="weft-plan" value="pro" data-bind="text:$.labels.pro"></label><label><input data-weft-id="plan-team" type="radio" name="weft-plan" value="team" disabled aria-label="Team"><span aria-hidden="true">Team</span></label>
+    </div>
+    <label><span aria-hidden="true">Language</span><select data-weft-id="language" aria-label="Language" data-bind="disabled:$.account.locked; value:$.account.language" data-action="change:account.edit">
         <option data-weft-id="language-en" value="en">English</option>
         <option data-weft-id="language-fr" value="fr" data-bind="text:$.labels.french"></option>
-      </select>
-    </label>
-    <p data-weft-id="internal" hidden>Internal note: never shown.</p>
+      </select></label>
+    <div data-weft-id="internal" hidden data-weft-kind="text">Internal note: never shown.</div>
     <div data-weft-id="saved" role="alert" data-tone="success" data-bind="hidden:!$.saved">Your changes were saved.</div>
     <footer data-weft-slot="footer">
-      <button data-weft-id="save" data-state="busy" type="submit" data-variant="primary">Save</button>
-      <button data-weft-id="cancel" data-state="idle" type="button" data-variant="secondary" data-bind="text:$.labels.cancel" data-action="press:account.cancel"></button>
-      <a data-weft-id="help" href="https://example.com/help" data-bind="text:$.labels.help"></a>
+      <button data-weft-id="save" data-state="busy" type="submit" data-variant="primary">Save</button><button data-weft-id="cancel" data-state="idle" type="button" data-variant="secondary" data-bind="text:$.labels.cancel" data-action="press:account.cancel"></button><a data-weft-id="help" href="https://example.com/help" data-bind="text:$.labels.help"></a>
     </footer>
   </form>
 </main>

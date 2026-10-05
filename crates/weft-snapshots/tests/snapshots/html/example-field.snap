@@ -37,18 +37,14 @@ description: example-field as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Sign up">
-  <div class="weft-field">
-    <label>
-      <span>Email</span>
-      <input data-weft-id="email" data-state="valid" type="email" placeholder="you@example.com" required data-bind="error:$.errors.email; value:$.email" data-action="change:form.edit">
-    </label>
+  <div data-weft-field>
+    <label><span aria-hidden="true">Email</span><input data-weft-id="email" aria-label="Email" data-state="valid" type="email" placeholder="you@example.com" required data-bind="error:$.errors.email; value:$.email" data-action="change:form.edit"></label>
   </div>
 </main>
 </body>

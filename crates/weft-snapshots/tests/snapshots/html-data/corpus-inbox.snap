@@ -37,8 +37,7 @@ description: corpus-inbox as html-data
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,9 +45,7 @@ description: corpus-inbox as html-data
 <main data-weft-id="inbox" aria-label="Inbox" data-state="loading">
   <div>
     <div data-weft-id="folders" role="tablist" data-action="change:inbox.folder">
-      <button data-weft-id="tab-inbox" type="button" role="tab" id="weft-tab-inbox-tab" aria-selected="true" aria-controls="weft-tab-inbox-panel">Inbox</button>
-      <button data-weft-id="tab-drafts" type="button" role="tab" id="weft-tab-drafts-tab" aria-selected="false" aria-controls="weft-tab-drafts-panel">Drafts</button>
-      <button data-weft-id="tab-sent" type="button" role="tab" id="weft-tab-sent-tab" aria-selected="false" aria-controls="weft-tab-sent-panel">Sent</button>
+      <button data-weft-id="tab-inbox" type="button" role="tab" id="weft-tab-inbox-tab" aria-selected="true" aria-controls="weft-tab-inbox-panel">Inbox</button><button data-weft-id="tab-drafts" type="button" role="tab" id="weft-tab-drafts-tab" aria-selected="false" aria-controls="weft-tab-drafts-panel">Drafts</button><button data-weft-id="tab-sent" type="button" role="tab" id="weft-tab-sent-tab" aria-selected="false" aria-controls="weft-tab-sent-panel">Sent</button>
     </div>
     <div role="tabpanel" id="weft-tab-inbox-panel" aria-labelledby="weft-tab-inbox-tab">
       <ol data-weft-id="messages" data-state="ready">
@@ -59,7 +56,7 @@ description: corpus-inbox as html-data
     <div role="tabpanel" id="weft-tab-drafts-panel" aria-labelledby="weft-tab-drafts-tab" hidden>
       <ul data-weft-id="drafts" data-state="empty">
         <li role="none" data-weft-slot="empty">
-          <p data-weft-id="no-drafts">No drafts.</p>
+          <div data-weft-id="no-drafts" data-weft-kind="text">No drafts.</div>
         </li>
       </ul>
     </div>
@@ -70,22 +67,15 @@ description: corpus-inbox as html-data
     </div>
   </div>
   <div data-weft-id="message-actions" aria-label="Message actions" role="menu">
-    <button data-weft-id="archive" type="button" role="menuitem" data-action="press:inbox.archive">Archive</button>
-    <button data-weft-id="delete" type="button" role="menuitem" disabled data-action="press:inbox.delete">Delete</button>
+    <button data-weft-id="archive" type="button" role="menuitem" data-action="press:inbox.archive">Archive</button><button data-weft-id="delete" type="button" role="menuitem" disabled data-action="press:inbox.delete">Delete</button>
   </div>
   <dialog data-weft-id="compose" aria-label="New message" open data-action="close:inbox.closeCompose">
     <form data-weft-id="compose-form" data-state="submitting" data-action="submit:inbox.send">
-      <div class="weft-field">
-        <label>
-          <span>To</span>
-          <input data-weft-id="to" type="email" value="grace@example.com">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">To</span><input data-weft-id="to" aria-label="To" type="email" value="grace@example.com"></label>
       </div>
-      <div class="weft-field">
-        <label>
-          <span>Message</span>
-          <textarea data-weft-id="body">See you there.</textarea>
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Message</span><textarea data-weft-id="body" aria-label="Message">See you there.</textarea></label>
       </div>
     </form>
     <footer data-weft-slot="actions">

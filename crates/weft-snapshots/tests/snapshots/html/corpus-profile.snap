@@ -37,8 +37,7 @@ description: corpus-profile as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -46,11 +45,10 @@ description: corpus-profile as html
 <main data-weft-id="profile" aria-label="Profile">
   <img data-weft-id="avatar" alt="Profile photo" data-bind="src:$.user.avatar">
   <h1 data-weft-id="name" data-bind="text:$.user.name"></h1>
-  <p data-weft-id="bio" data-bind="text:$.user.bio"></p>
+  <div data-weft-id="bio" data-weft-kind="text" data-bind="text:$.user.bio"></div>
   <h2 data-weft-id="links-title">Links</h2>
   <div data-weft-id="links" class="weft-row" style="gap: var(--weft-space-md)">
-    <a data-weft-id="website" href="#" data-bind="href:$.user.website">Website</a>
-    <a data-weft-id="github" href="#" data-bind="href:$.user.github">GitHub</a>
+    <a data-weft-id="website" href="#" data-bind="href:$.user.website">Website</a><a data-weft-id="github" href="#" data-bind="href:$.user.github">GitHub</a>
   </div>
   <button data-weft-id="edit" type="button" data-action="press:profile.edit">Edit profile</button>
 </main>

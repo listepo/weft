@@ -37,17 +37,16 @@ description: example-grid as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Gallery">
   <div data-weft-id="cards" class="weft-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--weft-space-lg)">
-    <p data-weft-id="card-a">Revenue</p>
-    <p data-weft-id="card-b">Orders</p>
-    <p data-weft-id="card-c">Visitors</p>
+    <div data-weft-id="card-a" data-weft-kind="text">Revenue</div>
+    <div data-weft-id="card-b" data-weft-kind="text">Orders</div>
+    <div data-weft-id="card-c" data-weft-kind="text">Visitors</div>
   </div>
 </main>
 </body>

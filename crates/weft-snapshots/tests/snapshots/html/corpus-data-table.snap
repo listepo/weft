@@ -37,8 +37,7 @@ description: corpus-data-table as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -58,13 +57,13 @@ description: corpus-data-table as html
       <template data-weft-id="rows" data-each="$.users" data-as="user">
         <tr data-weft-id="row">
           <td data-weft-id="cell-name">
-            <p data-weft-id="user-name" data-bind="text:$user.name"></p>
+            <div data-weft-id="user-name" data-weft-kind="text" data-bind="text:$user.name"></div>
           </td>
           <td data-weft-id="cell-email">
-            <p data-weft-id="user-email" data-bind="text:$user.email"></p>
+            <div data-weft-id="user-email" data-weft-kind="text" data-bind="text:$user.email"></div>
           </td>
           <td data-weft-id="cell-role">
-            <p data-weft-id="user-role" data-bind="text:$user.role"></p>
+            <div data-weft-id="user-role" data-weft-kind="text" data-bind="text:$user.role"></div>
           </td>
           <td data-weft-id="cell-actions">
             <button data-weft-id="delete" type="button" data-variant="danger" data-action="press:users.delete">Delete</button>

@@ -37,15 +37,14 @@ description: example-screen as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="root" aria-label="Home" data-state="ready">
   <h1 data-weft-id="title">Welcome back</h1>
-  <p data-weft-id="intro">Pick up where you left off.</p>
+  <div data-weft-id="intro" data-weft-kind="text">Pick up where you left off.</div>
 </main>
 </body>
 </html>

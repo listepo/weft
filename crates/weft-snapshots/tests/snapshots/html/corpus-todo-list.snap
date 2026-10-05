@@ -37,8 +37,7 @@ description: corpus-todo-list as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,11 +46,8 @@ description: corpus-todo-list as html
   <h1 data-weft-id="title">Tasks</h1>
   <form data-weft-id="add-form" data-action="submit:todo.add">
     <div data-weft-id="add-row" class="weft-row" style="gap: var(--weft-space-sm)">
-      <div class="weft-field">
-        <label>
-          <span>New task</span>
-          <input data-weft-id="draft" type="text" data-bind="value:$.draft">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">New task</span><input data-weft-id="draft" aria-label="New task" type="text" data-bind="value:$.draft"></label>
       </div>
       <button data-weft-id="add" type="submit" data-variant="primary" data-bind="disabled:!$.draft">Add</button>
     </div>
@@ -59,17 +55,13 @@ description: corpus-todo-list as html
   <ul data-weft-id="list">
     <template data-weft-id="todo-each" data-each="$.todos" data-as="todo">
       <li data-weft-id="todo">
-        <label class="weft-toggle">
-          <input data-weft-id="todo-done" type="checkbox" data-bind="checked:$todo.done; label:$todo.title">
-          <span></span>
-        </label>
-        <button data-weft-id="todo-remove" type="button" data-action="press:todo.remove">Remove</button>
+        <label><input data-weft-id="todo-done" type="checkbox" data-bind="checked:$todo.done; label:$todo.title"></label><button data-weft-id="todo-remove" type="button" data-action="press:todo.remove">Remove</button>
       </li>
     </template>
   </ul>
   <div data-weft-id="summary" class="weft-row" style="gap: var(--weft-space-xs)">
-    <p data-weft-id="remaining" data-bind="text:$.remaining"></p>
-    <p data-weft-id="remaining-label">items left</p>
+    <div data-weft-id="remaining" data-weft-kind="text" data-bind="text:$.remaining"></div>
+    <div data-weft-id="remaining-label" data-weft-kind="text">items left</div>
   </div>
 </main>
 </body>

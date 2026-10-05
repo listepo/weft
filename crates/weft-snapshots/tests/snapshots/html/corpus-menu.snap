@@ -37,19 +37,15 @@ description: corpus-menu as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main data-weft-id="account-menu" aria-label="Account menu">
-  <p data-weft-id="signed-in" data-bind="text:$.user.email"></p>
+  <div data-weft-id="signed-in" data-weft-kind="text" data-bind="text:$.user.email"></div>
   <div data-weft-id="menu" aria-label="Account" role="menu">
-    <button data-weft-id="item-profile" type="button" role="menuitem" data-action="press:nav.profile">Profile</button>
-    <button data-weft-id="item-settings" type="button" role="menuitem" data-action="press:nav.settings">Settings</button>
-    <button data-weft-id="item-billing" type="button" role="menuitem" data-bind="disabled:!$.isOwner" data-action="press:nav.billing">Billing</button>
-    <button data-weft-id="item-signout" type="button" role="menuitem" data-action="press:auth.signout">Sign out</button>
+    <button data-weft-id="item-profile" type="button" role="menuitem" data-action="press:nav.profile">Profile</button><button data-weft-id="item-settings" type="button" role="menuitem" data-action="press:nav.settings">Settings</button><button data-weft-id="item-billing" type="button" role="menuitem" data-bind="disabled:!$.isOwner" data-action="press:nav.billing">Billing</button><button data-weft-id="item-signout" type="button" role="menuitem" data-action="press:auth.signout">Sign out</button>
   </div>
 </main>
 </body>

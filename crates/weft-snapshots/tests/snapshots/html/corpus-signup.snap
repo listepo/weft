@@ -37,8 +37,7 @@ description: corpus-signup as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,38 +46,23 @@ description: corpus-signup as html
   <form data-weft-id="form" data-state="idle" data-action="submit:auth.signup">
     <h1 data-weft-id="title">Create your account</h1>
     <div data-weft-id="fields" class="weft-stack" style="gap: var(--weft-space-md)">
-      <div class="weft-field">
-        <label>
-          <span>Full name</span>
-          <input data-weft-id="name" type="text" required data-bind="value:$.name">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Full name</span><input data-weft-id="name" aria-label="Full name" type="text" required data-bind="value:$.name"></label>
       </div>
-      <div class="weft-field">
-        <label>
-          <span>Email</span>
-          <input data-weft-id="email" type="email" required data-bind="value:$.email">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Email</span><input data-weft-id="email" aria-label="Email" type="email" required data-bind="value:$.email"></label>
       </div>
-      <div class="weft-field">
-        <label>
-          <span>Password</span>
-          <input data-weft-id="password" type="password" required data-bind="value:$.password">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Password</span><input data-weft-id="password" aria-label="Password" type="password" required data-bind="value:$.password"></label>
       </div>
-      <div class="weft-field">
-        <label>
-          <span>Confirm password</span>
-          <input data-weft-id="confirm" type="password" required data-bind="value:$.confirm">
-        </label>
+      <div data-weft-field>
+        <label><span aria-hidden="true">Confirm password</span><input data-weft-id="confirm" aria-label="Confirm password" type="password" required data-bind="value:$.confirm"></label>
       </div>
-      <label class="weft-toggle">
-        <input data-weft-id="terms" type="checkbox" data-bind="checked:$.acceptTerms">
-        <span>I accept the terms of service</span>
-      </label>
+      <label><input data-weft-id="terms" aria-label="I accept the terms of service" type="checkbox" data-bind="checked:$.acceptTerms"><span aria-hidden="true">I accept the terms of service</span></label>
     </div>
     <button data-weft-id="submit" type="submit" data-variant="primary" data-bind="disabled:!$.acceptTerms">Create account</button>
     <footer data-weft-slot="footer">
-      <a data-weft-id="signin" href="#" data-action="press:nav.signin">Already have an account? Sign in</a>
+      <a data-weft-id="signin" role="link" tabindex="0" data-action="press:nav.signin">Already have an account? Sign in</a>
     </footer>
   </form>
 </main>

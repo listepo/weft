@@ -37,8 +37,7 @@ description: corpus-tabs as html
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
 [data-wrap] { flex-wrap: wrap; }
-.weft-field label, .weft-toggle { display: flex; gap: 0.5em; }
-.weft-field label { flex-direction: column; }
+a { display: inline-block; }
 [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,23 +46,21 @@ description: corpus-tabs as html
   <h1 data-weft-id="title">Account</h1>
   <div>
     <div data-weft-id="tabs" aria-label="Account sections" role="tablist">
-      <button data-weft-id="tab-overview" type="button" role="tab" id="weft-tab-overview-tab" aria-selected="true" aria-controls="weft-tab-overview-panel">Overview</button>
-      <button data-weft-id="tab-billing" type="button" role="tab" id="weft-tab-billing-tab" aria-selected="false" aria-controls="weft-tab-billing-panel">Billing</button>
-      <button data-weft-id="tab-team" type="button" role="tab" id="weft-tab-team-tab" aria-selected="false" aria-controls="weft-tab-team-panel">Team</button>
+      <button data-weft-id="tab-overview" type="button" role="tab" id="weft-tab-overview-tab" aria-selected="true" aria-controls="weft-tab-overview-panel">Overview</button><button data-weft-id="tab-billing" type="button" role="tab" id="weft-tab-billing-tab" aria-selected="false" aria-controls="weft-tab-billing-panel">Billing</button><button data-weft-id="tab-team" type="button" role="tab" id="weft-tab-team-tab" aria-selected="false" aria-controls="weft-tab-team-panel">Team</button>
     </div>
     <div role="tabpanel" id="weft-tab-overview-panel" aria-labelledby="weft-tab-overview-tab">
-      <p data-weft-id="account-name" data-bind="text:$.account.name"></p>
-      <p data-weft-id="account-email" data-bind="text:$.account.email"></p>
+      <div data-weft-id="account-name" data-weft-kind="text" data-bind="text:$.account.name"></div>
+      <div data-weft-id="account-email" data-weft-kind="text" data-bind="text:$.account.email"></div>
     </div>
     <div role="tabpanel" id="weft-tab-billing-panel" aria-labelledby="weft-tab-billing-tab" hidden>
-      <p data-weft-id="plan" data-bind="text:$.billing.plan"></p>
+      <div data-weft-id="plan" data-weft-kind="text" data-bind="text:$.billing.plan"></div>
       <button data-weft-id="change-plan" type="button" data-variant="primary" data-action="press:billing.change">Change plan</button>
     </div>
     <div role="tabpanel" id="weft-tab-team-panel" aria-labelledby="weft-tab-team-tab" hidden>
       <ul data-weft-id="members">
         <template data-weft-id="members-each" data-each="$.team" data-as="member">
           <li data-weft-id="member">
-            <p data-weft-id="member-name" data-bind="text:$member.name"></p>
+            <div data-weft-id="member-name" data-weft-kind="text" data-bind="text:$member.name"></div>
           </li>
         </template>
       </ul>

@@ -18,6 +18,7 @@ declare module "virtual:weft-screens" {
     data: unknown;
     reference: string;
     html: string;
+    css: string;
     back: { html: string; figma: string; penpot: string };
   }[];
   export const components: Record<
