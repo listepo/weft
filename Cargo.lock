@@ -1428,6 +1428,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "weft-snapshots"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "weft-catalog",
+ "weft-core",
+]
+
+[[package]]
 name = "weft-swiftui"
 version = "0.1.0"
 dependencies = [
