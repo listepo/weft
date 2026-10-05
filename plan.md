@@ -12,7 +12,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T46 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T47 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T48 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T49 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
@@ -181,25 +180,6 @@ Done when:
 - `STATIC_PAGE_DIFFERS` keeps only screens with a stated, unavoidable reason;
 - changed baselines and snapshots are reviewed;
 - the full check exits 0.
-
-### T48. Importer binding readback in round trips
-
-The HTML and JSX importers lose bindings that the generators write, so round trips in `packages/visual` stay pinned as expected failures (`HTML_ROUND_TRIP_GAPS`, `JSX_ROUND_TRIP_GAPS`).
-
-- **`inbox`:** the tabs' bound `selected` and a tab's bound `label` are dropped by the tab inversion. This happens in both the HTML and the JSX importer.
-- **`account`:** the number field's value is written through `_float(...)`, which the JSX importer drops.
-- **`leaderboard`:** an array-index binding is written as `_get(...)`, which the JSX importer drops.
-
-Fix them in `crates/weft-web` and `crates/weft-import`, reading back exactly what the generators write. Done when:
-- both gap lists are empty;
-- each fix has a Rust test or snapshot;
-- the full check exits 0.
-
-Execution plan:
-1. Importer (`crates/weft-import/src/build.rs`, `convert_tabs`): read back what the generators write. HTML writes `data-bind="selected:…"` on the tablist and `label:…` on a tab. React and SolidJS render the tab label as the button's bound text and choose the tab by `Math.max(0, tabs.findIndex((x) => x.doc === path || x.id === path))`. Keep a bound label and a bound `selected` instead of the literal.
-2. JSX evaluator (`crates/weft-web/src/from_jsx/eval.rs`, `lower.rs`): treat `_float(x)` as a pass-through like `_text`; read `_get(base, ["players", "0", "name"])` back as a path, keeping only segments a binding can spell; recognize the `findIndex` selection and `index === choice` and bind it on the tablist as `selected`.
-3. Tests: Rust tests in `crates/weft-web/tests/html.rs` or `import.rs` (tab bindings from HTML), `jsx_import.rs` (React and SolidJS tabs, `_float`, `_get`, and a hostile `_get` segment that is not read), unit tests in `weft-import`.
-4. Empty both gap lists in `packages/visual/test/web/screens.test.ts`; run the visual suite; review changed snapshots; run the full check.
 
 ### T49. Token modes in the design plugin UI
 
