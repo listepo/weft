@@ -178,7 +178,7 @@ fn str_v(s: impl Into<String>) -> V {
 }
 
 /// A number prop brought into its declared range (SPEC §5.1), as the renderer's `prop` does.
-fn clamp_number(v: &V, integer: bool, min: Option<f64>, max: Option<f64>) -> V {
+pub(crate) fn clamp_number(v: &V, integer: bool, min: Option<f64>, max: Option<f64>) -> V {
     let V::Num(x) = v else {
         return v.clone();
     };
