@@ -59,8 +59,13 @@ struct Run {
 }
 
 fn run(args: &[&dyn AsRef<std::ffi::OsStr>]) -> Run {
+    run_in(Path::new("."), args)
+}
+
+fn run_in(dir: &Path, args: &[&dyn AsRef<std::ffi::OsStr>]) -> Run {
     let out = Command::new(env!("CARGO_BIN_EXE_weft"))
         .args(args.iter().map(|a| a.as_ref()))
+        .current_dir(dir)
         .output()
         .unwrap();
     Run {
@@ -273,7 +278,16 @@ fn swiftui_writes_where_the_project_says_with_its_tokens_and_reads_back() {
     let r = run(&[&"swiftui", &screen]);
     assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
     let swift = std::fs::read_to_string(s.path("ios/plain.swift")).unwrap();
-    assert!(swift.contains("var sm: CGFloat = 12"), "{swift}");
+    // A project's screens read the one `WeftTokens` file.
+    assert!(swift.contains("var theme = WeftTokens()"), "{swift}");
+    assert!(!swift.contains("CGFloat"), "{swift}");
+
+    // `swiftui-tokens` finds the project from the working directory.
+    let r = run_in(&s.path("screens"), &[&"swiftui-tokens"]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    let tokens = std::fs::read_to_string(s.path("ios/WeftTokens.swift")).unwrap();
+    assert!(tokens.contains("struct WeftTokens: Sendable {"), "{tokens}");
+    assert!(tokens.contains("var sm: CGFloat = 12"), "{tokens}");
 
     let r = run(&[&"import-swiftui", &s.path("ios/plain.swift")]);
     assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
@@ -291,10 +305,57 @@ fn swiftui_arguments_override_the_project() {
     assert!(elsewhere.join("plain.swift").is_file());
     assert!(!s.path("ios").exists());
 
-    // Without the project: printed, with the default tokens.
+    // Without the project: printed, with the default tokens in the file.
     let r = run(&[&"swiftui", &screen, &"--no-project"]);
     assert_eq!(r.code, 0, "{}", r.stderr);
     assert!(r.stdout.contains("var sm: CGFloat = 8"), "{}", r.stdout);
+
+    // The flag beats `export.swiftui.sharedTokens`, which beats the default.
+    let r = run(&[
+        &"swiftui",
+        &screen,
+        &"--no-shared-tokens",
+        &"--out-dir",
+        &elsewhere,
+    ]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    let swift = std::fs::read_to_string(elsewhere.join("plain.swift")).unwrap();
+    assert!(swift.contains("var sm: CGFloat = 12"), "{swift}");
+    let r = run(&[&"swiftui", &screen, &"--no-project", &"--shared-tokens"]);
+    assert!(
+        r.stdout.contains("var theme = WeftTokens()"),
+        "{}",
+        r.stdout
+    );
+    let project = std::fs::read_to_string(s.path("weft.json")).unwrap();
+    s.write(
+        "weft.json",
+        &project.replace(
+            r#""outDir": "ios" }"#,
+            r#""outDir": "ios", "sharedTokens": false }"#,
+        ),
+    );
+    let r = run(&[&"swiftui", &screen, &"--out-dir", &elsewhere]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    let swift = std::fs::read_to_string(elsewhere.join("plain.swift")).unwrap();
+    assert!(swift.contains("var sm: CGFloat = 12"), "{swift}");
+
+    // `--tokens` and `--out-dir` replace the project's.
+    let r = run(&[
+        &"swiftui-tokens",
+        &"--project",
+        &s.path("weft.json"),
+        &"--tokens",
+        &s.path("tokens/swift.tokens.json"),
+        &"--out-dir",
+        &elsewhere,
+    ]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    let tokens = std::fs::read_to_string(elsewhere.join("WeftTokens.swift")).unwrap();
+    assert!(
+        tokens.contains("var sm: CGFloat = 12") && !tokens.contains("color"),
+        "{tokens}"
+    );
 
     let r = run(&[
         &"import-swiftui",
@@ -310,17 +371,16 @@ fn swiftui_arguments_override_the_project() {
 #[test]
 fn swiftui_refuses_what_it_cannot_generate_and_exits_1() {
     let s = Scratch::new("swiftui-refused");
-    // `rating` comes from the project's catalog extension; SwiftUI has only the core kinds.
+    // `rating` comes from the project's catalog extension: the app writes `RatingView`.
     let screen = s.path("screens/cart.weft");
-    let r = run(&[&"swiftui", &screen]);
-    assert_eq!(r.code, 1);
-    assert_eq!(r.stdout, "");
-    assert!(
-        r.stderr
-            .contains("rating#line-score: `rating` is not a kind of the core catalog"),
-        "{}",
-        r.stderr
-    );
+    let r = run(&[&"swiftui", &screen, &"--out-dir", &s.path("ios")]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    let swift = std::fs::read_to_string(s.path("ios/cart.swift")).unwrap();
+    assert!(swift.contains("RatingView(value: "), "{swift}");
+    assert!(swift.contains("`RatingView` (`rating`)"), "{swift}");
+    // Without the project's catalog `rating` is not a kind at all.
+    let r = run(&[&"swiftui", &screen, &"--no-project"]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
 
     let broken = s.write(
         "screens/broken.weft",

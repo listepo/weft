@@ -1,4 +1,5 @@
 {
   "$schema": "../../../../schemas/weft.schema.json",
-  "tokens": ["tokens/brand.tokens.json"]
+  "tokens": ["tokens/brand.tokens.json"],
+  "catalog": "catalog.json"
 }

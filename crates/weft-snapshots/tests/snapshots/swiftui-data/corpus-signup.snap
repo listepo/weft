@@ -62,11 +62,11 @@ struct SignupEvent: Sendable, Equatable {
     var item: String?
 }
 
-/// The design tokens the screen uses, in points.
+/// The design tokens the screen uses.
 struct SignupTheme: Sendable {
-    var space = Space()
+    var space = SpaceTokens()
 
-    struct Space: Sendable {
+    struct SpaceTokens: Sendable {
         var md: CGFloat = 16
     }
 }

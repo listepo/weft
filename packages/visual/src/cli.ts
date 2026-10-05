@@ -8,14 +8,26 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 export const CORPUS = join(ROOT, "corpus");
+/** The SwiftPM sample of the Xcode plugin: a project with shared tokens and a custom component. */
+export const SAMPLE = join(ROOT, "plugins/xcode/Examples/PackageSample");
 // Built by `moon run root:cli` into a target directory of its own (see moon.yml).
 const CLI = join(ROOT, "target/visual/debug/weft");
 
-/** Runs the Rust CLI on `input` written to a scratch file named `file`. */
-export function cli(command: string, file: string, input: string, ...flags: string[]): string {
+function binary(): string {
   if (!existsSync(CLI)) {
     throw new Error(`${CLI} is missing; build it with \`moon run root:cli\``);
   }
+  return CLI;
+}
+
+/** Runs the Rust CLI with `args` as they are, on files that stay where their project is. */
+export function weft(...args: string[]): string {
+  return execFileSync(binary(), args, { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] });
+}
+
+/** Runs the Rust CLI on `input` written to a scratch file named `file`. */
+export function cli(command: string, file: string, input: string, ...flags: string[]): string {
+  binary();
   const dir = mkdtempSync(join(tmpdir(), "weft-visual-"));
   try {
     const path = join(dir, file);

@@ -171,6 +171,30 @@ enum Command {
         out_dir: Option<PathBuf>,
         #[command(flatten)]
         data: SampleData,
+        /// Read the tokens from the shared `WeftTokens` that `weft swiftui-tokens` writes
+        /// (default: the project's `export.swiftui.sharedTokens`, which is true; without a project,
+        /// the screen carries its own tokens).
+        #[arg(long, conflicts_with = "no_shared_tokens")]
+        shared_tokens: bool,
+        /// Put the tokens the screen uses in the screen file, so it builds on its own.
+        #[arg(long)]
+        no_shared_tokens: bool,
+    },
+    /// Generate `WeftTokens.swift`, the design tokens every SwiftUI screen of a project shares.
+    SwiftuiTokens {
+        /// Token JSON; replaces the project's tokens (default: the default tokens).
+        #[arg(long)]
+        tokens: Option<PathBuf>,
+        /// Project file; without it, the nearest `weft.json` in or above the working directory.
+        #[arg(long, conflicts_with = "no_project")]
+        project: Option<PathBuf>,
+        /// Ignore any project file.
+        #[arg(long)]
+        no_project: bool,
+        /// Write `WeftTokens.swift` here instead of printing (default: the project's
+        /// `export.swiftui.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
     },
     /// Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses.
     ImportSwiftui {
@@ -463,6 +487,8 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             project,
             out_dir,
             data,
+            shared_tokens,
+            no_shared_tokens,
         } => swiftui::export(
             swiftui::ExportArgs {
                 file,
@@ -471,6 +497,23 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 project,
                 out_dir,
                 data: data.data,
+                shared_tokens: (shared_tokens, no_shared_tokens),
+            },
+            out,
+        ),
+        Command::SwiftuiTokens {
+            tokens,
+            project,
+            no_project,
+            out_dir,
+        } => swiftui::export_tokens(
+            swiftui::TokensArgs {
+                tokens,
+                project: ProjectArgs {
+                    project,
+                    no_project,
+                },
+                out_dir,
             },
             out,
         ),

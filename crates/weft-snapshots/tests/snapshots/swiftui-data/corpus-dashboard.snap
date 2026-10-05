@@ -75,11 +75,11 @@ struct DashboardEvent: Sendable, Equatable {
     var item: String?
 }
 
-/// The design tokens the screen uses, in points.
+/// The design tokens the screen uses.
 struct DashboardTheme: Sendable {
-    var space = Space()
+    var space = SpaceTokens()
 
-    struct Space: Sendable {
+    struct SpaceTokens: Sendable {
         var lg: CGFloat = 24
         var md: CGFloat = 16
         var sm: CGFloat = 8

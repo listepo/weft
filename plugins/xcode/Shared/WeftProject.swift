@@ -43,8 +43,23 @@ struct WeftProject {
 
     /// A string setting such as `export.swiftui.outDir`.
     func setting(_ path: [String]) -> String? {
+        value(path) as? String
+    }
+
+    /// Whether `weft swiftui` reads the tokens from the shared `WeftTokens.swift`: the tool's
+    /// default for a project is yes.
+    var sharesTokens: Bool {
+        // `JSONSerialization` gives a JSON boolean as an `NSNumber`, which `as? Bool` also accepts
+        // for 0 and 1: check the type so a number does not pass for a flag.
+        guard let flag = value(["export", "swiftui", "sharedTokens"]) as? NSNumber,
+            CFGetTypeID(flag) == CFBooleanGetTypeID()
+        else { return true }
+        return flag.boolValue
+    }
+
+    private func value(_ path: [String]) -> Any? {
         var node: Any? = members
         for key in path { node = (node as? [String: Any])?[key] }
-        return node as? String
+        return node
     }
 }

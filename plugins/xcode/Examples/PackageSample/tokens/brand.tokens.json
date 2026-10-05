@@ -1,4 +1,10 @@
 {
+  "color": {
+    "$type": "color",
+    "accent": {
+      "$value": { "colorSpace": "srgb", "components": [0.85, 0.47, 0.02], "hex": "#d97806" }
+    }
+  },
   "space": {
     "$type": "dimension",
     "md": { "$value": { "value": 16, "unit": "px" } }

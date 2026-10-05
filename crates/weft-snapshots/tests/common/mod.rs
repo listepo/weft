@@ -86,3 +86,27 @@ pub fn parse_strict(
     );
     (result.document, result.diagnostics)
 }
+
+/// A project directory under the repository root, loaded as `weft.json` there says.
+pub struct Project {
+    pub dir: PathBuf,
+    pub catalog: Catalog,
+    pub tokens: IndexMap<String, Token>,
+}
+
+pub fn project(dir: &str) -> Project {
+    let dir = root().join(dir);
+    let read = |name: &str| std::fs::read_to_string(dir.join(name)).ok();
+    let text = std::fs::read_to_string(dir.join("weft.json")).unwrap();
+    let options = weft_catalog::ProjectOptions {
+        read: Some(&read),
+        ..weft_catalog::ProjectOptions::default()
+    };
+    let load = weft_catalog::load_project_text(&text, &options).unwrap();
+    assert!(load.diagnostics.is_empty(), "{:?}", load.diagnostics);
+    Project {
+        catalog: load.project.catalog,
+        tokens: load.project.tokens.unwrap(),
+        dir,
+    }
+}

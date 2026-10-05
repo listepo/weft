@@ -157,6 +157,11 @@
             "data": {
               "$ref": "#/$defs/fileName",
               "description": "Sample data (a JSON file, relative to the project file) the generated model is built from in a `sample` property that `#Preview` shows. Default: none, the preview shows the model's defaults."
+            },
+            "sharedTokens": {
+              "type": "boolean",
+              "description": "Screens read the tokens from one shared `WeftTokens.swift` (`weft swiftui-tokens`) instead of each carrying the tokens it uses.",
+              "default": true
             }
           },
           "additionalProperties": false,

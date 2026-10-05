@@ -1,0 +1,5 @@
+{
+  "tokens": ["tokens.json"],
+  "catalog": "catalog.json",
+  "render": { "data": "sample.data.json" }
+}

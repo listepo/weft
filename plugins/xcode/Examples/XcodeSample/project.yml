@@ -1,5 +1,6 @@
 # An Xcode project (generate it with `xcodegen`; the .xcodeproj is not committed) whose app target
-# runs the Weft build tool plugin: `Sources/login.weft` is turned into SwiftUI on every build.
+# runs the Weft build tool plugin: `Sources/login.weft` and `Sources/review.weft` are turned into
+# SwiftUI on every build, with one `WeftTokens.swift` for both.
 name: XcodeSample
 options:
   bundleIdPrefix: dev.weft.sample

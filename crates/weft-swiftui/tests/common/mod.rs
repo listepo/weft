@@ -5,7 +5,9 @@
 use std::path::PathBuf;
 
 use indexmap::IndexMap;
-use weft_catalog::{Token, core_catalog, load_tokens, token_types};
+use weft_catalog::{
+    ProjectOptions, Token, core_catalog, load_project_text, load_tokens, token_types,
+};
 use weft_core::{Catalog, Document, Mode, ParseOptions, parse, parse_json};
 
 pub struct Screen {
@@ -111,4 +113,62 @@ pub fn parse_screen(markup: &str, catalog: &Catalog, tokens: &IndexMap<String, T
 /// `corpus/login` → `CorpusLogin`, so every screen gets its own type names in one module.
 pub fn type_name(name: &str) -> String {
     name.replace('/', "-")
+}
+
+/// A project whose catalog extends the core one with kinds the app writes the views for.
+pub struct Project {
+    pub catalog: Catalog,
+    pub tokens: IndexMap<String, Token>,
+    pub screens: Vec<Screen>,
+}
+
+/// The example projects: `examples/project` (`rating`, a string colour) and
+/// `tests/fixtures/project` (every prop type, content, slots and events).
+pub fn projects() -> Vec<Project> {
+    vec![
+        project_at(root().join("examples/project"), "project"),
+        project_at(
+            PathBuf::from(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/tests/fixtures/project"
+            )),
+            "custom",
+        ),
+    ]
+}
+
+fn project_at(dir: PathBuf, prefix: &str) -> Project {
+    let read = |name: &str| std::fs::read_to_string(dir.join(name)).ok();
+    let text = std::fs::read_to_string(dir.join("weft.json")).unwrap();
+    let load = load_project_text(
+        &text,
+        &ProjectOptions {
+            read: Some(&read),
+            ..ProjectOptions::default()
+        },
+    )
+    .unwrap();
+    assert!(load.diagnostics.is_empty(), "{:?}", load.diagnostics);
+    // One sample for every screen of the project, as `render.data` gives it.
+    let data = std::fs::read_to_string(dir.join("sample.data.json"))
+        .ok()
+        .map(|text| serde_json::from_str(&text).unwrap());
+    let mut paths: Vec<_> = std::fs::read_dir(dir.join("screens"))
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .collect();
+    paths.sort();
+    let screens = paths
+        .iter()
+        .map(|path| Screen {
+            name: format!("{prefix}/{}", path.file_stem().unwrap().to_string_lossy()),
+            markup: std::fs::read_to_string(path).unwrap(),
+            data: data.clone(),
+        })
+        .collect();
+    Project {
+        catalog: load.project.catalog,
+        tokens: load.project.tokens.unwrap(),
+        screens,
+    }
 }

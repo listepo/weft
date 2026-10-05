@@ -31,11 +31,11 @@ struct WizardEvent: Sendable, Equatable {
     var item: String?
 }
 
-/// The design tokens the screen uses, in points.
+/// The design tokens the screen uses.
 struct WizardTheme: Sendable {
-    var space = Space()
+    var space = SpaceTokens()
 
-    struct Space: Sendable {
+    struct SpaceTokens: Sendable {
         var sm: CGFloat = 8
     }
 }

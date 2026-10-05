@@ -143,6 +143,7 @@ fn swiftui() {
             catalog: &catalog,
             tokens: &tokens,
             name: None,
+            shared_tokens: false,
             data: None,
         };
         // A refusal is an output too: pinning its message keeps the reason reviewed.
@@ -159,8 +160,66 @@ fn swiftui_with_data() {
             catalog: &catalog,
             tokens: &tokens,
             name: None,
+            shared_tokens: false,
             data: Some(data),
         };
         weft_swiftui::generate(document, &options).unwrap_or_else(|e| format!("refused: {e}\n"))
     });
+}
+
+/// The shared `WeftTokens.swift`, and screens that read it: a corpus screen with the default
+/// tokens, and a project screen that calls the views of its catalog extension's kinds.
+#[test]
+fn swiftui_shared_tokens() {
+    let snapshot = |name: &str, output: String| {
+        insta::with_settings!({
+            snapshot_path => "snapshots/swiftui-shared",
+            prepend_module_to_snapshot => false,
+            omit_expression => true,
+            description => format!("{name} as SwiftUI with shared tokens"),
+        }, {
+            insta::assert_snapshot!(name.to_owned(), output);
+        });
+    };
+    let catalog = common::catalog();
+    let tokens = common::tokens();
+    snapshot("WeftTokens", weft_swiftui::generate_tokens(&tokens).0);
+    let login = screens()
+        .into_iter()
+        .find(|(n, _)| n == "corpus-login")
+        .unwrap()
+        .1;
+    let options = GenerateOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+        name: None,
+        shared_tokens: true,
+        data: None,
+    };
+    snapshot(
+        "corpus-login",
+        weft_swiftui::generate(&login, &options).unwrap(),
+    );
+
+    let project = common::project("crates/weft-swiftui/tests/fixtures/project");
+    let (swift, skipped) = weft_swiftui::generate_tokens(&project.tokens);
+    assert!(skipped.is_empty(), "{skipped:?}");
+    snapshot("project-WeftTokens", swift);
+    let markup = std::fs::read_to_string(project.dir.join("screens/offers.weft")).unwrap();
+    let (document, diagnostics) = common::parse_strict(&markup, &project.catalog, &project.tokens);
+    let document = document.unwrap_or_else(|| panic!("{diagnostics:?}"));
+    // The sample initializer and `#Preview` pass the data through the custom views too.
+    let data = std::fs::read_to_string(project.dir.join("sample.data.json")).unwrap();
+    let data = parse_json(&data).unwrap();
+    let options = GenerateOptions {
+        catalog: &project.catalog,
+        tokens: &project.tokens,
+        name: None,
+        shared_tokens: true,
+        data: Some(&data),
+    };
+    snapshot(
+        "project-offers",
+        weft_swiftui::generate(&document, &options).unwrap(),
+    );
 }

@@ -75,6 +75,7 @@ const HTML_EXPORT: &[Setting] = &[
         Kind::File,
     ),
 ];
+const SHARED_TOKENS: &str = "Screens read the tokens from one shared `WeftTokens.swift` (`weft swiftui-tokens`) instead of each carrying the tokens it uses.";
 const SWIFTUI_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
     setting(
@@ -82,6 +83,7 @@ const SWIFTUI_EXPORT: &[Setting] = &[
         "Sample data (a JSON file, relative to the project file) the generated model is built from in a `sample` property that `#Preview` shows. Default: none, the preview shows the model's defaults.",
         Kind::File,
     ),
+    with_default("sharedTokens", SHARED_TOKENS, Kind::Bool, "true"),
 ];
 const JSX_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),

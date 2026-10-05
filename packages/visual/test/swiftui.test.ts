@@ -4,7 +4,9 @@
 //
 // Each screen is generated with its corpus data (`weft swiftui --data`) and shows the model's
 // `sample`, the data the React screenshots show, so the screenshot pins the layout, controls and
-// text with real content in them.
+// text with real content in them. One more screen comes from the Xcode plugin's sample project:
+// it reads the project's shared `WeftTokens` and calls `RatingView`, the view the app writes for
+// its own `rating` kind.
 //
 // The simulator is pinned (device and runtime below), since a baseline is only meaningful on the
 // runtime that drew it. Without macOS, Xcode or that simulator the suite is skipped and says why.
@@ -14,7 +16,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { matchBaseline } from "../src/baseline.ts";
-import { CORPUS, cli } from "../src/cli.ts";
+import { CORPUS, SAMPLE, cli, weft } from "../src/cli.ts";
 import { compare } from "../src/compare.ts";
 
 const DEVICE_TYPE = "com.apple.CoreSimulator.SimDeviceType.iPhone-17";
@@ -24,6 +26,8 @@ const TARGET = "arm64-apple-ios17.0-simulator";
 
 // The generator refuses these screens on purpose (array-index paths); its own tests pin why.
 const REFUSED = new Set(["leaderboard"]);
+// The sample project's screen, named apart from the corpus screens it is listed with.
+const SAMPLE_SCREEN = "sample-review";
 
 const run = (cmd: string, args: string[]) =>
   spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
@@ -132,8 +136,31 @@ const INFO = `<?xml version="1.0" encoding="UTF-8"?>
 </plist>
 `;
 
+/**
+ * The sample project's review screen, with its data, the shared tokens it reads and the custom
+ * view it calls. The project's files stay where they are, so the CLI finds the catalog and tokens.
+ */
+function sampleSources(dir: string): { screen: string; support: Map<string, string> } {
+  const data = join(dir, "review.data.json");
+  writeFileSync(data, JSON.stringify({ score: 4 }));
+  const project = join(SAMPLE, "weft.json");
+  const screen = weft(
+    "swiftui",
+    join(SAMPLE, "Sources/Screens/review.weft"),
+    "--project",
+    project,
+    "--data",
+    data,
+  );
+  const support = new Map([
+    ["WeftTokens.swift", weft("swiftui-tokens", "--project", project)],
+    ["RatingView.swift", readFileSync(join(SAMPLE, "Sources/Screens/RatingView.swift"), "utf8")],
+  ]);
+  return { screen, support };
+}
+
 /** Writes and compiles the app with every screen in it; returns the `.app` path. */
-function buildApp(dir: string, sources: Map<string, string>): string {
+function buildApp(dir: string, sources: Map<string, string>, support: Map<string, string>): string {
   const swift = join(dir, "src");
   mkdirSync(swift);
   const types = new Map<string, string>();
@@ -142,6 +169,7 @@ function buildApp(dir: string, sources: Map<string, string>): string {
     types.set(name, type);
     writeFileSync(join(swift, `${type}.swift`), renamed(source, type));
   }
+  for (const [file, source] of support) writeFileSync(join(swift, file), source);
   writeFileSync(join(swift, "App.swift"), APP);
   writeFileSync(join(swift, "WeftScreens.swift"), dispatcher(types));
   const app = join(dir, "WeftScreens.app");
@@ -171,17 +199,20 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
   const udid = "udid" in found ? found.udid : "";
-  const names = readdirSync(CORPUS, { withFileTypes: true })
-    .filter((e) => e.isDirectory() && !REFUSED.has(e.name))
-    .map((e) => e.name)
-    .sort();
+  const names = [
+    ...readdirSync(CORPUS, { withFileTypes: true })
+      .filter((e) => e.isDirectory() && !REFUSED.has(e.name))
+      .map((e) => e.name)
+      .sort(),
+    SAMPLE_SCREEN,
+  ];
   let dir = "";
   let booted = false;
 
   beforeAll(() => {
     dir = mkdtempSync(join(tmpdir(), "weft-swiftui-"));
     const sources = new Map<string, string>();
-    for (const name of names) {
+    for (const name of names.filter((n) => n !== SAMPLE_SCREEN)) {
       sources.set(
         name,
         cli(
@@ -193,9 +224,11 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
         ),
       );
     }
+    const sample = sampleSources(dir);
+    sources.set(SAMPLE_SCREEN, sample.screen);
     const login = sources.get("login")!;
     for (const [name, mutate] of Object.entries(MUTANTS)) sources.set(name, mutate(login));
-    const app = buildApp(dir, sources);
+    const app = buildApp(dir, sources, sample.support);
 
     if (deviceState(udid) !== "Booted") {
       execFileSync("xcrun", ["simctl", "boot", udid]);

@@ -36,7 +36,7 @@ struct FilesEvent: Sendable, Equatable {
     var item: String?
 }
 
-/// The design tokens the screen uses, in points.
+/// The design tokens the screen uses.
 struct FilesTheme: Sendable {
 }
 

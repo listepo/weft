@@ -1,0 +1,17 @@
+<screen id="offers" label="Offers" weft="0.1">
+  <rating id="score" label="Score" value="4" color="{token.color.accent}"/>
+  <rating id="live-score" label="Live score" value="{$.score}" color="{token.color.brand}"/>
+  <promo-card id="promo" accent="{token.color.accent}" count="3" gap="{token.space.md}" note="{$.note}" pinned="true" state="busy" title="{$.offer.title}" tone="loud" on-dismiss="promo.dismiss" on-open-link="promo.open">
+    Save <text id="percent" text="{$.offer.percent}"/> today.
+    <slot name="footer">
+      <button id="claim" variant="primary" on-press="promo.claim">Claim</button>
+    </slot>
+    <slot name="header-actions">
+      <button id="share" on-press="promo.share">Share</button>
+    </slot>
+  </promo-card>
+  <promo-card id="empty-promo" title="Nothing yet"/>
+  <stack id="raised" gap="{token.space.sm}">
+    <rating id="plain" label="Plain" value="2.5" color="{token.color.surface.raised}"/>
+  </stack>
+</screen>

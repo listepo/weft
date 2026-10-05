@@ -1,0 +1,27 @@
+{
+  "weft": "0.1",
+  "name": "sample",
+  "version": "1.0.0",
+  "components": {
+    "rating": {
+      "description": "Shows a score from 0 to 5 as stars. The app writes it: `RatingView`.",
+      "role": "img",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "value": {
+          "description": "The score, from 0 to 5.",
+          "type": "number",
+          "required": true,
+          "min": 0,
+          "max": 5
+        },
+        "color": {
+          "description": "Colour of the filled stars, as a color token.",
+          "type": "token",
+          "tokenType": "color"
+        }
+      }
+    }
+  }
+}

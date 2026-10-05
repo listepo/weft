@@ -77,13 +77,24 @@ pub fn sample_data(
 
 /// A boolean flag pair (`--x` / `--no-x`), else the project's setting at `path`, else false.
 pub fn switch(on: bool, off: bool, project: Option<&Project>, path: &[&str]) -> bool {
+    switch_or(on, off, project, path, false)
+}
+
+/// [`switch`] with its own default.
+pub fn switch_or(
+    on: bool,
+    off: bool,
+    project: Option<&Project>,
+    path: &[&str],
+    default: bool,
+) -> bool {
     if on || off {
         return on;
     }
     project
         .and_then(|p| p.setting(path))
         .and_then(serde_json::Value::as_bool)
-        .unwrap_or(false)
+        .unwrap_or(default)
 }
 
 /// `--out-dir` (relative to the working directory), else the project's `<section>.<target>.outDir`
