@@ -10,4 +10,5 @@ dist/
 target/
 packages/core/wasm/
 packages/core/wasm-web/
+packages/core/native/
 packages/visual/diffs/

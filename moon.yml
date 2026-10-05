@@ -1,10 +1,10 @@
 # The workspace root: checks that cover every package at once.
-id: 'root'
-language: 'typescript'
+id: "root"
+language: "typescript"
 
 workspace:
   inheritedTasks:
-    exclude: ['test']
+    exclude: ["test"]
 
 tasks:
   # The Rust core compiled to WebAssembly for @weft/core and @weft/catalog. Generated and
@@ -17,23 +17,47 @@ tasks:
     # Two modules: the core alone (`@weft/core`), and the core with the web importers and
     # generators (`@weft/core/web`), so core-only pages do not download the HTML and JSX parsers.
     script: 'export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(pwd -P)=/weft" && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm-web --out-name weft -- --features web'
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json']
-    outputs: ['/packages/core/wasm/**/*', '/packages/core/wasm-web/**/*']
+    inputs: ["/crates/**/*", "/Cargo.toml", "/Cargo.lock", "/packages/catalog/catalog.json"]
+    outputs: ["/packages/core/wasm/**/*", "/packages/core/wasm-web/**/*"]
+  # The native addon of the same Rust core (crates/weft-node) for Node and Bun, built for the host
+  # into the gitignored packages/core/native/. `@weft/core` picks it at load time and uses the
+  # WebAssembly module where there is none. The prebuilt list in packages/core/package.json
+  # (arm64 macOS, x64 and arm64 glibc Linux, x64 Windows) is built per target by the release job,
+  # not here. Intel macOS is not supported.
+  native:
+    command: "napi build --platform --release --no-js --cwd packages/core --manifest-path ../../crates/weft-node/Cargo.toml -p weft-node --output-dir native"
+    inputs:
+      [
+        "/crates/**/*",
+        "/Cargo.toml",
+        "/Cargo.lock",
+        "/packages/catalog/catalog.json",
+        "/packages/core/package.json",
+      ]
+    outputs: ["/packages/core/native/**/*"]
   # The `weft` CLI, which @weft/visual runs for the targets that exist only in Rust. Its own
   # target directory: rust-test builds `target/debug/weft` with every feature, and running in
   # parallel it would replace the binary while the visual suite calls it. Not cached: cargo
   # already skips an up-to-date build, and a cached run would not notice a deleted binary.
   cli:
-    command: 'cargo build -p weft-cli --target-dir target/visual'
+    command: "cargo build -p weft-cli --target-dir target/visual"
     options:
       cache: false
   typecheck:
-    command: 'tsc --noEmit -p .'
-    deps: ['root:wasm']
-    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/tsconfig.json']
+    command: "tsc --noEmit -p ."
+    deps: ["root:wasm"]
+    inputs: ["/packages/**/*", "/plugins/**/*", "/bench/**/*", "/tsconfig.json"]
   lint:
     script: "oxlint --deny-warnings --ignore-pattern 'plugins/*/dist/**' . && oxfmt --check '**/*.{ts,tsx,json}'"
-    inputs: ['/packages/**/*', '/plugins/**/*', '/bench/**/*', '/compat/**/*', '/*.json', '/.claude-plugin/*.json']
+    inputs:
+      [
+        "/packages/**/*",
+        "/plugins/**/*",
+        "/bench/**/*",
+        "/compat/**/*",
+        "/*.json",
+        "/.claude-plugin/*.json",
+      ]
   fmt:
     command: 'oxfmt "**/*.{ts,tsx,json}"'
     options:
@@ -42,11 +66,22 @@ tasks:
   # The Rust core and CLI. The differential fixtures, written by the former TypeScript core, pin
   # their results; the TypeScript suites check that the WebAssembly build still reproduces them.
   rust-test:
-    command: 'cargo nextest run --workspace --all-features'
+    command: "cargo nextest run --workspace --all-features"
     # weft-catalog embeds catalog.json and its tests read the examples and default tokens; the
     # CLI tests read the example project; the schema test checks schemas/weft.schema.json;
     # weft-swiftui generates and reads back every corpus screen.
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json', '/packages/catalog/examples/**/*', '/packages/catalog/tokens/**/*', '/examples/**/*', '/schemas/**/*', '/corpus/**/*']
+    inputs:
+      [
+        "/crates/**/*",
+        "/Cargo.toml",
+        "/Cargo.lock",
+        "/packages/catalog/catalog.json",
+        "/packages/catalog/examples/**/*",
+        "/packages/catalog/tokens/**/*",
+        "/examples/**/*",
+        "/schemas/**/*",
+        "/corpus/**/*",
+      ]
   rust-lint:
-    script: 'cargo clippy --workspace --all-targets --all-features -- -D warnings && cargo fmt --all --check'
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/clippy.toml']
+    script: "cargo clippy --workspace --all-targets --all-features -- -D warnings && cargo fmt --all --check"
+    inputs: ["/crates/**/*", "/Cargo.toml", "/Cargo.lock", "/clippy.toml"]

@@ -35,7 +35,7 @@ export function htmlImport(html: string, catalog: Catalog): ImportResult {
 }
 
 export function instanceIdOf(raw: string): string | undefined {
-  return wasm.instanceId(wellFormed(raw));
+  return wasm.instanceId(wellFormed(raw)) ?? undefined;
 }
 
 type Tables = {
