@@ -14,6 +14,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T51 | todo | P2 | 3 | 0% | |
 | T52 | todo | P2 | 5 | 0% | |
 | T55 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
+| T56 | in progress | P2 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
+| T57 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -214,4 +216,29 @@ Following SwiftUI and common design-system practice, the creator chose to define
 Done when:
 - the affected baselines and snapshots are retaken and reviewed;
 - todo-list's button no longer stretches;
+- the full check exits 0.
+
+### T56. Narrow the WebAssembly task's inputs
+
+`root:wasm` lists `/crates/**/*` as its input, so any crate change rebuilds both WebAssembly modules (about 45 s), even a change to a crate the modules do not contain, such as `weft-swiftui` or `weft-cli`. Found in T54.
+
+- Make the inputs exactly the crates the two modules are built from: `weft-wasm` with and without the `web` feature, and their dependency closure from `cargo metadata`, plus the workspace `Cargo.toml` and `Cargo.lock` and the files the build reads.
+- The list must not go stale silently. A test compares the declared inputs with the crate closure and fails when a dependency is added without updating them.
+- Do the same for `root:native` if it has the same coarse input.
+
+Done when:
+- a change in `weft-swiftui` no longer rebuilds the modules;
+- a change in `weft-core` still does;
+- the full check exits 0.
+
+### T57. Cache the mcp test task
+
+The `mcp` package's `test` task is never served from moon's cache. Vitest writes `node_modules/.vite/.../results.json`, which falls inside the task's `**/*` input, so the hash changes after every run and `moon ci` always re-runs the tests. Found in T54.
+
+- Find the cause in the inherited `test` task (`.moon/tasks/all.yml`) or the package's own config, and exclude Vitest's cache output from the inputs. Alternatively, move Vitest's cache out of the input tree, using the documented `cacheDir` option.
+- Check every other package for the same problem.
+
+Done when:
+- a second `moon run :test` with no changes is fully cached;
+- a source change still re-runs the affected tests;
 - the full check exits 0.
