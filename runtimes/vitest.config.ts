@@ -40,7 +40,9 @@ if (browser && !existsSync(chromium.executablePath())) {
 export default defineConfig({
   root: resolve(import.meta.dirname, ".."),
   resolve: {
-    alias: browser ? { "node:assert/strict": resolve(import.meta.dirname, "assert-browser.ts") } : {},
+    alias: browser
+      ? { "node:assert/strict": resolve(import.meta.dirname, "assert-browser.ts") }
+      : {},
   },
   test: {
     name: runtime,
