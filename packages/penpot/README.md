@@ -47,7 +47,8 @@ On export, `readThemes` reads the first theme group that turns the base set on. 
 
 ## Limits of this stage
 
-- Visual edits with no Weft prop (fills, strokes, radius, padding) are reported as `tokens` losses. Style overrides are excluded until `docs/figma-style-overrides-design.md` is approved.
+- Tilts: `rotate-z` is drawn as the shape's `rotation` (taken as clockwise, which the plugin types do not state, so this direction is unverified against a real file); `rotate-x`, `rotate-y` and `perspective` are not drawn and stay in the Weft source, which is what reads back. Turning a shape by hand is a visual edit.
+- Visual edits with no Weft prop (fills, strokes, radius, padding, rotation) are reported as `tokens` losses. Style overrides are excluded until `docs/figma-style-overrides-design.md` is approved.
 - `rem` tokens are converted at 16 px (`REM_PX`).
 - Penpot's default font family is kept; only size and weight are set.
 
