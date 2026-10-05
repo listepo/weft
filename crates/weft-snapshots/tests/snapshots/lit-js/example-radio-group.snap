@@ -1,0 +1,52 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-radio-group as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Plan"
+      ><div data-weft-id="plan" aria-label="Plan" role="radiogroup"
+        ><span aria-hidden="true">Plan</span
+        ><label
+          ><input data-weft-id="plan-free" type="radio" name=${"weft-plan"} value="free" aria-label="Free" .checked=${_text(data?.plan) !== "" && "free" === _text(data?.plan)} @change=${() => { onChange?.("$.plan", "free"); _act(actions, { id: "plan", action: "plan.choose" }); }}
+          ><span aria-hidden="true">Free</span
+        ></label
+        ><label
+          ><input data-weft-id="plan-pro" type="radio" name=${"weft-plan"} value="pro" aria-label="Pro" .checked=${_text(data?.plan) !== "" && "pro" === _text(data?.plan)} @change=${() => { onChange?.("$.plan", "pro"); _act(actions, { id: "plan", action: "plan.choose" }); }}
+          ><span aria-hidden="true">Pro</span
+        ></label
+      ></div
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

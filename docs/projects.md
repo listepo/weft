@@ -132,10 +132,11 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `export.react.typescript`, `export.solid.typescript` | `false` | Write TSX with typed props (`--javascript` overrides it). |
 | `export.react.source`, `export.solid.source` | `false` | The component keeps the screen in a leading comment, so `weft import-react` and `weft import-solid` give it back exactly (`--no-source` overrides it). |
 | `export.solid.outDir` | standard output | Where `weft solid` writes `<screen>.jsx` or `.tsx` (`--out-dir` overrides it). |
+| `export.lit.outDir` | standard output | Where `weft lit` writes `<screen>.js` (`--out-dir` overrides it). |
 | `import.html.outDir` | next to the page | Where screens imported from HTML go; `weft import-html` prints when it is absent (`--out-dir` overrides it). |
 | `import.react.outDir`, `import.solid.outDir` | standard output | Where `weft import-react` and `weft import-solid` write `<file>.weft` (`--out-dir` overrides it). |
 | `export.swiftui.outDir` | standard output | Where `weft swiftui` writes `<screen>.swift` and `weft swiftui-tokens` writes `WeftTokens.swift`, and the Xcode command plugin's `export` (next to the screen when absent; `--out-dir` overrides it). The build tool plugin ignores it and writes into the build folder. |
-| `export.css.outDir` | standard output | Where `weft css-tokens` writes `weft-tokens.css`, the stylesheet with the `--weft-…` properties that React and SolidJS components read, and `weft css-base` writes `weft-base.css`, their base rules (`--out-dir` overrides it). |
+| `export.css.outDir` | standard output | Where `weft css-tokens` writes `weft-tokens.css`, the stylesheet with the `--weft-…` properties that React, SolidJS and Lit components read, and `weft css-base` writes `weft-base.css`, their base rules (`--out-dir` overrides it). |
 | `export.swiftui.sharedTokens` | `true` | Screens read the tokens from one shared `WeftTokens.swift` instead of each carrying a theme with the tokens it uses (`--shared-tokens` and `--no-shared-tokens` override it). The Xcode build tool plugin writes `WeftTokens.swift` once per target. |
 | `export.swiftui.data` | none | Sample data `weft swiftui` builds the model's `sample` from, for `#Preview` (`--data` overrides it). |
 | `import.swiftui.outDir` | standard output | Where `weft import-swiftui` writes `<file>.weft`, and the Xcode command plugin's `import` (next to the view when absent; `--out-dir` overrides it). |

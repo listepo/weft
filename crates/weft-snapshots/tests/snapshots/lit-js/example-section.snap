@@ -1,0 +1,34 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-section as lit-js
+---
+import { LitElement, html } from "lit";
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Account"
+      ><section data-weft-id="profile" aria-label="Profile"
+        ><div data-weft-slot="header"
+          ><h2 data-weft-id="profile-title">Profile</h2
+        ></div
+        ><div data-weft-id="bio">Product designer based in Lisbon.</div
+      ></section
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

@@ -1,0 +1,84 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-data-table as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _press(e, fire) {
+  if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  fire();
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="users" aria-label="Users"
+      ><h1 data-weft-id="title">Users</h1>${(() => {
+        const _cols = [
+          html`<th data-weft-id="col-name" scope="col" aria-sort="ascending" tabindex=${0} @click=${() => _act(actions, { id: "col-name", action: "users.sort" })} @keydown=${(_e) => _press(_e, () => _act(actions, { id: "col-name", action: "users.sort" }))}>Name</th>`,
+          html`<th data-weft-id="col-email" scope="col" aria-sort="none" tabindex=${0} @click=${() => _act(actions, { id: "col-email", action: "users.sort" })} @keydown=${(_e) => _press(_e, () => _act(actions, { id: "col-email", action: "users.sort" }))}>Email</th>`,
+          html`<th data-weft-id="col-role" scope="col" aria-sort="none" tabindex=${0} @click=${() => _act(actions, { id: "col-role", action: "users.sort" })} @keydown=${(_e) => _press(_e, () => _act(actions, { id: "col-role", action: "users.sort" }))}>Role</th>`,
+          html`<th data-weft-id="col-actions" scope="col">Actions</th>`,
+          ..._list(data?.users).flatMap((user, _i0) => []),
+        ];
+        const _rows = [
+          ..._list(data?.users).flatMap((user, _i0) => [
+            html`<tr data-weft-id=${"row[" + _i0 + "]"}
+                ><td data-weft-id=${"cell-name[" + _i0 + "]"}
+                  ><div data-weft-id=${"user-name[" + _i0 + "]"}>${!(_text(user?.name).trim() === "") ? _squash(_text(user?.name)) : ""}</div
+                ></td
+                ><td data-weft-id=${"cell-email[" + _i0 + "]"}
+                  ><div data-weft-id=${"user-email[" + _i0 + "]"}>${!(_text(user?.email).trim() === "") ? _squash(_text(user?.email)) : ""}</div
+                ></td
+                ><td data-weft-id=${"cell-role[" + _i0 + "]"}
+                  ><div data-weft-id=${"user-role[" + _i0 + "]"}>${!(_text(user?.role).trim() === "") ? _squash(_text(user?.role)) : ""}</div
+                ></td
+                ><td data-weft-id=${"cell-actions[" + _i0 + "]"}
+                  ><button data-weft-id=${"delete[" + _i0 + "]"} type="button" data-variant="danger" @click=${(_e) => _act(actions, { id: "delete[" + _i0 + "]", action: "users.delete", item: "$.users." + _i0 })}>Delete</button
+                ></td
+              ></tr>`,
+          ]),
+        ];
+        return html`<table data-weft-id="table" aria-label="Users">${_cols.length > 0 ? html`<thead
+                ><tr>${_cols}</tr
+              ></thead>` : null}${_rows.length > 0 ? html`<tbody>${_rows}</tbody>` : null}</table>`;
+      })()}</main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

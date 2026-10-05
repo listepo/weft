@@ -18,6 +18,7 @@
     "@weft/to-jsx": "workspace:*",
     "babel-preset-solid": "1.9.15",
     "fast-png": "8.0.0",
+    "lit": "3.3.3",
     "oxc-transform": "0.152.0",
     "pixelmatch": "7.2.0",
     "playwright": "1.63.0",

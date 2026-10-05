@@ -11,6 +11,7 @@ import {
   expectSameLook,
   showMarkup,
   showPage,
+  showLit,
   showReact,
   showSolid,
 } from "./stage.ts";
@@ -31,6 +32,7 @@ for (const screen of screens) {
       const props = { data };
       await showReact("react", (await load("react")) as ComponentType<Props>, props, head);
       await showSolid("solid", (await load("solid")) as (p: Props) => unknown, props, head);
+      await showLit("lit", name, props, head);
       await showMarkup("reference", screen.reference, head);
       await showPage("html", screen.html, backdrop);
       await showPage("html-back", screen.back.html, backdrop);
@@ -60,6 +62,9 @@ for (const screen of screens) {
     test("SolidJS looks like React", async () => {
       await expectSameLook("#react", "#solid", `web/${name}.solid`);
     });
+    test("Lit looks like React", async () => {
+      await expectSameLook("#react", "#lit", `web/${name}.lit`);
+    });
     test("the reference renderer looks like React", async () => {
       await expectSameLook("#react", "#reference", `web/${name}.reference`);
     });
@@ -69,9 +74,10 @@ for (const screen of screens) {
     test("the static page gives React's accessibility tree", async () => {
       expect(await commands.ariaSnapshot("#html")).toBe(await commands.ariaSnapshot("#react"));
     });
-    test("React, SolidJS and the reference renderer give the same accessibility tree", async () => {
+    test("React, SolidJS, Lit and the reference renderer give the same accessibility tree", async () => {
       const react = await commands.ariaSnapshot("#react");
       expect(await commands.ariaSnapshot("#solid")).toBe(react);
+      expect(await commands.ariaSnapshot("#lit")).toBe(react);
       expect(await commands.ariaSnapshot("#reference")).toBe(react);
     });
 

@@ -13,7 +13,7 @@ const APPEARANCE_COMPONENT = "virtual:weft-appearance-component";
 const OWN = new Set([SCREENS, APPEARANCE, APPEARANCE_COMPONENT]);
 
 /** The component variants a screen has: generated, and generated after a round trip. */
-export const VARIANTS = ["react", "solid", "react-back", "solid-back"] as const;
+export const VARIANTS = ["react", "solid", "lit", "react-back", "solid-back"] as const;
 export type Variant = (typeof VARIANTS)[number];
 
 function code(screen: Screen, variant: Variant): string {
@@ -22,6 +22,8 @@ function code(screen: Screen, variant: Variant): string {
       return screen.react;
     case "solid":
       return screen.solid;
+    case "lit":
+      return screen.lit;
     case "react-back":
       return screen.back.react;
     case "solid-back":
@@ -47,7 +49,7 @@ export function weftScreens(): Plugin {
       if (id === `\0${APPEARANCE_COMPONENT}`) return appearance().react;
       if (id === `\0${SCREENS}`) {
         const list = await load();
-        const pages = list.map(({ react: _r, solid: _s, back, ...rest }) => ({
+        const pages = list.map(({ react: _r, solid: _s, lit: _l, back, ...rest }) => ({
           ...rest,
           back: { html: back.html, figma: back.figma, penpot: back.penpot },
         }));

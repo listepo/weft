@@ -1,0 +1,79 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-search-results as lit-js
+---
+import { LitElement, html, nothing } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="search" aria-label="Search"
+      ><form data-weft-id="form" @submit=${(_e) => { _e.preventDefault(); _act(actions, { id: "form", action: "search.run" }); }}
+        ><div data-weft-id="bar" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" })}
+          ><div data-weft-field=""
+            ><label
+              ><span aria-hidden="true">Search</span
+              ><input data-weft-id="query" aria-label="Search" type="search" .value=${_text(data?.query)} @input=${(_e) => onChange?.("$.query", _e.currentTarget.value)}
+            ></label
+          ></div
+          ><button data-weft-id="go" type="submit" data-variant="primary" @click=${(_e) => { _e.preventDefault(); _act(actions, { id: "form", action: "search.run" }); }}>Search</button
+        ></div
+      ></form
+      ><ul data-weft-id="results">${!(_list(data?.results).length > 0) ? html`<li role="none" data-weft-slot="empty"
+            ><div data-weft-id="empty">No results found</div
+          ></li>` : html`${_list(data?.results).map((result, _i0) => html`<li data-weft-id=${"result[" + _i0 + "]"}
+              ><h3 data-weft-id=${"result-title[" + _i0 + "]"}>${!(_text(result?.title).trim() === "") ? _squash(_text(result?.title)) : ""}</h3
+              ><div data-weft-id=${"result-snippet[" + _i0 + "]"}>${!(_text(result?.snippet).trim() === "") ? _squash(_text(result?.snippet)) : ""}</div>${(() => {
+                const _href = _url("");
+                return html`<a data-weft-id=${"result-open[" + _i0 + "]"} href=${(_href) ?? nothing} role=${(_href === undefined ? "link" : undefined) ?? nothing} tabindex=${(_href === undefined ? 0 : undefined) ?? nothing} @keydown=${_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "result-open[" + _i0 + "]", action: "results.open", item: "$.results." + _i0 }); } : undefined} @click=${() => _act(actions, { id: "result-open[" + _i0 + "]", action: "results.open", item: "$.results." + _i0 })} style=${styleMap({ display: "inline-block" })}>Open</a>`;
+              })()}</li>`)}`}</ul
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

@@ -1,0 +1,74 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-settings as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="settings" aria-label="Settings"
+      ><h1 data-weft-id="title">Settings</h1
+      ><section data-weft-id="notifications" aria-label="Notifications"
+        ><h2 data-weft-id="notifications-title">Notifications</h2
+        ><label
+          ><input data-weft-id="email-alerts" type="checkbox" role="switch" aria-label="Email alerts" .checked=${_on(data?.emailAlerts)} @change=${(_e) => onChange?.("$.emailAlerts", _e.currentTarget.checked)}
+          ><span aria-hidden="true">Email alerts</span
+        ></label
+        ><label
+          ><input data-weft-id="push-alerts" type="checkbox" role="switch" aria-label="Push notifications" .checked=${_on(data?.pushAlerts)} @change=${(_e) => onChange?.("$.pushAlerts", _e.currentTarget.checked)}
+          ><span aria-hidden="true">Push notifications</span
+        ></label
+      ></section
+      ><section data-weft-id="appearance" aria-label="Appearance"
+        ><h2 data-weft-id="appearance-title">Appearance</h2
+        ><label
+          ><span aria-hidden="true">Language</span>${(() => {
+            const _o = [
+              { value: "en", el: html`<option data-weft-id="lang-en" ?selected=${"en" === _text(data?.language)} value="en">English</option>` },
+              { value: "de", el: html`<option data-weft-id="lang-de" ?selected=${"de" === _text(data?.language)} value="de">Deutsch</option>` },
+              { value: "fr", el: html`<option data-weft-id="lang-fr" ?selected=${"fr" === _text(data?.language)} value="fr">Français</option>` },
+            ];
+            return html`<select data-weft-id="language" aria-label="Language" .value=${_text(data?.language)} @change=${(_e) => { const _c = _o.find((_x) => _text(_x.value) === _e.currentTarget.value); onChange?.("$.language", _c ? _c.value : _e.currentTarget.value); }}>${_o.map((_x) => _x.el)}</select>`;
+          })()}</label
+        ><label
+          ><input data-weft-id="dark-mode" type="checkbox" role="switch" aria-label="Dark mode" .checked=${_on(data?.darkMode)} @change=${(_e) => onChange?.("$.darkMode", _e.currentTarget.checked)}
+          ><span aria-hidden="true">Dark mode</span
+        ></label
+      ></section
+      ><button data-weft-id="save" type="button" ?disabled=${!_on(data?.dirty)} data-variant="primary" @click=${(_e) => _act(actions, { id: "save", action: "settings.save" })}>Save changes</button
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

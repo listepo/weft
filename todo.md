@@ -6,6 +6,6 @@
 - T39. Context in the document
 - T52.1. 3D models
 - T18. Follow-ups from the prototype
-- T13. Interoperability with A2UI (and json-render in T13.1)
 - T13.1. json-render export and import
-- T15. Second code target and catalog import
+- T15.1. Catalog import from a Custom Elements Manifest
+- T60. Deterministic top strip and blur in SwiftUI screenshots

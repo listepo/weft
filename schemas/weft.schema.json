@@ -168,6 +168,17 @@
           "additionalProperties": false,
           "description": "SolidJS components (`weft solid`)."
         },
+        "lit": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Lit web components, JavaScript only (`weft lit`)."
+        },
         "swiftui": {
           "type": "object",
           "properties": {

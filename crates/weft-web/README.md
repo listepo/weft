@@ -1,7 +1,7 @@
 # weft-web
 
 Weft and the web, both ways: importers that read HTML and JSX source into a Weft document with a
-loss table, and generators that write HTML/CSS, React and SolidJS. The shared importer parts (loss
+loss table, and generators that write HTML/CSS, React, SolidJS and Lit. The shared importer parts (loss
 table, ids, literals, required-prop stand-ins, limits, the role tree builder) live in
 `crates/weft-import`.
 
