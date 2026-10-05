@@ -60,12 +60,18 @@ type JsxExportSettings = { outDir?: string; typescript?: boolean; source?: boole
 export type Settings = {
   validate?: { mode?: Mode };
   format?: { write?: boolean };
-  render?: { data?: string; tokens?: string[] | string; outDir?: string };
+  render?: {
+    data?: string;
+    tokens?: string[] | string;
+    outDir?: string;
+    appearance?: "light" | "dark";
+  };
   export?: {
     html?: { outDir?: string; source?: boolean };
     react?: JsxExportSettings;
     solid?: JsxExportSettings;
     swiftui?: { outDir?: string };
+    css?: { outDir?: string };
   };
   import?: {
     html?: { outDir?: string };

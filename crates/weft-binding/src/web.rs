@@ -208,6 +208,7 @@ pub fn to_html(
         catalog,
         tokens: &tokens,
         source: wire.source,
+        appearance: None,
     };
     write(&match weft_web::to_html(&document, &options) {
         Ok(code) => Page::Code { code },

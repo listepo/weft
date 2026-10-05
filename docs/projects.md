@@ -100,6 +100,7 @@ Tokens that differ by mode (light and dark, compact and roomy, two brands) live 
 - A modifier with `light` and `dark` contexts is the appearance: generated SwiftUI colours, pages and stylesheets follow the system's light or dark mode.
 - File references are relative to the resolver and stay inside the project. Every problem is `W705` (or `W703` and `W704` for files) with a pointer into the resolver, and the rest still loads.
 - A plain list of token files works as before.
+- React and SolidJS components read their tokens from CSS custom properties: `weft css-tokens` writes them as `weft-tokens.css`, light values first and the dark ones under `prefers-color-scheme: dark`. Link it once in the app.
 
 ## Choosing the project
 
@@ -122,6 +123,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `render.data` | none | Sample data for rendered pages (`--data` overrides it). |
 | `render.tokens` | the project's `tokens` | Token files for rendered pages, layered the same way, or one resolver file (`--tokens` overrides it). |
 | `render.outDir` | next to the screen | Where rendered pages go (an output path overrides it). |
+| `render.appearance` | the default context | `"light"` or `"dark"`: which theme of a resolver's light and dark modifier rendered pages use (`--appearance` overrides it). |
 | `export.html.outDir` | standard output | Where `weft html` writes `<screen>.html` (`--out-dir` overrides it). |
 | `export.html.source` | `false` | The page keeps the screen in a leading comment, so `weft import-html` gives it back exactly (`--no-source` overrides it). Off by default: a deployed page would publish it. |
 | `export.html.data` | none | Sample data `weft html` shows in the page instead of keeping bindings as a template (`--data` overrides it). |
@@ -132,6 +134,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `import.html.outDir` | next to the page | Where screens imported from HTML go; `weft import-html` prints when it is absent (`--out-dir` overrides it). |
 | `import.react.outDir`, `import.solid.outDir` | standard output | Where `weft import-react` and `weft import-solid` write `<file>.weft` (`--out-dir` overrides it). |
 | `export.swiftui.outDir` | standard output | Where `weft swiftui` writes `<screen>.swift` and `weft swiftui-tokens` writes `WeftTokens.swift`, and the Xcode command plugin's `export` (next to the screen when absent; `--out-dir` overrides it). The build tool plugin ignores it and writes into the build folder. |
+| `export.css.outDir` | standard output | Where `weft css-tokens` writes `weft-tokens.css`, the stylesheet with the `--weft-…` properties that React and SolidJS components read (`--out-dir` overrides it). |
 | `export.swiftui.sharedTokens` | `true` | Screens read the tokens from one shared `WeftTokens.swift` instead of each carrying a theme with the tokens it uses (`--shared-tokens` and `--no-shared-tokens` override it). The Xcode build tool plugin writes `WeftTokens.swift` once per target. |
 | `export.swiftui.data` | none | Sample data `weft swiftui` builds the model's `sample` from, for `#Preview` (`--data` overrides it). |
 | `import.swiftui.outDir` | standard output | Where `weft import-swiftui` writes `<file>.weft`, and the Xcode command plugin's `import` (next to the view when absent; `--out-dir` overrides it). |

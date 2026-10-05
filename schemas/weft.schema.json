@@ -91,6 +91,13 @@
         "outDir": {
           "$ref": "#/$defs/fileName",
           "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+        },
+        "appearance": {
+          "enum": [
+            "light",
+            "dark"
+          ],
+          "description": "Which context of the resolver's light and dark modifier (SPEC §10.3) the page is rendered with, and the page's color-scheme. Default: the resolver's default context, and no color-scheme."
         }
       },
       "additionalProperties": false,
@@ -180,6 +187,17 @@
           },
           "additionalProperties": false,
           "description": "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`)."
+        },
+        "css": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "The token stylesheet `weft-tokens.css` that React and SolidJS components read their `var(--weft-…)` from (`weft css-tokens`). Default folder: standard output."
         }
       },
       "additionalProperties": false,

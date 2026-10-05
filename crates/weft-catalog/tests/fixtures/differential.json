@@ -17822,7 +17822,7 @@
       "severity": "warning",
       "message": "Unknown key \"cobol\" in \"export\".",
       "path": "#/export/cobol",
-      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\", \"css\"",
       "got": "cobol"
      },
      {

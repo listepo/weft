@@ -50,6 +50,7 @@ pub fn import_html(html: &str, options: &ImportOptions<'_>) -> ImportResult {
                 catalog: options.catalog,
                 tokens: options.tokens,
                 source: true,
+                appearance: None,
             },
         )
         && same_body(&dom, &parse_html(&again))

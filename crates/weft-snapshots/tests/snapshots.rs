@@ -81,6 +81,7 @@ fn static_html() {
             catalog: &catalog,
             tokens: &tokens,
             source: false,
+            appearance: None,
         };
         to_html(document, &options).unwrap()
     });
@@ -95,6 +96,7 @@ fn static_html_with_data() {
             catalog: &catalog,
             tokens: &tokens,
             source: false,
+            appearance: None,
         };
         to_html_with_data(document, &options, Some(data)).unwrap()
     });
@@ -264,4 +266,38 @@ fn swiftui_appearance() {
         "example-review",
         weft_swiftui::generate(&document, &options).unwrap(),
     );
+}
+
+/// The same project as a static page and as `weft-tokens.css`: light values on `:root`, the dark
+/// ones that differ under `prefers-color-scheme: dark`, and the typography token as a `font`
+/// shorthand with its letter spacing.
+#[test]
+fn html_appearance() {
+    let snapshot = |name: &str, output: String| {
+        insta::with_settings!({
+            snapshot_path => "snapshots/html-appearance",
+            prepend_module_to_snapshot => false,
+            omit_expression => true,
+            description => format!("{name} with light and dark tokens"),
+        }, {
+            insta::assert_snapshot!(name.to_owned(), output);
+        });
+    };
+    let project = common::project("examples/project");
+    let appearance = weft_catalog::appearance(&project.modifiers);
+    assert!(appearance.is_some());
+    snapshot(
+        "example-tokens-css",
+        weft_web::tokens_css(&project.tokens, appearance),
+    );
+    let markup = std::fs::read_to_string(project.dir.join("screens/review.weft")).unwrap();
+    let (document, diagnostics) = common::parse_strict(&markup, &project.catalog, &project.tokens);
+    let document = document.unwrap_or_else(|| panic!("{diagnostics:?}"));
+    let options = HtmlOptions {
+        catalog: &project.catalog,
+        tokens: &project.tokens,
+        source: false,
+        appearance,
+    };
+    snapshot("example-review", to_html(&document, &options).unwrap());
 }

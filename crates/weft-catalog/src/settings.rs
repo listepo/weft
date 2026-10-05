@@ -13,8 +13,8 @@ use crate::project::{MAX_TOKEN_FILES, escape_pointer, is_project_file_name, quot
 pub(crate) enum Kind {
     /// Named settings; any other key is `W702`.
     Section(&'static [Setting]),
-    /// `"strict"` or `"lenient"`.
-    Mode,
+    /// One of these strings.
+    OneOf(&'static [&'static str]),
     Bool,
     /// A file or directory name relative to the project file (SPEC §10.2).
     File,
@@ -115,6 +115,11 @@ const EXPORT: &[Setting] = &[
         "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`).",
         Kind::Section(SWIFTUI_EXPORT),
     ),
+    setting(
+        "css",
+        "The token stylesheet `weft-tokens.css` that React and SolidJS components read their `var(--weft-…)` from (`weft css-tokens`). Default folder: standard output.",
+        Kind::Section(OUT_ONLY),
+    ),
 ];
 const IMPORT: &[Setting] = &[
     setting(
@@ -203,7 +208,7 @@ pub(crate) const SECTIONS: &[Setting] = &[
         Kind::Section(&[with_default(
             "mode",
             "\"strict\" reports unknown elements and attributes as errors, \"lenient\" as warnings (SPEC §8). Used by `weft validate` and as the default of weft_validate's strict argument.",
-            Kind::Mode,
+            Kind::OneOf(&["strict", "lenient"]),
             "\"lenient\"",
         )]),
     ),
@@ -232,6 +237,11 @@ pub(crate) const SECTIONS: &[Setting] = &[
                 Kind::TokenFiles,
             ),
             setting("outDir", OUT_DIR, Kind::File),
+            setting(
+                "appearance",
+                "Which context of the resolver's light and dark modifier (SPEC §10.3) the page is rendered with, and the page's color-scheme. Default: the resolver's default context, and no color-scheme.",
+                Kind::OneOf(&["light", "dark"]),
+            ),
         ]),
     ),
     setting(
@@ -303,12 +313,14 @@ pub(crate) fn sanitize(
             }
             Some(Json::Object(kept))
         }
-        Kind::Mode => match value.as_str() {
-            Some("strict" | "lenient") => Some(value.clone()),
+        Kind::OneOf(values) => match value.as_str() {
+            Some(v) if values.contains(&v) => Some(value.clone()),
             _ => {
+                let quoted: Vec<String> = values.iter().map(|v| quote(v)).collect();
+                let choices = quoted.join(" or ");
                 report(wrong(
-                    format!("{} must be \"strict\" or \"lenient\".", quote(&dotted)),
-                    "\"strict\" or \"lenient\"",
+                    format!("{} must be {choices}.", quote(&dotted)),
+                    &choices,
                 ));
                 None
             }
@@ -437,7 +449,7 @@ fn pointer_name(pointer: &str) -> String {
 fn schema_of(setting: &Setting) -> Json {
     let mut schema = match &setting.kind {
         Kind::Section(children) => section_schema(children),
-        Kind::Mode => json!({ "enum": ["strict", "lenient"] }),
+        Kind::OneOf(values) => json!({ "enum": values }),
         Kind::Bool => json!({ "type": "boolean" }),
         Kind::File => json!({ "$ref": "#/$defs/fileName" }),
         Kind::TokenFiles => json!({

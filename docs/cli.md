@@ -31,6 +31,7 @@ Commands:
   html            Generate a static HTML page with CSS and no script from a markup document
   react           Generate a React component (JSX or TSX) from a markup document
   solid           Generate a SolidJS component (JSX or TSX) from a markup document
+  css-tokens      Generate `weft-tokens.css`, the design tokens React and SolidJS components read as CSS custom properties
   import-html     Read an HTML page back into markup; what Weft cannot hold is listed on stderr as losses
   import-react    Read a React component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
   import-solid    Read a SolidJS component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
@@ -175,7 +176,7 @@ The commands use the project's catalog and tokens, or `--catalog` and `--tokens`
 
 With `--data <file>` (or the project's `export.swiftui.data`), the model also gets an initializer and a `sample` built from that JSON, and `#Preview` shows it. The importer ignores both.
 
-## `weft html`, `weft react`, `weft solid` and their importers
+## `weft html`, `weft react`, `weft solid`, `weft css-tokens` and the importers
 
 `weft html` prints a static page: semantic HTML, the tokens as CSS custom properties, and no script. Bindings, events and repetition are kept as inert `data-` attributes and `<template>` elements. With `--data <file>` (or the project's `export.html.data`), the page shows that data instead: bound values filled in, one copy per list item, empty slots shown. Such a page is a picture of the screen, not a template. `weft react` and `weft solid` print one self-contained component, JSX by default or TSX with `--typescript`. With `--source`, the output keeps the screen in a leading comment, and the matching importer gives it back unchanged:
 
@@ -201,6 +202,8 @@ weft-tour/Hello.jsx:/screen#screen-hello/button#button-toggle loss actions: onCl
 ```
 
 The source is parsed, never run. `import-react` and `import-solid` read `.tsx` (and `.ts`) files as TypeScript. `--source`/`--no-source`, `--typescript`/`--javascript` and `--out-dir` override the project's `export.<target>` and `import.<target>` settings ([Projects](projects.md)); `--catalog` and `--tokens` replace the project's catalog and tokens. The parsers and the mapping are described in `crates/weft-web/README.md` and SPEC §9.
+
+A component reads its tokens as `var(--weft-…)`. `weft css-tokens` writes them once for the app as `weft-tokens.css`, from the project found in the working directory (or `--project`, `--tokens`). It prints unless `--out-dir` or the project's `export.css.outDir` names a folder. When the project's tokens are a resolver with light and dark themes ([Projects](projects.md#light-and-dark-a-resolver)), the stylesheet and the page from `weft html` follow the system appearance: the light values on `:root`, the ones that differ in the dark under `@media (prefers-color-scheme: dark)`. A typography token is the `font` shorthand plus `--weft-<path>-letter-spacing`.
 
 ## What `weft` does not do
 

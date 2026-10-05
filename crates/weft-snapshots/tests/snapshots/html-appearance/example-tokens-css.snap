@@ -1,0 +1,19 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-tokens-css with light and dark tokens
+---
+:root {
+  color-scheme: light dark;
+  --weft-color-brand: #d97706;
+  --weft-color-star: #d97706;
+  --weft-space-sm: 8px;
+  --weft-space-md: 16px;
+  --weft-font-body: 400 16px/1.5 system-ui;
+  --weft-font-body-letter-spacing: 0.2px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --weft-color-brand: #fbbf24;
+    --weft-color-star: #fbbf24;
+  }
+}
