@@ -1,0 +1,41 @@
+FRAME "screen#login" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#login)
+  | weft.source = {"kind":"screen","id":"login","props":{"label":"Sign in"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  FRAME "form#form" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+    | weft.origin = layer(form#form)
+    | weft.source = {"kind":"form","id":"form","props":{"state":"idle"},"on":{"submit":"auth.submit"}}
+    | weft.style = [[],[],0,[0,0,0,0],8]
+    INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+      | weft.origin = layer(heading#title)
+      | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Sign in"],"shown":{"text":"Sign in"}}
+      TEXT "text" chars="Sign in" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "stack#fields" layoutMode="VERTICAL" itemSpacing=16 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
+      | weft.origin = layer(stack#fields)
+      | weft.source = {"kind":"stack","id":"fields","props":{"gap":{"token":"space.md"}}}
+      | weft.style = [[],[],0,[0,0,0,0],null]
+      INSTANCE "field#email" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=email, state=(unset)>"
+        | weft.origin = layer(field#email)
+        | weft.source = {"kind":"field","id":"email","props":{"label":"Email","required":true,"type":"email","value":{"bind":"$.email"}},"shown":{"text":"","label":"Email"}}
+        TEXT "label" chars="Email"
+        FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+      INSTANCE "field#password" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=password, state=(unset)>"
+        | weft.origin = layer(field#password)
+        | weft.source = {"kind":"field","id":"password","props":{"label":"Password","required":true,"type":"password","value":{"bind":"$.password"}},"shown":{"text":"","label":"Password"}}
+        TEXT "label" chars="Password"
+        FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+    INSTANCE "button#submit" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+      | weft.origin = layer(button#submit)
+      | weft.source = {"kind":"button","id":"submit","props":{"disabled":{"bind":"$.email","not":true},"submit":true,"variant":"primary"},"children":["Sign in"],"shown":{"text":"Sign in"}}
+      TEXT "text" chars="Sign in" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+    FRAME "slot:footer" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.slot = footer
+      INSTANCE "link#reset" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+        | weft.origin = layer(link#reset)
+        | weft.source = {"kind":"link","id":"reset","on":{"press":"nav.reset"},"children":["Forgot password?"],"shown":{"text":"Forgot password?"}}
+        TEXT "text" chars="Forgot password?" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
+      INSTANCE "link#signup" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+        | weft.origin = layer(link#signup)
+        | weft.source = {"kind":"link","id":"signup","on":{"press":"nav.signup"},"children":["Create an account"],"shown":{"text":"Create an account"}}
+        TEXT "text" chars="Create an account" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]

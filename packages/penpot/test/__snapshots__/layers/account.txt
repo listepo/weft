@@ -1,0 +1,130 @@
+board "screen#account" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#account>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#account)
+  | weft/weft.source = {"kind":"screen","id":"account","props":{"label":"Edit account"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "heading#title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#title>","dir":"column"}
+    | weft/weft.kind = heading
+    | weft/weft.origin = shape(heading#title)
+    | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Edit account"],"shown":{"text":"Edit account"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Edit account"
+  board "form#account-form" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<form#account-form>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(form#account-form)
+    | weft/weft.source = {"kind":"form","id":"account-form","props":{"label":"Account","state":"invalid"},"on":{"submit":"account.save"}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],8]
+    board "field#name" inCopy=true head=true componentOf="<type=text, state=valid>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#name>","dir":"column"}
+      | weft/weft.kind = field
+      | weft/weft.origin = shape(field#name)
+      | weft/weft.source = {"kind":"field","id":"name","props":{"label":"Full name","placeholder":"Ada Lovelace","state":"valid","type":"text","value":{"bind":"$.account.name"}},"on":{"change":"account.edit"},"shown":{"text":"","label":"Full name"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Full name"
+      board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+    board "field#age" inCopy=true head=true componentOf="<type=number, state=invalid>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#age>","dir":"column"}
+      | weft/weft.kind = field
+      | weft/weft.origin = shape(field#age)
+      | weft/weft.source = {"kind":"field","id":"age","props":{"error":{"bind":"$.errors.age"},"label":"Age","state":"invalid","type":"number","value":{"bind":"$.account.age"}},"shown":{"text":"","label":"Age"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Age"
+      board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+    board "field#handle" inCopy=true head=true componentOf="<type=text, state=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#handle>","dir":"column"}
+      | weft/weft.kind = field
+      | weft/weft.origin = shape(field#handle)
+      | weft/weft.source = {"kind":"field","id":"handle","props":{"disabled":{"bind":"$.account.locked"},"label":"Handle","placeholder":"{handle}","value":{"bind":"$.account.handle"}},"shown":{"text":"","label":"Handle"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Handle"
+      board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+    board "field#bio" inCopy=true head=true componentOf="<type=multiline, state=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#bio>","dir":"column"}
+      | weft/weft.kind = field
+      | weft/weft.origin = shape(field#bio)
+      | weft/weft.source = {"kind":"field","id":"bio","props":{"label":"Bio","type":"multiline","value":{"bind":"$.account.bio"}},"shown":{"text":"","label":"Bio"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Bio"
+      board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+    board "field#email" inCopy=true head=true componentOf="<type=email, state=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#email>","dir":"column"}
+      | weft/weft.kind = field
+      | weft/weft.origin = shape(field#email)
+      | weft/weft.source = {"kind":"field","id":"email","props":{"disabled":true,"label":"Email","type":"email","value":{"bind":"$.account.email"}},"shown":{"text":"","label":"Email"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Email"
+      board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+    board "checkbox#newsletter" inCopy=true head=true componentOf="<checkbox>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<checkbox#newsletter>","dir":"row"}
+      | weft/weft.kind = checkbox
+      | weft/weft.origin = shape(checkbox#newsletter)
+      | weft/weft.source = {"kind":"checkbox","id":"newsletter","props":{"checked":{"bind":"$.account.newsletter"},"label":"Send me the newsletter"},"on":{"change":"account.edit"},"shown":{"text":"","label":"Send me the newsletter"}}
+      rectangle "mark" width=16 height=16 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
+      text "label" inCopy=true growType="auto-width" text="Send me the newsletter"
+    board "checkbox#terms" inCopy=true head=true componentOf="<checkbox>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<checkbox#terms>","dir":"row"}
+      | weft/weft.kind = checkbox
+      | weft/weft.origin = shape(checkbox#terms)
+      | weft/weft.source = {"kind":"checkbox","id":"terms","props":{"checked":true,"disabled":true,"label":"Terms accepted"},"shown":{"text":"","label":"Terms accepted"}}
+      rectangle "mark" width=16 height=16 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
+      text "label" inCopy=true growType="auto-width" text="Terms accepted"
+    board "switch#public" inCopy=true head=true componentOf="<switch>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<switch#public>","dir":"row"}
+      | weft/weft.kind = switch
+      | weft/weft.origin = shape(switch#public)
+      | weft/weft.source = {"kind":"switch","id":"public","props":{"checked":{"bind":"$.account.public"},"disabled":{"bind":"$.account.verified","not":true},"label":"Public profile"},"on":{"change":"account.edit"},"shown":{"text":"","label":"Public profile"}}
+      rectangle "mark" width=32 height=16 borderRadius=999 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
+      text "label" inCopy=true growType="auto-width" text="Public profile"
+    board "radio-group#plan" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<radio-group#plan>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(radio-group#plan)
+      | weft/weft.source = {"kind":"radio-group","id":"plan","props":{"label":"Plan","value":{"bind":"$.account.plan"}},"on":{"change":"account.edit"},"shown":{"label":"Plan"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]
+      text "label" fontWeight="700" growType="auto-width" text="Plan"
+        | weft/weft.label = 1
+      board "radio#plan-free" inCopy=true head=true componentOf="<radio>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<radio#plan-free>","dir":"row"}
+        | weft/weft.kind = radio
+        | weft/weft.origin = shape(radio#plan-free)
+        | weft/weft.source = {"kind":"radio","id":"plan-free","props":{"value":"free"},"children":["Free"],"shown":{"text":"Free"}}
+        rectangle "mark" width=16 height=16 borderRadius=999 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
+        text "text" inCopy=true growType="auto-width" text="Free"
+      board "radio#plan-pro" inCopy=true head=true componentOf="<radio>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<radio#plan-pro>","dir":"row"}
+        | weft/weft.kind = radio
+        | weft/weft.origin = shape(radio#plan-pro)
+        | weft/weft.source = {"kind":"radio","id":"plan-pro","props":{"text":{"bind":"$.labels.pro"},"value":"pro"},"shown":{"text":"{$.labels.pro}"}}
+        rectangle "mark" width=16 height=16 borderRadius=999 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
+        text "text" inCopy=true growType="auto-width" text="{$.labels.pro}"
+      board "radio#plan-team" inCopy=true head=true componentOf="<radio>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<radio#plan-team>","dir":"row"}
+        | weft/weft.kind = radio
+        | weft/weft.origin = shape(radio#plan-team)
+        | weft/weft.source = {"kind":"radio","id":"plan-team","props":{"disabled":true,"value":"team"},"children":["Team"],"shown":{"text":"Team"}}
+        rectangle "mark" width=16 height=16 borderRadius=999 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
+        text "text" inCopy=true growType="auto-width" text="Team"
+    board "select#language" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<select#language>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(select#language)
+      | weft/weft.source = {"kind":"select","id":"language","props":{"disabled":{"bind":"$.account.locked"},"label":"Language","value":{"bind":"$.account.language"}},"on":{"change":"account.edit"},"shown":{"label":"Language"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]
+      text "label" fontWeight="700" growType="auto-width" text="Language"
+        | weft/weft.label = 1
+      board "option#language-en" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<option>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<option#language-en>","dir":"column"}
+        | weft/weft.kind = option
+        | weft/weft.origin = shape(option#language-en)
+        | weft/weft.source = {"kind":"option","id":"language-en","props":{"value":"en"},"children":["English"],"shown":{"text":"English"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="English"
+      board "option#language-fr" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<option>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<option#language-fr>","dir":"column"}
+        | weft/weft.kind = option
+        | weft/weft.origin = shape(option#language-fr)
+        | weft/weft.source = {"kind":"option","id":"language-fr","props":{"text":{"bind":"$.labels.french"},"value":"fr"},"shown":{"text":"{$.labels.french}"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.labels.french}"
+    board "text#internal" hidden=true inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#internal>","dir":"column"}
+      | weft/weft.kind = text
+      | weft/weft.origin = shape(text#internal)
+      | weft/weft.source = {"kind":"text","id":"internal","props":{"hidden":true},"children":["Internal note: never shown."],"shown":{"text":"Internal note: never shown."}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Internal note: never shown."
+    board "alert#saved" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<alert#saved>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(alert#saved)
+      | weft/weft.source = {"kind":"alert","id":"saved","props":{"hidden":{"bind":"$.saved","not":true},"tone":"success"}}
+      | weft/weft.style = [[],[],0,[12,12,12,12],8]
+      text "text" growType="auto-width" text="Your changes were saved."
+        | weft/weft.text = 1
+    board "slot:footer" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:footer>","dir":"column","wrap":"nowrap"}
+      | weft/weft.slot = footer
+      board "button#save" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.primary"} inCopy=true head=true componentOf="<variant=primary, state=busy>" fillList=[{"fillColor":"#2663eb","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#save>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#save)
+        | weft/weft.source = {"kind":"button","id":"save","props":{"state":"busy","submit":true,"variant":"primary"},"children":["Save"],"shown":{"text":"Save"}}
+        text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Save"
+      board "button#cancel" borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.white","strokeColor":"color.ink"} inCopy=true head=true componentOf="<variant=secondary, state=idle>" fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#cancel>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#cancel)
+        | weft/weft.source = {"kind":"button","id":"cancel","props":{"state":"idle","text":{"bind":"$.labels.cancel"},"variant":"secondary"},"on":{"press":"account.cancel"},"shown":{"text":"{$.labels.cancel}"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.labels.cancel}"
+      board "link#help" inCopy=true head=true componentOf="<link>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<link#help>","dir":"column"}
+        | weft/weft.kind = link
+        | weft/weft.origin = shape(link#help)
+        | weft/weft.source = {"kind":"link","id":"help","props":{"href":"https://example.com/help","text":{"bind":"$.labels.help"}},"shown":{"text":"{$.labels.help}"}}
+        text "text" tokens={"fill":"color.action.primary"} inCopy=true fillList=[{"fillColor":"#2663eb","fillOpacity":1}] growType="auto-width" text="{$.labels.help}"

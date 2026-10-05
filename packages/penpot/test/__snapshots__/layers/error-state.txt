@@ -1,0 +1,33 @@
+board "screen#load-error" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#load-error>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#load-error)
+  | weft/weft.source = {"kind":"screen","id":"load-error","props":{"label":"Load error","state":"error"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "alert#alert" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<alert#alert>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(alert#alert)
+    | weft/weft.source = {"kind":"alert","id":"alert","props":{"tone":"danger"}}
+    | weft/weft.style = [[],[],0,[12,12,12,12],8]
+    board "heading#error-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#error-title>","dir":"column"}
+      | weft/weft.kind = heading
+      | weft/weft.origin = shape(heading#error-title)
+      | weft/weft.source = {"kind":"heading","id":"error-title","props":{"level":2},"children":["Could not load your data"],"shown":{"text":"Could not load your data"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Could not load your data"
+    board "text#error-message" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#error-message>","dir":"column"}
+      | weft/weft.kind = text
+      | weft/weft.origin = shape(text#error-message)
+      | weft/weft.source = {"kind":"text","id":"error-message","props":{"text":{"bind":"$.error.message"}},"shown":{"text":"{$.error.message}"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.error.message}"
+  board "stack#actions" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#actions>","dir":"row","wrap":"nowrap"}
+    | weft/weft.origin = shape(stack#actions)
+    | weft/weft.source = {"kind":"stack","id":"actions","props":{"direction":"row","gap":{"token":"space.sm"}}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    board "button#retry" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.primary"} inCopy=true head=true componentOf="<variant=primary, state=(unset)>" fillList=[{"fillColor":"#2663eb","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#retry>","dir":"row"}
+      | weft/weft.kind = button
+      | weft/weft.origin = shape(button#retry)
+      | weft/weft.source = {"kind":"button","id":"retry","props":{"variant":"primary"},"on":{"press":"load.retry"},"children":["Retry"],"shown":{"text":"Retry"}}
+      text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Retry"
+    board "link#support" inCopy=true head=true componentOf="<link>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<link#support>","dir":"column"}
+      | weft/weft.kind = link
+      | weft/weft.origin = shape(link#support)
+      | weft/weft.source = {"kind":"link","id":"support","on":{"press":"nav.support"},"children":["Contact support"],"shown":{"text":"Contact support"}}
+      text "text" tokens={"fill":"color.action.primary"} inCopy=true fillList=[{"fillColor":"#2663eb","fillOpacity":1}] growType="auto-width" text="Contact support"

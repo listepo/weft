@@ -1,0 +1,34 @@
+board "screen#account-menu" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#account-menu>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#account-menu)
+  | weft/weft.source = {"kind":"screen","id":"account-menu","props":{"label":"Account menu"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "text#signed-in" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#signed-in>","dir":"column"}
+    | weft/weft.kind = text
+    | weft/weft.origin = shape(text#signed-in)
+    | weft/weft.source = {"kind":"text","id":"signed-in","props":{"text":{"bind":"$.user.email"}},"shown":{"text":"{$.user.email}"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.user.email}"
+  board "menu#menu" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<menu#menu>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(menu#menu)
+    | weft/weft.source = {"kind":"menu","id":"menu","props":{"label":"Account"}}
+    | weft/weft.style = [[],[],0,[8,8,8,8],8]
+    board "menu-item#item-profile" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<menu-item>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<menu-item#item-profile>","dir":"column"}
+      | weft/weft.kind = menu-item
+      | weft/weft.origin = shape(menu-item#item-profile)
+      | weft/weft.source = {"kind":"menu-item","id":"item-profile","on":{"press":"nav.profile"},"children":["Profile"],"shown":{"text":"Profile"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Profile"
+    board "menu-item#item-settings" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<menu-item>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<menu-item#item-settings>","dir":"column"}
+      | weft/weft.kind = menu-item
+      | weft/weft.origin = shape(menu-item#item-settings)
+      | weft/weft.source = {"kind":"menu-item","id":"item-settings","on":{"press":"nav.settings"},"children":["Settings"],"shown":{"text":"Settings"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Settings"
+    board "menu-item#item-billing" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<menu-item>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<menu-item#item-billing>","dir":"column"}
+      | weft/weft.kind = menu-item
+      | weft/weft.origin = shape(menu-item#item-billing)
+      | weft/weft.source = {"kind":"menu-item","id":"item-billing","props":{"disabled":{"bind":"$.isOwner","not":true}},"on":{"press":"nav.billing"},"children":["Billing"],"shown":{"text":"Billing"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Billing"
+    board "menu-item#item-signout" tokens={"paddingLeft":"space.sm","paddingRight":"space.sm"} inCopy=true head=true componentOf="<menu-item>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":8,"bottomPadding":0,"leftPadding":8},"owner":"<menu-item#item-signout>","dir":"column"}
+      | weft/weft.kind = menu-item
+      | weft/weft.origin = shape(menu-item#item-signout)
+      | weft/weft.source = {"kind":"menu-item","id":"item-signout","on":{"press":"auth.signout"},"children":["Sign out"],"shown":{"text":"Sign out"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Sign out"

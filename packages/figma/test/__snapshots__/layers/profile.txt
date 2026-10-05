@@ -1,0 +1,37 @@
+FRAME "screen#profile" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#profile)
+  | weft.source = {"kind":"screen","id":"profile","props":{"label":"Profile"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "image#avatar" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<image>"
+    | weft.origin = layer(image#avatar)
+    | weft.source = {"kind":"image","id":"avatar","props":{"label":"Profile photo","src":{"bind":"$.user.avatar"}},"shown":{"text":""}}
+    RECTANGLE "image" width=160 fills=[{"type":"SOLID","color":"#e6e8eb"}]
+  INSTANCE "heading#name" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#name)
+    | weft.source = {"kind":"heading","id":"name","props":{"level":1,"text":{"bind":"$.user.name"}},"shown":{"text":"{$.user.name}"}}
+    TEXT "text" chars="{$.user.name}" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  INSTANCE "text#bio" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+    | weft.origin = layer(text#bio)
+    | weft.source = {"kind":"text","id":"bio","props":{"text":{"bind":"$.user.bio"}},"shown":{"text":"{$.user.bio}"}}
+    TEXT "text" chars="{$.user.bio}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  INSTANCE "heading#links-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#links-title)
+    | weft.source = {"kind":"heading","id":"links-title","props":{"level":2},"children":["Links"],"shown":{"text":"Links"}}
+    TEXT "text" chars="Links" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "stack#links" layoutMode="HORIZONTAL" itemSpacing=16 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
+    | weft.origin = layer(stack#links)
+    | weft.source = {"kind":"stack","id":"links","props":{"direction":"row","gap":{"token":"space.md"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "link#website" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+      | weft.origin = layer(link#website)
+      | weft.source = {"kind":"link","id":"website","props":{"href":{"bind":"$.user.website"}},"children":["Website"],"shown":{"text":"Website"}}
+      TEXT "text" chars="Website" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
+    INSTANCE "link#github" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+      | weft.origin = layer(link#github)
+      | weft.source = {"kind":"link","id":"github","props":{"href":{"bind":"$.user.github"}},"children":["GitHub"],"shown":{"text":"GitHub"}}
+      TEXT "text" chars="GitHub" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
+  INSTANCE "button#edit" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=secondary, state=(unset)>"
+    | weft.origin = layer(button#edit)
+    | weft.source = {"kind":"button","id":"edit","on":{"press":"profile.edit"},"children":["Edit profile"],"shown":{"text":"Edit profile"}}
+    TEXT "text" chars="Edit profile" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

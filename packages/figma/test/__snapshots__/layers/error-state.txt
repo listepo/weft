@@ -1,0 +1,29 @@
+FRAME "screen#load-error" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#load-error)
+  | weft.source = {"kind":"screen","id":"load-error","props":{"label":"Load error","state":"error"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  FRAME "alert#alert" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+    | weft.origin = layer(alert#alert)
+    | weft.source = {"kind":"alert","id":"alert","props":{"tone":"danger"}}
+    | weft.style = [[],[],0,[12,12,12,12],8]
+    INSTANCE "heading#error-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+      | weft.origin = layer(heading#error-title)
+      | weft.source = {"kind":"heading","id":"error-title","props":{"level":2},"children":["Could not load your data"],"shown":{"text":"Could not load your data"}}
+      TEXT "text" chars="Could not load your data" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "text#error-message" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+      | weft.origin = layer(text#error-message)
+      | weft.source = {"kind":"text","id":"error-message","props":{"text":{"bind":"$.error.message"}},"shown":{"text":"{$.error.message}"}}
+      TEXT "text" chars="{$.error.message}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "stack#actions" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+    | weft.origin = layer(stack#actions)
+    | weft.source = {"kind":"stack","id":"actions","props":{"direction":"row","gap":{"token":"space.sm"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "button#retry" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+      | weft.origin = layer(button#retry)
+      | weft.source = {"kind":"button","id":"retry","props":{"variant":"primary"},"on":{"press":"load.retry"},"children":["Retry"],"shown":{"text":"Retry"}}
+      TEXT "text" chars="Retry" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+    INSTANCE "link#support" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+      | weft.origin = layer(link#support)
+      | weft.source = {"kind":"link","id":"support","on":{"press":"nav.support"},"children":["Contact support"],"shown":{"text":"Contact support"}}
+      TEXT "text" chars="Contact support" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]

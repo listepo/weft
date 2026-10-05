@@ -1,0 +1,109 @@
+FRAME "screen#dashboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#dashboard)
+  | weft.source = {"kind":"screen","id":"dashboard","props":{"label":"Team dashboard","state":"ready"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  FRAME "stack#header" layoutMode="HORIZONTAL" layoutWrap="WRAP" itemSpacing=32 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xl)"}
+    | weft.origin = layer(stack#header)
+    | weft.source = {"kind":"stack","id":"header","props":{"align":"center","direction":"row","gap":{"token":"space.xl"},"wrap":true}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+      | weft.origin = layer(heading#title)
+      | weft.source = {"kind":"heading","id":"title","props":{"level":1,"text":{"bind":"$.team.name"}},"shown":{"text":"{$.team.name}"}}
+      TEXT "text" chars="{$.team.name}" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "text#updated" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=muted>"
+      | weft.origin = layer(text#updated)
+      | weft.source = {"kind":"text","id":"updated","props":{"text":{"bind":"$.updatedAt"},"tone":"muted"},"shown":{"text":"{$.updatedAt}"}}
+      TEXT "text" chars="{$.updatedAt}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "grid#stats" layoutMode="GRID" itemSpacing=24 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" gridColumnCount=3 gridRowGap=24 gridColumnGap=24 bound={"gridRowGap":"var(space/lg)","gridColumnGap":"var(space/lg)"}
+    | weft.origin = layer(grid#stats)
+    | weft.source = {"kind":"grid","id":"stats","props":{"columns":3,"gap":{"token":"space.lg"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    FRAME "section#velocity" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(section#velocity)
+      | weft.source = {"kind":"section","id":"velocity","props":{"label":"Velocity"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      INSTANCE "text#velocity-value" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=success>"
+        | weft.origin = layer(text#velocity-value)
+        | weft.source = {"kind":"text","id":"velocity-value","props":{"text":{"bind":"$.stats.velocity"},"tone":"success"},"shown":{"text":"{$.stats.velocity}"}}
+        TEXT "text" chars="{$.stats.velocity}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      FRAME "slot:header" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.slot = header
+        INSTANCE "heading#velocity-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#velocity-title)
+          | weft.source = {"kind":"heading","id":"velocity-title","props":{"level":2},"children":["Velocity"],"shown":{"text":"Velocity"}}
+          TEXT "text" chars="Velocity" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "section#bugs" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(section#bugs)
+      | weft.source = {"kind":"section","id":"bugs","props":{"label":"Open bugs"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      INSTANCE "text#bugs-value" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=warning>"
+        | weft.origin = layer(text#bugs-value)
+        | weft.source = {"kind":"text","id":"bugs-value","props":{"text":{"bind":"$.stats.bugs"},"tone":"warning"},"shown":{"text":"{$.stats.bugs}"}}
+        TEXT "text" chars="{$.stats.bugs}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      FRAME "slot:header" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.slot = header
+        INSTANCE "heading#bugs-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#bugs-title)
+          | weft.source = {"kind":"heading","id":"bugs-title","props":{"level":2},"children":["Open bugs"],"shown":{"text":"Open bugs"}}
+          TEXT "text" chars="Open bugs" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "section#incidents" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(section#incidents)
+      | weft.source = {"kind":"section","id":"incidents","props":{"label":"Incidents"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      INSTANCE "text#incidents-value" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=danger>"
+        | weft.origin = layer(text#incidents-value)
+        | weft.source = {"kind":"text","id":"incidents-value","props":{"text":{"bind":"$.stats.incidents"},"tone":"danger"},"shown":{"text":"{$.stats.incidents}"}}
+        TEXT "text" chars="{$.stats.incidents}" size=14 fills=[{"type":"SOLID","color":"#db2626","boundVariables":{"color":"var(color/action/danger)"}}]
+      FRAME "slot:header" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.slot = header
+        INSTANCE "heading#incidents-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#incidents-title)
+          | weft.source = {"kind":"heading","id":"incidents-title","props":{"level":2},"children":["Incidents"],"shown":{"text":"Incidents"}}
+          TEXT "text" chars="Incidents" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "stack#notices" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+    | weft.origin = layer(stack#notices)
+    | weft.source = {"kind":"stack","id":"notices","props":{"align":"stretch","direction":"column","gap":{"token":"space.sm"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    FRAME "alert#release" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(alert#release)
+      | weft.source = {"kind":"alert","id":"release","props":{"tone":"info"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      TEXT "text" chars="Release 2.4 ships on Friday." size=14
+        | weft.text = 1
+    FRAME "alert#backup" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(alert#backup)
+      | weft.source = {"kind":"alert","id":"backup","props":{"text":{"bind":"$.backupStatus"},"tone":"success"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+    FRAME "alert#quota" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(alert#quota)
+      | weft.source = {"kind":"alert","id":"quota","props":{"tone":"warning"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      INSTANCE "text#quota-text" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#quota-text)
+        | weft.source = {"kind":"text","id":"quota-text","children":["Storage is 90% full."],"shown":{"text":"Storage is 90% full."}}
+        TEXT "text" chars="Storage is 90% full." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "link#quota-link" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+        | weft.origin = layer(link#quota-link)
+        | weft.source = {"kind":"link","id":"quota-link","props":{"href":"https://example.com/storage"},"children":["Manage storage"],"shown":{"text":"Manage storage"}}
+        TEXT "text" chars="Manage storage" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
+  FRAME "stack#footer" layoutMode="VERTICAL" itemSpacing=4 counterAxisAlignItems="MAX" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
+    | weft.origin = layer(stack#footer)
+    | weft.source = {"kind":"stack","id":"footer","props":{"align":"end","gap":{"token":"space.xs"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "text#owner" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=default>"
+      | weft.origin = layer(text#owner)
+      | weft.source = {"kind":"text","id":"owner","props":{"tone":"default"},"children":["Owned by the platform team"],"shown":{"text":"Owned by the platform team"}}
+      TEXT "text" chars="Owned by the platform team" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "stack#footer-links" layoutMode="HORIZONTAL" itemSpacing=16 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
+      | weft.origin = layer(stack#footer-links)
+      | weft.source = {"kind":"stack","id":"footer-links","props":{"align":"start","direction":"row","gap":{"token":"space.md"}}}
+      | weft.style = [[],[],0,[0,0,0,0],null]
+      INSTANCE "link#docs" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+        | weft.origin = layer(link#docs)
+        | weft.source = {"kind":"link","id":"docs","props":{"href":"/docs"},"children":["Docs"],"shown":{"text":"Docs"}}
+        TEXT "text" chars="Docs" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
+      INSTANCE "link#status" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+        | weft.origin = layer(link#status)
+        | weft.source = {"kind":"link","id":"status","props":{"href":{"bind":"$.statusUrl"}},"children":["Status page"],"shown":{"text":"Status page"}}
+        TEXT "text" chars="Status page" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]

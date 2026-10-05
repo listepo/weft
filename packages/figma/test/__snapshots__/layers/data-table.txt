@@ -1,0 +1,69 @@
+FRAME "screen#users" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#users)
+  | weft.source = {"kind":"screen","id":"users","props":{"label":"Users"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Users"],"shown":{"text":"Users"}}
+    TEXT "text" chars="Users" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "table#table" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+    | weft.origin = layer(table#table)
+    | weft.source = {"kind":"table","id":"table","props":{"label":"Users"}}
+    | weft.style = [[],[],0,[8,8,8,8],8]
+    INSTANCE "column#col-name" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<sort=ascending>"
+      | weft.origin = layer(column#col-name)
+      | weft.source = {"kind":"column","id":"col-name","props":{"sort":"ascending"},"on":{"press":"users.sort"},"children":["Name"],"shown":{"text":"Name"}}
+      TEXT "text" chars="Name" font={"family":"Inter","style":"Bold"} size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "column#col-email" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<sort=none>"
+      | weft.origin = layer(column#col-email)
+      | weft.source = {"kind":"column","id":"col-email","props":{"sort":"none"},"on":{"press":"users.sort"},"children":["Email"],"shown":{"text":"Email"}}
+      TEXT "text" chars="Email" font={"family":"Inter","style":"Bold"} size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "column#col-role" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<sort=none>"
+      | weft.origin = layer(column#col-role)
+      | weft.source = {"kind":"column","id":"col-role","props":{"sort":"none"},"on":{"press":"users.sort"},"children":["Role"],"shown":{"text":"Role"}}
+      TEXT "text" chars="Role" font={"family":"Inter","style":"Bold"} size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "column#col-actions" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<sort=(unset)>"
+      | weft.origin = layer(column#col-actions)
+      | weft.source = {"kind":"column","id":"col-actions","children":["Actions"],"shown":{"text":"Actions"}}
+      TEXT "text" chars="Actions" font={"family":"Inter","style":"Bold"} size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "each#rows" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+      | weft.origin = layer(each#rows)
+      | weft.source = {"kind":"each","id":"rows","props":{"as":"user","in":{"bind":"$.users"}}}
+      | weft.style = [[],[],0,[0,0,0,0],0]
+      FRAME "row#row" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+        | weft.origin = layer(row#row)
+        | weft.source = {"kind":"row","id":"row"}
+        | weft.style = [[],[],0,[8,8,8,8],8]
+        FRAME "cell#cell-name" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+          | weft.origin = layer(cell#cell-name)
+          | weft.source = {"kind":"cell","id":"cell-name"}
+          | weft.style = [[],[],0,[8,8,8,8],8]
+          INSTANCE "text#user-name" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+            | weft.origin = layer(text#user-name)
+            | weft.source = {"kind":"text","id":"user-name","props":{"text":{"bind":"$user.name"}},"shown":{"text":"{$user.name}"}}
+            TEXT "text" chars="{$user.name}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+        FRAME "cell#cell-email" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+          | weft.origin = layer(cell#cell-email)
+          | weft.source = {"kind":"cell","id":"cell-email"}
+          | weft.style = [[],[],0,[8,8,8,8],8]
+          INSTANCE "text#user-email" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+            | weft.origin = layer(text#user-email)
+            | weft.source = {"kind":"text","id":"user-email","props":{"text":{"bind":"$user.email"}},"shown":{"text":"{$user.email}"}}
+            TEXT "text" chars="{$user.email}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+        FRAME "cell#cell-role" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+          | weft.origin = layer(cell#cell-role)
+          | weft.source = {"kind":"cell","id":"cell-role"}
+          | weft.style = [[],[],0,[8,8,8,8],8]
+          INSTANCE "text#user-role" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+            | weft.origin = layer(text#user-role)
+            | weft.source = {"kind":"text","id":"user-role","props":{"text":{"bind":"$user.role"}},"shown":{"text":"{$user.role}"}}
+            TEXT "text" chars="{$user.role}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+        FRAME "cell#cell-actions" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+          | weft.origin = layer(cell#cell-actions)
+          | weft.source = {"kind":"cell","id":"cell-actions"}
+          | weft.style = [[],[],0,[8,8,8,8],8]
+          INSTANCE "button#delete" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#db2626","boundVariables":{"color":"var(color/action/danger)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=danger, state=(unset)>"
+            | weft.origin = layer(button#delete)
+            | weft.source = {"kind":"button","id":"delete","props":{"variant":"danger"},"on":{"press":"users.delete"},"children":["Delete"],"shown":{"text":"Delete"}}
+            TEXT "text" chars="Delete" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
