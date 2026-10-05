@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T44 | in progress | P1 | 4 | 5% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -151,24 +150,3 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
-
-### T44. Shared SwiftUI tokens and custom components
-
-The SwiftUI generator (T34) gives every screen its own theme struct holding only the tokens that screen references, accepts only px and rem dimension tokens, and refuses screens with kinds outside the core catalog. In an app built with the Xcode build tool plugin (T42) that means duplicated token code and failed builds for screens with colour tokens or the project's own components.
-
-- **One tokens file per project:** the build tool plugin (and `weft swiftui` with a project) generates one `WeftTokens.swift` from the project's tokens (`weft.json`): colours as `Color` (with light and dark values when the token set has them), dimensions, typography and the other DTCG types the catalog supports. Every generated screen refers to it instead of carrying its own theme.
-- **Custom components:** a kind from the project's catalog extension maps to a SwiftUI view the developer writes once (for example `rating` → `RatingView`, with its props as typed arguments and its slots as view builders); the generator calls it, and the build reports a missing view clearly. The importer reads such a call back as the kind.
-- New options get `weft.json` keys under `export.swiftui`; the round trip of generated code stays byte-identical, and the editor extension keeps its core-catalog behaviour.
-
-Done when a sample app with two screens sharing tokens, a colour token and a custom component builds through the build tool plugin for iOS 17 and macOS 14, the shared file appears once, the T36 snapshots and screenshots are updated and reviewed, and the round trips stay green.
-
-Execution plan:
-
-1. **Spec first.** SPEC §9 "To SwiftUI" describes the shared tokens type and custom views; §10.6 gets `export.swiftui.sharedTokens` (boolean, default `true`: a screen in a project refers to `WeftTokens`; `false` keeps a per-screen theme). Weft token sets have no modes today (the DTCG resolver module is not supported), so every colour has one value; how to add a dark value is a question for the creator, not part of this change.
-2. **Tokens (`crates/weft-swiftui/src/theme.rs`).** One printer for both forms: `WeftTokens` with every token of the project (`generate_tokens`; tokens it cannot express are skipped and reported), or `<Screen>Theme` with the tokens one screen references (a screen without a project stays self-contained). `color` → `Color` (srgb, srgb-linear, display-p3 components, else `hex`), `dimension` → `CGFloat`, `number` → `Double`, `fontFamily` → `[String]`, `fontWeight` → `Font.Weight`, `duration` → `Double` seconds, `cubicBezier` → `UnitCurve`, `typography` → `Font`.
-3. **Custom components (`generate.rs`, `import/read.rs`).** A kind outside the core catalog calls `<Kind>View(...)`: props in catalog order as typed labelled arguments (`string`/`enum` → `String`, `number` → `Double` or `Int` when `integer`, `boolean` → `Bool`, `token` → the token's type, writable → `Binding`), events as `on<Event>` closures, content and every slot as trailing view builders (`content` first). The generated file names the views it needs in a comment at the call. The importer maps `<Kind>View` back through the catalog.
-4. **CLI.** `weft swiftui --shared-tokens/--no-shared-tokens`, and `weft swiftui-tokens [--tokens] [--project] [--out-dir]` writes `WeftTokens.swift`.
-5. **Xcode plugins.** The build tool plugin adds one `swiftui-tokens` command per target (inputs: weft.json and its files; output: `WeftTokens.swift`) and fails clearly when a target's screens use two projects with shared tokens; the command plugin's `export` also writes `WeftTokens.swift` next to the screens. The editor extension keeps `--no-project`.
-6. **Samples.** `PackageSample` and `XcodeSample` get a second screen (`review.weft`) with the `rating` kind and a colour token, `catalog.json` and a hand-written `RatingView.swift`; the plugin tests check the build for iOS 17 and macOS 14, that `WeftTokens.swift` appears once, and that a missing view is reported.
-7. **Tests and docs.** Round trip and typecheck in both token forms plus custom kinds; insta snapshots for the tokens file and the sample screens; a screenshot baseline for the sample screen in `packages/visual`; settings table and schema; the crate README, `docs/xcode-plugin.md`, `docs/cli.md`, `docs/projects.md`. Verify with the full check.
-
