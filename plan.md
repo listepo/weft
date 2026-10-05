@@ -12,6 +12,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T43 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T44 | todo | P1 | 4 | 0% | |
 
 ### T8. Evaluation
 
@@ -164,4 +165,14 @@ The T36 screenshots show that the static HTML generator (`weft html`) and the Sw
 - **SwiftUI:** the generated model can be filled from the screen's data (an initializer from values or from JSON), and with sample data the generated file gets a `#Preview` that uses it (an argument and a key under `export.swiftui`). The importer ignores what the generator adds for the data, so round trips stay byte-identical.
 
 Done when the T36 visual suite renders the static page and the SwiftUI screens with the corpus data, the new baselines are reviewed, the static page is compared with React where the comparison is now meaningful, and the snapshots and round trips stay green.
+
+### T44. Shared SwiftUI tokens and custom components
+
+The SwiftUI generator (T34) gives every screen its own theme struct holding only the tokens that screen references, accepts only px and rem dimension tokens, and refuses screens with kinds outside the core catalog. In an app built with the Xcode build tool plugin (T42) that means duplicated token code and failed builds for screens with colour tokens or the project's own components.
+
+- **One tokens file per project:** the build tool plugin (and `weft swiftui` with a project) generates one `WeftTokens.swift` from the project's tokens (`weft.json`): colours as `Color` (with light and dark values when the token set has them), dimensions, typography and the other DTCG types the catalog supports. Every generated screen refers to it instead of carrying its own theme.
+- **Custom components:** a kind from the project's catalog extension maps to a SwiftUI view the developer writes once (for example `rating` → `RatingView`, with its props as typed arguments and its slots as view builders); the generator calls it, and the build reports a missing view clearly. The importer reads such a call back as the kind.
+- New options get `weft.json` keys under `export.swiftui`; the round trip of generated code stays byte-identical, and the editor extension keeps its core-catalog behaviour.
+
+Done when a sample app with two screens sharing tokens, a colour token and a custom component builds through the build tool plugin for iOS 17 and macOS 14, the shared file appears once, the T36 snapshots and screenshots are updated and reviewed, and the round trips stay green.
 
