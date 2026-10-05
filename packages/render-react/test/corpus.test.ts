@@ -8,8 +8,8 @@ import { expectedTree, renderPage } from "../src/index.ts";
 
 const screens = corpusScreens();
 
-test("the corpus has its nineteen screens", () => {
-  assert.equal(screens.length, 19);
+test("the corpus has its twenty screens", () => {
+  assert.equal(screens.length, 20);
 });
 
 for (const { name, document, diagnostics, data } of screens) {

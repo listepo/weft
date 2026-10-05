@@ -4,8 +4,10 @@
 import type { Token } from "@weft/catalog";
 import type { Catalog, Document } from "@weft/core";
 import {
+  cloneElement,
   createElement as h,
   Fragment,
+  isValidElement,
   type CSSProperties,
   type KeyboardEvent,
   type ReactElement,
@@ -43,7 +45,7 @@ import {
   type InstChild,
 } from "./expand.ts";
 import { exposedRole, fallbackRole, TRANSPARENT } from "./roles.ts";
-import { isRecord, safeUrl, tokenCss } from "./values.ts";
+import { isRecord, safeUrl, tiltCss, tokenCss } from "./values.ts";
 
 export type ActionEvent = { id: string; action: string; item?: string };
 export type Action = (event: ActionEvent) => void;
@@ -184,7 +186,19 @@ function layoutStyle(n: Inst, ctx: Ctx): CSSProperties {
 
 // ---- Kinds ----
 
+// SPEC §2.2: the tilt is a `transform` on the element the node draws; a dialog, drawn into the
+// top layer, is the one exception.
 function renderNode(n: Inst, ctx: Ctx): ReactNode {
+  const out = renderKind(n, ctx);
+  const transform = tiltCss(n.props);
+  if (transform === undefined || n.kind === "dialog" || !isValidElement(out)) return out;
+  const { style } = out.props as { style?: CSSProperties };
+  return cloneElement(out as ReactElement<{ style?: CSSProperties }>, {
+    style: { ...style, transform },
+  });
+}
+
+function renderKind(n: Inst, ctx: Ctx): ReactNode {
   if (!n.def) return fallback(n, ctx);
   switch (n.kind) {
     case "screen":
