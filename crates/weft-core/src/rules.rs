@@ -179,6 +179,9 @@ static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 8]> = LazyLock::new(|| {
     ]
 });
 
+/// The universal attributes of a 3D tilt (SPEC §2.2), in the order the CSS transform lists them.
+pub const TILT_PROPS: [&str; 4] = ["perspective", "rotate-x", "rotate-y", "rotate-z"];
+
 pub fn universal_prop(name: &str) -> Option<&'static PropDef> {
     UNIVERSAL_PROPS
         .iter()

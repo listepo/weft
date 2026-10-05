@@ -27,6 +27,7 @@ use weft_core::{
 use weft_import::{js_number_from, js_trim, squash};
 
 use crate::js::{INHERITED, V, compare_utf16, is_integer, is_plain_segment, js_round, quote};
+use crate::tilt;
 pub use runtime::{Helper, RUNTIME, react_runtime};
 use tree::{
     Attr, AttrV, C, Code, J, Seg, Str, attr, attr_js, attr_s, el, expr, js, lit, s, str_js,
@@ -1211,6 +1212,36 @@ impl<'a> Gen<'a> {
     // that a document nested to the depth limit fits the stack of WebAssembly and of threads.
     #[inline(never)]
     fn render(&mut self, n: &Rc<N<'a>>, ctx: &Ctx<'a>) -> Option<C<'a>> {
+        let out = self.render_kind(n, ctx)?;
+        Some(Self::tilted(n, out))
+    }
+
+    /// SPEC §2.2: the tilt is a `transform` on the element the node draws (a dialog, drawn into
+    /// the top layer, is the one exception, as in the reference renderer). The props are literals,
+    /// so the value is written out.
+    fn tilted(n: &N<'a>, mut out: C<'a>) -> C<'a> {
+        if n.kind == "dialog" {
+            return out;
+        }
+        let transform = tilt::css(|name| n.raw(name).and_then(Json::as_f64));
+        if let (Some(transform), C::J(j)) = (transform, &mut out) {
+            let entry = format!("transform: {}", quote(&transform));
+            match j.attrs.iter_mut().find(|a| a.name == "style") {
+                Some(Attr {
+                    value: AttrV::Js(code),
+                    ..
+                }) => match code.strip_suffix(" }") {
+                    Some(open) => *code = format!("{open}, {entry} }}"),
+                    None => *code = format!("{{ ...{code}, {entry} }}"),
+                },
+                _ => j.attrs.push(attr_js("style", format!("{{ {entry} }}"))),
+            }
+        }
+        out
+    }
+
+    #[inline(never)]
+    fn render_kind(&mut self, n: &Rc<N<'a>>, ctx: &Ctx<'a>) -> Option<C<'a>> {
         if n.def.is_none() {
             return Some(self.fallback(n, ctx));
         }

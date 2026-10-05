@@ -139,3 +139,55 @@ fn generated_pages_without_their_source_come_back_by_convention() {
     }
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
+
+const TILTED: &str = r#"<screen id="s" weft="0.1"><stack id="a" gap="{token.space.md}" perspective="800" rotate-y="30"><button id="b" rotate-z="-5.5">Go</button></stack></screen>"#;
+
+fn tilted() -> Document {
+    let catalog = core_catalog().unwrap();
+    let options = ParseOptions {
+        catalog: Some(&catalog),
+        ..Default::default()
+    };
+    parse(TILTED, &options).document.unwrap()
+}
+
+#[test]
+fn a_tilt_is_a_transform_next_to_the_layout_style() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = HtmlOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+        source: false,
+        appearance: None,
+    };
+    let html = to_html(&tilted(), &options).unwrap();
+    assert!(
+        html.contains(
+            "style=\"gap: var(--weft-space-md); transform: perspective(800px) rotateY(30deg)\""
+        ),
+        "{html}"
+    );
+    assert!(
+        html.contains("style=\"transform: rotateZ(-5.5deg)\""),
+        "{html}"
+    );
+    let back = import_html(&html, &import_options(&catalog, &tokens));
+    assert!(back.losses.is_empty(), "{:?}", back.losses);
+    assert_eq!(serialize(&back.document), serialize(&tilted()));
+}
+
+#[test]
+fn a_transform_that_is_not_a_tilt_is_a_loss() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let html = r#"<main data-weft-id="s"><div data-weft-id="a" style="transform: translateX(4px)"></div></main>"#;
+    let back = import_html(html, &import_options(&catalog, &tokens));
+    assert!(
+        back.losses
+            .iter()
+            .any(|l| l.note.contains("transform: translateX(4px)")),
+        "{:?}",
+        back.losses
+    );
+}

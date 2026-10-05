@@ -23,6 +23,7 @@ use weft_core::{
 
 use crate::fill::fill;
 use crate::provenance;
+use crate::tilt;
 
 pub struct HtmlOptions<'a> {
     pub catalog: &'a Catalog,
@@ -416,6 +417,17 @@ impl Attrs {
         self.0.push((name.to_owned(), None));
     }
 
+    /// Adds a declaration to the `style` attribute, which the layout kinds may have written.
+    fn style(&mut self, declaration: &str) {
+        match self.0.iter_mut().find(|(n, _)| n == "style") {
+            Some((_, Some(style))) => {
+                style.push_str("; ");
+                style.push_str(declaration);
+            }
+            _ => self.set("style", declaration),
+        }
+    }
+
     fn print(&self) -> String {
         let mut out = String::new();
         for (name, value) in &self.0 {
@@ -542,6 +554,9 @@ impl Writer<'_> {
         if !n.on.is_empty() {
             let actions: Vec<String> = n.on.iter().map(|(e, a)| format!("{e}:{a}")).collect();
             attrs.set("data-action", actions.join("; "));
+        }
+        if let Some(transform) = tilt::css_of(&n.props) {
+            attrs.style(&format!("transform: {transform}"));
         }
         attrs
     }
