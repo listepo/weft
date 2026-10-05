@@ -4,7 +4,7 @@
 //! what has members is a struct.
 
 use indexmap::IndexMap;
-use weft_core::{Catalog, Child, Node, PropType, Value};
+use weft_core::{Catalog, Child, Node, PropType, TILT_PROPS, Value};
 
 use crate::swift;
 use crate::{Unsupported, kinds};
@@ -51,6 +51,8 @@ pub fn prop_leaf(catalog: &Catalog, kind: &str, prop: &str) -> Option<(Leaf, boo
     match prop {
         "label" | "state" => return Some((Leaf::Text, false)),
         "hidden" => return Some((Leaf::Bool, false)),
+        // A dialog's tilt stays a marker, so the leaf is the one its number takes.
+        _ if TILT_PROPS.contains(&prop) => return Some((Leaf::Double, false)),
         _ => {}
     }
     let def = catalog.components.get(kind)?.prop(prop)?;

@@ -63,6 +63,9 @@ function figmaHost(api: FigmaApi, library: Library): BuildHost<Built, FComponent
       }
       return frame;
     },
+    turn(layer, degrees) {
+      layer.rotation = -degrees;
+    },
     text: (drawing) => drawText(api, library, drawing),
     setText: (layer, name, value) => setLayerText(api, layer, name, value),
     append(parent, child) {

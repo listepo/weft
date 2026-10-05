@@ -78,6 +78,8 @@ export function styleKey(shape: PShape, withSpacing: boolean): string {
   // Appended only when there is one, so a board built before the blur was read keeps the
   // fingerprint stored in its plugin data and does not read back as edited.
   if (shape.backgroundBlur !== undefined) key.push(blur(shape.backgroundBlur));
+  // Likewise only when turned, so the key of every upright shape stays as it was.
+  if (shape.rotation !== 0) key.push(shape.rotation);
   return JSON.stringify(key);
 }
 

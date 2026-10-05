@@ -130,6 +130,23 @@ export function tokenCss(
   return css ?? `var(--weft-${path.replaceAll(".", "-").replaceAll("$", "_")})`;
 }
 
+// SPEC §2.2: the 3D tilt as a CSS `transform`. The attributes are literal numbers; the order is
+// the one `weft-web` writes (perspective, then x, y, z).
+const TILT: readonly (readonly [string, string, string])[] = [
+  ["perspective", "perspective", "px"],
+  ["rotate-x", "rotateX", "deg"],
+  ["rotate-y", "rotateY", "deg"],
+  ["rotate-z", "rotateZ", "deg"],
+];
+
+export function tiltCss(props: Record<string, unknown>): string | undefined {
+  const parts = TILT.flatMap(([name, fn, unit]) => {
+    const v = props[name];
+    return typeof v === "number" && Number.isFinite(v) ? [`${fn}(${v}${unit})`] : [];
+  });
+  return parts.length === 0 ? undefined : parts.join(" ");
+}
+
 const MATERIAL_PROPS = ["tint", "solid", "blur"] as const;
 const HEX6 = /^#[0-9a-fA-F]{6}$/;
 

@@ -59,8 +59,10 @@ So the work is split:
   - variants and `state`;
   - visibility, as `hidden`;
   - stack direction, alignment and wrap;
+  - turning a layer, as a visual edit (below);
   - grid columns;
   - a gap bound to another variable, or typed as a number that equals a token.
+- **Tilts:** Figma has no 3D transform. `rotate-z` is drawn as the layer's `rotation` (Figma counts counterclockwise, so the sign flips); `rotate-x`, `rotate-y` and `perspective` are not drawn and stay in the layer's Weft source, which is what reads back.
 - **Duplicated layers** get a fresh id.
 - **Foreign layers** (anything the library did not make) convert lossily:
   - text becomes a string or a `text` element;
@@ -76,7 +78,7 @@ So the work is split:
 | `ids` | The layer has no Weft source, or it is a copy, so its id was generated. |
 | `hidden` | A hidden layer without a Weft source was dropped. |
 | `props` | A frame named after a kind has no source; only its text and content were read. |
-| `tokens` | A visual edit with no Weft prop (fill, stroke, radius, padding), or a gap that matches no token. |
+| `tokens` | A visual edit with no Weft prop (fill, stroke, radius, padding, rotation), or a gap that matches no token. |
 | `layout` | A frame without auto layout; its children were ordered by position. |
 | `kinds` | A layer Weft has no kind for (a vector or an empty shape) was dropped. |
 | `names` | A kind that needs a label had none; `""` stands in. |

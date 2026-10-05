@@ -90,6 +90,7 @@ A file for a screen whose id is `login` contains these parts, in order:
 | `id` | `.accessibilityIdentifier(id)` |
 | `label` | The control's title, else `.accessibilityLabel` (not on `stack`, `grid` or `text`, which have no name) |
 | `hidden` | `.weftHidden(condition)`, which removes the view while the condition holds |
+| `rotate-x`, `rotate-y`, `rotate-z`, `perspective` | A chain of `.rotation3DEffect(.degrees(n), axis: (x:, y:, z:), perspective:)`, z then y then x because modifiers apply in order where CSS lists them right to left. Only the last effect carries the perspective, as `400 / px`: SwiftUI takes it relative to the view, so this is exact only for a view about 400 points across, and the importer reads the pixels back from it. A perspective alone is a zero-degree effect about a zero axis. A `dialog` keeps its tilt as a `weftProp` marker, because its sheet is drawn in its own layer |
 | `disabled` | `.disabled` |
 | `on-*` | `send(.case, id)`, which calls `perform` with a `LoginEvent` |
 | Binding `{$.a.b}` | `model.a.b`; a writable prop gets `$model.a.b` |
@@ -170,7 +171,7 @@ Losses use the SPEC §9 kinds. `tests/fixtures/import/Settings.swift` is a hand-
 | `repetition` | A `ForEach` runs over something other than a data path. |
 | `hidden` | An `if` has a condition that is not a data path. |
 | `slots` | A section footer has no slot. |
-| `props` | A prop value is invalid for the catalog. |
+| `props` | A prop value is invalid for the catalog, or a `rotation3DEffect` is not one `generate` prints (another axis, or a perspective that is not `400 / px`). |
 | `values`, `names` | A required prop or label gets a stand-in. |
 | `kinds` | A view has no Weft kind (a shape, a custom view from another file). |
 | `text` | Text has no place in the content model, or reads like a reference. |
