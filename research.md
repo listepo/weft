@@ -111,7 +111,7 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | Extensibility without breaking agents | Answered: `x-<vendor>-` extensions with an ARIA fallback role; unknown elements render as `group` | SPEC §8 |
 | Mapping to code and back | Partly: React renderer and JSX generator; SwiftUI generator and importer (T34); importers from DOM and snapshots with a documented loss table | SPEC §9, `roadmap.md` |
 | Streaming and incremental generation | Open. Flat id lists in A2UI and json-render exist for progressive rendering; nested markup has to show it can do the same | `roadmap.md` |
-| Host capabilities | Specified (a host advertises its catalogs), not implemented | SPEC §8, `roadmap.md` |
+| Host capabilities | Answered for MCP hosts: `weft_capabilities` reports the format version, catalogs, token paths and action names the host checks (T10); other hosts are not covered | SPEC §8, `packages/mcp` |
 | Layout without becoming CSS | Open: only `stack` and `grid` | `roadmap.md` |
 | Who keeps a registry of extension catalogs | Open | `roadmap.md` |
 | Figma as a source | Open | `roadmap.md` |

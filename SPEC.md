@@ -445,7 +445,7 @@ type Patch =
   - Minor: a prop stops being required; a slot stops being required; `requiresLabel` turns off; `bindable` or `writable` turns on; a numeric range widens.
   - A numeric range narrows when its lower bound rises, its upper bound falls, or a bound appears; the opposite is widening. A prop field the classifier does not know is major when it changes.
   - A change to a `description` only is none.
-- A host advertises `{ weft, catalogs: [{ name, version }] }`; an agent writes only what the host advertises.
+- A host advertises `{ weft, catalogs: [{ name, version }] }`; an agent writes only what the host advertises. A host that also checks design tokens, action names or a data schema (§10) adds `tokens`, `actions` and `data` to the advertisement, so a writer knows which of them are enforced: a category that is absent is not checked. The MCP server (`weft_capabilities`) does this; the catalog list names the core catalog first and then the project's extension when there is one.
 
 ## 9. Mapping
 

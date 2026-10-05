@@ -14,7 +14,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 | T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
-| T10 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
@@ -205,10 +204,6 @@ Done when:
 - the suite passes repeatedly (at least three consecutive runs);
 - baselines are retaken only if the visible area changes, and are then reviewed;
 - the full check exits 0.
-
-### T10. Host capabilities
-
-SPEC §8 says a host advertises `{ weft, catalogs }` and an agent writes only what is advertised; no code does this. The MCP server reports its capabilities, loads catalogs, tokens and actions from configuration, and turns token and action checks on when they are given.
 
 ### T18. Follow-ups from the prototype
 

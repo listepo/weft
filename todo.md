@@ -8,5 +8,4 @@
 - T52. 3D transforms and models
 - T58. Natural `align="center"` coverage in the corpus
 - T59. Deterministic home indicator in SwiftUI screenshots
-- T10. Host capabilities
 - T18. Follow-ups from the prototype

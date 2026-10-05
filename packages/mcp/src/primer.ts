@@ -17,6 +17,7 @@ export const primer = (
 - Comments are allowed and dropped by weft_format.
 
 Tools:
+- weft_capabilities: what the host accepts: the format version, the catalogs and, when the host checks them, the design token paths and action names. Write only what it lists.
 - weft_catalog: no arguments lists every component; pass kind for one component in full (props, slots, states, events).
 - weft_validate: check markup. Diagnostics carry a code, a path, what was expected and often the fix in "hint".
 - weft_format: canonical markup, the one form that diffs and hashes.
