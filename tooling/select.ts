@@ -32,8 +32,15 @@ export interface Facts {
   projects: readonly Project[];
   tasks: readonly Task[];
   crates: readonly Crate[];
-  /** Project id to the ids of the projects whose folders its sources name by path. */
-  reads: Readonly<Record<string, readonly string[]>>;
+  /**
+   * Project id to the ids of the projects whose folders its files name by path: `source` for files
+   * under `src/`, which every importer runs too, `own` for tests and build scripts, which only its
+   * own suite runs.
+   */
+  reads: {
+    source: Readonly<Record<string, readonly string[]>>;
+    own: Readonly<Record<string, readonly string[]>>;
+  };
 }
 
 export interface RustPlan {
@@ -196,12 +203,18 @@ export function select(facts: Facts): Plan {
   const projects = facts.projects.filter((project) => project.id !== ROOT);
   const owner = (file: string) => projectOf(file, projects);
   const declared = new Map(projects.map((p) => [p.id, new Set(p.dependencies)]));
-  const named = new Map(
-    projects.map((p) => [p.id, new Set([...p.dependencies, ...(facts.reads[p.id] ?? [])])]),
-  );
-  // Imports are what Vitest follows; a path in a source text is only a guess that the file is read.
+  // Imports are what Vitest follows; a path in a source text is only a guess that the file is read,
+  // and only one step of it counts: what a project reads by path is not what that project imports.
   const imported = (id: string) => closure([id], declared);
-  const read = (id: string) => closure([id], named);
+  const read = (id: string) => {
+    const imports = imported(id);
+    const ids = new Set(imports);
+    for (const dependency of imports) {
+      (facts.reads.source[dependency] ?? []).forEach((other) => ids.add(other));
+    }
+    (facts.reads.own[id] ?? []).forEach((other) => ids.add(other));
+    return ids;
+  };
 
   const reasons = new Map<string, Reason[]>();
   const add = (target: string, reason: Reason) =>

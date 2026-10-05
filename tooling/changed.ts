@@ -110,8 +110,11 @@ function cargoCrates(): Crate[] {
 
 // Tests read sibling packages by path as well as by import; the package.json graph shows only the
 // imports, so the sources are scanned for the paths.
-function sourceReads(projects: Project[]): Record<string, string[]> {
-  const found: Record<string, Set<string>> = {};
+function sourceReads(projects: Project[]): Facts["reads"] {
+  const found = { source: {}, own: {} } as Record<
+    keyof Facts["reads"],
+    Record<string, Set<string>>
+  >;
   const files = lines(
     read("git", [
       "ls-files",
@@ -136,13 +139,17 @@ function sourceReads(projects: Project[]): Record<string, string[]> {
     } catch {
       continue; // Deleted in the working tree.
     }
+    const home = projects.find((project) => project.id === id);
+    const kind = home && file.startsWith(`${home.source}/src/`) ? "source" : "own";
     for (const other of referencedProjects(text, projects)) {
       if (other !== id) {
-        (found[id] ??= new Set()).add(other);
+        (found[kind][id] ??= new Set()).add(other);
       }
     }
   }
-  return Object.fromEntries(Object.entries(found).map(([id, set]) => [id, [...set]]));
+  const lists = (byId: Record<string, Set<string>>) =>
+    Object.fromEntries(Object.entries(byId).map(([id, set]) => [id, [...set]]));
+  return { source: lists(found.source), own: lists(found.own) };
 }
 
 function gather(requestedBase: string | undefined): { base: string; facts: Facts } {
