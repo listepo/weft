@@ -12,17 +12,19 @@ What `generate` prints reads back to the same document with no losses. Other Swi
 ```console
 $ weft swiftui screens/login.weft > Login.swift
 $ weft swiftui screens/login.weft --out-dir ios        # writes ios/login.swift
+$ weft swiftui screens/login.weft --data login.json    # #Preview shows that data
 $ weft import-swiftui Login.swift > login.weft          # losses go to stderr
 ```
 
 - **Catalog and tokens.** Both commands take the catalog from `--catalog`, then the project (`weft.json`), then the core catalog. `weft swiftui` takes tokens from `--tokens`, then the project, then `packages/catalog/tokens/default.tokens.json`.
+- **Sample data.** It comes from `--data`, then the project's `export.swiftui.data`, then none.
 - **Output directory.** It comes from `--out-dir`, then the project's `export.swiftui.outDir` or `import.swiftui.outDir`, then standard output.
 - **Exit codes.** A screen that is not strictly valid exits 1, and so does one the generator cannot express (`x-` content, a kind outside the core catalog, a token that is not a px or rem dimension). For the importer, losses are not failures: it exits 1 only on an error diagnostic.
 
 As a library:
 
 ```rust
-let swift = weft_swiftui::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None })?;
+let swift = weft_swiftui::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None, data: None })?;
 let result = weft_swiftui::import_swiftui(&swift, &ImportOptions { catalog: &catalog });
 ```
 
@@ -39,7 +41,8 @@ A file for a screen whose id is `login` contains these parts, in order:
 | Events | `struct LoginEvent { action, id, item }`: what the handler receives. Inside `<each>`, `item` is the data path of the list item (`$.todos.2`). |
 | Theme | `struct LoginTheme`: the tokens the screen references, as nested `CGFloat` values (px, or rem × 16). |
 | View | `struct LoginScreen: View` with `@Bindable var model`, `var theme`, and `var perform: (LoginEvent) -> Void`. |
-| Preview | `#Preview` with an empty model. |
+| Sample | With sample data only: a memberwise `init` on the model (every argument defaults to the declared value) and `extension LoginModel { static var sample }` built from the data. The importer ignores both. |
+| Preview | `#Preview` with an empty model, or with `.sample` when there is sample data. |
 | Helpers | `fileprivate` helpers named `weft…`. They carry what SwiftUI has no form for, so the importer can read it back. |
 
 ## Mapping
@@ -119,6 +122,6 @@ The source is untrusted: it is parsed, never compiled or run. It is limited to `
 
 ## Tests
 
-- **`swift`.** It checks that generation is deterministic. It also typechecks every corpus screen, catalog example and fixture with `xcrun swiftc -typecheck -swift-version 6`, for iOS 17 and for macOS 14, together with the hand-written sample. Without Xcode this test is skipped and says so.
+- **`swift`.** It checks that generation is deterministic. It also typechecks every corpus screen (also generated with its `data.json`), catalog example and fixture with `xcrun swiftc -typecheck -swift-version 6`, for iOS 17 and for macOS 14, together with the hand-written sample. Without Xcode this test is skipped and says so.
 - **`roundtrip`.** For every screen, Weft → SwiftUI → Weft gives byte-identical output with no losses.
 - **`import`.** It pins the hand-written sample, and a property test checks that any source imports, without panicking, to a document that is valid in lenient mode.
