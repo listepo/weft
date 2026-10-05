@@ -544,8 +544,8 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | `export.solid.outDir` | file name | standard output | Where `weft solid` writes `<screen>.jsx` or `.tsx`. |
 | `import.html.outDir` | file name | next to the page | Where screens imported from HTML go (`weft import-html` prints when absent). |
 | `import.react.outDir`, `import.solid.outDir` | file name | standard output | Where `weft import-react` and `weft import-solid` write `<file>.weft`. |
-| `export.swiftui.outDir` | file name | standard output | Where `weft swiftui` writes `<screen>.swift`. The target (iOS 17, macOS 14) is fixed: `@Observable` needs it. |
-| `import.swiftui.outDir` | file name | standard output | Where `weft import-swiftui` writes `<file>.weft`. |
+| `export.swiftui.outDir` | file name | standard output | Where `weft swiftui` writes `<screen>.swift`, and where the Xcode command plugin's `export` does (next to the screen when absent). The build tool plugin ignores it: it writes into the build folder. The target (iOS 17, macOS 14) is fixed: `@Observable` needs it. |
+| `import.swiftui.outDir` | file name | standard output | Where `weft import-swiftui` writes `<file>.weft`, and where the Xcode command plugin's `import` does (next to the view when absent). |
 | `mcp.limits.markupChars`, `dataChars`, `patchesChars`, `projectChars` | whole number ≥ 1 | 200,000; 200,000; 200,000; 500,000 | Bounds, in UTF-16 code units, on the arguments of one MCP call. |
 | `mcp.limits.patches`, `diagnostics`, `inputElements` | whole number ≥ 1 | 100; 40; 20,000 | Patches per call, diagnostics listed per result, JSON values per call. |
 | `plugins.open-design.tokensDir` | file name | next to the design system | Where the Open Design plugin's `design-md` script writes the tokens it maps from a `DESIGN.md` or `tokens.css`. |

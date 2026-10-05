@@ -1,0 +1,17 @@
+# The Swift side of the Xcode plugins. Everything here needs macOS with Xcode, and skips with a
+# message elsewhere.
+id: 'xcode-plugin'
+language: 'typescript'
+
+tasks:
+  # `weft` for Apple Silicon as a SwiftPM artifact bundle (gitignored); the package, the samples
+  # and the editor extension all take it from here.
+  bundle:
+    command: 'node scripts/artifactbundle.ts'
+    inputs: ['scripts/artifactbundle.ts', '/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json']
+    outputs: ['Artifacts/weft.artifactbundle/**/*']
+  test:
+    deps: ['bundle']
+    # The agent script registers the Claude Code plugin's server and guide; the catalog is bundled
+    # into the editor extension.
+    inputs: ['/plugins/claude-code/dist/**/*', '/plugins/claude-code/skills/**/*', '/packages/catalog/catalog.json']

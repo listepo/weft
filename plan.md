@@ -10,8 +10,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T42 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 | T43 | in progress | P1 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T44 | todo | P1 | 4 | 0% | |
 
 ### T8. Evaluation
 
@@ -153,17 +153,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T42. Xcode plugins
-
-Bring Weft into Xcode for SwiftUI projects, on top of the T34 generator and importer (`crates/weft-swiftui`, `weft swiftui`, `weft import-swiftui`). Approved scope, four parts:
-
-- **Build tool plugin** (SwiftPM and Xcode projects): every `.weft` file in a target becomes generated SwiftUI at build time, so the generated code is never committed and always matches its screen. It reads the project's `weft.json`.
-- **Command plugin:** `swift package` commands that convert once between SwiftUI and `.weft` (import a view, export a screen), writing into the package with the permission SwiftPM asks for.
-- **Source Editor Extension** (XcodeKit): Editor menu commands that turn the selected SwiftUI into `.weft`, turn a `.weft` buffer into SwiftUI, and validate a `.weft` buffer.
-- **Xcode's agents through MCP:** the weft MCP server registered for the coding agents built into Xcode, if Xcode supports MCP servers; the guide (AGENT-SPEC) made available to them. Facts come from Apple's documentation with the version and date checked.
-
-The plugins get the `weft` program as an artifact bundle (`binaryTarget`), arm64 macOS only. Until the repository has a remote, the bundle is built locally and referenced by path; publishing it on GitHub Releases waits for the remote. Done when a sample SwiftUI app builds with a `.weft` screen through the build tool plugin, the command plugin round-trips a corpus screen, the editor extension commands work on a corpus screen, each part has automated tests where it can be tested headless, and the manual checks that need Xcode's UI are listed.
-
 ### T43. Sample data in static HTML and SwiftUI
 
 The T36 screenshots show that the static HTML generator (`weft html`) and the SwiftUI generator (`weft swiftui`) render bound values empty: buttons and radio options without labels, lists without rows, counters without numbers. React and SolidJS show the screen's data, so the static page cannot be compared with them, and the SwiftUI screenshots use the models' defaults because a generated model cannot be filled from JSON.
@@ -172,4 +161,14 @@ The T36 screenshots show that the static HTML generator (`weft html`) and the Sw
 - **SwiftUI:** the generated model can be filled from the screen's data (an initializer from values or from JSON), and with sample data the generated file gets a `#Preview` that uses it (an argument and a key under `export.swiftui`). The importer ignores what the generator adds for the data, so round trips stay byte-identical.
 
 Done when the T36 visual suite renders the static page and the SwiftUI screens with the corpus data, the new baselines are reviewed, the static page is compared with React where the comparison is now meaningful, and the snapshots and round trips stay green.
+
+### T44. Shared SwiftUI tokens and custom components
+
+The SwiftUI generator (T34) gives every screen its own theme struct holding only the tokens that screen references, accepts only px and rem dimension tokens, and refuses screens with kinds outside the core catalog. In an app built with the Xcode build tool plugin (T42) that means duplicated token code and failed builds for screens with colour tokens or the project's own components.
+
+- **One tokens file per project:** the build tool plugin (and `weft swiftui` with a project) generates one `WeftTokens.swift` from the project's tokens (`weft.json`): colours as `Color` (with light and dark values when the token set has them), dimensions, typography and the other DTCG types the catalog supports. Every generated screen refers to it instead of carrying its own theme.
+- **Custom components:** a kind from the project's catalog extension maps to a SwiftUI view the developer writes once (for example `rating` → `RatingView`, with its props as typed arguments and its slots as view builders); the generator calls it, and the build reports a missing view clearly. The importer reads such a call back as the kind.
+- New options get `weft.json` keys under `export.swiftui`; the round trip of generated code stays byte-identical, and the editor extension keeps its core-catalog behaviour.
+
+Done when a sample app with two screens sharing tokens, a colour token and a custom component builds through the build tool plugin for iOS 17 and macOS 14, the shared file appears once, the T36 snapshots and screenshots are updated and reviewed, and the round trips stay green.
 
