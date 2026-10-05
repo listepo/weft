@@ -163,9 +163,18 @@ static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 8]> = LazyLock::new(|| {
             PropDef::new("One of the component's states.", PropType::Enum),
         ),
         ("role", role),
-        ("rotate-x", angle("Rotation about the horizontal axis, in degrees.")),
-        ("rotate-y", angle("Rotation about the vertical axis, in degrees.")),
-        ("rotate-z", angle("Rotation in the screen plane, in degrees.")),
+        (
+            "rotate-x",
+            angle("Rotation about the horizontal axis, in degrees."),
+        ),
+        (
+            "rotate-y",
+            angle("Rotation about the vertical axis, in degrees."),
+        ),
+        (
+            "rotate-z",
+            angle("Rotation in the screen plane, in degrees."),
+        ),
         ("perspective", perspective),
     ]
 });
