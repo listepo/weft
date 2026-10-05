@@ -290,7 +290,7 @@ describe("a glass surface (T51)", () => {
   const glass = corpusMarkup("glass");
 
   test("comes back unchanged, still taking its material token", async () => {
-    const { penpot, root } = await built(glass);
+    const { root } = await built(glass);
     const result = await read(root);
     assert.equal(serialize(result.document), serialize(parseStrict(glass)));
     assert.deepEqual(result.losses, []);
