@@ -140,5 +140,6 @@ export function hasErrors(diagnostics: readonly Diagnostic[]): boolean {
 
 /** Nearest candidate by edit distance, close enough to be a likely typo (the Rust core decides). */
 export function didYouMean(word: string, candidates: Iterable<string>): string | undefined {
-  return wasm.didYouMean(wellFormed(word), toJson([...candidates]) ?? "[]");
+  // The addon answers `null` where WebAssembly answers `undefined`.
+  return wasm.didYouMean(wellFormed(word), toJson([...candidates]) ?? "[]") ?? undefined;
 }

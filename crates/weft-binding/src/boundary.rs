@@ -1,4 +1,4 @@
-//! What crosses between JavaScript and WebAssembly: JSON text both ways, plus the options object.
+//! What crosses between JavaScript and Rust: JSON text both ways, plus the options object.
 //! JSON text keeps JavaScript's key order and own-property semantics on both sides (the reasons
 //! are in plan.md T22), so this module is the only place that knows the wire format.
 
@@ -6,22 +6,22 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value as Json;
 use thiserror::Error;
-use weft_core::{Document, JSON_DEPTH_LIMIT, JsonError, Mode, parse_json, to_document};
+use weft_core::{Catalog, Document, JSON_DEPTH_LIMIT, JsonError, Mode, parse_json, to_document};
 
 #[derive(Debug, Error)]
 pub enum BindingError {
     /// The JavaScript side wrote something this module cannot read; a bug in the wrapper.
-    #[error("weft-wasm: malformed {what}: {source}")]
+    #[error("weft-binding: malformed {what}: {source}")]
     Wire {
         what: &'static str,
         source: serde_json::Error,
     },
-    #[error("weft-wasm: the catalog is not a Weft catalog: {0}")]
+    #[error("weft-binding: the catalog is not a Weft catalog: {0}")]
     Catalog(serde_json::Error),
     /// A document argument that cannot be JSON (a cycle) or nests past any valid document.
-    #[error("weft-wasm: the document nests deeper than any valid document")]
+    #[error("weft-binding: the document nests deeper than any valid document")]
     TooDeep,
-    #[error("weft-wasm: cannot write the result: {0}")]
+    #[error("weft-binding: cannot write the result: {0}")]
     Output(serde_json::Error),
 }
 
@@ -131,6 +131,11 @@ pub fn read_document(text: Option<&str>) -> Result<Document> {
             source,
         }),
     }
+}
+
+/// The catalog behind a `Catalog` handle, parsed once from the wrapper's JSON text.
+pub fn read_catalog(text: &str) -> Result<Catalog> {
+    serde_json::from_str(text).map_err(BindingError::Catalog)
 }
 
 pub fn read_list(text: &str, what: &'static str) -> Result<Vec<String>> {

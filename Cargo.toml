@@ -11,6 +11,7 @@ license = "Apache-2.0"
 publish = false
 
 [workspace.dependencies]
+weft-binding = { path = "crates/weft-binding" }
 weft-core = { path = "crates/weft-core" }
 weft-catalog = { path = "crates/weft-catalog" }
 weft-import = { path = "crates/weft-import" }
@@ -50,6 +51,12 @@ tree-sitter-swift = "0.7.4"
 # weft-wasm. Exact: the generated glue only loads with the wasm-bindgen CLI of the same version,
 # which mise pins.
 wasm-bindgen = "=0.2.129"
+
+# weft-node: the native addon for Node and Bun. Latest stable of each, checked on crates.io on
+# 2026-10-05; napi-derive and napi-build are the macro and build-script halves of napi.
+napi = { version = "3.14.1", default-features = false, features = ["napi8"] }
+napi-derive = "3.6.11"
+napi-build = "2.6.0"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

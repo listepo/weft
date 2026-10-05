@@ -5,7 +5,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
-| T23 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
@@ -31,9 +30,6 @@ Execution plan:
 7. `bench/EVALUATION.md`: results against the done criteria (Weft first-try validity at least 95%, after one repair at least 99%), comparison with the baselines, failure analysis, continue/stop recommendation.
 8. Verify with `pnpm run ci`.
 
-### T23. Native Node and Bun addon
-
-A napi-rs addon of the same Rust core for Node and Bun, chosen at load time with the WASM build as the fallback when no prebuilt binary fits the platform. Done when the test suite passes on both builds and a broken or missing addon falls back to WASM with a warning.
 
 ### T28. Binding readback against inverted conditions
 

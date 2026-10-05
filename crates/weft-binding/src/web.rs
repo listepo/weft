@@ -1,5 +1,6 @@
-//! The web importers and generators of `weft-web`, in the `web` build of the module only
-//! (`@weft/core/web` loads it): core-only consumers do not carry the HTML and JSX parsers.
+//! The web importers and generators of `weft-web`, in the `web` feature only: the WebAssembly
+//! module behind `@weft/core/web` has it, so core-only consumers do not carry the HTML and JSX
+//! parsers; the native addon always does.
 
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
@@ -12,6 +13,11 @@ use weft_import::{
 use weft_web::{Framework, HtmlOptions, ImportOptions, JsxOptions};
 
 use crate::boundary::{BindingError, Result, read_input, read_list, write};
+
+/// `instanceId` of `@weft/from-aria`: the id a component instance name stands for.
+pub fn instance_id(raw: &str) -> Option<String> {
+    weft_web::instance_id(raw)
+}
 
 /// `fromDom` of `@weft/from-aria`.
 pub fn from_dom(html: &str, catalog: &Catalog) -> Result<String> {

@@ -10,6 +10,7 @@ dist/
 target/
 packages/core/wasm/
 packages/core/wasm-web/
+packages/core/native/
 # The Xcode plugins: the artifact bundle is built locally, and Swift and Xcode write their own
 # build folders and generated projects.
 plugins/xcode/Artifacts/

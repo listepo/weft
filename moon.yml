@@ -1,10 +1,10 @@
 # The workspace root: checks that cover every package at once.
-id: 'root'
-language: 'typescript'
+id: "root"
+language: "typescript"
 
 workspace:
   inheritedTasks:
-    exclude: ['test']
+    exclude: ["test"]
 
 fileGroups:
   # What the binding suites read: the packages' sources and tests, the generated module they load,
@@ -33,31 +33,65 @@ tasks:
     # Two modules: the core alone (`@weft/core`), and the core with the web importers and
     # generators (`@weft/core/web`), so core-only pages do not download the HTML and JSX parsers.
     script: 'export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(pwd -P)=/weft" && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm-web --out-name weft -- --features web'
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json']
-    outputs: ['/packages/core/wasm/**/*', '/packages/core/wasm-web/**/*']
+    inputs: ["/crates/**/*", "/Cargo.toml", "/Cargo.lock", "/packages/catalog/catalog.json"]
+    outputs: ["/packages/core/wasm/**/*", "/packages/core/wasm-web/**/*"]
+  # The native addon of the same Rust core (crates/weft-node) for Node and Bun, built for the host
+  # into the gitignored packages/core/native/. `@weft/core` picks it at load time and uses the
+  # WebAssembly module where there is none. The prebuilt list in packages/core/package.json
+  # (arm64 macOS, x64 and arm64 glibc Linux, x64 Windows) is built per target by the release job,
+  # not here. Intel macOS is not supported.
+  native:
+    command: "napi build --platform --release --no-js --cwd packages/core --manifest-path ../../crates/weft-node/Cargo.toml -p weft-node --output-dir native"
+    inputs:
+      [
+        "/crates/**/*",
+        "/Cargo.toml",
+        "/Cargo.lock",
+        "/packages/catalog/catalog.json",
+        "/packages/core/package.json",
+      ]
+    outputs: ["/packages/core/native/**/*"]
   # The `weft` CLI, which @weft/visual runs for the targets that exist only in Rust. Its own
   # target directory: rust-test builds `target/debug/weft` with every feature, and running in
   # parallel it would replace the binary while the visual suite calls it. Not cached: cargo
   # already skips an up-to-date build, and a cached run would not notice a deleted binary.
   cli:
-    command: 'cargo build -p weft-cli --target-dir target/visual'
+    command: "cargo build -p weft-cli --target-dir target/visual"
     options:
       cache: false
   # The @weft/core and @weft/catalog suites on Node, Deno, Bun and headless Chromium, which are the
-  # runtimes the WebAssembly module ships to. One Vitest config (runtimes/vitest.config.ts) for all
-  # four legs; they run in parallel and the task passes when every leg does. It belongs in `moon ci`:
-  # the legs cost seconds beyond `:test`, mise already pins Deno and Bun for CI, and a regression that
-  # only one runtime shows (a missing API, a different module loader) reaches nothing else. A leg
-  # depends on `root:wasm` only: `@weft/core` decides what it loads, so a native addon with WebAssembly
-  # as the fallback is exercised by the same legs without a change here.
+  # runtimes the WebAssembly module ships to, plus Node and Bun again on the native addon. One Vitest
+  # config (runtimes/vitest.config.ts) for all six legs; they run in parallel and the task passes when
+  # every leg does. It belongs in `moon ci`: the legs cost seconds beyond `:test`, mise already pins
+  # Deno and Bun for CI, and a regression that only one runtime shows (a missing API, a different
+  # module loader) reaches nothing else. `WEFT_ENGINE` is set on every leg, because under the default
+  # `auto` a built addon would silently take over the Node and Bun legs and the module would no
+  # longer be tested there. Deno and the browser have no addon, so they stay on WebAssembly. A native
+  # leg fails when the addon did not load (engines.test.ts), so it cannot pass on the fallback.
   runtimes:
     command: 'noop'
-    deps: ['root:runtimes-node', 'root:runtimes-deno', 'root:runtimes-bun', 'root:runtimes-browser']
+    deps:
+      [
+        'root:runtimes-node',
+        'root:runtimes-node-native',
+        'root:runtimes-deno',
+        'root:runtimes-bun',
+        'root:runtimes-bun-native',
+        'root:runtimes-browser',
+      ]
   runtimes-node:
     command: 'vitest run --config runtimes/vitest.config.ts'
     env:
       WEFT_RUNTIME: 'node'
+      WEFT_ENGINE: 'wasm'
     deps: ['root:wasm']
+    inputs: ['@group(runtime-suites)']
+  runtimes-node-native:
+    command: 'vitest run --config runtimes/vitest.config.ts'
+    env:
+      WEFT_RUNTIME: 'node'
+      WEFT_ENGINE: 'native'
+    deps: ['root:wasm', 'root:native']
     inputs: ['@group(runtime-suites)']
   # Deno and Bun run Vitest's own entry point, so the leg exercises the same test files and runner
   # as Node. `--node-modules-dir=manual` makes Deno use the pnpm-installed node_modules; `--bun` makes
@@ -66,18 +100,28 @@ tasks:
     script: 'deno --version | head -1 && deno run -A --node-modules-dir=manual node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
     env:
       WEFT_RUNTIME: 'deno'
+      WEFT_ENGINE: 'wasm'
     deps: ['root:wasm']
     inputs: ['@group(runtime-suites)']
   runtimes-bun:
     script: 'echo "bun $(bun --version)" && bun --bun node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
     env:
       WEFT_RUNTIME: 'bun'
+      WEFT_ENGINE: 'wasm'
     deps: ['root:wasm']
+    inputs: ['@group(runtime-suites)']
+  runtimes-bun-native:
+    script: 'echo "bun $(bun --version)" && bun --bun node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
+    env:
+      WEFT_RUNTIME: 'bun'
+      WEFT_ENGINE: 'native'
+    deps: ['root:wasm', 'root:native']
     inputs: ['@group(runtime-suites)']
   runtimes-browser:
     command: 'vitest run --config runtimes/vitest.config.ts'
     env:
       WEFT_RUNTIME: 'browser'
+      WEFT_ENGINE: 'wasm'
     deps: ['root:wasm']
     inputs: ['@group(runtime-suites)']
   typecheck:
@@ -95,11 +139,22 @@ tasks:
   # The Rust core and CLI. The differential fixtures, written by the former TypeScript core, pin
   # their results; the TypeScript suites check that the WebAssembly build still reproduces them.
   rust-test:
-    command: 'cargo nextest run --workspace --all-features'
+    command: "cargo nextest run --workspace --all-features"
     # weft-catalog embeds catalog.json and its tests read the examples and default tokens; the
     # CLI tests read the example project; the schema test checks schemas/weft.schema.json;
     # weft-swiftui generates and reads back every corpus screen.
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/packages/catalog/catalog.json', '/packages/catalog/examples/**/*', '/packages/catalog/tokens/**/*', '/examples/**/*', '/schemas/**/*', '/corpus/**/*']
+    inputs:
+      [
+        "/crates/**/*",
+        "/Cargo.toml",
+        "/Cargo.lock",
+        "/packages/catalog/catalog.json",
+        "/packages/catalog/examples/**/*",
+        "/packages/catalog/tokens/**/*",
+        "/examples/**/*",
+        "/schemas/**/*",
+        "/corpus/**/*",
+      ]
   rust-lint:
-    script: 'cargo clippy --workspace --all-targets --all-features -- -D warnings && cargo fmt --all --check'
-    inputs: ['/crates/**/*', '/Cargo.toml', '/Cargo.lock', '/clippy.toml']
+    script: "cargo clippy --workspace --all-targets --all-features -- -D warnings && cargo fmt --all --check"
+    inputs: ["/crates/**/*", "/Cargo.toml", "/Cargo.lock", "/clippy.toml"]

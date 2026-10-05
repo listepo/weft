@@ -54,6 +54,8 @@
 | tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
 | tree-sitter-swift | local | https://github.com/alex-pinkus/tree-sitter-swift | The Swift grammar for that parser |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |
+| napi, napi-derive | local | https://github.com/napi-rs/napi-rs | `weft-node` exports for Node and Bun; its macros expand to `allow(unsafe_code)`, so that crate alone relaxes the workspace's `forbid` to `deny` |
+| napi-build | local (build) | https://github.com/napi-rs/napi-rs | Link flags of the addon (`weft-node/build.rs`) |
 | unicode-normalization | local | https://github.com/unicode-rs/unicode-normalization | NFKD before folding imported names into id slugs, as `String.prototype.normalize` does in the TypeScript importers |
 | unicode-properties | local | https://github.com/unicode-rs/unicode-properties | Unicode letter and number classes (`\p{L}`, `\p{N}`) for the JSX generators' check of which text runs print as written |
 | html5ever | local | https://github.com/servo/html5ever | Parses HTML in `weft-web` with the WHATWG tree builder, so imported pages read as a browser builds them |
