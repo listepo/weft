@@ -10,6 +10,7 @@ use std::collections::{HashMap, HashSet};
 use indexmap::IndexMap;
 use serde_json::Value as Json;
 use weft_catalog::{Appearance, Token, token_types};
+use weft_core::controls::{self, DateType};
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, Mode, Node, PropType,
     ValidateOptions, Value, has_errors, validate_document,
@@ -203,6 +204,41 @@ fn and_block(mut lines: Vec<String>, label: &str, body: Vec<String>) -> Vec<Stri
     lines.extend(indent(body));
     lines.push("}".to_owned());
     lines
+}
+
+/// A number a control reads: what the document wrote, or code that reads it at run time.
+enum Num {
+    Absent,
+    Lit(f64),
+    Expr(String),
+}
+
+impl Num {
+    fn lit(&self) -> Option<f64> {
+        match self {
+            Num::Lit(n) => Some(*n),
+            _ => None,
+        }
+    }
+
+    /// Swift code for the number, `default` when the document did not write one.
+    fn code(&self, default: &str) -> String {
+        match self {
+            Num::Absent => default.to_owned(),
+            Num::Lit(n) => swift::number_literal(*n),
+            Num::Expr(e) => e.clone(),
+        }
+    }
+}
+
+/// A control's `step`: a step that is not above 0 is the default, so it goes through the helper.
+/// A slider always needs one, because SwiftUI's slider without a step is continuous.
+fn step_code(step: &Num, always: bool) -> String {
+    match step {
+        Num::Lit(n) if *n > 0.0 => swift::number_literal(*n),
+        Num::Absent if !always => "1".to_owned(),
+        other => format!("weftStep({})", other.code("nil")),
+    }
 }
 
 /// A loop variable of an enclosing `<each>`.
@@ -468,6 +504,7 @@ impl<'a> Gen<'a> {
             Ty::String => ("String".to_owned(), "\"\"".to_owned()),
             Ty::Bool => ("Bool".to_owned(), "false".to_owned()),
             Ty::Int => ("Int".to_owned(), "0".to_owned()),
+            Ty::Double => ("Double".to_owned(), "0".to_owned()),
             Ty::Struct(at) => {
                 let type_name = unique_type(&format!("{}Data", upper_first(name)), taken);
                 let qualified = if scope.is_empty() {
@@ -596,16 +633,19 @@ impl<'a> Gen<'a> {
                 Leaf::Text => string_literal(s),
                 Leaf::Bool => (!s.is_empty() && s != "false").to_string(),
                 Leaf::Int => swift::number_literal(s.trim().parse::<f64>().unwrap_or(0.0)),
+                Leaf::Double => {
+                    swift::number_literal(controls::numeric(None, Some(s)).unwrap_or(0.0))
+                }
             },
             Value::Number(n) => match leaf {
                 Leaf::Text => string_literal(&swift::number_literal(*n)),
                 Leaf::Bool => (*n != 0.0).to_string(),
-                Leaf::Int => swift::number_literal(*n),
+                Leaf::Int | Leaf::Double => swift::number_literal(*n),
             },
             Value::Bool(b) => match leaf {
                 Leaf::Text => string_literal(&b.to_string()),
                 Leaf::Bool => b.to_string(),
-                Leaf::Int => if *b { "1" } else { "0" }.to_owned(),
+                Leaf::Int | Leaf::Double => if *b { "1" } else { "0" }.to_owned(),
             },
             Value::Token(path) => token_expr(path),
             Value::Bind { bind, not } => {
@@ -616,13 +656,13 @@ impl<'a> Gen<'a> {
                     (Leaf::Bool, false) => match ty {
                         Ty::Bool => read,
                         Ty::String => format!("!{read}.isEmpty"),
-                        Ty::Int => format!("{read} != 0"),
+                        Ty::Int | Ty::Double => format!("{read} != 0"),
                         _ => format!("weftOn({read})"),
                     },
                     (Leaf::Bool, true) => match ty {
                         Ty::Bool => format!("!{read}"),
                         Ty::String => format!("{read}.isEmpty"),
-                        Ty::Int => format!("{read} == 0"),
+                        Ty::Int | Ty::Double => format!("{read} == 0"),
                         _ => format!("!weftOn({read})"),
                     },
                     (Leaf::Text, _) => match ty {
@@ -632,6 +672,11 @@ impl<'a> Gen<'a> {
                     (Leaf::Int, _) => match ty {
                         Ty::Int => read,
                         _ => format!("weftInt({read})"),
+                    },
+                    (Leaf::Double, _) => match ty {
+                        Ty::Double => read,
+                        Ty::Int => format!("Double({read})"),
+                        _ => format!("weftDouble({read})"),
                     },
                 }
             }
@@ -653,7 +698,8 @@ impl<'a> Gen<'a> {
             }
             None => match leaf {
                 Leaf::Bool => (".constant(false)".to_owned(), false),
-                _ => (".constant(\"\")".to_owned(), false),
+                Leaf::Int | Leaf::Double => (".constant(0)".to_owned(), false),
+                Leaf::Text => (".constant(\"\")".to_owned(), false),
             },
         }
     }
@@ -1149,7 +1195,188 @@ impl<'a> Gen<'a> {
                 self.disabled(&mut v, props, loops);
                 v
             }
-            "radio-group" | "select" => {
+            "slider" => {
+                let (min, max, step) = self.number_props(props, loops);
+                let value = props.get("value").cloned();
+                let read = self.read_writable(value.as_ref(), Leaf::Double, loops);
+                let binding = self.number_binding(props, loops);
+                // `ClosedRange` traps when the bounds are reversed: a range is a literal only when
+                // the document wrote both bounds, as the renderer reads them (a `max` below `min`
+                // is `min`); otherwise the helper fills what is absent and applies the same rule.
+                let range = match (&min, &max) {
+                    (Num::Lit(_), Num::Lit(_)) => {
+                        let span = controls::slider_span(min.lit(), max.lit(), None);
+                        format!(
+                            "{}...{}",
+                            swift::number_literal(span.min),
+                            swift::number_literal(span.max)
+                        )
+                    }
+                    _ => format!("weftRange({}, {})", min.code("nil"), max.code("nil")),
+                };
+                let head = format!(
+                    "Slider(value: {binding}, in: {range}, step: {})",
+                    step_code(&step, true)
+                );
+                let mut v = V::new(block(&head, vec![format!("Text({label_text})")]));
+                v.captioned = true;
+                if let Some(a) = on.shift_remove("change") {
+                    v.modifier(format!(
+                        ".onChange(of: {read}) {{ {} }}",
+                        self.send(&a, id, loops)
+                    ));
+                }
+                self.disabled(&mut v, props, loops);
+                v
+            }
+            "stepper" => {
+                let (min, max, step) = self.number_props(props, loops);
+                let value = props.get("value").cloned();
+                let read = self.read_writable(value.as_ref(), Leaf::Double, loops);
+                let binding = self.number_binding(props, loops);
+                let mut args = vec![label_text.clone(), format!("value: {binding}")];
+                match (&min, &max) {
+                    (Num::Absent, Num::Absent) => {}
+                    (Num::Lit(_), Num::Lit(_)) => {
+                        let b = controls::stepper_bounds(min.lit(), max.lit(), None);
+                        args.push(format!(
+                            "in: {}...{}",
+                            swift::number_literal(b.min.unwrap_or(0.0)),
+                            swift::number_literal(b.max.unwrap_or(0.0))
+                        ));
+                    }
+                    // One open side has no range literal; the helper opens it.
+                    _ => args.push(format!(
+                        "in: weftBounds({}, {})",
+                        min.code("nil"),
+                        max.code("nil")
+                    )),
+                }
+                if !matches!(step, Num::Absent) {
+                    args.push(format!("step: {}", step_code(&step, false)));
+                }
+                let mut v = V::line(format!("Stepper({})", args.join(", ")));
+                v.captioned = true;
+                if let Some(a) = on.shift_remove("change") {
+                    v.modifier(format!(
+                        ".onChange(of: {read}) {{ {} }}",
+                        self.send(&a, id, loops)
+                    ));
+                }
+                self.disabled(&mut v, props, loops);
+                v
+            }
+            "date-picker" => {
+                let kind = props.shift_remove("type");
+                // An absent `type` is left out of the helper calls, so it reads back absent.
+                let type_arg = kind
+                    .as_ref()
+                    .map(|t| format!(", {}", self.expr(t, Leaf::Text, loops)))
+                    .unwrap_or_default();
+                let type_text = type_arg.trim_start_matches(", ").to_owned();
+                let components = match &kind {
+                    Some(Value::String(t)) => match DateType::of(t) {
+                        DateType::Date => "[.date]".to_owned(),
+                        DateType::Time => "[.hourAndMinute]".to_owned(),
+                        DateType::DateTime => "[.date, .hourAndMinute]".to_owned(),
+                    },
+                    None => "[.date]".to_owned(),
+                    Some(_) => format!("weftComponents({type_text})"),
+                };
+                let (binding, blank) = self.binding(props.get("value"), Leaf::Text, loops);
+                let read = self.read_writable(props.get("value"), Leaf::Text, loops);
+                if !blank {
+                    props.shift_remove("value");
+                }
+                let min = props.shift_remove("min");
+                let max = props.shift_remove("max");
+                let mut args = vec![
+                    label_text.clone(),
+                    format!("selection: weftDate({binding}{type_arg})"),
+                ];
+                if min.is_some() || max.is_some() {
+                    let edge = |this: &Self, v: &Option<Value>| match v {
+                        Some(v) => this.expr(v, Leaf::Text, loops),
+                        None => string_literal(""),
+                    };
+                    args.push(format!(
+                        "in: weftDates({}, {}{type_arg})",
+                        edge(self, &min),
+                        edge(self, &max)
+                    ));
+                }
+                args.push(format!("displayedComponents: {components}"));
+                let mut v = V::line(format!("DatePicker({})", args.join(", ")));
+                v.captioned = true;
+                // The text is a calendar date, not an instant: every device reads and shows it in
+                // one zone, so a value means the same everywhere.
+                v.modifier(".weftUTC()");
+                if let Some(a) = on.shift_remove("change") {
+                    v.modifier(format!(
+                        ".onChange(of: {read}) {{ {} }}",
+                        self.send(&a, id, loops)
+                    ));
+                }
+                self.disabled(&mut v, props, loops);
+                v
+            }
+            "color-picker" => {
+                let (binding, blank) = self.binding(props.get("value"), Leaf::Text, loops);
+                let read = self.read_writable(props.get("value"), Leaf::Text, loops);
+                if !blank {
+                    props.shift_remove("value");
+                }
+                let mut v = V::line(format!(
+                    "ColorPicker({label_text}, selection: weftColor({binding}), supportsOpacity: false)"
+                ));
+                v.captioned = true;
+                if let Some(a) = on.shift_remove("change") {
+                    v.modifier(format!(
+                        ".onChange(of: {read}) {{ {} }}",
+                        self.send(&a, id, loops)
+                    ));
+                }
+                self.disabled(&mut v, props, loops);
+                v
+            }
+            "combobox" => {
+                let (binding, blank) = self.binding(props.get("value"), Leaf::Text, loops);
+                let read = self.read_writable(props.get("value"), Leaf::Text, loops);
+                if !blank {
+                    props.shift_remove("value");
+                }
+                let mut args = vec![label_text.clone(), format!("text: {binding}")];
+                if let Some(p) = props.shift_remove("placeholder") {
+                    args.push(format!(
+                        "prompt: Text({})",
+                        self.expr(&p, Leaf::Text, loops)
+                    ));
+                }
+                let options = self.children(&node.children, loops, ctx, path);
+                // SwiftUI has no combobox: a text field beside a menu of the options, which the
+                // marker below reads back as one control.
+                let picker = block(&format!("Picker(\"\", selection: {binding})"), options);
+                let menu = and_block(
+                    block("Menu", picker),
+                    "label",
+                    vec!["Image(systemName: \"chevron.down\")".to_owned()],
+                );
+                let mut body = vec![format!("TextField({})", args.join(", "))];
+                body.extend(menu);
+                let mut v = V::new(block("HStack", body));
+                v.captioned = true;
+                v.container = true;
+                v.modifier(".weftCombobox()");
+                if let Some(a) = on.shift_remove("change") {
+                    v.modifier(format!(
+                        ".onChange(of: {read}) {{ {} }}",
+                        self.send(&a, id, loops)
+                    ));
+                }
+                self.disabled(&mut v, props, loops);
+                v
+            }
+            "radio-group" | "segmented-control" | "select" => {
                 let (binding, blank) = self.binding(props.get("value"), Leaf::Text, loops);
                 let read = self.read_writable(props.get("value"), Leaf::Text, loops);
                 if !blank {
@@ -1161,8 +1388,10 @@ impl<'a> Gen<'a> {
                     body,
                 ));
                 v.captioned = true;
-                if node.kind == "radio-group" {
-                    v.modifier(".pickerStyle(.inline)");
+                match node.kind.as_str() {
+                    "radio-group" => v.modifier(".pickerStyle(.inline)"),
+                    "segmented-control" => v.modifier(".pickerStyle(.segmented)"),
+                    _ => {}
                 }
                 if let Some(a) = on.shift_remove("change") {
                     v.modifier(format!(
@@ -1173,7 +1402,7 @@ impl<'a> Gen<'a> {
                 self.disabled(&mut v, props, loops);
                 v
             }
-            "radio" | "option" => {
+            "radio" | "option" | "segment" => {
                 let text = self.text_view(node, props, loops);
                 let mut v = V::line(text);
                 if let Some(value) = props.shift_remove("value") {
@@ -1454,13 +1683,49 @@ impl<'a> Gen<'a> {
         v
     }
 
+    /// The `min`, `max` and `step` of a slider or stepper, taken out of `props`.
+    fn number_props(&self, props: &mut IndexMap<String, Value>, loops: &[Loop]) -> (Num, Num, Num) {
+        let mut take = |name: &str| self.number(props.shift_remove(name).as_ref(), loops);
+        let min = take("min");
+        let max = take("max");
+        let step = take("step");
+        (min, max, step)
+    }
+
+    /// The `Binding<Double>` of a slider or stepper. A literal is a constant; a zero reads the
+    /// same as an absent value, so it keeps its marker, like blank text.
+    fn number_binding(&self, props: &mut IndexMap<String, Value>, loops: &[Loop]) -> String {
+        let (binding, _) = self.binding(props.get("value"), Leaf::Double, loops);
+        let zero = matches!(self.number(props.get("value"), loops), Num::Lit(n) if n == 0.0);
+        if !zero {
+            props.shift_remove("value");
+        }
+        binding
+    }
+
+    /// A number prop of the number controls: absent, a literal, or a Swift expression.
+    fn number(&self, value: Option<&Value>, loops: &[Loop]) -> Num {
+        match value {
+            None => Num::Absent,
+            Some(Value::Number(n)) => {
+                controls::numeric(Some(*n), None).map_or(Num::Absent, Num::Lit)
+            }
+            Some(Value::String(s)) => {
+                controls::numeric(None, Some(s)).map_or(Num::Absent, Num::Lit)
+            }
+            Some(v @ Value::Bind { .. }) => Num::Expr(self.expr(v, Leaf::Double, loops)),
+            Some(_) => Num::Absent,
+        }
+    }
+
     /// The value a writable prop currently holds, for `.onChange(of:)`.
     fn read_writable(&self, value: Option<&Value>, leaf: Leaf, loops: &[Loop]) -> String {
         match value {
             Some(v) => self.expr(v, leaf, loops),
             None => match leaf {
                 Leaf::Bool => "false".to_owned(),
-                _ => string_literal(""),
+                Leaf::Int | Leaf::Double => "0".to_owned(),
+                Leaf::Text => string_literal(""),
             },
         }
     }

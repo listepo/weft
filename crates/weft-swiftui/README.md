@@ -67,6 +67,12 @@ A file for a screen whose id is `login` contains these parts, in order:
 | `switch` | `Toggle` with `.toggleStyle(.switch)` |
 | `radio-group` | `Picker` with `.pickerStyle(.inline)` |
 | `select` | `Picker` |
+| `segmented-control`, `segment` | `Picker` with `.pickerStyle(.segmented)` |
+| `slider` | `Slider(value:in:step:)` over a `Double` in the model |
+| `stepper` | `Stepper(_:value:in:step:)` over a `Double` in the model |
+| `date-picker` | `DatePicker` over `weftDate(…)`, which converts the text to a `Date` in UTC; `type` sets `displayedComponents` |
+| `color-picker` | `ColorPicker(supportsOpacity: false)` over `weftColor(…)`, which converts `#rrggbb` text to a `Color` |
+| `combobox` | an `HStack` of a `TextField` and a `Menu` of the options, marked `.weftCombobox()` |
 | `radio`, `option` | `Text(…).tag(value)` inside the picker |
 | `list` | `List`; the `empty` slot goes in an `.overlay` shown when the list has nothing to show |
 | `item` | `HStack` |
@@ -145,7 +151,7 @@ The importer reads the call back as the kind, through the same catalog. A writab
 The importer reads the first view that no other view in the file uses, and inlines the views it uses from the same file. Source the generator printed comes back unchanged. Other source imports with these rules:
 
 - **Containers.** `VStack`, `HStack` and `LazyHStack` become `stack`. `LazyVGrid` and `LazyHGrid` become `grid`. `List` becomes `list`, `Form` becomes `form`, and `TabView` becomes `tabs`.
-- **Controls.** `TextField`, `SecureField` and `TextEditor` become `field`. `Toggle` becomes `switch`, or `checkbox` with a checkbox style. `Picker` becomes `select`, or `radio-group` when its style is inline, radio-group or segmented.
+- **Controls.** `TextField`, `SecureField` and `TextEditor` become `field`. `Toggle` becomes `switch`, or `checkbox` with a checkbox style. `Picker` becomes `select`, `radio-group` when its style is inline or radio-group, or `segmented-control` when it is segmented. `Slider`, `Stepper`, `DatePicker` and `ColorPicker` become `slider`, `stepper`, `date-picker` and `color-picker`; the generated `weftRange`, `weftBounds`, `weftStep`, `weftDate`, `weftDates` and `weftColor` calls read back as the props they were written from, with a `nil` argument for a prop the document left out. An `HStack` marked `.weftCombobox()` becomes a `combobox`.
 - **Overlays.** `.sheet` and `.alert` become a `dialog`.
 - **Repetition and conditions.** `ForEach` over a data path becomes `<each>`. An `if` on a data path becomes `hidden`.
 - **Actions.** `send(.case)` and `perform(.case)` keep the action, and so does a call such as `onSave()`.

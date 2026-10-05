@@ -678,8 +678,8 @@ impl<'a> Reader<'a> {
                 };
                 match (name, only) {
                     (
-                        "weftText" | "weftInt" | "weftColumns" | "weftURL" | "weftOn" | "String"
-                        | "Int" | "Double" | "Text",
+                        "weftText" | "weftInt" | "weftDouble" | "weftStep" | "weftColumns"
+                        | "weftURL" | "weftOn" | "String" | "Int" | "Double" | "Text",
                         Some(inner),
                     ) => self.value_inner(inner, leaf, path, d),
                     _ => match c.callee.as_ref() {
@@ -1110,6 +1110,7 @@ impl<'a> Reader<'a> {
 
     fn element_view(&mut self, name: &str, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
         match name {
+            "HStack" if mods.has("weftCombobox") => self.combobox(call, mods, path),
             "VStack" | "HStack" | "LazyHStack" => self.stack(name, call, mods, path),
             "LazyVGrid" | "LazyHGrid" => self.grid(call, mods, path),
             "Grid" => self.container("table", call, mods, Place::Table, path),
@@ -1161,6 +1162,10 @@ impl<'a> Reader<'a> {
             "Form" => self.form(call, mods, path),
             "TextField" | "SecureField" | "TextEditor" => self.field(name, call, mods, path),
             "Toggle" => self.toggle(call, mods, path),
+            "Slider" => self.slider(call, mods, path),
+            "Stepper" => self.stepper(call, mods, path),
+            "DatePicker" => self.date_picker(call, mods, path),
+            "ColorPicker" => self.color_picker(call, mods, path),
             "Picker" => self.picker(call, mods, path),
             "List" => self.list(call, mods, path),
             "TabView" => self.tabs(call, mods, path),
@@ -1745,7 +1750,7 @@ impl<'a> Reader<'a> {
             "column" => {
                 mods.take_flag("font", "headline");
             }
-            "radio" | "option" => {
+            "radio" | "option" | "segment" => {
                 match mods.take("tag").and_then(|m| first_arg(&m.args).cloned()) {
                     Some(e) => {
                         if let Some(v) = self.value(&e, Leaf::Text, &here) {
@@ -1924,6 +1929,7 @@ impl<'a> Reader<'a> {
                     // A blank constant is what `generate` prints for an absent prop.
                     Some(Value::String(s)) if s.is_empty() => None,
                     Some(Value::Bool(false)) => None,
+                    Some(Value::Number(n)) if n == 0.0 && leaf == Leaf::Double => None,
                     other => other,
                 }
             }
@@ -1962,12 +1968,7 @@ impl<'a> Reader<'a> {
             Leaf::Text,
             &here,
         );
-        if let Some(Expr::Call(p)) = arg(&call.args, "prompt")
-            && let Some(e) = first_arg(&p.args)
-            && let Some(v) = self.value(e, Leaf::Text, &here)
-        {
-            node.props.insert("placeholder".to_owned(), v);
-        }
+        self.placeholder(&mut node, call, &here);
         let mut field_type = match name {
             "SecureField" => Some(Value::String("password".to_owned())),
             "TextEditor" => Some(Value::String("multiline".to_owned())),
@@ -2002,6 +2003,193 @@ impl<'a> Reader<'a> {
         self.finish(node, mods, &here)
     }
 
+    /// `prompt: Text(…)` is the placeholder.
+    fn placeholder(&mut self, node: &mut Node, call: &Call, path: &str) {
+        if let Some(Expr::Call(p)) = arg(&call.args, "prompt")
+            && let Some(e) = first_arg(&p.args)
+            && let Some(v) = self.value(e, Leaf::Text, path)
+        {
+            node.props.insert("placeholder".to_owned(), v);
+        }
+    }
+
+    /// A number prop read from `e`; `nil` and anything else that is not a number is absent.
+    fn number(&mut self, node: &mut Node, prop: &str, e: Option<&Expr>, path: &str) {
+        if let Some(v) = e.and_then(|e| self.value(e, Leaf::Double, path)) {
+            node.props.insert(prop.to_owned(), v);
+        }
+    }
+
+    /// The two ends of `lo...hi`, or of the helper that keeps a range from being reversed.
+    fn range(e: Option<&Expr>) -> (Option<&Expr>, Option<&Expr>) {
+        match e {
+            Some(Expr::Binary { left, op, right }) if op == "..." => {
+                (Some(left.as_ref()), Some(right.as_ref()))
+            }
+            Some(Expr::Call(c)) if matches!(ident(&c.callee), Some("weftRange" | "weftBounds")) => {
+                let at = |i: usize| c.args.get(i).map(|a| &a.value);
+                (at(0), at(1))
+            }
+            _ => (None, None),
+        }
+    }
+
+    fn slider(&mut self, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
+        let Some((mut node, here)) = self.element("slider", &mut mods, "", path) else {
+            return vec![];
+        };
+        self.caption(&mut node, call, &here);
+        self.writes(
+            &mut node,
+            "value",
+            arg(&call.args, "value"),
+            Leaf::Double,
+            &here,
+        );
+        let (lo, hi) = Self::range(arg(&call.args, "in"));
+        self.number(&mut node, "min", lo, &here);
+        self.number(&mut node, "max", hi, &here);
+        self.number(&mut node, "step", arg(&call.args, "step"), &here);
+        self.finish(node, mods, &here)
+    }
+
+    fn stepper(&mut self, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
+        let Some((mut node, here)) = self.element("stepper", &mut mods, "", path) else {
+            return vec![];
+        };
+        self.caption(&mut node, call, &here);
+        self.writes(
+            &mut node,
+            "value",
+            arg(&call.args, "value"),
+            Leaf::Double,
+            &here,
+        );
+        let (lo, hi) = Self::range(arg(&call.args, "in"));
+        self.number(&mut node, "min", lo, &here);
+        self.number(&mut node, "max", hi, &here);
+        self.number(&mut node, "step", arg(&call.args, "step"), &here);
+        self.finish(node, mods, &here)
+    }
+
+    fn date_picker(&mut self, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
+        let Some((mut node, here)) = self.element("date-picker", &mut mods, "", path) else {
+            return vec![];
+        };
+        self.caption(&mut node, call, &here);
+        mods.take("weftUTC");
+        // `weftDate(binding, type)` is what `generate` prints; a plain `Date` binding is not data.
+        let selection = arg(&call.args, "selection");
+        let (binding, kind) = match selection {
+            // The helper leaves an absent `type` out, so the second argument is the `type` prop.
+            Some(Expr::Call(c)) if ident(&c.callee) == Some("weftDate") => (
+                c.args.first().map(|a| &a.value),
+                c.args
+                    .get(1)
+                    .and_then(|a| self.value(&a.value, Leaf::Text, &here)),
+            ),
+            other => {
+                let components = Self::components(arg(&call.args, "displayedComponents"));
+                (
+                    other,
+                    components.filter(|k| *k != Value::String("date".to_owned())),
+                )
+            }
+        };
+        self.writes(&mut node, "value", binding, Leaf::Text, &here);
+        if let Some(kind) = kind {
+            node.props.insert("type".to_owned(), kind);
+        }
+        if let Some(Expr::Call(c)) = arg(&call.args, "in")
+            && ident(&c.callee) == Some("weftDates")
+        {
+            for (prop, i) in [("min", 0), ("max", 1)] {
+                if let Some(v) = c
+                    .args
+                    .get(i)
+                    .and_then(|a| self.value(&a.value, Leaf::Text, &here))
+                    && v != Value::String(String::new())
+                {
+                    node.props.insert(prop.to_owned(), v);
+                }
+            }
+        }
+        self.finish(node, mods, &here)
+    }
+
+    /// The `type` a hand-written `displayedComponents: [.date, .hourAndMinute]` stands for.
+    fn components(e: Option<&Expr>) -> Option<Value> {
+        let names: Vec<&str> = match e? {
+            Expr::Array(items) => items.iter().filter_map(|i| implicit(Some(i))).collect(),
+            other => implicit(Some(other)).into_iter().collect(),
+        };
+        let kind = match (names.contains(&"date"), names.contains(&"hourAndMinute")) {
+            (true, true) => "datetime",
+            (false, true) => "time",
+            _ => "date",
+        };
+        Some(Value::String(kind.to_owned()))
+    }
+
+    fn color_picker(&mut self, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
+        let Some((mut node, here)) = self.element("color-picker", &mut mods, "", path) else {
+            return vec![];
+        };
+        self.caption(&mut node, call, &here);
+        let binding = match arg(&call.args, "selection") {
+            Some(Expr::Call(c)) if ident(&c.callee) == Some("weftColor") => {
+                c.args.first().map(|a| &a.value)
+            }
+            other => other,
+        };
+        self.writes(&mut node, "value", binding, Leaf::Text, &here);
+        self.finish(node, mods, &here)
+    }
+
+    /// The text field and the menu of options that `generate` prints for a combobox.
+    fn combobox(&mut self, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
+        mods.take("weftCombobox");
+        let Some((mut node, here)) = self.element("combobox", &mut mods, "", path) else {
+            return vec![];
+        };
+        let body = closure(&call.closures, None)
+            .map(|c| c.body.clone())
+            .unwrap_or_default();
+        let calls: Vec<&Call> = body
+            .iter()
+            .filter_map(|s| match s {
+                Stmt::Expr(Expr::Call(c)) => Some(c),
+                _ => None,
+            })
+            .collect();
+        if let Some(field) = calls.iter().find(|c| name_is(c, "TextField")) {
+            self.caption(&mut node, field, &here);
+            self.writes(
+                &mut node,
+                "value",
+                arg(&field.args, "text"),
+                Leaf::Text,
+                &here,
+            );
+            self.placeholder(&mut node, field, &here);
+        }
+        let options = calls
+            .iter()
+            .find(|c| name_is(c, "Menu"))
+            .and_then(|m| closure(&m.closures, None))
+            .and_then(|c| {
+                c.body.iter().find_map(|s| match s {
+                    Stmt::Expr(Expr::Call(p)) if name_is(p, "Picker") => {
+                        closure(&p.closures, None).map(|c| c.body.clone())
+                    }
+                    _ => None,
+                })
+            })
+            .unwrap_or_default();
+        node.children = self.nested(|r| r.views(&options, Place::Choice("option"), &here));
+        self.finish(node, mods, &here)
+    }
+
     fn toggle(&mut self, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
         let checkbox = mods.0.iter().any(|m| {
             m.name == "toggleStyle"
@@ -2031,14 +2219,10 @@ impl<'a> Reader<'a> {
         let style = mods
             .take("pickerStyle")
             .and_then(|m| implicit(first_arg(&m.args)).map(str::to_owned));
-        let radio = matches!(
-            style.as_deref(),
-            Some("inline" | "radioGroup" | "segmented")
-        );
-        let (kind, child) = if radio {
-            ("radio-group", "radio")
-        } else {
-            ("select", "option")
+        let (kind, child) = match style.as_deref() {
+            Some("segmented") => ("segmented-control", "segment"),
+            Some("inline" | "radioGroup") => ("radio-group", "radio"),
+            _ => ("select", "option"),
         };
         let Some((mut node, here)) = self.element(kind, &mut mods, "", path) else {
             return vec![];

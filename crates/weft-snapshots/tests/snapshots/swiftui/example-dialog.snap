@@ -98,6 +98,10 @@ fileprivate extension View {
     func weftProp(_ name: String, _ value: Double) -> some View { self }
     /// Removes the view from layout and accessibility while `hidden` is true.
     func weftHidden(_ hidden: Bool) -> some View { modifier(WeftHidden(hidden: hidden)) }
+    /// Reads and shows a date-picker's text in UTC: the text is a calendar date, not an instant.
+    func weftUTC() -> some View { environment(\.timeZone, TimeZone(secondsFromGMT: 0) ?? .current) }
+    /// Marks the text field and option menu beside it as one Weft combobox.
+    func weftCombobox() -> some View { self }
     /// Names the `<each>` element the repeated content came from.
     func weftEach(_ id: String) -> some View { self }
     /// The keyboard a text field of this Weft `type` asks for.
@@ -147,16 +151,101 @@ fileprivate func weftURL(_ href: String) -> URL? {
 // Weft reads any value as text, a flag or a number (SPEC §2.1); these convert the model's types.
 fileprivate func weftText(_ v: Int) -> String { String(v) }
 fileprivate func weftText(_ v: Bool) -> String { v ? "true" : "false" }
+fileprivate func weftText(_ v: Double) -> String {
+    v.isFinite && v == v.rounded() && abs(v) < 1e15 ? String(Int(v)) : String(v)
+}
 fileprivate func weftText<T>(_ v: T) -> String { "" }
 // An array or object is true even when empty (SPEC §2.1): only the model's scalars can be false.
 fileprivate func weftOn<T>(_ v: T) -> Bool { true }
 fileprivate func weftInt(_ v: String) -> Int { Int(v) ?? 0 }
 fileprivate func weftInt(_ v: Bool) -> Int { v ? 1 : 0 }
+fileprivate func weftInt(_ v: Double) -> Int { v.isFinite && abs(v) < 1e15 ? Int(v.rounded()) : 0 }
 fileprivate func weftInt<T>(_ v: T) -> Int { 0 }
+// Only plain decimal text is a number; `0x10`, `inf` and `nan` are data that does not fit.
+fileprivate func weftDouble(_ v: String) -> Double {
+    let t = v.trimmingCharacters(in: .whitespaces)
+    guard !t.contains(where: { "xX".contains($0) }), let d = Double(t), d.isFinite else { return 0 }
+    return d
+}
+fileprivate func weftDouble(_ v: Bool) -> Double { v ? 1 : 0 }
+fileprivate func weftDouble<T>(_ v: T) -> Double { 0 }
 fileprivate func weftColumns(_ v: Int) -> Int { max(1, v) }
 fileprivate func weftHeadingLevel(_ v: Int) -> AccessibilityHeadingLevel {
     switch min(max(v, 1), 6) { case 1: .h1; case 2: .h2; case 3: .h3; case 4: .h4; case 5: .h5; default: .h6 }
 }
 fileprivate func weftHeadingFont(_ v: Int) -> Font {
     switch min(max(v, 1), 6) { case 1: .largeTitle; case 2: .title; case 3: .title2; case 4: .title3; case 5: .headline; default: .subheadline }
+}
+
+// The number controls. A `ClosedRange` traps when its bounds are reversed, so every range a
+// document can set goes through these, which apply the reference renderer's rules.
+fileprivate func weftRange(_ lo: Double?, _ hi: Double?) -> ClosedRange<Double> {
+    let low = lo.flatMap { $0.isFinite ? $0 : nil } ?? 0
+    let high = hi.flatMap { $0.isFinite ? $0 : nil } ?? 100
+    return low...max(high, low)
+}
+fileprivate func weftBounds(_ lo: Double?, _ hi: Double?) -> ClosedRange<Double> {
+    let low = lo.flatMap { $0.isFinite ? $0 : nil } ?? -Double.greatestFiniteMagnitude
+    let high = hi.flatMap { $0.isFinite ? $0 : nil } ?? Double.greatestFiniteMagnitude
+    return low...max(high, low)
+}
+fileprivate func weftStep(_ s: Double?) -> Double { s.flatMap { $0.isFinite && $0 > 0 ? $0 : nil } ?? 1 }
+
+// A date-picker's value is text in a fixed format (SPEC §5.1); SwiftUI wants a `Date`. Text that
+// is not exactly a date of that format reads as the epoch, because `DatePicker` cannot be blank.
+fileprivate func weftFormatter(_ type: String) -> DateFormatter {
+    let f = DateFormatter()
+    f.locale = Locale(identifier: "en_US_POSIX")
+    f.timeZone = TimeZone(secondsFromGMT: 0)
+    switch type {
+    case "time": f.dateFormat = "HH:mm"
+    case "datetime": f.dateFormat = "yyyy-MM-dd'T'HH:mm"
+    default: f.dateFormat = "yyyy-MM-dd"
+    }
+    return f
+}
+fileprivate func weftDate(_ text: Binding<String>, _ type: String = "date") -> Binding<Date> {
+    Binding(
+        get: {
+            let f = weftFormatter(type)
+            let t = text.wrappedValue
+            // The parser accepts `2025-1-5`; Weft's format has fixed widths.
+            guard let d = f.date(from: t), f.string(from: d) == t else { return Date(timeIntervalSince1970: 0) }
+            return d
+        },
+        set: { text.wrappedValue = weftFormatter(type).string(from: $0) }
+    )
+}
+fileprivate func weftDates(_ lo: String, _ hi: String, _ type: String = "date") -> ClosedRange<Date> {
+    let f = weftFormatter(type)
+    let low = f.date(from: lo) ?? .distantPast
+    let high = f.date(from: hi) ?? .distantFuture
+    return low...max(high, low)
+}
+fileprivate func weftComponents(_ type: String) -> DatePickerComponents {
+    switch type { case "time": [.hourAndMinute]; case "datetime": [.date, .hourAndMinute]; default: [.date] }
+}
+
+// A color-picker's value is `#rrggbb` text; anything else shows black.
+fileprivate func weftColor(_ hex: Binding<String>) -> Binding<Color> {
+    Binding(
+        get: {
+            let s = hex.wrappedValue
+            let digits = s.hasPrefix("#") ? String(s.dropFirst()) : ""
+            guard digits.count == 6, digits.allSatisfy(\.isHexDigit), let n = UInt32(digits, radix: 16) else { return .black }
+            return Color(.sRGB, red: Double((n >> 16) & 255) / 255, green: Double((n >> 8) & 255) / 255, blue: Double(n & 255) / 255, opacity: 1)
+        },
+        set: { hex.wrappedValue = weftHex($0) }
+    )
+}
+fileprivate func weftHex(_ c: Color) -> String {
+    #if canImport(UIKit)
+    var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+    UIColor(c).getRed(&r, green: &g, blue: &b, alpha: &a)
+    #else
+    let ns = NSColor(c).usingColorSpace(.sRGB) ?? .black
+    let (r, g, b) = (ns.redComponent, ns.greenComponent, ns.blueComponent)
+    #endif
+    func byte(_ x: CGFloat) -> Int { Int((min(max(x, 0), 1) * 255).rounded()) }
+    return String(format: "#%02x%02x%02x", byte(r), byte(g), byte(b))
 }

@@ -82,7 +82,7 @@ impl<'c> KindIndex<'c> {
             }
             by_role
                 .entry(def.role.as_str())
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(kind.as_str());
         }
         KindIndex {
