@@ -23,17 +23,24 @@ If an `AGENTS.md` or `CLAUDE.md` exists higher in the tree, follow it too; on co
 - **Every new tool option gets a `weft.json` key in the same change.** A flag of the CLI, an argument of a script or an MCP server setting that a user can choose is also a setting of the project file: a row in `SPEC.md` §10.6, an entry in the table of `crates/weft-catalog/src/settings.rs` (`WEFT_UPDATE_FIXTURES=1 cargo test -p weft-catalog --test schema` regenerates `schemas/weft.schema.json`), and the tool reading it with the precedence argument > `weft.json` > default. A new export or import target adds its section under `export.<target>` or `import.<target>`.
 - **Tests** run with Vitest (`describe`, `test`, hooks from `vitest`) and assert with `node:assert/strict`; property tests use `fast-check`. Vitest has no subtests: one `describe` per case with a `test` per check. One `vitest.config.ts` at the root serves every package. Test files live in `<package>/test/*.test.ts`.
 - **Measurement history.** Every benchmark run that is kept, full or partial, adds one row to the History table in `test.md` in the same commit as its raw results in `bench/results/`: date, commit the run used, provider and model, run, samples, headline rates, results file, notes. Rows are never edited or removed; a re-score or a rerun adds a new row. A change to the method (tasks, checks, prompt, criteria) updates the method sections of `test.md` in the same commit.
-- **Layout.** `crates/` (the Rust core, catalog, CLI, `weft-binding` layer with its `weft-wasm` and `weft-node` bindings, the `weft-swiftui` generator and importer, the `weft-web` HTML, React and SolidJS generators and importers, and `weft-import`, the parts every importer shares), `packages/core` (model types, the WebAssembly wrappers, CLI), `packages/catalog` (core catalog and tokens), `corpus/` (reference screens in every compared format), `bench/` (benchmark harness), `plugins/xcode` (Swift: the SwiftPM and Xcode plugins and the Source Editor Extension; it needs macOS with Xcode, its tests skip elsewhere, and it takes `weft` from the artifact bundle that `moon run xcode-plugin:bundle` builds).
+- **Layout.** `crates/` (the Rust core, catalog, CLI, `weft-binding` layer with its `weft-wasm` and `weft-node` bindings, the `weft-swiftui` generator and importer, the `weft-web` HTML, React and SolidJS generators and importers, and `weft-import`, the parts every importer shares), `packages/core` (model types, the WebAssembly wrappers, CLI), `packages/catalog` (core catalog and tokens), `corpus/` (reference screens in every compared format), `bench/` (benchmark harness), `tooling/` (the affected-checks script, `moon run root:changed`), `plugins/xcode` (Swift: the SwiftPM and Xcode plugins and the Source Editor Extension; it needs macOS with Xcode, its tests skip elsewhere, and it takes `weft` from the artifact bundle that `moon run xcode-plugin:bundle` builds).
 
 ## Commands
 
 ```bash
 mise install       # every program, at the pinned versions
 pnpm install
+moon run root:changed # the iteration loop: only the checks the change affects (`-- --dry-run` prints the plan)
 moon ci            # typecheck, lint, every package's tests (cached); `pnpm run ci` does the same
 moon run core:test # one package
 # one file, from the package folder: pnpm exec vitest run --config ../../vitest.config.ts test/<file>.test.ts
 moon run root:fmt  # format
+```
+
+**Iterate with `moon run root:changed`, merge on the full check.** `tooling/changed.ts` diffs the working tree against the merge base with `main`, then runs the Rust tests of the changed crates and their dependents (nextest `rdeps()`, clippy on the same crates) and the TypeScript projects the change reaches, only the Vitest tests that import a changed module where imports are the link. It falls back to the full check, saying why, when the change set cannot be computed or a lockfile, toolchain pin, moon or workspace configuration changed. Its rules live in `tooling/select.ts` (tests in `tooling/test/`); a task whose declared inputs name files its sources do not, or a test that reads a sibling package by a path the scan in `changed.ts` cannot see, makes the selection miss it, so fix the declaration rather than the loop. Before a merge, run the full check, which must exit 0:
+
+```bash
+moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes
 ```
 
 **SwiftUI screenshots and the simulator.** `packages/visual/test/swiftui.test.ts` drives one iOS Simulator app id, so concurrent runs must not share a device. `WEFT_SIMULATOR=shared` (default) serialises runs on one device with a lock in `~/Library/Caches/weft-visual/`; `WEFT_SIMULATOR=own` gives your worktree a device named `weft-visual-<worktree folder>`. When you work in a worktree while other agents may run the suite, use `own`, and delete the device with `xcrun simctl delete weft-visual-<folder>` when you remove the worktree (list them with `xcrun simctl list devices | grep weft-visual-`). Details in `packages/visual/README.md`.
