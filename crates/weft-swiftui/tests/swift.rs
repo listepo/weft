@@ -34,6 +34,27 @@ fn generate_all() -> Vec<(String, String)> {
 }
 
 #[test]
+fn refused_screens_are_refused_with_the_reason() {
+    let catalog = common::catalog();
+    let tokens = common::tokens();
+    let refused: Vec<_> = common::all_screens()
+        .into_iter()
+        .filter(|s| common::REFUSED.contains(&s.name.as_str()))
+        .collect();
+    assert_eq!(refused.len(), common::REFUSED.len());
+    for screen in refused {
+        let document = common::parse_screen(&screen.markup, &catalog, &tokens);
+        let options = GenerateOptions {
+            catalog: &catalog,
+            tokens: &tokens,
+            name: None,
+        };
+        let error = generate(&document, &options).unwrap_err().to_string();
+        assert!(error.contains("array index"), "{}: {error}", screen.name);
+    }
+}
+
+#[test]
 fn every_screen_generates_deterministically() {
     let first = generate_all();
     let second = generate_all();
