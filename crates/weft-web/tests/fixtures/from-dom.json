@@ -4203,6 +4203,176 @@
   }
  },
  {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"tilt\" aria-label=\"Card flips\"><h1 data-weft-id=\"title\">Card flips</h1><div data-weft-id=\"deck\" style=\"gap:var(--weft-space-lg);display:flex;flex-direction:column\"><section data-weft-id=\"front\" aria-label=\"Front side\" style=\"transform:perspective(800px) rotateY(25deg)\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"front-title\">Front</h2></div><div data-weft-id=\"front-text\">The card shows its front side.</div><button data-weft-id=\"front-flip\" type=\"button\" data-variant=\"primary\">Flip</button></section><section data-weft-id=\"back\" aria-label=\"Back side\" style=\"transform:perspective(800px) rotateY(180deg)\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"back-title\">Back</h2></div><div data-weft-id=\"back-text\">The back is mirrored in the plane of the screen.</div><button data-weft-id=\"back-flip\" type=\"button\">Flip</button></section><section data-weft-id=\"lean\" aria-label=\"Leaning card\" style=\"transform:perspective(600px) rotateX(20deg) rotateZ(-6deg)\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"lean-title\">Leaning</h2></div><div data-weft-id=\"lean-text\">Tilted back and turned a little in the plane.</div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Note</span><input data-weft-id=\"lean-note\" aria-label=\"Note\" type=\"text\" placeholder=\"Add a note\" value=\"Check the edges\"/></label></div></section></div></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "tilt",
+     "props": {
+      "label": "Card flips"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "title",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Card flips"
+       ]
+      },
+      {
+       "kind": "stack",
+       "id": "deck",
+       "children": [
+        {
+         "kind": "section",
+         "id": "front",
+         "props": {
+          "label": "Front side"
+         },
+         "children": [
+          {
+           "kind": "heading",
+           "id": "front-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Front"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "front-text",
+           "children": [
+            "The card shows its front side."
+           ]
+          },
+          {
+           "kind": "button",
+           "id": "front-flip",
+           "props": {
+            "variant": "primary"
+           },
+           "children": [
+            "Flip"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "section",
+         "id": "back",
+         "props": {
+          "label": "Back side"
+         },
+         "children": [
+          {
+           "kind": "heading",
+           "id": "back-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Back"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "back-text",
+           "children": [
+            "The back is mirrored in the plane of the screen."
+           ]
+          },
+          {
+           "kind": "button",
+           "id": "back-flip",
+           "children": [
+            "Flip"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "section",
+         "id": "lean",
+         "props": {
+          "label": "Leaning card"
+         },
+         "children": [
+          {
+           "kind": "heading",
+           "id": "lean-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Leaning"
+           ]
+          },
+          {
+           "kind": "text",
+           "id": "lean-text",
+           "children": [
+            "Tilted back and turned a little in the plane."
+           ]
+          },
+          {
+           "kind": "field",
+           "id": "lean-note",
+           "props": {
+            "label": "Note",
+            "placeholder": "Add a note",
+            "value": "Check the edges"
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#tilt",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#tilt",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#tilt",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#tilt",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#tilt",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#tilt/stack#deck",
+     "note": "gap var(--weft-space-lg) cannot be mapped back to a design token"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
   "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"todos\" aria-label=\"Tasks\"><h1 data-weft-id=\"title\">Tasks</h1><form data-weft-id=\"add-form\"><div data-weft-id=\"add-row\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">New task</span><input data-weft-id=\"draft\" aria-label=\"New task\" type=\"text\" value=\"\"/></label></div><button data-weft-id=\"add\" type=\"submit\" disabled=\"\" data-variant=\"primary\">Add</button></div></form><ul data-weft-id=\"list\"><li data-weft-id=\"todo[0]\"><label><input data-weft-id=\"todo-done[0]\" type=\"checkbox\" aria-label=\"Write spec\" checked=\"\"/><span aria-hidden=\"true\">Write spec</span></label><button data-weft-id=\"todo-remove[0]\" type=\"button\">Remove</button></li><li data-weft-id=\"todo[1]\"><label><input data-weft-id=\"todo-done[1]\" type=\"checkbox\" aria-label=\"Build parser\"/><span aria-hidden=\"true\">Build parser</span></label><button data-weft-id=\"todo-remove[1]\" type=\"button\">Remove</button></li></ul><div data-weft-id=\"summary\" style=\"gap:var(--weft-space-xs);display:flex;flex-direction:row;align-items:center\"><div data-weft-id=\"remaining\">1</div><div data-weft-id=\"remaining-label\">items left</div></div></main></body></html>\n",
   "result": {
    "document": {

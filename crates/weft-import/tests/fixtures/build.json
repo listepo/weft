@@ -3963,6 +3963,256 @@
   "sems": [
    {
     "role": "main",
+    "name": "Card flips",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "heading",
+      "name": "Card flips",
+      "states": {
+       "level": 1
+      },
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "region",
+      "name": "Front side",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "heading",
+        "name": "Front",
+        "states": {
+         "level": 2
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "text",
+        "name": "The card shows its front side.",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "button",
+        "name": "Flip",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "region",
+      "name": "Back side",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "heading",
+        "name": "Back",
+        "states": {
+         "level": 2
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "text",
+        "name": "The back is mirrored in the plane of the screen.",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "button",
+        "name": "Flip",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "region",
+      "name": "Leaning card",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "heading",
+        "name": "Leaning",
+        "states": {
+         "level": 2
+        },
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "text",
+        "name": "Tilted back and turned a little in the plane.",
+        "states": {},
+        "props": {},
+        "children": []
+       },
+       {
+        "role": "textbox",
+        "name": "Note",
+        "states": {},
+        "props": {},
+        "children": [
+         {
+          "role": "text",
+          "name": "Check the edges",
+          "states": {},
+          "props": {},
+          "children": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-card-flips",
+     "props": {
+      "label": "Card flips"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "heading-card-flips",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Card flips"
+       ]
+      },
+      {
+       "kind": "section",
+       "id": "section-front-side",
+       "props": {
+        "label": "Front side"
+       },
+       "children": [
+        {
+         "kind": "heading",
+         "id": "heading-front",
+         "props": {
+          "level": 2
+         },
+         "children": [
+          "Front"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "text-the-card-shows-its-front-side",
+         "children": [
+          "The card shows its front side."
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "button-flip",
+         "children": [
+          "Flip"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "section",
+       "id": "section-back-side",
+       "props": {
+        "label": "Back side"
+       },
+       "children": [
+        {
+         "kind": "heading",
+         "id": "heading-back",
+         "props": {
+          "level": 2
+         },
+         "children": [
+          "Back"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "text-the-back-is-mirrored-in-the-plan",
+         "children": [
+          "The back is mirrored in the plane of the screen."
+         ]
+        },
+        {
+         "kind": "button",
+         "id": "button-flip-2",
+         "children": [
+          "Flip"
+         ]
+        }
+       ]
+      },
+      {
+       "kind": "section",
+       "id": "section-leaning-card",
+       "props": {
+        "label": "Leaning card"
+       },
+       "children": [
+        {
+         "kind": "heading",
+         "id": "heading-leaning",
+         "props": {
+          "level": 2
+         },
+         "children": [
+          "Leaning"
+         ]
+        },
+        {
+         "kind": "text",
+         "id": "text-tilted-back-and-turned-a-little",
+         "children": [
+          "Tilted back and turned a little in the plane."
+         ]
+        },
+        {
+         "kind": "field",
+         "id": "field-note",
+         "props": {
+          "label": "Note",
+          "value": "Check the edges"
+         }
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-card-flips"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
     "name": "Tasks",
     "states": {},
     "props": {},
