@@ -11,9 +11,12 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T51 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T52 | todo | P2 | 5 | 0% | |
+| T52 | in progress | P2 | 5 | 0% | Claude Code / claude-sonnet-5-5 |
 | T58 | in progress | P3 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 | T59 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
+| T10 | in progress | P2 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T11 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -203,3 +206,17 @@ Done when:
 - the suite passes repeatedly (at least three consecutive runs);
 - baselines are retaken only if the visible area changes, and are then reviewed;
 - the full check exits 0.
+
+### T10. Host capabilities
+
+SPEC §8 says a host advertises `{ weft, catalogs }` and an agent writes only what is advertised; no code does this. The MCP server reports its capabilities, loads catalogs, tokens and actions from configuration, and turns token and action checks on when they are given.
+
+### T11. Streaming and incremental generation
+
+A2UI and json-render use flat id lists so that a UI can render while a model is still writing it. Weft must show the same for nested markup: a truncated document parses into a renderable prefix with diagnostics only for the unfinished tail, and the renderer shows it. If it cannot, the trade-off is measured and written into `research.md`.
+
+### T18. Follow-ups from the prototype
+
+- `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
+- Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
+- Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.
