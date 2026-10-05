@@ -40,7 +40,6 @@ Import losses:
 | bindings | /screen#screen-pricing | values are the resolved values the page shows, not bindings |
 | actions | /screen#screen-pricing | event handlers and their action names are not in the HTML |
 | tokens | /screen#screen-pricing | design token references are rendered as CSS and cannot be mapped back |
-| slots | /screen#screen-pricing | slot membership is not in the HTML; slot content is imported as default content |
 | hidden | /screen#screen-pricing | elements a renderer leaves out (hidden, closed dialogs) are not in the HTML |
 $ cat weft-tour/pricing.weft
 <screen id="screen-pricing" label="Pricing" weft="0.1">
@@ -88,7 +87,7 @@ Every import ends with this table. The `Kind` column says what is missing; [SPEC
 | `tokens` | Colors and sizes became CSS and cannot be traced back to tokens. |
 | `layout` | The gap of a flex or grid container is a plain size on the page and cannot be mapped back to a token. |
 | `repetition` | A repeated list is imported as separate static items, not an `<each>`. |
-| `slots` | Slot content lands in the default content; move it into `<slot>` by hand. |
+| `slots` | A kind's content that the page does not mark with `data-weft-slot` lands in the default content, or in the first slot that takes it; move it into `<slot>` by hand. Pages that the renderers wrote carry the marker, so their slots come back. |
 | `hidden` | Hidden elements and closed dialogs are not in the result. |
 | `props` | Details with no equivalent in HTML are lost, or values that the catalog rejects. |
 | `values`, `names` | A required value or label that was missing got a stand-in (an empty label, a placeholder value). |

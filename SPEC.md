@@ -469,7 +469,7 @@ type Patch =
 | `tokens` | Always. | A token-backed `gap` is noted; token values are not recovered. |
 | `layout` | Always: `stack` and `grid` are not in the tree. | Only a `gap` that is not a token variable. |
 | `repetition` | Always: repeated content is static siblings, not `<each>`. | Each `id[index]` instance becomes a static sibling; `<template data-each>` is an `<each>`. |
-| `slots` | Always; content a kind does not take by default goes to the first slot that takes it. | Likewise. |
+| `slots` | Always; content a kind does not take by default goes to the first slot that takes it. | Only content outside a `data-weft-slot` wrapper (the renderers write one around a slot's content): it goes to the first slot that takes it. |
 | `hidden` | Always: hidden elements, closed dialogs and unselected tab panels are absent. | Hidden elements and closed dialogs; all tab panels are kept. |
 | `props` | Always: props and states without an ARIA equivalent (variant, tone, placeholder, required, sort, modal, `data-state`); also invalid values. | Invalid values only. |
 | `values` | A required prop missing from the input is filled with a stand-in. | Likewise. |
