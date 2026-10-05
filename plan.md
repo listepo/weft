@@ -12,7 +12,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
-| T15.1 | in progress | P3 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T15.1 | in progress | P3 | 3 | 5% | Claude Code / claude-sonnet-5-5 |
 | T60 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
@@ -179,6 +179,15 @@ Export a Weft document to A2UI v0.9 messages and to a json-render spec, and impo
 ### T15.1. Catalog import from a Custom Elements Manifest
 
 An importer that turns a Custom Elements Manifest (schema 2.1.0, https://github.com/webcomponents/custom-elements-manifest) into a Weft catalog: each custom element becomes a kind, its attributes and fields become props, its slots become slots, its events become events. Done when the manifest of a real component library imports into a catalog that validates, with the lost parts listed.
+
+Execution plan:
+
+1. Schema source: `custom-elements-manifest` 2.1.0 on npm (`schema.json`, `schema.d.ts`, published 2024-05-06, BSD-3-Clause; repository https://github.com/webcomponents/custom-elements-manifest). Cite it in the module docs and SPEC.
+2. `crates/weft-import/src/cem.rs`: `import_cem(text) -> CemImport { catalog, losses, diagnostics }`, reusing `Loss`/`LossKind`, `limit_reached`, `squash`/`clean` and `parse_json`. Bounded input (size, kinds, members per kind; `W602`), unreadable or wrong-schema input is `W601`. Mapping: tag name from `tagName` or the `custom-element-definition` export; attributes and public fields merged into props (TypeScript `boolean`, `number`, `string`, string-literal unions as enums, `null`/`undefined` ignored, defaults only when a literal); slots, events (camelCase to kebab-case); `role` is `generic` because a manifest has none. Everything else (methods, static, private and read-only members, CSS parts, properties and states, demos, superclass, mixins, event payload types, deprecation, non-element declarations, readme) is a loss, one entry per place.
+3. The output is a catalog extension (SPEC section 10.4), not a new format. Tests: a small Shoelace-shaped fixture; the catalog loads as the `catalog` of a project with no diagnostics (W706/W707), parses and validates a document that uses the imported kinds, and a hostile-input test set (oversized, deep, wrong types, bad names).
+4. CLI: `weft import-cem <manifest.json> [--name] [--version] [--out-dir]` prints the catalog, with losses and diagnostics on stderr (`crates/weft-cli/src/cem.rs`, one dispatch line in `main.rs`).
+5. Docs: SPEC section 9 (From a Custom Elements Manifest, loss table), `docs/cli.md`, `docs/catalog.md`, `toolchain.md` if a dependency is added (none expected).
+6. Verify: `moon run root:changed`, then the full check once; merge main before closing.
 
 ### T60. Deterministic top strip and blur in SwiftUI screenshots
 
