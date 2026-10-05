@@ -168,6 +168,9 @@ function gather(requestedBase: string | undefined): { base: string; facts: Facts
 }
 
 const quote = (arg: string) => (/^[\w@%+=:,./-]+$/.test(arg) ? arg : `'${arg}'`);
+// Moon hands the arguments after `--` to a shell as written, so a filterset with spaces and
+// parentheses must carry its own quotes. Crate names come from cargo and hold no quote character.
+const shellQuoted = (text: string) => `'${text}'`;
 
 interface Step {
   command: string;
@@ -180,7 +183,11 @@ function steps(plan: Plan & { kind: "selected" }, base: string): { rust: Step[];
   if (tests !== null) {
     rust.push({
       command: "moon",
-      args: ["run", "root:rust-test", ...(tests === "all" ? [] : ["--", "-E", tests.filterset])],
+      args: [
+        "run",
+        "root:rust-test",
+        ...(tests === "all" ? [] : ["--", "-E", shellQuoted(tests.filterset)]),
+      ],
     });
   }
   // The same commands as `root:rust-lint`, limited to the affected crates; that task is a script,
@@ -212,7 +219,8 @@ function steps(plan: Plan & { kind: "selected" }, base: string): { rust: Step[];
   return { rust, ts };
 }
 
-const show = (step: Step) => `${step.command} ${step.args.map(quote).join(" ")}`;
+const show = (step: Step) =>
+  `${step.command} ${step.args.map((arg) => (arg.startsWith("'") ? arg : quote(arg))).join(" ")}`;
 
 function describe(plan: Plan, base: string, changed: number): string[] {
   if (plan.kind === "full") {
