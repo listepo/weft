@@ -16,16 +16,6 @@ import {
 
 type Props = { data?: unknown };
 
-// The static page shows the screen's data like the components do (`weft html --data`, T43), but
-// it has a layout stylesheet of its own: field captions stack above their controls, a toggle's
-// label is a flex row that pushes the next control onto a new line, and stacks are spaced with
-// their gap tokens, while the generated components render with no stylesheet at all. So the two
-// look the same only on a screen with no field, toggle or stacked layout. No pixel tolerance helps:
-// a caption moved onto its own line shifts everything under it. With the data in, the accessibility
-// trees are the comparison that means something, and they are compared below. Each listed screen
-// must still differ, so one that starts matching fails here until it is removed.
-const STATIC_PAGE_DIFFERS = new Set<string>([]);
-
 for (const screen of screens) {
   const { name, data } = screen;
   const load = async (variant: "react" | "solid" | "react-back" | "solid-back") =>
@@ -71,12 +61,9 @@ for (const screen of screens) {
     test("the reference renderer looks like React", async () => {
       await expectSameLook("#react", "#reference", `web/${name}.reference`);
     });
-    (STATIC_PAGE_DIFFERS.has(name) ? test.fails : test)(
-      "the static page looks like React",
-      async () => {
-        await expectSameLook("#react", "#html", `web/${name}.html`);
-      },
-    );
+    test("the static page looks like React", async () => {
+      await expectSameLook("#react", "#html", `web/${name}.html`);
+    });
     test("the static page gives React's accessibility tree", async () => {
       expect(await commands.ariaSnapshot("#html")).toBe(await commands.ariaSnapshot("#react"));
     });
