@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T45 | in progress | P1 | 4 | 65% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -151,40 +150,3 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
-
-### T45. Token modes through the DTCG resolver
-
-Weft token sets have no modes, so a colour has one value in light and dark appearance (an open question of T44). Use the standard instead of a Weft-only scheme: the DTCG 2025.10 Resolver Module, where a resolver document names token sets and modifiers such as `theme` with the contexts `light` and `dark`. The exact format is taken from the specification and cited.
-
-- **Loading:** `tokens` in `weft.json` may name a resolver document instead of a list of token files; the loader resolves the default context for validation and keeps every context of each modifier for the generators. Plain token files keep working unchanged.
-- **SwiftUI:** a colour token whose `dark` value differs becomes a dynamic `Color` in `WeftTokens.swift` (and in a screen's own theme) that follows the system appearance; tokens without a difference stay as they are.
-- **Web:** the static HTML stylesheet and the React and SolidJS output follow the system appearance (`light-dark()` or `prefers-color-scheme`), and the reference renderer can show either context.
-- **Then Figma and Penpot:** the contexts become Figma variable modes and Penpot token themes, both ways, in the T14/T40 round trips.
-- **Typography (added by the creator):** typography tokens no longer drop `letterSpacing` and `lineHeight`. SwiftUI applies them with `tracking(_:)` and a line spacing computed from the font size (iOS 17 / macOS 14 have no line-height modifier); the web targets carry them too. Snapshots of tokens without these fields do not change.
-
-Done when the example project has a light and dark resolver, SwiftUI and the web targets render both appearances (screenshots of each, reviewed), Figma and Penpot round-trip the modes, and token files without a resolver behave exactly as before.
-
-Execution plan:
-
-1. Research (`research.md` §13): the Resolver Module 2025.10 (sets, modifiers, contexts, `default`, `resolutionOrder`, reference objects), the SwiftUI and CSS APIs, Figma variable modes and Penpot token themes, each with its primary source.
-2. SPEC first: §10.2 and §10.3 say `tokens` may be one resolver file (or a resolver document as project content); the input is each modifier's `default`, else its first context; the appearance modifier is the first one in `resolutionOrder` with `light` and `dark` contexts; resolver problems are `W705` with a pointer into the resolver.
-3. Loader (`crates/weft-catalog/src/resolver.rs`, `project.rs`): references in the same document and to project files relative to the resolver (no URLs); `resolutionOrder` flattened with the existing token-tree merge; the default input for validation and every context of each modifier (the others at their default) for the generators, as `Project.modifiers`, passed through the binding to `@weft/catalog`. `render.tokens` takes a resolver the same way; `weft.schema.json` regenerated.
-4. SwiftUI (`theme.rs`, CLI): a colour that differs in `dark` becomes a `Color` that follows the system appearance; a typography token with `letterSpacing` or `lineHeight` becomes `WeftTypography` with a `weftTypography(_:)` modifier. Snapshots for a resolver project, Swift typecheck, simulator screenshots in light and dark.
-5. Web: the static page's `:root` gets `color-scheme: light dark` and an `@media (prefers-color-scheme: dark)` override for the tokens that differ; typography tokens become custom properties (font, letter spacing, line height); React and SolidJS follow the same variables through the approved `weft css-tokens` stylesheet; the reference renderer takes either context (`render.appearance`). Snapshots and Chromium screenshots in both schemes.
-6. Example project: `tokens/theme.resolver.json` with a `theme` modifier (`light`, `dark`).
-7. Figma and Penpot: contexts become variable modes and token themes when the library is built, and read back into a resolver document; fakes and round-trip tests extended; plugin dists rebuilt.
-8. Full check, review of every new screenshot recorded here, close into `done.md`.
-
-Approved decisions (creator):
-
-- **Q1:** a `weft css-tokens` command writes `weft-tokens.css` (`:root` with every token, `color-scheme: light dark`, and an `@media (prefers-color-scheme: dark)` block with the tokens that differ) for the React and SolidJS components, which only reference `var(--weft-…)`. Its folder is the new key `export.css.outDir`.
-- **Q2:** "both ways" is the full round trip: resolver contexts → Figma variable modes or Penpot token themes (one set per context) → a resolver document with the same values per context, returned in a new reply field.
-
-Screenshot review (each copy downscaled with `sips -Z 700` and read):
-
-- `swiftui/example-review.png` (light): white background, black title and item names, the blue "Place order" button, amber stars (#d97706, the brand colour through `color.star`); 4 and 5 filled stars as the sample data says. Correct.
-- `swiftui/example-review-dark.png` (dark): black background, white text, the same blue button, the lighter amber of the dark theme (#fbbf24) on the stars; layout identical to the light shot. Correct.
-- `html/example-review.png` (static page, light scheme): white canvas, black serif title and item names ("Linen shirt", "Canvas tote" from the sample data), a light system button. The rating is the project's own kind, which the page keeps as an inert element, so the star colour has nothing to draw on the web. Correct.
-- `html/example-review-dark.png` (static page, dark scheme): the page's `color-scheme: light dark` turns the canvas near-black and the text white, and the button dark grey; layout identical to the light shot. Correct.
-- `web/example-review.png` and `web/example-review-dark.png` (React with `weft-tokens.css`): the same two looks, without the static page's layout stylesheet (each line a flex row with the `--weft-space-sm` gap); the dark one follows the stylesheet's `color-scheme`. The reference renderer drawn with each theme matches React pixel for pixel. Correct.
-
