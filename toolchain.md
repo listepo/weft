@@ -75,6 +75,10 @@
 | playwright | local | https://github.com/microsoft/playwright | Accessibility snapshot of rendered pages |
 | @modelcontextprotocol/sdk | local | https://github.com/modelcontextprotocol/typescript-sdk | MCP server exposing the format to agents |
 | oxc-transform | local | https://github.com/oxc-project/oxc | Compiles generated JSX in the equivalence tests |
+| solid-js | local | https://github.com/solidjs/solid | Server-renders generated SolidJS components in the equivalence tests |
+| babel-preset-solid | local | https://github.com/solidjs/solid/tree/main/packages/babel-preset-solid | Compiles generated SolidJS JSX for server rendering in the equivalence tests |
+| @babel/core | local | https://github.com/babel/babel | Runs babel-preset-solid; 7.x because the preset requires Babel 7 |
+| @types/babel__core | local | https://github.com/DefinitelyTyped/DefinitelyTyped | Types for @babel/core in the equivalence tests |
 | p-limit | local | https://github.com/sindresorhus/p-limit | Concurrency limit for benchmark requests |
 | undici | local | https://github.com/nodejs/undici | Fetch without the header timeout, for slow local model servers |
 | ajv | local | https://github.com/ajv-validator/ajv | Validates the Cursor plugin manifests against Cursor's own JSON schemas |

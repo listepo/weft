@@ -5,7 +5,7 @@
 // text-node markers). Comparing the imported documents is therefore comparing the
 // accessibility-relevant structure. The markup itself is compared too, because the renderer's
 // boxes that the tree does not show (named-slot wrappers, aria-hidden captions) are part of the
-// structure a host styles.
+// structure a host styles. Each case runs for React and SolidJS, as JSX and as TSX.
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { beforeAll, describe, test } from "vitest";
@@ -16,7 +16,7 @@ import { render } from "@weft/render-react";
 import { parseSync } from "oxc-parser";
 import { renderToStaticMarkup } from "react-dom/server";
 import { toJsx } from "../src/index.ts";
-import { load, markup, normalizeMarkup } from "./compile.ts";
+import { load, loadSolid, markup, normalizeMarkup, type Props } from "./compile.ts";
 
 const corpus = new URL("../../../corpus/", import.meta.url);
 const examples = new URL("../../catalog/examples/", import.meta.url);
@@ -48,31 +48,58 @@ function read(url: URL): Document {
   return result.document;
 }
 
+type Variant = {
+  label: string;
+  framework: "react" | "solid";
+  typescript: boolean;
+  load: (source: string, typescript: boolean) => Promise<(props: Props) => string>;
+};
+
+const loadReact = async (source: string, typescript: boolean) => {
+  const component = await load(source, typescript);
+  return (props: Props) => markup(component, props);
+};
+
+const variants: Variant[] = [
+  { label: "", framework: "react", typescript: false, load: loadReact },
+  { label: " (React TSX)", framework: "react", typescript: true, load: loadReact },
+  { label: " (SolidJS)", framework: "solid", typescript: false, load: loadSolid },
+  { label: " (SolidJS TSX)", framework: "solid", typescript: true, load: loadSolid },
+];
+
 for (const c of cases()) {
-  // Vitest has no subtests: the checks are tests of one block, sharing what the first renders.
-  describe(`equivalence: ${c.name}`, () => {
-    let source: string;
-    let reference: string;
-    let generated: string;
-    let expected: ReturnType<typeof fromDom>;
-    let actual: ReturnType<typeof fromDom>;
-    beforeAll(async () => {
-      source = toJsx(c.document, { catalog: coreCatalog });
-      const component = await load(source);
-      reference = renderToStaticMarkup(render(c.document, { catalog: coreCatalog, data: c.data }));
-      generated = markup(component, { data: c.data });
-      expected = fromDom(reference, { catalog: coreCatalog });
-      actual = fromDom(generated, { catalog: coreCatalog });
+  for (const v of variants) {
+    // Vitest has no subtests: the checks are tests of one block, sharing what the first renders.
+    describe(`equivalence: ${c.name}${v.label}`, () => {
+      let source: string;
+      let reference: string;
+      let generated: string;
+      let expected: ReturnType<typeof fromDom>;
+      let actual: ReturnType<typeof fromDom>;
+      beforeAll(async () => {
+        source = toJsx(c.document, {
+          catalog: coreCatalog,
+          framework: v.framework,
+          typescript: v.typescript,
+        });
+        const component = await v.load(source, v.typescript);
+        reference = renderToStaticMarkup(
+          render(c.document, { catalog: coreCatalog, data: c.data }),
+        );
+        generated = component({ data: c.data });
+        expected = fromDom(reference, { catalog: coreCatalog });
+        actual = fromDom(generated, { catalog: coreCatalog });
+      });
+      test("the output parses without errors", () => {
+        assert.deepEqual(parseSync(v.typescript ? "screen.tsx" : "screen.jsx", source).errors, []);
+      });
+      test("same accessible structure", () => {
+        assert.deepEqual(actual.document, expected.document);
+        assert.deepEqual(actual.losses, expected.losses);
+      });
+      test("same markup", () => {
+        assert.equal(normalizeMarkup(generated), normalizeMarkup(reference));
+      });
     });
-    test("the output parses without errors", () => {
-      assert.deepEqual(parseSync("screen.jsx", source).errors, []);
-    });
-    test("same accessible structure", () => {
-      assert.deepEqual(actual.document, expected.document);
-      assert.deepEqual(actual.losses, expected.losses);
-    });
-    test("same markup", () => {
-      assert.equal(normalizeMarkup(generated), normalizeMarkup(reference));
-    });
-  });
+  }
 }
