@@ -1,0 +1,9 @@
+# The tooling scripts of the repository (the affected-checks selection) and their tests.
+language: "typescript"
+
+tasks:
+  test:
+    # Pure functions over fixtures: no WebAssembly module in sight, so the suite does not wait for one.
+    deps: []
+    options:
+      mergeDeps: "replace"
