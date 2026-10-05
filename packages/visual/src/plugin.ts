@@ -1,11 +1,16 @@
 // A Vite plugin that serves every corpus screen to the browser tests as modules:
 // `virtual:weft-screens` lists the screens with their markup and pages, and
 // `virtual:weft-component/<variant>/<screen>` is one compiled component, imported on demand.
+// `virtual:weft-appearance` is the example project's screen for the light and dark tests, and
+// `virtual:weft-appearance-component` its compiled React component.
 import type { Plugin } from "vite";
-import { screens, type Screen } from "./artifacts.ts";
+import { appearanceScreen, screens, type AppearanceScreen, type Screen } from "./artifacts.ts";
 
 const SCREENS = "virtual:weft-screens";
 const COMPONENT = "virtual:weft-component/";
+const APPEARANCE = "virtual:weft-appearance";
+const APPEARANCE_COMPONENT = "virtual:weft-appearance-component";
+const OWN = new Set([SCREENS, APPEARANCE, APPEARANCE_COMPONENT]);
 
 /** The component variants a screen has: generated, and generated after a round trip. */
 export const VARIANTS = ["react", "solid", "react-back", "solid-back"] as const;
@@ -27,12 +32,19 @@ function code(screen: Screen, variant: Variant): string {
 export function weftScreens(): Plugin {
   let all: Promise<Screen[]> | undefined;
   const load = () => (all ??= screens());
+  let example: AppearanceScreen | undefined;
+  const appearance = () => (example ??= appearanceScreen());
   return {
     name: "weft-screens",
     resolveId(id) {
-      return id === SCREENS || id.startsWith(COMPONENT) ? `\0${id}` : undefined;
+      return OWN.has(id) || id.startsWith(COMPONENT) ? `\0${id}` : undefined;
     },
     async load(id) {
+      if (id === `\0${APPEARANCE}`) {
+        const { react: _r, ...rest } = appearance();
+        return `export const example = ${JSON.stringify(rest)};\n`;
+      }
+      if (id === `\0${APPEARANCE_COMPONENT}`) return appearance().react;
       if (id === `\0${SCREENS}`) {
         const list = await load();
         const pages = list.map(({ react: _r, solid: _s, back, ...rest }) => ({
