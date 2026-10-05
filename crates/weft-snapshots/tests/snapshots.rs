@@ -1,6 +1,6 @@
 //! What every generator writes for every corpus screen and catalog example, pinned as reviewed
 //! insta snapshots under `tests/snapshots/<target>/<screen>.snap`: canonical JSON, the static
-//! HTML page, React and SolidJS components as JSX and TSX, and SwiftUI; and for every corpus
+//! HTML page, React and SolidJS components as JSX and TSX, Lit elements, and SwiftUI; and for every corpus
 //! screen, the static page and SwiftUI generated with its sample data (`html-data`,
 //! `swiftui-data`). The differential and
 //! round-trip tests prove the outputs agree with each other; these make any change to an output a
@@ -134,6 +134,11 @@ fn solid_jsx() {
 #[test]
 fn solid_tsx() {
     snapshot_all("solid-tsx", jsx(Framework::Solid, true));
+}
+
+#[test]
+fn lit_js() {
+    snapshot_all("lit-js", jsx(Framework::Lit, false));
 }
 
 #[test]

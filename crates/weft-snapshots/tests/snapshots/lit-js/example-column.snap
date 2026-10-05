@@ -1,0 +1,48 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-column as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _press(e, fire) {
+  if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  fire();
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Users">${(() => {
+        const _cols = [
+          html`<th data-weft-id="col-name" scope="col" aria-sort="ascending" tabindex=${0} @click=${() => _act(actions, { id: "col-name", action: "users.sortByName" })} @keydown=${(_e) => _press(_e, () => _act(actions, { id: "col-name", action: "users.sortByName" }))}>Name</th>`,
+          html`<th data-weft-id="col-role" scope="col" aria-sort="none">Role</th>`,
+        ];
+        const _rows = [];
+        return html`<table data-weft-id="users" aria-label="Users">${_cols.length > 0 ? html`<thead
+                ><tr>${_cols}</tr
+              ></thead>` : null}${_rows.length > 0 ? html`<tbody>${_rows}</tbody>` : null}</table>`;
+      })()}</main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

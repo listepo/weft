@@ -70,6 +70,9 @@ impl<'a> Gen<'a> {
     /// An element or expression in expression position.
     #[inline(never)]
     pub(super) fn expr_of(&mut self, c: &C<'a>, indent: &str) -> String {
+        if self.lit() && matches!(c, C::J(_)) {
+            return self.lit_template(c, indent);
+        }
         match c {
             C::J(j) => {
                 let inner = format!("{indent}  ");

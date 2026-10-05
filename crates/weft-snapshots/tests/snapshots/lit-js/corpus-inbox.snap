@@ -1,0 +1,114 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-inbox as lit-js
+---
+import { LitElement, html, nothing } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _busy(state) {
+  return state === "loading" || state === "busy" || state === "submitting" ? "true" : undefined;
+}
+
+function _press(e, fire) {
+  if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  fire();
+}
+
+function _tabKey(e, i, count, choose) {
+  const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+  if (step === 0 || count === 0) return;
+  e.preventDefault();
+  const next = (i + step + count) % count;
+  choose(next);
+  e.currentTarget.parentElement?.querySelectorAll('[role="tab"]')[next]?.focus();
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="inbox" data-state="loading" aria-busy="true" aria-label="Inbox">${(() => {
+        const _t = [
+          { id: "tab-inbox", doc: "tab-inbox", state: "", label: "Inbox", panel: html`<ol data-weft-id="messages" data-state="ready">${!(_list(data?.messages).length > 0) ? html`<li role="none" data-weft-slot="empty"
+                  ><div data-weft-id="no-messages">No messages.</div
+                ></li>` : html`${_list(data?.messages).map((message, _i0) => html`<li data-weft-id=${"message[" + _i0 + "]"} tabindex=${0} @click=${() => _act(actions, { id: "message[" + _i0 + "]", action: "inbox.open", item: "$.messages." + _i0 })} @keydown=${(_e) => _press(_e, () => _act(actions, { id: "message[" + _i0 + "]", action: "inbox.open", item: "$.messages." + _i0 }))}>${!(_text(message?.subject).trim() === "") ? _text(message?.subject) : null}</li>`)}`}</ol>` },
+          { id: "tab-drafts", doc: "tab-drafts", state: "", label: _text(data?.labels?.drafts).trim(), panel: html`<ul data-weft-id="drafts" data-state="empty"
+              ><li role="none" data-weft-slot="empty"
+                ><div data-weft-id="drafts-empty" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "column", alignItems: "center" })}
+                  ><div data-weft-id="no-drafts">No drafts.</div
+                  ><div data-weft-id="no-drafts-hint">Messages you start appear here.</div
+                ></div
+              ></li
+            ></ul>` },
+          { id: "tab-sent", doc: "tab-sent", state: "", label: "Sent", panel: html`<ul data-weft-id="sent" data-state="loading" aria-busy="true"
+              ><li data-weft-id="sent-loading">${"Loading…"}</li
+            ></ul>` },
+        ];
+        const _s = Math.max(0, _t.findIndex((_x) => _x.doc === _text(data?.folder) || _x.id === _text(data?.folder)));
+        const _choose = (_k) => { const _x = _t[_k]; if (!_x || _k === _s) return; onChange?.("$.folder", _x.doc); _act(actions, { id: "folders", action: "inbox.folder" }); };
+        return html`<div data-weft-tabs=""
+            ><div data-weft-id="folders" role="tablist">${_t.map((_x, _k) => html`<button data-weft-id=${(_x.id || undefined) ?? nothing} data-state=${(_x.state || undefined) ?? nothing} aria-busy=${(_busy(_x.state)) ?? nothing} type="button" role="tab" id=${"weft-" + _x.id + "-tab"} aria-selected=${String(_k === _s)} aria-controls=${"weft-" + _x.id + "-panel"} tabindex=${(_k === _s ? 0 : -1) ?? nothing} @click=${() => _choose(_k)} @keydown=${(_e) => _tabKey(_e, _k, _t.length, _choose)}>${_x.label}</button>`)}</div>${_t.map((_x, _k) => html`<div role="tabpanel" id=${"weft-" + _x.id + "-panel"} aria-labelledby=${"weft-" + _x.id + "-tab"} ?hidden=${_k !== _s} tabindex=${0}>${_x.panel}</div>`)}</div>`;
+      })()}<div data-weft-id="message-actions" aria-label="Message actions" role="menu"
+        ><button data-weft-id="archive" type="button" role="menuitem" @click=${() => _act(actions, { id: "archive", action: "inbox.archive" })}>${!(_text(data?.labels?.archive).trim() === "") ? _squash(_text(data?.labels?.archive)) : ""}</button
+        ><button data-weft-id="delete" type="button" role="menuitem" ?disabled=${!_on(data?.selection)} @click=${() => _act(actions, { id: "delete", action: "inbox.delete" })}>Delete</button
+      ></div>${_on(data?.composing) ? html`<dialog data-weft-id="compose" aria-label="New message" open @keydown=${(_e) => { if (_e.key !== "Escape") return; _e.preventDefault(); onChange?.("$.composing", false); _act(actions, { id: "compose", action: "inbox.closeCompose" }); }}
+          ><form data-weft-id="compose-form" data-state="submitting" aria-busy="true" @submit=${(_e) => { _e.preventDefault(); _act(actions, { id: "compose-form", action: "inbox.send" }); }}
+            ><div data-weft-field=""
+              ><label
+                ><span aria-hidden="true">To</span
+                ><input data-weft-id="to" aria-label="To" type="email" .value=${_text(data?.draft?.to)} @input=${(_e) => onChange?.("$.draft.to", _e.currentTarget.value)}
+              ></label
+            ></div
+            ><div data-weft-field=""
+              ><label
+                ><span aria-hidden="true">Message</span
+                ><textarea data-weft-id="body" aria-label="Message" .value=${_text(data?.draft?.body)} @input=${(_e) => onChange?.("$.draft.body", _e.currentTarget.value)}></textarea
+              ></label
+            ></div
+          ></form
+          ><div data-weft-slot="actions"
+            ><button data-weft-id="send" type="button" data-variant="primary" @click=${(_e) => _act(actions, { id: "send", action: "inbox.send" })}>Send</button
+          ></div
+        ></dialog>` : null}</main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;
