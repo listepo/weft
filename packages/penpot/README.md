@@ -13,7 +13,7 @@ The mapping itself is not here. It lives in `@weft/design-tool`, which `@weft/fi
 | Step | Function | Result |
 | --- | --- | --- |
 | Library | `ensureLibrary(api, catalog, tokens, modifier?)` | A `Weft library` page with a `Weft components` board. Each catalog kind becomes a component; a kind with enum props or `state` gets one component per combination, combined into variants with one property per axis. Each token becomes a design token in a `Weft tokens` set, named by its Weft path: dimensions as `spacing` (px), numbers as `number`, colors as `color`. Calling it again reuses what is there and updates token values. With a resolver `modifier`, its contexts become token themes (see "Token themes" below). |
-| Themes → resolver | `readThemes(catalog, tokens)` | The library's theme group as a DTCG resolver document. |
+| Themes → resolver | `readThemes(catalog, tokens, data)` | The library's theme group as a DTCG resolver document. |
 | Weft → Penpot | `buildScreen(api, document, options)` | Text-only kinds become copies of their variant. Every other kind becomes a board with a flex layout, or a grid layout for `grid`. Each shape carries its Weft source in shared plugin data (namespace `weft`). A `gap` token is applied to the board's row and column gap. |
 | Penpot → Weft | `readScreen(shape, options)` | `{ document, losses, diagnostics }`, read as described in `@weft/design-tool` and `@weft/figma`: an unedited screen comes back byte-identical; edits come back as Weft changes; foreign shapes convert with a loss table. `readLayers` is the half that runs in the sandbox. |
 | Plugin, sandbox | `handleRequest(api, selection, message, options)` | Validates a message from the plugin UI, then builds a parsed screen or reads the selected board. |
@@ -33,7 +33,7 @@ A Penpot theme turns a list of token sets on, and only one theme of a group is o
 - The default context's theme is made first and turned on. Turning a set on by hand turns every theme off, so the build only does that for the base set when it is off.
 - A token the context's set already has follows the context on later builds, so an override that no longer differs stops differing instead of staying stale.
 
-On export, `readThemes` reads the first theme group that turns the base set on. Each theme is the request's tokens with the values of its sets, later sets winning, and the first theme of the group is the default context. Token text is parsed as a number, a px length, a `#rrggbb[aa]` or an `rgb()`/`rgba()` colour; an alias (`{color.brand}`) or a formula is left out. The document goes back in the reply's `resolver` field, built as `@weft/figma` describes.
+On export, `readThemes` reads the first theme group that turns the base set on. Each theme is the request's tokens with the values of its sets, later sets winning, and the default context is the theme the build recorded as shared plugin data on the library (`weft.default-context/<group>`, under the namespace `weft`), else the first theme of the group. Token text is parsed as a number, a px length, a `#rrggbb[aa]` or an `rgb()`/`rgba()` colour; an alias (`{color.brand}`) or a formula is left out. The document goes back in the reply's `resolver` field, built as `@weft/figma` describes.
 
 ## Penpot specifics
 

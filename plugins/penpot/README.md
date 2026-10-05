@@ -3,7 +3,9 @@
 A Penpot plugin with two actions:
 
 - **Build:** paste a `.weft` screen or open one, and the plugin builds it as boards and component copies. The first build also creates the Weft component library and design tokens in the file.
-- **Export:** select a board and export it back as `.weft`. The plugin lists any losses along with the markup.
+- **Export:** select a board and export it back as `.weft`. The plugin lists any losses along with the markup. When the library has a theme group for the Weft tokens, it also shows it as a DTCG resolver document and offers `tokens.resolver.json` for download.
+
+Token modes are optional. Paste a resolver document, or pick its file, under "Token modes", press "Load resolver" and choose the modifier whose contexts become a theme group ("Modes from"). The appearance modifier (`light` and `dark`) is chosen when the resolver has one; "No modes" builds no themes. The resolver's default context replaces the plugin's default tokens, as `tokens` of a project does. The document must carry its token sets inline: it is read without files, so a `$ref` to a file is reported (`W704`) and skipped. A document larger than one million characters is refused, and everything else the loader finds wrong is listed as a note (`W705`) while the rest still loads.
 
 All the conversion lives in `@weft/penpot`. The plugin has two halves, because Penpot runs plugin code in an SES compartment without WebAssembly and the Weft core is WebAssembly (see "Where the code runs" in `packages/penpot/README.md`):
 

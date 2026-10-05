@@ -2,11 +2,13 @@
 // splits a plugin: the main thread without WebAssembly, the UI with the core inlined in the page.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, test } from "vitest";
+import { resolverDocument } from "../../../packages/design-tool/src/index.ts";
+import { exampleModes } from "../../../packages/design-tool/test/modes.ts";
 import { buildPlugin } from "../build.ts";
 
 const screen = fileURLToPath(new URL("../../../corpus/login/screen.weft", import.meta.url));
@@ -47,5 +49,22 @@ describe("the plugin bundles", () => {
     assert.deepEqual(result.exported.notes, []);
     assert.equal(result.broken.status, "The markup has errors; nothing was built.");
     assert.ok(result.broken.notes > 0);
+  });
+
+  test("a pasted resolver makes the file's modes, which export returns as a resolver", () => {
+    // The UI reads a resolver without files, so the example's modes are written with inline sets.
+    const file = join(dist, "tokens.resolver.json");
+    writeFileSync(file, JSON.stringify(resolverDocument(exampleModes().modifier)));
+    const output = execFileSync(process.execPath, [harness, dist, screen, file], {
+      encoding: "utf8",
+    });
+    const result = JSON.parse(output.trim().split("\n").at(-1) ?? "{}");
+    assert.equal(result.loaded, "Resolver loaded with 1 modifier.");
+    assert.equal(result.built.status, "Built.");
+    assert.equal(result.exported.status, "Exported.");
+    assert.equal(result.exported.downloadable, true);
+    const modes = JSON.parse(result.exported.resolver).modifiers.theme;
+    assert.equal(modes.default, "light");
+    assert.deepEqual(Object.keys(modes.contexts).sort(), ["dark", "light"]);
   });
 });

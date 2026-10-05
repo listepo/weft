@@ -59,16 +59,32 @@ export async function loadUi(
   return byId;
 }
 
-/** Builds `markup`, exports the selection, then tries broken markup; returns what the UI shows. */
+/**
+ * Loads `resolver` when given, builds `markup`, exports the selection, then tries broken markup;
+ * returns what the UI shows.
+ */
 export async function runUi(
   byId: (id: string) => FakeElement,
   markup: string,
   settle: () => Promise<void>,
+  resolver?: string,
 ): Promise<{
+  loaded: string;
   built: string;
-  exported: { status: string; markup: string; notes: string[] };
+  exported: {
+    status: string;
+    markup: string;
+    notes: string[];
+    resolver: string;
+    downloadable: boolean;
+  };
   broken: { status: string; notes: number };
 }> {
+  if (resolver !== undefined) {
+    byId("resolver").value = resolver;
+    byId("load-resolver").click();
+  }
+  const loaded = byId("status").textContent;
   byId("source").value = markup;
   byId("build").click();
   await settle();
@@ -80,11 +96,13 @@ export async function runUi(
     status: byId("status").textContent,
     markup: byId("result").value,
     notes: byId("notes").items.map((i) => i.textContent),
+    resolver: byId("resolver-out").value,
+    downloadable: !byId("download-resolver").disabled,
   };
 
   byId("source").value = "<screen";
   byId("build").click();
   await settle();
   const broken = { status: byId("status").textContent, notes: byId("notes").items.length };
-  return { built, exported, broken };
+  return { loaded, built, exported, broken };
 }

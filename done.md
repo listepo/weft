@@ -404,3 +404,49 @@ Fix them in `crates/weft-web` and `crates/weft-import`, reading back exactly wha
 
 Result: tab inversion in `weft-import` (`convert_tabs`) keeps a bound tab label (`label:` from HTML, the button's bound text from React and SolidJS) and the tablist's bound `selected` instead of the literal. The JSX evaluator reads `_float(x)` as a pass-through, `_get(base, ["players", "0", "name"])` as the path `$.players.0.name` (only segments a binding can spell, from a data path; anything else stays a loss), and the generated `Math.max(0, tabs.findIndex((x) => x.doc === path || x.id === path))` with `index === choice` as the tablist's `selected` binding. Both gap lists in `packages/visual/test/web/screens.test.ts` are gone, and `account`, `inbox` and `leaderboard` round trip through every importer. New tests in `crates/weft-web/tests/bindings.rs` cover each readback and the hostile `_get` segments; `JSX_CONVENTION_GAPS` in `jsx_import.rs` lost the fixed clauses.
 
+### T49. Token modes in the design plugin UI
+
+T45 lets a build request carry one token modifier and an export return the modes as a DTCG resolver document. The Figma and Penpot plugin UI (`packages/design-plugin`, `plugins/figma`, `plugins/penpot`) still has no way to use this: modes are sent only by a caller that sets `UiOptions.modifier`.
+
+- **Build:** the UI accepts a resolver document (pasted or picked as a file, next to the token input) and lets the user choose the modifier. The appearance modifier is the default choice.
+- **Export:** the UI shows the returned `resolver` and offers it as a downloadable `.resolver.json` file.
+- **Penpot:** the default context on export is the first theme of the group in creation order. Keep the order stable, or record which theme is the default, if Penpot's plugin API allows it.
+
+Done when:
+- UI tests over the existing fakes cover choosing a modifier and downloading the resolver;
+- the plugin bundles are rebuilt;
+- the plugin READMEs and skills are updated;
+- the full check exits 0.
+
+Execution plan (Claude Code / claude-sonnet-5-5):
+
+1. `packages/design-plugin`: add a resolver input beside the screen input (file picker, paste box, Load button). The text is bounded by `MAX_MARKUP`, parsed with `JSON.parse`, and loaded through `loadProject({ tokens })` of `@weft/catalog` (the Rust resolver loader through WebAssembly, no new TS parser), so every breach shows as a `W705` note. A modifier `<select>` lists the resolver's modifiers plus "No modes"; the appearance modifier is preselected. The chosen modifier goes into `UiOptions.modifier`, and the resolver's default context becomes the token set of build and export.
+2. Export: a second read-only box shows the reply's `resolver`, with a Download button for `tokens.resolver.json`. The existing download code becomes one helper.
+3. Penpot: record the default context on the library's plugin data (`Library extends PluginData`) when themes are written, and read it back before falling back to creation order.
+4. Tests: `ui.test.ts` over the fake DOM (choose modifier, default, `W705`, size guard, download), the Figma and Penpot bundle tests with a resolver, a Penpot `modes.test.ts` case for the recorded default.
+5. Update the READMEs and plugin skills, rebuild the bundles, run the full check, close T49 into `done.md`.
+
+Result: the Figma and Penpot plugin UI takes a DTCG resolver document, pasted or picked as a file.
+- **Loading:** the document is at most one million characters and is read by `loadProject` of `@weft/catalog` (the Rust resolver loader; no TypeScript parser). The UI lists its diagnostics: `W705`, and `W704` for a file `$ref`, which a pasted document cannot resolve.
+- **Modes:** a "Modes from" list picks the modifier sent as `UiOptions.modifier`. The appearance modifier is preselected; with none, "No modes" is. The resolver's default context replaces the default tokens for build and export.
+- **Export:** the returned resolver is shown and offered as `tokens.resolver.json`. A later export with one mode clears it.
+- **Penpot default context:** recorded on build as shared plugin data on the library (`weft.default-context/<group>`). `TokenTheme` carries no plugin data and no order field (`@penpot/plugin-types` 1.5.0 `index.d.ts`, lines 5321–5380), and private plugin data is keyed by a per-install id. Export reads the recorded theme, else the first theme in creation order.
+- **Tests:** `packages/design-plugin` `ui.test.ts` covers modifier choice, defaults, diagnostics, the size guard, download and round trip. `@weft/penpot` `modes.test.ts` covers reordered and deleted themes. The Figma and Penpot bundle tests build from a pasted resolver.
+- **Docs:** READMEs, SPEC §10.3 and `research.md` §13 are updated.
+
+The full check exits 0.
+
+Manual checks for the creator:
+- **Figma, paid plan:**
+  - Build from a pasted resolver. Check that `Weft tokens` has `light` and `dark` modes and that switching a frame's mode recolours it.
+  - Export, download `tokens.resolver.json` and load it in `weft`.
+- **Figma, free plan:** a build shows the mode-limit note and keeps one mode.
+- **Penpot:**
+  - Build, reorder the themes and export: the default stays `light`.
+  - Reinstall the plugin on the same file: the default is still read.
+- **Both tools:** the file picker and the download work inside the plugin iframe.
+
+Open questions:
+- A pasted resolver cannot `$ref` project files, so the example's `theme.resolver.json` does not paste as is. Multi-file picking, or a CLI command that writes a self-contained resolver, would fix it.
+- `resolverDocument` drops `$root` tokens (from T45).
+- A modifier with one context is refused as `W705`.

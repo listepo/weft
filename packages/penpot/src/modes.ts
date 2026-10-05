@@ -1,13 +1,17 @@
 // Token modes as Penpot token themes (SPEC §10.3): a resolver modifier is a theme group, each of
 // its contexts a theme. Every theme turns on the library's base set; a context other than the
 // default also turns on a set of its own with the tokens whose value differs, which wins because
-// it comes later. Read back, the first theme of the group is the default context, as the build
-// creates it first. Token values in the file are untrusted text: what does not parse is left out.
+// it comes later. A theme carries no plugin data of its own, so the build records the default
+// context's name on the library as shared plugin data (`Library` extends `PluginData`, and private
+// data would not survive another install, see `NAMESPACE`); read back, that theme is the
+// default, and the first theme of the group stands in when nothing is recorded or it was deleted.
+// Token values in the file are untrusted text: what does not parse is left out.
 import type { Token, TokenModifier } from "@weft/catalog";
 import {
   hexOf,
   MAX_CONTEXTS,
   modeToken,
+  type PluginData,
   resolverDocument,
   TOKEN_COLLECTION,
   tokenColor,
@@ -35,6 +39,8 @@ const cssColor = (c: RGBA): string =>
     ? hexOf(c)
     : `rgba(${[c.r, c.g, c.b].map((v) => Math.round(v * 255)).join(", ")}, ${c.a})`;
 
+const defaultKey = (group: string) => `weft.default-context/${group}`;
+
 const has = (sets: readonly PTokenSet[], set: PTokenSet) => sets.some((s) => s.id === set.id);
 
 /**
@@ -47,6 +53,7 @@ export function writeThemes(
   base: PTokenSet,
   tokens: ReadonlyMap<string, Token>,
   modifier: TokenModifier,
+  data: PluginData,
 ): void {
   const contexts = [...modifier.contexts].slice(0, MAX_CONTEXTS);
   contexts.sort(([a], [b]) => Number(b === modifier.default) - Number(a === modifier.default));
@@ -75,7 +82,9 @@ export function writeThemes(
     }
     if (!has(theme.activeSets, set)) theme.addSet(set.id);
   }
-  if (first !== undefined && !first.active) first.toggleActive();
+  if (first === undefined) return;
+  if (!first.active) first.toggleActive();
+  data.setPluginData(defaultKey(modifier.name), first.name);
 }
 
 const RGBA_TEXT =
@@ -106,6 +115,7 @@ function modeValue(type: string, text: unknown): ModeValue | undefined {
 export function readThemes(
   catalog: PTokenCatalog,
   tokens: ReadonlyMap<string, Token>,
+  data: PluginData,
 ): Record<string, unknown> | undefined {
   const base = catalog.sets.find((s) => s.name === TOKEN_COLLECTION);
   if (base === undefined) return undefined;
@@ -123,6 +133,7 @@ export function readThemes(
     }
     contexts.set(theme.name, context);
   }
-  const first = contexts.keys().next().value as string;
+  const recorded = data.getPluginData(defaultKey(group));
+  const first = contexts.has(recorded) ? recorded : (contexts.keys().next().value as string);
   return resolverDocument({ name: group, default: first, contexts });
 }
