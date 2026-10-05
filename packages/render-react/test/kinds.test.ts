@@ -93,9 +93,18 @@ test("a row without align centres its children, a column and an explicit align d
     el("stack", "column", {}),
   );
   const v = dom(d);
-  assert.equal(v.byId("row").attribs["style"], "display:flex;flex-direction:row;align-items:center");
-  assert.equal(v.byId("end").attribs["style"], "display:flex;flex-direction:row;align-items:flex-end");
-  assert.equal(v.byId("bad").attribs["style"], "display:flex;flex-direction:row;align-items:center");
+  assert.equal(
+    v.byId("row").attribs["style"],
+    "display:flex;flex-direction:row;align-items:center",
+  );
+  assert.equal(
+    v.byId("end").attribs["style"],
+    "display:flex;flex-direction:row;align-items:flex-end",
+  );
+  assert.equal(
+    v.byId("bad").attribs["style"],
+    "display:flex;flex-direction:row;align-items:center",
+  );
   assert.equal(v.byId("column").attribs["style"], "display:flex;flex-direction:column");
 });
 

@@ -151,7 +151,9 @@ export function layoutView(
     return {
       mode,
       // SPEC §5.1: a row without `align` centres its children, a column keeps them at the start.
-      align: (typeof align === "string" ? ALIGN[align] : undefined) ?? (mode === "row" ? "center" : "start"),
+      align:
+        (typeof align === "string" ? ALIGN[align] : undefined) ??
+        (mode === "row" ? "center" : "start"),
       wrap: mode === "row" && props?.["wrap"] === true,
       columns: 1,
       gap: gapOf(),
