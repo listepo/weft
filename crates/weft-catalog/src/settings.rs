@@ -69,6 +69,19 @@ const TYPESCRIPT: &str = "Write TSX with typed props instead of JSX.";
 const HTML_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
     with_default("source", SOURCE, Kind::Bool, "false"),
+    setting(
+        "data",
+        "Sample data (a JSON file, relative to the project file) the page shows: bindings read it and `<each>` repeats over it. Default: none, the page is a template for a host to fill.",
+        Kind::File,
+    ),
+];
+const SWIFTUI_EXPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    setting(
+        "data",
+        "Sample data (a JSON file, relative to the project file) the generated model is built from in a `sample` property that `#Preview` shows. Default: none, the preview shows the model's defaults.",
+        Kind::File,
+    ),
 ];
 const JSX_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
@@ -97,7 +110,7 @@ const EXPORT: &[Setting] = &[
     setting(
         "swiftui",
         "SwiftUI views for iOS 17 and macOS 14 (`weft swiftui`).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SWIFTUI_EXPORT),
     ),
 ];
 const IMPORT: &[Setting] = &[

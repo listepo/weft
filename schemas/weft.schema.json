@@ -96,6 +96,10 @@
               "type": "boolean",
               "description": "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.",
               "default": false
+            },
+            "data": {
+              "$ref": "#/$defs/fileName",
+              "description": "Sample data (a JSON file, relative to the project file) the page shows: bindings read it and `<each>` repeats over it. Default: none, the page is a template for a host to fill."
             }
           },
           "additionalProperties": false,
@@ -149,6 +153,10 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "data": {
+              "$ref": "#/$defs/fileName",
+              "description": "Sample data (a JSON file, relative to the project file) the generated model is built from in a `sample` property that `#Preview` shows. Default: none, the preview shows the model's defaults."
             }
           },
           "additionalProperties": false,
