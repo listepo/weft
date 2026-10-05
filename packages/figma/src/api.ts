@@ -56,8 +56,6 @@ export interface FScene extends FBase {
   y: number;
   readonly width: number;
   readonly height: number;
-  /** Degrees counterclockwise (the Plugin API reads and writes -180 to 180). */
-  rotation: number;
 }
 
 export interface FParent {
@@ -68,6 +66,8 @@ export interface FParent {
 
 /** Auto layout, fills and corners: frames, components, component sets and instances. */
 export interface FLayout extends FScene, FParent {
+  /** Degrees counterclockwise (the Plugin API reads and writes -180 to 180). */
+  rotation: number;
   layoutMode: "NONE" | "HORIZONTAL" | "VERTICAL" | "GRID";
   layoutWrap: "NO_WRAP" | "WRAP";
   itemSpacing: number;
@@ -126,6 +126,7 @@ export interface FInstance extends FLayout {
 
 export interface FText extends FScene {
   readonly type: "TEXT";
+  rotation: number;
   characters: string;
   fontName: FFont | FMixed;
   fontSize: number | FMixed;
