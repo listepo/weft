@@ -90,7 +90,8 @@ impl<'a> Env<'a> {
 /// Helpers of the generated components that pass their argument through, as far as Weft is
 /// concerned: they only coerce or guard it.
 const PASS_THROUGH: &[&str] = &[
-    "_text", "_on", "_squash", "_list", "_keyed", "_ix", "_float", "String", "Boolean", "Number",
+    "_text", "_on", "_squash", "_list", "_keyed", "_ix", "_float", "_numeric", "_slide", "_count",
+    "_color", "String", "Boolean", "Number",
 ];
 
 /// Calls of a value that leave it a value of the same path (`.trim()`, `.toString()`).
@@ -360,6 +361,37 @@ impl Eval {
             let name = id.name.as_str();
             if PASS_THROUGH.contains(&name) {
                 return first.map_or(Sv::Undef, |x| self.eval(x, env));
+            }
+            // The bounds a number control reads: each side is what the document wrote, since the
+            // defaults the helper falls back to are not part of the document.
+            if name == "_span" || name == "_bounds" {
+                let fields = ["min", "max", "step"]
+                    .iter()
+                    .zip(&call.arguments)
+                    .filter_map(|(field, a)| {
+                        let v = self.eval(a.as_expression()?, env);
+                        Some(((*field).to_owned(), v))
+                    })
+                    .collect();
+                return Sv::Obj(Rc::new(fields));
+            }
+            if name == "_dateType" {
+                return match first.map(|x| self.eval(x, env)) {
+                    Some(Sv::Str(s)) => Sv::Str(if s == "time" || s == "datetime" {
+                        s
+                    } else {
+                        "date".into()
+                    }),
+                    Some(Sv::Undef) | None => Sv::Str("date".into()),
+                    Some(v) => v,
+                };
+            }
+            if name == "_dateText" {
+                return call
+                    .arguments
+                    .get(1)
+                    .and_then(Argument::as_expression)
+                    .map_or(Sv::Undef, |x| self.eval(x, env));
             }
             if name == "_url" {
                 return match first.map(|x| self.eval(x, env)) {

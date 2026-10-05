@@ -214,6 +214,173 @@ pub const RUNTIME: &[Helper] = &[
   e.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="tab"]')[next]?.focus();
 }"#,
     },
+    Helper {
+        name: "_numeric",
+        js: r#"function _numeric(v) {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(v.trim())) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}"#,
+        ts: r#"function _numeric(v: unknown): number | undefined {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(v.trim())) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}"#,
+    },
+    Helper {
+        name: "_tidy",
+        js: r#"function _tidy(x, ...inputs) {
+  const d = (y) => {
+    const [m = "", e] = String(y).split("e");
+    return Math.max(0, (m.split(".")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));
+  };
+  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));
+}"#,
+        ts: r#"function _tidy(x: number, ...inputs: number[]): number {
+  const d = (y: number): number => {
+    const [m = "", e] = String(y).split("e");
+    return Math.max(0, (m.split(".")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));
+  };
+  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));
+}"#,
+    },
+    Helper {
+        name: "_span",
+        js: r#"function _span(min, max, step) {
+  const lo = _numeric(min) ?? 0;
+  const st = _numeric(step);
+  return { min: lo, max: Math.max(_numeric(max) ?? 100, lo), step: st !== undefined && st > 0 ? st : 1 };
+}"#,
+        ts: r#"function _span(min: unknown, max: unknown, step: unknown): { min: number; max: number; step: number } {
+  const lo = _numeric(min) ?? 0;
+  const st = _numeric(step);
+  return { min: lo, max: Math.max(_numeric(max) ?? 100, lo), step: st !== undefined && st > 0 ? st : 1 };
+}"#,
+    },
+    Helper {
+        name: "_slide",
+        js: r#"function _slide(value, s) {
+  const v = Math.min(Math.max(_numeric(value) ?? s.min, s.min), s.max);
+  let on = s.min + Math.floor((v - s.min) / s.step + 0.5) * s.step;
+  if (on > s.max) on -= s.step;
+  return String(_tidy(Math.max(on, s.min), s.min, s.step));
+}"#,
+        ts: r#"function _slide(value: unknown, s: { min: number; max: number; step: number }): string {
+  const v = Math.min(Math.max(_numeric(value) ?? s.min, s.min), s.max);
+  let on = s.min + Math.floor((v - s.min) / s.step + 0.5) * s.step;
+  if (on > s.max) on -= s.step;
+  return String(_tidy(Math.max(on, s.min), s.min, s.step));
+}"#,
+    },
+    Helper {
+        name: "_bounds",
+        js: r#"function _bounds(min, max, step) {
+  const lo = _numeric(min);
+  const hi = _numeric(max);
+  const st = _numeric(step);
+  const b = { step: st !== undefined && st > 0 ? st : 1 };
+  if (lo !== undefined) b.min = lo;
+  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);
+  return b;
+}"#,
+        ts: r#"function _bounds(min: unknown, max: unknown, step: unknown): { min?: number; max?: number; step: number } {
+  const lo = _numeric(min);
+  const hi = _numeric(max);
+  const st = _numeric(step);
+  const b: { min?: number; max?: number; step: number } = { step: st !== undefined && st > 0 ? st : 1 };
+  if (lo !== undefined) b.min = lo;
+  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);
+  return b;
+}"#,
+    },
+    Helper {
+        name: "_clamp",
+        js: r#"function _clamp(v, b) {
+  if (b.min !== undefined) v = Math.max(v, b.min);
+  if (b.max !== undefined) v = Math.min(v, b.max);
+  return v;
+}"#,
+        ts: r#"function _clamp(v: number, b: { min?: number; max?: number; step: number }): number {
+  if (b.min !== undefined) v = Math.max(v, b.min);
+  if (b.max !== undefined) v = Math.min(v, b.max);
+  return v;
+}"#,
+    },
+    Helper {
+        name: "_count",
+        js: r#"function _count(value, b) {
+  return _clamp(_numeric(value) ?? 0, b);
+}"#,
+        ts: r#"function _count(value: unknown, b: { min?: number; max?: number; step: number }): number {
+  return _clamp(_numeric(value) ?? 0, b);
+}"#,
+    },
+    Helper {
+        name: "_step",
+        js: r#"function _step(current, direction, b) {
+  return _tidy(_clamp(current + direction * b.step, b), current, b.step);
+}"#,
+        ts: r#"function _step(current: number, direction: 1 | -1, b: { min?: number; max?: number; step: number }): number {
+  return _tidy(_clamp(current + direction * b.step, b), current, b.step);
+}"#,
+    },
+    Helper {
+        name: "_dateType",
+        js: r#"function _dateType(v) {
+  return v === "time" || v === "datetime" ? v : "date";
+}"#,
+        ts: r#"function _dateType(v: string): "date" | "time" | "datetime" {
+  return v === "time" || v === "datetime" ? v : "date";
+}"#,
+    },
+    Helper {
+        name: "_dateText",
+        js: r#"function _dateText(type, value) {
+  const day = (s) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return false;
+    const [year, month, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    if (year < 1 || month < 1 || month > 12 || d < 1) return false;
+    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    return d <= [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];
+  };
+  const time = (s) => /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
+  if (type === "date") return day(value) ? value : "";
+  if (type === "time") return time(value) ? value : "";
+  const [d = "", t = "", ...rest] = value.split("T");
+  return rest.length === 0 && day(d) && time(t) ? value : "";
+}"#,
+        ts: r#"function _dateText(type: string, value: string): string {
+  const day = (s: string): boolean => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return false;
+    const [year, month, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    if (year < 1 || month < 1 || month > 12 || d < 1) return false;
+    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    return d <= [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]!;
+  };
+  const time = (s: string): boolean => /^([01]\d|2[0-3]):[0-5]\d$/.test(s);
+  if (type === "date") return day(value) ? value : "";
+  if (type === "time") return time(value) ? value : "";
+  const [d = "", t = "", ...rest] = value.split("T");
+  return rest.length === 0 && day(d) && time(t) ? value : "";
+}"#,
+    },
+    Helper {
+        name: "_color",
+        js: r##"function _color(v) {
+  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : "#000000";
+}"##,
+        ts: r##"function _color(v: string): string {
+  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : "#000000";
+}"##,
+    },
     // SolidJS only: loops outside JSX get the index as an accessor, as `<For>` passes it, so one
     // expression reads the index the same way in both places.
     Helper {

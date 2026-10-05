@@ -2689,6 +2689,35 @@
     "kind": "screen",
     "id": "root",
     "props": {
+     "label": "Theme"
+    },
+    "children": [
+     {
+      "kind": "color-picker",
+      "id": "accent",
+      "props": {
+       "disabled": false,
+       "label": "Accent colour",
+       "value": {
+        "bind": "$.accent"
+       }
+      },
+      "on": {
+       "change": "theme.update"
+      }
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _color(v) {\n  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : \"#000000\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Theme\">\n      <label>\n        <span aria-hidden=\"true\">Accent colour</span>\n        <input data-weft-id=\"accent\" type=\"color\" aria-label=\"Accent colour\" value={_color(_text(data?.accent))} onChange={(_e) => { const _v = _e.currentTarget.value; if (_v !== undefined) onChange?.(\"$.accent\", _v); _act(actions, { id: \"accent\", action: \"theme.update\" }); }} />\n      </label>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
      "label": "Users"
     },
     "children": [
@@ -2728,6 +2757,90 @@
    }
   },
   "output": "import { Fragment } from \"react\";\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nfunction _press(e, fire) {\n  if (e.target !== e.currentTarget || (e.key !== \"Enter\" && e.key !== \" \")) return;\n  e.preventDefault();\n  fire();\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Users\">\n      {(() => {\n        const _cols = [\n          (\n            <th data-weft-id=\"col-name\" scope=\"col\" aria-sort=\"ascending\" tabIndex={0} onClick={() => _act(actions, { id: \"col-name\", action: \"users.sortByName\" })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: \"col-name\", action: \"users.sortByName\" }))}>Name</th>\n          ),\n          (\n            <th data-weft-id=\"col-role\" scope=\"col\" aria-sort=\"none\">Role</th>\n          ),\n        ];\n        const _rows = [];\n        return (\n          <table data-weft-id=\"users\" aria-label=\"Users\">\n            {_cols.length > 0 ? (\n              <thead>\n                <tr>\n                  {_keyed(_cols)}\n                </tr>\n              </thead>\n            ) : null}\n            {_rows.length > 0 ? (\n              <tbody>\n                {_keyed(_rows)}\n              </tbody>\n            ) : null}\n          </table>\n        );\n      })()}\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+     "label": "Shipping"
+    },
+    "children": [
+     {
+      "kind": "combobox",
+      "id": "city",
+      "props": {
+       "disabled": false,
+       "label": "City",
+       "placeholder": "Type a city",
+       "value": {
+        "bind": "$.city"
+       }
+      },
+      "on": {
+       "change": "shipping.update"
+      },
+      "children": [
+       {
+        "kind": "option",
+        "id": "city-lisbon",
+        "props": {
+         "value": "Lisbon"
+        },
+        "children": [
+         "Portugal"
+        ]
+       },
+       {
+        "kind": "option",
+        "id": "city-madrid",
+        "props": {
+         "value": "Madrid"
+        },
+        "children": [
+         "Spain"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Shipping\">\n      {(() => {\n        const _o = [\n          { value: \"Lisbon\", el: (\n            <option data-weft-id=\"city-lisbon\" value=\"Lisbon\">Portugal</option>\n          ) },\n          { value: \"Madrid\", el: (\n            <option data-weft-id=\"city-madrid\" value=\"Madrid\">Spain</option>\n          ) },\n        ];\n        return (\n          <label>\n            <span aria-hidden=\"true\">City</span>\n            <input data-weft-id=\"city\" aria-label=\"City\" list={\"weft-city-options\"} placeholder=\"Type a city\" value={_text(data?.city)} onChange={(_e) => { const _v = _e.currentTarget.value; if (_v !== undefined) onChange?.(\"$.city\", _v); _act(actions, { id: \"city\", action: \"shipping.update\" }); }} />\n            <datalist id={\"weft-city-options\"}>\n              {_keyed(_o.map((_x) => _x.el))}\n            </datalist>\n          </label>\n        );\n      })()}\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+     "label": "Delivery"
+    },
+    "children": [
+     {
+      "kind": "date-picker",
+      "id": "day",
+      "props": {
+       "disabled": false,
+       "label": "Delivery date",
+       "max": "2026-12-31",
+       "min": "2026-01-01",
+       "type": "date",
+       "value": {
+        "bind": "$.day"
+       }
+      },
+      "on": {
+       "change": "delivery.update"
+      }
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _dateType(v) {\n  return v === \"time\" || v === \"datetime\" ? v : \"date\";\n}\n\nfunction _dateText(type, value) {\n  const day = (s) => {\n    const m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(s);\n    if (!m) return false;\n    const [year, month, d] = [Number(m[1]), Number(m[2]), Number(m[3])];\n    if (year < 1 || month < 1 || month > 12 || d < 1) return false;\n    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;\n    return d <= [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];\n  };\n  const time = (s) => /^([01]\\d|2[0-3]):[0-5]\\d$/.test(s);\n  if (type === \"date\") return day(value) ? value : \"\";\n  if (type === \"time\") return time(value) ? value : \"\";\n  const [d = \"\", t = \"\", ...rest] = value.split(\"T\");\n  return rest.length === 0 && day(d) && time(t) ? value : \"\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Delivery\">\n      <label>\n        <span aria-hidden=\"true\">Delivery date</span>\n        {(() => {\n          const _t = _dateType(\"date\");\n          return (\n            <input data-weft-id=\"day\" type={_t === \"datetime\" ? \"datetime-local\" : _t} aria-label=\"Delivery date\" min={_dateText(_t, \"2026-01-01\") || undefined} max={_dateText(_t, \"2026-12-31\") || undefined} value={_dateText(_t, _text(data?.day))} onChange={(_e) => { const _v = _dateText(_t, _e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.day\", _v); _act(actions, { id: \"day\", action: \"delivery.update\" }); }} />\n          );\n        })()}\n      </label>\n    </main>\n  );\n}\n"
  },
  {
   "document": {
@@ -3539,6 +3652,114 @@
     "kind": "screen",
     "id": "root",
     "props": {
+     "label": "Sort"
+    },
+    "children": [
+     {
+      "kind": "segmented-control",
+      "id": "order",
+      "props": {
+       "label": "Order",
+       "value": {
+        "bind": "$.order"
+       }
+      },
+      "children": [
+       {
+        "kind": "segment",
+        "id": "order-new",
+        "props": {
+         "disabled": false,
+         "value": "new"
+        },
+        "children": [
+         "Newest"
+        ]
+       },
+       {
+        "kind": "segment",
+        "id": "order-top",
+        "props": {
+         "value": "top"
+        },
+        "children": [
+         "Top"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Sort\">\n      <div data-weft-id=\"order\" aria-label=\"Order\" role=\"radiogroup\" data-weft-segmented=\"\">\n        <span aria-hidden=\"true\">Order</span>\n        <label>\n          <input data-weft-id=\"order-new\" type=\"radio\" name={\"weft-order\"} value=\"new\" aria-label=\"Newest\" checked={_text(data?.order) !== \"\" && \"new\" === _text(data?.order)} onChange={() => onChange?.(\"$.order\", \"new\")} />\n          <span aria-hidden=\"true\">Newest</span>\n        </label>\n        <label>\n          <input data-weft-id=\"order-top\" type=\"radio\" name={\"weft-order\"} value=\"top\" aria-label=\"Top\" checked={_text(data?.order) !== \"\" && \"top\" === _text(data?.order)} onChange={() => onChange?.(\"$.order\", \"top\")} />\n          <span aria-hidden=\"true\">Top</span>\n        </label>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+     "label": "Calendar"
+    },
+    "children": [
+     {
+      "kind": "segmented-control",
+      "id": "view",
+      "props": {
+       "label": "View",
+       "value": {
+        "bind": "$.view"
+       }
+      },
+      "on": {
+       "change": "calendar.update"
+      },
+      "children": [
+       {
+        "kind": "segment",
+        "id": "view-day",
+        "props": {
+         "value": "day"
+        },
+        "children": [
+         "Day"
+        ]
+       },
+       {
+        "kind": "segment",
+        "id": "view-week",
+        "props": {
+         "value": "week"
+        },
+        "children": [
+         "Week"
+        ]
+       },
+       {
+        "kind": "segment",
+        "id": "view-month",
+        "props": {
+         "value": "month"
+        },
+        "children": [
+         "Month"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Calendar\">\n      <div data-weft-id=\"view\" aria-label=\"View\" role=\"radiogroup\" data-weft-segmented=\"\">\n        <span aria-hidden=\"true\">View</span>\n        <label>\n          <input data-weft-id=\"view-day\" type=\"radio\" name={\"weft-view\"} value=\"day\" aria-label=\"Day\" checked={_text(data?.view) !== \"\" && \"day\" === _text(data?.view)} onChange={() => { onChange?.(\"$.view\", \"day\"); _act(actions, { id: \"view\", action: \"calendar.update\" }); }} />\n          <span aria-hidden=\"true\">Day</span>\n        </label>\n        <label>\n          <input data-weft-id=\"view-week\" type=\"radio\" name={\"weft-view\"} value=\"week\" aria-label=\"Week\" checked={_text(data?.view) !== \"\" && \"week\" === _text(data?.view)} onChange={() => { onChange?.(\"$.view\", \"week\"); _act(actions, { id: \"view\", action: \"calendar.update\" }); }} />\n          <span aria-hidden=\"true\">Week</span>\n        </label>\n        <label>\n          <input data-weft-id=\"view-month\" type=\"radio\" name={\"weft-view\"} value=\"month\" aria-label=\"Month\" checked={_text(data?.view) !== \"\" && \"month\" === _text(data?.view)} onChange={() => { onChange?.(\"$.view\", \"month\"); _act(actions, { id: \"view\", action: \"calendar.update\" }); }} />\n          <span aria-hidden=\"true\">Month</span>\n        </label>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
      "label": "Locale"
     },
     "children": [
@@ -3582,6 +3803,38 @@
    }
   },
   "output": "import { Fragment } from \"react\";\n\nfunction _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Locale\">\n      <label>\n        <span aria-hidden=\"true\">Country</span>\n        {(() => {\n          const _o = [\n            { value: \"pt\", el: (\n              <option data-weft-id=\"c-pt\" value=\"pt\">Portugal</option>\n            ) },\n            { value: \"es\", el: (\n              <option data-weft-id=\"c-es\" value=\"es\">Spain</option>\n            ) },\n          ];\n          return (\n            <select data-weft-id=\"country\" aria-label=\"Country\" value={_text(data?.country)} onChange={(_e) => { const _c = _o.find((_x) => _text(_x.value) === _e.currentTarget.value); onChange?.(\"$.country\", _c ? _c.value : _e.currentTarget.value); _act(actions, { id: \"country\", action: \"profile.update\" }); }}>\n              {_keyed(_o.map((_x) => _x.el))}\n            </select>\n          );\n        })()}\n      </label>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+     "label": "Sound"
+    },
+    "children": [
+     {
+      "kind": "slider",
+      "id": "volume",
+      "props": {
+       "disabled": false,
+       "label": "Volume",
+       "max": 100,
+       "min": 0,
+       "step": 5,
+       "value": {
+        "bind": "$.volume"
+       }
+      },
+      "on": {
+       "change": "sound.update"
+      }
+     }
+    ]
+   }
+  },
+  "output": "function _num(v, integer, min, max) {\n  if (typeof v !== \"number\") return v;\n  if (!Number.isFinite(v)) return undefined;\n  if (integer) v = Math.round(v);\n  if (min !== undefined) v = Math.max(v, min);\n  if (max !== undefined) v = Math.min(v, max);\n  return v;\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _numeric(v) {\n  if (typeof v === \"number\") return Number.isFinite(v) ? v : undefined;\n  if (typeof v === \"string\" && /^-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[eE][-+]?\\d+)?$/.test(v.trim())) {\n    const n = Number(v);\n    return Number.isFinite(n) ? n : undefined;\n  }\n  return undefined;\n}\n\nfunction _tidy(x, ...inputs) {\n  const d = (y) => {\n    const [m = \"\", e] = String(y).split(\"e\");\n    return Math.max(0, (m.split(\".\")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));\n  };\n  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));\n}\n\nfunction _span(min, max, step) {\n  const lo = _numeric(min) ?? 0;\n  const st = _numeric(step);\n  return { min: lo, max: Math.max(_numeric(max) ?? 100, lo), step: st !== undefined && st > 0 ? st : 1 };\n}\n\nfunction _slide(value, s) {\n  const v = Math.min(Math.max(_numeric(value) ?? s.min, s.min), s.max);\n  let on = s.min + Math.floor((v - s.min) / s.step + 0.5) * s.step;\n  if (on > s.max) on -= s.step;\n  return String(_tidy(Math.max(on, s.min), s.min, s.step));\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Sound\">\n      <label>\n        <span aria-hidden=\"true\">Volume</span>\n        {(() => {\n          const _s = _span(0, 100, 5);\n          return (\n            <input data-weft-id=\"volume\" type=\"range\" aria-label=\"Volume\" min={_s.min} max={_s.max} step={_s.step} value={_slide(_num(data?.volume, false, undefined, undefined), _s)} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.volume\", _v); _act(actions, { id: \"volume\", action: \"sound.update\" }); }} />\n          );\n        })()}\n      </label>\n    </main>\n  );\n}\n"
  },
  {
   "document": {
@@ -3634,6 +3887,38 @@
    }
   },
   "output": "function _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Actions\">\n      <div data-weft-id=\"actions\" style={{ gap: \"var(--weft-space-md)\", display: \"flex\", flexDirection: \"row\", alignItems: \"center\" }}>\n        <button data-weft-id=\"save\" type=\"button\" data-variant=\"primary\" onClick={(_e) => _act(actions, { id: \"save\", action: \"doc.save\" })}>Save</button>\n        <button data-weft-id=\"discard\" type=\"button\" onClick={(_e) => _act(actions, { id: \"discard\", action: \"doc.discard\" })}>Discard</button>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+     "label": "Order"
+    },
+    "children": [
+     {
+      "kind": "stepper",
+      "id": "quantity",
+      "props": {
+       "disabled": false,
+       "label": "Quantity",
+       "max": 10,
+       "min": 1,
+       "step": 1,
+       "value": {
+        "bind": "$.quantity"
+       }
+      },
+      "on": {
+       "change": "order.update"
+      }
+     }
+    ]
+   }
+  },
+  "output": "function _num(v, integer, min, max) {\n  if (typeof v !== \"number\") return v;\n  if (!Number.isFinite(v)) return undefined;\n  if (integer) v = Math.round(v);\n  if (min !== undefined) v = Math.max(v, min);\n  if (max !== undefined) v = Math.min(v, max);\n  return v;\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _numeric(v) {\n  if (typeof v === \"number\") return Number.isFinite(v) ? v : undefined;\n  if (typeof v === \"string\" && /^-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[eE][-+]?\\d+)?$/.test(v.trim())) {\n    const n = Number(v);\n    return Number.isFinite(n) ? n : undefined;\n  }\n  return undefined;\n}\n\nfunction _tidy(x, ...inputs) {\n  const d = (y) => {\n    const [m = \"\", e] = String(y).split(\"e\");\n    return Math.max(0, (m.split(\".\")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));\n  };\n  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));\n}\n\nfunction _bounds(min, max, step) {\n  const lo = _numeric(min);\n  const hi = _numeric(max);\n  const st = _numeric(step);\n  const b = { step: st !== undefined && st > 0 ? st : 1 };\n  if (lo !== undefined) b.min = lo;\n  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);\n  return b;\n}\n\nfunction _clamp(v, b) {\n  if (b.min !== undefined) v = Math.max(v, b.min);\n  if (b.max !== undefined) v = Math.min(v, b.max);\n  return v;\n}\n\nfunction _count(value, b) {\n  return _clamp(_numeric(value) ?? 0, b);\n}\n\nfunction _step(current, direction, b) {\n  return _tidy(_clamp(current + direction * b.step, b), current, b.step);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Order\">\n      <label>\n        <span aria-hidden=\"true\">Quantity</span>\n        {(() => {\n          const _b = _bounds(1, 10, 1);\n          return (\n            <span data-weft-stepper=\"\">\n              <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"down\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.quantity, false, undefined, undefined), _b), -1, _b); onChange?.(\"$.quantity\", _n); _act(actions, { id: \"quantity\", action: \"order.update\" }); }}>{\"−\"}</button>\n              <input data-weft-id=\"quantity\" type=\"number\" aria-label=\"Quantity\" min={_b.min} max={_b.max} step={_b.step} value={String(_count(_num(data?.quantity, false, undefined, undefined), _b))} onChange={(_e) => { const _v = _numeric(_e.currentTarget.value); if (_v !== undefined) onChange?.(\"$.quantity\", _v); _act(actions, { id: \"quantity\", action: \"order.update\" }); }} />\n              <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"up\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(_num(data?.quantity, false, undefined, undefined), _b), 1, _b); onChange?.(\"$.quantity\", _n); _act(actions, { id: \"quantity\", action: \"order.update\" }); }}>+</button>\n            </span>\n          );\n        })()}\n      </label>\n    </main>\n  );\n}\n"
  },
  {
   "document": {
@@ -8079,7 +8364,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "stack",
+    "kind": "menu-item",
     "id": "V+JHC",
     "props": {},
     "children": [],
@@ -8096,7 +8381,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"V+JHC\" style={{ display: \"flex\", flexDirection: \"column\" }}>\n      <div data-weft-slot=\"10\" />\n      <div data-weft-slot=\"t\" />\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <button data-weft-id=\"V+JHC\" type=\"button\" role=\"menuitem\" />\n  );\n}\n"
  },
  {
   "document": {
@@ -8154,7 +8439,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "stack",
+    "kind": "button",
     "id": "  \\u0022 */ globalThis.__weftPwned = 1 /*",
     "props": {},
     "on": {},
@@ -8169,7 +8454,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"  \\\\u0022 */ globalThis.__weftPwned = 1 /*\"} style={{ display: \"flex\", flexDirection: \"column\" }}>\n      {\"  \\\\u0022 */ globalThis.__weftPwned = 1 /*\"}\n      <div data-weft-slot=\"AgQWG:)\">{\"</main>{globalThis.__weftPwned = 1}<main>\"}</div>\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <button data-weft-id={\"  \\\\u0022 */ globalThis.__weftPwned = 1 /*\"} type=\"button\">{\"\\\\u0022 */ globalThis.__weftPwned = 1 /*\"}</button>\n  );\n}\n"
  },
  {
   "document": {
@@ -8285,11 +8570,11 @@
    "root": [
     "' + (globalThis.__weftPwned = 1) + '",
     {
-     "kind": "list",
+     "kind": "checkbox",
      "id": "&lt;script&gt;alert(1)&lt;/script&gt;",
      "props": {
       "in": {
-       "kind": "alert",
+       "kind": "heading",
        "id": "~h8o+d/6_)",
        "children": [
         "zq=+!kY[,",
@@ -8648,7 +8933,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "text",
+    "kind": "menu",
     "id": "3y",
     "props": {
      "label": -3.4198495630533747e+68
@@ -8665,7 +8950,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"3y\" />\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"3y\" aria-label=\"-3.4198495630533747e+68\" role=\"menu\">\n      <div data-weft-slot=\"rdS*DN\">{\"Ae9]\"}</div>\n    </div>\n  );\n}\n"
  },
  {
   "document": {
@@ -8789,7 +9074,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "grid",
+    "kind": "cell",
     "props": {},
     "on": {
      "change": "^",
@@ -8806,7 +9091,7 @@
     ]
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div style={{ display: \"grid\" }} />\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div role=\"cell\" />\n  );\n}\n"
  },
  {
   "document": {
@@ -8819,7 +9104,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "menu",
+    "kind": "tab",
     "props": {
      "ordered": "`${globalThis.__weftPwned = 1}`",
      "submit": {
@@ -8833,7 +9118,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-state=\"-1494759920\" role=\"menu\" />\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-state=\"-1494759920\" role=\"group\" />\n  );\n}\n"
  },
  {
   "document": {
@@ -8953,7 +9238,7 @@
        }
       },
       {
-       "kind": "option",
+       "kind": "alert",
        "id": "!",
        "on": {
         "close": "&lt;script&gt;alert(1)&lt;/script&gt;"
@@ -8965,13 +9250,13 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"Crème brûlée 日本  x﻿\"} role=\"group\">\n      <div data-weft-slot=\"10\">{\"\\\"});globalThis.__weftPwned = 1;//\"}</div>\n      <div data-weft-slot=\"c)RavaUh@x\">\n        <div data-weft-id={\"!]]=9\\\\Lbz=\"} role=\"group\">\n          <div data-weft-slot=\"10\">{\"]Jh\"}</div>\n          <div data-weft-slot=\"empty\">lZA/</div>\n        </div>\n        <div data-weft-id=\"!\" />\n      </div>\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"Crème brûlée 日本  x﻿\"} role=\"group\">\n      <div data-weft-slot=\"10\">{\"\\\"});globalThis.__weftPwned = 1;//\"}</div>\n      <div data-weft-slot=\"c)RavaUh@x\">\n        <div data-weft-id={\"!]]=9\\\\Lbz=\"} role=\"group\">\n          <div data-weft-slot=\"10\">{\"]Jh\"}</div>\n          <div data-weft-slot=\"empty\">lZA/</div>\n        </div>\n        <div data-weft-id=\"!\" role=\"alert\" />\n      </div>\n    </div>\n  );\n}\n"
  },
  {
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "item",
+    "kind": "color-picker",
     "id": "f",
     "props": {
      "type": "</main>{globalThis.__weftPwned = 1}<main>"
@@ -8982,7 +9267,7 @@
     }
    }
   },
-  "output": "function _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _press(e, fire) {\n  if (e.target !== e.currentTarget || (e.key !== \"Enter\" && e.key !== \" \")) return;\n  e.preventDefault();\n  fire();\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <li data-weft-id=\"f\" tabIndex={0} onClick={() => _act(actions, { id: \"f\", action: \"Crème brûlée 日本  x﻿\" })} onKeyDown={(_e) => _press(_e, () => _act(actions, { id: \"f\", action: \"Crème brûlée 日本  x﻿\" }))} />\n  );\n}\n"
+  "output": "function _color(v) {\n  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : \"#000000\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id=\"f\" type=\"color\" aria-label=\"\" defaultValue={_color(\"\")} />\n    </label>\n  );\n}\n"
  },
  {
   "document": {
@@ -9006,7 +9291,7 @@
        },
        "children": [
         {
-         "kind": "radio",
+         "kind": "checkbox",
          "id": "  \\u0022 */ globalThis.__weftPwned = 1 /*",
          "props": {
           "label": "%",
@@ -9068,7 +9353,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "radio",
+    "kind": "each",
     "id": "7p\"constr",
     "on": {},
     "children": [
@@ -9086,7 +9371,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id={\"7p\\\"constr\"} type=\"radio\" value=\"\" aria-label=\"\" />\n      <span aria-hidden=\"true\" />\n    </label>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return null;\n}\n"
  },
  {
   "document": {
@@ -9223,7 +9508,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "item",
+    "kind": "stepper",
     "id": "<7g4",
     "props": {
      "checked": null,
@@ -9237,7 +9522,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <li data-weft-id={\"<7g4\"} />\n  );\n}\n"
+  "output": "function _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _numeric(v) {\n  if (typeof v === \"number\") return Number.isFinite(v) ? v : undefined;\n  if (typeof v === \"string\" && /^-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[eE][-+]?\\d+)?$/.test(v.trim())) {\n    const n = Number(v);\n    return Number.isFinite(n) ? n : undefined;\n  }\n  return undefined;\n}\n\nfunction _tidy(x, ...inputs) {\n  const d = (y) => {\n    const [m = \"\", e] = String(y).split(\"e\");\n    return Math.max(0, (m.split(\".\")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));\n  };\n  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));\n}\n\nfunction _bounds(min, max, step) {\n  const lo = _numeric(min);\n  const hi = _numeric(max);\n  const st = _numeric(step);\n  const b = { step: st !== undefined && st > 0 ? st : 1 };\n  if (lo !== undefined) b.min = lo;\n  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);\n  return b;\n}\n\nfunction _clamp(v, b) {\n  if (b.min !== undefined) v = Math.max(v, b.min);\n  if (b.max !== undefined) v = Math.min(v, b.max);\n  return v;\n}\n\nfunction _count(value, b) {\n  return _clamp(_numeric(value) ?? 0, b);\n}\n\nfunction _step(current, direction, b) {\n  return _tidy(_clamp(current + direction * b.step, b), current, b.step);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      {(() => {\n        const _b = _bounds(undefined, undefined, undefined);\n        return (\n          <span data-weft-stepper=\"\">\n            <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"down\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(undefined, _b), -1, _b); if (_i) _i.value = String(_n); _act(actions, { id: \"<7g4\", action: \"Crème brûlée 日本  x﻿\" }); }}>{\"−\"}</button>\n            <input data-weft-id={\"<7g4\"} type=\"number\" aria-label=\"\" min={_b.min} max={_b.max} step={_b.step} defaultValue={String(_count(undefined, _b))} onChange={() => _act(actions, { id: \"<7g4\", action: \"Crème brûlée 日本  x﻿\" })} />\n            <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"up\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(undefined, _b), 1, _b); if (_i) _i.value = String(_n); _act(actions, { id: \"<7g4\", action: \"Crème brûlée 日本  x﻿\" }); }}>+</button>\n          </span>\n        );\n      })()}\n    </label>\n  );\n}\n"
  },
  {
   "document": {
@@ -9332,7 +9617,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "alert",
+    "kind": "text",
     "props": {},
     "on": {
      "submit": "4i-bPYNpwK",
@@ -9347,7 +9632,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div role=\"alert\" />\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div />\n  );\n}\n"
  },
  {
   "document": {
@@ -9527,7 +9812,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "select",
+    "kind": "menu-item",
     "id": "v",
     "props": {
      "submit": [
@@ -9547,7 +9832,7 @@
     "slots": {}
    }
   },
-  "output": "import { Fragment } from \"react\";\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      {(() => {\n        const _o = [];\n        return (\n          <select data-weft-id=\"v\" aria-label=\"\" defaultValue=\"\">\n            {_keyed(_o.map((_x) => _x.el))}\n          </select>\n        );\n      })()}\n    </label>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <button data-weft-id=\"v\" type=\"button\" role=\"menuitem\">true</button>\n  );\n}\n"
  },
  {
   "document": {
@@ -9558,11 +9843,11 @@
     },
     false,
     {
-     "kind": "link",
+     "kind": "list",
      "props": {
       "checked": "X^dj:",
       "value": {
-       "kind": "section",
+       "kind": "dialog",
        "id": "</main>{globalThis.__weftPwned = 1}<main>",
        "props": {
         "open": "",
@@ -9814,7 +10099,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "select",
+    "kind": "column",
     "id": "`${globalThis.__weftPwned = 1}`",
     "props": {
      "error": [
@@ -9845,13 +10130,13 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "form",
+    "kind": "each",
     "id": "\"});globalThis.__weftPwned = 1;//",
     "props": {
      "text": -5.003829679976795e-197,
      "type": "f",
      "as": {
-      "kind": "option",
+      "kind": "alert",
       "id": "\"});globalThis.__weftPwned = 1;//",
       "props": {},
       "children": []
@@ -9864,7 +10149,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <form data-weft-id={\"\\\"});globalThis.__weftPwned = 1;//\"} onSubmit={(_e) => _e.preventDefault()} />\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return null;\n}\n"
  },
  {
   "document": {
@@ -10039,7 +10324,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "tab",
+    "kind": "segment",
     "id": "f. tL,W",
     "props": {
      "ordered": {
@@ -10074,18 +10359,18 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"f. tL,W\" role=\"group\">\n      {\"J- `${globalThis.__weftPwned = 1}` &lt;script&gt;alert(1)&lt;/script&gt;\"}\n      <div data-weft-slot={\"'o816\\\\u\"} />\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id=\"f. tL,W\" type=\"radio\" value=\"\" aria-label={\"J- `${globalThis.__weftPwned = 1}` &lt;script&gt;alert(1)&lt;/script&gt;\"} />\n      <span aria-hidden=\"true\">{\"J- `${globalThis.__weftPwned = 1}` &lt;script&gt;alert(1)&lt;/script&gt;\"}</span>\n    </label>\n  );\n}\n"
  },
  {
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "grid",
+    "kind": "text",
     "id": "  \\u0022 */ globalThis.__weftPwned = 1 /*",
     "props": {
      "hidden": "H`JRU|",
      "type": {
-      "kind": "menu-item",
+      "kind": "button",
       "id": "Dh\\Y)9O",
       "on": {
        "press": "Crème brûlée 日本  x﻿"
@@ -10108,7 +10393,7 @@
     "slots": {
      "2": [
       {
-       "kind": "cell",
+       "kind": "combobox",
        "id": "gx&Yq*[",
        "children": [
         "Qk__",
@@ -10244,7 +10529,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "column",
+    "kind": "row",
     "id": "' + (globalThis.__weftPwned = 1) + '",
     "props": {
      "as": 1431562925,
@@ -10281,7 +10566,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"' + (globalThis.__weftPwned = 1) + '\" role=\"columnheader\">\n      <div data-weft-slot=\"header\">\n        <div role=\"group\">\n          {\"~{-S^s >:. lPschjY[7B\"}\n          <div data-weft-slot=\"\" />\n        </div>\n      </div>\n      <div data-weft-slot=\"y@tr\" />\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"' + (globalThis.__weftPwned = 1) + '\" role=\"row\">\n      <div data-weft-slot=\"header\">\n        <div role=\"group\">\n          {\"~{-S^s >:. lPschjY[7B\"}\n          <div data-weft-slot=\"\" />\n        </div>\n      </div>\n      <div data-weft-slot=\"y@tr\" />\n    </div>\n  );\n}\n"
  },
  {
   "document": {
@@ -10303,7 +10588,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "select",
+    "kind": "stack",
     "on": {
      "change": "\"});globalThis.__weftPwned = 1;//",
      "submit": "' + (globalThis.__weftPwned = 1) + '"
@@ -10320,7 +10605,7 @@
     "slots": {}
    }
   },
-  "output": "import { Fragment } from \"react\";\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      {(() => {\n        const _o = [];\n        return (\n          <select aria-label=\"\" defaultValue=\"\" onChange={() => _act(actions, { id: \"\", action: \"\\\"});globalThis.__weftPwned = 1;//\" })}>\n            {_keyed(_o.map((_x) => _x.el))}\n          </select>\n        );\n      })()}\n    </label>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div style={{ display: \"flex\", flexDirection: \"column\" }} />\n  );\n}\n"
  },
  {
   "document": {
@@ -10545,7 +10830,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "menu",
+    "kind": "heading",
     "id": "Hl[`sP(XPk",
     "props": {
      "value": {
@@ -10609,7 +10894,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"Hl[`sP(XPk\"} role=\"menu\">\n      <div data-weft-slot=\"header\" />\n      {\"  \\\\u0022 */ globalThis.__weftPwned = 1 /*\"}\n      <div data-weft-slot=\"0YpEivl\" />\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <h2 data-weft-id={\"Hl[`sP(XPk\"}>{\"\\\\u0022 */ globalThis.__weftPwned = 1 /*\"}</h2>\n  );\n}\n"
  },
  {
   "document": {
@@ -10744,7 +11029,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "column",
+    "kind": "checkbox",
     "id": "W1^2",
     "props": {},
     "on": {},
@@ -10756,7 +11041,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"W1^2\" role=\"columnheader\">\n      <div data-weft-slot=\"10\">' + (globalThis.__weftPwned = 1) + '</div>\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id=\"W1^2\" type=\"checkbox\" aria-label=\"\" />\n    </label>\n  );\n}\n"
  },
  {
   "document": {
@@ -10863,7 +11148,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "column",
+    "kind": "alert",
     "props": {
      "as": {
       "bind": "$.a"
@@ -10881,7 +11166,7 @@
      ],
      "header": [
       {
-       "kind": "image",
+       "kind": "switch",
        "props": {
         "selected": [
          "&0",
@@ -10895,7 +11180,7 @@
       },
       [
        {
-        "kind": "section",
+        "kind": "color-picker",
         "id": "' + (globalThis.__weftPwned = 1) + '",
         "props": {
          "level": "Lcw4>6",
@@ -10930,7 +11215,7 @@
     }
    }
   },
-  "output": "function _url(value) {\n  const url = value.replace(/[\\t\\n\\r]/g, \"\").replace(/^[\\u0000- ]+|[\\u0000- ]+$/g, \"\");\n  if (url === \"\") return undefined;\n  const colon = url.indexOf(\":\");\n  const delimiter = url.search(/[/?#]/);\n  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;\n  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();\n  return scheme === \"http\" || scheme === \"https\" || scheme === \"mailto\" ? url : undefined;\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div role=\"columnheader\">\n      <div data-weft-slot=\"header\">\n        <img alt=\"\" src={_url(\"\")} />\n      </div>\n      <div data-weft-slot=\"2\">{\"</main>{globalThis.__weftPwned = 1}<main> dq*u\"}</div>\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div role=\"alert\">\n      <div data-weft-slot=\"header\">\n        <label>\n          <input type=\"checkbox\" role=\"switch\" aria-label=\"\" />\n        </label>\n      </div>\n      <div data-weft-slot=\"2\">{\"</main>{globalThis.__weftPwned = 1}<main> dq*u\"}</div>\n    </div>\n  );\n}\n"
  },
  {
   "document": {
@@ -11107,7 +11392,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "table",
+    "kind": "image",
     "id": "RK",
     "props": {
      "level": "&lt;script&gt;alert(1)&lt;/script&gt;",
@@ -11132,7 +11417,7 @@
     }
    }
   },
-  "output": "import { Fragment } from \"react\";\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (() => {\n    const _cols = [];\n    const _rows = [];\n    return (\n      <table data-weft-id=\"RK\">\n        {_cols.length > 0 ? (\n          <thead>\n            <tr>\n              {_keyed(_cols)}\n            </tr>\n          </thead>\n        ) : null}\n        {_rows.length > 0 ? (\n          <tbody>\n            {_keyed(_rows)}\n          </tbody>\n        ) : null}\n      </table>\n    );\n  })();\n}\n"
+  "output": "function _url(value) {\n  const url = value.replace(/[\\t\\n\\r]/g, \"\").replace(/^[\\u0000- ]+|[\\u0000- ]+$/g, \"\");\n  if (url === \"\") return undefined;\n  const colon = url.indexOf(\":\");\n  const delimiter = url.search(/[/?#]/);\n  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;\n  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();\n  return scheme === \"http\" || scheme === \"https\" || scheme === \"mailto\" ? url : undefined;\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <img data-weft-id=\"RK\" alt=\"\" src={_url(\"\")} />\n  );\n}\n"
  },
  {
   "document": {
@@ -11354,7 +11639,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "alert",
+    "kind": "combobox",
     "id": "D9x Ey^Z0!",
     "props": {},
     "on": {
@@ -11372,6 +11657,6 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"D9x Ey^Z0!\" role=\"alert\">\n      <div data-weft-slot=\"empty\" />\n    </div>\n  );\n}\n"
+  "output": "import { Fragment } from \"react\";\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (() => {\n    const _o = [];\n    return (\n      <label>\n        <input data-weft-id=\"D9x Ey^Z0!\" aria-label=\"\" list={\"weft-D9x Ey^Z0!-options\"} defaultValue={\"\"} onChange={() => _act(actions, { id: \"D9x Ey^Z0!\", action: \"iO 8J\" })} />\n        <datalist id={\"weft-D9x Ey^Z0!-options\"}>\n          {_keyed(_o.map((_x) => _x.el))}\n        </datalist>\n      </label>\n    );\n  })();\n}\n"
  }
 ]
