@@ -1,0 +1,76 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-column as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "users"
+          ],
+          "accessibility": {
+            "label": "Users"
+          }
+        },
+        {
+          "id": "users",
+          "component": "Column",
+          "children": [
+            "users-header",
+            "users-rows"
+          ],
+          "accessibility": {
+            "label": "Users"
+          }
+        },
+        {
+          "id": "col-name-label",
+          "component": "Text",
+          "text": "Name"
+        },
+        {
+          "id": "col-name",
+          "component": "Button",
+          "child": "col-name-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "users.sortByName"
+            }
+          }
+        },
+        {
+          "id": "col-role-2",
+          "component": "Text",
+          "text": "Role"
+        },
+        {
+          "id": "users-header",
+          "component": "Row",
+          "children": [
+            "col-name",
+            "col-role-2"
+          ]
+        },
+        {
+          "id": "users-rows",
+          "component": "List",
+          "children": []
+        }
+      ]
+    }
+  }
+]

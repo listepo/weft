@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-option as a2ui-losses
+---
+Repetition /screen#root/select#size: options that repeat over data have no A2UI form; they are left out

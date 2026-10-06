@@ -1,0 +1,16 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-error-state as a2ui-import
+---
+<screen id="load-error" weft="0.1">
+  <stack id="alert">
+    <stack id="alert-body">
+      <heading id="error-title" level="2">Could not load your data</heading>
+      <text id="error-message" text="{$.error.message}"/>
+    </stack>
+  </stack>
+  <stack id="actions" direction="row">
+    <button id="retry" variant="primary" on-press="load.retry">Retry</button>
+    <link id="support" on-press="nav.support">Contact support</link>
+  </stack>
+</screen>

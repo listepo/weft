@@ -1,0 +1,97 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-cell as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "users"
+          ],
+          "accessibility": {
+            "label": "Users"
+          }
+        },
+        {
+          "id": "users",
+          "component": "Column",
+          "children": [
+            "users-header",
+            "users-rows"
+          ],
+          "accessibility": {
+            "label": "Users"
+          }
+        },
+        {
+          "id": "col-name-2",
+          "component": "Text",
+          "text": "Name"
+        },
+        {
+          "id": "users-header",
+          "component": "Row",
+          "children": [
+            "col-name-2"
+          ]
+        },
+        {
+          "id": "row-ana",
+          "component": "Row",
+          "children": [
+            "column"
+          ]
+        },
+        {
+          "id": "ana-name",
+          "component": "Text",
+          "text": "Ana"
+        },
+        {
+          "id": "ana-link",
+          "component": "Button",
+          "child": "ana-link-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "users.open"
+            }
+          }
+        },
+        {
+          "id": "ana-link-label",
+          "component": "Text",
+          "text": "View"
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "ana-name",
+            "ana-link"
+          ]
+        },
+        {
+          "id": "users-rows",
+          "component": "List",
+          "children": [
+            "row-ana"
+          ]
+        }
+      ]
+    }
+  }
+]

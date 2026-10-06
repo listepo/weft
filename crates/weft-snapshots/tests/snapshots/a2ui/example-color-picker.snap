@@ -1,0 +1,40 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-color-picker as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "accent"
+          ],
+          "accessibility": {
+            "label": "Theme"
+          }
+        },
+        {
+          "id": "accent",
+          "component": "TextField",
+          "label": "Accent colour",
+          "variant": "shortText",
+          "value": {
+            "path": "/accent"
+          }
+        }
+      ]
+    }
+  }
+]

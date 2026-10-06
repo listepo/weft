@@ -1,0 +1,7 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-error-state as a2ui-losses
+---
+Props /screen#load-error/alert#alert: tone: this prop has no A2UI property
+Tokens /screen#load-error/stack#actions: gap: design tokens have no A2UI form
+Props /screen#load-error: state: this prop has no A2UI property

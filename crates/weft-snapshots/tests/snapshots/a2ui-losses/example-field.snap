@@ -1,0 +1,9 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-field as a2ui-losses
+---
+Props /screen#root/field#email: disabled: this prop has no A2UI property
+Bindings /screen#root/field#email: error: this binding has no A2UI property
+Props /screen#root/field#email: placeholder: this prop has no A2UI property
+Props /screen#root/field#email: state: this prop has no A2UI property
+Actions /screen#root/field#email: on-change="form.edit" has no A2UI event

@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-tabs as a2ui-losses
+---
+Bindings /screen#root/tabs#account-tabs: selected: this binding has no A2UI property
+Actions /screen#root/tabs#account-tabs: on-change="tabs.change" has no A2UI event

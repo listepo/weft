@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-segment as a2ui-losses
+---
+Props /screen#root/segmented-control#order/segment#order-new: disabled: this prop has no A2UI property

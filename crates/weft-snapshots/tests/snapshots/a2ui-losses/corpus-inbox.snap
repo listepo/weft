@@ -1,0 +1,19 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-inbox as a2ui-losses
+---
+Actions /screen#inbox/tabs#folders/tab#tab-inbox/list#messages/each#message-each/item#message: on-press="inbox.open" has no A2UI event
+Props /screen#inbox/tabs#folders/tab#tab-inbox/list#messages: ordered: this prop has no A2UI property
+Props /screen#inbox/tabs#folders/tab#tab-inbox/list#messages: state: this prop has no A2UI property
+Tokens /screen#inbox/tabs#folders/tab#tab-drafts/list#drafts/stack#drafts-empty: gap: design tokens have no A2UI form
+Props /screen#inbox/tabs#folders/tab#tab-drafts/list#drafts: state: this prop has no A2UI property
+Props /screen#inbox/tabs#folders/tab#tab-sent/list#sent: state: this prop has no A2UI property
+Bindings /screen#inbox/tabs#folders: selected: this binding has no A2UI property
+Actions /screen#inbox/tabs#folders: on-change="inbox.folder" has no A2UI event
+Actions /screen#inbox/dialog#compose/form#compose-form: no submit button carries the form's action
+Props /screen#inbox/dialog#compose/form#compose-form: state: this prop has no A2UI property
+Structure /screen#inbox/dialog#compose: A2UI opens a Modal from a trigger; a generated button opens this one
+Props /screen#inbox/dialog#compose: modal: this prop has no A2UI property
+Bindings /screen#inbox/dialog#compose: open: this binding has no A2UI property
+Actions /screen#inbox/dialog#compose: on-close="inbox.closeCompose" has no A2UI event
+Props /screen#inbox: state: this prop has no A2UI property

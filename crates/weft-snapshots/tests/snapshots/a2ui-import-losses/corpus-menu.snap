@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-menu as a2ui-import-losses
+---
+Bindings /screen#account-menu/list#menu/item#item-3/link#item-billing: <link> takes no a binding for disabled; it is left out

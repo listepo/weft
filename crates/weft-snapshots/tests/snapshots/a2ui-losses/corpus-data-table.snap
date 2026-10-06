@@ -1,0 +1,8 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-data-table as a2ui-losses
+---
+Props /screen#users/table#table/column#col-name: sort: this prop has no A2UI property
+Props /screen#users/table#table/column#col-email: sort: this prop has no A2UI property
+Props /screen#users/table#table/column#col-role: sort: this prop has no A2UI property
+Props /screen#users/table#table/each#rows/row#row/cell#cell-actions/button#delete: variant: this prop has no A2UI property

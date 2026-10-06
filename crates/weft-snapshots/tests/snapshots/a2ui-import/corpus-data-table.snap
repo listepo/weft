@@ -1,0 +1,27 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-data-table as a2ui-import
+---
+<screen id="users" weft="0.1">
+  <heading id="title" level="1">Users</heading>
+  <stack id="table" label="Users">
+    <stack id="table-header" direction="row">
+      <link id="col-name" on-press="users.sort">Name</link>
+      <link id="col-email" on-press="users.sort">Email</link>
+      <link id="col-role" on-press="users.sort">Role</link>
+      <text id="col-actions">Actions</text>
+    </stack>
+    <list id="table-rows">
+      <each id="each-1" as="item" in="{$.users}">
+        <item id="item-1">
+          <stack id="row" direction="row">
+            <text id="user-name" text="{$item.name}"/>
+            <text id="user-email" text="{$item.email}"/>
+            <text id="user-role" text="{$item.role}"/>
+            <button id="delete" on-press="users.delete">Delete</button>
+          </stack>
+        </item>
+      </each>
+    </list>
+  </stack>
+</screen>

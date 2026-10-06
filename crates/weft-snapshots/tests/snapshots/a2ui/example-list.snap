@@ -1,0 +1,53 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-list as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "todos",
+            "todos-empty"
+          ],
+          "accessibility": {
+            "label": "Todos"
+          }
+        },
+        {
+          "id": "todos",
+          "component": "List",
+          "children": {
+            "componentId": "todo-title",
+            "path": "/todos"
+          }
+        },
+        {
+          "id": "todos-empty",
+          "component": "Text",
+          "text": "Nothing to do.",
+          "variant": "caption"
+        },
+        {
+          "id": "todo-title",
+          "component": "Text",
+          "text": {
+            "path": "title"
+          }
+        }
+      ]
+    }
+  }
+]

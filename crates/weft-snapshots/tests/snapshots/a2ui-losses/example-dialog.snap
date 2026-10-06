@@ -1,0 +1,9 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-dialog as a2ui-losses
+---
+Props /screen#root/dialog#confirm/button#ok: variant: this prop has no A2UI property
+Structure /screen#root/dialog#confirm: A2UI opens a Modal from a trigger; a generated button opens this one
+Props /screen#root/dialog#confirm: modal: this prop has no A2UI property
+Bindings /screen#root/dialog#confirm: open: this binding has no A2UI property
+Actions /screen#root/dialog#confirm: on-close="dialog.close" has no A2UI event

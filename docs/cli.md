@@ -17,7 +17,7 @@ The examples assume you have also made the scratch folder from the [tour](tour.m
 $ mkdir -p weft-tour
 $ cp corpus/login/screen.weft weft-tour/login.weft
 $ weft --help
-Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React and SolidJS
+Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React, SolidJS and A2UI
 
 Usage: weft <COMMAND>
 
@@ -37,6 +37,8 @@ Commands:
   import-html     Read an HTML page back into markup; what Weft cannot hold is listed on stderr as losses
   import-react    Read a React component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
   import-solid    Read a SolidJS component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
+  a2ui            Write a markup document as A2UI v0.9 messages (basic catalog); what A2UI cannot hold is listed on stderr as losses
+  import-a2ui     Read A2UI v0.9 messages (a JSON array, one object or JSON Lines) back into markup; losses go to stderr
   help            Print this message or the help of the given subcommand(s)
 
 Options:
@@ -216,10 +218,21 @@ A component reads its tokens as `var(--weft-…)`. `weft css-tokens` writes them
 It is a base, not a theme. It sets no page colour and no page font; it puts a field's caption above its control, a checkbox, switch or radio and its caption in a row, spaces the fields of a form, makes links (including `role="link"` elements) look like links, styles buttons (`primary` and `danger` are filled) and gives tabs, alerts, tones, footers, tables and lists the few rules they need. It uses `space.xs`, `space.sm`, `space.md`, `radius.sm`, `radius.pill`, `font-size.sm`, `color.white`, `color.action.primary`, `color.action.danger` and, if your tokens have them, `color.success` and `color.warning`; borders and muted text mix `currentColor`, so light and dark follow the page. It uses `:has()` (Chromium 105, Safari 15.4, Firefox 121 or later). [SPEC §9](../SPEC.md) lists every rule's target.
 
 
+## `weft a2ui` and `weft import-a2ui`
+
+[A2UI](https://a2ui.org/specification/v0.9-a2ui/) is the format agents send to render a UI. `weft a2ui` writes the messages of one surface (`createSurface` and `updateComponents`, A2UI v0.9, basic catalog) as a JSON array, and `weft import-a2ui` reads them back: a JSON array, one object, or JSON Lines. What A2UI has no form for (design tokens, the `state` prop, `on-change` events, a `dialog`'s own opening) is listed on stderr, one loss per line, as for the other importers; the table is in SPEC section 9.
+
+```console
+$ weft a2ui weft-tour/login.weft --out-dir weft-tour/a2ui
+$ weft import-a2ui weft-tour/a2ui/login.a2ui.json
+```
+
+The commands use the project's catalog, or `--catalog`. `--out-dir` writes `<name>.a2ui.json` or `<name>.weft` instead of printing, and falls back to the project's `export.a2ui.outDir` or `import.a2ui.outDir` ([Projects](projects.md)). The data of a screen is not part of it, so no `updateDataModel` message is written, and one in the input is ignored.
+
 ## What `weft` does not do
 
 - It does not check token names, action names or bindings without a project: those checks need your app's tokens, actions and data schema, which a `weft.json` declares ([Projects](projects.md)).
-- It does not render pages with sample data, and it does not convert to or from Figma or Penpot. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
+- It does not render pages with sample data, and it does not convert to or from Figma, Penpot or json-render. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
 - It does not apply patches. [Patches](patches.md) go through the MCP server or the library.
 
 ## The Node version

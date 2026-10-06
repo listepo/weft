@@ -1,0 +1,210 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-signup as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "signup",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "signup",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "form"
+          ],
+          "accessibility": {
+            "label": "Create account"
+          }
+        },
+        {
+          "id": "form",
+          "component": "Column",
+          "children": [
+            "title",
+            "fields",
+            "submit",
+            "signin"
+          ]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Create your account",
+          "variant": "h1"
+        },
+        {
+          "id": "fields",
+          "component": "Column",
+          "children": [
+            "name",
+            "email",
+            "password",
+            "confirm",
+            "terms"
+          ]
+        },
+        {
+          "id": "name",
+          "component": "TextField",
+          "label": "Full name",
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/name"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ],
+          "value": {
+            "path": "/name"
+          }
+        },
+        {
+          "id": "email",
+          "component": "TextField",
+          "label": "Email",
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/email"
+                  }
+                }
+              },
+              "message": "Required"
+            },
+            {
+              "condition": {
+                "call": "email",
+                "args": {
+                  "value": {
+                    "path": "/email"
+                  }
+                }
+              },
+              "message": "Not an email address"
+            }
+          ],
+          "value": {
+            "path": "/email"
+          }
+        },
+        {
+          "id": "password",
+          "component": "TextField",
+          "label": "Password",
+          "variant": "obscured",
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/password"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ],
+          "value": {
+            "path": "/password"
+          }
+        },
+        {
+          "id": "confirm",
+          "component": "TextField",
+          "label": "Confirm password",
+          "variant": "obscured",
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/confirm"
+                  }
+                }
+              },
+              "message": "Required"
+            }
+          ],
+          "value": {
+            "path": "/confirm"
+          }
+        },
+        {
+          "id": "terms",
+          "component": "CheckBox",
+          "label": "I accept the terms of service",
+          "value": {
+            "path": "/acceptTerms"
+          }
+        },
+        {
+          "id": "submit",
+          "component": "Button",
+          "child": "submit-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "auth.signup"
+            }
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/acceptTerms"
+                  }
+                }
+              },
+              "message": "Not available"
+            }
+          ]
+        },
+        {
+          "id": "submit-label",
+          "component": "Text",
+          "text": "Create account"
+        },
+        {
+          "id": "signin",
+          "component": "Button",
+          "child": "signin-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "nav.signin"
+            }
+          }
+        },
+        {
+          "id": "signin-label",
+          "component": "Text",
+          "text": "Already have an account? Sign in"
+        }
+      ]
+    }
+  }
+]

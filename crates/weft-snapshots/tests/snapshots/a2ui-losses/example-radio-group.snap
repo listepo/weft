@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-radio-group as a2ui-losses
+---
+Actions /screen#root/radio-group#plan: on-change="plan.choose" has no A2UI event
