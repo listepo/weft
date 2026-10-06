@@ -12,7 +12,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T13.1 | todo | P2 | 3 | 0% | |
 | T15.1 | in progress | P3 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T61 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -160,7 +159,3 @@ The json-render half of T13: export a Weft document to a json-render spec (`{ ro
 ### T15.1. Catalog import from a Custom Elements Manifest
 
 An importer that turns a Custom Elements Manifest (schema 2.1.0, https://github.com/webcomponents/custom-elements-manifest) into a Weft catalog: each custom element becomes a kind, its attributes and fields become props, its slots become slots, its events become events. Done when the manifest of a real component library imports into a catalog that validates, with the lost parts listed.
-
-### T61. Valid change handler for a read-only bound control
-
-The JSX generator can print `onChange={(_e) => const _v = ...}` for a number, date, colour or combobox control whose `value` is bound but not writable and that has no `on-change`: `Self::handler` prints a lone statement as an arrow body, and a `const` declaration is not an expression. The fast-check property "any input yields a well-formed module" in `packages/to-jsx/test/generate.test.ts` fails on some seeds (for example 502940636). Fix it in `valued` (`crates/weft-web/src/jsx/mod.rs`) or `handler`, add a deterministic regression test for React, SolidJS and Lit, and keep generated output unchanged where it was valid. Done when the regression test and the property test with that seed pass and the full check exits 0.
