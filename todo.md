@@ -7,3 +7,4 @@
 - T52.1. 3D models
 - T13. Interoperability with A2UI and json-render
 - T15.1. Catalog import from a Custom Elements Manifest
+- T61. Valid change handler for a read-only bound control
