@@ -63,11 +63,19 @@ const EXAMPLE_DARK = "example-review-dark";
 const GLASS_DARK = "glass-dark";
 // The screens with a glass material, shown over a backdrop the glass can blur.
 const OVER_BACKDROP = new Set(["glass", EXAMPLE_SCREEN]);
+// The system draws the glass itself and its blur is not reproducible to the pixel under load: a
+// glass-dark run once differed from its baseline by 2 pixels (of 3.2 million) at the glass corners
+// and passed on rerun (T60). These screens, and only these, accept up to this many differing
+// pixels; any real change to a glass screen moves far more.
+const GLASS_TOLERANCE = 16;
 // A dark shot is its light screen again, in the other appearance.
 const DARK_OF = new Map([
   [EXAMPLE_DARK, EXAMPLE_SCREEN],
   [GLASS_DARK, "glass"],
 ]);
+
+const toleranceOf = (name: string) =>
+  OVER_BACKDROP.has(DARK_OF.get(name) ?? name) ? GLASS_TOLERANCE : 0;
 
 const run = (cmd: string, args: string[]) =>
   spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
@@ -221,10 +229,11 @@ struct GlassBackdrop<Content: View>: View {
 
 // The system draws the home indicator inside the bottom safe-area inset, in some screenshots and
 // not in others, and an app cannot switch it off: persistentSystemOverlays(.hidden) only asks the
-// system to hide it, and a run with it still showed the indicator in four screenshots. The suite
-// therefore leaves that strip out of every comparison, and the app says how tall it is on this
-// device, so no size is written down here. It is read from the window, because a view that ignores
-// the safe area is told the inset is zero.
+// system to hide it, and a run with it still showed the indicator in four screenshots. The same
+// goes for the top: some screenshots include the Dynamic Island and the screen's rounded corners
+// (T60). The suite therefore leaves both strips out of every comparison, and the app says how tall
+// they are on this device, so no size is written down here. They are read from the window, because
+// a view that ignores the safe area is told the inset is zero.
 struct InsetProbe: View {
     var body: some View {
         Color.clear.task {
@@ -232,7 +241,7 @@ struct InsetProbe: View {
                 let window = UIApplication.shared.connectedScenes
                     .compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
                 if let window, window.bounds.width > 0 {
-                    let json = "{\\"width\\": \\(window.bounds.width), \\"bottom\\": \\(window.safeAreaInsets.bottom)}"
+                    let json = "{\\"width\\": \\(window.bounds.width), \\"top\\": \\(window.safeAreaInsets.top), \\"bottom\\": \\(window.safeAreaInsets.bottom)}"
                     let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
                     try? json.write(to: dir.appendingPathComponent("insets.json"), atomically: true, encoding: .utf8)
                     return
@@ -472,26 +481,29 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
   }
 
   /**
-   * The height in screenshot pixels of the bottom safe-area inset, where the home indicator
-   * appears, as the launched app measured it. Read once: the device does not change.
+   * The heights in screenshot pixels of the top and bottom safe-area insets, where the Dynamic
+   * Island and the home indicator appear, as the launched app measured them. Read once: the
+   * device does not change.
    */
-  let insetPx: number | undefined;
-  async function bottomInsetPx(png: Uint8Array): Promise<number> {
-    if (insetPx !== undefined) return insetPx;
+  let strips: { ignoreTop: number; ignoreBottom: number } | undefined;
+  async function systemStrips(png: Uint8Array) {
+    if (strips !== undefined) return strips;
     const container = run("xcrun", ["simctl", "get_app_container", udid, BUNDLE, "data"]);
     if (container.status !== 0) throw new Error(`no app container: ${container.stderr.trim()}`);
     const file = join(container.stdout.trim(), "Documents", "insets.json");
     for (let attempt = 0; attempt < 40; attempt++) {
       if (existsSync(file)) {
-        const { width, bottom } = JSON.parse(readFileSync(file, "utf8")) as {
+        const { width, top, bottom } = JSON.parse(readFileSync(file, "utf8")) as {
           width: number;
+          top: number;
           bottom: number;
         };
-        if (!(width > 0) || !(bottom >= 0)) throw new Error(`bad insets in ${file}`);
+        if (!(width > 0) || !(top > 0) || !(bottom >= 0)) throw new Error(`bad insets in ${file}`);
         // A PNG's width is in its IHDR chunk, bytes 16 to 19.
         const pixels = new DataView(png.buffer, png.byteOffset).getUint32(16);
-        insetPx = Math.ceil((bottom * pixels) / width);
-        return insetPx;
+        const px = (inset: number) => Math.ceil((inset * pixels) / width);
+        strips = { ignoreTop: px(top), ignoreBottom: px(bottom) };
+        return strips;
       }
       await sleep(250);
     }
@@ -508,7 +520,8 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     test(`${name} matches its reviewed baseline`, async ({ skip }) => {
       const png = await shot(name);
       const result = matchBaseline(png, `swiftui/${name}`, {
-        ignoreBottom: await bottomInsetPx(png),
+        ...(await systemStrips(png)),
+        tolerance: toleranceOf(name),
       });
       if (result.status === "missing") {
         if (result.reviewed)
@@ -529,24 +542,23 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
   test("the example screen follows the appearance", async () => {
     const light = await shot(EXAMPLE_SCREEN);
     const dark = await shot(EXAMPLE_DARK);
-    const ignoreBottom = await bottomInsetPx(light);
+    const ignore = await systemStrips(light);
     expect(
-      compare(light, dark, "appearance/swiftui-example-review", { ignoreBottom }).differing,
+      compare(light, dark, "appearance/swiftui-example-review", ignore).differing,
     ).toBeGreaterThan(0);
   });
 
   for (const mutant of Object.keys(MUTANTS)) {
     test(`${mutant} is caught against login and its baseline`, async () => {
       const changed = await shot(mutant);
-      const ignoreBottom = await bottomInsetPx(changed);
+      const ignore = await systemStrips(changed);
       expect(
-        compare(await shot("login"), changed, `mutation/swiftui-${mutant}`, { ignoreBottom })
-          .differing,
+        compare(await shot("login"), changed, `mutation/swiftui-${mutant}`, ignore).differing,
       ).toBeGreaterThan(0);
       const result = matchBaseline(changed, "swiftui/login", {
         readOnly: true,
         label: `mutation/swiftui-${mutant}.baseline`,
-        ignoreBottom,
+        ...ignore,
       });
       if (result.status !== "missing") expect(result.status).toBe("differ");
     });

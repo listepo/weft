@@ -13,7 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T15.1 | in progress | P3 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T60 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
@@ -179,9 +178,3 @@ Export a Weft document to A2UI v0.9 messages and to a json-render spec, and impo
 ### T15.1. Catalog import from a Custom Elements Manifest
 
 An importer that turns a Custom Elements Manifest (schema 2.1.0, https://github.com/webcomponents/custom-elements-manifest) into a Weft catalog: each custom element becomes a kind, its attributes and fields become props, its slots become slots, its events become events. Done when the manifest of a real component library imports into a catalog that validates, with the lost parts listed.
-
-### T60. Deterministic top strip and blur in SwiftUI screenshots
-
-After T59 masked the home indicator, two more SwiftUI screenshot flakes showed up on main in four full visual runs: `tilt` once differed by 38,537 px because the capture included the black Dynamic Island pill at the top, and `glass-dark` twice differed by 2 px, most likely from blur noise in the glass effect. Both pass on rerun, so the merge gate is unreliable.
-
-Mask the top system strip the same way T59 masks the bottom one (the host app measures the top safe-area inset from its window and the comparison blanks it in both images), or keep the island out of the capture if the simulator allows it. For the glass screens, prefer a deterministic render; if blur stays noisy, allow a small, documented per-screen pixel tolerance for those screens only. Retake baselines only if the compared area changes, and review them. Done when the SwiftUI suite passes 5 consecutive runs in `WEFT_SIMULATOR=own` and 1 in `shared`, and the full check exits 0.
