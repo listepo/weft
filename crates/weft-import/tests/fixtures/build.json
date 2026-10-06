@@ -1617,7 +1617,7 @@
         "children": [
          {
           "role": "row",
-          "name": "Ada Lovelace ada@example.com Admin Delete",
+          "name": "Ada Lovelace ada@example.com Admin Delete Ada Lovelace",
           "states": {},
           "props": {},
           "children": [
@@ -1644,16 +1644,24 @@
            },
            {
             "role": "cell",
-            "name": "Delete",
+            "name": "Delete Ada Lovelace",
             "states": {},
             "props": {},
             "children": [
              {
               "role": "button",
-              "name": "Delete",
+              "name": "Delete Ada Lovelace",
               "states": {},
               "props": {},
-              "children": []
+              "children": [
+               {
+                "role": "text",
+                "name": "Delete",
+                "states": {},
+                "props": {},
+                "children": []
+               }
+              ]
              }
             ]
            }
@@ -1661,7 +1669,7 @@
          },
          {
           "role": "row",
-          "name": "Alan Turing alan@example.com Editor Delete",
+          "name": "Alan Turing alan@example.com Editor Delete Alan Turing",
           "states": {},
           "props": {},
           "children": [
@@ -1688,16 +1696,24 @@
            },
            {
             "role": "cell",
-            "name": "Delete",
+            "name": "Delete Alan Turing",
             "states": {},
             "props": {},
             "children": [
              {
               "role": "button",
-              "name": "Delete",
+              "name": "Delete Alan Turing",
               "states": {},
               "props": {},
-              "children": []
+              "children": [
+               {
+                "role": "text",
+                "name": "Delete",
+                "states": {},
+                "props": {},
+                "children": []
+               }
+              ]
              }
             ]
            }
@@ -1769,6 +1785,9 @@
         {
          "kind": "row",
          "id": "row-ada-lovelace-ada-example-com-adm",
+         "props": {
+          "label": "Ada Lovelace ada@example.com Admin Delete Ada Lovelace"
+         },
          "children": [
           {
            "kind": "cell",
@@ -1793,11 +1812,17 @@
           },
           {
            "kind": "cell",
-           "id": "cell-delete",
+           "id": "cell-delete-ada-lovelace",
+           "props": {
+            "label": "Delete Ada Lovelace"
+           },
            "children": [
             {
              "kind": "button",
-             "id": "button-delete",
+             "id": "button-delete-ada-lovelace",
+             "props": {
+              "label": "Delete Ada Lovelace"
+             },
              "children": [
               "Delete"
              ]
@@ -1809,6 +1834,9 @@
         {
          "kind": "row",
          "id": "row-alan-turing-alan-example-com-edi",
+         "props": {
+          "label": "Alan Turing alan@example.com Editor Delete Alan Turing"
+         },
          "children": [
           {
            "kind": "cell",
@@ -1833,11 +1861,17 @@
           },
           {
            "kind": "cell",
-           "id": "cell-delete-2",
+           "id": "cell-delete-alan-turing",
+           "props": {
+            "label": "Delete Alan Turing"
+           },
            "children": [
             {
              "kind": "button",
-             "id": "button-delete-2",
+             "id": "button-delete-alan-turing",
+             "props": {
+              "label": "Delete Alan Turing"
+             },
              "children": [
               "Delete"
              ]
@@ -4593,7 +4627,7 @@
      },
      {
       "role": "text",
-      "name": "1 items left",
+      "name": "1 item left",
       "states": {},
       "props": {},
       "children": []
@@ -4688,9 +4722,9 @@
       },
       {
        "kind": "text",
-       "id": "text-1-items-left",
+       "id": "text-1-item-left",
        "children": [
-        "1 items left"
+        "1 item left"
        ]
       }
      ]

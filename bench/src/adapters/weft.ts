@@ -57,7 +57,10 @@ function convert(n: Node, loops: string[], form: string | undefined): NNode[] {
   const children: NNode[] = [];
   if (content === "text") {
     // A text kind is named by its content or by its `text` prop, never both (SPEC §5.1).
-    Object.assign(out, texts.length > 0 ? { name: texts.join(" ") } : naming(props["text"]));
+    // A `label` is the accessible name and wins over the text the element shows.
+    const label = naming(props["label"]);
+    const shown = texts.length > 0 ? { name: texts.join(" ") } : naming(props["text"]);
+    Object.assign(out, Object.keys(label).length > 0 ? label : shown);
   } else {
     Object.assign(out, naming(props["label"]));
     if (props["text"] !== undefined) children.push(node("text", naming(props["text"])));

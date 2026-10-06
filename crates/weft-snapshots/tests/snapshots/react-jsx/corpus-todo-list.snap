@@ -61,11 +61,8 @@ export default function WeftScreen({ data, actions, onChange }) {
           </Fragment>
         ))}
       </ul>
-      <div data-weft-id="summary" style={{ gap: "var(--weft-space-xs)", display: "flex", flexDirection: "row", alignItems: "center" }}>
-        <div data-weft-id="remaining">
-          {!(_text(data?.remaining).trim() === "") ? _squash(_text(data?.remaining)) : ""}
-        </div>
-        <div data-weft-id="remaining-label">items left</div>
+      <div data-weft-id="remaining">
+        {!(_text(data?.remainingLabel).trim() === "") ? _squash(_text(data?.remainingLabel)) : ""}
       </div>
     </main>
   );

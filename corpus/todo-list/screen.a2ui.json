@@ -14,7 +14,7 @@
         {
           "id": "root",
           "component": "Column",
-          "children": ["title", "add-form", "list", "summary"]
+          "children": ["title", "add-form", "list", "remaining"]
         },
         {
           "id": "title",
@@ -108,21 +108,11 @@
           "text": "Remove"
         },
         {
-          "id": "summary",
-          "component": "Row",
-          "children": ["remaining", "remaining-label"]
-        },
-        {
           "id": "remaining",
           "component": "Text",
           "text": {
-            "path": "/remaining"
+            "path": "/remainingLabel"
           }
-        },
-        {
-          "id": "remaining-label",
-          "component": "Text",
-          "text": "items left"
         }
       ]
     }

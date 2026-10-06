@@ -61,6 +61,30 @@ fn compare_with_fixture() {
     );
 }
 
+/// SPEC §9: the renderers wrap a slot's content in `data-weft-slot`, which is the one thing that
+/// says where rendered content belongs; a page that lacks it still loses the placement.
+#[test]
+fn slot_membership_comes_back_from_the_wrappers() {
+    let catalog = core_catalog().unwrap();
+    let page = |slot: &str| {
+        let html = format!("<main aria-label=\"M\"><form><h1>Sign in</h1>{slot}</form></main>");
+        let result = from_dom(&html, &catalog);
+        let value = serde_json::to_value(&result).unwrap();
+        (
+            value["document"]["root"].to_string(),
+            value["losses"].to_string(),
+        )
+    };
+    let (root, losses) = page("<div data-weft-slot=\"footer\"><a href=\"/reset\">Reset</a></div>");
+    assert!(
+        root.contains("\"slots\":{\"footer\":[{\"kind\":\"link\""),
+        "{root}"
+    );
+    assert!(!losses.contains("\"kind\":\"slots\""), "{losses}");
+    let (root, _) = page("<div><a href=\"/reset\">Reset</a></div>");
+    assert!(!root.contains("\"slots\""), "{root}");
+}
+
 proptest! {
     #![proptest_config(ProptestConfig::with_cases(256))]
 

@@ -69,7 +69,7 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
         options,
         out: vec![],
         ids: IndexMap::new(),
-        tab_references: vec![],
+        references: vec![],
     };
     let root = &document.root;
     let root_path = format!("/{}", path_segment(&root.kind, root.id.as_deref(), None));
@@ -77,22 +77,22 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
     v.check_version(&document.weft, &version_at);
     v.visit_node(root, &root_path, None, &[]);
 
-    let tab_ids: Vec<String> = v
-        .ids
-        .iter()
-        .filter(|(_, (kind, _))| kind == "tab")
-        .map(|(id, _)| id.clone())
-        .collect();
-    for (value, at) in std::mem::take(&mut v.tab_references) {
-        if v.ids.get(&value).map(|(kind, _)| kind.as_str()) != Some("tab") {
+    for (value, target, at) in std::mem::take(&mut v.references) {
+        if v.ids.get(&value).map(|(kind, _)| kind.as_str()) != Some(target.as_str()) {
+            let ids: Vec<String> = v
+                .ids
+                .iter()
+                .filter(|(_, (kind, _))| *kind == target)
+                .map(|(id, _)| id.clone())
+                .collect();
             let d = diag(
                 Code::W309,
                 &at,
-                format!("\"{value}\" is not the id of a <tab>."),
-                one_of(&tab_ids),
+                format!("\"{value}\" is not the id of a <{target}>."),
+                one_of(&ids),
             )
             .got(value.clone())
-            .hint_opt(did_you_mean(&value, &tab_ids));
+            .hint_opt(did_you_mean(&value, &ids));
             v.report(d);
         }
     }
@@ -237,7 +237,8 @@ struct Validator<'a> {
     options: &'a ValidateOptions<'a>,
     out: Vec<Diagnostic>,
     ids: IndexMap<String, (String, String)>,
-    tab_references: Vec<(String, At)>,
+    /// Literal values of props that name an element, with the kind they must name.
+    references: Vec<(String, String, At)>,
 }
 
 impl<'a> Validator<'a> {
@@ -745,22 +746,34 @@ impl<'a> Validator<'a> {
                 .got(kind),
             );
         }
-        if owner.is_none() && kind != "screen" {
-            self.report(
-                diag(
-                    Code::W201,
-                    &at,
-                    "The root element must be <screen>.",
-                    "screen",
-                )
-                .got(kind),
-            );
-        } else if owner.is_some() && kind == "screen" {
+        let is_root_kind = |kind: &str| {
+            catalog
+                .components
+                .get(kind)
+                .is_some_and(|c| c.root == Some(true))
+        };
+        if owner.is_none() {
+            let roots: Vec<&str> = kinds()
+                .filter(|k| is_root_kind(k))
+                .map(String::as_str)
+                .collect();
+            if !roots.is_empty() && !roots.contains(&kind) {
+                self.report(
+                    diag(
+                        Code::W201,
+                        &at,
+                        format!("The root element must be <{}>.", roots.join("> or <")),
+                        roots.join(" or "),
+                    )
+                    .got(kind),
+                );
+            }
+        } else if is_root_kind(kind) {
             self.report(
                 diag(
                     Code::W312,
                     &at,
-                    "<screen> is allowed only as the root.",
+                    format!("<{kind}> is allowed only as the root."),
                     "a container below the root",
                 )
                 .hint("use <section> or <stack>"),
@@ -973,10 +986,15 @@ impl<'a> Validator<'a> {
                     );
                 }
             }
-            // SPEC §6 layer 3: the catalog format has no id-reference type yet, so this rule is by kind.
-            if let (true, Some(Value::String(selected))) = (kind == "tabs", props.get("selected")) {
-                self.tab_references
-                    .push((selected.clone(), node_at(node, path, Some("selected"))));
+            for (name, def) in component.props.iter().flatten() {
+                if let (Some(target), Some(Value::String(id))) = (&def.references, props.get(name))
+                {
+                    self.references.push((
+                        id.clone(),
+                        target.clone(),
+                        node_at(node, path, Some(name)),
+                    ));
+                }
             }
         } else if category == Category::Extension && !props.contains_key("role") {
             self.report(

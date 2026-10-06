@@ -289,7 +289,7 @@ a { display: inline-block; }
           <div data-weft-id="user-role[0]" data-weft-kind="text">Admin</div>
         </td>
         <td data-weft-id="cell-actions[0]">
-          <button data-weft-id="delete[0]" type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
+          <button data-weft-id="delete[0]" aria-label="Delete Ada Lovelace" type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
         </td>
       </tr>
       <tr data-weft-id="row[1]">
@@ -303,7 +303,7 @@ a { display: inline-block; }
           <div data-weft-id="user-role[1]" data-weft-kind="text">Editor</div>
         </td>
         <td data-weft-id="cell-actions[1]">
-          <button data-weft-id="delete[1]" type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
+          <button data-weft-id="delete[1]" aria-label="Delete Alan Turing" type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
         </td>
       </tr>
     </tbody>

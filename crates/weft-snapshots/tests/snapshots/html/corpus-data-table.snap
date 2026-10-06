@@ -290,7 +290,7 @@ a { display: inline-block; }
             <div data-weft-id="user-role" data-weft-kind="text" data-bind="text:$user.role"></div>
           </td>
           <td data-weft-id="cell-actions">
-            <button data-weft-id="delete" type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
+            <button data-weft-id="delete" type="button" data-variant="danger" data-bind="label:$user.deleteLabel" data-action="press:users.delete">Delete</button>
           </td>
         </tr>
       </template>
