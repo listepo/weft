@@ -519,7 +519,7 @@ Losses of the A2UI conversions (A2UI v0.9, `specification/v0_9` of `a2ui-project
 | `props` | Props with no A2UI property (`state`, `tone`, `sort`, `placeholder`, `step`, `ordered`, `min` and `max` of a stepper, the tilts, `modal`, …), a field `type` other than text, email, password, number and multiline, and a `disabled` on anything but a button. | `accessibility.description`, `fit`, `validationRegexp`, a `ChoicePicker` that allows several values (one is kept), a check with no Weft prop. |
 | `values` | None. | `updateDataModel` messages (a document holds no data); a selected value beyond the first. |
 | `names` | None. | A required `label` missing from the input is set to `""`. |
-| `kinds` | `switch`, `stepper` and `color-picker` (written as `CheckBox` and `TextField`), and any kind without a component, which is dropped with its content kept. | `Icon`, `Video`, `AudioPlayer`, `Divider` and any component of another catalog are dropped; a `Card` with no label is a `stack`. |
+| `kinds` | `switch`, `stepper` and `color-picker` (written as `CheckBox` and `TextField`), and any kind without a component, such as `model` (A2UI has no 3D or model component, so its paths and still are lost as `props`), which is dropped with its content kept. | `Icon`, `Video`, `AudioPlayer`, `Divider` and any component of another catalog are dropped; a `Card` with no label is a `stack`. |
 | `text` | Text with no place in the content model is dropped. | Likewise. |
 | `structure` | A `dialog` is a `Modal` with a generated trigger; a `tabs` with no tab, which A2UI refuses. | Other surfaces than the first, a component that is used but not defined, a `Button` whose child is not a `Text`. |
 

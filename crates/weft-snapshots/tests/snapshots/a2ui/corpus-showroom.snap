@@ -1,0 +1,119 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-showroom as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "showroom",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "showroom",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "shelf"
+          ],
+          "accessibility": {
+            "label": "Showroom"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Showroom",
+          "variant": "h1"
+        },
+        {
+          "id": "shelf",
+          "component": "Column",
+          "children": [
+            "gem-section",
+            "turned-section"
+          ]
+        },
+        {
+          "id": "gem-section",
+          "component": "Card",
+          "child": "column",
+          "accessibility": {
+            "label": "Gem"
+          }
+        },
+        {
+          "id": "gem-title",
+          "component": "Text",
+          "text": "Gem",
+          "variant": "h2"
+        },
+        {
+          "id": "gem-caption",
+          "component": "Text",
+          "text": {
+            "path": "/caption"
+          }
+        },
+        {
+          "id": "gem-pick",
+          "component": "Button",
+          "child": "gem-pick-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "gem.pick"
+            }
+          }
+        },
+        {
+          "id": "gem-pick-label",
+          "component": "Text",
+          "text": "Choose this gem"
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "gem-title",
+            "gem-caption",
+            "gem-pick"
+          ]
+        },
+        {
+          "id": "turned-section",
+          "component": "Card",
+          "child": "column-2",
+          "accessibility": {
+            "label": "Turned gem"
+          }
+        },
+        {
+          "id": "turned-title",
+          "component": "Text",
+          "text": "Turned",
+          "variant": "h2"
+        },
+        {
+          "id": "turned-caption",
+          "component": "Text",
+          "text": "Without a USDZ file Apple platforms show the still image."
+        },
+        {
+          "id": "column-2",
+          "component": "Column",
+          "children": [
+            "turned-title",
+            "turned-caption"
+          ]
+        }
+      ]
+    }
+  }
+]

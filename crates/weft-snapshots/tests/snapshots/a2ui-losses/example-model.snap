@@ -1,0 +1,8 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-model as a2ui-losses
+---
+Kinds /screen#root/model#chair: model has no A2UI component; its content is kept
+Props /screen#root/model#chair: fallback: this prop has no A2UI property
+Props /screen#root/model#chair: src: this prop has no A2UI property
+Props /screen#root/model#chair: usdz: this prop has no A2UI property
