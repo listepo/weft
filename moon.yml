@@ -91,12 +91,14 @@ tasks:
         "root:runtimes-bun-native",
         "root:runtimes-browser",
       ]
+  # The WebAssembly legs depend on the addon too: engines.test.ts loads it on every leg and compares
+  # its surface with the module, so a stale addon would fail them after a change to the Rust core.
   runtimes-node:
     command: "vitest run --config runtimes/vitest.config.ts"
     env:
       WEFT_RUNTIME: "node"
       WEFT_ENGINE: "wasm"
-    deps: ["root:wasm"]
+    deps: ["root:wasm", "root:native"]
     inputs: ["@group(runtime-suites)"]
   runtimes-node-native:
     command: "vitest run --config runtimes/vitest.config.ts"
@@ -120,7 +122,7 @@ tasks:
     env:
       WEFT_RUNTIME: "bun"
       WEFT_ENGINE: "wasm"
-    deps: ["root:wasm"]
+    deps: ["root:wasm", "root:native"]
     inputs: ["@group(runtime-suites)"]
   runtimes-bun-native:
     script: 'echo "bun $(bun --version)" && bun --bun node_modules/vitest/vitest.mjs run --config runtimes/vitest.config.ts'
