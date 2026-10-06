@@ -1,0 +1,7 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-settings as a2ui-losses
+---
+Kinds /screen#settings/section#notifications/switch#email-alerts: switch has no A2UI component; a checkbox stands in
+Kinds /screen#settings/section#notifications/switch#push-alerts: switch has no A2UI component; a checkbox stands in
+Kinds /screen#settings/section#appearance/switch#dark-mode: switch has no A2UI component; a checkbox stands in

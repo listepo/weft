@@ -4,5 +4,6 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T13. Interoperability with A2UI and json-render
+- T13.1. json-render export and import
 - T15.1. Catalog import from a Custom Elements Manifest
+- T61. Valid change handler for a read-only bound control

@@ -105,12 +105,14 @@ export type Settings = {
     solid?: JsxExportSettings;
     swiftui?: { outDir?: string };
     css?: { outDir?: string };
+    a2ui?: { outDir?: string };
   };
   import?: {
     html?: { outDir?: string };
     react?: { outDir?: string };
     solid?: { outDir?: string };
     swiftui?: { outDir?: string };
+    a2ui?: { outDir?: string };
   };
   mcp?: { limits?: Partial<Record<LimitName, number>> };
   plugins?: Record<string, Record<string, unknown>>;

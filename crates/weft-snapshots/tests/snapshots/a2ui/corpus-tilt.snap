@@ -1,0 +1,176 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-tilt as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "tilt",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "tilt",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "deck"
+          ],
+          "accessibility": {
+            "label": "Card flips"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Card flips",
+          "variant": "h1"
+        },
+        {
+          "id": "deck",
+          "component": "Column",
+          "children": [
+            "front",
+            "back",
+            "lean"
+          ]
+        },
+        {
+          "id": "front",
+          "component": "Card",
+          "child": "column",
+          "accessibility": {
+            "label": "Front side"
+          }
+        },
+        {
+          "id": "front-title",
+          "component": "Text",
+          "text": "Front",
+          "variant": "h2"
+        },
+        {
+          "id": "front-text",
+          "component": "Text",
+          "text": {
+            "path": "/front"
+          }
+        },
+        {
+          "id": "front-flip",
+          "component": "Button",
+          "child": "front-flip-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "card.flip"
+            }
+          }
+        },
+        {
+          "id": "front-flip-label",
+          "component": "Text",
+          "text": "Flip"
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "front-title",
+            "front-text",
+            "front-flip"
+          ]
+        },
+        {
+          "id": "back",
+          "component": "Card",
+          "child": "column-2",
+          "accessibility": {
+            "label": "Back side"
+          }
+        },
+        {
+          "id": "back-title",
+          "component": "Text",
+          "text": "Back",
+          "variant": "h2"
+        },
+        {
+          "id": "back-text",
+          "component": "Text",
+          "text": {
+            "path": "/back"
+          }
+        },
+        {
+          "id": "back-flip",
+          "component": "Button",
+          "child": "back-flip-label",
+          "variant": "default",
+          "action": {
+            "event": {
+              "name": "card.flip"
+            }
+          }
+        },
+        {
+          "id": "back-flip-label",
+          "component": "Text",
+          "text": "Flip"
+        },
+        {
+          "id": "column-2",
+          "component": "Column",
+          "children": [
+            "back-title",
+            "back-text",
+            "back-flip"
+          ]
+        },
+        {
+          "id": "lean",
+          "component": "Card",
+          "child": "column-3",
+          "accessibility": {
+            "label": "Leaning card"
+          }
+        },
+        {
+          "id": "lean-title",
+          "component": "Text",
+          "text": "Leaning",
+          "variant": "h2"
+        },
+        {
+          "id": "lean-text",
+          "component": "Text",
+          "text": "Tilted back and turned a little in the plane."
+        },
+        {
+          "id": "lean-note",
+          "component": "TextField",
+          "label": "Note",
+          "variant": "shortText",
+          "value": {
+            "path": "/note"
+          }
+        },
+        {
+          "id": "column-3",
+          "component": "Column",
+          "children": [
+            "lean-title",
+            "lean-text",
+            "lean-note"
+          ]
+        }
+      ]
+    }
+  }
+]

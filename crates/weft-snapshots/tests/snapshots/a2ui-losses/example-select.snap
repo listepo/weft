@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-select as a2ui-losses
+---
+Props /screen#root/select#country: disabled: this prop has no A2UI property
+Actions /screen#root/select#country: on-change="profile.update" has no A2UI event

@@ -1,0 +1,21 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-menu as a2ui-import
+---
+<screen id="account-menu" weft="0.1">
+  <text id="signed-in" text="{$.user.email}"/>
+  <list id="menu" label="Account">
+    <item id="item-1">
+      <link id="item-profile" on-press="nav.profile">Profile</link>
+    </item>
+    <item id="item-2">
+      <link id="item-settings" on-press="nav.settings">Settings</link>
+    </item>
+    <item id="item-3">
+      <link id="item-billing" on-press="nav.billing">Billing</link>
+    </item>
+    <item id="item-4">
+      <link id="item-signout" on-press="auth.signout">Sign out</link>
+    </item>
+  </list>
+</screen>

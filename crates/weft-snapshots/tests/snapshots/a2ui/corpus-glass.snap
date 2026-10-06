@@ -1,0 +1,88 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-glass as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "glass",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "glass",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "card",
+            "tiles"
+          ],
+          "accessibility": {
+            "label": "Glass"
+          }
+        },
+        {
+          "id": "card",
+          "component": "Column",
+          "children": [
+            "title",
+            "body",
+            "close"
+          ]
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": {
+            "path": "/title"
+          },
+          "variant": "h2"
+        },
+        {
+          "id": "body",
+          "component": "Text",
+          "text": "The panel blurs what is behind it."
+        },
+        {
+          "id": "close",
+          "component": "Button",
+          "child": "close-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "glass.close"
+            }
+          }
+        },
+        {
+          "id": "close-label",
+          "component": "Text",
+          "text": "Got it"
+        },
+        {
+          "id": "tiles",
+          "component": "Column",
+          "children": [
+            "tile-light",
+            "tile-dark"
+          ]
+        },
+        {
+          "id": "tile-light",
+          "component": "Text",
+          "text": "Light"
+        },
+        {
+          "id": "tile-dark",
+          "component": "Text",
+          "text": "Dark"
+        }
+      ]
+    }
+  }
+]

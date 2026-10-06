@@ -10,8 +10,9 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T13.1 | todo | P2 | 3 | 0% | |
 | T15.1 | in progress | P3 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T61 | in progress | P1 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -152,10 +153,14 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T13. Interoperability with A2UI and json-render
+### T13.1. json-render export and import
 
-Export a Weft document to A2UI v0.9 messages and to a json-render spec, and import from both, each with a loss table in SPEC §9. Done when every corpus screen converts both ways and the losses are listed.
+The json-render half of T13: export a Weft document to a json-render spec (`{ root, elements, state }`, the Weft catalog as the json-render catalog) and import one back, with a loss table in SPEC §9, in `crates/weft-interop`. Done when every corpus screen converts both ways and the losses are listed.
 
 ### T15.1. Catalog import from a Custom Elements Manifest
 
 An importer that turns a Custom Elements Manifest (schema 2.1.0, https://github.com/webcomponents/custom-elements-manifest) into a Weft catalog: each custom element becomes a kind, its attributes and fields become props, its slots become slots, its events become events. Done when the manifest of a real component library imports into a catalog that validates, with the lost parts listed.
+
+### T61. Valid change handler for a read-only bound control
+
+The JSX generator can print `onChange={(_e) => const _v = ...}` for a number, date, colour or combobox control whose `value` is bound but not writable and that has no `on-change`: `Self::handler` prints a lone statement as an arrow body, and a `const` declaration is not an expression. The fast-check property "any input yields a well-formed module" in `packages/to-jsx/test/generate.test.ts` fails on some seeds (for example 502940636). Fix it in `valued` (`crates/weft-web/src/jsx/mod.rs`) or `handler`, add a deterministic regression test for React, SolidJS and Lit, and keep generated output unchanged where it was valid. Done when the regression test and the property test with that seed pass and the full check exits 0.

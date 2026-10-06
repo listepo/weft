@@ -1,0 +1,50 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-radio as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "speed"
+          ],
+          "accessibility": {
+            "label": "Delivery"
+          }
+        },
+        {
+          "id": "speed",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Standard",
+              "value": "standard"
+            },
+            {
+              "label": "Express",
+              "value": "express"
+            }
+          ],
+          "value": {
+            "path": "/speed"
+          },
+          "label": "Delivery speed"
+        }
+      ]
+    }
+  }
+]

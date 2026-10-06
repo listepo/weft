@@ -1,0 +1,88 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-form as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "login"
+          ],
+          "accessibility": {
+            "label": "Sign in"
+          }
+        },
+        {
+          "id": "login",
+          "component": "Column",
+          "children": [
+            "email",
+            "go"
+          ]
+        },
+        {
+          "id": "email",
+          "component": "TextField",
+          "label": "Email",
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/email"
+                  }
+                }
+              },
+              "message": "Required"
+            },
+            {
+              "condition": {
+                "call": "email",
+                "args": {
+                  "value": {
+                    "path": "/email"
+                  }
+                }
+              },
+              "message": "Not an email address"
+            }
+          ],
+          "value": {
+            "path": "/email"
+          }
+        },
+        {
+          "id": "go",
+          "component": "Button",
+          "child": "go-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "auth.submit"
+            }
+          }
+        },
+        {
+          "id": "go-label",
+          "component": "Text",
+          "text": "Sign in"
+        }
+      ]
+    }
+  }
+]

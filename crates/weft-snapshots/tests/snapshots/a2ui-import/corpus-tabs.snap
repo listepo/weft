@@ -1,0 +1,34 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-tabs as a2ui-import
+---
+<screen id="account" weft="0.1">
+  <heading id="title" level="1">Account</heading>
+  <tabs id="tabs" label="Account sections">
+    <tab id="tab-overview-2" label="Overview">
+      <stack id="tab-overview">
+        <text id="account-name" text="{$.account.name}"/>
+        <text id="account-email" text="{$.account.email}"/>
+      </stack>
+    </tab>
+    <tab id="tab-billing-2" label="Billing">
+      <stack id="tab-billing">
+        <text id="plan" text="{$.billing.plan}"/>
+        <button id="change-plan" variant="primary" on-press="billing.change">Change plan</button>
+      </stack>
+    </tab>
+    <tab id="tab-team-2" label="Team">
+      <stack id="tab-team">
+        <list id="members">
+          <each id="each-1" as="item" in="{$.team}">
+            <item id="item-1">
+              <stack id="member">
+                <text id="member-name" text="{$item.name}"/>
+              </stack>
+            </item>
+          </each>
+        </list>
+      </stack>
+    </tab>
+  </tabs>
+</screen>

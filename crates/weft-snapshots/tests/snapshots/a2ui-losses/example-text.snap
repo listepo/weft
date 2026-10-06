@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-text as a2ui-losses
+---
+Props /screen#root/text#saved: tone: this prop has no A2UI property

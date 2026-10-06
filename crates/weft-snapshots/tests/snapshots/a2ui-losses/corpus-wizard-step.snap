@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-wizard-step as a2ui-losses
+---
+Tokens /screen#wizard/stack#nav: gap: design tokens have no A2UI form

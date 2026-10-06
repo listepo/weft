@@ -1,0 +1,40 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-stepper as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "quantity"
+          ],
+          "accessibility": {
+            "label": "Order"
+          }
+        },
+        {
+          "id": "quantity",
+          "component": "TextField",
+          "label": "Quantity",
+          "variant": "number",
+          "value": {
+            "path": "/quantity"
+          }
+        }
+      ]
+    }
+  }
+]

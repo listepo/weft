@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-leaderboard as a2ui-losses
+---
+Tokens /screen#leaderboard/stack#leader: gap: design tokens have no A2UI form
+Props /screen#leaderboard/list#players: ordered: this prop has no A2UI property

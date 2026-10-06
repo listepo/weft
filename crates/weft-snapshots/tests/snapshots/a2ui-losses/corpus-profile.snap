@@ -1,0 +1,9 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-profile as a2ui-losses
+---
+Bindings /screen#profile/stack#links/link#website: openUrl takes a literal URL; a bound href is left out
+Actions /screen#profile/stack#links/link#website: an A2UI button needs an action; the id names the press
+Bindings /screen#profile/stack#links/link#github: openUrl takes a literal URL; a bound href is left out
+Actions /screen#profile/stack#links/link#github: an A2UI button needs an action; the id names the press
+Tokens /screen#profile/stack#links: gap: design tokens have no A2UI form

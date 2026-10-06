@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-segmented-control as a2ui-losses
+---
+Actions /screen#root/segmented-control#view: on-change="calendar.update" has no A2UI event

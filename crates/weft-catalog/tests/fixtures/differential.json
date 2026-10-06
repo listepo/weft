@@ -18063,7 +18063,7 @@
       "severity": "warning",
       "message": "Unknown key \"cobol\" in \"export\".",
       "path": "#/export/cobol",
-      "expected": "one of: \"html\", \"react\", \"solid\", \"lit\", \"swiftui\", \"css\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"lit\", \"swiftui\", \"css\", \"a2ui\"",
       "got": "cobol"
      },
      {
@@ -18080,7 +18080,7 @@
       "severity": "warning",
       "message": "Unknown key \"figma\" in \"import\".",
       "path": "#/import/figma",
-      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\", \"a2ui\"",
       "got": "figma"
      },
      {

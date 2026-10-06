@@ -1,0 +1,17 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-booking as a2ui-losses
+---
+Repetition /screen#booking/form#trip/combobox#city: options that repeat over data have no A2UI form; they are left out
+Props /screen#booking/form#trip/combobox#city: placeholder: this prop has no A2UI property
+Actions /screen#booking/form#trip/combobox#city: on-change="trip.edit" has no A2UI event
+Actions /screen#booking/form#trip/date-picker#depart: on-change="trip.edit" has no A2UI event
+Kinds /screen#booking/form#trip/stepper#guests: stepper has no A2UI component; a text field stands in
+Props /screen#booking/form#trip/stepper#guests: max: this prop has no A2UI property
+Props /screen#booking/form#trip/stepper#guests: min: this prop has no A2UI property
+Actions /screen#booking/form#trip/stepper#guests: on-change="trip.edit" has no A2UI event
+Props /screen#booking/form#trip/slider#budget: step: this prop has no A2UI property
+Actions /screen#booking/form#trip/slider#budget: on-change="trip.edit" has no A2UI event
+Actions /screen#booking/form#trip/segmented-control#cabin: on-change="trip.edit" has no A2UI event
+Kinds /screen#booking/form#trip/color-picker#tag: color-picker has no A2UI component; a text field stands in
+Actions /screen#booking/form#trip/color-picker#tag: on-change="trip.edit" has no A2UI event

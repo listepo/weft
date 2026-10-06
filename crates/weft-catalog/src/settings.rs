@@ -125,6 +125,11 @@ const EXPORT: &[Setting] = &[
         "The stylesheets React and SolidJS components need: `weft-tokens.css`, the `var(--weft-…)` values they read (`weft css-tokens`), and `weft-base.css`, the rules they share with the static page (`weft css-base`). Default folder: standard output.",
         Kind::Section(OUT_ONLY),
     ),
+    setting(
+        "a2ui",
+        "A2UI v0.9 messages, a JSON array of `createSurface` and `updateComponents` (`weft a2ui`).",
+        Kind::Section(OUT_ONLY),
+    ),
 ];
 const IMPORT: &[Setting] = &[
     setting(
@@ -145,6 +150,11 @@ const IMPORT: &[Setting] = &[
     setting(
         "swiftui",
         "SwiftUI source files (`weft import-swiftui`).",
+        Kind::Section(OUT_ONLY),
+    ),
+    setting(
+        "a2ui",
+        "A2UI v0.9 messages, a JSON array, one object or JSON Lines (`weft import-a2ui`).",
         Kind::Section(OUT_ONLY),
     ),
 ];

@@ -1,0 +1,27 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-account as a2ui-losses
+---
+Props /screen#account/form#account-form/field#name: placeholder: this prop has no A2UI property
+Props /screen#account/form#account-form/field#name: state: this prop has no A2UI property
+Actions /screen#account/form#account-form/field#name: on-change="account.edit" has no A2UI event
+Bindings /screen#account/form#account-form/field#age: error: this binding has no A2UI property
+Props /screen#account/form#account-form/field#age: state: this prop has no A2UI property
+Bindings /screen#account/form#account-form/field#handle: disabled: this binding has no A2UI property
+Props /screen#account/form#account-form/field#handle: placeholder: this prop has no A2UI property
+Props /screen#account/form#account-form/field#email: disabled: this prop has no A2UI property
+Actions /screen#account/form#account-form/checkbox#newsletter: on-change="account.edit" has no A2UI event
+Props /screen#account/form#account-form/checkbox#terms: disabled: this prop has no A2UI property
+Kinds /screen#account/form#account-form/switch#public: switch has no A2UI component; a checkbox stands in
+Bindings /screen#account/form#account-form/switch#public: disabled: this binding has no A2UI property
+Actions /screen#account/form#account-form/switch#public: on-change="account.edit" has no A2UI event
+Props /screen#account/form#account-form/radio-group#plan/radio#plan-team: disabled: this prop has no A2UI property
+Actions /screen#account/form#account-form/radio-group#plan: on-change="account.edit" has no A2UI event
+Bindings /screen#account/form#account-form/select#language: disabled: this binding has no A2UI property
+Actions /screen#account/form#account-form/select#language: on-change="account.edit" has no A2UI event
+Hidden /screen#account/form#account-form/text#internal: a hidden element is not written
+Hidden /screen#account/form#account-form/alert#saved: hidden: a bound `hidden` has no A2UI form; the element is always shown
+Props /screen#account/form#account-form/alert#saved: tone: this prop has no A2UI property
+Props /screen#account/form#account-form/button#save: state: this prop has no A2UI property
+Props /screen#account/form#account-form/button#cancel: state: this prop has no A2UI property
+Props /screen#account/form#account-form: state: this prop has no A2UI property

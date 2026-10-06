@@ -1,0 +1,254 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-account as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "account",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "account",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "account-form"
+          ],
+          "accessibility": {
+            "label": "Edit account"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Edit account",
+          "variant": "h1"
+        },
+        {
+          "id": "account-form",
+          "component": "Column",
+          "children": [
+            "name",
+            "age",
+            "handle",
+            "bio",
+            "email",
+            "newsletter",
+            "terms",
+            "public",
+            "plan",
+            "language",
+            "saved",
+            "save",
+            "cancel",
+            "help"
+          ],
+          "accessibility": {
+            "label": "Account"
+          }
+        },
+        {
+          "id": "name",
+          "component": "TextField",
+          "label": "Full name",
+          "variant": "shortText",
+          "value": {
+            "path": "/account/name"
+          }
+        },
+        {
+          "id": "age",
+          "component": "TextField",
+          "label": "Age",
+          "variant": "number",
+          "value": {
+            "path": "/account/age"
+          }
+        },
+        {
+          "id": "handle",
+          "component": "TextField",
+          "label": "Handle",
+          "variant": "shortText",
+          "value": {
+            "path": "/account/handle"
+          }
+        },
+        {
+          "id": "bio",
+          "component": "TextField",
+          "label": "Bio",
+          "variant": "longText",
+          "value": {
+            "path": "/account/bio"
+          }
+        },
+        {
+          "id": "email",
+          "component": "TextField",
+          "label": "Email",
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": {
+                "call": "email",
+                "args": {
+                  "value": {
+                    "path": "/account/email"
+                  }
+                }
+              },
+              "message": "Not an email address"
+            }
+          ],
+          "value": {
+            "path": "/account/email"
+          }
+        },
+        {
+          "id": "newsletter",
+          "component": "CheckBox",
+          "label": "Send me the newsletter",
+          "value": {
+            "path": "/account/newsletter"
+          }
+        },
+        {
+          "id": "terms",
+          "component": "CheckBox",
+          "label": "Terms accepted",
+          "value": true
+        },
+        {
+          "id": "public",
+          "component": "CheckBox",
+          "label": "Public profile",
+          "value": {
+            "path": "/account/public"
+          }
+        },
+        {
+          "id": "plan",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Free",
+              "value": "free"
+            },
+            {
+              "label": {
+                "path": "/labels/pro"
+              },
+              "value": "pro"
+            },
+            {
+              "label": "Team",
+              "value": "team"
+            }
+          ],
+          "value": {
+            "path": "/account/plan"
+          },
+          "label": "Plan"
+        },
+        {
+          "id": "language",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "English",
+              "value": "en"
+            },
+            {
+              "label": {
+                "path": "/labels/french"
+              },
+              "value": "fr"
+            }
+          ],
+          "value": {
+            "path": "/account/language"
+          },
+          "label": "Language",
+          "filterable": true
+        },
+        {
+          "id": "saved",
+          "component": "Card",
+          "child": "text"
+        },
+        {
+          "id": "text",
+          "component": "Text",
+          "text": "Your changes were saved."
+        },
+        {
+          "id": "save",
+          "component": "Button",
+          "child": "save-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "account.save"
+            }
+          }
+        },
+        {
+          "id": "save-label",
+          "component": "Text",
+          "text": "Save"
+        },
+        {
+          "id": "cancel",
+          "component": "Button",
+          "child": "cancel-label",
+          "variant": "default",
+          "action": {
+            "event": {
+              "name": "account.cancel"
+            }
+          }
+        },
+        {
+          "id": "cancel-label",
+          "component": "Text",
+          "text": {
+            "path": "/labels/cancel"
+          }
+        },
+        {
+          "id": "help",
+          "component": "Button",
+          "child": "help-label",
+          "variant": "borderless",
+          "action": {
+            "functionCall": {
+              "call": "openUrl",
+              "args": {
+                "url": "https://example.com/help"
+              },
+              "returnType": "void"
+            }
+          }
+        },
+        {
+          "id": "help-label",
+          "component": "Text",
+          "text": {
+            "path": "/labels/help"
+          }
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-login as a2ui-losses
+---
+Tokens /screen#login/form#form/stack#fields: gap: design tokens have no A2UI form
+Props /screen#login/form#form: state: this prop has no A2UI property

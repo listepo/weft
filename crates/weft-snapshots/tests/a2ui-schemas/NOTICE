@@ -1,0 +1,10 @@
+These JSON Schemas are copies of files of the A2UI specification, which is licensed under the
+Apache License, Version 2.0 (the text is in LICENSE, taken from the same commit):
+
+- Source: https://github.com/a2ui-project/a2ui, commit 4787774e92 (2026-10-05)
+- Files: specification/v0_9/json/server_to_client.json -> server_to_client.json,
+  specification/v0_9/json/common_types.json -> common_types.json,
+  specification/v0_9/catalogs/basic/catalog.json -> basic_catalog.json
+- Changes: whitespace only, by the project's formatter (oxfmt).
+
+They are used by the weft-snapshots tests to check the A2UI messages that weft-interop writes.

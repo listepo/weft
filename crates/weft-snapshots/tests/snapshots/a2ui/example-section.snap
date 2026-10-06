@@ -1,0 +1,58 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-section as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "profile"
+          ],
+          "accessibility": {
+            "label": "Account"
+          }
+        },
+        {
+          "id": "profile",
+          "component": "Card",
+          "child": "column",
+          "accessibility": {
+            "label": "Profile"
+          }
+        },
+        {
+          "id": "profile-title",
+          "component": "Text",
+          "text": "Profile",
+          "variant": "h2"
+        },
+        {
+          "id": "bio",
+          "component": "Text",
+          "text": "Product designer based in Lisbon."
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "profile-title",
+            "bio"
+          ]
+        }
+      ]
+    }
+  }
+]
