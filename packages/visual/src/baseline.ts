@@ -29,7 +29,7 @@ export type MatchOptions = CompareOptions & {
 export function matchBaseline(
   png: Uint8Array,
   name: string,
-  { readOnly = false, label = name, ignoreBottom }: MatchOptions = {},
+  { readOnly = false, label = name, ...ignore }: MatchOptions = {},
 ): BaselineResult {
   const path = join(BASELINES, `${name}.png`);
   if (updating() && !readOnly) {
@@ -40,11 +40,9 @@ export function matchBaseline(
   if (!existsSync(path)) {
     return { status: "missing", platform: PLATFORM, reviewed: existsSync(BASELINES) };
   }
-  const comparison = compare(
-    readFileSync(path),
-    png,
-    `${PLATFORM}/${label}`,
-    ignoreBottom === undefined ? {} : { ignoreBottom },
-  );
-  return { status: comparison.differing === 0 ? "match" : "differ", comparison };
+  const comparison = compare(readFileSync(path), png, `${PLATFORM}/${label}`, ignore);
+  return {
+    status: comparison.differing <= (ignore.tolerance ?? 0) ? "match" : "differ",
+    comparison,
+  };
 }
