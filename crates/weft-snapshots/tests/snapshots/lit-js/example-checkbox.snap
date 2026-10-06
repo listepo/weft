@@ -1,0 +1,42 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-checkbox as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Terms"
+      ><label
+        ><input data-weft-id="terms" type="checkbox" aria-label="I accept the terms" .checked=${_on(data?.acceptTerms)} @change=${(_e) => { onChange?.("$.acceptTerms", _e.currentTarget.checked); _act(actions, { id: "terms", action: "form.edit" }); }}
+        ><span aria-hidden="true">I accept the terms</span
+      ></label
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

@@ -1,0 +1,68 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-profile as lit-js
+---
+import { LitElement, html, nothing } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="profile" aria-label="Profile"
+      ><img data-weft-id="avatar" alt="Profile photo" src=${(_url(_text(data?.user?.avatar))) ?? nothing}
+      ><h1 data-weft-id="name">${!(_text(data?.user?.name).trim() === "") ? _squash(_text(data?.user?.name)) : ""}</h1
+      ><div data-weft-id="bio">${!(_text(data?.user?.bio).trim() === "") ? _squash(_text(data?.user?.bio)) : ""}</div
+      ><h2 data-weft-id="links-title">Links</h2
+      ><div data-weft-id="links" style=${styleMap({ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "center" })}>${(() => {
+          const _href = _url(_text(data?.user?.website));
+          return html`<a data-weft-id="website" href=${(_href) ?? nothing} role=${(_href === undefined ? "link" : undefined) ?? nothing} tabindex=${(_href === undefined ? 0 : undefined) ?? nothing} style=${styleMap({ display: "inline-block" })}>Website</a>`;
+        })()}${(() => {
+          const _href = _url(_text(data?.user?.github));
+          return html`<a data-weft-id="github" href=${(_href) ?? nothing} role=${(_href === undefined ? "link" : undefined) ?? nothing} tabindex=${(_href === undefined ? 0 : undefined) ?? nothing} style=${styleMap({ display: "inline-block" })}>GitHub</a>`;
+        })()}</div
+      ><button data-weft-id="edit" type="button" @click=${(_e) => _act(actions, { id: "edit", action: "profile.edit" })}>Edit profile</button
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

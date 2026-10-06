@@ -1,0 +1,48 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-list as lit-js
+---
+import { LitElement, html } from "lit";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _list(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="root" aria-label="Todos"
+      ><ul data-weft-id="todos" data-state="ready">${!(_list(data?.todos).length > 0) ? html`<li role="none" data-weft-slot="empty"
+            ><div data-weft-id="todos-empty" data-tone="muted">Nothing to do.</div
+          ></li>` : html`${_list(data?.todos).map((todo, _i0) => html`<li data-weft-id=${"todo-item[" + _i0 + "]"}
+              ><div data-weft-id=${"todo-title[" + _i0 + "]"}>${!(_text(todo?.title).trim() === "") ? _squash(_text(todo?.title)) : ""}</div
+            ></li>`)}`}</ul
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

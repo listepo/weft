@@ -105,6 +105,43 @@ export async function showSolid(
   await settle(el);
 }
 
+/**
+ * A generated Lit element. Custom elements are registered per window, so the iframe loads the
+ * module itself; the module's URL is Vite's for a virtual module (`/@id/__x00__` is its `\0`).
+ */
+export async function showLit(
+  id: string,
+  name: string,
+  props: Props,
+  head = "",
+): Promise<HTMLElement> {
+  const el = await frame(id, withHead(head));
+  const win = el.contentWindow;
+  const doc = el.contentDocument;
+  if (win === null || doc === null) throw new Error(`#${id} has no window`);
+  const url = `/@id/__x00__virtual:weft-component/lit/${name}`;
+  const ready = new Promise<void>((resolve, reject) => {
+    win.addEventListener("weft-ready", () => resolve(), { once: true });
+    win.addEventListener("unhandledrejection", (e) => reject(e.reason), { once: true });
+  });
+  const script = doc.createElement("script");
+  script.type = "module";
+  script.textContent = `import ${JSON.stringify(url)};
+const host = document.createElement("div");
+const screen = document.createElement("weft-screen");
+screen.data = ${JSON.stringify(props.data ?? null)};
+host.append(screen);
+document.body.append(host);
+await screen.updateComplete;
+dispatchEvent(new Event("weft-ready"));`;
+  doc.head.append(script);
+  await ready;
+  await settle(el);
+  const screen = doc.querySelector<HTMLElement>("weft-screen");
+  if (screen === null) throw new Error(`#${id} has no element`);
+  return screen;
+}
+
 /** Re-measures `#id` after its content was changed in place. */
 export async function refit(id: string): Promise<void> {
   const el = document.getElementById(id);

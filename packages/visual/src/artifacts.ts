@@ -1,6 +1,6 @@
 // Everything the browser renders for a corpus screen, produced in Node before the tests run: the
 // reference renderer's markup, the generated React and SolidJS components compiled for the
-// browser, the static HTML page, and the same targets after a round trip through each importer
+// browser, the generated Lit element (plain JavaScript, so nothing to compile), the static HTML page, and the same targets after a round trip through each importer
 // and design tool. And the example project's screen under its light and dark themes.
 import { transformSync as babel } from "@babel/core";
 import { readdirSync, readFileSync } from "node:fs";
@@ -21,6 +21,7 @@ import { CORPUS, EXAMPLE, cli, weft } from "./cli.ts";
 const SOLID_PRESET = createRequire(import.meta.url).resolve("babel-preset-solid");
 
 export type Framework = "react" | "solid";
+type Generated = Framework | "lit";
 
 /** What a screen renders as, per target; component code is an ES module for the browser. */
 export type Screen = {
@@ -35,6 +36,8 @@ export type Screen = {
   /** The generated components, compiled for the browser. */
   react: string;
   solid: string;
+  /** The generated Lit element, an ES module that imports `lit`. */
+  lit: string;
   /** Each target after a round trip through its importer or design tool, re-rendered. */
   back: {
     html: string;
@@ -58,7 +61,7 @@ function parseMarkup(markup: string, what: string): Document {
   return document;
 }
 
-function generate(document: Document, framework: Framework): string {
+function generate(document: Document, framework: Generated): string {
   return toJsx(document, { catalog: coreCatalog, framework });
 }
 
@@ -110,6 +113,7 @@ async function screen(name: string, css: string): Promise<Screen> {
     css,
     react: compile(generate(document, "react"), "react"),
     solid: compile(generate(document, "solid"), "solid"),
+    lit: generate(document, "lit"),
     back: {
       html: page(serialize(htmlBack)),
       react: compile(generate(jsxBack("react"), "react"), "react"),
