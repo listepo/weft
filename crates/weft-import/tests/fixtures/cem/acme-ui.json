@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "2.1.0",
+  "readme": "README.md",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/button/button.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A button. Use it for commands. It takes a label or an icon.",
+          "name": "AcmeButton",
+          "cssParts": [
+            { "description": "The native button.", "name": "base" },
+            { "description": "The label.", "name": "label" }
+          ],
+          "cssProperties": [{ "description": "The corner radius.", "name": "--acme-button-radius" }],
+          "slots": [
+            { "description": "The label.", "name": "" },
+            { "description": "An icon before the label.", "name": "prefix" },
+            { "description": "An icon after the label.", "name": "suffix" }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "variant",
+              "type": { "text": "'default' | 'primary' | 'danger'" },
+              "default": "'default'",
+              "description": "Visual emphasis.",
+              "attribute": "variant",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": { "text": "'small' | 'medium' | 'large'" },
+              "default": "'medium'",
+              "attribute": "size",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": { "text": "boolean" },
+              "default": "false",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            { "kind": "field", "name": "href", "type": { "text": "string | undefined" }, "attribute": "href" },
+            { "kind": "field", "name": "_hasFocus", "type": { "text": "boolean" }, "privacy": "private", "default": "false" },
+            { "kind": "field", "name": "styles", "static": true, "default": "css``" },
+            { "kind": "field", "name": "validity", "type": { "text": "ValidityState" }, "readonly": true },
+            { "kind": "method", "name": "click", "description": "Clicks the button." },
+            {
+              "kind": "method",
+              "name": "focus",
+              "parameters": [{ "name": "options", "optional": true, "type": { "text": "FocusOptions" } }]
+            }
+          ],
+          "events": [
+            { "name": "acme-click", "type": { "text": "CustomEvent<{ id: string }>" }, "description": "Emitted on press." },
+            { "name": "acme-focus", "type": { "text": "CustomEvent<never>" } }
+          ],
+          "attributes": [
+            { "name": "variant", "type": { "text": "'default' | 'primary' | 'danger'" }, "default": "'default'", "fieldName": "variant" },
+            { "name": "size", "type": { "text": "'small' | 'medium' | 'large'" }, "default": "'medium'", "fieldName": "size" },
+            { "name": "disabled", "type": { "text": "boolean" }, "default": "false", "fieldName": "disabled" },
+            { "name": "href", "type": { "text": "string | undefined" }, "fieldName": "href" }
+          ],
+          "superclass": { "name": "LitElement", "package": "lit" },
+          "tagName": "acme-button",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        { "kind": "js", "name": "AcmeButton", "declaration": { "name": "AcmeButton", "module": "src/button/button.js" } },
+        {
+          "kind": "custom-element-definition",
+          "name": "acme-button",
+          "declaration": { "name": "AcmeButton", "module": "src/button/button.js" }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/rating/rating.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A star rating that shows or sets a score.",
+          "name": "AcmeRating",
+          "members": [
+            { "kind": "field", "name": "value", "type": { "text": "number" }, "default": "0", "attribute": "value" },
+            { "kind": "field", "name": "max", "type": { "text": "number" }, "default": "5", "attribute": "max" },
+            { "kind": "field", "name": "readonly", "type": { "text": "boolean" }, "default": "false", "attribute": "readonly" },
+            { "kind": "field", "name": "valueLabel", "type": { "text": "string" }, "default": "''" },
+            { "kind": "field", "name": "getSymbol", "type": { "text": "(value: number) => string" } },
+            { "kind": "field", "name": "marks", "type": { "text": "Array<number>" } }
+          ],
+          "events": [
+            { "name": "acme-change", "type": { "text": "CustomEvent<never>" } },
+            { "name": "valueHover", "type": { "text": "CustomEvent<{ value: number }>" } }
+          ],
+          "attributes": [
+            { "name": "value", "type": { "text": "number" }, "default": "0", "fieldName": "value" },
+            { "name": "max", "type": { "text": "number" }, "default": "5", "fieldName": "max" },
+            { "name": "readonly", "type": { "text": "boolean" }, "default": "false", "fieldName": "readonly" },
+            { "name": "precision", "type": { "text": "1 | 0.5" }, "default": "1" }
+          ],
+          "tagName": "acme-rating",
+          "customElement": true
+        }
+      ],
+      "exports": []
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/card/card.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "A surface with an optional header and footer.",
+          "name": "AcmeCard",
+          "slots": [
+            { "description": "The body.", "name": "" },
+            { "description": "The header.", "name": "header" },
+            { "description": "The footer.", "name": "footer" },
+            { "description": "Not a valid name.", "name": "Hero Image" }
+          ],
+          "attributes": [{ "name": "elevated", "type": { "text": "boolean" }, "deprecated": "Use the shadow token." }],
+          "tagName": "acme-card",
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "name": "AcmeBadge",
+          "summary": "A small status marker.",
+          "slots": [{ "name": "" }],
+          "attributes": [{ "name": "pill", "type": { "text": "boolean" } }, { "name": "id", "type": { "text": "string" } }],
+          "customElement": true
+        },
+        {
+          "kind": "class",
+          "name": "AcmeBadgeAgain",
+          "tagName": "acme-badge",
+          "slots": [],
+          "customElement": true
+        },
+        { "kind": "class", "name": "AcmeLegacy", "tagName": "acme_legacy", "customElement": true },
+        { "kind": "class", "name": "Hidden", "tagName": "x-acme-hidden", "customElement": true },
+        { "kind": "class", "name": "Orphan", "customElement": true },
+        { "kind": "class", "name": "AcmeDate", "tagName": "date-picker", "customElement": true },
+        { "kind": "mixin", "name": "FormMixin", "customElement": true, "parameters": [{ "name": "base" }] },
+        { "kind": "class", "name": "Util" },
+        { "kind": "function", "name": "register", "parameters": [] },
+        { "kind": "variable", "name": "version", "type": { "text": "string" } }
+      ],
+      "exports": [
+        { "kind": "custom-element-definition", "name": "acme-badge", "declaration": { "name": "AcmeBadge", "module": "src/card/card.js" } },
+        { "kind": "custom-element-definition", "name": "lit-button", "declaration": { "name": "LitButton", "package": "lit" } }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 [package]
 name = "weft-import"
-description = "Shared parts of every Weft importer: the loss table, ids, literals, required-prop stand-ins, limits and the role tree builder"
+description = "Shared parts of every Weft importer: the loss table, ids, literals, required-prop stand-ins, limits and the role tree builder, and the Custom Elements Manifest importer"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

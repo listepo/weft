@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T13.1 | todo | P2 | 3 | 0% | |
-| T15.1 | in progress | P3 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
+| T15.2 | todo | P3 | 2 | 0% | |
 
 ### T8. Evaluation
 
@@ -156,6 +156,6 @@ Progress: the design proposal is in `docs/context-design.md` and awaits the crea
 
 The json-render half of T13: export a Weft document to a json-render spec (`{ root, elements, state }`, the Weft catalog as the json-render catalog) and import one back, with a loss table in SPEC §9, in `crates/weft-interop`. Done when every corpus screen converts both ways and the losses are listed.
 
-### T15.1. Catalog import from a Custom Elements Manifest
+### T15.2. Surfaces for the Custom Elements Manifest importer
 
-An importer that turns a Custom Elements Manifest (schema 2.1.0, https://github.com/webcomponents/custom-elements-manifest) into a Weft catalog: each custom element becomes a kind, its attributes and fields become props, its slots become slots, its events become events. Done when the manifest of a real component library imports into a catalog that validates, with the lost parts listed.
+T15.1 delivers `import_cem` in `weft-import` (library, tests, SPEC section 9). This task makes it reachable: `weft import-cem <manifest.json> [--name] [--version] [--catalog]` prints the catalog (pretty JSON) on stdout and the losses and diagnostics on stderr, reading the file only when it is at most `MAX_MANIFEST_LENGTH` bytes; the `import.cem.outDir` setting if it fits (SPEC section 10.6); the WebAssembly and native bindings (`weft-binding`, `weft-wasm`, `weft-node`, `@weft/core` types) if the creator wants it from TypeScript; `docs/importing.md` and `docs/cli.md`. Done when a manifest file imports from the command line into a catalog that `weft validate --catalog` accepts.

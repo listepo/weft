@@ -5,6 +5,7 @@
 //! without pulling in a web parser.
 
 mod build;
+mod cem;
 mod ids;
 mod kinds;
 mod limits;
@@ -14,6 +15,7 @@ mod sem;
 mod text;
 
 pub use build::{BuildOptions, Built, build_document};
+pub use cem::{CemImport, CemOptions, MAX_KINDS, MAX_MANIFEST_LENGTH, MAX_MEMBERS, import_cem};
 pub use ids::IdState;
 pub use kinds::{
     DISSOLVED_ROLES, KindIndex, ROLE_DEFAULTS, ROLE_REFINEMENTS, Refinement, Resolved,
