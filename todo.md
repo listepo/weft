@@ -6,3 +6,4 @@
 - T39. Context in the document
 - T13.1. json-render export and import
 - T15.2. Surfaces for the Custom Elements Manifest importer
+- T62. Native addon as a dependency of the WebAssembly runtime legs
