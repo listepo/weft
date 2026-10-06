@@ -20,10 +20,7 @@ export default function Todos({ data, actions }) {
           </li>
         ))}
       </ul>
-      <div className="row gap-xs">
-        <p>{data.remaining}</p>
-        <p>items left</p>
-      </div>
+      <p>{data.remainingLabel}</p>
     </main>
   );
 }

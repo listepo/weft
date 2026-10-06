@@ -193,7 +193,6 @@ Import losses:
 | bindings | /screen#login | values are the resolved values the page shows, not bindings |
 | actions | /screen#login | event handlers and their action names are not in the HTML |
 | tokens | /screen#login | design token references are rendered as CSS and cannot be mapped back |
-| slots | /screen#login | slot membership is not in the HTML; slot content is imported as default content |
 | hidden | /screen#login | elements a renderer leaves out (hidden, closed dialogs) are not in the HTML |
 | layout | /screen#login/form#form/stack#fields | gap 16px cannot be mapped back to a design token |
 $ cat weft-tour/imported.weft
@@ -205,8 +204,10 @@ $ cat weft-tour/imported.weft
       <field id="password" label="Password" required="true" type="password" value=""/>
     </stack>
     <button id="submit" submit="true" variant="primary">Sign in</button>
-    <link id="reset">Forgot password?</link>
-    <link id="signup">Create an account</link>
+    <slot name="footer">
+      <link id="reset">Forgot password?</link>
+      <link id="signup">Create an account</link>
+    </slot>
   </form>
 </screen>
 ```

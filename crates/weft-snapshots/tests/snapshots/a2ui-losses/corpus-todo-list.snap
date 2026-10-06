@@ -3,4 +3,3 @@ source: crates/weft-snapshots/tests/interop.rs
 description: corpus-todo-list as a2ui-losses
 ---
 Tokens /screen#todos/form#add-form/stack#add-row: gap: design tokens have no A2UI form
-Tokens /screen#todos/stack#summary: gap: design tokens have no A2UI form

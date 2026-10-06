@@ -20,8 +20,5 @@ description: corpus-todo-list as a2ui-import
       </item>
     </each>
   </list>
-  <stack id="summary" direction="row">
-    <text id="remaining" text="{$.remaining}"/>
-    <text id="remaining-label">items left</text>
-  </stack>
+  <text id="remaining" text="{$.remainingLabel}"/>
 </screen>

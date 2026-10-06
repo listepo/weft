@@ -231,7 +231,7 @@
         },
         "before": {
           "kind": "button",
-          "name": "Delete"
+          "nameBind": "$*.deleteLabel"
         }
       }
     ]
@@ -267,7 +267,7 @@
       {
         "has": {
           "kind": "button",
-          "name": "Delete",
+          "nameBind": "$*.deleteLabel",
           "on": {
             "press": "users.remove"
           }

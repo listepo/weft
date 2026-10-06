@@ -667,12 +667,28 @@ impl<'d> Ctx<'d> {
                 if role == "columnheader" {
                     lift_header_button(&mut s);
                 }
-                let slot = attr("data-weft-slot").or((tag == "footer").then_some("footer"));
-                if let Some(slot) = slot {
-                    s.role = "generic".into();
-                    for c in &mut s.children {
-                        c.slot = Some(slot.to_owned());
-                    }
+            }
+            // The renderers wrap a slot's content in this marker; a `<footer>` is a slot of the
+            // generators' own pages only, since on any other page it is a landmark.
+            let slot = attr("data-weft-slot")
+                .or((self.conventions.is_some() && tag == "footer").then_some("footer"));
+            if let Some(slot) = slot {
+                s.role = "generic".into();
+                // The empty slot of a table is a row of one cell; the cell is markup, not content.
+                if tag == "tr" {
+                    s.children = std::mem::take(&mut s.children)
+                        .into_iter()
+                        .flat_map(|c| {
+                            if c.role == "cell" {
+                                c.children
+                            } else {
+                                vec![c]
+                            }
+                        })
+                        .collect();
+                }
+                for c in &mut s.children {
+                    c.slot = Some(slot.to_owned());
                 }
             }
         }
@@ -1121,10 +1137,6 @@ const DOM_LOSSES: &[(LossKind, &str)] = &[
     (
         LossKind::Tokens,
         "design token references are rendered as CSS and cannot be mapped back",
-    ),
-    (
-        LossKind::Slots,
-        "slot membership is not in the HTML; slot content is imported as default content",
     ),
     (
         LossKind::Hidden,

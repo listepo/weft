@@ -141,6 +141,9 @@ description: corpus-data-table as json
                         "kind": "button",
                         "id": "delete",
                         "props": {
+                          "label": {
+                            "bind": "$user.deleteLabel"
+                          },
                           "variant": "danger"
                         },
                         "on": {

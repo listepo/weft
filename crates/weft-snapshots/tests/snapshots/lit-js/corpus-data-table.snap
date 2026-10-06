@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/snapshots.rs
 description: corpus-data-table as lit-js
 ---
-import { LitElement, html } from "lit";
+import { LitElement, html, nothing } from "lit";
 
 function _text(v) {
   if (typeof v === "string") return v;
@@ -67,7 +67,7 @@ class WeftScreen extends LitElement {
                   ><div data-weft-id=${"user-role[" + _i0 + "]"}>${!(_text(user?.role).trim() === "") ? _squash(_text(user?.role)) : ""}</div
                 ></td
                 ><td data-weft-id=${"cell-actions[" + _i0 + "]"}
-                  ><button data-weft-id=${"delete[" + _i0 + "]"} type="button" data-variant="danger" @click=${(_e) => _act(actions, { id: "delete[" + _i0 + "]", action: "users.delete", item: "$.users." + _i0 })}>Delete</button
+                  ><button data-weft-id=${"delete[" + _i0 + "]"} aria-label=${(_text(user?.deleteLabel).trim() || undefined) ?? nothing} type="button" data-variant="danger" @click=${(_e) => _act(actions, { id: "delete[" + _i0 + "]", action: "users.delete", item: "$.users." + _i0 })}>Delete</button
                 ></td
               ></tr>`,
           ]),

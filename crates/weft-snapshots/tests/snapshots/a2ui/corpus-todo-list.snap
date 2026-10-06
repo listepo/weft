@@ -22,7 +22,7 @@ description: corpus-todo-list as a2ui
             "title",
             "add-form",
             "list",
-            "summary"
+            "remaining"
           ],
           "accessibility": {
             "label": "Tasks"
@@ -130,24 +130,11 @@ description: corpus-todo-list as a2ui
           ]
         },
         {
-          "id": "summary",
-          "component": "Row",
-          "children": [
-            "remaining",
-            "remaining-label"
-          ]
-        },
-        {
           "id": "remaining",
           "component": "Text",
           "text": {
-            "path": "/remaining"
+            "path": "/remainingLabel"
           }
-        },
-        {
-          "id": "remaining-label",
-          "component": "Text",
-          "text": "items left"
         }
       ]
     }

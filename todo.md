@@ -5,7 +5,5 @@
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
 - T52.1. 3D models
-- T18. Follow-ups from the prototype
 - T13.1. json-render export and import
 - T15.1. Catalog import from a Custom Elements Manifest
-- T60. Deterministic top strip and blur in SwiftUI screenshots

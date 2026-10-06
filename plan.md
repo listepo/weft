@@ -13,8 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T13.1 | todo | P2 | 3 | 0% | |
 | T15.1 | in progress | P3 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T60 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
-| T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -166,12 +164,6 @@ Split from T52. A `model` element showing a 3D asset, with a still fallback imag
 - Groundwork tried in T52 and removed again: the `model` kind in `packages/catalog/src/core.ts`, `asset_problem` in `weft-core/src/rules.rs`, the `W317` check in `validate.rs`, cases in `packages/core/test/cases.ts` and `crates/weft-core/tests/codes.rs`, `model` in the fixture catalog `packages/core/test/catalog.ts`.
 - Add a corpus screen with a model, covered like the corpus. Screenshots are deterministic (the fallback). Done when the full check exits 0 and new baselines are reviewed.
 
-### T18. Follow-ups from the prototype
-
-- `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
-- Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
-- Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.
-
 ### T13.1. json-render export and import
 
 The json-render half of T13: export a Weft document to a json-render spec (`{ root, elements, state }`, the Weft catalog as the json-render catalog) and import one back, with a loss table in SPEC §9, in `crates/weft-interop`. Done when every corpus screen converts both ways and the losses are listed.
@@ -179,9 +171,3 @@ The json-render half of T13: export a Weft document to a json-render spec (`{ ro
 ### T15.1. Catalog import from a Custom Elements Manifest
 
 An importer that turns a Custom Elements Manifest (schema 2.1.0, https://github.com/webcomponents/custom-elements-manifest) into a Weft catalog: each custom element becomes a kind, its attributes and fields become props, its slots become slots, its events become events. Done when the manifest of a real component library imports into a catalog that validates, with the lost parts listed.
-
-### T60. Deterministic top strip and blur in SwiftUI screenshots
-
-After T59 masked the home indicator, two more SwiftUI screenshot flakes showed up on main in four full visual runs: `tilt` once differed by 38,537 px because the capture included the black Dynamic Island pill at the top, and `glass-dark` twice differed by 2 px, most likely from blur noise in the glass effect. Both pass on rerun, so the merge gate is unreliable.
-
-Mask the top system strip the same way T59 masks the bottom one (the host app measures the top safe-area inset from its window and the comparison blanks it in both images), or keep the island out of the capture if the simulator allows it. For the glass screens, prefer a deterministic render; if blur stays noisy, allow a small, documented per-screen pixel tolerance for those screens only. Retake baselines only if the compared area changes, and review them. Done when the SwiftUI suite passes 5 consecutive runs in `WEFT_SIMULATOR=own` and 1 in `shared`, and the full check exits 0.

@@ -141,6 +141,18 @@ export const rows: Row[] = [
     ["components.button.props.title.writable"],
   ],
   [
+    "prop names an element kind",
+    edit((c) => (c["button"]!.props!["title"]!.references = "button")),
+    "major",
+    ["components.button.props.title.references"],
+  ],
+  [
+    "component becomes the root",
+    edit((c) => (c["button"]!.root = true)),
+    "major",
+    ["components.button.root"],
+  ],
+  [
     "range narrowed (min raised)",
     edit((c) => (loose(c["button"]!.props!["count"])["min"] = 2)),
     "major",

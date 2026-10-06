@@ -146,6 +146,11 @@ description: corpus-data-table as a2ui
             "event": {
               "name": "users.delete"
             }
+          },
+          "accessibility": {
+            "label": {
+              "path": "deleteLabel"
+            }
           }
         },
         {

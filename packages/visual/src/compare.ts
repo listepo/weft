@@ -49,10 +49,11 @@ function pad(image: Rgba, width: number, height: number): Uint8Array {
   return out;
 }
 
-/** Paints the bottom `rows` pixel rows one color, so whatever the system drew there never counts. */
-function blankBottom(data: Uint8Array, width: number, height: number, rows: number): void {
-  const from = Math.max(0, height - Math.max(0, Math.ceil(rows)));
-  data.fill(0, from * width * 4, height * width * 4);
+/** Paints the top `top` and the bottom `bottom` pixel rows one color, so whatever the system drew there never counts. */
+function blankEdges(data: Uint8Array, width: number, height: number, top: number, bottom: number) {
+  const rows = (n: number) => Math.min(height, Math.max(0, Math.ceil(n)));
+  data.fill(0, 0, rows(top) * width * 4);
+  data.fill(0, (height - rows(bottom)) * width * 4, height * width * 4);
 }
 
 const png = (width: number, height: number, data: Uint8Array) =>
@@ -64,17 +65,28 @@ export type CompareOptions = {
    * the home indicator there in some screenshots and not in others, whatever the app asks for.
    */
   ignoreBottom?: number;
+  /**
+   * Pixel rows at the top of both images to leave out of the comparison. A simulator screenshot
+   * sometimes includes the Dynamic Island and the screen's rounded corners, and sometimes not.
+   */
+  ignoreTop?: number;
+  /**
+   * How many differing pixels still count as a match: the diff images are then not written.
+   * Zero by default; only a screen whose pixels the system itself draws nondeterministically
+   * (the glass material) may ask for more.
+   */
+  tolerance?: number;
 };
 
 /**
  * Compares two PNG screenshots. `label` names the diff images (`diffs/<label>.diff.png` and the
- * two inputs beside it); nothing is written when the images match.
+ * two inputs beside it); nothing is written when the images match (within `tolerance`).
  */
 export function compare(
   expected: Uint8Array,
   actual: Uint8Array,
   label: string,
-  { ignoreBottom = 0 }: CompareOptions = {},
+  { ignoreBottom = 0, ignoreTop = 0, tolerance = 0 }: CompareOptions = {},
 ): Comparison {
   const a = rgba(expected);
   const b = rgba(actual);
@@ -83,13 +95,11 @@ export function compare(
   // Copies, since `pad` hands back an image's own data when the sizes already match.
   const left = Uint8Array.from(pad(a, width, height));
   const right = Uint8Array.from(pad(b, width, height));
-  if (ignoreBottom > 0) {
-    blankBottom(left, width, height, ignoreBottom);
-    blankBottom(right, width, height, ignoreBottom);
-  }
+  blankEdges(left, width, height, ignoreTop, ignoreBottom);
+  blankEdges(right, width, height, ignoreTop, ignoreBottom);
   const out = new Uint8Array(width * height * 4);
   const differing = pixelmatch(left, right, out, width, height, { threshold: 0.1 });
-  if (differing === 0) return { width, height, differing };
+  if (differing <= tolerance) return { width, height, differing };
   const diff = join(DIFFS, `${label}.diff.png`);
   mkdirSync(dirname(diff), { recursive: true });
   writeFileSync(diff, png(width, height, out));

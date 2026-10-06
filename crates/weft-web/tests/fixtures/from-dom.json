@@ -28,6 +28,43 @@
         "label": "Account",
         "state": "invalid"
        },
+       "slots": {
+        "footer": [
+         {
+          "kind": "button",
+          "id": "save",
+          "props": {
+           "state": "busy",
+           "submit": true,
+           "variant": "primary"
+          },
+          "children": [
+           "Save"
+          ]
+         },
+         {
+          "kind": "button",
+          "id": "cancel",
+          "props": {
+           "state": "idle",
+           "variant": "secondary"
+          },
+          "children": [
+           "Cancel"
+          ]
+         },
+         {
+          "kind": "link",
+          "id": "help",
+          "props": {
+           "href": "https://example.com/help"
+          },
+          "children": [
+           "Help"
+          ]
+         }
+        ]
+       },
        "children": [
         {
          "kind": "field",
@@ -172,39 +209,6 @@
            ]
           }
          ]
-        },
-        {
-         "kind": "button",
-         "id": "save",
-         "props": {
-          "state": "busy",
-          "submit": true,
-          "variant": "primary"
-         },
-         "children": [
-          "Save"
-         ]
-        },
-        {
-         "kind": "button",
-         "id": "cancel",
-         "props": {
-          "state": "idle",
-          "variant": "secondary"
-         },
-         "children": [
-          "Cancel"
-         ]
-        },
-        {
-         "kind": "link",
-         "id": "help",
-         "props": {
-          "href": "https://example.com/help"
-         },
-         "children": [
-          "Help"
-         ]
         }
        ]
       }
@@ -226,11 +230,6 @@
      "kind": "tokens",
      "path": "/screen#account",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#account",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -419,11 +418,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#appearance",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#appearance",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -464,6 +458,21 @@
        "id": "trip",
        "props": {
         "label": "Trip"
+       },
+       "slots": {
+        "footer": [
+         {
+          "kind": "button",
+          "id": "book",
+          "props": {
+           "submit": true,
+           "variant": "primary"
+          },
+          "children": [
+           "Book"
+          ]
+         }
+        ]
        },
        "children": [
         {
@@ -603,17 +612,6 @@
           "label": "Trip colour",
           "value": "#3b82f6"
          }
-        },
-        {
-         "kind": "button",
-         "id": "book",
-         "props": {
-          "submit": true,
-          "variant": "primary"
-         },
-         "children": [
-          "Book"
-         ]
         }
        ]
       }
@@ -635,11 +633,6 @@
      "kind": "tokens",
      "path": "/screen#booking",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#booking",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -715,11 +708,6 @@
      "kind": "tokens",
      "path": "/screen#files",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#files",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -820,11 +808,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-file",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-file",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -889,17 +872,21 @@
          "props": {
           "label": "Velocity"
          },
+         "slots": {
+          "header": [
+           {
+            "kind": "heading",
+            "id": "velocity-title",
+            "props": {
+             "level": 2
+            },
+            "children": [
+             "Velocity"
+            ]
+           }
+          ]
+         },
          "children": [
-          {
-           "kind": "heading",
-           "id": "velocity-title",
-           "props": {
-            "level": 2
-           },
-           "children": [
-            "Velocity"
-           ]
-          },
           {
            "kind": "text",
            "id": "velocity-value",
@@ -918,17 +905,21 @@
          "props": {
           "label": "Open bugs"
          },
+         "slots": {
+          "header": [
+           {
+            "kind": "heading",
+            "id": "bugs-title",
+            "props": {
+             "level": 2
+            },
+            "children": [
+             "Open bugs"
+            ]
+           }
+          ]
+         },
          "children": [
-          {
-           "kind": "heading",
-           "id": "bugs-title",
-           "props": {
-            "level": 2
-           },
-           "children": [
-            "Open bugs"
-           ]
-          },
           {
            "kind": "text",
            "id": "bugs-value",
@@ -947,17 +938,21 @@
          "props": {
           "label": "Incidents"
          },
+         "slots": {
+          "header": [
+           {
+            "kind": "heading",
+            "id": "incidents-title",
+            "props": {
+             "level": 2
+            },
+            "children": [
+             "Incidents"
+            ]
+           }
+          ]
+         },
          "children": [
-          {
-           "kind": "heading",
-           "id": "incidents-title",
-           "props": {
-            "level": 2
-           },
-           "children": [
-            "Incidents"
-           ]
-          },
           {
            "kind": "text",
            "id": "incidents-value",
@@ -1093,11 +1088,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#dashboard",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#dashboard",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -1132,7 +1122,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"users\" aria-label=\"Users\"><h1 data-weft-id=\"title\">Users</h1><table data-weft-id=\"table\" aria-label=\"Users\"><thead><tr><th data-weft-id=\"col-name\" scope=\"col\" aria-sort=\"ascending\" tabindex=\"0\">Name</th><th data-weft-id=\"col-email\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Email</th><th data-weft-id=\"col-role\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Role</th><th data-weft-id=\"col-actions\" scope=\"col\">Actions</th></tr></thead><tbody><tr data-weft-id=\"row[0]\"><td data-weft-id=\"cell-name[0]\"><div data-weft-id=\"user-name[0]\">Ada Lovelace</div></td><td data-weft-id=\"cell-email[0]\"><div data-weft-id=\"user-email[0]\">ada@example.com</div></td><td data-weft-id=\"cell-role[0]\"><div data-weft-id=\"user-role[0]\">Admin</div></td><td data-weft-id=\"cell-actions[0]\"><button data-weft-id=\"delete[0]\" type=\"button\" data-variant=\"danger\">Delete</button></td></tr><tr data-weft-id=\"row[1]\"><td data-weft-id=\"cell-name[1]\"><div data-weft-id=\"user-name[1]\">Alan Turing</div></td><td data-weft-id=\"cell-email[1]\"><div data-weft-id=\"user-email[1]\">alan@example.com</div></td><td data-weft-id=\"cell-role[1]\"><div data-weft-id=\"user-role[1]\">Editor</div></td><td data-weft-id=\"cell-actions[1]\"><button data-weft-id=\"delete[1]\" type=\"button\" data-variant=\"danger\">Delete</button></td></tr></tbody></table></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"users\" aria-label=\"Users\"><h1 data-weft-id=\"title\">Users</h1><table data-weft-id=\"table\" aria-label=\"Users\"><thead><tr><th data-weft-id=\"col-name\" scope=\"col\" aria-sort=\"ascending\" tabindex=\"0\">Name</th><th data-weft-id=\"col-email\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Email</th><th data-weft-id=\"col-role\" scope=\"col\" aria-sort=\"none\" tabindex=\"0\">Role</th><th data-weft-id=\"col-actions\" scope=\"col\">Actions</th></tr></thead><tbody><tr data-weft-id=\"row[0]\"><td data-weft-id=\"cell-name[0]\"><div data-weft-id=\"user-name[0]\">Ada Lovelace</div></td><td data-weft-id=\"cell-email[0]\"><div data-weft-id=\"user-email[0]\">ada@example.com</div></td><td data-weft-id=\"cell-role[0]\"><div data-weft-id=\"user-role[0]\">Admin</div></td><td data-weft-id=\"cell-actions[0]\"><button data-weft-id=\"delete[0]\" aria-label=\"Delete Ada Lovelace\" type=\"button\" data-variant=\"danger\">Delete</button></td></tr><tr data-weft-id=\"row[1]\"><td data-weft-id=\"cell-name[1]\"><div data-weft-id=\"user-name[1]\">Alan Turing</div></td><td data-weft-id=\"cell-email[1]\"><div data-weft-id=\"user-email[1]\">alan@example.com</div></td><td data-weft-id=\"cell-role[1]\"><div data-weft-id=\"user-role[1]\">Editor</div></td><td data-weft-id=\"cell-actions[1]\"><button data-weft-id=\"delete[1]\" aria-label=\"Delete Alan Turing\" type=\"button\" data-variant=\"danger\">Delete</button></td></tr></tbody></table></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -1248,6 +1238,7 @@
              "kind": "button",
              "id": "delete-0",
              "props": {
+              "label": "Delete Ada Lovelace",
               "variant": "danger"
              },
              "children": [
@@ -1309,6 +1300,7 @@
              "kind": "button",
              "id": "delete-1",
              "props": {
+              "label": "Delete Alan Turing",
               "variant": "danger"
              },
              "children": [
@@ -1339,11 +1331,6 @@
      "kind": "tokens",
      "path": "/screen#users",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#users",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -1445,7 +1432,7 @@
   }
  },
  {
-  "html": "<main aria-label=\"Users\">\n  <h1>Users</h1>\n  <table aria-label=\"Users\">\n    <thead>\n      <tr>\n        <th aria-sort=\"ascending\"><button type=\"button\" data-action=\"press:users.sort\">Name</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Email</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Role</button></th>\n        <th>Actions</th>\n      </tr>\n    </thead>\n    <tbody>\n      <template data-each=\"$.users\" data-as=\"user\">\n        <tr>\n          <td>\n            <p data-bind=\"text:$user.name\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.email\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.role\"></p>\n          </td>\n          <td>\n            <button type=\"button\" data-variant=\"danger\" data-action=\"press:users.delete\">Delete</button>\n          </td>\n        </tr>\n      </template>\n    </tbody>\n  </table>\n</main>\n",
+  "html": "<main aria-label=\"Users\">\n  <h1>Users</h1>\n  <table aria-label=\"Users\">\n    <thead>\n      <tr>\n        <th aria-sort=\"ascending\"><button type=\"button\" data-action=\"press:users.sort\">Name</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Email</button></th>\n        <th aria-sort=\"none\"><button type=\"button\" data-action=\"press:users.sort\">Role</button></th>\n        <th>Actions</th>\n      </tr>\n    </thead>\n    <tbody>\n      <template data-each=\"$.users\" data-as=\"user\">\n        <tr>\n          <td>\n            <p data-bind=\"text:$user.name\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.email\"></p>\n          </td>\n          <td>\n            <p data-bind=\"text:$user.role\"></p>\n          </td>\n          <td>\n            <button type=\"button\" data-variant=\"danger\" data-bind=\"label:$user.deleteLabel\" data-action=\"press:users.delete\">Delete</button>\n          </td>\n        </tr>\n      </template>\n    </tbody>\n  </table>\n</main>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -1530,11 +1517,6 @@
      "kind": "tokens",
      "path": "/screen#screen-users",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen-users",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -1630,11 +1612,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#load-error",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#load-error",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -1722,11 +1699,6 @@
      "kind": "tokens",
      "path": "/screen#screen-load-error",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen-load-error",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -1823,11 +1795,6 @@
      "kind": "tokens",
      "path": "/screen#glass",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#glass",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -2014,6 +1981,20 @@
         "label": "New message",
         "open": true
        },
+       "slots": {
+        "actions": [
+         {
+          "kind": "button",
+          "id": "send",
+          "props": {
+           "variant": "primary"
+          },
+          "children": [
+           "Send"
+          ]
+         }
+        ]
+       },
        "children": [
         {
          "kind": "form",
@@ -2041,16 +2022,6 @@
            }
           }
          ]
-        },
-        {
-         "kind": "button",
-         "id": "send",
-         "props": {
-          "variant": "primary"
-         },
-         "children": [
-          "Send"
-         ]
         }
        ]
       }
@@ -2074,11 +2045,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#inbox",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#inbox",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -2097,11 +2063,6 @@
      "kind": "tokens",
      "path": "/screen#inbox/tabs#folders/tab#tab-drafts/list#drafts/slot[empty]/stack#drafts-empty",
      "note": "gap var(--weft-space-sm) cannot be mapped back to a design token"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#inbox/tabs#folders/tab#tab-drafts/list#drafts/slot[empty]",
-     "note": "content <list> does not hold by default is placed in its empty slot"
     }
    ],
    "diagnostics": []
@@ -2250,11 +2211,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#leaderboard",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#leaderboard",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -2331,6 +2287,24 @@
        "props": {
         "state": "idle"
        },
+       "slots": {
+        "footer": [
+         {
+          "kind": "link",
+          "id": "reset",
+          "children": [
+           "Forgot password?"
+          ]
+         },
+         {
+          "kind": "link",
+          "id": "signup",
+          "children": [
+           "Create an account"
+          ]
+         }
+        ]
+       },
        "children": [
         {
          "kind": "heading",
@@ -2378,20 +2352,6 @@
          "children": [
           "Sign in"
          ]
-        },
-        {
-         "kind": "link",
-         "id": "reset",
-         "children": [
-          "Forgot password?"
-         ]
-        },
-        {
-         "kind": "link",
-         "id": "signup",
-         "children": [
-          "Create an account"
-         ]
         }
        ]
       }
@@ -2413,11 +2373,6 @@
      "kind": "tokens",
      "path": "/screen#login",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#login",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -2533,11 +2488,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-sign-in",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-sign-in",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -2625,11 +2575,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#account-menu",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#account-menu",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -2709,11 +2654,6 @@
      "kind": "tokens",
      "path": "/screen#screen-account-menu",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen-account-menu",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -2838,31 +2778,23 @@
         "label": "Archived orders",
         "state": "empty"
        },
+       "slots": {
+        "empty": [
+         {
+          "kind": "text",
+          "id": "archived-empty",
+          "children": [
+           "Nothing archived yet."
+          ]
+         }
+        ]
+       },
        "children": [
         {
          "kind": "column",
          "id": "col-archived",
          "children": [
           "Order"
-         ]
-        },
-        {
-         "kind": "row",
-         "id": "row-1",
-         "children": [
-          {
-           "kind": "cell",
-           "id": "cell-1",
-           "children": [
-            {
-             "kind": "text",
-             "id": "archived-empty",
-             "children": [
-              "Nothing archived yet."
-             ]
-            }
-           ]
-          }
          ]
         }
        ]
@@ -2918,11 +2850,6 @@
      "kind": "tokens",
      "path": "/screen#orders",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#orders",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -3076,11 +3003,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#profile",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#profile",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -3167,11 +3089,6 @@
      "kind": "tokens",
      "path": "/screen#screen-profile",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen-profile",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -3320,11 +3237,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#search",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#search",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -3437,11 +3349,6 @@
      "kind": "tokens",
      "path": "/screen#screen-search",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen-search",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -3605,11 +3512,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#settings",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#settings",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -3768,11 +3670,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-settings",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-settings",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -3798,6 +3695,17 @@
        "id": "form",
        "props": {
         "state": "idle"
+       },
+       "slots": {
+        "footer": [
+         {
+          "kind": "link",
+          "id": "signin",
+          "children": [
+           "Already have an account? Sign in"
+          ]
+         }
+        ]
        },
        "children": [
         {
@@ -3873,13 +3781,6 @@
          "children": [
           "Create account"
          ]
-        },
-        {
-         "kind": "link",
-         "id": "signin",
-         "children": [
-          "Already have an account? Sign in"
-         ]
         }
        ]
       }
@@ -3901,11 +3802,6 @@
      "kind": "tokens",
      "path": "/screen#signup",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#signup",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -4033,11 +3929,6 @@
      "kind": "tokens",
      "path": "/screen#screen-create-account",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen-create-account",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -4190,11 +4081,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#account",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#account",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -4328,11 +4214,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-account",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-account",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -4373,17 +4254,21 @@
          "props": {
           "label": "Front side"
          },
+         "slots": {
+          "header": [
+           {
+            "kind": "heading",
+            "id": "front-title",
+            "props": {
+             "level": 2
+            },
+            "children": [
+             "Front"
+            ]
+           }
+          ]
+         },
          "children": [
-          {
-           "kind": "heading",
-           "id": "front-title",
-           "props": {
-            "level": 2
-           },
-           "children": [
-            "Front"
-           ]
-          },
           {
            "kind": "text",
            "id": "front-text",
@@ -4409,17 +4294,21 @@
          "props": {
           "label": "Back side"
          },
+         "slots": {
+          "header": [
+           {
+            "kind": "heading",
+            "id": "back-title",
+            "props": {
+             "level": 2
+            },
+            "children": [
+             "Back"
+            ]
+           }
+          ]
+         },
          "children": [
-          {
-           "kind": "heading",
-           "id": "back-title",
-           "props": {
-            "level": 2
-           },
-           "children": [
-            "Back"
-           ]
-          },
           {
            "kind": "text",
            "id": "back-text",
@@ -4442,17 +4331,21 @@
          "props": {
           "label": "Leaning card"
          },
+         "slots": {
+          "header": [
+           {
+            "kind": "heading",
+            "id": "lean-title",
+            "props": {
+             "level": 2
+            },
+            "children": [
+             "Leaning"
+            ]
+           }
+          ]
+         },
          "children": [
-          {
-           "kind": "heading",
-           "id": "lean-title",
-           "props": {
-            "level": 2
-           },
-           "children": [
-            "Leaning"
-           ]
-          },
           {
            "kind": "text",
            "id": "lean-text",
@@ -4493,11 +4386,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#tilt",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#tilt",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -4512,7 +4400,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"todos\" aria-label=\"Tasks\"><h1 data-weft-id=\"title\">Tasks</h1><form data-weft-id=\"add-form\"><div data-weft-id=\"add-row\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">New task</span><input data-weft-id=\"draft\" aria-label=\"New task\" type=\"text\" value=\"\"/></label></div><button data-weft-id=\"add\" type=\"submit\" disabled=\"\" data-variant=\"primary\">Add</button></div></form><ul data-weft-id=\"list\"><li data-weft-id=\"todo[0]\"><label><input data-weft-id=\"todo-done[0]\" type=\"checkbox\" aria-label=\"Write spec\" checked=\"\"/><span aria-hidden=\"true\">Write spec</span></label><button data-weft-id=\"todo-remove[0]\" type=\"button\">Remove</button></li><li data-weft-id=\"todo[1]\"><label><input data-weft-id=\"todo-done[1]\" type=\"checkbox\" aria-label=\"Build parser\"/><span aria-hidden=\"true\">Build parser</span></label><button data-weft-id=\"todo-remove[1]\" type=\"button\">Remove</button></li></ul><div data-weft-id=\"summary\" style=\"gap:var(--weft-space-xs);display:flex;flex-direction:row;align-items:center\"><div data-weft-id=\"remaining\">1</div><div data-weft-id=\"remaining-label\">items left</div></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"todos\" aria-label=\"Tasks\"><h1 data-weft-id=\"title\">Tasks</h1><form data-weft-id=\"add-form\"><div data-weft-id=\"add-row\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">New task</span><input data-weft-id=\"draft\" aria-label=\"New task\" type=\"text\" value=\"\"/></label></div><button data-weft-id=\"add\" type=\"submit\" disabled=\"\" data-variant=\"primary\">Add</button></div></form><ul data-weft-id=\"list\"><li data-weft-id=\"todo[0]\"><label><input data-weft-id=\"todo-done[0]\" type=\"checkbox\" aria-label=\"Write spec\" checked=\"\"/><span aria-hidden=\"true\">Write spec</span></label><button data-weft-id=\"todo-remove[0]\" type=\"button\">Remove</button></li><li data-weft-id=\"todo[1]\"><label><input data-weft-id=\"todo-done[1]\" type=\"checkbox\" aria-label=\"Build parser\"/><span aria-hidden=\"true\">Build parser</span></label><button data-weft-id=\"todo-remove[1]\" type=\"button\">Remove</button></li></ul><div data-weft-id=\"remaining\">1 item left</div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -4616,26 +4504,10 @@
        ]
       },
       {
-       "kind": "stack",
-       "id": "summary",
-       "props": {
-        "direction": "row"
-       },
+       "kind": "text",
+       "id": "remaining",
        "children": [
-        {
-         "kind": "text",
-         "id": "remaining",
-         "children": [
-          "1"
-         ]
-        },
-        {
-         "kind": "text",
-         "id": "remaining-label",
-         "children": [
-          "items left"
-         ]
-        }
+        "1 item left"
        ]
       }
      ]
@@ -4656,11 +4528,6 @@
      "kind": "tokens",
      "path": "/screen#todos",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#todos",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -4701,18 +4568,13 @@
      "kind": "repetition",
      "path": "/screen#todos/list#list/item#todo-1/button#todo-remove-1",
      "note": "instance todo-remove[1] of a repeated element is imported as the static element todo-remove-1"
-    },
-    {
-     "kind": "tokens",
-     "path": "/screen#todos/stack#summary",
-     "note": "gap var(--weft-space-xs) cannot be mapped back to a design token"
     }
    ],
    "diagnostics": []
   }
  },
  {
-  "html": "<main aria-label=\"Tasks\">\n  <h1>Tasks</h1>\n  <form data-action=\"submit:todo.add\">\n    <div class=\"row gap-sm\">\n      <label for=\"draft\">New task</label>\n      <input id=\"draft\" type=\"text\" data-bind=\"value:$.draft\">\n      <button type=\"submit\" data-variant=\"primary\" data-bind=\"disabled:!$.draft\">Add</button>\n    </div>\n  </form>\n  <ul>\n    <template data-each=\"$.todos\" data-as=\"todo\">\n      <li>\n        <label>\n          <input type=\"checkbox\" data-bind=\"checked:$todo.done\">\n          <span data-bind=\"text:$todo.title\"></span>\n        </label>\n        <button type=\"button\" data-action=\"press:todo.remove\">Remove</button>\n      </li>\n    </template>\n  </ul>\n  <div class=\"row gap-xs\">\n    <p data-bind=\"text:$.remaining\"></p>\n    <p>items left</p>\n  </div>\n</main>\n",
+  "html": "<main aria-label=\"Tasks\">\n  <h1>Tasks</h1>\n  <form data-action=\"submit:todo.add\">\n    <div class=\"row gap-sm\">\n      <label for=\"draft\">New task</label>\n      <input id=\"draft\" type=\"text\" data-bind=\"value:$.draft\">\n      <button type=\"submit\" data-variant=\"primary\" data-bind=\"disabled:!$.draft\">Add</button>\n    </div>\n  </form>\n  <ul>\n    <template data-each=\"$.todos\" data-as=\"todo\">\n      <li>\n        <label>\n          <input type=\"checkbox\" data-bind=\"checked:$todo.done\">\n          <span data-bind=\"text:$todo.title\"></span>\n        </label>\n        <button type=\"button\" data-action=\"press:todo.remove\">Remove</button>\n      </li>\n    </template>\n  </ul>\n  <p data-bind=\"text:$.remainingLabel\"></p>\n</main>\n",
   "result": {
    "document": {
     "weft": "0.1",
@@ -4764,13 +4626,6 @@
       {
        "kind": "text",
        "id": "text-1"
-      },
-      {
-       "kind": "text",
-       "id": "text-items-left",
-       "children": [
-        "items left"
-       ]
       }
      ]
     }
@@ -4790,11 +4645,6 @@
      "kind": "tokens",
      "path": "/screen#screen-tasks",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen-tasks",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -4918,11 +4768,6 @@
      "kind": "tokens",
      "path": "/screen#wizard",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#wizard",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -5051,11 +4896,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-setup-wizard",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-setup-wizard",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -5129,11 +4969,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -5184,11 +5019,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -5273,11 +5103,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -5323,11 +5148,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -5376,11 +5196,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -5450,11 +5265,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -5528,11 +5338,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -5583,11 +5388,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -5624,11 +5424,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -5683,11 +5478,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -5714,6 +5504,21 @@
        "props": {
         "state": "idle"
        },
+       "slots": {
+        "footer": [
+         {
+          "kind": "button",
+          "id": "go",
+          "props": {
+           "submit": true,
+           "variant": "primary"
+          },
+          "children": [
+           "Sign in"
+          ]
+         }
+        ]
+       },
        "children": [
         {
          "kind": "field",
@@ -5724,17 +5529,6 @@
           "type": "email",
           "value": ""
          }
-        },
-        {
-         "kind": "button",
-         "id": "go",
-         "props": {
-          "submit": true,
-          "variant": "primary"
-         },
-         "children": [
-          "Sign in"
-         ]
         }
        ]
       }
@@ -5756,11 +5550,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -5833,11 +5622,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -5897,11 +5681,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -5948,11 +5727,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -6032,11 +5806,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -6092,11 +5861,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -6160,19 +5924,9 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root/list#todos/slot[empty]",
-     "note": "content <list> does not hold by default is placed in its empty slot"
     }
    ],
    "diagnostics": []
@@ -6215,11 +5969,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -6285,11 +6034,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -6347,11 +6091,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -6421,11 +6160,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -6498,11 +6232,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -6572,11 +6301,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -6635,11 +6359,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -6666,17 +6385,21 @@
        "props": {
         "label": "Profile"
        },
+       "slots": {
+        "header": [
+         {
+          "kind": "heading",
+          "id": "profile-title",
+          "props": {
+           "level": 2
+          },
+          "children": [
+           "Profile"
+          ]
+         }
+        ]
+       },
        "children": [
-        {
-         "kind": "heading",
-         "id": "profile-title",
-         "props": {
-          "level": 2
-         },
-         "children": [
-          "Profile"
-         ]
-        },
         {
          "kind": "text",
          "id": "bio",
@@ -6704,11 +6427,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -6778,11 +6496,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -6864,11 +6577,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -6938,11 +6646,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -6990,11 +6693,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -7064,11 +6762,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -7124,11 +6817,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -7174,11 +6862,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -7247,11 +6930,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -7279,6 +6957,24 @@
         "label": "Recent orders",
         "state": "ready"
        },
+       "slots": {
+        "empty": [
+         {
+          "kind": "text",
+          "id": "orders-empty",
+          "children": [
+           "No orders yet."
+          ]
+         },
+         {
+          "kind": "button",
+          "id": "orders-shop",
+          "children": [
+           "Start shopping"
+          ]
+         }
+        ]
+       },
        "children": [
         {
          "kind": "column",
@@ -7295,32 +6991,6 @@
          },
          "children": [
           "Total"
-         ]
-        },
-        {
-         "kind": "row",
-         "id": "row-1",
-         "children": [
-          {
-           "kind": "cell",
-           "id": "cell-1",
-           "children": [
-            {
-             "kind": "text",
-             "id": "orders-empty",
-             "children": [
-              "No orders yet."
-             ]
-            },
-            {
-             "kind": "button",
-             "id": "orders-shop",
-             "children": [
-              "Start shopping"
-             ]
-            }
-           ]
-          }
          ]
         }
        ]
@@ -7343,11 +7013,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -7431,11 +7096,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#root",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -7488,11 +7148,6 @@
      "kind": "tokens",
      "path": "/screen#root",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#root",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -7569,11 +7224,6 @@
      "kind": "tokens",
      "path": "/screen#s",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#s",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -7713,11 +7363,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-form",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-form",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -7774,11 +7419,6 @@
      "kind": "tokens",
      "path": "/screen#screen-1",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -9617,11 +9257,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -10934,11 +10569,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11019,11 +10649,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11071,11 +10696,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -11130,11 +10750,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-m",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-m",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11177,11 +10792,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -11231,11 +10841,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -11300,11 +10905,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11364,11 +10964,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11416,11 +11011,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -11491,11 +11081,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11549,11 +11134,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -11614,11 +11194,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11673,11 +11248,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11725,11 +11295,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -11781,11 +11346,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -11833,11 +11393,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -11889,11 +11444,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -11950,11 +11500,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -12004,11 +11549,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -12056,11 +11596,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -12120,11 +11655,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -12172,11 +11702,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -12294,11 +11819,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -12379,11 +11899,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -12422,11 +11937,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -12478,11 +11988,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -12532,11 +12037,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -12591,11 +12091,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -12675,11 +12170,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -12732,11 +12222,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -12793,11 +12278,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -12845,11 +12325,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -12907,11 +12382,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -12973,11 +12443,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -13025,11 +12490,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -13082,11 +12542,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -13143,11 +12598,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -13197,11 +12647,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -13249,11 +12694,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -13313,11 +12753,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -13381,11 +12816,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -13465,11 +12895,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -13532,11 +12957,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -13607,11 +13027,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -13794,11 +13209,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -13919,11 +13329,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -13988,11 +13393,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14040,11 +13440,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -14113,11 +13508,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14167,11 +13557,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14216,11 +13601,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -14278,11 +13658,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -14344,11 +13719,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14396,11 +13766,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -14455,11 +13820,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -14524,11 +13884,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14587,11 +13942,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -14668,11 +14018,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14732,11 +14077,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14784,11 +14124,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -14840,11 +14175,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14883,11 +14213,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -14939,11 +14264,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -14991,11 +14311,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -15089,11 +14404,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15158,11 +14468,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15212,11 +14517,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15261,11 +14561,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -15313,11 +14608,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15356,11 +14646,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -15422,11 +14707,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15465,11 +14745,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -15518,11 +14793,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15561,11 +14831,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -15617,11 +14882,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15669,11 +14929,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -15725,11 +14980,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15774,11 +15024,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -15830,11 +15075,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -15882,11 +15122,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -15956,11 +15191,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16015,11 +15245,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16069,11 +15294,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16121,11 +15341,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -16242,11 +15457,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16339,11 +15549,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16392,11 +15597,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -16469,11 +15669,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16533,11 +15728,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16588,11 +15778,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -16649,11 +15834,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16701,11 +15881,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -16757,11 +15932,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -16818,11 +15988,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16870,11 +16035,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -16926,11 +16086,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -16978,11 +16133,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17034,11 +16184,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -17086,11 +16231,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17142,11 +16282,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -17185,11 +16320,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17241,11 +16371,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -17293,11 +16418,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17360,11 +16480,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17452,11 +16567,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -17516,11 +16626,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -17568,11 +16673,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17624,11 +16724,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -17673,11 +16768,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17729,11 +16819,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -17781,11 +16866,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17840,11 +16920,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -17922,11 +16997,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -17986,11 +17056,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18038,11 +17103,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -18119,11 +17179,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18172,11 +17227,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -18276,11 +17326,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18350,11 +17395,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18402,11 +17442,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -18458,11 +17493,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18510,11 +17540,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -18592,11 +17617,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18657,11 +17677,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18712,11 +17727,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18764,11 +17774,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -18823,11 +17828,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18877,11 +17877,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -18929,11 +17924,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -18992,11 +17982,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -19068,11 +18053,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19132,11 +18112,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19191,11 +18166,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19246,11 +18216,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -19310,11 +18275,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19353,11 +18313,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -19409,11 +18364,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19461,11 +18411,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -19532,11 +18477,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19596,11 +18536,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19648,11 +18583,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -19704,11 +18634,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19756,11 +18681,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -19820,11 +18740,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19863,11 +18778,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -19931,11 +18841,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -19993,11 +18898,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -20060,11 +18960,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20119,11 +19014,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20166,11 +19056,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -20222,11 +19107,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20274,11 +19154,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -20340,11 +19215,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20395,11 +19265,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -20458,11 +19323,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20517,11 +19377,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20569,11 +19424,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -20625,11 +19475,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20679,11 +19524,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20731,11 +19571,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -20796,11 +19631,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20853,11 +19683,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -20926,11 +19751,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -20985,11 +19805,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21039,11 +19854,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21082,11 +19892,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -21152,11 +19957,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21209,11 +20009,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -21273,11 +20068,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21331,11 +20121,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -21398,11 +20183,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21459,11 +20239,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21515,11 +20290,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21564,11 +20334,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -21621,11 +20386,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21674,11 +20434,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -21730,11 +20485,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21784,11 +20534,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -21827,11 +20572,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -21881,11 +20621,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -21945,11 +20680,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22006,11 +20736,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22065,11 +20790,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22119,11 +20839,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22171,11 +20886,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -22245,11 +20955,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -22324,11 +21029,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22383,11 +21083,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22437,11 +21132,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22489,11 +21179,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -22548,11 +21233,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22600,11 +21280,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -22656,11 +21331,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22701,11 +21371,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22744,11 +21409,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -22800,11 +21460,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22854,11 +21509,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -22901,11 +21551,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -22957,11 +21602,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23000,11 +21640,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23055,11 +21690,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23124,11 +21754,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23180,11 +21805,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23234,11 +21854,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23277,11 +21892,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23324,11 +21934,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23367,11 +21972,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23421,11 +22021,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23502,11 +22097,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23559,11 +22149,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23620,11 +22205,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23674,11 +22254,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23717,11 +22292,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23773,11 +22343,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23820,11 +22385,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23876,11 +22436,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -23928,11 +22483,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -23984,11 +22534,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24038,11 +22583,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24081,11 +22621,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -24167,11 +22702,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24226,11 +22756,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24278,11 +22803,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -24334,11 +22854,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24377,11 +22892,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -24431,11 +22941,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -24494,11 +22999,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24553,11 +23053,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24605,11 +23100,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -24661,11 +23151,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24704,11 +23189,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -24758,11 +23238,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -24816,11 +23291,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24864,11 +23334,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -24920,11 +23385,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -24963,11 +23423,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -25017,11 +23472,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -25082,11 +23532,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25135,11 +23580,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -25199,11 +23639,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25258,11 +23693,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25301,11 +23731,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -25370,11 +23795,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25434,11 +23854,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25486,11 +23901,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -25542,11 +23952,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25594,11 +23999,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -25660,11 +24060,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25719,11 +24114,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25773,11 +24163,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25825,11 +24210,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
@@ -25892,11 +24272,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen-1",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen-1",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25946,11 +24321,6 @@
      "note": "design token references are rendered as CSS and cannot be mapped back"
     },
     {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
-    },
-    {
      "kind": "hidden",
      "path": "/screen#screen",
      "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
@@ -25998,11 +24368,6 @@
      "kind": "tokens",
      "path": "/screen#screen",
      "note": "design token references are rendered as CSS and cannot be mapped back"
-    },
-    {
-     "kind": "slots",
-     "path": "/screen#screen",
-     "note": "slot membership is not in the HTML; slot content is imported as default content"
     },
     {
      "kind": "hidden",
