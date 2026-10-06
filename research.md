@@ -90,12 +90,12 @@ Measured (`bench/REPORT.md`, proxy tokenizer o200k_base, 12 screens):
 
 | Format | Tokens | Weft as a share |
 | --- | ---: | ---: |
-| Weft | 2529 | — |
-| HTML | 2536 | 100% |
-| JSX | 2980 | 85% |
-| A2UI v0.9 | 7734 | 33% |
+| Weft | 2502 | — |
+| HTML | 2524 | 99% |
+| JSX | 2965 | 84% |
+| A2UI v0.9 | 7702 | 32% |
 
-- Weft needs 67% fewer tokens than A2UI JSON, so the token half of the stop criterion is met. Against HTML there is no size advantage; any advantage there has to come from validation and edit accuracy.
+- Weft needs 67.5% fewer tokens than A2UI JSON, so the token half of the stop criterion is met. Against HTML there is no size advantage; any advantage there has to come from validation and edit accuracy.
 - The tokenizer is a proxy, not Claude's. Exact counts need an API key.
 - A2UI's basic catalog v0.9 has no table, switch, menu, link, alert or form submit; the corpus approximates them, so the comparison is partly approximate (`corpus/README.md`).
 - Writing the corpus exposed gaps in the first draft of the spec (bound text on buttons, submit buttons, empty states, numeric ranges); they were closed in T9.
