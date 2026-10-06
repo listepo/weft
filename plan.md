@@ -13,6 +13,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T15.1 | in progress | P3 | 3 | 5% | Claude Code / claude-sonnet-5-5 |
+| T15.2 | todo | P3 | 2 | 0% | |
 | T60 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 | T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
@@ -188,6 +189,10 @@ Execution plan:
 4. CLI: `weft import-cem <manifest.json> [--name] [--version] [--out-dir]` prints the catalog, with losses and diagnostics on stderr (`crates/weft-cli/src/cem.rs`, one dispatch line in `main.rs`).
 5. Docs: SPEC section 9 (From a Custom Elements Manifest, loss table), `docs/cli.md`, `docs/catalog.md`, `toolchain.md` if a dependency is added (none expected).
 6. Verify: `moon run root:changed`, then the full check once; merge main before closing.
+
+### T15.2. Surfaces for the Custom Elements Manifest importer
+
+T15.1 delivers `import_cem` in `weft-import` (library, tests, SPEC section 9). This task makes it reachable: `weft import-cem <manifest.json> [--name] [--version] [--catalog]` prints the catalog (pretty JSON) on stdout and the losses and diagnostics on stderr, reading the file only when it is at most `MAX_MANIFEST_LENGTH` bytes; the `import.cem.outDir` setting if it fits (SPEC section 10.6); the WebAssembly and native bindings (`weft-binding`, `weft-wasm`, `weft-node`, `@weft/core` types) if the creator wants it from TypeScript; `docs/importing.md` and `docs/cli.md`. Done when a manifest file imports from the command line into a catalog that `weft validate --catalog` accepts.
 
 ### T60. Deterministic top strip and blur in SwiftUI screenshots
 

@@ -8,4 +8,5 @@
 - T18. Follow-ups from the prototype
 - T13. Interoperability with A2UI and json-render
 - T15.1. Catalog import from a Custom Elements Manifest
+- T15.2. Surfaces for the Custom Elements Manifest importer
 - T60. Deterministic top strip and blur in SwiftUI screenshots
