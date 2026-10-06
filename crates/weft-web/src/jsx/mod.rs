@@ -2052,7 +2052,10 @@ impl<'a> Gen<'a> {
             // With nothing to write or fire the handler stays (React warns about a controlled
             // input without one), but a lone `const` is not a valid arrow body.
             let read = (write.is_some() || change.is_some()).then(|| format!("const _v = {read}"));
-            a.push(attr_js(on_input, Self::handler("(_e)", vec![read, write, change])));
+            a.push(attr_js(
+                on_input,
+                Self::handler("(_e)", vec![read, write, change]),
+            ));
         } else {
             a.push(attr_js(self.an("defaultValue"), shown));
             if let Some(change) = change {
