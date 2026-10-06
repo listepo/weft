@@ -3,6 +3,7 @@
 // `virtual:weft-component/<variant>/<screen>` is one compiled component, imported on demand.
 // `virtual:weft-appearance` is the example project's screen for the light and dark tests, and
 // `virtual:weft-appearance-component` its compiled React component.
+import { readFileSync } from "node:fs";
 import type { Plugin } from "vite";
 import { appearanceScreen, screens, type AppearanceScreen, type Screen } from "./artifacts.ts";
 
@@ -10,6 +11,9 @@ const SCREENS = "virtual:weft-screens";
 const COMPONENT = "virtual:weft-component/";
 const APPEARANCE = "virtual:weft-appearance";
 const APPEARANCE_COMPONENT = "virtual:weft-appearance-component";
+const ASSETS = new URL("../../../corpus/showroom/assets/", import.meta.url);
+// Only the files the showroom screen names, so the test server never maps a request onto a path.
+const SERVED: Record<string, string> = { "gem.png": "image/png" };
 const OWN = new Set([SCREENS, APPEARANCE, APPEARANCE_COMPONENT]);
 
 /** The component variants a screen has: generated, and generated after a round trip. */
@@ -36,6 +40,17 @@ export function weftScreens(): Plugin {
   const appearance = () => (example ??= appearanceScreen());
   return {
     name: "weft-screens",
+    // A screen's relative paths resolve against the test server, so the showroom still loads
+    // from the corpus the same way in every target.
+    configureServer(server) {
+      server.middlewares.use("/assets", (req, res, next) => {
+        const name = (req.url ?? "").slice(1);
+        const type = SERVED[name];
+        if (type === undefined) return next();
+        res.setHeader("content-type", type);
+        res.end(readFileSync(new URL(name, ASSETS)));
+      });
+    },
     resolveId(id) {
       return OWN.has(id) || id.startsWith(COMPONENT) ? `\0${id}` : undefined;
     },
