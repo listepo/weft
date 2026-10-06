@@ -126,6 +126,11 @@
           "id": "delete",
           "component": "Button",
           "child": "delete-label",
+          "accessibility": {
+            "label": {
+              "path": "deleteLabel"
+            }
+          },
           "action": {
             "event": {
               "name": "users.delete"

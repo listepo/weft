@@ -192,3 +192,66 @@ fn a_transform_that_is_not_a_tilt_is_a_loss() {
         back.losses
     );
 }
+
+const SHOWN: &str = r#"<screen id="s" weft="0.1"><model id="m" fallback="assets/gem.png" label="A gem" src="assets/gem.glb" usdz="assets/gem.usdz"/></screen>"#;
+
+fn shown(markup: &str) -> Document {
+    let catalog = core_catalog().unwrap();
+    let options = ParseOptions {
+        catalog: Some(&catalog),
+        ..Default::default()
+    };
+    parse(markup, &options).document.unwrap()
+}
+
+fn page(document: &Document) -> String {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = HtmlOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+        source: false,
+        appearance: None,
+    };
+    to_html(document, &options).unwrap()
+}
+
+#[test]
+fn a_model_is_a_model_viewer_with_a_poster_and_reads_back() {
+    let html = page(&shown(SHOWN));
+    assert!(html.contains("<model-viewer"), "{html}");
+    assert!(html.contains("src=\"assets/gem.glb\""), "{html}");
+    assert!(html.contains("ios-src=\"assets/gem.usdz\""), "{html}");
+    assert!(
+        html.contains("<img slot=\"poster\" alt=\"\" src=\"assets/gem.png\">"),
+        "{html}"
+    );
+    assert!(!html.contains("<script"), "{html}");
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let back = import_html(&html, &import_options(&catalog, &tokens));
+    assert!(back.losses.is_empty(), "{:?}", back.losses);
+    assert_eq!(serialize(&back.document), serialize(&shown(SHOWN)));
+}
+
+#[test]
+fn an_unsafe_model_path_is_refused_with_w317() {
+    // Parsed without a catalog, so the parser lets the document through to the generator.
+    let markup = SHOWN
+        .replace("assets/gem.glb", "javascript:alert(1).glb")
+        .replace("assets/gem.png", "data:image/png;base64,AAAA");
+    let document = parse(&markup, &ParseOptions::default()).document.unwrap();
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = HtmlOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+        source: false,
+        appearance: None,
+    };
+    let Err(invalid) = to_html(&document, &options) else {
+        panic!("an unsafe path was written")
+    };
+    let codes: Vec<_> = invalid.0.iter().map(|d| d.code.as_str()).collect();
+    assert_eq!(codes, ["W317", "W317"]);
+}

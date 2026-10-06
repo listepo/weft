@@ -95,6 +95,40 @@ export function safeUrl(value: string): string | undefined {
   return scheme !== undefined && SAFE_SCHEMES.has(scheme) ? url : undefined;
 }
 
+const MODEL_ASSETS: Record<string, readonly string[]> = {
+  src: [".glb", ".gltf"],
+  usdz: [".usdz"],
+  fallback: [".png", ".jpg", ".jpeg", ".webp"],
+};
+// oxlint-disable-next-line no-control-regex -- matching control characters is the point
+const ASSET_CHARS = /[\u0000-\u001f\u007f-\u009f\s\\]/;
+
+// The path of a `model` the page may use (SPEC §5.1, `W317`; `asset_problem` in
+// `crates/weft-core/src/rules.rs` is the rule, and a test compares the two) and then the URL rule
+// of `safeUrl`. `\s` also matches U+FEFF, which the Rust rule allows: stricter here is safe.
+export function modelAssetUrl(prop: string, value: string): string | undefined {
+  const extensions = MODEL_ASSETS[prop];
+  if (extensions === undefined || new TextEncoder().encode(value).length > 2048) return undefined;
+  if (ASSET_CHARS.test(value)) return undefined;
+  let path = value;
+  if (value.startsWith("https://")) {
+    const rest = value.slice("https://".length).split(/[?#]/, 1)[0] ?? "";
+    const slash = rest.indexOf("/");
+    const host = slash < 0 ? rest : rest.slice(0, slash);
+    if (host === "" || host.includes("@")) return undefined;
+    path = slash < 0 ? "" : rest.slice(slash + 1);
+  } else if (
+    value === "" ||
+    value.startsWith("/") ||
+    /[:%?#]/.test(value) ||
+    value.split("/").includes("..")
+  ) {
+    return undefined;
+  }
+  const lower = path.toLowerCase();
+  return extensions.some((e) => lower.endsWith(e)) ? safeUrl(value) : undefined;
+}
+
 const TOKEN_PATH = /^[A-Za-z0-9_$-]+(\.[A-Za-z0-9_$-]+)*$/;
 const DIMENSION_UNITS = new Set(["px", "rem"]);
 const HEX = /^#[0-9a-fA-F]{3,8}$/;

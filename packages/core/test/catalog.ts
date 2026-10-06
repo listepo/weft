@@ -12,6 +12,7 @@ export const catalog: Catalog = CatalogSchema.parse({
       description: d,
       role: "main",
       content: "nodes",
+      root: true,
       allowedParents: [],
       props: { weft: { description: d, type: "string", required: true, bindable: false } },
       states: ["ready", "loading", "error"],
@@ -47,6 +48,17 @@ export const catalog: Catalog = CatalogSchema.parse({
           type: "enum",
           values: ["default", "muted", "success", "warning", "danger"],
         },
+      },
+    },
+    model: {
+      description: d,
+      role: "img",
+      content: "none",
+      requiresLabel: true,
+      props: {
+        src: { description: d, type: "string", required: true, bindable: false },
+        usdz: { description: d, type: "string", bindable: false },
+        fallback: { description: d, type: "string", required: true, bindable: false },
       },
     },
     link: {
@@ -141,7 +153,9 @@ export const catalog: Catalog = CatalogSchema.parse({
       role: "tablist",
       content: "nodes",
       allowedChildren: ["tab"],
-      props: { selected: { description: d, type: "string", writable: true } },
+      props: {
+        selected: { description: d, type: "string", writable: true, references: "tab" },
+      },
       events: ["change"],
     },
     tab: {

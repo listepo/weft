@@ -10,11 +10,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
-| T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T13.1 | todo | P2 | 3 | 0% | |
 | T15.2 | todo | P3 | 2 | 0% | |
-| T60 | in progress | P1 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
-| T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -155,33 +152,10 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T52.1. 3D models
+### T13.1. json-render export and import
 
-Split from T52. A `model` element showing a 3D asset, with a still fallback image and an accessible label.
-
-- **A new leaf kind** `model` (role `img`, label required) with `src` (glTF, `.glb` or `.gltf`), `usdz` (optional, for Apple platforms) and `fallback` (a still image, required). glTF is what `<model-viewer>` loads and USDZ is what RealityKit loads, and neither reads the other's format, so the element names both.
-- **Web: `<model-viewer>`** (`@google/model-viewer`, Apache-2.0, 4.3.1 on npm). Markup `<model-viewer src alt>` with the fallback `<img slot="poster">` as its child, so a page without the script, and every screenshot, shows the fallback. The host page loads the script; Weft never injects one.
-- **SwiftUI:** `Model3D` is visionOS only (the SDK marks it `iOS unavailable`), so a helper uses `Model3D` on visionOS, `RealityView` with the bundled USDZ on iOS 18 and macOS 15, and the fallback `AsyncImage` elsewhere and while loading. An environment value forces the fallback, and the screenshot host sets it so images are deterministic.
-- **Asset paths are untrusted:** the three paths are literals validated by a new code `W317` (relative path without `..`, backslash, control characters or a scheme, or an `https` URL; the right extension; at most 2048 bytes), and renderers apply the existing `safe_url` / `safeUrl` guard again. One small properly licensed asset ships in the corpus with its licence noted; a test bounds its size. Design tools draw the library's image rectangle.
-- Groundwork tried in T52 and removed again: the `model` kind in `packages/catalog/src/core.ts`, `asset_problem` in `weft-core/src/rules.rs`, the `W317` check in `validate.rs`, cases in `packages/core/test/cases.ts` and `crates/weft-core/tests/codes.rs`, `model` in the fixture catalog `packages/core/test/catalog.ts`.
-- Add a corpus screen with a model, covered like the corpus. Screenshots are deterministic (the fallback). Done when the full check exits 0 and new baselines are reviewed.
-
-### T18. Follow-ups from the prototype
-
-- `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
-- Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
-- Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.
-
-### T13. Interoperability with A2UI and json-render
-
-Export a Weft document to A2UI v0.9 messages and to a json-render spec, and import from both, each with a loss table in SPEC §9. Done when every corpus screen converts both ways and the losses are listed.
+The json-render half of T13: export a Weft document to a json-render spec (`{ root, elements, state }`, the Weft catalog as the json-render catalog) and import one back, with a loss table in SPEC §9, in `crates/weft-interop`. Done when every corpus screen converts both ways and the losses are listed.
 
 ### T15.2. Surfaces for the Custom Elements Manifest importer
 
 T15.1 delivers `import_cem` in `weft-import` (library, tests, SPEC section 9). This task makes it reachable: `weft import-cem <manifest.json> [--name] [--version] [--catalog]` prints the catalog (pretty JSON) on stdout and the losses and diagnostics on stderr, reading the file only when it is at most `MAX_MANIFEST_LENGTH` bytes; the `import.cem.outDir` setting if it fits (SPEC section 10.6); the WebAssembly and native bindings (`weft-binding`, `weft-wasm`, `weft-node`, `@weft/core` types) if the creator wants it from TypeScript; `docs/importing.md` and `docs/cli.md`. Done when a manifest file imports from the command line into a catalog that `weft validate --catalog` accepts.
-
-### T60. Deterministic top strip and blur in SwiftUI screenshots
-
-After T59 masked the home indicator, two more SwiftUI screenshot flakes showed up on main in four full visual runs: `tilt` once differed by 38,537 px because the capture included the black Dynamic Island pill at the top, and `glass-dark` twice differed by 2 px, most likely from blur noise in the glass effect. Both pass on rerun, so the merge gate is unreliable.
-
-Mask the top system strip the same way T59 masks the bottom one (the host app measures the top safe-area inset from its window and the comparison blanks it in both images), or keep the island out of the capture if the simulator allows it. For the glass screens, prefer a deterministic render; if blur stays noisy, allow a small, documented per-screen pixel tolerance for those screens only. Retake baselines only if the compared area changes, and review them. Done when the SwiftUI suite passes 5 consecutive runs in `WEFT_SIMULATOR=own` and 1 in `shared`, and the full check exits 0.

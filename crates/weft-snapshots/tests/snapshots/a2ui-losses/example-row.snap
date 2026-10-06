@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-row as a2ui-losses
+---
+Bindings /screen#root/table#users/row#row-ana: selected: this binding has no A2UI property
+Actions /screen#root/table#users/row#row-ana: on-press="users.select" has no A2UI event

@@ -1,0 +1,270 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-inbox as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "inbox",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "inbox",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "folders",
+            "message-actions",
+            "compose"
+          ],
+          "accessibility": {
+            "label": "Inbox"
+          }
+        },
+        {
+          "id": "folders",
+          "component": "Tabs",
+          "tabs": [
+            {
+              "title": "Inbox",
+              "child": "column"
+            },
+            {
+              "title": {
+                "path": "/labels/drafts"
+              },
+              "child": "column-2"
+            },
+            {
+              "title": "Sent",
+              "child": "sent"
+            }
+          ]
+        },
+        {
+          "id": "messages",
+          "component": "List",
+          "children": {
+            "componentId": "message-text",
+            "path": "/messages"
+          }
+        },
+        {
+          "id": "no-messages",
+          "component": "Text",
+          "text": "No messages."
+        },
+        {
+          "id": "message-text",
+          "component": "Text",
+          "text": {
+            "path": "subject"
+          }
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "messages",
+            "no-messages"
+          ]
+        },
+        {
+          "id": "drafts",
+          "component": "List",
+          "children": []
+        },
+        {
+          "id": "drafts-empty",
+          "component": "Column",
+          "children": [
+            "no-drafts",
+            "no-drafts-hint"
+          ],
+          "align": "center"
+        },
+        {
+          "id": "no-drafts",
+          "component": "Text",
+          "text": "No drafts."
+        },
+        {
+          "id": "no-drafts-hint",
+          "component": "Text",
+          "text": "Messages you start appear here."
+        },
+        {
+          "id": "column-2",
+          "component": "Column",
+          "children": [
+            "drafts",
+            "drafts-empty"
+          ]
+        },
+        {
+          "id": "sent",
+          "component": "List",
+          "children": [
+            "text"
+          ]
+        },
+        {
+          "id": "text",
+          "component": "Text",
+          "text": "Loading…"
+        },
+        {
+          "id": "message-actions",
+          "component": "List",
+          "children": [
+            "archive",
+            "delete"
+          ],
+          "accessibility": {
+            "label": "Message actions"
+          }
+        },
+        {
+          "id": "archive",
+          "component": "Button",
+          "child": "archive-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "inbox.archive"
+            }
+          }
+        },
+        {
+          "id": "archive-label",
+          "component": "Text",
+          "text": {
+            "path": "/labels/archive"
+          }
+        },
+        {
+          "id": "delete",
+          "component": "Button",
+          "child": "delete-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "inbox.delete"
+            }
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/selection"
+                  }
+                }
+              },
+              "message": "Not available"
+            }
+          ]
+        },
+        {
+          "id": "delete-label",
+          "component": "Text",
+          "text": "Delete"
+        },
+        {
+          "id": "compose",
+          "component": "Modal",
+          "trigger": "compose-trigger",
+          "content": "column-3",
+          "accessibility": {
+            "label": "New message"
+          }
+        },
+        {
+          "id": "compose-form",
+          "component": "Column",
+          "children": [
+            "to",
+            "body"
+          ]
+        },
+        {
+          "id": "to",
+          "component": "TextField",
+          "label": "To",
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": {
+                "call": "email",
+                "args": {
+                  "value": {
+                    "path": "/draft/to"
+                  }
+                }
+              },
+              "message": "Not an email address"
+            }
+          ],
+          "value": {
+            "path": "/draft/to"
+          }
+        },
+        {
+          "id": "body",
+          "component": "TextField",
+          "label": "Message",
+          "variant": "longText",
+          "value": {
+            "path": "/draft/body"
+          }
+        },
+        {
+          "id": "send",
+          "component": "Button",
+          "child": "send-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "inbox.send"
+            }
+          }
+        },
+        {
+          "id": "send-label",
+          "component": "Text",
+          "text": "Send"
+        },
+        {
+          "id": "column-3",
+          "component": "Column",
+          "children": [
+            "compose-form",
+            "send"
+          ]
+        },
+        {
+          "id": "compose-trigger-label",
+          "component": "Text",
+          "text": "New message"
+        },
+        {
+          "id": "compose-trigger",
+          "component": "Button",
+          "child": "compose-trigger-label",
+          "action": {
+            "event": {
+              "name": "compose.open"
+            }
+          }
+        }
+      ]
+    }
+  }
+]

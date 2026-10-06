@@ -13170,6 +13170,202 @@
    }
   },
   {
+   "name": "prop names an element kind",
+   "next": {
+    "weft": "0.1",
+    "name": "t",
+    "version": "1.0.0",
+    "components": {
+     "list": {
+      "description": "A list.",
+      "role": "list",
+      "content": "nodes",
+      "allowedChildren": [
+       "item",
+       "other"
+      ],
+      "slots": {
+       "header": {
+        "description": "Header.",
+        "allowedChildren": [
+         "item"
+        ]
+       }
+      }
+     },
+     "item": {
+      "description": "An item.",
+      "role": "listitem",
+      "content": "mixed",
+      "allowedParents": [
+       "list"
+      ]
+     },
+     "button": {
+      "description": "A button.",
+      "role": "button",
+      "content": "text",
+      "requiresLabel": false,
+      "props": {
+       "variant": {
+        "description": "A prop.",
+        "type": "enum",
+        "values": [
+         "primary",
+         "danger"
+        ],
+        "default": "primary"
+       },
+       "count": {
+        "description": "A prop.",
+        "type": "number",
+        "required": true,
+        "min": 1,
+        "max": 10
+       },
+       "title": {
+        "description": "A prop.",
+        "type": "string",
+        "references": "button"
+       }
+      },
+      "slots": {
+       "icon": {
+        "description": "Icon."
+       }
+      },
+      "states": [
+       "idle",
+       "busy"
+      ],
+      "events": [
+       "press"
+      ]
+     }
+    }
+   },
+   "expect": {
+    "forward": {
+     "level": "major",
+     "changes": [
+      {
+       "path": "components.button.props.title.references",
+       "level": "major",
+       "message": "references changed from undefined to button."
+      }
+     ]
+    },
+    "reversed": {
+     "level": "minor",
+     "changes": [
+      {
+       "path": "components.button.props.title.references",
+       "level": "minor",
+       "message": "The prop no longer names an element."
+      }
+     ]
+    }
+   }
+  },
+  {
+   "name": "component becomes the root",
+   "next": {
+    "weft": "0.1",
+    "name": "t",
+    "version": "1.0.0",
+    "components": {
+     "list": {
+      "description": "A list.",
+      "role": "list",
+      "content": "nodes",
+      "allowedChildren": [
+       "item",
+       "other"
+      ],
+      "slots": {
+       "header": {
+        "description": "Header.",
+        "allowedChildren": [
+         "item"
+        ]
+       }
+      }
+     },
+     "item": {
+      "description": "An item.",
+      "role": "listitem",
+      "content": "mixed",
+      "allowedParents": [
+       "list"
+      ]
+     },
+     "button": {
+      "description": "A button.",
+      "role": "button",
+      "content": "text",
+      "requiresLabel": false,
+      "props": {
+       "variant": {
+        "description": "A prop.",
+        "type": "enum",
+        "values": [
+         "primary",
+         "danger"
+        ],
+        "default": "primary"
+       },
+       "count": {
+        "description": "A prop.",
+        "type": "number",
+        "required": true,
+        "min": 1,
+        "max": 10
+       },
+       "title": {
+        "description": "A prop.",
+        "type": "string"
+       }
+      },
+      "slots": {
+       "icon": {
+        "description": "Icon."
+       }
+      },
+      "states": [
+       "idle",
+       "busy"
+      ],
+      "events": [
+       "press"
+      ],
+      "root": true
+     }
+    }
+   },
+   "expect": {
+    "forward": {
+     "level": "major",
+     "changes": [
+      {
+       "path": "components.button.root",
+       "level": "major",
+       "message": "The component became the document root."
+      }
+     ]
+    },
+    "reversed": {
+     "level": "minor",
+     "changes": [
+      {
+       "path": "components.button.root",
+       "level": "minor",
+       "message": "The component is no longer the document root."
+      }
+     ]
+    }
+   }
+  },
+  {
    "name": "range narrowed (min raised)",
    "next": {
     "weft": "0.1",
@@ -17867,7 +18063,7 @@
       "severity": "warning",
       "message": "Unknown key \"cobol\" in \"export\".",
       "path": "#/export/cobol",
-      "expected": "one of: \"html\", \"react\", \"solid\", \"lit\", \"swiftui\", \"css\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"lit\", \"swiftui\", \"css\", \"a2ui\"",
       "got": "cobol"
      },
      {
@@ -17884,7 +18080,7 @@
       "severity": "warning",
       "message": "Unknown key \"figma\" in \"import\".",
       "path": "#/import/figma",
-      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\", \"a2ui\"",
       "got": "figma"
      },
      {

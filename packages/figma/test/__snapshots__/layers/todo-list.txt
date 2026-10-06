@@ -45,15 +45,7 @@ FRAME "screen#todos" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
           | weft.origin = layer(button#todo-remove)
           | weft.source = {"kind":"button","id":"todo-remove","on":{"press":"todo.remove"},"children":["Remove"],"shown":{"text":"Remove"}}
           TEXT "text" chars="Remove" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
-  FRAME "stack#summary" layoutMode="HORIZONTAL" itemSpacing=4 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
-    | weft.origin = layer(stack#summary)
-    | weft.source = {"kind":"stack","id":"summary","props":{"direction":"row","gap":{"token":"space.xs"}}}
-    | weft.style = [[],[],0,[0,0,0,0],null]
-    INSTANCE "text#remaining" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
-      | weft.origin = layer(text#remaining)
-      | weft.source = {"kind":"text","id":"remaining","props":{"text":{"bind":"$.remaining"}},"shown":{"text":"{$.remaining}"}}
-      TEXT "text" chars="{$.remaining}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
-    INSTANCE "text#remaining-label" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
-      | weft.origin = layer(text#remaining-label)
-      | weft.source = {"kind":"text","id":"remaining-label","children":["items left"],"shown":{"text":"items left"}}
-      TEXT "text" chars="items left" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  INSTANCE "text#remaining" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+    | weft.origin = layer(text#remaining)
+    | weft.source = {"kind":"text","id":"remaining","props":{"text":{"bind":"$.remainingLabel"}},"shown":{"text":"{$.remainingLabel}"}}
+    TEXT "text" chars="{$.remainingLabel}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

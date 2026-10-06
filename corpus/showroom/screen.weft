@@ -1,0 +1,20 @@
+<screen id="showroom" label="Showroom" weft="0.1">
+  <heading id="title" level="1">Showroom</heading>
+  <stack id="shelf" gap="{token.space.lg}">
+    <section id="gem-section" label="Gem">
+      <model id="gem" fallback="assets/gem.png" label="A teal gem with eight triangular faces" src="assets/gem.glb" usdz="assets/gem.usdz"/>
+      <text id="gem-caption" text="{$.caption}"/>
+      <button id="gem-pick" variant="primary" on-press="gem.pick">Choose this gem</button>
+      <slot name="header">
+        <heading id="gem-title" level="2">Gem</heading>
+      </slot>
+    </section>
+    <section id="turned-section" label="Turned gem">
+      <model id="turned" fallback="assets/gem.png" label="The same gem turned to its side" perspective="800" rotate-y="20" src="assets/gem.glb"/>
+      <text id="turned-caption">Without a USDZ file Apple platforms show the still image.</text>
+      <slot name="header">
+        <heading id="turned-title" level="2">Turned</heading>
+      </slot>
+    </section>
+  </stack>
+</screen>

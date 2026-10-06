@@ -221,7 +221,8 @@ function contribution(n: Inst): string {
   const own = label(n);
   if (own !== "" && n.kind !== "text" && n.kind !== "stack" && n.kind !== "grid") return own;
   if (n.def) {
-    if (n.kind === "checkbox" || n.kind === "switch" || n.kind === "image") return "";
+    if (n.kind === "checkbox" || n.kind === "switch" || n.kind === "image" || n.kind === "model")
+      return "";
     if (n.kind === "tabs") {
       const tabs = nodes(n.children).filter((c) => c.kind === "tab");
       const sel = tabs[selectedTab(n, tabs)];

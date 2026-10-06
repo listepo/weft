@@ -150,8 +150,9 @@ function assertValid(result: ImportResult): void {
   );
 }
 
-// Known gap: the `empty` slot of a table whose state is `empty` is not read back, so its text
-// element is lost in both imports. Pinned with `test.fails` so a fix shows up as a failure here.
+// Known gap: the `empty` slot of a table whose state is `empty` is not read back from an
+// accessibility snapshot, so its text element is lost. The DOM import reads it from the
+// `data-weft-slot` wrapper. Pinned with `test.fails` so a fix shows up as a failure here.
 const TABLE_EMPTY_SLOT = new Set(["orders"]);
 
 // Known gap: an accessibility snapshot carries a role and a name, not the markup around it. A
@@ -160,6 +161,11 @@ const TABLE_EMPTY_SLOT = new Set(["orders"]);
 // import tells them apart by the hints the renderer writes, so only the snapshot import is
 // pinned, with `test.fails` so a fix shows up as a failure here.
 const SNAPSHOT_SHARED_ROLES = new Set(["booking", "appearance"]);
+
+// Known gap: a `model` is an `img` with a name, exactly like an `image`, so a snapshot reads it
+// back as an `image` whose accessibility tree is the same. The DOM import sees `<model-viewer>`.
+// Only the structure check is pinned, with `test.fails` so a fix shows up as a failure here.
+const SNAPSHOT_MODEL_IS_IMAGE = new Set(["showroom"]);
 
 for (const s of screens()) {
   const structure = TABLE_EMPTY_SLOT.has(s.name) ? test.fails : test;
@@ -171,7 +177,7 @@ for (const s of screens()) {
       result = fromDom(renderPage(s.document, { catalog, data: s.data }), { catalog });
     });
     test("valid", () => assertValid(result));
-    structure("structure, roles, states and ids", () => {
+    test("structure, roles, states and ids", () => {
       assert.deepEqual(
         skeletonOf(result.document, {}, "dom"),
         skeletonOf(s.document, s.data, "dom"),
@@ -184,7 +190,10 @@ for (const s of screens()) {
   });
 
   const snapshotTest = SNAPSHOT_SHARED_ROLES.has(s.name) ? test.fails : test;
-  const snapshotStructure = SNAPSHOT_SHARED_ROLES.has(s.name) ? test.fails : structure;
+  const snapshotStructure =
+    SNAPSHOT_SHARED_ROLES.has(s.name) || SNAPSHOT_MODEL_IS_IMAGE.has(s.name)
+      ? test.fails
+      : structure;
   describe(`round trip from an accessibility snapshot: ${s.name}`, () => {
     const tree = expectedTree(s.document, { catalog, data: s.data });
     let result!: ImportResult;

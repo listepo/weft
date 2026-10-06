@@ -1,0 +1,3 @@
+<screen id="root" label="Showroom" weft="0.1">
+  <model id="chair" fallback="assets/chair.png" label="A wooden armchair" src="assets/chair.glb" usdz="assets/chair.usdz"/>
+</screen>

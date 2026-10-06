@@ -103,6 +103,7 @@ function build(c: InstChild, ctx: Ctx): AriaNode[] {
       });
     }
     case "image":
+    case "model":
       // An empty alt marks an image decorative, which removes it from the tree.
       return label(n) === "" ? [] : node("img", n, []);
     case "link": {

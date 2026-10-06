@@ -1,0 +1,90 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-leaderboard as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "leaderboard",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "leaderboard",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "leader",
+            "players"
+          ],
+          "accessibility": {
+            "label": "Leaderboard"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Leaderboard",
+          "variant": "h1"
+        },
+        {
+          "id": "leader",
+          "component": "Row",
+          "children": [
+            "leader-label",
+            "leader-name"
+          ]
+        },
+        {
+          "id": "leader-label",
+          "component": "Text",
+          "text": "In the lead:"
+        },
+        {
+          "id": "leader-name",
+          "component": "Text",
+          "text": {
+            "path": "/players/0/name"
+          }
+        },
+        {
+          "id": "players",
+          "component": "List",
+          "children": {
+            "componentId": "column",
+            "path": "/players"
+          }
+        },
+        {
+          "id": "player-name",
+          "component": "Text",
+          "text": {
+            "path": "name"
+          }
+        },
+        {
+          "id": "player-score",
+          "component": "Text",
+          "text": {
+            "path": "score"
+          },
+          "variant": "caption"
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "player-name",
+            "player-score"
+          ]
+        }
+      ]
+    }
+  }
+]

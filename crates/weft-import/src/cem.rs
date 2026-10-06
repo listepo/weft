@@ -431,6 +431,8 @@ impl Run {
             },
             allowed_children: None,
             allowed_parents: None,
+            // A manifest says nothing about where an element may stand.
+            root: None,
             requires_label: None,
             props: (!props.is_empty()).then_some(props),
             slots: (!slots.is_empty()).then_some(slots),

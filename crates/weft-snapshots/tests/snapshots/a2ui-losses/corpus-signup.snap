@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-signup as a2ui-losses
+---
+Tokens /screen#signup/form#form/stack#fields: gap: design tokens have no A2UI form
+Props /screen#signup/form#form: state: this prop has no A2UI property

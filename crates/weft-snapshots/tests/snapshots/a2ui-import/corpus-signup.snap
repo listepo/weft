@@ -1,0 +1,18 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-signup as a2ui-import
+---
+<screen id="signup" weft="0.1">
+  <stack id="form">
+    <heading id="title" level="1">Create your account</heading>
+    <stack id="fields">
+      <field id="name" label="Full name" required="true" value="{$.name}"/>
+      <field id="email" label="Email" required="true" value="{$.email}"/>
+      <field id="password" label="Password" required="true" type="password" value="{$.password}"/>
+      <field id="confirm" label="Confirm password" required="true" type="password" value="{$.confirm}"/>
+      <checkbox id="terms" checked="{$.acceptTerms}" label="I accept the terms of service"/>
+    </stack>
+    <button id="submit" disabled="{!$.acceptTerms}" variant="primary" on-press="auth.signup">Create account</button>
+    <link id="signin" on-press="nav.signin">Already have an account? Sign in</link>
+  </stack>
+</screen>

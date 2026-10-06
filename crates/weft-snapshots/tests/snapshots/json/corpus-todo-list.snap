@@ -114,32 +114,13 @@ description: corpus-todo-list as json
         ]
       },
       {
-        "kind": "stack",
-        "id": "summary",
+        "kind": "text",
+        "id": "remaining",
         "props": {
-          "direction": "row",
-          "gap": {
-            "token": "space.xs"
+          "text": {
+            "bind": "$.remainingLabel"
           }
-        },
-        "children": [
-          {
-            "kind": "text",
-            "id": "remaining",
-            "props": {
-              "text": {
-                "bind": "$.remaining"
-              }
-            }
-          },
-          {
-            "kind": "text",
-            "id": "remaining-label",
-            "children": [
-              "items left"
-            ]
-          }
-        ]
+        }
       }
     ]
   }

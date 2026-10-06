@@ -1,0 +1,74 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-menu as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "actions"
+          ],
+          "accessibility": {
+            "label": "Document"
+          }
+        },
+        {
+          "id": "actions",
+          "component": "List",
+          "children": [
+            "rename",
+            "delete"
+          ],
+          "accessibility": {
+            "label": "Document actions"
+          }
+        },
+        {
+          "id": "rename",
+          "component": "Button",
+          "child": "rename-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "doc.rename"
+            }
+          }
+        },
+        {
+          "id": "rename-label",
+          "component": "Text",
+          "text": "Rename"
+        },
+        {
+          "id": "delete",
+          "component": "Button",
+          "child": "delete-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "doc.delete"
+            }
+          }
+        },
+        {
+          "id": "delete-label",
+          "component": "Text",
+          "text": "Delete"
+        }
+      ]
+    }
+  }
+]

@@ -64,6 +64,46 @@ fn a_tilt_cannot_be_bound() {
     assert_eq!(only("<stack id=\"a\" rotate-y=\"{$.angle}\"/>"), ["W217"]);
 }
 
+#[test]
+fn a_model_takes_relative_paths_and_https_urls_with_the_right_extension() {
+    let model = |attrs: &str| only(&format!("<model id=\"a\" label=\"L\" {attrs}/>"));
+    let good = "src=\"assets/a.GLB\" usdz=\"assets/a.usdz\" fallback=\"a.png\"";
+    assert!(model(good).is_empty());
+    assert!(
+        model("src=\"https://cdn.example/a.gltf?v=1\" fallback=\"https://cdn.example/a.webp\"")
+            .is_empty()
+    );
+    let bad = [
+        "src=\"../a.glb\" fallback=\"a.png\"",
+        "src=\"a/../../b.glb\" fallback=\"a.png\"",
+        "src=\"/etc/a.glb\" fallback=\"a.png\"",
+        "src=\"a\\b.glb\" fallback=\"a.png\"",
+        "src=\"a%2f..%2fb.glb\" fallback=\"a.png\"",
+        "src=\"http://cdn.example/a.glb\" fallback=\"a.png\"",
+        "src=\"javascript:alert(1)//a.glb\" fallback=\"a.png\"",
+        "src=\"data:model/gltf-binary;base64,AA.glb\" fallback=\"a.png\"",
+        "src=\"https://u:p@cdn.example/a.glb\" fallback=\"a.png\"",
+        "src=\"https:///a.glb\" fallback=\"a.png\"",
+        "src=\"a.obj\" fallback=\"a.png\"",
+        "src=\"a.glb\" usdz=\"a.glb\" fallback=\"a.png\"",
+        "src=\"a.glb\" fallback=\"a.svg\"",
+        "src=\"a&#9;.glb\" fallback=\"a.png\"",
+    ];
+    for attrs in bad {
+        assert_eq!(model(attrs), ["W317"], "{attrs}");
+    }
+    let long = format!("src=\"{}.glb\" fallback=\"a.png\"", "a".repeat(2048));
+    assert_eq!(model(&long), ["W317"]);
+}
+
+#[test]
+fn a_model_asset_cannot_be_bound() {
+    assert_eq!(
+        only("<model id=\"a\" label=\"L\" src=\"{$.m}\" fallback=\"a.png\"/>"),
+        ["W217"]
+    );
+}
+
 // ---- modes --------------------------------------------------------------------------------
 
 #[test]
@@ -519,6 +559,44 @@ fn a_submit_button_needs_a_form_among_its_ancestors() {
         ["W313"]
     );
     assert!(only("<button id=\"b\" submit=\"false\">T</button>").is_empty());
+}
+
+#[test]
+fn id_references_and_the_root_follow_the_catalog() {
+    let messages = |catalog: &weft_core::Catalog, markup: &str| -> Vec<String> {
+        let options = ParseOptions {
+            catalog: Some(catalog),
+            ..ParseOptions::default()
+        };
+        let result = parse(markup, &options);
+        result.diagnostics.into_iter().map(|d| d.message).collect()
+    };
+    let tabs = screen("<tabs id=\"t\" selected=\"nope\"><tab id=\"a\" label=\"A\"/></tabs>");
+    let stack = "<stack id=\"s\" weft=\"0.1\"/>";
+    let mut catalog = catalog();
+    assert_eq!(
+        messages(&catalog, &tabs),
+        ["\"nope\" is not the id of a <tab>."]
+    );
+    assert_eq!(
+        messages(&catalog, stack),
+        ["The root element must be <screen>."]
+    );
+
+    let selected = |catalog: &mut weft_core::Catalog, target: Option<&str>| {
+        let props = catalog.components.get_mut("tabs").unwrap().props.as_mut();
+        props.unwrap()["selected"].references = target.map(str::to_owned);
+    };
+    selected(&mut catalog, Some("button"));
+    assert_eq!(
+        messages(&catalog, &tabs),
+        ["\"nope\" is not the id of a <button>."]
+    );
+    selected(&mut catalog, None);
+    assert!(messages(&catalog, &tabs).is_empty());
+
+    catalog.components.get_mut("screen").unwrap().root = None;
+    assert!(messages(&catalog, stack).is_empty());
 }
 
 #[test]

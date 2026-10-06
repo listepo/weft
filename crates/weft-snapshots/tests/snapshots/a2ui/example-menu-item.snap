@@ -1,0 +1,73 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-menu-item as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "actions"
+          ],
+          "accessibility": {
+            "label": "Document"
+          }
+        },
+        {
+          "id": "actions",
+          "component": "List",
+          "children": {
+            "componentId": "action-item",
+            "path": "/actions"
+          },
+          "accessibility": {
+            "label": "Document actions"
+          }
+        },
+        {
+          "id": "action-item",
+          "component": "Button",
+          "child": "action-item-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "doc.run"
+            }
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "enabled"
+                  }
+                }
+              },
+              "message": "Not available"
+            }
+          ]
+        },
+        {
+          "id": "action-item-label",
+          "component": "Text",
+          "text": {
+            "path": "label"
+          }
+        }
+      ]
+    }
+  }
+]

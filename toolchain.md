@@ -51,6 +51,7 @@
 | clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
 | proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core, weft-catalog and weft-swiftui: no panics, round trips, idempotent formatting |
 | insta | local (dev) | https://github.com/mitsuhiko/insta | Reviewed snapshots of every generator output per corpus screen and catalog example (weft-snapshots) |
+| jsonschema | local (dev) | https://github.com/Stranger6667/jsonschema | Checks every exported A2UI message against the vendored A2UI v0.9 JSON Schemas (weft-snapshots); no network or TLS features |
 | tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
 | tree-sitter-swift | local | https://github.com/alex-pinkus/tree-sitter-swift | The Swift grammar for that parser |
 | wasm-bindgen | local | https://github.com/wasm-bindgen/wasm-bindgen | `weft-wasm` exports; pinned exactly to the CLI version in `mise.toml` |

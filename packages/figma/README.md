@@ -62,6 +62,7 @@ So the work is split:
   - turning a layer, as a visual edit (below);
   - grid columns;
   - a gap bound to another variable, or typed as a number that equals a token.
+- **Models:** a `model` is drawn as a grey 160 by 120 rectangle named `model`; the paths stay in the plugin data, and Figma shows no 3D scene or still.
 - **Tilts:** Figma has no 3D transform. `rotate-z` is drawn as the layer's `rotation` (Figma counts counterclockwise, so the sign flips); `rotate-x`, `rotate-y` and `perspective` are not drawn and stay in the layer's Weft source, which is what reads back.
 - **Duplicated layers** get a fresh id.
 - **Foreign layers** (anything the library did not make) convert lossily:

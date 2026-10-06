@@ -29,6 +29,7 @@ use weft_core::{
 };
 use weft_import::{js_number_from, js_trim, squash};
 
+use crate::html::model_asset_url;
 use crate::js::{INHERITED, V, compare_utf16, is_integer, is_plain_segment, js_round, quote};
 use crate::tilt;
 pub use runtime::{Helper, RUNTIME, react_runtime};
@@ -1339,6 +1340,7 @@ impl<'a> Gen<'a> {
                 a.push(attr_js("src", format!("{url}({})", src.js)));
                 C::J(el("img", a, vec![]))
             }
+            "model" => self.model(n),
             "link" => self.link(n),
             "button" => self.button(n, ctx),
             "form" => {
@@ -1424,6 +1426,40 @@ impl<'a> Gen<'a> {
             }
             _ => self.fallback(n, ctx),
         })
+    }
+
+    /// `<model-viewer>` with its still as the poster child (SPEC §9). The paths are literals the
+    /// generator checks itself, so the component carries no URL guard for them.
+    fn model(&mut self, n: &N<'a>) -> C<'a> {
+        let mut a = self.base(n, true);
+        a.push(attr_s("role", "img"));
+        let label = self.label(n);
+        self.attr(&mut a, "alt", label);
+        let path = |prop: &str| {
+            n.raw(prop)
+                .and_then(Json::as_str)
+                .and_then(|value| model_asset_url(prop, value))
+        };
+        if let Some(src) = path("src") {
+            a.push(attr_s("src", src));
+        }
+        if let Some(usdz) = path("usdz") {
+            a.push(attr_s("ios-src", usdz));
+        }
+        a.push(attr_s("camera-controls", ""));
+        a.push(attr_s("interaction-prompt", "none"));
+        let poster = path("fallback").map(|still| {
+            C::J(el(
+                "img",
+                vec![
+                    attr_s("slot", "poster"),
+                    attr_s("alt", ""),
+                    attr_s("src", still),
+                ],
+                vec![],
+            ))
+        });
+        C::J(el("model-viewer", a, poster.into_iter().collect()))
     }
 
     fn text_kids(&self, e: E) -> Vec<C<'a>> {
@@ -2049,12 +2085,12 @@ impl<'a> Gen<'a> {
             let write = self
                 .write(n, "value", "_v")
                 .map(|w| format!("if (_v !== undefined) {w}"));
+            // With nothing to write or fire the handler stays (React warns about a controlled
+            // input without one), but a lone `const` is not a valid arrow body.
+            let read = (write.is_some() || change.is_some()).then(|| format!("const _v = {read}"));
             a.push(attr_js(
                 on_input,
-                Self::handler(
-                    "(_e)",
-                    vec![Some(format!("const _v = {read}")), write, change],
-                ),
+                Self::handler("(_e)", vec![read, write, change]),
             ));
         } else {
             a.push(attr_js(self.an("defaultValue"), shown));

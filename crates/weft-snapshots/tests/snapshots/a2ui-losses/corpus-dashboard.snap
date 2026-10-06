@@ -1,0 +1,22 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-dashboard as a2ui-losses
+---
+Tokens /screen#dashboard/stack#header: gap: design tokens have no A2UI form
+Layout /screen#dashboard/stack#header: wrap: this layout has no A2UI form
+Props /screen#dashboard/grid#stats/section#velocity/text#velocity-value: tone: this prop has no A2UI property
+Props /screen#dashboard/grid#stats/section#bugs/text#bugs-value: tone: this prop has no A2UI property
+Props /screen#dashboard/grid#stats/section#incidents/text#incidents-value: tone: this prop has no A2UI property
+Layout /screen#dashboard/grid#stats: columns: this layout has no A2UI form
+Tokens /screen#dashboard/grid#stats: gap: design tokens have no A2UI form
+Props /screen#dashboard/stack#notices/alert#release: tone: this prop has no A2UI property
+Props /screen#dashboard/stack#notices/alert#backup: tone: this prop has no A2UI property
+Props /screen#dashboard/stack#notices/alert#quota: tone: this prop has no A2UI property
+Tokens /screen#dashboard/stack#notices: gap: design tokens have no A2UI form
+Props /screen#dashboard/stack#footer/stack#footer-links/link#docs: openUrl takes an absolute URI; a relative href is left out
+Actions /screen#dashboard/stack#footer/stack#footer-links/link#docs: an A2UI button needs an action; the id names the press
+Bindings /screen#dashboard/stack#footer/stack#footer-links/link#status: openUrl takes a literal URL; a bound href is left out
+Actions /screen#dashboard/stack#footer/stack#footer-links/link#status: an A2UI button needs an action; the id names the press
+Tokens /screen#dashboard/stack#footer/stack#footer-links: gap: design tokens have no A2UI form
+Tokens /screen#dashboard/stack#footer: gap: design tokens have no A2UI form
+Props /screen#dashboard: state: this prop has no A2UI property

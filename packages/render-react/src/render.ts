@@ -45,7 +45,7 @@ import {
   type InstChild,
 } from "./expand.ts";
 import { exposedRole, fallbackRole, TRANSPARENT } from "./roles.ts";
-import { isRecord, materialStyle, safeUrl, tiltCss, tokenCss } from "./values.ts";
+import { isRecord, materialStyle, modelAssetUrl, safeUrl, tiltCss, tokenCss } from "./values.ts";
 
 export type ActionEvent = { id: string; action: string; item?: string };
 export type Action = (event: ActionEvent) => void;
@@ -223,6 +223,8 @@ function renderKind(n: Inst, ctx: Ctx): ReactNode {
       return h("div", { ...base(n, false), "data-tone": text(n, "tone") || undefined }, shown(n));
     case "image":
       return image(n);
+    case "model":
+      return model(n);
     case "link":
       return link(n, ctx);
     case "button":
@@ -375,6 +377,27 @@ function caption(n: Inst): ReactNode {
 function image(n: Inst): ReactNode {
   const src = safeUrl(text(n, "src"));
   return h("img", { ...base(n, false), alt: label(n), src });
+}
+
+// SPEC §9: `<model-viewer>` whose only child is the still, which a page without the viewer
+// script shows. The page that shows it loads the script; the renderer never injects one.
+function model(n: Inst): ReactNode {
+  const name = label(n);
+  const url = (prop: string) => modelAssetUrl(prop, text(n, prop));
+  const still = url("fallback");
+  return h(
+    "model-viewer",
+    {
+      ...base(n, true),
+      role: "img",
+      alt: name,
+      src: url("src"),
+      "ios-src": url("usdz"),
+      "camera-controls": "",
+      "interaction-prompt": "none",
+    },
+    still === undefined ? null : h("img", { slot: "poster", alt: "", src: still }),
+  );
 }
 
 function link(n: Inst, ctx: Ctx): ReactNode {

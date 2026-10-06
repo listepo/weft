@@ -112,7 +112,7 @@ An attribute value is exactly one of:
 Props are strings unless a type is given; `*` marks a required prop; "label" means the accessible `label` is required; events follow `;`. Every `text` or `mixed` component also takes `text`.
 
 - Layout: `stack` (`direction` column|row, `gap` token, `align` start|center|end|stretch, `wrap` boolean; a `row` without `align` centres its children, so leave `align` out for the default), `grid` (`columns`* integer ≥ 1, `gap` token), `section` (label; slot `header`).
-- Text: `heading` (`level`* integer 1–6), `text` (`tone` default|muted|success|warning|danger), `image` (`src`*, label), `link` (`href`; press), `alert` (`tone` info|success|warning|danger; mixed).
+- Text: `heading` (`level`* integer 1–6), `text` (`tone` default|muted|success|warning|danger), `image` (`src`*, label), `model` (`src`* glTF, `usdz`, `fallback`* still image, label*; the three paths are literals), `link` (`href`; press), `alert` (`tone` info|success|warning|danger; mixed).
 - Actions: `button` (`variant` primary|secondary|danger, `disabled` boolean, `submit` boolean literal; states idle|busy; press), `menu` (label) holding `menu-item` (`disabled`; press).
 - Forms: `form` (slot `footer`; states idle|submitting|invalid; submit), `field` (label, `type` text|email|password|number|search|multiline, `value` writable, `placeholder`, `required`, `disabled`, `error`; states valid|invalid; change), `checkbox` and `switch` (label, `checked` writable, `disabled`; change), `radio-group` (label, `value` writable; change) holding `radio` (`value`*, `disabled`), `select` (label, `value` writable, `disabled`; change) holding `option` (`value`*).
 - Rich controls: `slider` (label, `value` number writable, `min` number default 0, `max` number default 100, `step` number default 1, `disabled`; change), `stepper` (label, `value` number writable, `min`, `max`, `step` default 1, `disabled`; change), `date-picker` (label, `type` date|time|datetime, `value` writable as `yyyy-mm-dd`, `hh:mm` or `yyyy-mm-ddThh:mm`, `min`, `max`, `disabled`; change), `color-picker` (label, `value` writable as `#rrggbb`, `disabled`; change), `segmented-control` (label, `value` writable; change) holding `segment` (`value`*, `disabled`), and `combobox` (label, `value` writable text, `placeholder`, `disabled`; change) holding `option` (`value`*). Choose `combobox` over `select` when the user may type a value that is not an option.
@@ -232,6 +232,7 @@ What each code asks of you:
 | W314 | Put the element to repeat inside `<each>`, or remove the `<each>`. |
 | W315 | Bind a path the data schema declares; `expected` lists the names at that step and `hint` the nearest one. Inside `<each>`, start from the loop variable. |
 | W316 | Bind data of a type the attribute takes (`expected`), pick another attribute, or negate the binding when the attribute is a boolean condition. |
+| W317 | Give a `model` paths that are relative (no `..`, no scheme) or `https`, with the right extension: `.glb` or `.gltf` for `src`, `.usdz` for `usdz`, an image for `fallback`. |
 | W401 | Use a catalog component (see `hint`), or an extension the host knows. |
 | W402 | Use an attribute the component declares, or remove it. |
 | W403 | Write `weft="0.1"`: the reader is older than the version you wrote. |

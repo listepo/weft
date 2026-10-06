@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-screen as a2ui-losses
+---
+Props /screen#root: state: this prop has no A2UI property

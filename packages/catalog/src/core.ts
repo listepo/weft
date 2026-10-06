@@ -55,6 +55,7 @@ const components: Record<string, ComponentDef> = {
     description: "The root of every document: one full screen of UI, carrying the format version.",
     role: "main",
     content: "nodes",
+    root: true,
     props: {
       weft: str('The Weft format version of the document, always the literal "0.1".', {
         required: true,
@@ -146,6 +147,27 @@ const components: Record<string, ComponentDef> = {
     requiresLabel: true,
     props: {
       src: str("Where the image is loaded from, a URL or a binding to one.", { required: true }),
+    },
+  },
+  model: {
+    description:
+      "A 3D model the user can turn; give it a still fallback image and a label that describes what it shows.",
+    role: "img",
+    content: "none",
+    requiresLabel: true,
+    props: {
+      src: str(
+        "The glTF binary or JSON file (.glb, .gltf) the web shows; a path relative to the project or an https URL, never a binding.",
+        { required: true, bindable: false },
+      ),
+      usdz: str(
+        "The USDZ file (.usdz) Apple platforms show; a path relative to the project or an https URL, never a binding.",
+        { bindable: false },
+      ),
+      fallback: str(
+        "A still image (.png, .jpg, .jpeg, .webp) shown while the model loads, where it cannot be shown, and in design tools; same path rules as src.",
+        { required: true, bindable: false },
+      ),
     },
   },
   link: {
@@ -444,6 +466,7 @@ const components: Record<string, ComponentDef> = {
     props: {
       selected: str("The `id` of the selected `tab`; bind it to read and write the active tab.", {
         writable: true,
+        references: "tab",
       }),
     },
     events: ["change"],

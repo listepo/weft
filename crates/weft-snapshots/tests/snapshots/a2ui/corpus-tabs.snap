@@ -1,0 +1,127 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-tabs as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "account",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "account",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "tabs"
+          ],
+          "accessibility": {
+            "label": "Account"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Account",
+          "variant": "h1"
+        },
+        {
+          "id": "tabs",
+          "component": "Tabs",
+          "tabs": [
+            {
+              "title": "Overview",
+              "child": "column"
+            },
+            {
+              "title": "Billing",
+              "child": "column-2"
+            },
+            {
+              "title": "Team",
+              "child": "members"
+            }
+          ],
+          "accessibility": {
+            "label": "Account sections"
+          }
+        },
+        {
+          "id": "account-name",
+          "component": "Text",
+          "text": {
+            "path": "/account/name"
+          }
+        },
+        {
+          "id": "account-email",
+          "component": "Text",
+          "text": {
+            "path": "/account/email"
+          }
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "account-name",
+            "account-email"
+          ]
+        },
+        {
+          "id": "plan",
+          "component": "Text",
+          "text": {
+            "path": "/billing/plan"
+          }
+        },
+        {
+          "id": "change-plan",
+          "component": "Button",
+          "child": "change-plan-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "billing.change"
+            }
+          }
+        },
+        {
+          "id": "change-plan-label",
+          "component": "Text",
+          "text": "Change plan"
+        },
+        {
+          "id": "column-2",
+          "component": "Column",
+          "children": [
+            "plan",
+            "change-plan"
+          ]
+        },
+        {
+          "id": "members",
+          "component": "List",
+          "children": {
+            "componentId": "member-name",
+            "path": "/team"
+          }
+        },
+        {
+          "id": "member-name",
+          "component": "Text",
+          "text": {
+            "path": "name"
+          }
+        }
+      ]
+    }
+  }
+]

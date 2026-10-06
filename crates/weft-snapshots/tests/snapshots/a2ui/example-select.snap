@@ -1,0 +1,51 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-select as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "country"
+          ],
+          "accessibility": {
+            "label": "Locale"
+          }
+        },
+        {
+          "id": "country",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Portugal",
+              "value": "pt"
+            },
+            {
+              "label": "Spain",
+              "value": "es"
+            }
+          ],
+          "value": {
+            "path": "/country"
+          },
+          "label": "Country",
+          "filterable": true
+        }
+      ]
+    }
+  }
+]

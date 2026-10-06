@@ -1,0 +1,7 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-color-picker as a2ui-losses
+---
+Kinds /screen#root/color-picker#accent: color-picker has no A2UI component; a text field stands in
+Props /screen#root/color-picker#accent: disabled: this prop has no A2UI property
+Actions /screen#root/color-picker#accent: on-change="theme.update" has no A2UI event

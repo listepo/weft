@@ -1,0 +1,7 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-table as a2ui-losses
+---
+Props /screen#root/table#orders/column#col-total: sort: this prop has no A2UI property
+Props /screen#root/table#orders/each#order-each/row#order-row: selected: this prop has no A2UI property
+Props /screen#root/table#orders: state: this prop has no A2UI property

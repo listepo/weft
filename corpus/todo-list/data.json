@@ -1,6 +1,6 @@
 {
   "draft": "",
-  "remaining": 1,
+  "remainingLabel": "1 item left",
   "allDone": false,
   "todos": [
     { "title": "Write spec", "done": true, "locked": false },

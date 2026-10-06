@@ -1,0 +1,7 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-slider as a2ui-losses
+---
+Props /screen#root/slider#volume: disabled: this prop has no A2UI property
+Props /screen#root/slider#volume: step: this prop has no A2UI property
+Actions /screen#root/slider#volume: on-change="sound.update" has no A2UI event

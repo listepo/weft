@@ -1,0 +1,16 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-login as a2ui-import
+---
+<screen id="login" weft="0.1">
+  <stack id="form">
+    <heading id="title" level="1">Sign in</heading>
+    <stack id="fields">
+      <field id="email" label="Email" required="true" value="{$.email}"/>
+      <field id="password" label="Password" required="true" type="password" value="{$.password}"/>
+    </stack>
+    <button id="submit" disabled="{!$.email}" variant="primary" on-press="auth.submit">Sign in</button>
+    <link id="reset" on-press="nav.reset">Forgot password?</link>
+    <link id="signup" on-press="nav.signup">Create an account</link>
+  </stack>
+</screen>

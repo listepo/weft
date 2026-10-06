@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-column as a2ui-losses
+---
+Props /screen#root/table#users/column#col-name: sort: this prop has no A2UI property
+Props /screen#root/table#users/column#col-role: sort: this prop has no A2UI property

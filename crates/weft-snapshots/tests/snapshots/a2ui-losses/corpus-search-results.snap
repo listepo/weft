@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-search-results as a2ui-losses
+---
+Props /screen#search/form#form/stack#bar/field#query: type search has no A2UI form; a plain text field stands in
+Tokens /screen#search/form#form/stack#bar: gap: design tokens have no A2UI form

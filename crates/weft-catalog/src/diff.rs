@@ -30,7 +30,7 @@ pub struct CatalogDiff {
     pub changes: Vec<CatalogChange>,
 }
 
-const KNOWN_PROP_FIELDS: [&str; 10] = [
+const KNOWN_PROP_FIELDS: [&str; 11] = [
     "description",
     "type",
     "values",
@@ -41,6 +41,7 @@ const KNOWN_PROP_FIELDS: [&str; 10] = [
     "writable",
     "min",
     "max",
+    "references",
 ];
 
 type Out = Vec<CatalogChange>;
@@ -328,6 +329,25 @@ fn diff_prop(out: &mut Out, path: &str, previous: &Json, next: &Json) {
         };
         record(out, &format!("{path}.writable"), level, message.to_owned());
     }
+    if !strict_eq(field(a, "references"), field(b, "references")) {
+        // Dropping the reference lets any value through; naming or changing a kind rejects some.
+        let (level, message) = if field(b, "references").is_none() {
+            (
+                ChangeLevel::Minor,
+                "The prop no longer names an element.".to_owned(),
+            )
+        } else {
+            (
+                ChangeLevel::Major,
+                format!(
+                    "references changed from {} to {}.",
+                    text(field(a, "references")),
+                    text(field(b, "references"))
+                ),
+            )
+        };
+        record(out, &format!("{path}.references"), level, message);
+    }
     diff_bound(
         out,
         &format!("{path}.min"),
@@ -503,6 +523,23 @@ fn diff_component(out: &mut Out, path: &str, previous: &Json, next: &Json) {
             level,
             message.to_owned(),
         );
+    }
+    if !strict_eq(
+        Some(&flag(field(a, "root"), false)),
+        Some(&flag(field(b, "root"), false)),
+    ) {
+        let (level, message) = if is_true(field(b, "root")) {
+            (
+                ChangeLevel::Major,
+                "The component became the document root.",
+            )
+        } else {
+            (
+                ChangeLevel::Minor,
+                "The component is no longer the document root.",
+            )
+        };
+        record(out, &format!("{path}.root"), level, message.to_owned());
     }
     let props = format!("{path}.props");
     diff_record(

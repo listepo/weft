@@ -1,0 +1,51 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-segment as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "order"
+          ],
+          "accessibility": {
+            "label": "Sort"
+          }
+        },
+        {
+          "id": "order",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Newest",
+              "value": "new"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            }
+          ],
+          "value": {
+            "path": "/order"
+          },
+          "label": "Order",
+          "displayStyle": "chips"
+        }
+      ]
+    }
+  }
+]

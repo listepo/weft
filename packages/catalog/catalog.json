@@ -7,6 +7,7 @@
       "description": "The root of every document: one full screen of UI, carrying the format version.",
       "role": "main",
       "content": "nodes",
+      "root": true,
       "props": {
         "weft": {
           "description": "The Weft format version of the document, always the literal \"0.1\".",
@@ -129,6 +130,31 @@
           "description": "Where the image is loaded from, a URL or a binding to one.",
           "type": "string",
           "required": true
+        }
+      }
+    },
+    "model": {
+      "description": "A 3D model the user can turn; give it a still fallback image and a label that describes what it shows.",
+      "role": "img",
+      "content": "none",
+      "requiresLabel": true,
+      "props": {
+        "src": {
+          "description": "The glTF binary or JSON file (.glb, .gltf) the web shows; a path relative to the project or an https URL, never a binding.",
+          "type": "string",
+          "required": true,
+          "bindable": false
+        },
+        "usdz": {
+          "description": "The USDZ file (.usdz) Apple platforms show; a path relative to the project or an https URL, never a binding.",
+          "type": "string",
+          "bindable": false
+        },
+        "fallback": {
+          "description": "A still image (.png, .jpg, .jpeg, .webp) shown while the model loads, where it cannot be shown, and in design tools; same path rules as src.",
+          "type": "string",
+          "required": true,
+          "bindable": false
         }
       }
     },
@@ -604,7 +630,8 @@
         "selected": {
           "description": "The `id` of the selected `tab`; bind it to read and write the active tab.",
           "type": "string",
-          "writable": true
+          "writable": true,
+          "references": "tab"
         }
       },
       "events": ["change"]

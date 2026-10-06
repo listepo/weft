@@ -22,7 +22,7 @@
             <p data-bind="text:$user.role"></p>
           </td>
           <td>
-            <button type="button" data-variant="danger" data-action="press:users.delete">Delete</button>
+            <button type="button" data-variant="danger" data-bind="label:$user.deleteLabel" data-action="press:users.delete">Delete</button>
           </td>
         </tr>
       </template>

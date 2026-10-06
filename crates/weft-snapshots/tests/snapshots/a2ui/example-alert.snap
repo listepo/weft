@@ -1,0 +1,65 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-alert as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "failed"
+          ],
+          "accessibility": {
+            "label": "Payment"
+          }
+        },
+        {
+          "id": "failed",
+          "component": "Card",
+          "child": "column"
+        },
+        {
+          "id": "failed-text",
+          "component": "Text",
+          "text": "Your card was declined."
+        },
+        {
+          "id": "retry",
+          "component": "Button",
+          "child": "retry-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "payment.retry"
+            }
+          }
+        },
+        {
+          "id": "retry-label",
+          "component": "Text",
+          "text": "Try again"
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "failed-text",
+            "retry"
+          ]
+        }
+      ]
+    }
+  }
+]

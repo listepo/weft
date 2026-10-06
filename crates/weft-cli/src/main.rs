@@ -7,6 +7,7 @@
 //! either, `validate` checks only the syntax layer. Exit codes: 0 ok, 1 diagnostics with errors,
 //! 2 usage or I/O failure.
 
+mod a2ui;
 mod convert;
 mod swiftui;
 mod web;
@@ -28,7 +29,7 @@ use weft_core::{
 #[command(
     name = "weft",
     version,
-    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React and SolidJS"
+    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React, SolidJS and A2UI"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -269,6 +270,38 @@ enum Command {
     /// Read a SolidJS component (.jsx, or .tsx as TypeScript) back into markup; losses go to
     /// stderr.
     ImportSolid(WebImport),
+    /// Write a markup document as A2UI v0.9 messages (basic catalog); what A2UI cannot hold is
+    /// listed on stderr as losses.
+    A2ui(A2uiArgs),
+    /// Read A2UI v0.9 messages (a JSON array, one object or JSON Lines) back into markup; losses
+    /// go to stderr.
+    ImportA2ui(A2uiArgs),
+}
+
+/// A conversion to or from A2UI.
+#[derive(Args)]
+struct A2uiArgs {
+    file: PathBuf,
+    /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+    #[arg(long)]
+    catalog: Option<PathBuf>,
+    #[command(flatten)]
+    project: ProjectArgs,
+    /// Write `<file stem>.a2ui.json` (or `.weft` when importing) here instead of printing
+    /// (default: the project's `export.a2ui.outDir` or `import.a2ui.outDir`, else print).
+    #[arg(long)]
+    out_dir: Option<PathBuf>,
+}
+
+impl From<A2uiArgs> for a2ui::Args {
+    fn from(a: A2uiArgs) -> Self {
+        a2ui::Args {
+            file: a.file,
+            catalog: a.catalog,
+            project: a.project,
+            out_dir: a.out_dir,
+        }
+    }
 }
 
 const USAGE_ERROR: u8 = 2;
@@ -629,6 +662,8 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
         Command::ImportHtml(args) => web_import(web::Target::Html, args, out),
         Command::ImportReact(args) => web_import(web::Target::React, args, out),
         Command::ImportSolid(args) => web_import(web::Target::Solid, args, out),
+        Command::A2ui(args) => a2ui::export(args.into(), out),
+        Command::ImportA2ui(args) => a2ui::import(args.into(), out),
     }
 }
 

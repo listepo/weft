@@ -1,0 +1,16 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-appearance as a2ui-losses
+---
+Props /screen#appearance/stack#options/segmented-control#theme/segment#theme-dark: disabled: this prop has no A2UI property
+Props /screen#appearance/stack#options/slider#contrast: disabled: this prop has no A2UI property
+Kinds /screen#appearance/stack#options/stepper#columns: stepper has no A2UI component; a text field stands in
+Kinds /screen#appearance/stack#options/stepper#zoom: stepper has no A2UI component; a text field stands in
+Bindings /screen#appearance/stack#options/stepper#zoom: disabled: this binding has no A2UI property
+Props /screen#appearance/stack#options/stepper#zoom: max: this prop has no A2UI property
+Props /screen#appearance/stack#options/stepper#zoom: step: this prop has no A2UI property
+Kinds /screen#appearance/stack#options/color-picker#accent: color-picker has no A2UI component; a text field stands in
+Props /screen#appearance/stack#options/color-picker#accent: disabled: this prop has no A2UI property
+Props /screen#appearance/stack#options/date-picker#since: disabled: this prop has no A2UI property
+Props /screen#appearance/stack#options/combobox#font: disabled: this prop has no A2UI property
+Tokens /screen#appearance/stack#options: gap: design tokens have no A2UI form

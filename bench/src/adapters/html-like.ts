@@ -189,8 +189,12 @@ export function htmlLikeToNeutral(root: HEl): NNode {
     if (kind === "image") {
       if (a.alt) n.name = collapse(a.alt);
     } else if (NAMED_BY_TEXT.has(kind) || kind === "column") {
-      Object.assign(n, own);
-      if (!n.name && !n.nameBind && aria) n.name = collapse(aria);
+      // An accessible name from `label` wins over the text the element shows.
+      if (el.bind.label) n.nameBind = ref(el.bind.label, ctx.loops);
+      else {
+        Object.assign(n, own);
+        if (!n.name && !n.nameBind && aria) n.name = collapse(aria);
+      }
     } else if (kind === "radio-group") {
       const legend = el.children.filter(isEl).find((c) => c.tag === "legend");
       const t = legend ? textOf(legend, ctx.loops) : {};

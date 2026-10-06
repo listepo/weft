@@ -1,0 +1,51 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-showroom as solid-jsx
+---
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+export default function WeftScreen(props) {
+  return (
+    <main data-weft-id="showroom" aria-label="Showroom">
+      <h1 data-weft-id="title">Showroom</h1>
+      <div data-weft-id="shelf" style={{ gap: "var(--weft-space-lg)", display: "flex", "flex-direction": "column" }}>
+        <section data-weft-id="gem-section" aria-label="Gem">
+          <div data-weft-slot="header">
+            <h2 data-weft-id="gem-title">Gem</h2>
+          </div>
+          <model-viewer data-weft-id="gem" aria-label="A teal gem with eight triangular faces" role="img" alt="A teal gem with eight triangular faces" src="assets/gem.glb" ios-src="assets/gem.usdz" camera-controls="" interaction-prompt="none">
+            <img slot="poster" alt="" src="assets/gem.png" />
+          </model-viewer>
+          <div data-weft-id="gem-caption">
+            {!(_text(props.data?.caption).trim() === "") ? _squash(_text(props.data?.caption)) : ""}
+          </div>
+          <button data-weft-id="gem-pick" type="button" data-variant="primary" onClick={(_e) => _act(props.actions, { id: "gem-pick", action: "gem.pick" })}>Choose this gem</button>
+        </section>
+        <section data-weft-id="turned-section" aria-label="Turned gem">
+          <div data-weft-slot="header">
+            <h2 data-weft-id="turned-title">Turned</h2>
+          </div>
+          <model-viewer data-weft-id="turned" aria-label="The same gem turned to its side" role="img" alt="The same gem turned to its side" src="assets/gem.glb" camera-controls="" interaction-prompt="none" style={{ transform: "perspective(800px) rotateY(20deg)" }}>
+            <img slot="poster" alt="" src="assets/gem.png" />
+          </model-viewer>
+          <div data-weft-id="turned-caption">Without a USDZ file Apple platforms show the still image.</div>
+        </section>
+      </div>
+    </main>
+  );
+}

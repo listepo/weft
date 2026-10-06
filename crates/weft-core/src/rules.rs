@@ -136,6 +136,52 @@ pub fn has_non_xml_char(s: &str) -> bool {
     s.chars().any(is_non_xml_char)
 }
 
+/// The asset attributes of `model` and the extensions each takes (SPEC §5.1).
+pub const MODEL_ASSETS: [(&str, &[&str]); 3] = [
+    ("src", &[".glb", ".gltf"]),
+    ("usdz", &[".usdz"]),
+    ("fallback", &[".png", ".jpg", ".jpeg", ".webp"]),
+];
+
+/// Longest asset path of a `model`, in bytes (SPEC §5.1).
+pub const MAX_ASSET_PATH: usize = 2048;
+
+/// Why `value` is not an asset path of a `model` (SPEC §5.1), or `None` when it is one: a path
+/// relative to the project or an `https` URL, in at most [`MAX_ASSET_PATH`] bytes, with no control
+/// character, whitespace or backslash, and one of `extensions`. A relative path also has no scheme,
+/// `..` segment, leading `/` or `%`, which a loader could decode into one.
+pub fn asset_problem(value: &str, extensions: &[&str]) -> Option<&'static str> {
+    const SHAPE: &str = "a path relative to the project, or an https URL";
+    if value.len() > MAX_ASSET_PATH {
+        return Some("at most 2048 bytes");
+    }
+    if value
+        .chars()
+        .any(|c| c.is_control() || c.is_whitespace() || c == '\\')
+    {
+        return Some("no control character, whitespace or backslash");
+    }
+    let path = if let Some(rest) = value.strip_prefix("https://") {
+        let rest = &rest[..rest.find(['?', '#']).unwrap_or(rest.len())];
+        let (host, path) = rest.split_once('/').unwrap_or((rest, ""));
+        if host.is_empty() || host.contains('@') {
+            return Some("an https URL with a host and no credentials");
+        }
+        path
+    } else {
+        if value.is_empty()
+            || value.starts_with('/')
+            || value.contains([':', '%', '?', '#'])
+            || value.split('/').any(|segment| segment == "..")
+        {
+            return Some(SHAPE);
+        }
+        value
+    };
+    let path = path.to_ascii_lowercase();
+    (!extensions.iter().any(|e| path.ends_with(e))).then_some("the right file extension")
+}
+
 /// Universal attributes of SPEC §2.2 other than `id` and `on-*`; `state` values come from the
 /// component.
 static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 8]> = LazyLock::new(|| {
