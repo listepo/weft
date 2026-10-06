@@ -1,0 +1,26 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-model as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+      "label": "Showroom"
+    },
+    "children": [
+      {
+        "kind": "model",
+        "id": "chair",
+        "props": {
+          "fallback": "assets/chair.png",
+          "label": "A wooden armchair",
+          "src": "assets/chair.glb",
+          "usdz": "assets/chair.usdz"
+        }
+      }
+    ]
+  }
+}

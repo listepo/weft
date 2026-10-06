@@ -4,6 +4,5 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T52.1. 3D models
 - T13.1. json-render export and import
 - T15.1. Catalog import from a Custom Elements Manifest

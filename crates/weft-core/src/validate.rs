@@ -10,8 +10,9 @@ use crate::model::{
     Catalog, Child, ComponentDef, Content, Document, Node, PropDef, PropType, Value, WEFT_VERSION,
 };
 use crate::rules::{
-    ARIA_ROLES, EACH, MAX_DEPTH, SLOT, embedded_reference, has_non_xml_char, is_action, is_binding,
-    is_extension_name, is_id, is_loop_variable, is_name, is_token, universal_prop, version,
+    ARIA_ROLES, EACH, MAX_DEPTH, MODEL_ASSETS, SLOT, asset_problem, embedded_reference,
+    has_non_xml_char, is_action, is_binding, is_extension_name, is_id, is_loop_variable, is_name,
+    is_token, universal_prop, version,
 };
 use crate::shape::{document_issues, to_document};
 use crate::source::{NodeSource, path_segment};
@@ -959,6 +960,31 @@ impl<'a> Validator<'a> {
                     )
                     .hint("move it into a <form>, or remove submit=\"true\" and give it on-press"),
                 );
+            }
+            // The asset paths of a `model` are untrusted, and the catalog format has no path type.
+            if kind == "model" {
+                for (name, extensions) in MODEL_ASSETS {
+                    let Some(Value::String(value)) = props.get(name) else {
+                        continue;
+                    };
+                    let Some(problem) = asset_problem(value, extensions) else {
+                        continue;
+                    };
+                    let end = value.floor_char_boundary(80);
+                    self.report(
+                        diag(
+                            Code::W317,
+                            &node_at(node, path, Some(name)),
+                            format!("<model> {name} is not an asset path: {problem}."),
+                            format!(
+                                "a path relative to the project, or an https URL, ending in {}",
+                                extensions.join(" or ")
+                            ),
+                        )
+                        .got(value[..end].to_owned())
+                        .hint("write a relative path such as assets/chair.glb"),
+                    );
+                }
             }
             for (name, def) in component.props.iter().flatten() {
                 if let (Some(target), Some(Value::String(id))) = (&def.references, props.get(name))

@@ -1,0 +1,133 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-showroom as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "showroom",
+    "props": {
+      "label": "Showroom"
+    },
+    "children": [
+      {
+        "kind": "heading",
+        "id": "title",
+        "props": {
+          "level": 1
+        },
+        "children": [
+          "Showroom"
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "shelf",
+        "props": {
+          "gap": {
+            "token": "space.lg"
+          }
+        },
+        "children": [
+          {
+            "kind": "section",
+            "id": "gem-section",
+            "props": {
+              "label": "Gem"
+            },
+            "slots": {
+              "header": [
+                {
+                  "kind": "heading",
+                  "id": "gem-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "children": [
+                    "Gem"
+                  ]
+                }
+              ]
+            },
+            "children": [
+              {
+                "kind": "model",
+                "id": "gem",
+                "props": {
+                  "fallback": "assets/gem.png",
+                  "label": "A teal gem with eight triangular faces",
+                  "src": "assets/gem.glb",
+                  "usdz": "assets/gem.usdz"
+                }
+              },
+              {
+                "kind": "text",
+                "id": "gem-caption",
+                "props": {
+                  "text": {
+                    "bind": "$.caption"
+                  }
+                }
+              },
+              {
+                "kind": "button",
+                "id": "gem-pick",
+                "props": {
+                  "variant": "primary"
+                },
+                "on": {
+                  "press": "gem.pick"
+                },
+                "children": [
+                  "Choose this gem"
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "section",
+            "id": "turned-section",
+            "props": {
+              "label": "Turned gem"
+            },
+            "slots": {
+              "header": [
+                {
+                  "kind": "heading",
+                  "id": "turned-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "children": [
+                    "Turned"
+                  ]
+                }
+              ]
+            },
+            "children": [
+              {
+                "kind": "model",
+                "id": "turned",
+                "props": {
+                  "fallback": "assets/gem.png",
+                  "label": "The same gem turned to its side",
+                  "perspective": 800,
+                  "rotate-y": 20,
+                  "src": "assets/gem.glb"
+                }
+              },
+              {
+                "kind": "text",
+                "id": "turned-caption",
+                "children": [
+                  "Without a USDZ file Apple platforms show the still image."
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

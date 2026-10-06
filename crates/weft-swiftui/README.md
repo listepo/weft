@@ -59,6 +59,7 @@ A file for a screen whose id is `login` contains these parts, in order:
 | `heading` | `Text` with a font for the `level` and `.accessibilityHeading(.hN)` |
 | `text` | `Text`; `tone` gives `.foregroundStyle` |
 | `image` | `AsyncImage(url:)`; only `http`, `https`, `mailto` and relative URLs load |
+| `model` | `WeftModel` (generated only when a screen has a `model`): `Model3D` on visionOS and `RealityView` on iOS 18 and macOS 15 show the bundled `usdz` file, and the `fallback` image shows while it loads, below those versions, with no `usdz`, and when the process sets `WEFT_STILL_MODELS` (the screenshot host does); `src` stays a `weftProp` marker, since SwiftUI cannot read glTF |
 | `link` | `Button` that calls `openLink` (the same URL rule) |
 | `button` | `Button` that sends the action; `variant` gives `.buttonStyle`, and `danger` gives `role: .destructive` |
 | `form` | `Form`; `on-submit` gives `.onSubmit`, and the `footer` slot gives a section footer |

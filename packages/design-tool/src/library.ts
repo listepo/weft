@@ -233,6 +233,18 @@ export function drawing(
     };
     return { ...box, children: [rect] };
   }
+  if (kind === "model") {
+    // A design tool draws no 3D scene, so the model is the rectangle its still fills, in the
+    // still's 4:3 shape (SPEC §9).
+    const rect: RectDrawing = {
+      type: "rect",
+      name: "model",
+      width: 160,
+      height: 120,
+      fill: { color: GREY },
+    };
+    return { ...box, children: [rect] };
+  }
   if (kind === "checkbox" || kind === "switch" || kind === "radio") {
     const mark: RectDrawing = {
       type: "rect",

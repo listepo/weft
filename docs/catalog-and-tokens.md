@@ -16,7 +16,7 @@ A catalog is a JSON file. It lists components; each component has a one-sentence
 | Group | Components |
 | --- | --- |
 | Structure | `screen`, `stack`, `grid`, `section`, `tabs`, `tab`, `dialog` |
-| Text and media | `heading`, `text`, `image`, `link`, `alert` |
+| Text and media | `heading`, `text`, `image`, `model`, `link`, `alert` |
 | Actions | `button`, `menu`, `menu-item` |
 | Input | `form`, `field`, `checkbox`, `switch`, `radio-group`, `radio`, `select`, `option`, `combobox`, `slider`, `stepper`, `date-picker`, `color-picker`, `segmented-control`, `segment` |
 | Collections | `list`, `item`, `table`, `column`, `row`, `cell` |

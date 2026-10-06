@@ -2502,6 +2502,138 @@
    "weft": "0.1",
    "root": {
     "kind": "screen",
+    "id": "showroom",
+    "props": {
+     "label": "Showroom"
+    },
+    "children": [
+     {
+      "kind": "heading",
+      "id": "title",
+      "props": {
+       "level": 1
+      },
+      "children": [
+       "Showroom"
+      ]
+     },
+     {
+      "kind": "stack",
+      "id": "shelf",
+      "props": {
+       "gap": {
+        "token": "space.lg"
+       }
+      },
+      "children": [
+       {
+        "kind": "section",
+        "id": "gem-section",
+        "props": {
+         "label": "Gem"
+        },
+        "slots": {
+         "header": [
+          {
+           "kind": "heading",
+           "id": "gem-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Gem"
+           ]
+          }
+         ]
+        },
+        "children": [
+         {
+          "kind": "model",
+          "id": "gem",
+          "props": {
+           "fallback": "assets/gem.png",
+           "label": "A teal gem with eight triangular faces",
+           "src": "assets/gem.glb",
+           "usdz": "assets/gem.usdz"
+          }
+         },
+         {
+          "kind": "text",
+          "id": "gem-caption",
+          "props": {
+           "text": {
+            "bind": "$.caption"
+           }
+          }
+         },
+         {
+          "kind": "button",
+          "id": "gem-pick",
+          "props": {
+           "variant": "primary"
+          },
+          "on": {
+           "press": "gem.pick"
+          },
+          "children": [
+           "Choose this gem"
+          ]
+         }
+        ]
+       },
+       {
+        "kind": "section",
+        "id": "turned-section",
+        "props": {
+         "label": "Turned gem"
+        },
+        "slots": {
+         "header": [
+          {
+           "kind": "heading",
+           "id": "turned-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Turned"
+           ]
+          }
+         ]
+        },
+        "children": [
+         {
+          "kind": "model",
+          "id": "turned",
+          "props": {
+           "fallback": "assets/gem.png",
+           "label": "The same gem turned to its side",
+           "perspective": 800,
+           "rotate-y": 20,
+           "src": "assets/gem.glb"
+          }
+         },
+         {
+          "kind": "text",
+          "id": "turned-caption",
+          "children": [
+           "Without a USDZ file Apple platforms show the still image."
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"showroom\" aria-label=\"Showroom\">\n      <h1 data-weft-id=\"title\">Showroom</h1>\n      <div data-weft-id=\"shelf\" style={{ gap: \"var(--weft-space-lg)\", display: \"flex\", flexDirection: \"column\" }}>\n        <section data-weft-id=\"gem-section\" aria-label=\"Gem\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"gem-title\">Gem</h2>\n          </div>\n          <model-viewer data-weft-id=\"gem\" aria-label=\"A teal gem with eight triangular faces\" role=\"img\" alt=\"A teal gem with eight triangular faces\" src=\"assets/gem.glb\" ios-src=\"assets/gem.usdz\" camera-controls=\"\" interaction-prompt=\"none\">\n            <img slot=\"poster\" alt=\"\" src=\"assets/gem.png\" />\n          </model-viewer>\n          <div data-weft-id=\"gem-caption\">\n            {!(_text(data?.caption).trim() === \"\") ? _squash(_text(data?.caption)) : \"\"}\n          </div>\n          <button data-weft-id=\"gem-pick\" type=\"button\" data-variant=\"primary\" onClick={(_e) => _act(actions, { id: \"gem-pick\", action: \"gem.pick\" })}>Choose this gem</button>\n        </section>\n        <section data-weft-id=\"turned-section\" aria-label=\"Turned gem\">\n          <div data-weft-slot=\"header\">\n            <h2 data-weft-id=\"turned-title\">Turned</h2>\n          </div>\n          <model-viewer data-weft-id=\"turned\" aria-label=\"The same gem turned to its side\" role=\"img\" alt=\"The same gem turned to its side\" src=\"assets/gem.glb\" camera-controls=\"\" interaction-prompt=\"none\" style={{ transform: \"perspective(800px) rotateY(20deg)\" }}>\n            <img slot=\"poster\" alt=\"\" src=\"assets/gem.png\" />\n          </model-viewer>\n          <div data-weft-id=\"turned-caption\">Without a USDZ file Apple platforms show the still image.</div>\n        </section>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
     "id": "signup",
     "props": {
      "label": "Create account"
@@ -4012,6 +4144,31 @@
    }
   },
   "output": "function _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Document\">\n      <div data-weft-id=\"actions\" aria-label=\"Document actions\" role=\"menu\">\n        <button data-weft-id=\"rename\" type=\"button\" role=\"menuitem\" onClick={() => _act(actions, { id: \"rename\", action: \"doc.rename\" })}>Rename</button>\n        <button data-weft-id=\"delete\" type=\"button\" role=\"menuitem\" onClick={() => _act(actions, { id: \"delete\", action: \"doc.delete\" })}>Delete</button>\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
+   "weft": "0.1",
+   "root": {
+    "kind": "screen",
+    "id": "root",
+    "props": {
+     "label": "Showroom"
+    },
+    "children": [
+     {
+      "kind": "model",
+      "id": "chair",
+      "props": {
+       "fallback": "assets/chair.png",
+       "label": "A wooden armchair",
+       "src": "assets/chair.glb",
+       "usdz": "assets/chair.usdz"
+      }
+     }
+    ]
+   }
+  },
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"root\" aria-label=\"Showroom\">\n      <model-viewer data-weft-id=\"chair\" aria-label=\"A wooden armchair\" role=\"img\" alt=\"A wooden armchair\" src=\"assets/chair.glb\" ios-src=\"assets/chair.usdz\" camera-controls=\"\" interaction-prompt=\"none\">\n        <img slot=\"poster\" alt=\"\" src=\"assets/chair.png\" />\n      </model-viewer>\n    </main>\n  );\n}\n"
  },
  {
   "document": {
@@ -9025,7 +9182,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "menu-item",
+    "kind": "color-picker",
     "id": "V+JHC",
     "props": {},
     "children": [],
@@ -9042,7 +9199,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <button data-weft-id=\"V+JHC\" type=\"button\" role=\"menuitem\" />\n  );\n}\n"
+  "output": "function _color(v) {\n  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : \"#000000\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id=\"V+JHC\" type=\"color\" aria-label=\"\" defaultValue={_color(\"\")} />\n    </label>\n  );\n}\n"
  },
  {
   "document": {
@@ -9100,7 +9257,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "button",
+    "kind": "color-picker",
     "id": "  \\u0022 */ globalThis.__weftPwned = 1 /*",
     "props": {},
     "on": {},
@@ -9115,7 +9272,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <button data-weft-id={\"  \\\\u0022 */ globalThis.__weftPwned = 1 /*\"} type=\"button\">{\"\\\\u0022 */ globalThis.__weftPwned = 1 /*\"}</button>\n  );\n}\n"
+  "output": "function _color(v) {\n  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : \"#000000\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id={\"  \\\\u0022 */ globalThis.__weftPwned = 1 /*\"} type=\"color\" aria-label=\"\" defaultValue={_color(\"\")} />\n    </label>\n  );\n}\n"
  },
  {
   "document": {
@@ -9231,11 +9388,11 @@
    "root": [
     "' + (globalThis.__weftPwned = 1) + '",
     {
-     "kind": "checkbox",
+     "kind": "stack",
      "id": "&lt;script&gt;alert(1)&lt;/script&gt;",
      "props": {
       "in": {
-       "kind": "heading",
+       "kind": "model",
        "id": "~h8o+d/6_)",
        "children": [
         "zq=+!kY[,",
@@ -9594,7 +9751,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "menu",
+    "kind": "model",
     "id": "3y",
     "props": {
      "label": -3.4198495630533747e+68
@@ -9611,7 +9768,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"3y\" aria-label=\"-3.4198495630533747e+68\" role=\"menu\">\n      <div data-weft-slot=\"rdS*DN\">{\"Ae9]\"}</div>\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <model-viewer data-weft-id=\"3y\" aria-label=\"-3.4198495630533747e+68\" role=\"img\" alt=\"-3.4198495630533747e+68\" camera-controls=\"\" interaction-prompt=\"none\" />\n  );\n}\n"
  },
  {
   "document": {
@@ -9735,7 +9892,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "cell",
+    "kind": "screen",
     "props": {},
     "on": {
      "change": "^",
@@ -9752,7 +9909,7 @@
     ]
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div role=\"cell\" />\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main />\n  );\n}\n"
  },
  {
   "document": {
@@ -9765,7 +9922,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "tab",
+    "kind": "item",
     "props": {
      "ordered": "`${globalThis.__weftPwned = 1}`",
      "submit": {
@@ -9779,7 +9936,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-state=\"-1494759920\" role=\"group\" />\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <li data-state=\"-1494759920\" />\n  );\n}\n"
  },
  {
   "document": {
@@ -9899,7 +10056,7 @@
        }
       },
       {
-       "kind": "alert",
+       "kind": "model",
        "id": "!",
        "on": {
         "close": "&lt;script&gt;alert(1)&lt;/script&gt;"
@@ -9911,13 +10068,13 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"Crème brûlée 日本  x﻿\"} role=\"group\">\n      <div data-weft-slot=\"10\">{\"\\\"});globalThis.__weftPwned = 1;//\"}</div>\n      <div data-weft-slot=\"c)RavaUh@x\">\n        <div data-weft-id={\"!]]=9\\\\Lbz=\"} role=\"group\">\n          <div data-weft-slot=\"10\">{\"]Jh\"}</div>\n          <div data-weft-slot=\"empty\">lZA/</div>\n        </div>\n        <div data-weft-id=\"!\" role=\"alert\" />\n      </div>\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"Crème brûlée 日本  x﻿\"} role=\"group\">\n      <div data-weft-slot=\"10\">{\"\\\"});globalThis.__weftPwned = 1;//\"}</div>\n      <div data-weft-slot=\"c)RavaUh@x\">\n        <div data-weft-id={\"!]]=9\\\\Lbz=\"} role=\"group\">\n          <div data-weft-slot=\"10\">{\"]Jh\"}</div>\n          <div data-weft-slot=\"empty\">lZA/</div>\n        </div>\n        <model-viewer data-weft-id=\"!\" role=\"img\" alt=\"\" camera-controls=\"\" interaction-prompt=\"none\" />\n      </div>\n    </div>\n  );\n}\n"
  },
  {
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "color-picker",
+    "kind": "section",
     "id": "f",
     "props": {
      "type": "</main>{globalThis.__weftPwned = 1}<main>"
@@ -9928,7 +10085,7 @@
     }
    }
   },
-  "output": "function _color(v) {\n  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : \"#000000\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id=\"f\" type=\"color\" aria-label=\"\" defaultValue={_color(\"\")} />\n    </label>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <section data-weft-id=\"f\" />\n  );\n}\n"
  },
  {
   "document": {
@@ -9952,7 +10109,7 @@
        },
        "children": [
         {
-         "kind": "checkbox",
+         "kind": "heading",
          "id": "  \\u0022 */ globalThis.__weftPwned = 1 /*",
          "props": {
           "label": "%",
@@ -10014,7 +10171,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "each",
+    "kind": "item",
     "id": "7p\"constr",
     "on": {},
     "children": [
@@ -10032,7 +10189,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return null;\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <li data-weft-id={\"7p\\\"constr\"}>\n      <div data-weft-slot=\"empty\" />\n    </li>\n  );\n}\n"
  },
  {
   "document": {
@@ -10071,7 +10228,7 @@
    "weft": "0.1",
    "root": [
     {
-     "kind": "table",
+     "kind": "menu-item",
      "props": {
       "as": "PKF",
       "open": "QE",
@@ -10169,7 +10326,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "stepper",
+    "kind": "text",
     "id": "<7g4",
     "props": {
      "checked": null,
@@ -10183,7 +10340,7 @@
     "slots": {}
    }
   },
-  "output": "function _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _numeric(v) {\n  if (typeof v === \"number\") return Number.isFinite(v) ? v : undefined;\n  if (typeof v === \"string\" && /^-?(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:[eE][-+]?\\d+)?$/.test(v.trim())) {\n    const n = Number(v);\n    return Number.isFinite(n) ? n : undefined;\n  }\n  return undefined;\n}\n\nfunction _tidy(x, ...inputs) {\n  const d = (y) => {\n    const [m = \"\", e] = String(y).split(\"e\");\n    return Math.max(0, (m.split(\".\")[1]?.length ?? 0) - (e === undefined ? 0 : Number(e)));\n  };\n  return Number(x.toFixed(Math.min(100, Math.max(...inputs.map(d)))));\n}\n\nfunction _bounds(min, max, step) {\n  const lo = _numeric(min);\n  const hi = _numeric(max);\n  const st = _numeric(step);\n  const b = { step: st !== undefined && st > 0 ? st : 1 };\n  if (lo !== undefined) b.min = lo;\n  if (hi !== undefined) b.max = lo === undefined ? hi : Math.max(hi, lo);\n  return b;\n}\n\nfunction _clamp(v, b) {\n  if (b.min !== undefined) v = Math.max(v, b.min);\n  if (b.max !== undefined) v = Math.min(v, b.max);\n  return v;\n}\n\nfunction _count(value, b) {\n  return _clamp(_numeric(value) ?? 0, b);\n}\n\nfunction _step(current, direction, b) {\n  return _tidy(_clamp(current + direction * b.step, b), current, b.step);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      {(() => {\n        const _b = _bounds(undefined, undefined, undefined);\n        return (\n          <span data-weft-stepper=\"\">\n            <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"down\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(undefined, _b), -1, _b); if (_i) _i.value = String(_n); _act(actions, { id: \"<7g4\", action: \"Crème brûlée 日本  x﻿\" }); }}>{\"−\"}</button>\n            <input data-weft-id={\"<7g4\"} type=\"number\" aria-label=\"\" min={_b.min} max={_b.max} step={_b.step} defaultValue={String(_count(undefined, _b))} onChange={() => _act(actions, { id: \"<7g4\", action: \"Crème brûlée 日本  x﻿\" })} />\n            <button type=\"button\" tabIndex={-1} aria-hidden=\"true\" data-weft-step=\"up\" onClick={(_e) => { const _i = _e.currentTarget.parentElement?.querySelector(\"input\"); const _n = _step(_numeric(_i?.value) ?? _count(undefined, _b), 1, _b); if (_i) _i.value = String(_n); _act(actions, { id: \"<7g4\", action: \"Crème brûlée 日本  x﻿\" }); }}>+</button>\n          </span>\n        );\n      })()}\n    </label>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"<7g4\"} />\n  );\n}\n"
  },
  {
   "document": {
@@ -10278,7 +10435,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "text",
+    "kind": "button",
     "props": {},
     "on": {
      "submit": "4i-bPYNpwK",
@@ -10293,7 +10450,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div />\n  );\n}\n"
+  "output": "function _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <button type=\"button\" onClick={(_e) => _act(actions, { id: \"\", action: \"jzxJD[1]\" })} />\n  );\n}\n"
  },
  {
   "document": {
@@ -10473,7 +10630,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "menu-item",
+    "kind": "stack",
     "id": "v",
     "props": {
      "submit": [
@@ -10493,7 +10650,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <button data-weft-id=\"v\" type=\"button\" role=\"menuitem\">true</button>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"v\" style={{ display: \"flex\", flexDirection: \"column\" }} />\n  );\n}\n"
  },
  {
   "document": {
@@ -10504,11 +10661,11 @@
     },
     false,
     {
-     "kind": "list",
+     "kind": "slider",
      "props": {
       "checked": "X^dj:",
       "value": {
-       "kind": "dialog",
+       "kind": "option",
        "id": "</main>{globalThis.__weftPwned = 1}<main>",
        "props": {
         "open": "",
@@ -10760,7 +10917,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "column",
+    "kind": "item",
     "id": "`${globalThis.__weftPwned = 1}`",
     "props": {
      "error": [
@@ -10791,13 +10948,13 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "each",
+    "kind": "menu",
     "id": "\"});globalThis.__weftPwned = 1;//",
     "props": {
      "text": -5.003829679976795e-197,
      "type": "f",
      "as": {
-      "kind": "alert",
+      "kind": "form",
       "id": "\"});globalThis.__weftPwned = 1;//",
       "props": {},
       "children": []
@@ -10810,7 +10967,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return null;\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"\\\"});globalThis.__weftPwned = 1;//\"} role=\"menu\" />\n  );\n}\n"
  },
  {
   "document": {
@@ -10985,7 +11142,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "segment",
+    "kind": "grid",
     "id": "f. tL,W",
     "props": {
      "ordered": {
@@ -11020,18 +11177,18 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id=\"f. tL,W\" type=\"radio\" value=\"\" aria-label={\"J- `${globalThis.__weftPwned = 1}` &lt;script&gt;alert(1)&lt;/script&gt;\"} />\n      <span aria-hidden=\"true\">{\"J- `${globalThis.__weftPwned = 1}` &lt;script&gt;alert(1)&lt;/script&gt;\"}</span>\n    </label>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"f. tL,W\" style={{ display: \"grid\" }}>\n      {\"J- `${globalThis.__weftPwned = 1}` &lt;script&gt;alert(1)&lt;/script&gt;\"}\n      <div data-weft-slot={\"'o816\\\\u\"} />\n    </div>\n  );\n}\n"
  },
  {
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "text",
+    "kind": "section",
     "id": "  \\u0022 */ globalThis.__weftPwned = 1 /*",
     "props": {
      "hidden": "H`JRU|",
      "type": {
-      "kind": "button",
+      "kind": "switch",
       "id": "Dh\\Y)9O",
       "on": {
        "press": "Crème brûlée 日本  x﻿"
@@ -11054,7 +11211,7 @@
     "slots": {
      "2": [
       {
-       "kind": "combobox",
+       "kind": "checkbox",
        "id": "gx&Yq*[",
        "children": [
         "Qk__",
@@ -11190,7 +11347,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "row",
+    "kind": "tab",
     "id": "' + (globalThis.__weftPwned = 1) + '",
     "props": {
      "as": 1431562925,
@@ -11227,7 +11384,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"' + (globalThis.__weftPwned = 1) + '\" role=\"row\">\n      <div data-weft-slot=\"header\">\n        <div role=\"group\">\n          {\"~{-S^s >:. lPschjY[7B\"}\n          <div data-weft-slot=\"\" />\n        </div>\n      </div>\n      <div data-weft-slot=\"y@tr\" />\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"' + (globalThis.__weftPwned = 1) + '\" role=\"group\">\n      <div data-weft-slot=\"header\">\n        <div role=\"group\">\n          {\"~{-S^s >:. lPschjY[7B\"}\n          <div data-weft-slot=\"\" />\n        </div>\n      </div>\n      <div data-weft-slot=\"y@tr\" />\n    </div>\n  );\n}\n"
  },
  {
   "document": {
@@ -11249,7 +11406,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "stack",
+    "kind": "checkbox",
     "on": {
      "change": "\"});globalThis.__weftPwned = 1;//",
      "submit": "' + (globalThis.__weftPwned = 1) + '"
@@ -11266,7 +11423,7 @@
     "slots": {}
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div style={{ display: \"flex\", flexDirection: \"column\" }} />\n  );\n}\n"
+  "output": "function _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input type=\"checkbox\" aria-label=\"\" onChange={() => _act(actions, { id: \"\", action: \"\\\"});globalThis.__weftPwned = 1;//\" })} />\n    </label>\n  );\n}\n"
  },
  {
   "document": {
@@ -11321,7 +11478,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "column",
+    "kind": "checkbox",
     "id": "&lt;script&gt;alert(1)&lt;/script&gt;",
     "props": {
      "type": {
@@ -11349,7 +11506,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"&lt;script&gt;alert(1)&lt;/script&gt;\"} role=\"columnheader\">\n      <div data-weft-slot=\"2\" />\n      <div data-weft-slot=\"E\">{\"</main>{globalThis.__weftPwned = 1}<main>\"}</div>\n    </div>\n  );\n}\n"
+  "output": "function _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id={\"&lt;script&gt;alert(1)&lt;/script&gt;\"} type=\"checkbox\" aria-label=\"\" onChange={() => _act(actions, { id: \"&lt;script&gt;alert(1)&lt;/script&gt;\", action: \"`${globalThis.__weftPwned = 1}`\" })} />\n    </label>\n  );\n}\n"
  },
  {
   "document": {
@@ -11491,7 +11648,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "heading",
+    "kind": "x-a-b",
     "id": "Hl[`sP(XPk",
     "props": {
      "value": {
@@ -11555,7 +11712,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <h2 data-weft-id={\"Hl[`sP(XPk\"}>{\"\\\\u0022 */ globalThis.__weftPwned = 1 /*\"}</h2>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id={\"Hl[`sP(XPk\"} role=\"group\">\n      <div data-weft-slot=\"header\" />\n      {\"  \\\\u0022 */ globalThis.__weftPwned = 1 /*\"}\n      <div data-weft-slot=\"0YpEivl\" />\n    </div>\n  );\n}\n"
  },
  {
   "document": {
@@ -11690,7 +11847,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "checkbox",
+    "kind": "color-picker",
     "id": "W1^2",
     "props": {},
     "on": {},
@@ -11702,7 +11859,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id=\"W1^2\" type=\"checkbox\" aria-label=\"\" />\n    </label>\n  );\n}\n"
+  "output": "function _color(v) {\n  return /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : \"#000000\";\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <label>\n      <input data-weft-id=\"W1^2\" type=\"color\" aria-label=\"\" defaultValue={_color(\"\")} />\n    </label>\n  );\n}\n"
  },
  {
   "document": {
@@ -11809,7 +11966,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "alert",
+    "kind": "x-a-b",
     "props": {
      "as": {
       "bind": "$.a"
@@ -11827,7 +11984,7 @@
      ],
      "header": [
       {
-       "kind": "switch",
+       "kind": "checkbox",
        "props": {
         "selected": [
          "&0",
@@ -11841,7 +11998,7 @@
       },
       [
        {
-        "kind": "color-picker",
+        "kind": "menu-item",
         "id": "' + (globalThis.__weftPwned = 1) + '",
         "props": {
          "level": "Lcw4>6",
@@ -11876,7 +12033,7 @@
     }
    }
   },
-  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div role=\"alert\">\n      <div data-weft-slot=\"header\">\n        <label>\n          <input type=\"checkbox\" role=\"switch\" aria-label=\"\" />\n        </label>\n      </div>\n      <div data-weft-slot=\"2\">{\"</main>{globalThis.__weftPwned = 1}<main> dq*u\"}</div>\n    </div>\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div role=\"group\">\n      <div data-weft-slot=\"header\">\n        <label>\n          <input type=\"checkbox\" aria-label=\"\" />\n        </label>\n      </div>\n      <div data-weft-slot=\"2\">{\"</main>{globalThis.__weftPwned = 1}<main> dq*u\"}</div>\n    </div>\n  );\n}\n"
  },
  {
   "document": {
@@ -12053,7 +12210,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "image",
+    "kind": "text",
     "id": "RK",
     "props": {
      "level": "&lt;script&gt;alert(1)&lt;/script&gt;",
@@ -12078,7 +12235,7 @@
     }
    }
   },
-  "output": "function _url(value) {\n  const url = value.replace(/[\\t\\n\\r]/g, \"\").replace(/^[\\u0000- ]+|[\\u0000- ]+$/g, \"\");\n  if (url === \"\") return undefined;\n  const colon = url.indexOf(\":\");\n  const delimiter = url.search(/[/?#]/);\n  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;\n  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();\n  return scheme === \"http\" || scheme === \"https\" || scheme === \"mailto\" ? url : undefined;\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <img data-weft-id=\"RK\" alt=\"\" src={_url(\"\")} />\n  );\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"RK\" />\n  );\n}\n"
  },
  {
   "document": {
@@ -12300,7 +12457,7 @@
   "document": {
    "weft": "0.1",
    "root": {
-    "kind": "combobox",
+    "kind": "column",
     "id": "D9x Ey^Z0!",
     "props": {},
     "on": {
@@ -12318,6 +12475,6 @@
     }
    }
   },
-  "output": "import { Fragment } from \"react\";\n\nfunction _act(actions, event) {\n  if (typeof actions !== \"object\" || actions === null || !Object.hasOwn(actions, event.action)) return;\n  const fn = actions[event.action];\n  if (typeof fn === \"function\") fn(event);\n}\n\nfunction _keyed(list) {\n  return list.map((x, i) => <Fragment key={i}>{x}</Fragment>);\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (() => {\n    const _o = [];\n    return (\n      <label>\n        <input data-weft-id=\"D9x Ey^Z0!\" aria-label=\"\" list={\"weft-D9x Ey^Z0!-options\"} defaultValue={\"\"} onChange={() => _act(actions, { id: \"D9x Ey^Z0!\", action: \"iO 8J\" })} />\n        <datalist id={\"weft-D9x Ey^Z0!-options\"}>\n          {_keyed(_o.map((_x) => _x.el))}\n        </datalist>\n      </label>\n    );\n  })();\n}\n"
+  "output": "export default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <div data-weft-id=\"D9x Ey^Z0!\" role=\"columnheader\">\n      <div data-weft-slot=\"empty\" />\n    </div>\n  );\n}\n"
  }
 ]

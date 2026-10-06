@@ -18,6 +18,7 @@
 // worktree a device of its own, created on first use.
 import { execFileSync, spawnSync } from "node:child_process";
 import {
+  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -345,6 +346,8 @@ function buildApp(dir: string, sources: Map<string, string>, support: Map<string
   const app = join(dir, "WeftScreens.app");
   mkdirSync(app);
   writeFileSync(join(app, "Info.plist"), INFO);
+  // The showroom's still, found by name in the bundle as the generated `WeftModel` looks for it.
+  copyFileSync(join(CORPUS, "showroom/assets/gem.png"), join(app, "gem.png"));
   const files = readdirSync(swift).map((f) => join(swift, f));
   const compiled = run("xcrun", [
     "--sdk",
@@ -456,7 +459,13 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     const lightScreen = DARK_OF.get(name);
     const [screen, scheme] = lightScreen !== undefined ? [lightScreen, "dark"] : [name, "light"];
     execFileSync("xcrun", ["simctl", "launch", "--terminate-running-process", udid, BUNDLE], {
-      env: { ...process.env, SIMCTL_CHILD_WEFT_SCREEN: screen, SIMCTL_CHILD_WEFT_SCHEME: scheme },
+      env: {
+        ...process.env,
+        SIMCTL_CHILD_WEFT_SCREEN: screen,
+        SIMCTL_CHILD_WEFT_SCHEME: scheme,
+        // A live RealityView has no fixed first frame, so a model shows its still (SPEC §9).
+        SIMCTL_CHILD_WEFT_STILL_MODELS: "1",
+      },
       stdio: "ignore",
     });
     const path = join(dir, `${name}.png`);

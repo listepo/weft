@@ -19,8 +19,9 @@ use weft_catalog::{
     Appearance, MATERIAL, Token, composite_part, font_weight, material_parts, token_types,
 };
 use weft_core::{
-    Catalog, Child, ComponentDef, Content, Diagnostic, Document, Mode, Node, ValidateOptions,
-    Value, controls, format_value, has_errors, js_number, serialize, validate_document,
+    Catalog, Child, ComponentDef, Content, Diagnostic, Document, MODEL_ASSETS, Mode, Node,
+    ValidateOptions, Value, asset_problem, controls, format_value, has_errors, js_number,
+    serialize, validate_document,
 };
 
 use crate::fill::fill;
@@ -428,6 +429,18 @@ pub(crate) fn safe_url(value: &str) -> Option<String> {
     (valid && matches!(scheme.as_str(), "http" | "https" | "mailto")).then(|| url.to_owned())
 }
 
+/// A path of a `model` the page may use: one that follows the rule of SPEC §5.1 and the URL rule
+/// of §9. `to_html` validates first, so this holds even for a document built in memory.
+pub(crate) fn model_asset_url(prop: &str, value: &str) -> Option<String> {
+    let extensions = MODEL_ASSETS.iter().find(|(name, _)| *name == prop)?.1;
+    asset_problem(value, extensions).is_none().then_some(())?;
+    safe_url(value)
+}
+
+fn model_asset(n: &Node, prop: &str) -> Option<String> {
+    model_asset_url(prop, &literal_text(n.props.get(prop))?)
+}
+
 fn literal_text(v: Option<&Value>) -> Option<String> {
     match v? {
         Value::String(s) => Some(s.clone()),
@@ -685,6 +698,29 @@ impl Writer<'_> {
                 }
                 let a = Self::finish(n, b);
                 self.inline(depth, "img", &a, "");
+            }
+            "model" => {
+                let mut b = self.base(n, &["src", "usdz", "fallback"], true);
+                b.attrs.set("role", "img");
+                b.attrs.set("alt", Self::label(n));
+                if let Some(src) = model_asset(n, "src") {
+                    b.attrs.set("src", src);
+                }
+                if let Some(usdz) = model_asset(n, "usdz") {
+                    b.attrs.set("ios-src", usdz);
+                }
+                b.attrs.flag("camera-controls");
+                b.attrs.set("interaction-prompt", "none");
+                let a = Self::finish(n, b);
+                self.open(depth, "model-viewer", &a);
+                if let Some(still) = model_asset(n, "fallback") {
+                    let mut poster = Attrs::default();
+                    poster.set("slot", "poster");
+                    poster.set("alt", "");
+                    poster.set("src", still);
+                    self.inline(depth + 1, "img", &poster, "");
+                }
+                self.close(depth, "model-viewer");
             }
             "link" => {
                 let mut b = self.base(n, &["href", "text"], true);

@@ -64,6 +64,46 @@ fn a_tilt_cannot_be_bound() {
     assert_eq!(only("<stack id=\"a\" rotate-y=\"{$.angle}\"/>"), ["W217"]);
 }
 
+#[test]
+fn a_model_takes_relative_paths_and_https_urls_with_the_right_extension() {
+    let model = |attrs: &str| only(&format!("<model id=\"a\" label=\"L\" {attrs}/>"));
+    let good = "src=\"assets/a.GLB\" usdz=\"assets/a.usdz\" fallback=\"a.png\"";
+    assert!(model(good).is_empty());
+    assert!(
+        model("src=\"https://cdn.example/a.gltf?v=1\" fallback=\"https://cdn.example/a.webp\"")
+            .is_empty()
+    );
+    let bad = [
+        "src=\"../a.glb\" fallback=\"a.png\"",
+        "src=\"a/../../b.glb\" fallback=\"a.png\"",
+        "src=\"/etc/a.glb\" fallback=\"a.png\"",
+        "src=\"a\\b.glb\" fallback=\"a.png\"",
+        "src=\"a%2f..%2fb.glb\" fallback=\"a.png\"",
+        "src=\"http://cdn.example/a.glb\" fallback=\"a.png\"",
+        "src=\"javascript:alert(1)//a.glb\" fallback=\"a.png\"",
+        "src=\"data:model/gltf-binary;base64,AA.glb\" fallback=\"a.png\"",
+        "src=\"https://u:p@cdn.example/a.glb\" fallback=\"a.png\"",
+        "src=\"https:///a.glb\" fallback=\"a.png\"",
+        "src=\"a.obj\" fallback=\"a.png\"",
+        "src=\"a.glb\" usdz=\"a.glb\" fallback=\"a.png\"",
+        "src=\"a.glb\" fallback=\"a.svg\"",
+        "src=\"a&#9;.glb\" fallback=\"a.png\"",
+    ];
+    for attrs in bad {
+        assert_eq!(model(attrs), ["W317"], "{attrs}");
+    }
+    let long = format!("src=\"{}.glb\" fallback=\"a.png\"", "a".repeat(2048));
+    assert_eq!(model(&long), ["W317"]);
+}
+
+#[test]
+fn a_model_asset_cannot_be_bound() {
+    assert_eq!(
+        only("<model id=\"a\" label=\"L\" src=\"{$.m}\" fallback=\"a.png\"/>"),
+        ["W217"]
+    );
+}
+
 // ---- modes --------------------------------------------------------------------------------
 
 #[test]

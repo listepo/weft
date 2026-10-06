@@ -76,6 +76,7 @@ export const DIAGNOSTIC_CODES = {
   W314: { severity: "error", summary: "`<each>` without an element to repeat." },
   W315: { severity: "error", summary: "Binding path not declared in the data schema." },
   W316: { severity: "error", summary: "Bound data has a type the attribute does not take." },
+  W317: { severity: "error", summary: "Asset path of a `model` is not an allowed path." },
 
   W401: { severity: "mode", summary: "Unknown element." },
   W402: { severity: "mode", summary: "Unknown attribute." },

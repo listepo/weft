@@ -11,7 +11,7 @@ fn the_embedded_json_is_the_catalog_the_core_reads() {
     let catalog = core_catalog().unwrap();
     assert_eq!(catalog.name, "weft-core");
     assert_eq!(catalog.weft, WEFT_VERSION);
-    assert_eq!(catalog.components.len(), 36);
+    assert_eq!(catalog.components.len(), 37);
     for name in [
         "screen", "stack", "text", "button", "form", "field", "list", "item", "dialog",
     ] {

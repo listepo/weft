@@ -78,3 +78,42 @@ fn an_effect_about_another_axis_is_a_loss() {
         result.losses
     );
 }
+
+#[test]
+fn a_model_shows_the_bundled_usdz_over_the_still_and_reads_back() {
+    let (out, document) = swift(
+        "<model id=\"m\" fallback=\"assets/gem.png\" label=\"A gem\" src=\"assets/gem.glb\" usdz=\"assets/gem.usdz\"/>",
+    );
+    assert!(
+        out.contains("WeftModel(usdz: \"assets/gem.usdz\", fallback: \"assets/gem.png\")"),
+        "{out}"
+    );
+    // The glTF file is for the web only: SwiftUI cannot read it, so it is kept as a marker.
+    assert!(
+        out.contains(".weftProp(\"src\", \"assets/gem.glb\")"),
+        "{out}"
+    );
+    assert!(out.contains("WEFT_STILL_MODELS"), "{out}");
+    assert_eq!(back(&out), document);
+}
+
+#[test]
+fn a_screen_without_a_model_carries_no_model_code() {
+    let (out, _) = swift("<text id=\"t\">Hi</text>");
+    assert!(
+        !out.contains("WeftModel") && !out.contains("RealityView"),
+        "{out}"
+    );
+}
+
+#[test]
+fn a_model_without_a_usdz_is_only_the_still() {
+    let (out, document) = swift(
+        "<model id=\"m\" fallback=\"assets/gem.png\" label=\"A gem\" src=\"assets/gem.glb\"/>",
+    );
+    assert!(
+        out.contains("WeftModel(fallback: \"assets/gem.png\")"),
+        "{out}"
+    );
+    assert_eq!(back(&out), document);
+}

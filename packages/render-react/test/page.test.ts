@@ -97,7 +97,7 @@ test("gallery writes one page per corpus screen and an index", () => {
     out,
   ]);
   const files = readdirSync(out).sort();
-  assert.equal(files.length, 22);
+  assert.equal(files.length, 23);
   assert.ok(files.includes("index.html") && files.includes("login.html"));
   assert.match(readFileSync(join(out, "index.html"), "utf8"), /<a href="login.html">login<\/a>/);
   assert.match(readFileSync(join(out, "login.html"), "utf8"), /<title>Weft corpus: login<\/title>/);

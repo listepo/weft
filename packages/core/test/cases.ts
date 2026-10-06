@@ -96,6 +96,9 @@ export const cases: Record<DocumentCode, Case> = {
   W312: { markup: screen('<screen id="inner" weft="0.1"/>') },
   W313: { markup: screen('<button id="b" submit="true">Send</button>') },
   W314: { markup: screen('<list id="l"><each id="e" as="row" in="{$.rows}"/></list>') },
+  W317: {
+    markup: screen('<model id="m" label="Chair" src="../chair.glb" fallback="chair.png"/>'),
+  },
   W401: { markup: screen('<fancy id="f"/>') },
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
   W403: { markup: screen("", "0.2") },

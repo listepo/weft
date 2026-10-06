@@ -13,6 +13,7 @@ test("every catalog kind is covered by this file", () => {
     "heading",
     "text",
     "image",
+    "model",
     "link",
     "button",
     "form",
