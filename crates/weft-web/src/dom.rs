@@ -380,6 +380,7 @@ impl<'d> Ctx<'d> {
                     _ => (role, None),
                 }
             }
+            "model-viewer" if role == "img" => (role, Some("model")),
             _ if role == "radiogroup" && attr("data-weft-segmented").is_some() => {
                 (role, Some("segmented-control"))
             }
@@ -497,6 +498,24 @@ impl<'d> Ctx<'d> {
             && let Some(v) = attr("src")
         {
             set("src", v);
+        }
+        if named == Some("model") {
+            for (from, to) in [("src", "src"), ("ios-src", "usdz")] {
+                if let Some(v) = attr(from) {
+                    set(to, v);
+                }
+            }
+            // The poster is the model's still; read as an element of its own it would be an image
+            // inside a kind that holds none.
+            let poster = dom
+                .elements(el)
+                .find(|&c| dom.name(c) == Some("img") && dom.attr(c, "slot") == Some("poster"));
+            if let Some(poster) = poster {
+                if let Some(v) = dom.attr(poster, "src") {
+                    set("fallback", v);
+                }
+                self.consumed.insert(poster);
+            }
         }
         if tag == "ol" {
             set("ordered", "true");

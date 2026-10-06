@@ -49,6 +49,17 @@ export const catalog: Catalog = CatalogSchema.parse({
         },
       },
     },
+    model: {
+      description: d,
+      role: "img",
+      content: "none",
+      requiresLabel: true,
+      props: {
+        src: { description: d, type: "string", required: true, bindable: false },
+        usdz: { description: d, type: "string", bindable: false },
+        fallback: { description: d, type: "string", required: true, bindable: false },
+      },
+    },
     link: {
       description: d,
       role: "link",

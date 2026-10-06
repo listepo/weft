@@ -1,0 +1,13 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-model as react-jsx
+---
+export default function WeftScreen({ data, actions, onChange }) {
+  return (
+    <main data-weft-id="root" aria-label="Showroom">
+      <model-viewer data-weft-id="chair" aria-label="A wooden armchair" role="img" alt="A wooden armchair" src="assets/chair.glb" ios-src="assets/chair.usdz" camera-controls="" interaction-prompt="none">
+        <img slot="poster" alt="" src="assets/chair.png" />
+      </model-viewer>
+    </main>
+  );
+}

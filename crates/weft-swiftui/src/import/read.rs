@@ -1151,6 +1151,7 @@ impl<'a> Reader<'a> {
                 self.text_kind(kind, call, mods, path)
             }
             "Image" | "AsyncImage" => self.image(name, call, mods, path),
+            "WeftModel" => self.model(call, mods, path),
             "Button" => {
                 let link = mods.0.iter().any(|m| {
                     m.name == "accessibilityAddTraits"
@@ -1878,6 +1879,20 @@ impl<'a> Reader<'a> {
                 node.props.insert("src".to_owned(), v);
             }
             None => self.lose(LossKind::Values, &here, "the image source is not read"),
+        }
+        self.finish(node, mods, &here)
+    }
+
+    /// The `WeftModel` helper the generator prints; `src` comes back from its `weftProp` marker.
+    fn model(&mut self, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
+        let Some((mut node, here)) = self.element("model", &mut mods, "", path) else {
+            return vec![];
+        };
+        for (arg_name, prop) in [("usdz", "usdz"), ("fallback", "fallback")] {
+            if let Some(v) = arg(&call.args, arg_name).and_then(|e| self.value(e, Leaf::Text, &here))
+            {
+                node.props.insert(prop.to_owned(), v);
+            }
         }
         self.finish(node, mods, &here)
     }

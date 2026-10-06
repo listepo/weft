@@ -183,6 +183,10 @@ fn cases() -> Vec<(&'static str, Case)> {
             in_screen("<button id=\"a\" submit=\"true\">T</button>"),
         ),
         ("W314", in_screen("<each id=\"a\" as=\"x\" in=\"{$.xs}\"/>")),
+        (
+            "W317",
+            in_screen("<model id=\"a\" label=\"L\" src=\"../a.glb\" fallback=\"a.png\"/>"),
+        ),
         ("W401", in_screen("<mystery id=\"a\"/>")),
         ("W402", in_screen("<stack id=\"a\" shape=\"round\"/>")),
         (

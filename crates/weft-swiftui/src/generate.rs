@@ -282,6 +282,7 @@ struct Gen<'a> {
     loop_names: HashSet<String>,
     submits: bool,
     links: bool,
+    models: bool,
     shared_tokens: bool,
     /// The views the app writes for the kinds of its own catalog, by view name.
     custom: IndexMap<String, String>,
@@ -302,6 +303,7 @@ impl<'a> Gen<'a> {
             loop_names: HashSet::new(),
             submits: false,
             links: false,
+            models: false,
             shared_tokens: false,
             custom: IndexMap::new(),
             problems: vec![],
@@ -344,6 +346,9 @@ impl<'a> Gen<'a> {
         if node.kind == "link" && node.props.contains_key("href") {
             self.links = true;
         }
+        if node.kind == "model" {
+            self.models = true;
+        }
         if node.kind == EACH
             && let Some(Value::String(name)) = node.props.get("as")
         {
@@ -383,12 +388,15 @@ impl<'a> Gen<'a> {
                 views.join(", ")
             ));
         }
-        out.extend([
-            String::new(),
-            "import Observation".to_owned(),
-            "import SwiftUI".to_owned(),
-            String::new(),
-        ]);
+        out.push(String::new());
+        if self.models {
+            out.push("import ImageIO".to_owned());
+        }
+        out.push("import Observation".to_owned());
+        if self.models {
+            out.push("import RealityKit".to_owned());
+        }
+        out.extend(["import SwiftUI".to_owned(), String::new()]);
         out.extend(self.model_class());
         out.push(String::new());
         out.extend(self.action_enum());
@@ -430,6 +438,9 @@ impl<'a> Gen<'a> {
         out.push("}".to_owned());
         out.push(String::new());
         out.extend(HELPERS.lines().map(str::to_owned));
+        if self.models {
+            out.extend(MODEL_HELPERS.lines().map(str::to_owned));
+        }
         let mut text = out.join("\n");
         text.push('\n');
         text
@@ -1081,6 +1092,20 @@ impl<'a> Gen<'a> {
                     .map(|s| self.expr(&s, Leaf::Text, loops))
                     .unwrap_or_else(|| string_literal(""));
                 V::line(format!("AsyncImage(url: weftURL({src}))"))
+            }
+            "model" => {
+                // `src` (glTF) has no SwiftUI form and stays a `weftProp` marker.
+                let mut path = |name: &str| {
+                    props
+                        .shift_remove(name)
+                        .map(|v| self.expr(&v, Leaf::Text, loops))
+                };
+                let usdz = path("usdz").map(|usdz| format!("usdz: {usdz}, "));
+                let fallback = path("fallback").unwrap_or_else(|| string_literal(""));
+                V::line(format!(
+                    "WeftModel({}fallback: {fallback})",
+                    usdz.unwrap_or_default()
+                ))
             }
             "link" => {
                 let mut action = vec![];
@@ -1911,6 +1936,10 @@ const HEADING_FONTS: [&str; 6] = [
 
 /// Fixed helpers every generated file carries, `fileprivate` so several screens can share a module.
 const HELPERS: &str = include_str!("helpers.swift");
+
+/// The `model` view, carried only by a file that has a model: it needs RealityKit, which the other
+/// screens do not link.
+const MODEL_HELPERS: &str = include_str!("model.swift");
 
 /// SwiftUI takes a perspective relative to the view, where CSS takes pixels; a view of this many
 /// points is the one the two agree on. `generate` prints `NOMINAL / px` so the importer can read

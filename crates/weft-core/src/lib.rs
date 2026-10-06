@@ -40,7 +40,7 @@ pub use parse::{ParseOptions, ParseResult, parse, parse_partial};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};
 /// The catalog-independent props every element takes (`hidden`, `label`, `state`, …).
 pub use rules::universal_prop;
-pub use rules::{ARIA_ROLES, MAX_DEPTH, TILT_PROPS};
+pub use rules::{ARIA_ROLES, MAX_DEPTH, MODEL_ASSETS, TILT_PROPS, asset_problem};
 /// The grammars of SPEC §2–§4, for importers, generators and project settings that build or check
 /// names, ids and references outside the parser.
 pub use rules::{
