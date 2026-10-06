@@ -62,10 +62,7 @@ class WeftScreen extends LitElement {
               ><input data-weft-id=${"todo-done[" + _i0 + "]"} type="checkbox" aria-label=${(_text(todo?.title).trim()) ?? nothing} .checked=${_on(todo?.done)} @change=${(_e) => onChange?.("$.todos." + _i0 + ".done", _e.currentTarget.checked)}>${_text(todo?.title).trim() ? html`<span aria-hidden="true">${_text(todo?.title).trim()}</span>` : null}</label
             ><button data-weft-id=${"todo-remove[" + _i0 + "]"} type="button" @click=${(_e) => _act(actions, { id: "todo-remove[" + _i0 + "]", action: "todo.remove", item: "$.todos." + _i0 })}>Remove</button
           ></li>`)}</ul
-      ><div data-weft-id="summary" style=${styleMap({ gap: "var(--weft-space-xs)", display: "flex", flexDirection: "row", alignItems: "center" })}
-        ><div data-weft-id="remaining">${!(_text(data?.remaining).trim() === "") ? _squash(_text(data?.remaining)) : ""}</div
-        ><div data-weft-id="remaining-label">items left</div
-      ></div
+      ><div data-weft-id="remaining">${!(_text(data?.remainingLabel).trim() === "") ? _squash(_text(data?.remainingLabel)) : ""}</div
     ></main>`;
   }
 }
