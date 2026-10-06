@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
-| T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
+| T13.1 | todo | P2 | 3 | 0% | |
 | T15.1 | in progress | P3 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
@@ -164,9 +164,9 @@ Split from T52. A `model` element showing a 3D asset, with a still fallback imag
 - Groundwork tried in T52 and removed again: the `model` kind in `packages/catalog/src/core.ts`, `asset_problem` in `weft-core/src/rules.rs`, the `W317` check in `validate.rs`, cases in `packages/core/test/cases.ts` and `crates/weft-core/tests/codes.rs`, `model` in the fixture catalog `packages/core/test/catalog.ts`.
 - Add a corpus screen with a model, covered like the corpus. Screenshots are deterministic (the fallback). Done when the full check exits 0 and new baselines are reviewed.
 
-### T13. Interoperability with A2UI and json-render
+### T13.1. json-render export and import
 
-Export a Weft document to A2UI v0.9 messages and to a json-render spec, and import from both, each with a loss table in SPEC §9. Done when every corpus screen converts both ways and the losses are listed.
+The json-render half of T13: export a Weft document to a json-render spec (`{ root, elements, state }`, the Weft catalog as the json-render catalog) and import one back, with a loss table in SPEC §9, in `crates/weft-interop`. Done when every corpus screen converts both ways and the losses are listed.
 
 ### T15.1. Catalog import from a Custom Elements Manifest
 

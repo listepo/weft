@@ -1,0 +1,152 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-appearance as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "appearance",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "appearance",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "options"
+          ],
+          "accessibility": {
+            "label": "Appearance"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Appearance",
+          "variant": "h1"
+        },
+        {
+          "id": "options",
+          "component": "Column",
+          "children": [
+            "theme",
+            "size",
+            "contrast",
+            "columns",
+            "zoom",
+            "accent",
+            "since",
+            "font"
+          ],
+          "align": "stretch"
+        },
+        {
+          "id": "theme",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Light",
+              "value": "light"
+            },
+            {
+              "label": "Dark",
+              "value": "dark"
+            },
+            {
+              "label": {
+                "path": "/automatic"
+              },
+              "value": "auto"
+            }
+          ],
+          "value": {
+            "path": "/theme"
+          },
+          "label": "Theme",
+          "displayStyle": "chips"
+        },
+        {
+          "id": "size",
+          "component": "Slider",
+          "min": 12,
+          "max": 24,
+          "value": {
+            "path": "/size"
+          },
+          "label": "Text size"
+        },
+        {
+          "id": "contrast",
+          "component": "Slider",
+          "min": 0,
+          "max": 100,
+          "value": {
+            "path": "/contrast"
+          },
+          "label": "Contrast"
+        },
+        {
+          "id": "columns",
+          "component": "TextField",
+          "label": "Columns",
+          "variant": "number",
+          "value": {
+            "path": "/columns"
+          }
+        },
+        {
+          "id": "zoom",
+          "component": "TextField",
+          "label": "Zoom",
+          "variant": "number",
+          "value": {
+            "path": "/zoom"
+          }
+        },
+        {
+          "id": "accent",
+          "component": "TextField",
+          "label": "Accent colour",
+          "variant": "shortText",
+          "value": "#d946ef"
+        },
+        {
+          "id": "since",
+          "component": "DateTimeInput",
+          "value": "2024-05-17",
+          "enableDate": true,
+          "enableTime": false,
+          "label": "Member since"
+        },
+        {
+          "id": "font",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Menlo",
+              "value": "Menlo"
+            }
+          ],
+          "value": [
+            "Inter"
+          ],
+          "label": "Font",
+          "filterable": true
+        }
+      ]
+    }
+  }
+]

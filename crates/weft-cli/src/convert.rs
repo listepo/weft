@@ -12,7 +12,7 @@ use weft_catalog::{
     load_project, load_tokens,
 };
 use weft_core::{Catalog, Document, Mode, ParseOptions, has_errors, parse, parse_json, serialize};
-use weft_import::ImportResult;
+use weft_import::{ImportResult, Loss};
 
 use crate::load_project as load_project_file;
 use crate::{DIAGNOSTICS, ProjectArgs, load_catalog, print, project_file, read};
@@ -212,17 +212,9 @@ pub fn strict_document(file: &Path, catalog: &Catalog) -> Result<Option<Document
     }
 }
 
-/// Losses are not failures: they go to stderr, one per line, and the exit code is 0 unless the
-/// importer reports an error. The screen goes to stdout or `dir`.
-pub fn finish_import(
-    file: &Path,
-    result: &ImportResult,
-    dir: Option<PathBuf>,
-    out: &mut dyn Write,
-) -> Result<u8> {
-    let errors = &mut std::io::stderr();
-    print(file, &result.diagnostics, errors)?;
-    for loss in &result.losses {
+/// One loss per line: `<file>:<path> loss <kind>: <note>`.
+pub fn report_losses(file: &Path, losses: &[Loss], errors: &mut dyn Write) -> Result<()> {
+    for loss in losses {
         let kind = serde_json::to_value(loss.kind)?;
         let kind = kind.as_str().unwrap_or_default();
         writeln!(
@@ -233,6 +225,19 @@ pub fn finish_import(
             loss.note
         )?;
     }
+    Ok(())
+}
+
+/// Losses are not failures: they go to stderr, one per line, and the exit code is 0 unless the
+/// importer reports an error. The screen goes to stdout or `dir`.
+pub fn finish_import(
+    file: &Path,
+    result: &ImportResult,
+    dir: Option<PathBuf>,
+    out: &mut dyn Write,
+) -> Result<u8> {
+    print(file, &result.diagnostics, &mut std::io::stderr())?;
+    report_losses(file, &result.losses, &mut std::io::stderr())?;
     emit(&serialize(&result.document), file, dir, "weft", out)?;
     Ok(if has_errors(&result.diagnostics) {
         DIAGNOSTICS

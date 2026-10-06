@@ -15,6 +15,7 @@ weft-binding = { path = "crates/weft-binding" }
 weft-core = { path = "crates/weft-core" }
 weft-catalog = { path = "crates/weft-catalog" }
 weft-import = { path = "crates/weft-import" }
+weft-interop = { path = "crates/weft-interop" }
 weft-swiftui = { path = "crates/weft-swiftui" }
 weft-web = { path = "crates/weft-web" }
 # weft-core
@@ -42,6 +43,8 @@ oxc_span = "0.152.0"
 proptest = "1.11.0"
 # tests: weft-snapshots, reviewed per-target output snapshots.
 insta = "1.49.0"
+# tests: weft-snapshots, the A2UI JSON Schemas the exported messages are checked against (no network or TLS).
+jsonschema = { version = "0.58.5", default-features = false }
 # weft-cli
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }

@@ -1,0 +1,50 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-radio-group as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "plan"
+          ],
+          "accessibility": {
+            "label": "Plan"
+          }
+        },
+        {
+          "id": "plan",
+          "component": "ChoicePicker",
+          "variant": "mutuallyExclusive",
+          "options": [
+            {
+              "label": "Free",
+              "value": "free"
+            },
+            {
+              "label": "Pro",
+              "value": "pro"
+            }
+          ],
+          "value": {
+            "path": "/plan"
+          },
+          "label": "Plan"
+        }
+      ]
+    }
+  }
+]

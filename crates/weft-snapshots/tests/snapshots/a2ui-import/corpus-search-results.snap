@@ -1,0 +1,24 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-search-results as a2ui-import
+---
+<screen id="search" weft="0.1">
+  <stack id="form">
+    <stack id="bar" direction="row">
+      <field id="query" label="Search" value="{$.query}"/>
+      <button id="go" variant="primary" on-press="search.run">Search</button>
+    </stack>
+  </stack>
+  <list id="results">
+    <each id="each-1" as="item" in="{$.results}">
+      <item id="item-1">
+        <stack id="result">
+          <heading id="result-title" level="3" text="{$item.title}"/>
+          <text id="result-snippet" text="{$item.snippet}"/>
+          <link id="result-open" on-press="results.open">Open</link>
+        </stack>
+      </item>
+    </each>
+  </list>
+  <text id="empty">No results found</text>
+</screen>

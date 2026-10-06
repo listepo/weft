@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-date-picker as a2ui-losses
+---
+Props /screen#root/date-picker#day: disabled: this prop has no A2UI property
+Actions /screen#root/date-picker#day: on-change="delivery.update" has no A2UI event

@@ -1,0 +1,55 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-grid as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "cards"
+          ],
+          "accessibility": {
+            "label": "Gallery"
+          }
+        },
+        {
+          "id": "cards",
+          "component": "Column",
+          "children": [
+            "card-a",
+            "card-b",
+            "card-c"
+          ]
+        },
+        {
+          "id": "card-a",
+          "component": "Text",
+          "text": "Revenue"
+        },
+        {
+          "id": "card-b",
+          "component": "Text",
+          "text": "Orders"
+        },
+        {
+          "id": "card-c",
+          "component": "Text",
+          "text": "Visitors"
+        }
+      ]
+    }
+  }
+]

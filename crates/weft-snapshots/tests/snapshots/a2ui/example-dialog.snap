@@ -1,0 +1,101 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-dialog as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "confirm"
+          ],
+          "accessibility": {
+            "label": "Files"
+          }
+        },
+        {
+          "id": "confirm",
+          "component": "Modal",
+          "trigger": "confirm-trigger",
+          "content": "column",
+          "accessibility": {
+            "label": "Delete file?"
+          }
+        },
+        {
+          "id": "warn",
+          "component": "Text",
+          "text": "This cannot be undone."
+        },
+        {
+          "id": "cancel",
+          "component": "Button",
+          "child": "cancel-label",
+          "variant": "default",
+          "action": {
+            "event": {
+              "name": "dialog.close"
+            }
+          }
+        },
+        {
+          "id": "cancel-label",
+          "component": "Text",
+          "text": "Cancel"
+        },
+        {
+          "id": "ok",
+          "component": "Button",
+          "child": "ok-label",
+          "variant": "default",
+          "action": {
+            "event": {
+              "name": "file.delete"
+            }
+          }
+        },
+        {
+          "id": "ok-label",
+          "component": "Text",
+          "text": "Delete"
+        },
+        {
+          "id": "column",
+          "component": "Column",
+          "children": [
+            "warn",
+            "cancel",
+            "ok"
+          ]
+        },
+        {
+          "id": "confirm-trigger-label",
+          "component": "Text",
+          "text": "Delete file?"
+        },
+        {
+          "id": "confirm-trigger",
+          "component": "Button",
+          "child": "confirm-trigger-label",
+          "action": {
+            "event": {
+              "name": "confirm.open"
+            }
+          }
+        }
+      ]
+    }
+  }
+]

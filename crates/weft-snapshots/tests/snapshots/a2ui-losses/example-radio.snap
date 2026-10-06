@@ -1,0 +1,6 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-radio as a2ui-losses
+---
+Props /screen#root/radio-group#speed/radio#speed-std: disabled: this prop has no A2UI property
+Bindings /screen#root/radio-group#speed/radio#speed-fast: disabled: this binding has no A2UI property

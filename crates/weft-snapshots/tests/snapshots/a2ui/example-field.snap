@@ -1,0 +1,64 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-field as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "email"
+          ],
+          "accessibility": {
+            "label": "Sign up"
+          }
+        },
+        {
+          "id": "email",
+          "component": "TextField",
+          "label": "Email",
+          "variant": "shortText",
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/email"
+                  }
+                }
+              },
+              "message": "Required"
+            },
+            {
+              "condition": {
+                "call": "email",
+                "args": {
+                  "value": {
+                    "path": "/email"
+                  }
+                }
+              },
+              "message": "Not an email address"
+            }
+          ],
+          "value": {
+            "path": "/email"
+          }
+        }
+      ]
+    }
+  }
+]

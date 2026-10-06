@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-error-state as a2ui-import-losses
+---
+Kinds /screen#load-error/stack#alert: a Card has no Weft kind; a stack stands in

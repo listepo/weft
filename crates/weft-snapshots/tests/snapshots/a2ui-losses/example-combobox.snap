@@ -1,0 +1,7 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-combobox as a2ui-losses
+---
+Props /screen#root/combobox#city: disabled: this prop has no A2UI property
+Props /screen#root/combobox#city: placeholder: this prop has no A2UI property
+Actions /screen#root/combobox#city: on-change="shipping.update" has no A2UI event

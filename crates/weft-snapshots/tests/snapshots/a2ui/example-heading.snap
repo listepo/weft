@@ -1,0 +1,46 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: example-heading as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "root",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "root",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title",
+            "subtitle"
+          ],
+          "accessibility": {
+            "label": "Settings"
+          }
+        },
+        {
+          "id": "title",
+          "component": "Text",
+          "text": "Settings",
+          "variant": "h1"
+        },
+        {
+          "id": "subtitle",
+          "component": "Text",
+          "text": {
+            "path": "/section/title"
+          },
+          "variant": "h2"
+        }
+      ]
+    }
+  }
+]

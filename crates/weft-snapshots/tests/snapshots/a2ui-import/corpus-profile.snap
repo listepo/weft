@@ -1,0 +1,15 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-profile as a2ui-import
+---
+<screen id="profile" weft="0.1">
+  <image id="avatar" label="Profile photo" src="{$.user.avatar}"/>
+  <heading id="name" level="1" text="{$.user.name}"/>
+  <text id="bio" text="{$.user.bio}"/>
+  <heading id="links-title" level="2">Links</heading>
+  <stack id="links" direction="row">
+    <link id="website">Website</link>
+    <link id="github">GitHub</link>
+  </stack>
+  <button id="edit" on-press="profile.edit">Edit profile</button>
+</screen>

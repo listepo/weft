@@ -1,0 +1,129 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-menu as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "account-menu",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "account-menu",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "signed-in",
+            "menu"
+          ],
+          "accessibility": {
+            "label": "Account menu"
+          }
+        },
+        {
+          "id": "signed-in",
+          "component": "Text",
+          "text": {
+            "path": "/user/email"
+          }
+        },
+        {
+          "id": "menu",
+          "component": "List",
+          "children": [
+            "item-profile",
+            "item-settings",
+            "item-billing",
+            "item-signout"
+          ],
+          "accessibility": {
+            "label": "Account"
+          }
+        },
+        {
+          "id": "item-profile",
+          "component": "Button",
+          "child": "item-profile-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "nav.profile"
+            }
+          }
+        },
+        {
+          "id": "item-profile-label",
+          "component": "Text",
+          "text": "Profile"
+        },
+        {
+          "id": "item-settings",
+          "component": "Button",
+          "child": "item-settings-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "nav.settings"
+            }
+          }
+        },
+        {
+          "id": "item-settings-label",
+          "component": "Text",
+          "text": "Settings"
+        },
+        {
+          "id": "item-billing",
+          "component": "Button",
+          "child": "item-billing-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "nav.billing"
+            }
+          },
+          "checks": [
+            {
+              "condition": {
+                "call": "required",
+                "args": {
+                  "value": {
+                    "path": "/isOwner"
+                  }
+                }
+              },
+              "message": "Not available"
+            }
+          ]
+        },
+        {
+          "id": "item-billing-label",
+          "component": "Text",
+          "text": "Billing"
+        },
+        {
+          "id": "item-signout",
+          "component": "Button",
+          "child": "item-signout-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "auth.signout"
+            }
+          }
+        },
+        {
+          "id": "item-signout-label",
+          "component": "Text",
+          "text": "Sign out"
+        }
+      ]
+    }
+  }
+]
