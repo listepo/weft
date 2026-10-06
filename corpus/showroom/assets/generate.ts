@@ -209,7 +209,7 @@ export function png(width = 320, height = 240): Buffer {
       0.35 +
       0.65 * Math.max(0, (n[0] * light[0] + n[1] * light[1] + n[2] * light[2]) / lightLength);
     const color = COLOR.map((c) => Math.min(1, c * shade * 1.2)) as Vec;
-    const [a, b, c] = face.map((p) => project(turn(p))) as [number[], number[], number[]];
+    const [a, b, c] = face.map((p) => project(turn(p))) as [Vec, Vec, Vec];
     const area = (b[0]! - a[0]!) * (c[1]! - a[1]!) - (b[1]! - a[1]!) * (c[0]! - a[0]!);
     const minX = Math.max(0, Math.floor(Math.min(a[0]!, b[0]!, c[0]!)));
     const maxX = Math.min(w - 1, Math.ceil(Math.max(a[0]!, b[0]!, c[0]!)));
