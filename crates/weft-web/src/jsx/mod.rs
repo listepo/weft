@@ -2049,12 +2049,12 @@ impl<'a> Gen<'a> {
             let write = self
                 .write(n, "value", "_v")
                 .map(|w| format!("if (_v !== undefined) {w}"));
+            // With nothing to write or fire the handler stays (React warns about a controlled
+            // input without one), but a lone `const` is not a valid arrow body.
+            let read = (write.is_some() || change.is_some()).then(|| format!("const _v = {read}"));
             a.push(attr_js(
                 on_input,
-                Self::handler(
-                    "(_e)",
-                    vec![Some(format!("const _v = {read}")), write, change],
-                ),
+                Self::handler("(_e)", vec![read, write, change]),
             ));
         } else {
             a.push(attr_js(self.an("defaultValue"), shown));

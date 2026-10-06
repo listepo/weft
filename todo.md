@@ -7,4 +7,3 @@
 - T52.1. 3D models
 - T13.1. json-render export and import
 - T15.1. Catalog import from a Custom Elements Manifest
-- T61. Valid change handler for a read-only bound control

@@ -407,6 +407,20 @@ const json = fc.letrec((tie) => ({
   ),
 }));
 
+// A `value` bound to something that is not a path has no write-back, and without `on-change`
+// there is nothing left for the handler to do but read: it must still be a valid arrow function.
+test("a read-only bound control keeps a valid change handler on every target", () => {
+  for (const framework of ["react", "solid", "lit"] as const) {
+    for (const kind of ["slider", "stepper", "date-picker", "color-picker", "combobox"]) {
+      const d = doc({ kind, id: "c", props: { label: "L", value: { bind: "no path" } } });
+      const source = toJsx(d, { catalog: coreCatalog, framework });
+      const { errors } = parseSync("screen.jsx", source);
+      assert.deepEqual(errors, [], `${framework} ${kind}\n${source}`);
+      assert.doesNotMatch(source, /=> const /, `${framework} ${kind}`);
+    }
+  }
+});
+
 test("property: any input yields a well-formed module", () => {
   fc.assert(
     fc.property(json.value, (root) => {
