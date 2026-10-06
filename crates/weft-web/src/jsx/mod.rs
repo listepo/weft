@@ -26,8 +26,8 @@ use weft_core::{
 };
 use weft_import::{js_number_from, js_trim, squash};
 
-use crate::js::{INHERITED, V, compare_utf16, is_integer, is_plain_segment, js_round, quote};
 use crate::html::model_asset_url;
+use crate::js::{INHERITED, V, compare_utf16, is_integer, is_plain_segment, js_round, quote};
 use crate::tilt;
 pub use runtime::{Helper, RUNTIME, react_runtime};
 use tree::{
@@ -1393,7 +1393,11 @@ impl<'a> Gen<'a> {
         let poster = path("fallback").map(|still| {
             C::J(el(
                 "img",
-                vec![attr_s("slot", "poster"), attr_s("alt", ""), attr_s("src", still)],
+                vec![
+                    attr_s("slot", "poster"),
+                    attr_s("alt", ""),
+                    attr_s("src", still),
+                ],
                 vec![],
             ))
         });

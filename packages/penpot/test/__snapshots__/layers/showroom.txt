@@ -1,0 +1,61 @@
+board "screen#showroom" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#showroom>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#showroom)
+  | weft/weft.source = {"kind":"screen","id":"showroom","props":{"label":"Showroom"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "heading#title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#title>","dir":"column"}
+    | weft/weft.kind = heading
+    | weft/weft.origin = shape(heading#title)
+    | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Showroom"],"shown":{"text":"Showroom"}}
+    text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Showroom"
+  board "stack#shelf" tokens={"rowGap":"space.lg","columnGap":"space.lg"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":24,"columnGap":24,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#shelf>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(stack#shelf)
+    | weft/weft.source = {"kind":"stack","id":"shelf","props":{"gap":{"token":"space.lg"}}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    board "section#gem-section" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#gem-section>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(section#gem-section)
+      | weft/weft.source = {"kind":"section","id":"gem-section","props":{"label":"Gem"}}
+      | weft/weft.style = [[],[],0,[12,12,12,12],8]
+      board "model#gem" inCopy=true head=true componentOf="<model>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<model#gem>","dir":"column"}
+        | weft/weft.kind = model
+        | weft/weft.origin = shape(model#gem)
+        | weft/weft.source = {"kind":"model","id":"gem","props":{"fallback":"assets/gem.png","label":"A teal gem with eight triangular faces","src":"assets/gem.glb","usdz":"assets/gem.usdz"},"shown":{"text":""}}
+        rectangle "model" width=160 height=120 inCopy=true fillList=[{"fillColor":"#e6e8eb","fillOpacity":1}]
+      board "text#gem-caption" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#gem-caption>","dir":"column"}
+        | weft/weft.kind = text
+        | weft/weft.origin = shape(text#gem-caption)
+        | weft/weft.source = {"kind":"text","id":"gem-caption","props":{"text":{"bind":"$.caption"}},"shown":{"text":"{$.caption}"}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.caption}"
+      board "button#gem-pick" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.primary"} inCopy=true head=true componentOf="<variant=primary, state=(unset)>" fillList=[{"fillColor":"#2663eb","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#gem-pick>","dir":"row"}
+        | weft/weft.kind = button
+        | weft/weft.origin = shape(button#gem-pick)
+        | weft/weft.source = {"kind":"button","id":"gem-pick","props":{"variant":"primary"},"on":{"press":"gem.pick"},"children":["Choose this gem"],"shown":{"text":"Choose this gem"}}
+        text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Choose this gem"
+      board "slot:header" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
+        | weft/weft.slot = header
+        board "heading#gem-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#gem-title>","dir":"column"}
+          | weft/weft.kind = heading
+          | weft/weft.origin = shape(heading#gem-title)
+          | weft/weft.source = {"kind":"heading","id":"gem-title","props":{"level":2},"children":["Gem"],"shown":{"text":"Gem"}}
+          text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Gem"
+    board "section#turned-section" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#turned-section>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(section#turned-section)
+      | weft/weft.source = {"kind":"section","id":"turned-section","props":{"label":"Turned gem"}}
+      | weft/weft.style = [[],[],0,[12,12,12,12],8]
+      board "model#turned" inCopy=true head=true componentOf="<model>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<model#turned>","dir":"column"}
+        | weft/weft.kind = model
+        | weft/weft.origin = shape(model#turned)
+        | weft/weft.source = {"kind":"model","id":"turned","props":{"fallback":"assets/gem.png","label":"The same gem turned to its side","perspective":800,"rotate-y":20,"src":"assets/gem.glb"},"shown":{"text":""}}
+        rectangle "model" width=160 height=120 inCopy=true fillList=[{"fillColor":"#e6e8eb","fillOpacity":1}]
+      board "text#turned-caption" inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#turned-caption>","dir":"column"}
+        | weft/weft.kind = text
+        | weft/weft.origin = shape(text#turned-caption)
+        | weft/weft.source = {"kind":"text","id":"turned-caption","children":["Without a USDZ file Apple platforms show the still image."],"shown":{"text":"Without a USDZ file Apple platforms show the still image."}}
+        text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Without a USDZ file Apple platforms show the still image."
+      board "slot:header" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
+        | weft/weft.slot = header
+        board "heading#turned-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#turned-title>","dir":"column"}
+          | weft/weft.kind = heading
+          | weft/weft.origin = shape(heading#turned-title)
+          | weft/weft.source = {"kind":"heading","id":"turned-title","props":{"level":2},"children":["Turned"],"shown":{"text":"Turned"}}
+          text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Turned"

@@ -3782,6 +3782,153 @@
   }
  },
  {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"image\" href=\"assets/gem.png\"/><title>Weft</title></head><body><main data-weft-id=\"showroom\" aria-label=\"Showroom\"><h1 data-weft-id=\"title\">Showroom</h1><div data-weft-id=\"shelf\" style=\"gap:var(--weft-space-lg);display:flex;flex-direction:column\"><section data-weft-id=\"gem-section\" aria-label=\"Gem\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"gem-title\">Gem</h2></div><model-viewer data-weft-id=\"gem\" aria-label=\"A teal gem with eight triangular faces\" role=\"img\" alt=\"A teal gem with eight triangular faces\" src=\"assets/gem.glb\" ios-src=\"assets/gem.usdz\" camera-controls=\"\" interaction-prompt=\"none\"><img slot=\"poster\" alt=\"\" src=\"assets/gem.png\"/></model-viewer><div data-weft-id=\"gem-caption\">Drag to turn it; the still image shows until the model has loaded.</div><button data-weft-id=\"gem-pick\" type=\"button\" data-variant=\"primary\">Choose this gem</button></section><section data-weft-id=\"turned-section\" aria-label=\"Turned gem\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"turned-title\">Turned</h2></div><model-viewer data-weft-id=\"turned\" aria-label=\"The same gem turned to its side\" role=\"img\" alt=\"The same gem turned to its side\" src=\"assets/gem.glb\" camera-controls=\"\" interaction-prompt=\"none\" style=\"transform:perspective(800px) rotateY(20deg)\"><img slot=\"poster\" alt=\"\" src=\"assets/gem.png\"/></model-viewer><div data-weft-id=\"turned-caption\">Without a USDZ file Apple platforms show the still image.</div></section></div></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "showroom",
+     "props": {
+      "label": "Showroom"
+     },
+     "children": [
+      {
+       "kind": "heading",
+       "id": "title",
+       "props": {
+        "level": 1
+       },
+       "children": [
+        "Showroom"
+       ]
+      },
+      {
+       "kind": "stack",
+       "id": "shelf",
+       "children": [
+        {
+         "kind": "section",
+         "id": "gem-section",
+         "props": {
+          "label": "Gem"
+         },
+         "children": [
+          {
+           "kind": "heading",
+           "id": "gem-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Gem"
+           ]
+          },
+          {
+           "kind": "model",
+           "id": "gem",
+           "props": {
+            "fallback": "assets/gem.png",
+            "label": "A teal gem with eight triangular faces",
+            "src": "assets/gem.glb",
+            "usdz": "assets/gem.usdz"
+           }
+          },
+          {
+           "kind": "text",
+           "id": "gem-caption",
+           "children": [
+            "Drag to turn it; the still image shows until the model has loaded."
+           ]
+          },
+          {
+           "kind": "button",
+           "id": "gem-pick",
+           "props": {
+            "variant": "primary"
+           },
+           "children": [
+            "Choose this gem"
+           ]
+          }
+         ]
+        },
+        {
+         "kind": "section",
+         "id": "turned-section",
+         "props": {
+          "label": "Turned gem"
+         },
+         "children": [
+          {
+           "kind": "heading",
+           "id": "turned-title",
+           "props": {
+            "level": 2
+           },
+           "children": [
+            "Turned"
+           ]
+          },
+          {
+           "kind": "model",
+           "id": "turned",
+           "props": {
+            "fallback": "assets/gem.png",
+            "label": "The same gem turned to its side",
+            "src": "assets/gem.glb"
+           }
+          },
+          {
+           "kind": "text",
+           "id": "turned-caption",
+           "children": [
+            "Without a USDZ file Apple platforms show the still image."
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#showroom",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#showroom",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#showroom",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#showroom",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#showroom",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#showroom/stack#shelf",
+     "note": "gap var(--weft-space-lg) cannot be mapped back to a design token"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
   "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"signup\" aria-label=\"Create account\"><form data-weft-id=\"form\" data-state=\"idle\"><h1 data-weft-id=\"title\">Create your account</h1><div data-weft-id=\"fields\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:column\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Full name</span><input data-weft-id=\"name\" aria-label=\"Full name\" type=\"text\" required=\"\" value=\"Ada Lovelace\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Email</span><input data-weft-id=\"email\" aria-label=\"Email\" type=\"email\" required=\"\" value=\"ada@example.com\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Password</span><input data-weft-id=\"password\" aria-label=\"Password\" type=\"password\" required=\"\" value=\"\"/></label></div><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Confirm password</span><input data-weft-id=\"confirm\" aria-label=\"Confirm password\" type=\"password\" required=\"\" value=\"\"/></label></div><label><input data-weft-id=\"terms\" type=\"checkbox\" aria-label=\"I accept the terms of service\"/><span aria-hidden=\"true\">I accept the terms of service</span></label></div><button data-weft-id=\"submit\" type=\"submit\" disabled=\"\" data-variant=\"primary\">Create account</button><div data-weft-slot=\"footer\"><a data-weft-id=\"signin\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Already have an account? Sign in</a></div></form></main></body></html>\n",
   "result": {
    "document": {
@@ -6264,6 +6411,61 @@
          ]
         }
        ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#root",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#root",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "slots",
+     "path": "/screen#root",
+     "note": "slot membership is not in the HTML; slot content is imported as default content"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#root",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"image\" href=\"assets/chair.png\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Showroom\"><model-viewer data-weft-id=\"chair\" aria-label=\"A wooden armchair\" role=\"img\" alt=\"A wooden armchair\" src=\"assets/chair.glb\" ios-src=\"assets/chair.usdz\" camera-controls=\"\" interaction-prompt=\"none\"><img slot=\"poster\" alt=\"\" src=\"assets/chair.png\"/></model-viewer></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "root",
+     "props": {
+      "label": "Showroom"
+     },
+     "children": [
+      {
+       "kind": "model",
+       "id": "chair",
+       "props": {
+        "fallback": "assets/chair.png",
+        "label": "A wooden armchair",
+        "src": "assets/chair.glb",
+        "usdz": "assets/chair.usdz"
+       }
       }
      ]
     }

@@ -1,0 +1,53 @@
+FRAME "screen#showroom" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#showroom)
+  | weft.source = {"kind":"screen","id":"showroom","props":{"label":"Showroom"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+    | weft.origin = layer(heading#title)
+    | weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Showroom"],"shown":{"text":"Showroom"}}
+    TEXT "text" chars="Showroom" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "stack#shelf" layoutMode="VERTICAL" itemSpacing=24 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/lg)"}
+    | weft.origin = layer(stack#shelf)
+    | weft.source = {"kind":"stack","id":"shelf","props":{"gap":{"token":"space.lg"}}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    FRAME "section#gem-section" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(section#gem-section)
+      | weft.source = {"kind":"section","id":"gem-section","props":{"label":"Gem"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      INSTANCE "model#gem" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<model>"
+        | weft.origin = layer(model#gem)
+        | weft.source = {"kind":"model","id":"gem","props":{"fallback":"assets/gem.png","label":"A teal gem with eight triangular faces","src":"assets/gem.glb","usdz":"assets/gem.usdz"},"shown":{"text":""}}
+        RECTANGLE "model" width=160 height=120 fills=[{"type":"SOLID","color":"#e6e8eb"}]
+      INSTANCE "text#gem-caption" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#gem-caption)
+        | weft.source = {"kind":"text","id":"gem-caption","props":{"text":{"bind":"$.caption"}},"shown":{"text":"{$.caption}"}}
+        TEXT "text" chars="{$.caption}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      INSTANCE "button#gem-pick" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+        | weft.origin = layer(button#gem-pick)
+        | weft.source = {"kind":"button","id":"gem-pick","props":{"variant":"primary"},"on":{"press":"gem.pick"},"children":["Choose this gem"],"shown":{"text":"Choose this gem"}}
+        TEXT "text" chars="Choose this gem" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+      FRAME "slot:header" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.slot = header
+        INSTANCE "heading#gem-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#gem-title)
+          | weft.source = {"kind":"heading","id":"gem-title","props":{"level":2},"children":["Gem"],"shown":{"text":"Gem"}}
+          TEXT "text" chars="Gem" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    FRAME "section#turned-section" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
+      | weft.origin = layer(section#turned-section)
+      | weft.source = {"kind":"section","id":"turned-section","props":{"label":"Turned gem"}}
+      | weft.style = [[],[],0,[12,12,12,12],8]
+      INSTANCE "model#turned" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<model>"
+        | weft.origin = layer(model#turned)
+        | weft.source = {"kind":"model","id":"turned","props":{"fallback":"assets/gem.png","label":"The same gem turned to its side","perspective":800,"rotate-y":20,"src":"assets/gem.glb"},"shown":{"text":""}}
+        RECTANGLE "model" width=160 height=120 fills=[{"type":"SOLID","color":"#e6e8eb"}]
+      INSTANCE "text#turned-caption" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
+        | weft.origin = layer(text#turned-caption)
+        | weft.source = {"kind":"text","id":"turned-caption","children":["Without a USDZ file Apple platforms show the still image."],"shown":{"text":"Without a USDZ file Apple platforms show the still image."}}
+        TEXT "text" chars="Without a USDZ file Apple platforms show the still image." size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+      FRAME "slot:header" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+        | weft.slot = header
+        INSTANCE "heading#turned-title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
+          | weft.origin = layer(heading#turned-title)
+          | weft.source = {"kind":"heading","id":"turned-title","props":{"level":2},"children":["Turned"],"shown":{"text":"Turned"}}
+          TEXT "text" chars="Turned" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]

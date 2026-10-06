@@ -39,6 +39,7 @@ const expected: Record<string, Row> = {
     enums: { tone: ["default", "muted", "success", "warning", "danger"] },
   },
   image: { role: "img", content: "none", label: true, required: ["src"] },
+  model: { role: "img", content: "none", label: true, required: ["src", "fallback"] },
   link: { role: "link", content: "text", events: ["press"] },
   button: {
     role: "button",

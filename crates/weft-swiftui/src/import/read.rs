@@ -1889,7 +1889,8 @@ impl<'a> Reader<'a> {
             return vec![];
         };
         for (arg_name, prop) in [("usdz", "usdz"), ("fallback", "fallback")] {
-            if let Some(v) = arg(&call.args, arg_name).and_then(|e| self.value(e, Leaf::Text, &here))
+            if let Some(v) =
+                arg(&call.args, arg_name).and_then(|e| self.value(e, Leaf::Text, &here))
             {
                 node.props.insert(prop.to_owned(), v);
             }
