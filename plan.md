@@ -185,3 +185,9 @@ A generator for Lit web components and an importer that turns a Custom Elements 
 After T59 masked the home indicator, two more SwiftUI screenshot flakes showed up on main in four full visual runs: `tilt` once differed by 38,537 px because the capture included the black Dynamic Island pill at the top, and `glass-dark` twice differed by 2 px, most likely from blur noise in the glass effect. Both pass on rerun, so the merge gate is unreliable.
 
 Mask the top system strip the same way T59 masks the bottom one (the host app measures the top safe-area inset from its window and the comparison blanks it in both images), or keep the island out of the capture if the simulator allows it. For the glass screens, prefer a deterministic render; if blur stays noisy, allow a small, documented per-screen pixel tolerance for those screens only. Retake baselines only if the compared area changes, and review them. Done when the SwiftUI suite passes 5 consecutive runs in `WEFT_SIMULATOR=own` and 1 in `shared`, and the full check exits 0.
+
+Execution plan:
+
+1. Top strip: the host app also writes the window's top safe-area inset to `insets.json`; `compare` and `matchBaseline` take `ignoreTop` beside `ignoreBottom`; every SwiftUI comparison passes both (`packages/visual/src/compare.ts`, `baseline.ts`, `test/swiftui.test.ts`, `test/compare.test.ts`).
+2. Glass: shoot `glass` and `glass-dark` many times, compare each shot with the baseline and with the previous one, and find which pixels differ and whether the render is nondeterministic. Choose a deterministic fix, or a small per-screen tolerance for those two screens only, documented in `packages/visual/README.md`.
+3. Verify: `compare` unit tests, the SwiftUI suite 5 times with `WEFT_SIMULATOR=own` and once with `shared`, then the full check.
