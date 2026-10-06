@@ -13,7 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T52.1 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T13 | in progress | P2 | 4 | 0% | Claude Code / claude-sonnet-5-5 |
 | T15.1 | in progress | P3 | 3 | 0% | Claude Code / claude-sonnet-5-5 |
-| T18 | in progress | P3 | 2 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T8. Evaluation
 
@@ -164,12 +163,6 @@ Split from T52. A `model` element showing a 3D asset, with a still fallback imag
 - **Asset paths are untrusted:** the three paths are literals validated by a new code `W317` (relative path without `..`, backslash, control characters or a scheme, or an `https` URL; the right extension; at most 2048 bytes), and renderers apply the existing `safe_url` / `safeUrl` guard again. One small properly licensed asset ships in the corpus with its licence noted; a test bounds its size. Design tools draw the library's image rectangle.
 - Groundwork tried in T52 and removed again: the `model` kind in `packages/catalog/src/core.ts`, `asset_problem` in `weft-core/src/rules.rs`, the `W317` check in `validate.rs`, cases in `packages/core/test/cases.ts` and `crates/weft-core/tests/codes.rs`, `model` in the fixture catalog `packages/core/test/catalog.ts`.
 - Add a corpus screen with a model, covered like the corpus. Screenshots are deterministic (the fallback). Done when the full check exits 0 and new baselines are reviewed.
-
-### T18. Follow-ups from the prototype
-
-- `fromDom` recovers slot membership from the renderer's `data-weft-slot` wrappers; SPEC §9 stops listing slots as always lost from DOM.
-- Catalog fields for the validator rules that are still tied to specific kinds (`tabs.selected` names a `tab`, `screen` only at the root).
-- Corpus: per-row accessible names for the Delete buttons in `data-table`; singular and plural in the `todo-list` counter.
 
 ### T13. Interoperability with A2UI and json-render
 

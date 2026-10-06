@@ -14,7 +14,7 @@ import SwiftUI
 final class TodosModel {
     var draft: String = ""
     var todos: [TodosItemData] = []
-    var remaining: String = ""
+    var remainingLabel: String = ""
 
     struct TodosItemData: Hashable, Sendable {
         var done: Bool = false
@@ -43,7 +43,6 @@ struct TodosTheme: Sendable {
 
     struct SpaceTokens: Sendable {
         var sm: CGFloat = 8
-        var xs: CGFloat = 4
     }
 }
 
@@ -98,14 +97,8 @@ struct TodosScreen: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("list")
-            HStack(spacing: theme.space.xs) {
-                Text(model.remaining)
-                    .accessibilityIdentifier("remaining")
-                Text("items left")
-                    .accessibilityIdentifier("remaining-label")
-            }
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("summary")
+            Text(model.remainingLabel)
+                .accessibilityIdentifier("remaining")
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tasks")

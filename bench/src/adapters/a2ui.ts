@@ -110,19 +110,16 @@ export function parseA2ui(src: string): Parsed {
   }
   if (!byId.has("root")) return { errors: [...errors, 'no component with id "root"'] };
 
+  const labelOf = (v: Json): Partial<NNode> => {
+    const d = dynamic(v);
+    return d.path ? { nameBind: d.path } : d.lit !== undefined ? { name: collapse(d.lit) } : {};
+  };
   const textOf = (id: string | undefined): Partial<NNode> => {
     const t = id ? byId.get(id) : undefined;
     const d = dynamic(t?.text);
     return d.path ? { nameBind: d.path } : d.lit !== undefined ? { name: collapse(d.lit) } : {};
   };
-  const named = (c: Json): Partial<NNode> => {
-    const label = c.accessibility?.label;
-    return typeof label === "string" ? { name: collapse(label) } : {};
-  };
-  const labelOf = (v: Json): Partial<NNode> => {
-    const d = dynamic(v);
-    return d.path ? { nameBind: d.path } : d.lit !== undefined ? { name: collapse(d.lit) } : {};
-  };
+  const named = (c: Json): Partial<NNode> => labelOf(c.accessibility?.label);
   const seen = new Set<string>();
 
   const kids = (list: Json): NNode[] => {
@@ -164,7 +161,12 @@ export function parseA2ui(src: string): Parsed {
       }
       case "Button": {
         const link = c.variant === "borderless";
-        const n = node(link ? "link" : "button", textOf(c.child));
+        // An accessibility label names the button instead of the text it shows.
+        const label = named(c);
+        const n = node(
+          link ? "link" : "button",
+          Object.keys(label).length ? label : textOf(c.child),
+        );
         if (!link) n.variant = c.variant === "primary" ? "primary" : "secondary";
         const ev = c.action?.event?.name;
         if (typeof ev === "string") n.on.press = ev;

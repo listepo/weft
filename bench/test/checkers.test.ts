@@ -138,14 +138,14 @@ const solutions: Record<string, Partial<Record<Format, (src: string) => string>>
     html: (s) =>
       replace(
         s,
-        '<button type="button" data-variant="danger"',
-        '<button type="button" data-action="press:users.edit">Edit</button>\n<button type="button" data-variant="danger"',
+        '<button type="button" data-variant="danger" data-bind="label:$user.deleteLabel"',
+        '<button type="button" data-action="press:users.edit">Edit</button>\n<button type="button" data-variant="danger" data-bind="label:$user.deleteLabel"',
       ),
     jsx: (s) =>
       replace(
         s,
-        '<button type="button" data-variant="danger"',
-        '<button type="button" onClick={() => actions.users.edit()}>Edit</button>\n<button type="button" data-variant="danger"',
+        '<button type="button" aria-label={user.deleteLabel} data-variant="danger"',
+        '<button type="button" onClick={() => actions.users.edit()}>Edit</button>\n<button type="button" aria-label={user.deleteLabel} data-variant="danger"',
       ),
     a2ui: (s) =>
       a2ui(s, (byId, list) => {

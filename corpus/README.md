@@ -31,7 +31,7 @@ Each format follows its own idiom; none is minified or padded. Ids appear in HTM
 
 ## HTML conventions
 
-- `data-bind="prop:$.path; prop2:!$.path"` binds an element property to the data model. Properties: `value`, `checked`, `open`, `src`, `href`, `disabled`, `hidden`, `text` (element content). `!` negates.
+- `data-bind="prop:$.path; prop2:!$.path"` binds an element property to the data model. Properties: `value`, `checked`, `open`, `src`, `href`, `disabled`, `hidden`, `text` (element content), `label` (the accessible name, written as `aria-label`). `!` negates.
 - `data-action="event:action.name"` names the host action an event fires. Events: `press`, `submit`, `change`, `close`.
 - Repetition: `<template data-each="$.items" data-as="item">`; inside it paths are `$item.field`.
 - Empty state: `<template data-empty>` inside a list or table holds the content shown instead of the items when there are none (Weft's `empty` slot).

@@ -14,17 +14,17 @@ import SwiftUI
 final class TodosModel {
     var draft: String = ""
     var todos: [TodosItemData] = []
-    var remaining: String = ""
+    var remainingLabel: String = ""
 
     /// Every property, defaulting to the value it is declared with.
     init(
         draft: String = "",
         todos: [TodosItemData] = [],
-        remaining: String = ""
+        remainingLabel: String = ""
     ) {
         self.draft = draft
         self.todos = todos
-        self.remaining = remaining
+        self.remainingLabel = remainingLabel
     }
 
     struct TodosItemData: Hashable, Sendable {
@@ -48,7 +48,7 @@ extension TodosModel {
                     title: "Build parser"
                 )
             ],
-            remaining: "1"
+            remainingLabel: "1 item left"
         )
     }
 }
@@ -74,7 +74,6 @@ struct TodosTheme: Sendable {
 
     struct SpaceTokens: Sendable {
         var sm: CGFloat = 8
-        var xs: CGFloat = 4
     }
 }
 
@@ -129,14 +128,8 @@ struct TodosScreen: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("list")
-            HStack(spacing: theme.space.xs) {
-                Text(model.remaining)
-                    .accessibilityIdentifier("remaining")
-                Text("items left")
-                    .accessibilityIdentifier("remaining-label")
-            }
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("summary")
+            Text(model.remainingLabel)
+                .accessibilityIdentifier("remaining")
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tasks")

@@ -75,7 +75,7 @@ export default function WeftScreen({ data, actions, onChange }) {
                   </div>
                 </td>
                 <td data-weft-id={"cell-actions[" + _i0 + "]"}>
-                  <button data-weft-id={"delete[" + _i0 + "]"} type="button" data-variant="danger" onClick={(_e) => _act(actions, { id: "delete[" + _i0 + "]", action: "users.delete", item: "$.users." + _i0 })}>Delete</button>
+                  <button data-weft-id={"delete[" + _i0 + "]"} aria-label={_text(user?.deleteLabel).trim() || undefined} type="button" data-variant="danger" onClick={(_e) => _act(actions, { id: "delete[" + _i0 + "]", action: "users.delete", item: "$.users." + _i0 })}>Delete</button>
                 </td>
               </tr>
             ),
