@@ -61,11 +61,22 @@ export function glb(): Buffer {
     materials: [
       {
         name: "Teal",
-        pbrMetallicRoughness: { baseColorFactor: [...COLOR, 1], metallicFactor: 0.2, roughnessFactor: 0.4 },
+        pbrMetallicRoughness: {
+          baseColorFactor: [...COLOR, 1],
+          metallicFactor: 0.2,
+          roughnessFactor: 0.4,
+        },
       },
     ],
     accessors: [
-      { bufferView: 0, componentType: 5126, count: FACES.length * 3, type: "VEC3", min: [-0.8, -1, -0.8], max: [0.8, 1, 0.8] },
+      {
+        bufferView: 0,
+        componentType: 5126,
+        count: FACES.length * 3,
+        type: "VEC3",
+        min: [-0.8, -1, -0.8],
+        max: [0.8, 1, 0.8],
+      },
       { bufferView: 1, componentType: 5126, count: FACES.length * 3, type: "VEC3" },
       { bufferView: 2, componentType: 5123, count: FACES.length * 3, type: "SCALAR" },
     ],
@@ -174,10 +185,18 @@ export function png(width = 320, height = 240): Buffer {
     const [x, y, z] = p;
     const x1 = x * Math.cos(yaw) + z * Math.sin(yaw);
     const z1 = -x * Math.sin(yaw) + z * Math.cos(yaw);
-    return [x1, y * Math.cos(pitch) - z1 * Math.sin(pitch), y * Math.sin(pitch) + z1 * Math.cos(pitch)];
+    return [
+      x1,
+      y * Math.cos(pitch) - z1 * Math.sin(pitch),
+      y * Math.sin(pitch) + z1 * Math.cos(pitch),
+    ];
   };
   const scale = h * 0.4;
-  const project = (p: Vec): [number, number, number] => [w / 2 + p[0] * scale, h / 2 - p[1] * scale, p[2]];
+  const project = (p: Vec): [number, number, number] => [
+    w / 2 + p[0] * scale,
+    h / 2 - p[1] * scale,
+    p[2],
+  ];
   const light: Vec = [-0.4, 0.7, 0.6];
   const lightLength = Math.hypot(...light);
   const background: Vec = [0.93, 0.95, 0.97];
@@ -186,7 +205,9 @@ export function png(width = 320, height = 240): Buffer {
     const n = turn(normal(face));
     // Seen from the camera on +z: a face turned away is hidden.
     if (n[2] <= 0) continue;
-    const shade = 0.35 + 0.65 * Math.max(0, (n[0] * light[0] + n[1] * light[1] + n[2] * light[2]) / lightLength);
+    const shade =
+      0.35 +
+      0.65 * Math.max(0, (n[0] * light[0] + n[1] * light[1] + n[2] * light[2]) / lightLength);
     const color = COLOR.map((c) => Math.min(1, c * shade * 1.2)) as Vec;
     const [a, b, c] = face.map((p) => project(turn(p))) as [number[], number[], number[]];
     const area = (b[0]! - a[0]!) * (c[1]! - a[1]!) - (b[1]! - a[1]!) * (c[0]! - a[0]!);
@@ -225,7 +246,8 @@ export function png(width = 320, height = 240): Buffer {
           sum[2] += c[2];
         }
       }
-      for (let k = 0; k < 3; k++) row[1 + x * 3 + k] = Math.round((sum[k]! / (SAMPLES * SAMPLES)) * 255);
+      for (let k = 0; k < 3; k++)
+        row[1 + x * 3 + k] = Math.round((sum[k]! / (SAMPLES * SAMPLES)) * 255);
     }
     rows.push(row);
   }
