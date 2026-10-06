@@ -1,0 +1,71 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-wizard-step as lit-js
+---
+import { LitElement, html } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _on(v) {
+  return v === "false" ? false : Boolean(v);
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="wizard" aria-label="Setup wizard"
+      ><h1 data-weft-id="title">Choose a plan</h1
+      ><div data-weft-id="progress">${!(_text(data?.progress).trim() === "") ? _squash(_text(data?.progress)) : ""}</div
+      ><div data-weft-id="plan" aria-label="Plan" role="radiogroup"
+        ><span aria-hidden="true">Plan</span
+        ><label
+          ><input data-weft-id="plan-free" type="radio" name=${"weft-plan"} value="free" aria-label="Free" .checked=${_text(data?.plan) !== "" && "free" === _text(data?.plan)} @change=${() => onChange?.("$.plan", "free")}
+          ><span aria-hidden="true">Free</span
+        ></label
+        ><label
+          ><input data-weft-id="plan-pro" type="radio" name=${"weft-plan"} value="pro" aria-label="Pro" .checked=${_text(data?.plan) !== "" && "pro" === _text(data?.plan)} @change=${() => onChange?.("$.plan", "pro")}
+          ><span aria-hidden="true">Pro</span
+        ></label
+        ><label
+          ><input data-weft-id="plan-team" type="radio" name=${"weft-plan"} value="team" aria-label="Team" .checked=${_text(data?.plan) !== "" && "team" === _text(data?.plan)} @change=${() => onChange?.("$.plan", "team")}
+          ><span aria-hidden="true">Team</span
+        ></label
+      ></div
+      ><div data-weft-id="nav" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" })}
+        ><button data-weft-id="back" type="button" @click=${(_e) => _act(actions, { id: "back", action: "wizard.back" })}>Back</button
+        ><button data-weft-id="next" type="button" ?disabled=${!_on(data?.plan)} data-variant="primary" @click=${(_e) => _act(actions, { id: "next", action: "wizard.next" })}>Next</button
+      ></div
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

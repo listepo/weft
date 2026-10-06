@@ -223,7 +223,9 @@ enum Command {
     React(JsxExport),
     /// Generate a SolidJS component (JSX or TSX) from a markup document.
     Solid(JsxExport),
-    /// Generate `weft-tokens.css`, the design tokens React and SolidJS components read as CSS
+    /// Generate a Lit web component (JavaScript) from a markup document.
+    Lit(WebExport),
+    /// Generate `weft-tokens.css`, the design tokens React, SolidJS and Lit components read as CSS
     /// custom properties.
     ///
     /// With light and dark themes (a DTCG resolver), the dark values apply under
@@ -243,7 +245,7 @@ enum Command {
         #[arg(long)]
         out_dir: Option<PathBuf>,
     },
-    /// Generate `weft-base.css`, the base stylesheet React and SolidJS components share with the
+    /// Generate `weft-base.css`, the base stylesheet React, SolidJS and Lit components share with the
     /// static page.
     ///
     /// Its rules read the custom properties of `weft css-tokens` and fall back to the default
@@ -623,6 +625,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 out,
             )
         }
+        Command::Lit(common) => web_export(web::Target::Lit, common, None, None, None, out),
         Command::ImportHtml(args) => web_import(web::Target::Html, args, out),
         Command::ImportReact(args) => web_import(web::Target::React, args, out),
         Command::ImportSolid(args) => web_import(web::Target::Solid, args, out),

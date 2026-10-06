@@ -1,16 +1,19 @@
-//! Weft document → a self-contained React or SolidJS component (SPEC §9, "To JSX"). The mapping
+//! Weft document → a self-contained React or SolidJS component, or a Lit element (SPEC §9, "To
+//! JSX"). The mapping
 //! restates `@weft/render-react` kind by kind rather than sharing it: the renderer builds elements
 //! with closures over resolved values, while this module prints source text, so a shared table
 //! would only cover tag names. packages/to-jsx/test/equivalence.test.ts renders both on every
 //! corpus screen and catalog example and compares the results, which is what keeps the two from
-//! drifting. React and SolidJS share one render plan; they differ only in how a loop, a condition,
-//! a dynamic tag and a few attributes are spelled.
+//! drifting. React, SolidJS and Lit share one render plan; they differ only in how a loop, a
+//! condition, a dynamic tag and a few attributes are spelled, and Lit prints the element tree as
+//! `html` templates (`lit.rs`) instead of JSX.
 //!
 //! The document is untrusted. No document string ever reaches the output except through
 //! `JSON.stringify` (a JavaScript string literal) or a JSX text/attribute run whose characters are
 //! all inert; identifiers come only from this module or are checked against the loop-variable
 //! grammar.
 
+mod lit;
 mod print;
 mod runtime;
 mod tree;
@@ -44,6 +47,9 @@ pub enum Framework {
     #[default]
     React,
     Solid,
+    /// A `LitElement` that renders into the light DOM, so the page's stylesheet reaches it as it
+    /// does the React and SolidJS output.
+    Lit,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -58,17 +64,26 @@ pub struct JsxOptions<'a> {
     pub source: bool,
 }
 
-/// The component name is not an identifier the output could carry safely.
+/// What the generator refuses: a component name the output could not carry safely, or an option
+/// the Lit target does not offer.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BadComponentName;
+pub enum JsxError {
+    BadComponentName,
+    /// The Lit target has no TypeScript flavour and no `weft:source` comment (there is no Lit
+    /// importer), so asking for one is an error rather than a silent downgrade.
+    LitOption(&'static str),
+}
 
-impl fmt::Display for BadComponentName {
+impl fmt::Display for JsxError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("componentName must match /^[A-Z][A-Za-z0-9]*$/")
+        match self {
+            Self::BadComponentName => f.write_str("componentName must match /^[A-Z][A-Za-z0-9]*$/"),
+            Self::LitOption(name) => write!(f, "the lit target has no {name}"),
+        }
     }
 }
 
-impl std::error::Error for BadComponentName {}
+impl std::error::Error for JsxError {}
 
 fn is_component_name(name: &str) -> bool {
     name.starts_with(|c: char| c.is_ascii_uppercase())
@@ -76,10 +91,18 @@ fn is_component_name(name: &str) -> bool {
 }
 
 /// The component for `document`, which may be any JSON: what is not a document renders nothing.
-pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, BadComponentName> {
+pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, JsxError> {
     let name = options.component_name.unwrap_or("WeftScreen");
     if !is_component_name(name) {
-        return Err(BadComponentName);
+        return Err(JsxError::BadComponentName);
+    }
+    if options.framework == Framework::Lit {
+        if options.typescript {
+            return Err(JsxError::LitOption("typescript flavour"));
+        }
+        if options.source {
+            return Err(JsxError::LitOption("source comment"));
+        }
     }
     let mut g = Gen::new(options.catalog, options.framework, options.typescript);
     let scope = Rc::new(Scope::default());
@@ -129,6 +152,7 @@ fn source_comment(document: &Json, options: &JsxOptions<'_>, name: &str) -> Opti
     let framework = match options.framework {
         Framework::React => "react",
         Framework::Solid => "solid",
+        Framework::Lit => "lit",
     };
     let flavour = if options.typescript {
         " typescript"
@@ -260,6 +284,11 @@ const RESERVED: &[&str] = &[
     "yield",
     "actions",
     "onChange",
+    // What the Lit module imports.
+    "html",
+    "nothing",
+    "styleMap",
+    "unsafeStatic",
 ];
 
 const ALIGN: &[(&str, &str)] = &[
@@ -409,6 +438,8 @@ pub(crate) struct Gen<'a> {
     /// SolidJS imports, by module.
     solid: BTreeSet<&'static str>,
     solid_web: BTreeSet<&'static str>,
+    /// What the Lit module imports beyond `LitElement` and `html`, set when printing.
+    lit_uses: lit::Uses,
 }
 
 impl<'a> Gen<'a> {
@@ -421,11 +452,31 @@ impl<'a> Gen<'a> {
             fragment: false,
             solid: BTreeSet::new(),
             solid_web: BTreeSet::new(),
+            lit_uses: lit::Uses::default(),
         }
     }
 
     fn solid(&self) -> bool {
         self.fw == Framework::Solid
+    }
+
+    fn lit(&self) -> bool {
+        self.fw == Framework::Lit
+    }
+
+    /// The event a text control reports a change on: React's `onChange` fires on every input,
+    /// while SolidJS and Lit keep the DOM's meaning, where that event is `input`.
+    fn input_event(&self) -> &'static str {
+        if self.solid() || self.lit() {
+            "onInput"
+        } else {
+            "onChange"
+        }
+    }
+
+    /// Loops and select options go without keys and `_keyed` fragments.
+    fn keyless(&self) -> bool {
+        self.solid() || self.lit()
     }
 
     fn use_(&mut self, helper: &'static str) -> &'static str {
@@ -473,10 +524,10 @@ impl<'a> Gen<'a> {
         }
     }
 
-    /// An attribute name as the framework spells it: SolidJS sets HTML attributes by their HTML
-    /// names and has no uncontrolled `default*` props.
+    /// An attribute name as the framework spells it: SolidJS and Lit set HTML attributes by their
+    /// HTML names and have no uncontrolled `default*` props.
     fn an(&self, react: &'static str) -> &'static str {
-        if !self.solid() {
+        if !self.keyless() {
             return react;
         }
         match react {
@@ -1014,7 +1065,7 @@ impl<'a> Gen<'a> {
                     };
                     match hidden {
                         None => out.push(c),
-                        Some(h) if self.solid() => {
+                        Some(h) if self.keyless() => {
                             out.push(self.cond(&format!("!{h}"), c, None));
                         }
                         Some(h) => {
@@ -1041,6 +1092,13 @@ impl<'a> Gen<'a> {
                             vec![attr_js("each", src.as_str())],
                             vec![C::Code(body)],
                         )));
+                    } else if self.lit() {
+                        let frag = el("", vec![], inner);
+                        out.push(C::Code(Code::of(vec![
+                            lit(format!("{src}.map(({ident}, {index}) => ")),
+                            expr(C::J(frag)),
+                            lit(")"),
+                        ])));
                     } else {
                         self.fragment = true;
                         let frag = el("Fragment", vec![attr_js("key", index.as_str())], inner);
@@ -1572,6 +1630,16 @@ impl<'a> Gen<'a> {
     /// An element whose tag is chosen at run time; `cast` is the tag TSX checks its attributes
     /// against.
     fn with_tag(&mut self, tag_js: String, cast: &str, mut j: J<'a>) -> C<'a> {
+        if self.lit() {
+            // Lit's static `html` tag takes the element name as a static value; the expression
+            // only ever yields a name from the closed set the catalog allows.
+            self.lit_uses.static_html = true;
+            j.tag = "${Tag}".to_owned();
+            return block(
+                vec![Code::lit(format!("const Tag = unsafeStatic({tag_js});"))],
+                C::J(j),
+            );
+        }
         if self.solid() {
             self.solid_web.insert("Dynamic");
             j.tag = "Dynamic".to_owned();
@@ -1748,7 +1816,7 @@ impl<'a> Gen<'a> {
         let change = self.fire(n, "change");
         // React's `onChange` on a text control fires on every input; SolidJS keeps the DOM's
         // meaning, where that event is `input`.
-        let on_input = if self.solid() { "onInput" } else { "onChange" };
+        let on_input = self.input_event();
         if is_binding_raw(n.raw("value")) {
             // A number input shows "" for anything that is not a valid float, so the value is
             // sanitized the same way before the framework sees it.
@@ -1957,7 +2025,7 @@ impl<'a> Gen<'a> {
         let value = self.text_of(n, "value");
         // SolidJS's server renderer writes a select's value as an attribute HTML ignores, so each
         // option says whether it is the chosen one; the select's own value stays for the client.
-        let chosen = self.solid().then(|| value.clone());
+        let chosen = self.keyless().then(|| value.clone());
         let options = self.option_list(n, chosen);
         let mut a = self.base(n, false);
         let label = self.label(n);
@@ -1983,7 +2051,7 @@ impl<'a> Gen<'a> {
         } else if controlled || change.is_some() {
             a.push(attr_js("onChange", Self::handler("()", vec![change])));
         }
-        let shown = if self.solid() {
+        let shown = if self.keyless() {
             "_o.map((_x) => _x.el)".to_owned()
         } else {
             let keyed = self.use_("_keyed");
@@ -2011,7 +2079,7 @@ impl<'a> Gen<'a> {
         let change = self.fire(n, "change");
         // React's `onChange` on these controls fires on every input; SolidJS keeps the DOM's
         // meaning, where that event is `input`.
-        let on_input = if self.solid() { "onInput" } else { "onChange" };
+        let on_input = self.input_event();
         if is_binding_raw(n.raw("value")) {
             a.push(attr_js("value", shown));
             let write = self
@@ -2225,7 +2293,7 @@ impl<'a> Gen<'a> {
         let mut kids = self.caption(name);
         kids.push(C::J(el("input", a, vec![])));
         if let Some(list) = list {
-            let shown = if self.solid() {
+            let shown = if self.keyless() {
                 "_o.map((_x) => _x.el)".to_owned()
             } else {
                 let keyed = self.use_("_keyed");
@@ -2311,7 +2379,7 @@ impl<'a> Gen<'a> {
             };
             c.map(|c| Code::of(vec![expr(c)]))
         });
-        let (cols, rows_js) = if self.solid() {
+        let (cols, rows_js) = if self.keyless() {
             ("_cols".to_owned(), "_rows".to_owned())
         } else {
             let keyed = self.use_("_keyed");
@@ -2466,9 +2534,9 @@ impl<'a> Gen<'a> {
         let selected = self.text_of(n, "selected");
         let busy = self.use_("_busy");
         let tab_key = self.use_("_tabKey");
-        let key = |solid: bool| (!solid).then(|| attr_js("key", "_k"));
-        let solid = self.solid();
-        let mut button_attrs: Vec<Attr<'a>> = key(solid).into_iter().collect();
+        let key = |keyless: bool| (!keyless).then(|| attr_js("key", "_k"));
+        let keyless = self.keyless();
+        let mut button_attrs: Vec<Attr<'a>> = key(keyless).into_iter().collect();
         button_attrs.extend([
             attr_js("data-weft-id", "_x.id || undefined"),
             attr_js("data-state", "_x.state || undefined"),
@@ -2486,7 +2554,7 @@ impl<'a> Gen<'a> {
             ),
         ]);
         let button = el("button", button_attrs, vec![C::Code(Code::lit("_x.label"))]);
-        let mut panel_attrs: Vec<Attr<'a>> = key(solid).into_iter().collect();
+        let mut panel_attrs: Vec<Attr<'a>> = key(keyless).into_iter().collect();
         panel_attrs.extend([
             attr_s("role", "tabpanel"),
             attr_js("id", "\"weft-\" + _x.id + \"-panel\""),
@@ -2569,7 +2637,7 @@ impl<'a> Gen<'a> {
         let dialog = C::J(el("dialog", a, self.content(n, ctx)));
         Some(match &open.lit {
             Some(_) => dialog,
-            None if self.solid() => self.cond(&open.js, dialog, None),
+            None if self.keyless() => self.cond(&open.js, dialog, None),
             None => C::Code(Code::of(vec![
                 lit(format!("{} && ", open.js)),
                 expr(dialog),
@@ -2600,6 +2668,9 @@ impl<'a> Gen<'a> {
     }
 
     fn module(&self, name: &str, body: &str) -> String {
+        if self.lit() {
+            return self.lit_module(name, body);
+        }
         let mut out = String::new();
         if self.solid() {
             if !self.solid.is_empty() {
