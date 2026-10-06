@@ -12,7 +12,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T13.1 | todo | P2 | 3 | 0% | |
 | T15.2 | todo | P3 | 2 | 0% | |
-| T62 | in progress | P1 | 1 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -160,7 +159,3 @@ The json-render half of T13: export a Weft document to a json-render spec (`{ ro
 ### T15.2. Surfaces for the Custom Elements Manifest importer
 
 T15.1 delivers `import_cem` in `weft-import` (library, tests, SPEC section 9). This task makes it reachable: `weft import-cem <manifest.json> [--name] [--version] [--catalog]` prints the catalog (pretty JSON) on stdout and the losses and diagnostics on stderr, reading the file only when it is at most `MAX_MANIFEST_LENGTH` bytes; the `import.cem.outDir` setting if it fits (SPEC section 10.6); the WebAssembly and native bindings (`weft-binding`, `weft-wasm`, `weft-node`, `@weft/core` types) if the creator wants it from TypeScript; `docs/importing.md` and `docs/cli.md`. Done when a manifest file imports from the command line into a catalog that `weft validate --catalog` accepts.
-
-### T62. Native addon as a dependency of the WebAssembly runtime legs
-
-`packages/core/test/engines.test.ts` loads the native addon on every leg (`loadNative({ choice: "native" })`) and compares its surface with the WebAssembly module whenever an addon is present. `root:runtimes-node` and `root:runtimes-bun` depend only on `root:wasm`, so after a merge that changes the Rust core they can run against a stale addon and fail until `moon run root:native` is run by hand (seen twice, in T52.1 and T15.1). Add `root:native` to their deps, as T57 did for the test suites. Done when both legs depend on it and the full check exits 0.
