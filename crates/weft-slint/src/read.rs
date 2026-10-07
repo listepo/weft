@@ -10,7 +10,7 @@ use i_slint_compiler::parser::{self, NodeOrToken, SyntaxKind, SyntaxNode};
 use weft_catalog::token_types;
 use weft_core::{
     Catalog, Child, Code, Diagnostic, Document, Mode, Node, ParseOptions, Value, WEFT_VERSION,
-    has_errors, is_id, parse,
+    has_errors, is_id, is_loop_variable, parse,
 };
 use weft_import::{
     ImportResult, LossKind, Losses, MAX_DEPTH, MAX_NODES, empty_result, limit_reached, literal,
@@ -35,7 +35,12 @@ pub fn read_slint(source: &str, options: &ImportOptions<'_>) -> ImportResult {
     let Some(element) = component.child_node(SyntaxKind::Element) else {
         return missing(diagnostics);
     };
-    let mut reader = Reader::new(options.catalog);
+    // A model, an alert and a combobox share a Slint element with image, stack and select.
+    let comment_kinds = comment_markup(source)
+        .as_deref()
+        .map(|markup| comment_kind_ids(markup, options))
+        .unwrap_or_default();
+    let mut reader = Reader::new(options.catalog, comment_kinds);
     if built.has_errors() {
         reader.lose(
             LossKind::Structure,
@@ -83,6 +88,12 @@ struct Reader<'a> {
     ids: weft_import::IdState,
     nodes: usize,
     limited: bool,
+    /// The repeated element of a list is an item only for that list's own children.
+    in_list: bool,
+    /// A `RadioButton` is a segment only inside the horizontal group.
+    segments: bool,
+    /// Ids the source comment calls `model`, `alert` or `combobox`.
+    comment_kinds: HashMap<String, String>,
 }
 
 struct Fact {
@@ -92,13 +103,16 @@ struct Fact {
 }
 
 impl<'a> Reader<'a> {
-    fn new(catalog: &'a Catalog) -> Self {
+    fn new(catalog: &'a Catalog, comment_kinds: HashMap<String, String>) -> Self {
         Reader {
             catalog,
             losses: Losses::default(),
             ids: weft_import::IdState::default(),
             nodes: 0,
             limited: false,
+            in_list: false,
+            segments: false,
+            comment_kinds,
         }
     }
 
@@ -111,7 +125,7 @@ impl<'a> Reader<'a> {
         let mut root = Node::new("screen");
         let items = subs(window);
         let (explicit, body) = if base_name(window) == "Window" || base_name(window).is_empty() {
-            plain_box(&items).unwrap_or((None, items))
+            screen_body(&items)
         } else {
             (None, vec![window.clone()])
         };
@@ -127,6 +141,8 @@ impl<'a> Reader<'a> {
         for sub in items {
             if sub.kind() == SyntaxKind::RepeatedElement {
                 self.lose(LossKind::Repetition, parent, "a for is read once");
+                out.extend(self.repeated(sub, parent, depth, self.in_list));
+                continue;
             }
             if sub.kind() == SyntaxKind::ConditionalElement {
                 self.lose(LossKind::Hidden, parent, "an if is read as shown");
@@ -136,7 +152,7 @@ impl<'a> Reader<'a> {
             let el = element_of(&host);
             let Some(el) = el else { continue };
             let id = sub_id(&host);
-            out.extend(self.one(&el, id, parent, depth));
+            out.extend(self.one(&el, id, parent, depth, false));
         }
         out
     }
@@ -147,28 +163,110 @@ impl<'a> Reader<'a> {
         id: Option<String>,
         parent: &str,
         depth: usize,
+        as_item: bool,
     ) -> Vec<Child> {
         if depth > MAX_DEPTH || self.nodes >= MAX_NODES {
             self.limited = true;
             return vec![];
         }
         let base = base_name(el);
-        let Some(kind) = kind_of(&base) else {
+        let Some(fallback) = kind_of(&base) else {
             let note = format!("`{base}` has no Weft kind; its children are kept");
             self.lose(LossKind::Kinds, parent, &note);
             return self.kids(&subs(el), parent, depth);
         };
+        let kind = self.refined(&base, fallback, el, id.as_deref(), as_item);
         self.nodes += 1;
         let hint = string_of(&facts(el), "text");
         let mut node = Node::new(kind);
         let stem = format!("{parent}/{kind}");
         node.id = Some(self.fresh(id.as_deref(), kind, &hint, &stem));
         let here = path_of(parent, &node);
+        // Descendants are not list items or segments; the caller restores the flags.
+        let saved_list = self.in_list;
+        let saved_segments = self.segments;
+        self.in_list = false;
+        self.segments = false;
         let extra = self.fill(&mut node, &base, el, &here, depth);
+        self.in_list = saved_list;
+        self.segments = saved_segments;
         self.blank_label(&mut node, &here);
         let mut out = vec![Child::Node(Box::new(node))];
         out.extend(extra);
         out
+    }
+
+    fn repeated(
+        &mut self,
+        sub: &SyntaxNode,
+        parent: &str,
+        depth: usize,
+        as_item: bool,
+    ) -> Vec<Child> {
+        if depth > MAX_DEPTH || self.nodes >= MAX_NODES {
+            self.limited = true;
+            return vec![];
+        }
+        self.nodes += 1;
+        let mut node = Node::new("each");
+        // The model expression stays a loss; the loop variable is a name, not an expression.
+        if let Some(name) = loop_name(sub) {
+            node.props.insert("as".into(), Value::String(name));
+        }
+        let stem = format!("{parent}/each");
+        node.id = Some(self.fresh(None, "each", "", &stem));
+        let here = path_of(parent, &node);
+        if let Some(host) = inner_host(sub)
+            && let Some(el) = element_of(&host)
+        {
+            node.children = self.one(&el, sub_id(&host), &here, depth + 1, as_item);
+        }
+        vec![Child::Node(Box::new(node))]
+    }
+
+    /// Several generator shapes share one element name.
+    fn refined(
+        &self,
+        base: &str,
+        fallback: &'static str,
+        el: &SyntaxNode,
+        id: Option<&str>,
+        as_item: bool,
+    ) -> &'static str {
+        // An item is printed as Text, TouchArea or VerticalLayout, and `<each>` is transparent,
+        // so leaving the wrapper as a stack would not be a child a list accepts.
+        if as_item && matches!(base, "Text" | "TouchArea" | "VerticalLayout") {
+            return "item";
+        }
+        if base == "RadioButton" && self.segments {
+            return "segment";
+        }
+        // That one property is the only line that separates a segmented control from a radio group.
+        if base == "RadioGroup" && is_horizontal(el) {
+            return "segmented-control";
+        }
+        if base == "Image" && self.comment_kind(id, "model") {
+            return "model";
+        }
+        // The id sits on the column when an empty branch is emitted beside the widget.
+        if base == "VerticalLayout" && splice_anon(el, "ListView").is_some() {
+            return "list";
+        }
+        if base == "VerticalLayout" && splice_anon(el, "StandardTableView").is_some() {
+            return "table";
+        }
+        // Slint has no alert widget, and select and combobox are both a ComboBox.
+        if base == "VerticalLayout" && self.comment_kind(id, "alert") {
+            return "alert";
+        }
+        if base == "ComboBox" && self.comment_kind(id, "combobox") {
+            return "combobox";
+        }
+        fallback
+    }
+
+    fn comment_kind(&self, id: Option<&str>, kind: &str) -> bool {
+        id.is_some_and(|name| self.comment_kinds.get(name).map(String::as_str) == Some(kind))
     }
 
     fn fill(
@@ -183,21 +281,25 @@ impl<'a> Reader<'a> {
         self.box_losses(node, base, path);
         self.note_rest(&fs, el, path);
         match base {
-            "Text" | "Button" => self.words(node, &fs, "text", path),
+            "Text" | "Button" | "RadioButton" => self.words(node, &fs, "text", path),
+            "MenuItem" => self.words(node, &fs, "title", path),
             "LineEdit" | "TextEdit" => self.attr(node, "value", &fs, "text", path),
             "CheckBox" | "Switch" => self.attr(node, "label", &fs, "text", path),
             "ComboBox" => self.lose(LossKind::Values, path, "a ComboBox model is not read"),
             "TouchArea" => return self.link(node, el, path, depth),
-            "GroupBox" => self.attr(node, "label", &fs, "title", path),
+            "GroupBox" | "Tab" | "Menu" | "RadioGroup" => {
+                self.attr(node, "label", &fs, "title", path);
+            }
+            "TabWidget" | "StandardTableView" | "Image" => {
+                self.attr(node, "label", &fs, "accessible-label", path);
+            }
             _ => {}
         }
         if base == "TextEdit" {
             let multiline = Value::String("multiline".into());
             node.props.insert("type".into(), multiline);
         }
-        let nest = base.ends_with("Layout") || base.ends_with("Box");
-        if nest {
-            let children = self.kids(&subs(el), path, depth + 1);
+        if let Some(children) = self.placed(node, base, el, path, depth) {
             if base == "GridLayout" {
                 let count = children.len().max(1) as f64;
                 node.props.insert("columns".into(), Value::Number(count));
@@ -205,6 +307,103 @@ impl<'a> Reader<'a> {
             node.children = children;
         }
         vec![]
+    }
+
+    /// The generator's wrapper is not a Weft element.
+    fn placed(
+        &mut self,
+        node: &mut Node,
+        base: &str,
+        el: &SyntaxNode,
+        path: &str,
+        depth: usize,
+    ) -> Option<Vec<Child>> {
+        let next = depth + 1;
+        if base == "MenuBar"
+            && subs(el).len() == 1
+            && let Some(menu) = anon_widget(el, "Menu")
+        {
+            self.attr(node, "label", &facts(&menu), "title", path);
+            return Some(self.kids(&subs(&menu), path, next));
+        }
+        if base == "Tab" {
+            let body = only_plain_column(el).unwrap_or_else(|| subs(el));
+            return Some(self.kids(&body, path, next));
+        }
+        if base == "PopupWindow" {
+            let items = only_plain_column(el).unwrap_or_else(|| subs(el));
+            return Some(self.dialog_body(node, &items, path, next));
+        }
+        let kind = node.kind.clone();
+        if base == "VerticalLayout" && matches!(kind.as_str(), "list" | "table") {
+            let widget = if kind == "list" {
+                "ListView"
+            } else {
+                "StandardTableView"
+            };
+            if let Some(inner) = anon_widget(el, widget)
+                && let Some(children) = splice_anon(el, widget)
+            {
+                self.attr(node, "label", &facts(&inner), "accessible-label", path);
+                self.note_rest(&facts(&inner), &inner, path);
+                return Some(self.descend(kind == "list", false, &children, path, next));
+            }
+        }
+        let nest = base.ends_with("Layout")
+            || base.ends_with("Box")
+            || matches!(
+                base,
+                "ListView" | "StandardTableView" | "TabWidget" | "Menu" | "MenuBar" | "RadioGroup"
+            );
+        if !nest {
+            return None;
+        }
+        Some(self.descend(
+            base == "ListView",
+            kind == "segmented-control",
+            &subs(el),
+            path,
+            next,
+        ))
+    }
+
+    fn dialog_body(
+        &mut self,
+        node: &mut Node,
+        items: &[SyntaxNode],
+        path: &str,
+        depth: usize,
+    ) -> Vec<Child> {
+        let Some(first) = items.first() else {
+            return vec![];
+        };
+        if let Some(text) = caption_text(first) {
+            self.attr(node, "label", &facts(&text), "text", path);
+            return self.kids(&items[1..], path, depth);
+        }
+        self.kids(items, path, depth)
+    }
+
+    fn descend(
+        &mut self,
+        list: bool,
+        segments: bool,
+        items: &[SyntaxNode],
+        parent: &str,
+        depth: usize,
+    ) -> Vec<Child> {
+        let saved_list = self.in_list;
+        let saved_segments = self.segments;
+        if list {
+            self.in_list = true;
+        }
+        if segments {
+            self.segments = true;
+        }
+        let children = self.kids(items, parent, depth);
+        self.in_list = saved_list;
+        self.segments = saved_segments;
+        children
     }
 
     fn note_rest(&mut self, fs: &[Fact], el: &SyntaxNode, path: &str) {
@@ -341,6 +540,16 @@ fn kind_of(base: &str) -> Option<&'static str> {
         "ComboBox" => "select",
         "Slider" => "slider",
         "SpinBox" => "stepper",
+        "ListView" => "list",
+        "StandardTableView" => "table",
+        "TabWidget" => "tabs",
+        "Tab" => "tab",
+        "PopupWindow" => "dialog",
+        "MenuBar" | "Menu" => "menu",
+        "MenuItem" => "menu-item",
+        "Image" => "image",
+        "RadioGroup" => "radio-group",
+        "RadioButton" => "radio",
         _ => return None,
     })
 }
@@ -366,6 +575,35 @@ fn shown(node: &Node) -> Option<String> {
         Some(Value::String(text)) if !text.is_empty() => Some(text.clone()),
         _ => None,
     }
+}
+
+fn screen_body(items: &[SyntaxNode]) -> (Option<String>, Vec<SyntaxNode>) {
+    if let Some(unwrapped) = plain_box(items) {
+        return unwrapped;
+    }
+    // A MenuBar cannot sit in a layout, so the generator places it beside the screen box.
+    let rest: Vec<SyntaxNode> = items
+        .iter()
+        .filter(|sub| !is_widget(sub, "MenuBar"))
+        .cloned()
+        .collect();
+    if rest.len() == items.len() {
+        return (None, items.to_vec());
+    }
+    let Some((id, inner)) = plain_box(&rest) else {
+        return (None, items.to_vec());
+    };
+    let mut body = Vec::new();
+    let mut opened = false;
+    for sub in items {
+        if is_widget(sub, "MenuBar") {
+            body.push(sub.clone());
+        } else if !opened {
+            body.extend(inner.iter().cloned());
+            opened = true;
+        }
+    }
+    (id, body)
 }
 
 fn plain_box(items: &[SyntaxNode]) -> Option<(Option<String>, Vec<SyntaxNode>)> {
@@ -538,6 +776,108 @@ fn subs(el: &SyntaxNode) -> Vec<SyntaxNode> {
         .collect()
 }
 
+fn is_widget(sub: &SyntaxNode, widget: &str) -> bool {
+    sub.kind() == SyntaxKind::SubElement
+        && element_in(sub).is_some_and(|el| base_name(&el) == widget)
+}
+
+fn element_in(sub: &SyntaxNode) -> Option<SyntaxNode> {
+    element_of(&inner_host(sub)?)
+}
+
+fn loop_name(repeated: &SyntaxNode) -> Option<String> {
+    let declared = repeated.child_node(SyntaxKind::DeclaredIdentifier)?;
+    let name = first_ident(&declared)?;
+    is_loop_variable(&name).then_some(name)
+}
+
+fn is_horizontal(el: &SyntaxNode) -> bool {
+    fact(el, "orientation").is_some_and(|f| f.raw == "Orientation.horizontal")
+}
+
+/// The list or table id is on the surrounding column, not on this widget.
+fn splice_anon(el: &SyntaxNode, widget: &str) -> Option<Vec<SyntaxNode>> {
+    let mut found = false;
+    let mut out = Vec::new();
+    for sub in subs(el) {
+        let inner = element_in(&sub);
+        let anon = sub.kind() == SyntaxKind::SubElement
+            && sub_id(&sub).is_none()
+            && inner
+                .as_ref()
+                .is_some_and(|inner| base_name(inner) == widget);
+        if anon {
+            if found {
+                return None;
+            }
+            found = true;
+            if let Some(inner) = inner {
+                out.extend(subs(&inner));
+            }
+        } else {
+            out.push(sub);
+        }
+    }
+    found.then_some(out)
+}
+
+fn anon_widget(el: &SyntaxNode, widget: &str) -> Option<SyntaxNode> {
+    let mut found = None;
+    for sub in subs(el) {
+        if sub.kind() != SyntaxKind::SubElement || sub_id(&sub).is_some() {
+            continue;
+        }
+        let Some(inner) = element_in(&sub) else {
+            continue;
+        };
+        if base_name(&inner) != widget {
+            continue;
+        }
+        if found.is_some() {
+            return None;
+        }
+        found = Some(inner);
+    }
+    found
+}
+
+/// A tab or dialog body is wrapped in a column that is not its own element.
+fn only_plain_column(el: &SyntaxNode) -> Option<Vec<SyntaxNode>> {
+    let items = subs(el);
+    let [only] = items.as_slice() else {
+        return None;
+    };
+    if only.kind() != SyntaxKind::SubElement || sub_id(only).is_some() {
+        return None;
+    }
+    let inner = element_in(only)?;
+    if base_name(&inner) != "VerticalLayout" || !facts(&inner).is_empty() {
+        return None;
+    }
+    let calls = inner
+        .children()
+        .any(|n| n.kind() == SyntaxKind::CallbackConnection);
+    if calls {
+        return None;
+    }
+    Some(subs(&inner))
+}
+
+fn caption_text(sub: &SyntaxNode) -> Option<SyntaxNode> {
+    if sub.kind() != SyntaxKind::SubElement || sub_id(sub).is_some() {
+        return None;
+    }
+    let el = element_in(sub)?;
+    if base_name(&el) != "Text" {
+        return None;
+    }
+    let fs = facts(&el);
+    let [only] = fs.as_slice() else {
+        return None;
+    };
+    (only.name == "text" && only.string.is_some()).then_some(el)
+}
+
 fn component_of(root: &SyntaxNode) -> Option<SyntaxNode> {
     let mut all = vec![];
     for child in root.children() {
@@ -579,6 +919,49 @@ fn comment_markup(source: &str) -> Option<String> {
         }
     }
     Some(markup.join("\n"))
+}
+
+/// Kinds that share one Slint element: `model` with `image`, `alert` with `stack`, `combobox` with `select`.
+fn comment_kind_ids(markup: &str, options: &ImportOptions<'_>) -> HashMap<String, String> {
+    let types = token_types(options.tokens);
+    let parsed = parse(
+        markup,
+        &ParseOptions {
+            catalog: Some(options.catalog),
+            mode: Mode::Strict,
+            tokens: Some(&types),
+            actions: None,
+        },
+    );
+    let Some(document) = parsed.document else {
+        return HashMap::new();
+    };
+    if has_errors(&parsed.diagnostics) {
+        return HashMap::new();
+    }
+    let mut ids = HashMap::new();
+    collect_comment_kinds(&document.root, &mut ids);
+    ids
+}
+
+fn collect_comment_kinds(node: &Node, ids: &mut HashMap<String, String>) {
+    if matches!(node.kind.as_str(), "model" | "alert" | "combobox")
+        && let Some(id) = &node.id
+    {
+        ids.insert(id.clone(), node.kind.clone());
+    }
+    for list in node.slots.values() {
+        for child in list {
+            if let Child::Node(child) = child {
+                collect_comment_kinds(child, ids);
+            }
+        }
+    }
+    for child in &node.children {
+        if let Child::Node(child) = child {
+            collect_comment_kinds(child, ids);
+        }
+    }
 }
 
 fn note_edits(root: &Node, markup: &str, options: &ImportOptions<'_>, losses: &mut Losses) {
