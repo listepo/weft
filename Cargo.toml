@@ -16,6 +16,7 @@ weft-core = { path = "crates/weft-core" }
 weft-catalog = { path = "crates/weft-catalog" }
 weft-import = { path = "crates/weft-import" }
 weft-interop = { path = "crates/weft-interop" }
+weft-slint = { path = "crates/weft-slint" }
 weft-swiftui = { path = "crates/weft-swiftui" }
 weft-web = { path = "crates/weft-web" }
 # weft-core
@@ -51,6 +52,9 @@ clap = { version = "4.6.7", features = ["derive"] }
 # weft-swiftui: the Swift grammar for the importer (`import` feature); C sources built by cc.
 tree-sitter = "0.27.0"
 tree-sitter-swift = "0.7.4"
+# tests: weft-slint, compiles the generated `.slint` files. Without default features: no backend or
+# renderer, only the compiler; `compat-1-18` is the feature set the crate requires.
+slint-interpreter = { version = "1.18.1", default-features = false, features = ["compat-1-18", "std"] }
 # weft-wasm. Exact: the generated glue only loads with the wasm-bindgen CLI of the same version,
 # which mise pins.
 wasm-bindgen = "=0.2.129"

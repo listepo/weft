@@ -169,3 +169,12 @@ fn the_swiftui_generator_builds_without_the_importers_c_parser() {
         ["tree-sitter", "tree-sitter-swift", "weft-import"]
     );
 }
+
+#[test]
+fn the_slint_target_compiles_slint_only_in_its_tests() {
+    let mut deps = dependencies("weft-slint");
+    deps.sort();
+    // The generator and importer are pure Rust over the core; the Slint compiler
+    // (`slint-interpreter`) is a dev-dependency that checks the generated files.
+    assert_eq!(deps, ["indexmap", "thiserror", "weft-catalog", "weft-core"]);
+}

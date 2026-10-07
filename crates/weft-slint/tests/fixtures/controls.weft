@@ -1,0 +1,19 @@
+<screen id="controls" label="{$.title_text}" weft="0.1">
+  <heading id="title" level="2">Say "hi" \{x} &amp; more</heading>
+  <grid id="layout" columns="2" gap="{token.space.sm}">
+    <field id="age" label="Age" placeholder="0" type="number" value="{$.age}" on-change="form.age"/>
+    <field id="bio" label="Bio" type="multiline" value="{$.bio}"/>
+    <slider id="volume" label="Volume" max="10" min="0" value="{$.volume}" on-change="audio.volume"/>
+    <stepper id="count" label="Count" min="1" value="{$.count}"/>
+  </grid>
+  <stack id="row" direction="row" gap="{token.space.md}">
+    <checkbox id="agree" checked="{$.agree}" label="Agree" on-change="form.agree"/>
+    <text id="note" hidden="{!$.agree}" text="{$.note}"/>
+    <text id="secret" hidden="true">Hidden</text>
+  </stack>
+  <select id="size" label="Size" value="m">
+    <option id="size-s" value="s">Small</option>
+    <option id="size-m" value="m">Medium</option>
+  </select>
+  <button id="reset" disabled="false" on-press="form.reset">Reset</button>
+</screen>
