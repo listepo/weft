@@ -1,0 +1,48 @@
+// weft:source slint
+// <screen id="account-menu" label="Account menu" weft="0.1">
+//   <text id="signed-in" text="{$.user.email}"/>
+//   <menu id="menu" label="Account">
+//     <menu-item id="item-profile" on-press="nav.profile">Profile</menu-item>
+//     <menu-item id="item-settings" on-press="nav.settings">Settings</menu-item>
+//     <menu-item id="item-billing" disabled="{!$.isOwner}" on-press="nav.billing">Billing</menu-item>
+//     <menu-item id="item-signout" on-press="auth.signout">Sign out</menu-item>
+//   </menu>
+// </screen>
+
+import { VerticalBox } from "std-widgets.slint";
+
+export component AccountMenuScreen inherits Window {
+    title: "Account menu";
+    in-out property <string> user-email;
+    in-out property <bool> isOwner;
+    callback perform(string, string);
+
+    menu := MenuBar {
+        Menu {
+            title: "Account";
+            item-profile := MenuItem {
+                title: "Profile";
+                activated => { root.perform("nav.profile", "item-profile"); }
+            }
+            item-settings := MenuItem {
+                title: "Settings";
+                activated => { root.perform("nav.settings", "item-settings"); }
+            }
+            item-billing := MenuItem {
+                title: "Billing";
+                enabled: root.isOwner;
+                activated => { root.perform("nav.billing", "item-billing"); }
+            }
+            item-signout := MenuItem {
+                title: "Sign out";
+                activated => { root.perform("auth.signout", "item-signout"); }
+            }
+        }
+    }
+    account-menu := VerticalBox {
+        alignment: LayoutAlignment.start;
+        signed-in := Text {
+            text: root.user-email;
+        }
+    }
+}
