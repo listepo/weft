@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// `weft validate` and `weft fmt`. The default catalog is wired in a later step, so for now the
-// catalog comes from --catalog and, without one, only the syntax layer runs.
+// `weft validate` and `weft fmt`, reduced to what the package's own tests drive. This is NOT
+// the `weft` command: the Rust CLI (docs/cli.md) is, and shipping this under the same name in
+// bin made installs resolve usage errors for flags the real CLI accepts.
 import { readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { hasErrors } from "./diagnostics.ts";

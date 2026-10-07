@@ -12,7 +12,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T13.1 | todo | P2 | 3 | 0% | |
 | T15.2 | todo | P3 | 2 | 0% | |
-| T72 | todo | P2 | 1 | 0% | |
 | T73 | todo | P2 | 2 | 0% | |
 | T63 | todo | P2 | 1 | 0% | |
 | T64 | todo | P2 | 2 | 0% | |
@@ -248,10 +247,6 @@ The native shell and the shared surface talk only through the slint-bindings C A
 **Out of scope.** Multiplayer and real-time collaboration, cloud storage, accounts and sharing, comments and review threads, prototyping and interaction flows, vector drawing tools and boolean shape operations, image editing, plugins for the editor, Figma file import (T14 covers the Figma round trip), a web version (later, through Slint's WebAssembly build), iOS and Android, Intel Macs, and Linux.
 
 Not started; nothing is built until the creator approves the plan of the first milestone.
-
-### T72. Two different `weft` commands; batch provider id assumption
-
-`packages/core/package.json:6-8` exposes a second, reduced TS `weft` bin (only `validate`/`fmt`, no project support) whose header comment is stale — anyone resolving `weft` through `@weft/core` gets usage errors for flags the real Rust CLI accepts. Also `bench/src/provider.ts:221` assumes the API echoes ids as `r<n>` (`out[Number(r.custom_id.slice(1))]` — a non-conforming id writes to index `NaN` and fails far from the cause). Done means: the bin points at the Rust binary or is removed, and the custom id is validated with `Number.isInteger`.
 
 ### T73. CI workflow for the documented merge gate
 

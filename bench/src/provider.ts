@@ -218,7 +218,12 @@ export async function anthropicBatch(
       throw new Error(
         `batch request ${r.custom_id} ${r.result.type}: ${JSON.stringify(r.result.error)}`,
       );
-    out[Number(r.custom_id.slice(1))] = fromAnthropic(r.result.message);
+    // The API is expected to echo ids as `r<n>`; anything else must fail here, not
+    // as a mysterious "no result for rNaN" after the loop.
+    const at = Number(r.custom_id.slice(1));
+    if (!Number.isInteger(at) || at < 0 || at >= out.length)
+      throw new Error(`batch ${created.id}: non-conforming custom_id ${JSON.stringify(r.custom_id)}`);
+    out[at] = fromAnthropic(r.result.message);
   }
   const missing = out.findIndex((c) => c === undefined);
   if (missing >= 0) throw new Error(`batch ${created.id} has no result for r${missing}`);
