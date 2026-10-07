@@ -767,3 +767,9 @@ Execution plan:
 Done when all of the above pass under `cargo nextest run`, `cargo clippy --workspace --all-targets -- -D warnings` and `cargo fmt --all --check`, and `SPEC.md` §9 has the "To Slint" and "From Slint" rules.
 
 Result: `crates/weft-slint` with `generate` and `import_slint`; golden files for `login`, `signup`, `settings` and `tests/fixtures/controls.weft`, each compiled with `slint-interpreter` 1.18.1 and read back byte-identical to the canonical markup and strictly valid. `cargo nextest run -p weft-slint -p weft-cli` (57 tests, 15 of them in weft-slint), `cargo clippy --workspace --all-targets -- -D warnings` and `cargo fmt --all --check` pass. The non-test code is about 830 lines, above the 500-line task size; it was kept in one task because the generator, the data typing and the read-back are tested only together.
+
+### T70. weft validate --no-project on canonical JSON skipped the shape layer
+
+`crates/weft-cli/src/main.rs` answered `vec![]` when no catalog/project applied to a `.json` input, so `weft validate --no-project broken.json` exited 0 with only a stderr hint — while the same document through the library, the MCP server or the markup path got its W200 shape diagnostics, and the hint claimed "only the syntax layer was checked". Found by the 2026-10-07 audit. Fix: the `None` branch runs the library `validate` with `catalog: None` (the shape layer runs before the catalog is consulted), and the hint now says "syntax and shape layers". Audit tasks T71–T73 recorded in plan.md (renumbered from the audit draft: T63–T66 were already taken in `done.md`).
+Model: ZCode / GLM-5.3 · Status: done 2026-10-07 · Priority: P2 · Complexity: 1 · Files: `crates/weft-cli/src/main.rs`, `crates/weft-cli/tests/project.rs`
+Check: `cargo test -p weft-cli` — 43 passed (new: `canonical_json_without_a_project_still_gets_its_shape_checked`); `cargo clippy -p weft-cli --all-targets -- -D warnings` clean; `cargo fmt --check` clean.
