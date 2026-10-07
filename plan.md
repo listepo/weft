@@ -18,8 +18,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T64 | todo | P2 | 2 | 0% | |
 | T65 | todo | P2 | 1 | 0% | |
 | T66 | todo | P2 | 2 | 0% | |
-| T67.4 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
-| T67.5 | in progress | P2 | 4 | 0% | Cursor / grok 4.7 |
+| T67.4 | in progress | P2 | 3 | 90% | Cursor / grok 4.7 |
+| T67.5 | in progress | P2 | 4 | 90% | Cursor / grok 4.7 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 
@@ -197,6 +197,8 @@ Execution plan:
 3. Tests in `crates/weft-slint/tests/import.rs` (`required-features = ["import"]`): strip the source comment from one generated golden that uses `each` and `tabs` (or `list`) and check kinds and ids. Do not edit `read_expr.rs`.
 4. Verify: `cargo nextest run -p weft-slint --features import`.
 
+Progress: the element match in `crates/weft-slint/src/read.rs` reads `for`, `ListView`, `StandardTableView`, `TabWidget`, `PopupWindow`, `MenuBar` / `Menu`, `Image` and `RadioGroup` as the SPEC §9 kinds, and SPEC §9 "From Slint" names them. Bindings and callbacks are unchanged. `cargo fmt`, clippy with `--features import`, and `cargo nextest run -p weft-slint --features import` (26 tests) passed in the `weft-t67.4` worktree. Uncommitted; not on `main`.
+
 ### T67.5. Slint reader recovers bindings and events
 
 `read_slint` treats every non-literal expression as a bindings loss and every callback as an actions loss. Invert `root.property` (`user-email` → `$.user.email`), `<=>`, truthiness (`!= ""`, `!= 0`), `enabled` and `visible` into `disabled` and `hidden`, and `root.perform` into the element's event. Also fold a caption `Text` into the control's label, recover a heading level from `font-size` and `font-weight`, read a `ComboBox` model as options, and match a `spacing` in px to one dimension token when the value equals one. Done when `login`, with the source comment removed, round-trips its bindings and events, and the losses that remain are the ones SPEC still lists.
@@ -207,6 +209,8 @@ Execution plan:
 2. New module `crates/weft-slint/src/read_expr.rs`. `read.rs` calls it at expression and callback sites and does not grow a second expression parser. Do not change the element-kind match (T67.4).
 3. Tests in `tests/import.rs`: `login` with the source comment deleted comes back with `$.email` and `auth.submit` (or whatever the screen names), and a spacing that equals a token is that token. `required-features = ["import"]`.
 4. Verify: `cargo nextest run -p weft-slint --features import`.
+
+Progress: `read_expr.rs` reads the generator's expressions back (`root` paths, `<=>`, truthiness, `enabled`/`visible`, `root.perform`, caption labels, heading levels, `ComboBox` options, a spacing that equals one dimension token). SPEC §9 loss rows for `bindings`, `actions`, `tokens`, `layout` and `values` are narrowed. `login` without the source comment keeps its bindings and `auth.submit`; `16px` stays unmatched because two dimension tokens share it. `cargo fmt`, clippy with `--features import`, and `cargo nextest run -p weft-slint --features import` (24 tests) passed in the `weft-t67.5` worktree. Non-test Rust is about 983 lines net (1013 added, 30 removed), over the 500-line cap. Uncommitted; not on `main`. Merging with T67.4 will conflict in `SPEC.md` and `read.rs`.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 
