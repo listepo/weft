@@ -696,3 +696,74 @@ Result: `import_cem` in `crates/weft-import/src/cem.rs` turns the text of a Cust
 `packages/core/test/engines.test.ts` loads the native addon on every leg (`loadNative({ choice: "native" })`) and compares its surface with the WebAssembly module whenever an addon is present. `root:runtimes-node` and `root:runtimes-bun` depend only on `root:wasm`, so after a merge that changes the Rust core they can run against a stale addon and fail until `moon run root:native` is run by hand (seen twice, in T52.1 and T15.1). Add `root:native` to their deps, as T57 did for the test suites. Done when both legs depend on it and the full check exits 0.
 
 Result: `root:runtimes-node` and `root:runtimes-bun` now depend on `root:native` as well as `root:wasm`, with a comment in `moon.yml` saying why. `moon run root:runtimes tooling:test root:lint` passes (411 tests on each leg).
+
+### T67. Weft to Slint and back
+
+Convert a Weft screen into a Slint component (`.slint`, Slint 1.x with `std-widgets.slint`) and read Slint source back into Weft, so a Weft screen can drive a native desktop app (macOS now, Windows from the same code, the web later through Slint's WebAssembly build) and a Slint UI can come back to Weft. A new crate, `crates/weft-slint`, follows `crates/weft-swiftui`: a pure-Rust generator plus an importer, developed on the branch `feat/weft-slint-convert`. The task is split by size: T67 is the library for the core vocabulary in both directions with its tests, T67.1 the CLI and project settings, T67.2 the reader of hand-written Slint and the rest of the catalog.
+
+**Weft side (input of the generator, output of the importer).** A strictly valid document (SPEC §2–§6) against the core catalog and the project tokens: the `<screen>` root with `weft`, elements with document-unique ids, props as literals, bindings (`{$.path}`, `{!$.path}`) or token references (`{token.path}`), events as `on-<event>` action names, named slots, and canonical markup and JSON (SPEC §3) as the form the importer returns.
+
+**Slint side (output of the generator, input of the importer).** One file per screen:
+
+| Part | Slint |
+| --- | --- |
+| Source comment | A leading `// weft:source slint [name=<name>]` line, then the canonical markup, one markup line per `// ` comment line |
+| Imports | `import { … } from "std-widgets.slint";` with only the widgets the screen uses |
+| Component | `export component <Name>Screen inherits Window`; `<Name>` is the PascalCase screen id or the `name` option; `title` from the screen's `label` |
+| Data | One `in-out property <string\|bool\|float\|int>` per root data path a binding reads: `$.email` → `email`, `$.user.email` → `user-email` |
+| Actions | One `callback perform(string, string)` that every event calls with the action name and the element id, like the SwiftUI target's `perform` handler |
+| Body | A `VerticalBox` (`alignment: LayoutAlignment.start`) whose element id is the screen id, holding the elements |
+
+**Kinds (Weft → Slint; the importer reads the same table back):**
+
+| Weft | Slint |
+| --- | --- |
+| `screen` | the `Window` component and its `VerticalBox` |
+| `stack` | `VerticalLayout` / `HorizontalLayout` (`direction`); a `gap` token → `spacing` in px (`rem` × 16) |
+| `grid` | `GridLayout`; child `n` gets `row: n / columns` and `col: n % columns` (`columns` must be a literal) |
+| `section` | `GroupBox` (`title` from `label`) around a `VerticalBox`; the `header` slot first |
+| `form` | `VerticalBox`; the `footer` slot in a `HorizontalBox` after the content |
+| `heading` | `Text` with the browser default size for `level` (32, 24, 19, 16, 13, 11 px) and weight 700 |
+| `text` | `Text` |
+| `link` | `TouchArea` around a `Text` in `Palette.accent-background`; `on-press` → `clicked` |
+| `button` | `Button`; `primary: true` for `variant="primary"`; `on-press` → `clicked` |
+| `field` | a caption `Text` above a `LineEdit` (`input-type: InputType.password` / `InputType.number`, `placeholder-text`); `type="multiline"` → `TextEdit` |
+| `checkbox`, `switch` | `CheckBox`, `Switch`; `text` from `label` |
+| `select` + `option` | a caption `Text` above a `ComboBox`: the option texts are its `model`; `value` picks `current-index` through a generated chain of comparisons, and `selected` writes the chosen option's `value` back |
+| `slider` | a caption `Text` above a `Slider` (`float`): `minimum`, `maximum`, `value` |
+| `stepper` | a caption `Text` above a `SpinBox` (`int`) |
+
+**Props, states, ids, slots, bindings and actions:**
+
+- **Ids.** A Weft id is the Slint element id (`email := LineEdit`). Slint reads `-` and `_` in an identifier as the same character and reserves `root`, `self` and `parent`, and an element id shadows the globals and enums the generated code names (`Palette`, `InputType`, `LayoutAlignment`), so a screen whose ids clash under these rules is refused with the element path.
+- **Bindings.** A data property is typed from the props that read it: the type of the writable prop that writes it, otherwise `string`, `float`, `int` or `bool` in that order of precedence. A writable prop bound to a path is a two-way binding (`text <=> root.email`); any other binding is an expression; a boolean read of text is `root.x != ""` and of a number `root.x != 0` (SPEC §2.1 truthiness); `not` is negation. `disabled` becomes `enabled` and `hidden` becomes `visible`, each the binding read negated so no double `!` appears. Array-index and loop-variable paths, paths named like a `Window` property (`$.title`, `$.width`, …) and paths whose property names clash are refused with the binding path.
+- **Actions.** `on-press` → `clicked`, `on-change` → `edited` (fields, `SpinBox`), `toggled` (`CheckBox`, `Switch`), `selected` (`ComboBox`) or `changed` (`Slider`); `on-submit` of a form runs from the `clicked` of its `submit="true"` buttons (after their own `on-press`) and from Enter in its `LineEdit`s (`accepted`). Every call is `root.perform("<action>", "<id>")`.
+- **Slots.** `header` of `section` and `footer` of `form` are placed as SPEC §5.1 places them; other slots belong to kinds T67 does not map.
+- **States and Weft-only props.** `state`, `required`, `error`, the field types `email` and `search`, `variant="danger"`, `tone`, `stack.align` and `wrap`, `step`, `href`, `material` and the 3D tilt have no Slint property: they are not rendered and survive only in the source comment. `label` on `button` and `heading` is `accessible-label`.
+- **Trust.** Document text reaches the output only as Slint string literals in which every backslash is doubled, quotes are escaped and control and line-separator characters are `\u{…}`, so no `\{…}` interpolation or line break can form; ids reach it only after the identifier check.
+
+**Slint → Weft.** The importer reads the document from the source comment and accepts it only when generating from it reproduces the file (lines compared trimmed, blank lines ignored); an edited file, a file generated with other tokens, a file without the comment, a comment that does not parse and input over 2 MB are refused with distinct errors. Reading hand-written or edited Slint with a loss table is T67.2.
+
+**Lossy points.** Weft → Slint: the Weft-only props and states above, and token references, which become their px values (the comment keeps them). Slint → Weft (T67.2): expressions that are not a property read, handlers that do more than one `perform` call, styling (colours, fonts, sizes, padding), components from other files, `for` and `if` over anything but a property, and animations become losses in the shape of the other importers.
+
+**Not in T67** (refused as `Unsupported` with the path until T67.2): `<each>`, `list`, `table`, `tabs`, `dialog`, `menu`, `image`, `model`, `alert`, the date and colour pickers, `radio-group`, `segmented-control`, `combobox` and catalog-extension kinds.
+
+**Mandatory tests:**
+
+- Unit tests, Weft → Slint: data-property typing and truthiness reads, refusal of clashing paths and ids, component naming, string-literal escaping.
+- Unit and integration tests, Slint → Weft: read-back of every generated golden file, a reindented file, and refusal of an edited file, a tampered comment, a file without the comment, a broken comment and oversize input.
+- Format tests: every generated file matches its reviewed golden file under `crates/weft-slint/tests/fixtures/` (`WEFT_UPDATE_FIXTURES=1` rewrites them) and compiles with `slint-interpreter` without errors; the read-back document passes the Weft validator in strict mode and serializes byte-identical to the canonical input (round trip Weft → Slint → Weft) for the `login`, `signup` and `settings` corpus screens and a fixture with the other mapped controls; document text with quotes, backslashes and `\{` compiles to exactly one component.
+- `crates/weft-cli/tests/deps.rs`: `weft-slint` has no Slint crate among its normal dependencies.
+
+Execution plan:
+
+1. `crates/weft-slint` (workspace member, `publish = false`; normal dependencies `weft-core`, `weft-catalog`, `indexmap`, `thiserror`; `slint-interpreter` 1.18 as a dev-dependency only, without backends or renderers). Modules: `names` (identifiers, component names, string literals), `data` (property inference and reads), `generate`, `import`.
+2. `generate(document, &GenerateOptions { catalog, tokens, name })` → `Result<String, GenerateError>`: strict validation first, then the id and data checks, then the component; `GenerateError::Unsupported` lists every refused element or binding path.
+3. `import_slint(source, &ImportOptions { catalog, tokens })` → `Result<Document, ImportError>` from the source comment, verified by regeneration.
+4. Tests as listed above: unit tests in `names.rs` and `data.rs`, `tests/slint.rs` with the golden files, the compile check, the round trip and the refusals; the assertion in `crates/weft-cli/tests/deps.rs`.
+5. `SPEC.md` §9 "To Slint" and "From Slint" (additive), the crate `README.md`, the `slint-interpreter` row in `toolchain.md` (`rust.md` already lists it).
+6. Verify with `cargo nextest run -p weft-slint -p weft-cli`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all --check`.
+
+Done when all of the above pass under `cargo nextest run`, `cargo clippy --workspace --all-targets -- -D warnings` and `cargo fmt --all --check`, and `SPEC.md` §9 has the "To Slint" and "From Slint" rules.
+
+Result: `crates/weft-slint` with `generate` and `import_slint`; golden files for `login`, `signup`, `settings` and `tests/fixtures/controls.weft`, each compiled with `slint-interpreter` 1.18.1 and read back byte-identical to the canonical markup and strictly valid. `cargo nextest run -p weft-slint -p weft-cli` (57 tests, 15 of them in weft-slint), `cargo clippy --workspace --all-targets -- -D warnings` and `cargo fmt --all --check` pass. The non-test code is about 830 lines, above the 500-line task size; it was kept in one task because the generator, the data typing and the read-back are tested only together.
