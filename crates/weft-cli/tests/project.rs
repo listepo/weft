@@ -317,6 +317,7 @@ fn swiftui_arguments_override_the_project() {
         &"--no-shared-tokens",
         &"--out-dir",
         &elsewhere,
+        &"--force",
     ]);
     assert_eq!(r.code, 0, "{}", r.stderr);
     let swift = std::fs::read_to_string(elsewhere.join("plain.swift")).unwrap();
@@ -335,7 +336,7 @@ fn swiftui_arguments_override_the_project() {
             r#""outDir": "ios", "sharedTokens": false }"#,
         ),
     );
-    let r = run(&[&"swiftui", &screen, &"--out-dir", &elsewhere]);
+    let r = run(&[&"swiftui", &screen, &"--out-dir", &elsewhere, &"--force"]);
     assert_eq!(r.code, 0, "{}", r.stderr);
     let swift = std::fs::read_to_string(elsewhere.join("plain.swift")).unwrap();
     assert!(swift.contains("var sm: CGFloat = 12"), "{swift}");
@@ -706,4 +707,34 @@ fn canonical_json_without_a_project_still_gets_its_shape_checked() {
     assert_eq!(r.code, 1, "{}", r.stdout);
     assert!(r.stdout.contains("W200 "), "{}", r.stdout);
     assert!(r.stderr.contains("shape layers"), "{}", r.stderr);
+}
+
+/// T71: a generator refuses to overwrite its output without `--force` —
+/// the same contract the plugin scripts keep — and says so.
+#[test]
+fn a_generator_refuses_to_overwrite_without_force() {
+    let s = swiftui_project("overwrite-refused");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let dir = s.path("gen");
+    let r = run(&[&"swiftui", &screen, &"--out-dir", &dir]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    let hand_edited = "var sm: CGFloat = 99\n";
+    std::fs::write(dir.join("plain.swift"), hand_edited).unwrap();
+
+    let r = run(&[&"swiftui", &screen, &"--out-dir", &dir]);
+    assert_eq!(r.code, 2, "{}", r.stdout);
+    assert!(r.stderr.contains("--force"), "{}", r.stderr);
+    assert_eq!(
+        std::fs::read_to_string(dir.join("plain.swift")).unwrap(),
+        hand_edited,
+        "the refusal must not touch the file"
+    );
+
+    let r = run(&[&"swiftui", &screen, &"--out-dir", &dir, &"--force"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert_ne!(
+        std::fs::read_to_string(dir.join("plain.swift")).unwrap(),
+        hand_edited,
+        "--force overwrites"
+    );
 }

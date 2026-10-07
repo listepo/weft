@@ -13,6 +13,8 @@ use crate::convert::{catalog, emit, finish_import, out_dir, project, strict_docu
 use crate::{ProjectArgs, read};
 
 pub struct Args {
+    pub force: bool,
+
     pub file: PathBuf,
     pub catalog: Option<PathBuf>,
     pub project: ProjectArgs,
@@ -38,7 +40,7 @@ pub fn export(args: Args, out: &mut dyn Write) -> Result<u8> {
         "a2ui",
     );
     // Not `.json` alone: the corpus names these `screen.a2ui.json`.
-    emit(&text, &args.file, dir, "a2ui.json", out)?;
+    emit(&text, &args.file, dir, "a2ui.json", args.force, out)?;
     Ok(0)
 }
 
@@ -54,5 +56,5 @@ pub fn import(args: Args, out: &mut dyn Write) -> Result<u8> {
         "import",
         "a2ui",
     );
-    finish_import(&args.file, &result, dir, out)
+    finish_import(&args.file, &result, dir, args.force, out)
 }

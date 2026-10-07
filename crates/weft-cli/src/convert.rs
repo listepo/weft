@@ -167,12 +167,16 @@ pub fn out_dir(
     })
 }
 
-/// Prints `text`, or writes it to `<dir>/<stem of file>.<extension>`.
+/// Prints `text`, or writes it to `<dir>/<stem of file>.<extension>`. An
+/// existing target is refused without `force` — the same contract the plugin
+/// scripts keep (`docs/exporting-jsx.md`): a hand-edited `gen/Login.jsx`
+/// must not be silently clobbered.
 pub fn emit(
     text: &str,
     file: &Path,
     dir: Option<PathBuf>,
     extension: &str,
+    force: bool,
     out: &mut dyn Write,
 ) -> Result<()> {
     let Some(dir) = dir else {
@@ -188,6 +192,12 @@ pub fn emit(
     name.push(".");
     name.push(extension);
     let target = dir.join(name);
+    if target.exists() && !force {
+        anyhow::bail!(
+            "{} already exists; pass --force to overwrite it",
+            target.display()
+        );
+    }
     std::fs::write(&target, text).with_context(|| format!("cannot write {}", target.display()))
 }
 
@@ -234,11 +244,12 @@ pub fn finish_import(
     file: &Path,
     result: &ImportResult,
     dir: Option<PathBuf>,
+    force: bool,
     out: &mut dyn Write,
 ) -> Result<u8> {
     print(file, &result.diagnostics, &mut std::io::stderr())?;
     report_losses(file, &result.losses, &mut std::io::stderr())?;
-    emit(&serialize(&result.document), file, dir, "weft", out)?;
+    emit(&serialize(&result.document), file, dir, "weft", force, out)?;
     Ok(if has_errors(&result.diagnostics) {
         DIAGNOSTICS
     } else {

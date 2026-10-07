@@ -43,7 +43,14 @@ pub fn export_css(args: TokensArgs, out: &mut dyn Write) -> Result<u8> {
         "export",
         "css",
     );
-    emit(&css, Path::new(CSS_TOKENS_FILE), dir, "css", out)?;
+    emit(
+        &css,
+        Path::new(CSS_TOKENS_FILE),
+        dir,
+        "css",
+        args.force,
+        out,
+    )?;
     Ok(0)
 }
 
@@ -52,6 +59,7 @@ pub fn export_css(args: TokensArgs, out: &mut dyn Write) -> Result<u8> {
 pub fn export_css_base(
     project_args: ProjectArgs,
     out_dir_arg: Option<PathBuf>,
+    force: bool,
     out: &mut dyn Write,
 ) -> Result<u8> {
     let (project, project_dir) = project(Path::new(PROJECT_FILE), project_args)?;
@@ -62,7 +70,7 @@ pub fn export_css_base(
         "export",
         "css",
     );
-    emit(BASE_CSS, Path::new(CSS_BASE_FILE), dir, "css", out)?;
+    emit(BASE_CSS, Path::new(CSS_BASE_FILE), dir, "css", force, out)?;
     Ok(0)
 }
 
@@ -86,6 +94,8 @@ impl Target {
 }
 
 pub struct ExportArgs {
+    pub force: bool,
+
     pub target: Target,
     pub file: PathBuf,
     pub catalog: Option<PathBuf>,
@@ -170,11 +180,13 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
         "export",
         target,
     );
-    emit(&text, &args.file, dir, extension, out)?;
+    emit(&text, &args.file, dir, extension, args.force, out)?;
     Ok(0)
 }
 
 pub struct ImportArgs {
+    pub force: bool,
+
     pub target: Target,
     pub file: PathBuf,
     pub catalog: Option<PathBuf>,
@@ -216,5 +228,5 @@ pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
         "import",
         args.target.name(),
     );
-    finish_import(&args.file, &result, dir, out)
+    finish_import(&args.file, &result, dir, args.force, out)
 }
