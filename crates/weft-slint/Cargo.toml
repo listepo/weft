@@ -7,14 +7,26 @@ rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
 
+[features]
+default = []
+# Syntax tree of i-slint-compiler, for a file the generator did not print or that was edited.
+# No renderer and no backend. Default features stay empty of Slint crates.
+import = ["dep:i-slint-compiler", "dep:weft-import"]
+
 [dependencies]
 indexmap = { workspace = true }
 thiserror = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
+i-slint-compiler = { workspace = true, optional = true }
+weft-import = { workspace = true, optional = true }
 
 [dev-dependencies]
 slint-interpreter = { workspace = true }
+
+[[test]]
+name = "import"
+required-features = ["import"]
 
 [lints]
 workspace = true

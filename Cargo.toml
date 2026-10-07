@@ -55,6 +55,9 @@ tree-sitter-swift = "0.7.4"
 # tests: weft-slint, compiles the generated `.slint` files. Without default features: no backend or
 # renderer, only the compiler; `compat-1-18` is the feature set the crate requires.
 slint-interpreter = { version = "1.18.1", default-features = false, features = ["compat-1-18", "std"] }
+# weft-slint: the syntax tree for the importer (`import` feature). Same 1.18 line, no renderer
+# and no backend (the crate's default features are empty).
+i-slint-compiler = { version = "1.18.1", default-features = false }
 # weft-wasm. Exact: the generated glue only loads with the wasm-bindgen CLI of the same version,
 # which mise pins.
 wasm-bindgen = "=0.2.129"
