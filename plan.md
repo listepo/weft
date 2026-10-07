@@ -16,6 +16,10 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T64 | todo | P2 | 2 | 0% | |
 | T65 | todo | P2 | 1 | 0% | |
 | T66 | todo | P2 | 2 | 0% | |
+| T67 | todo | P2 | 4 | 0% | |
+| T67.1 | todo | P2 | 2 | 0% | |
+| T67.2 | todo | P2 | 4 | 0% | |
+| T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 
 ### T8. Evaluation
 
@@ -179,3 +183,75 @@ T15.1 delivers `import_cem` in `weft-import` (library, tests, SPEC section 9). T
 ### T66. CI workflow for the documented merge gate
 
 There is no `.github/` in the repo; the documented merge gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md:50) runs only by hand — and T32 plans publishing from GitHub. Done means: the gate runs as a workflow on pull requests (and on main once the repo has a remote).
+
+### T67. Weft to Slint and back
+
+Convert a Weft screen into a Slint component (`.slint`, Slint 1.x with `std-widgets.slint`) and read Slint source back into Weft, so a Weft screen can drive a native desktop app (macOS now, Windows from the same code, the web later through Slint's WebAssembly build) and a Slint UI can come back to Weft. A new crate, `crates/weft-slint`, follows `crates/weft-swiftui`: a pure-Rust generator plus an importer, developed on the branch `feat/weft-slint-convert`. The task is split by size: T67 is the library for the core vocabulary in both directions with its tests, T67.1 the CLI and project settings, T67.2 the reader of hand-written Slint and the rest of the catalog.
+
+**Weft side (input of the generator, output of the importer).** A strictly valid document (SPEC §2–§6) against the core catalog and the project tokens: the `<screen>` root with `weft`, elements with document-unique ids, props as literals, bindings (`{$.path}`, `{!$.path}`) or token references (`{token.path}`), events as `on-<event>` action names, named slots, and canonical markup and JSON (SPEC §3) as the form the importer returns.
+
+**Slint side (output of the generator, input of the importer).** One file per screen:
+
+| Part | Slint |
+| --- | --- |
+| Source comment | A leading `// weft:source slint [name=<name>]` line, then the canonical markup, one markup line per `// ` comment line |
+| Imports | `import { … } from "std-widgets.slint";` with only the widgets the screen uses |
+| Component | `export component <Name>Screen inherits Window`; `<Name>` is the PascalCase screen id or the `name` option; `title` from the screen's `label` |
+| Data | One `in-out property <string\|bool\|float\|int>` per root data path a binding reads: `$.email` → `email`, `$.user.email` → `user-email` |
+| Actions | One `callback perform(string, string)` that every event calls with the action name and the element id, like the SwiftUI target's `perform` handler |
+| Body | A `VerticalBox` (`alignment: LayoutAlignment.start`) whose element id is the screen id, holding the elements |
+
+**Kinds (Weft → Slint; the importer reads the same table back):**
+
+| Weft | Slint |
+| --- | --- |
+| `screen` | the `Window` component and its `VerticalBox` |
+| `stack` | `VerticalLayout` / `HorizontalLayout` (`direction`); a `gap` token → `spacing` in px (`rem` × 16) |
+| `grid` | `GridLayout`; child `n` gets `row: n / columns` and `col: n % columns` (`columns` must be a literal) |
+| `section` | `GroupBox` (`title` from `label`) around a `VerticalBox`; the `header` slot first |
+| `form` | `VerticalBox`; the `footer` slot in a `HorizontalBox` after the content |
+| `heading` | `Text` with the browser default size for `level` (32, 24, 19, 16, 13, 11 px) and weight 700 |
+| `text` | `Text` |
+| `link` | `TouchArea` around a `Text` in `Palette.accent-background`; `on-press` → `clicked` |
+| `button` | `Button`; `primary: true` for `variant="primary"`; `on-press` → `clicked` |
+| `field` | a caption `Text` above a `LineEdit` (`input-type: InputType.password` / `InputType.number`, `placeholder-text`); `type="multiline"` → `TextEdit` |
+| `checkbox`, `switch` | `CheckBox`, `Switch`; `text` from `label` |
+| `select` + `option` | a caption `Text` above a `ComboBox`: the option texts are its `model`; `value` picks `current-index` through a generated chain of comparisons, and `selected` writes the chosen option's `value` back |
+| `slider` | a caption `Text` above a `Slider` (`float`): `minimum`, `maximum`, `value` |
+| `stepper` | a caption `Text` above a `SpinBox` (`int`) |
+
+**Props, states, ids, slots, bindings and actions:**
+
+- **Ids.** A Weft id is the Slint element id (`email := LineEdit`). Slint reads `-` and `_` in an identifier as the same character and reserves `root`, `self` and `parent`, and an element id shadows the globals and enums the generated code names (`Palette`, `InputType`, `LayoutAlignment`), so a screen whose ids clash under these rules is refused with the element path.
+- **Bindings.** A data property is typed from the props that read it: the type of the writable prop that writes it, otherwise `string`, `float`, `int` or `bool` in that order of precedence. A writable prop bound to a path is a two-way binding (`text <=> root.email`); any other binding is an expression; a boolean read of text is `root.x != ""` and of a number `root.x != 0` (SPEC §2.1 truthiness); `not` is negation. `disabled` becomes `enabled` and `hidden` becomes `visible`, each the binding read negated so no double `!` appears. Array-index and loop-variable paths, paths named like a `Window` property (`$.title`, `$.width`, …) and paths whose property names clash are refused with the binding path.
+- **Actions.** `on-press` → `clicked`, `on-change` → `edited` (fields, `SpinBox`), `toggled` (`CheckBox`, `Switch`), `selected` (`ComboBox`) or `changed` (`Slider`); `on-submit` of a form runs from the `clicked` of its `submit="true"` buttons (after their own `on-press`) and from Enter in its `LineEdit`s (`accepted`). Every call is `root.perform("<action>", "<id>")`.
+- **Slots.** `header` of `section` and `footer` of `form` are placed as SPEC §5.1 places them; other slots belong to kinds T67 does not map.
+- **States and Weft-only props.** `state`, `required`, `error`, the field types `email` and `search`, `variant="danger"`, `tone`, `stack.align` and `wrap`, `step`, `href`, `material` and the 3D tilt have no Slint property: they are not rendered and survive only in the source comment. `label` on `button` and `heading` is `accessible-label`.
+- **Trust.** Document text reaches the output only as Slint string literals in which every backslash is doubled, quotes are escaped and control and line-separator characters are `\u{…}`, so no `\{…}` interpolation or line break can form; ids reach it only after the identifier check.
+
+**Slint → Weft.** The importer reads the document from the source comment and accepts it only when generating from it reproduces the file (lines compared trimmed, blank lines ignored); an edited file, a file generated with other tokens, a file without the comment, a comment that does not parse and input over 2 MB are refused with distinct errors. Reading hand-written or edited Slint with a loss table is T67.2.
+
+**Lossy points.** Weft → Slint: the Weft-only props and states above, and token references, which become their px values (the comment keeps them). Slint → Weft (T67.2): expressions that are not a property read, handlers that do more than one `perform` call, styling (colours, fonts, sizes, padding), components from other files, `for` and `if` over anything but a property, and animations become losses in the shape of the other importers.
+
+**Not in T67** (refused as `Unsupported` with the path until T67.2): `<each>`, `list`, `table`, `tabs`, `dialog`, `menu`, `image`, `model`, `alert`, the date and colour pickers, `radio-group`, `segmented-control`, `combobox` and catalog-extension kinds.
+
+**Mandatory tests:**
+
+- Unit tests, Weft → Slint: data-property typing and truthiness reads, refusal of clashing paths and ids, component naming, string-literal escaping.
+- Unit and integration tests, Slint → Weft: read-back of every generated golden file, a reindented file, and refusal of an edited file, a tampered comment, a file without the comment, a broken comment and oversize input.
+- Format tests: every generated file matches its reviewed golden file under `crates/weft-slint/tests/fixtures/` (`WEFT_UPDATE_FIXTURES=1` rewrites them) and compiles with `slint-interpreter` without errors; the read-back document passes the Weft validator in strict mode and serializes byte-identical to the canonical input (round trip Weft → Slint → Weft) for the `login`, `signup` and `settings` corpus screens and a fixture with the other mapped controls; document text with quotes, backslashes and `\{` compiles to exactly one component.
+- `crates/weft-cli/tests/deps.rs`: `weft-slint` has no Slint crate among its normal dependencies.
+
+Done when all of the above pass under `cargo nextest run`, `cargo clippy --workspace --all-targets -- -D warnings` and `cargo fmt --all --check`, and `SPEC.md` §9 has the "To Slint" and "From Slint" rules.
+
+### T67.1. CLI and project settings for Slint
+
+`weft slint <file> [--out-dir] [--tokens] [--catalog] [--name]` and `weft import-slint <file>` in `crates/weft-cli`, following `weft swiftui` and `weft import-swiftui` (exit codes, stdout, `--out-dir`), with `export.slint` and `import.slint` sections in the project file (`SPEC.md` §10.6, `crates/weft-catalog/src/settings.rs`, the regenerated `schemas/weft.schema.json`), CLI cases in `crates/weft-cli/tests/` and a `docs/cli.md` section. Depends on T67. Done when `weft import-slint` of `weft slint` output equals `weft fmt` of the input for the corpus screens.
+
+### T67.2. Hand-written Slint and the rest of the catalog
+
+Read Slint source that the generator did not print, or that was edited, with the `i-slint-compiler` syntax tree in the importer only (an `import` feature, as tree-sitter in `weft-swiftui`), into Weft with `{ document, losses, diagnostics }` and the loss kinds of SPEC §9; and extend the generator to `<each>` (`for … in` over a struct model), `list`, `table` (`StandardTableView`), `tabs` (`TabWidget`), `dialog`, `image`, `alert`, the pickers, `radio-group`, `segmented-control` and `combobox`. Depends on T67. Done when every corpus screen generates, compiles and round-trips, and an edited generated file imports with the expected losses.
+
+### T68. Slint bindings for SwiftUI and WinUI
+
+Research how Slint embeds into native apps (the `slint::platform` custom platform, the software renderer, the window adapter, input and accessibility) and whether Slint has official bindings for SwiftUI (macOS, iOS) or WinUI 3 in `slint-ui/slint`, its code and its open pull requests. If official bindings exist, record where and use them. If not, build them as a separate project, `~/GitHub/listepo/apps/slint-bindings`, in the public repository `listepo/slint-bindings` (https://github.com/listepo/slint-bindings), pushed to `main`: a Rust core (`slint-bindings-core`) and a C ABI (`slint-bindings-ffi`), a Swift package that hosts a Slint component in SwiftUI through `NSViewRepresentable`, and a WinUI 3 package for Windows. Weft consumes those bindings and does not keep its own embedding: the Weft desktop work builds on T67 (the Slint the screens become) and on this project. Done when the research with its sources is written down in that repository, and a Slint component generated by T67 shows and takes input inside a SwiftUI window on macOS through the bindings; the WinUI 3 half is checked on Windows.
