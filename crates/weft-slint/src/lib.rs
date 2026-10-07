@@ -9,6 +9,8 @@ mod import;
 mod names;
 #[cfg(feature = "import")]
 mod read;
+#[cfg(feature = "import")]
+mod read_expr;
 
 pub use generate::{GenerateError, GenerateOptions, generate};
 pub use import::{ImportError, ImportOptions, MAX_SOURCE_LENGTH, import_slint};

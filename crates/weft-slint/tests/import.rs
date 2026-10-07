@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 use indexmap::IndexMap;
 use weft_catalog::{DEFAULT_TOKENS_JSON, Token, core_catalog, load_tokens};
-use weft_core::{Code, serialize};
+use weft_core::{Child, Code, Node, Value, serialize};
 use weft_slint::{ImportOptions, LossKind, MAX_SOURCE_LENGTH, import_slint, read_slint};
 
 fn here(path: &str) -> PathBuf {
@@ -136,4 +136,340 @@ fn an_unmodified_golden_round_trips_on_the_comment_path() {
     let markup = std::fs::read_to_string(here("../../corpus/login/screen.weft")).unwrap();
     let back = import_slint(&source, &import_options(&catalog, &tokens)).unwrap();
     assert_eq!(serialize(&back), markup);
+}
+
+fn without_source_comment(source: &str) -> String {
+    let mut out = Vec::new();
+    let mut skipping = false;
+    let mut seen = false;
+    for line in source.lines() {
+        let trimmed = line.trim_start();
+        if !seen && trimmed.is_empty() {
+            continue;
+        }
+        if !seen && trimmed.starts_with("// weft:source slint") {
+            seen = true;
+            skipping = true;
+            continue;
+        }
+        if skipping {
+            if trimmed.starts_with("//") {
+                continue;
+            }
+            skipping = false;
+        }
+        seen = true;
+        out.push(line);
+    }
+    let mut text = out.join("\n");
+    if source.ends_with('\n') {
+        text.push('\n');
+    }
+    text
+}
+
+fn read_stripped(path: &str) -> weft_core::Document {
+    let (catalog, tokens) = options();
+    let source = std::fs::read_to_string(here(path)).unwrap();
+    let source = without_source_comment(&source);
+    assert!(
+        !source.contains("weft:source"),
+        "the source comment is still in {path}"
+    );
+    let result = read_slint(&source, &import_options(&catalog, &tokens));
+    assert!(
+        result.diagnostics.is_empty(),
+        "{path}: {:?}",
+        result.diagnostics
+    );
+    result.document
+}
+
+fn find<'a>(node: &'a Node, kind: &str, id: &str) -> Option<&'a Node> {
+    if node.kind == kind && node.id.as_deref() == Some(id) {
+        return Some(node);
+    }
+    for child in &node.children {
+        if let Child::Node(child) = child
+            && let Some(found) = find(child, kind, id)
+        {
+            return Some(found);
+        }
+    }
+    for list in node.slots.values() {
+        for child in list {
+            if let Child::Node(child) = child
+                && let Some(found) = find(child, kind, id)
+            {
+                return Some(found);
+            }
+        }
+    }
+    None
+}
+
+fn assert_kind(doc: &weft_core::Document, kind: &str, id: &str) {
+    assert!(
+        find(&doc.root, kind, id).is_some(),
+        "missing {kind}#{id}\n{}",
+        serialize(doc)
+    );
+}
+
+#[test]
+fn a_stripped_list_keeps_each_and_the_ids() {
+    let (catalog, tokens) = options();
+    let source = std::fs::read_to_string(here("tests/fixtures/todo-list.slint")).unwrap();
+    let source = without_source_comment(&source);
+    let result = read_slint(&source, &import_options(&catalog, &tokens));
+    assert!(result.diagnostics.is_empty(), "{:?}", result.diagnostics);
+    assert!(
+        result
+            .losses
+            .iter()
+            .any(|loss| loss.kind == LossKind::Repetition),
+        "{:?}",
+        result.losses
+    );
+    let doc = &result.document;
+    for (kind, id) in [
+        ("screen", "todos"),
+        ("list", "list"),
+        ("field", "draft"),
+        ("button", "add"),
+        ("checkbox", "todo-done"),
+        ("button", "todo-remove"),
+        ("text", "remaining"),
+    ] {
+        assert_kind(doc, kind, id);
+    }
+    let list = find(&doc.root, "list", "list").unwrap();
+    let each = list.children.iter().find_map(|child| match child {
+        Child::Node(node) if node.kind == "each" => Some(node.as_ref()),
+        _ => None,
+    });
+    let each = each.expect("the list's for is an each");
+    assert_eq!(
+        each.props.get("as"),
+        Some(&Value::String("todo".into())),
+        "the loop variable is as"
+    );
+    assert!(
+        each.children
+            .iter()
+            .any(|child| matches!(child, Child::Node(node) if node.kind == "item")),
+        "the repeated element is an item\n{}",
+        serialize(doc)
+    );
+}
+
+#[test]
+fn a_stripped_tabs_screen_keeps_tabs_list_and_ids() {
+    let doc = read_stripped("tests/fixtures/tabs.slint");
+    for (kind, id) in [
+        ("screen", "account"),
+        ("tabs", "tabs"),
+        ("tab", "tab-overview"),
+        ("tab", "tab-billing"),
+        ("tab", "tab-team"),
+        ("text", "account-name"),
+        ("text", "account-email"),
+        ("text", "plan"),
+        ("button", "change-plan"),
+        ("list", "members"),
+        ("text", "member-name"),
+    ] {
+        assert_kind(&doc, kind, id);
+    }
+    let list = find(&doc.root, "list", "members").unwrap();
+    let each = list.children.iter().find_map(|child| match child {
+        Child::Node(node) if node.kind == "each" => Some(node.as_ref()),
+        _ => None,
+    });
+    let each = each.expect("the member for is an each");
+    assert_eq!(each.props.get("as"), Some(&Value::String("member".into())));
+    assert!(
+        each.children
+            .iter()
+            .any(|child| matches!(child, Child::Node(node) if node.kind == "item"))
+    );
+}
+
+#[test]
+fn stripped_screens_keep_menu_dialog_table_radio_and_image() {
+    let menu = read_stripped("tests/fixtures/menu.slint");
+    assert_kind(&menu, "screen", "account-menu");
+    assert_kind(&menu, "menu", "menu");
+    assert_kind(&menu, "menu-item", "item-profile");
+    assert_kind(&menu, "menu-item", "item-settings");
+    assert_kind(&menu, "menu-item", "item-billing");
+    assert_kind(&menu, "menu-item", "item-signout");
+    let menu_node = find(&menu.root, "menu", "menu").unwrap();
+    assert_eq!(
+        menu_node.props.get("label"),
+        Some(&Value::String("Account".into()))
+    );
+
+    let dialog = read_stripped("tests/fixtures/confirm-dialog.slint");
+    assert_kind(&dialog, "dialog", "confirm");
+    assert_kind(&dialog, "text", "warning");
+    assert_kind(&dialog, "text", "filename");
+    assert_kind(&dialog, "button", "cancel");
+    assert_kind(&dialog, "button", "confirm-delete");
+    let popup = find(&dialog.root, "dialog", "confirm").unwrap();
+    assert_eq!(
+        popup.props.get("label"),
+        Some(&Value::String("Delete file?".into()))
+    );
+
+    let wizard = read_stripped("tests/fixtures/wizard-step.slint");
+    assert_kind(&wizard, "radio-group", "plan");
+    assert_kind(&wizard, "radio", "plan-free");
+    assert_kind(&wizard, "radio", "plan-pro");
+    assert_kind(&wizard, "radio", "plan-team");
+
+    let appearance = read_stripped("tests/fixtures/appearance.slint");
+    assert_kind(&appearance, "segmented-control", "theme");
+    assert_kind(&appearance, "segment", "theme-light");
+    assert_kind(&appearance, "segment", "theme-dark");
+    assert_kind(&appearance, "segment", "theme-auto");
+
+    let table = read_stripped("tests/fixtures/data-table.slint");
+    assert_kind(&table, "table", "table");
+    assert!(
+        find(&table.root, "column", "col-name").is_none(),
+        "columns stay unread"
+    );
+
+    let orders = read_stripped("tests/fixtures/orders.slint");
+    assert_kind(&orders, "table", "open-orders");
+    assert_kind(&orders, "table", "archived");
+    assert_kind(&orders, "table", "pending");
+    assert_kind(&orders, "text", "no-orders");
+
+    let profile = read_stripped("tests/fixtures/profile.slint");
+    assert_kind(&profile, "image", "avatar");
+}
+
+#[test]
+fn an_image_is_a_model_only_when_the_comment_says_so() {
+    let (catalog, tokens) = options();
+    let source = std::fs::read_to_string(here("tests/fixtures/showroom.slint")).unwrap();
+    let with = read_slint(&source, &import_options(&catalog, &tokens));
+    assert_kind(&with.document, "model", "gem");
+    assert_kind(&with.document, "model", "turned");
+    let stripped = without_source_comment(&source);
+    let without = read_slint(&stripped, &import_options(&catalog, &tokens));
+    assert_kind(&without.document, "image", "gem");
+    assert_kind(&without.document, "image", "turned");
+}
+
+#[test]
+fn login_without_the_source_comment_keeps_bindings_and_submit() {
+    let (catalog, tokens) = options();
+    let source = std::fs::read_to_string(here("tests/fixtures/login.slint")).unwrap();
+    let source = without_source_comment(&source);
+    assert!(!source.contains("weft:source"), "{source}");
+    let result = read_slint(&source, &import_options(&catalog, &tokens));
+    let markup = serialize(&result.document);
+    for needle in [
+        "value=\"{$.email}\"",
+        "value=\"{$.password}\"",
+        "label=\"Email\"",
+        "label=\"Password\"",
+        "disabled=\"{!$.email}\"",
+        "on-submit=\"auth.submit\"",
+        "on-press=\"nav.reset\"",
+        "on-press=\"nav.signup\"",
+        "level=\"1\"",
+        "<heading",
+        "submit=\"true\"",
+    ] {
+        assert!(markup.contains(needle), "{needle} missing in {markup}");
+    }
+    assert!(
+        !markup.contains("gap="),
+        "16px matches more than one dimension token\n{markup}"
+    );
+    let kept = [
+        LossKind::Bindings,
+        LossKind::Actions,
+        LossKind::Values,
+        LossKind::Names,
+        LossKind::Text,
+        LossKind::Hidden,
+        LossKind::Repetition,
+        LossKind::Structure,
+        LossKind::Props,
+    ];
+    assert!(
+        result.losses.iter().all(|loss| !kept.contains(&loss.kind)),
+        "{markup}\n{:?}",
+        result.losses
+    );
+    assert!(result.diagnostics.is_empty(), "{:?}", result.diagnostics);
+}
+
+#[test]
+fn generated_expressions_round_trip() {
+    let (catalog, tokens) = options();
+    let source = r#"export component Hello inherits Window {
+    in-out property <string> user-email;
+    in-out property <string> title-data;
+    in-out property <string> language;
+    in-out property <bool> busy;
+    in-out property <int> count;
+    VerticalLayout {
+        spacing: 24px;
+        title := Text {
+            text: root.user-email;
+            font-size: 24px;
+            font-weight: 700;
+            visible: !root.busy;
+        }
+        kept := Text { text: root.title-data; }
+        VerticalLayout {
+            Text { text: "Language"; }
+            language := ComboBox {
+                model: ["English", "Deutsch"];
+                current-index: root.language == "de" ? 1 : 0;
+                selected => { root.language = ["en", "de"][self.current-index]; root.perform("settings.save", "language"); }
+            }
+        }
+        go := Button {
+            text: "Go";
+            enabled: root.count != 0;
+            clicked => { root.perform("settings.save", "go"); }
+        }
+    }
+}
+"#;
+    let result = read_slint(source, &import_options(&catalog, &tokens));
+    let markup = serialize(&result.document);
+    for needle in [
+        "gap=\"{token.space.lg}\"",
+        "text=\"{$.user.email}\"",
+        "text=\"{$.title}\"",
+        "hidden=\"{$.busy}\"",
+        "level=\"2\"",
+        "label=\"Language\"",
+        "value=\"{$.language}\"",
+        "value=\"en\"",
+        "value=\"de\"",
+        ">English<",
+        ">Deutsch<",
+        "on-change=\"settings.save\"",
+        "disabled=\"{!$.count}\"",
+        "on-press=\"settings.save\"",
+    ] {
+        assert!(markup.contains(needle), "{needle} missing in {markup}");
+    }
+    assert!(
+        result
+            .losses
+            .iter()
+            .all(|loss| { matches!(loss.kind, LossKind::Ids | LossKind::Kinds) }),
+        "{markup}\n{:?}",
+        result.losses
+    );
 }

@@ -309,6 +309,21 @@ fn property_name(
     Some(name)
 }
 
+/// The Weft path a generated property name stands for. A `-data` suffix is only the
+/// `Window` property it was kept off (`title-data` is `$.title`), so it is not another segment.
+pub(crate) fn binding_path(name: &str) -> String {
+    let key = clash_key(name);
+    let stem = if let Some(bare) = key.strip_suffix("-data")
+        && (TAKEN.contains(&bare) || bare.starts_with("accessible-"))
+        && let Some(kept) = name.strip_suffix("-data")
+    {
+        kept
+    } else {
+        name
+    };
+    format!("$.{}", stem.replace('-', "."))
+}
+
 fn note(readers: &mut Readers, ty: Ty, writable: bool) {
     if writable {
         readers.writable.push(ty);
