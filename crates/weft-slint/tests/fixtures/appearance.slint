@@ -1,0 +1,116 @@
+// weft:source slint
+// <screen id="appearance" label="Appearance" weft="0.1">
+//   <heading id="title" level="1">Appearance</heading>
+//   <stack id="options" align="stretch" gap="{token.space.md}">
+//     <segmented-control id="theme" label="Theme" value="{$.theme}">
+//       <segment id="theme-light" value="light">Light</segment>
+//       <segment id="theme-dark" disabled="true" value="dark">Dark</segment>
+//       <segment id="theme-auto" text="{$.automatic}" value="auto"/>
+//     </segmented-control>
+//     <slider id="size" label="Text size" max="24" min="12" value="{$.size}"/>
+//     <slider id="contrast" disabled="true" label="Contrast" value="{$.contrast}"/>
+//     <stepper id="columns" label="Columns" value="{$.columns}"/>
+//     <stepper id="zoom" disabled="{$.locked}" label="Zoom" max="3" step="0.5" value="{$.zoom}"/>
+//     <color-picker id="accent" disabled="true" label="Accent colour" value="#d946ef"/>
+//     <date-picker id="since" disabled="true" label="Member since" type="date" value="2024-05-17"/>
+//     <combobox id="font" disabled="true" label="Font" value="Inter">
+//       <option id="font-inter" value="Inter">Inter</option>
+//       <option id="font-mono" value="Menlo">Menlo</option>
+//     </combobox>
+//   </stack>
+// </screen>
+
+import { ComboBox, LineEdit, RadioGroup, Slider, SpinBox, VerticalBox } from "std-widgets.slint";
+
+export component AppearanceScreen inherits Window {
+    title: "Appearance";
+    in-out property <string> theme;
+    in-out property <string> automatic;
+    in-out property <float> size;
+    in-out property <float> contrast;
+    in-out property <int> columns;
+    in-out property <bool> locked;
+    in-out property <int> zoom;
+    callback perform(string, string);
+
+    appearance := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Appearance";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        options := VerticalLayout {
+            spacing: 16px;
+            theme := RadioGroup {
+                title: "Theme";
+                orientation: Orientation.horizontal;
+                theme-light := RadioButton {
+                    text: "Light";
+                    checked: root.theme == "light";
+                }
+                theme-dark := RadioButton {
+                    text: "Dark";
+                    enabled: false;
+                    checked: root.theme == "dark";
+                }
+                theme-auto := RadioButton {
+                    text: root.automatic;
+                    checked: root.theme == "auto";
+                }
+                selected(picked) => { root.theme = picked == "Light" ? "light" : picked == "Dark" ? "dark" : "auto"; }
+            }
+            VerticalLayout {
+                Text { text: "Text size"; }
+                size := Slider {
+                    minimum: 12;
+                    maximum: 24;
+                    value <=> root.size;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Contrast"; }
+                contrast := Slider {
+                    value <=> root.contrast;
+                    enabled: false;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Columns"; }
+                columns := SpinBox {
+                    value <=> root.columns;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Zoom"; }
+                zoom := SpinBox {
+                    maximum: 3;
+                    value <=> root.zoom;
+                    enabled: !root.locked;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Accent colour"; }
+                accent := LineEdit {
+                    text: "#d946ef";
+                    enabled: false;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Member since"; }
+                since := LineEdit {
+                    text: "2024-05-17";
+                    enabled: false;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Font"; }
+                font := ComboBox {
+                    model: ["Inter", "Menlo"];
+                    current-index: 0;
+                    enabled: false;
+                }
+            }
+        }
+    }
+}

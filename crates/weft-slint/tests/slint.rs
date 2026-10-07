@@ -20,13 +20,22 @@ use weft_slint::{
     import_slint,
 };
 
-/// The screens the Slint target maps in full, and where their markup lives.
-const SCREENS: &[(&str, &str)] = &[
-    ("login", "../../corpus/login/screen.weft"),
-    ("signup", "../../corpus/signup/screen.weft"),
-    ("settings", "../../corpus/settings/screen.weft"),
-    ("controls", "tests/fixtures/controls.weft"),
-];
+/// Every corpus screen, plus the fixture of controls the corpus does not combine.
+fn screens() -> Vec<(String, PathBuf)> {
+    let mut found = Vec::new();
+    let mut dirs: Vec<_> = std::fs::read_dir(here("../../corpus"))
+        .unwrap()
+        .map(|entry| entry.unwrap().path())
+        .filter(|path| path.join("screen.weft").is_file())
+        .collect();
+    dirs.sort();
+    for dir in dirs {
+        let name = dir.file_name().unwrap().to_string_lossy().into_owned();
+        found.push((name, dir.join("screen.weft")));
+    }
+    found.push(("controls".to_owned(), here("tests/fixtures/controls.weft")));
+    found
+}
 
 fn here(path: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(path)
@@ -70,22 +79,22 @@ fn compile(source: &str, component: &str) -> (Vec<String>, bool) {
     (errors, result.component(component).is_some())
 }
 
-fn component_name(name: &str) -> String {
-    let mut chars = name.chars();
-    let first = chars.next().unwrap().to_ascii_uppercase();
-    format!("{first}{}Screen", chars.as_str())
+fn exported_component(source: &str) -> &str {
+    source
+        .lines()
+        .find_map(|line| {
+            let rest = line.strip_prefix("export component ")?;
+            rest.split_whitespace().next()
+        })
+        .unwrap()
 }
 
 #[test]
 fn generated_slint_matches_the_golden_files() {
     let (catalog, tokens) = setup();
     let update = std::env::var_os("WEFT_UPDATE_FIXTURES").is_some();
-    for (name, path) in SCREENS {
-        let doc = document(
-            &std::fs::read_to_string(here(path)).unwrap(),
-            &catalog,
-            &tokens,
-        );
+    for (name, path) in screens() {
+        let doc = document(&std::fs::read_to_string(&path).unwrap(), &catalog, &tokens);
         let options = GenerateOptions {
             catalog: &catalog,
             tokens: &tokens,
@@ -103,19 +112,15 @@ fn generated_slint_matches_the_golden_files() {
 #[test]
 fn generated_slint_compiles() {
     let (catalog, tokens) = setup();
-    for (name, path) in SCREENS {
-        let doc = document(
-            &std::fs::read_to_string(here(path)).unwrap(),
-            &catalog,
-            &tokens,
-        );
+    for (name, path) in screens() {
+        let doc = document(&std::fs::read_to_string(&path).unwrap(), &catalog, &tokens);
         let options = GenerateOptions {
             catalog: &catalog,
             tokens: &tokens,
             name: None,
         };
         let slint = generate(&doc, &options).unwrap();
-        let (errors, built) = compile(&slint, &component_name(name));
+        let (errors, built) = compile(&slint, exported_component(&slint));
         assert!(errors.is_empty() && built, "{name}: {errors:#?}");
     }
 }
@@ -123,8 +128,8 @@ fn generated_slint_compiles() {
 #[test]
 fn generated_slint_reads_back_to_the_canonical_document() {
     let (catalog, tokens) = setup();
-    for (name, path) in SCREENS {
-        let markup = std::fs::read_to_string(here(path)).unwrap();
+    for (name, path) in screens() {
+        let markup = std::fs::read_to_string(&path).unwrap();
         let doc = document(&markup, &catalog, &tokens);
         let gen_options = GenerateOptions {
             catalog: &catalog,
@@ -155,7 +160,7 @@ fn generated_slint_reads_back_to_the_canonical_document() {
 #[test]
 fn a_named_screen_keeps_its_name_through_the_round_trip() {
     let (catalog, tokens) = setup();
-    let markup = std::fs::read_to_string(here(SCREENS[0].1)).unwrap();
+    let markup = std::fs::read_to_string(here("../../corpus/login/screen.weft")).unwrap();
     let doc = document(&markup, &catalog, &tokens);
     let options = GenerateOptions {
         catalog: &catalog,
@@ -172,10 +177,10 @@ fn a_named_screen_keeps_its_name_through_the_round_trip() {
 }
 
 #[test]
-fn kinds_outside_the_mapping_are_refused_with_their_path() {
+fn a_bound_heading_level_is_refused_with_its_path() {
     let (catalog, tokens) = setup();
     let markup =
-        r#"<screen id="s" weft="0.1"><list id="items"><item id="one">One</item></list></screen>"#;
+        r#"<screen id="s" weft="0.1"><heading id="h" level="{$.n}">Title</heading></screen>"#;
     let doc = document(markup, &catalog, &tokens);
     let options = GenerateOptions {
         catalog: &catalog,
@@ -183,9 +188,9 @@ fn kinds_outside_the_mapping_are_refused_with_their_path() {
         name: None,
     };
     let Err(GenerateError::Unsupported(problems)) = generate(&doc, &options) else {
-        panic!("a list must be refused");
+        panic!("a bound heading level must be refused");
     };
-    assert_eq!(problems[0].path, "list#items");
+    assert_eq!(problems[0].path, "heading#h");
 }
 
 #[test]
@@ -227,7 +232,7 @@ fn document_text_cannot_escape_its_string_literal() {
 #[test]
 fn edited_or_foreign_slint_is_not_taken_for_its_comment() {
     let (catalog, tokens) = setup();
-    let markup = std::fs::read_to_string(here(SCREENS[0].1)).unwrap();
+    let markup = std::fs::read_to_string(here("../../corpus/login/screen.weft")).unwrap();
     let doc = document(&markup, &catalog, &tokens);
     let options = GenerateOptions {
         catalog: &catalog,

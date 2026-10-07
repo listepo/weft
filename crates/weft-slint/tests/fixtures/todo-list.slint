@@ -1,0 +1,71 @@
+// weft:source slint
+// <screen id="todos" label="Tasks" weft="0.1">
+//   <heading id="title" level="1">Tasks</heading>
+//   <form id="add-form" on-submit="todo.add">
+//     <stack id="add-row" direction="row" gap="{token.space.sm}">
+//       <field id="draft" label="New task" value="{$.draft}"/>
+//       <button id="add" disabled="{!$.draft}" submit="true" variant="primary">Add</button>
+//     </stack>
+//   </form>
+//   <list id="list">
+//     <each id="todo-each" as="todo" in="{$.todos}">
+//       <item id="todo">
+//         <checkbox id="todo-done" checked="{$todo.done}" label="{$todo.title}"/>
+//         <button id="todo-remove" on-press="todo.remove">Remove</button>
+//       </item>
+//     </each>
+//   </list>
+//   <text id="remaining" text="{$.remainingLabel}"/>
+// </screen>
+
+import { Button, CheckBox, LineEdit, ListView, VerticalBox } from "std-widgets.slint";
+
+export component TodosScreen inherits Window {
+    title: "Tasks";
+    in-out property <string> draft;
+    in-out property <string> remainingLabel;
+    in-out property <[{ done: bool, title: string }]> todos;
+    callback perform(string, string);
+
+    todos := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Tasks";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        add-form := VerticalBox {
+            add-row := HorizontalLayout {
+                spacing: 8px;
+                VerticalLayout {
+                    Text { text: "New task"; }
+                    draft := LineEdit {
+                        text <=> root.draft;
+                        accepted => { root.perform("todo.add", "add-form"); }
+                    }
+                }
+                add := Button {
+                    text: "Add";
+                    primary: true;
+                    enabled: root.draft != "";
+                    clicked => { root.perform("todo.add", "add-form"); }
+                }
+            }
+        }
+        list := ListView {
+            for todo in root.todos: VerticalLayout {
+                todo-done := CheckBox {
+                    text: todo.title;
+                    checked <=> todo.done;
+                }
+                todo-remove := Button {
+                    text: "Remove";
+                    clicked => { root.perform("todo.remove", "todo-remove"); }
+                }
+            }
+        }
+        remaining := Text {
+            text: root.remainingLabel;
+        }
+    }
+}
