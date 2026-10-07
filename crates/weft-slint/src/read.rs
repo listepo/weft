@@ -7,7 +7,8 @@ use std::collections::HashMap;
 use i_slint_compiler::diagnostics::BuildDiagnostics;
 use i_slint_compiler::literals::unescape_string;
 use i_slint_compiler::parser::{self, NodeOrToken, SyntaxKind, SyntaxNode};
-use weft_catalog::token_types;
+use indexmap::IndexMap;
+use weft_catalog::{Token, token_types};
 use weft_core::{
     Catalog, Child, Code, Diagnostic, Document, Mode, Node, ParseOptions, Value, WEFT_VERSION,
     has_errors, is_id, parse,
@@ -16,8 +17,10 @@ use weft_import::{
     ImportResult, LossKind, Losses, MAX_DEPTH, MAX_NODES, empty_result, limit_reached, literal,
 };
 
+use crate::data::Ty;
 use crate::generate::MARKER;
 use crate::import::{ImportOptions, MAX_SOURCE_LENGTH};
+use crate::read_expr::{self, Index};
 
 /// Reads `source` from the Slint syntax tree. An exact generated file belongs to `import_slint`.
 pub fn read_slint(source: &str, options: &ImportOptions<'_>) -> ImportResult {
@@ -35,7 +38,11 @@ pub fn read_slint(source: &str, options: &ImportOptions<'_>) -> ImportResult {
     let Some(element) = component.child_node(SyntaxKind::Element) else {
         return missing(diagnostics);
     };
-    let mut reader = Reader::new(options.catalog);
+    let mut reader = Reader::new(
+        options.catalog,
+        options.tokens,
+        read_expr::properties(&element),
+    );
     if built.has_errors() {
         reader.lose(
             LossKind::Structure,
@@ -43,7 +50,8 @@ pub fn read_slint(source: &str, options: &ImportOptions<'_>) -> ImportResult {
             "syntax errors; parts were skipped",
         );
     }
-    let root = reader.screen(&element);
+    let mut root = reader.screen(&element);
+    reader.finish(&mut root);
     if reader.limited {
         limit_reached(&mut diagnostics, "#", "is past the import limit");
     }
@@ -79,24 +87,48 @@ fn missing(mut diagnostics: Vec<Diagnostic>) -> ImportResult {
 
 struct Reader<'a> {
     catalog: &'a Catalog,
+    tokens: &'a IndexMap<String, Token>,
+    props: read_expr::Props,
     losses: Losses,
     ids: weft_import::IdState,
+    pending: Vec<Pending>,
     nodes: usize,
     limited: bool,
 }
 
+struct Pending {
+    id: String,
+    event: &'static str,
+    action: String,
+}
+
+/// A label or `hidden` that belongs to the control inside a caption layout, not to the layout.
+struct Around {
+    label: Option<Fact>,
+    hidden: Option<Value>,
+}
+
+#[derive(Clone)]
 struct Fact {
     name: String,
     raw: String,
     string: Option<String>,
+    expr: Option<SyntaxNode>,
 }
 
 impl<'a> Reader<'a> {
-    fn new(catalog: &'a Catalog) -> Self {
+    fn new(
+        catalog: &'a Catalog,
+        tokens: &'a IndexMap<String, Token>,
+        props: read_expr::Props,
+    ) -> Self {
         Reader {
             catalog,
+            tokens,
+            props,
             losses: Losses::default(),
             ids: weft_import::IdState::default(),
+            pending: Vec::new(),
             nodes: 0,
             limited: false,
         }
@@ -104,6 +136,25 @@ impl<'a> Reader<'a> {
 
     fn lose(&mut self, kind: LossKind, path: &str, note: &str) {
         self.losses.push(kind, path, note);
+    }
+
+    fn finish(&mut self, root: &mut Node) {
+        let pending = std::mem::take(&mut self.pending);
+        for item in pending {
+            match place(root, &item) {
+                Hit::Ok => {}
+                Hit::Clash => self.lose(
+                    LossKind::Actions,
+                    &format!("#{}", item.id),
+                    "a callback names two actions",
+                ),
+                Hit::Miss => {
+                    let note =
+                        format!("`{}` names an element that is not in the tree", item.action);
+                    self.lose(LossKind::Actions, &format!("#{}", item.id), &note);
+                }
+            }
+        }
     }
 
     fn screen(&mut self, window: &SyntaxNode) -> Node {
@@ -136,7 +187,23 @@ impl<'a> Reader<'a> {
             let el = element_of(&host);
             let Some(el) = el else { continue };
             let id = sub_id(&host);
-            out.extend(self.one(&el, id, parent, depth));
+            if id.is_none()
+                && base_name(&el) == "VerticalLayout"
+                && let Some(folded) = self.fold_caption(&el, parent, depth)
+            {
+                out.extend(folded);
+                continue;
+            }
+            out.extend(self.one(
+                &el,
+                id,
+                parent,
+                depth,
+                Around {
+                    label: None,
+                    hidden: None,
+                },
+            ));
         }
         out
     }
@@ -147,6 +214,7 @@ impl<'a> Reader<'a> {
         id: Option<String>,
         parent: &str,
         depth: usize,
+        around: Around,
     ) -> Vec<Child> {
         if depth > MAX_DEPTH || self.nodes >= MAX_NODES {
             self.limited = true;
@@ -165,6 +233,16 @@ impl<'a> Reader<'a> {
         node.id = Some(self.fresh(id.as_deref(), kind, &hint, &stem));
         let here = path_of(parent, &node);
         let extra = self.fill(&mut node, &base, el, &here, depth);
+        if let Some(fact) = around.label
+            && !node.props.contains_key("label")
+        {
+            self.attr(&mut node, "label", &[fact], "text", &here);
+        }
+        if let Some(hidden) = around.hidden
+            && !node.props.contains_key("hidden")
+        {
+            node.props.insert("hidden".into(), hidden);
+        }
         self.blank_label(&mut node, &here);
         let mut out = vec![Child::Node(Box::new(node))];
         out.extend(extra);
@@ -181,21 +259,70 @@ impl<'a> Reader<'a> {
     ) -> Vec<Child> {
         let fs = facts(el);
         self.box_losses(node, base, path);
-        self.note_rest(&fs, el, path);
-        match base {
-            "Text" | "Button" => self.words(node, &fs, "text", path),
-            "LineEdit" | "TextEdit" => self.attr(node, "value", &fs, "text", path),
-            "CheckBox" | "Switch" => self.attr(node, "label", &fs, "text", path),
-            "ComboBox" => self.lose(LossKind::Values, path, "a ComboBox model is not read"),
-            "TouchArea" => return self.link(node, el, path, depth),
-            "GroupBox" => self.attr(node, "label", &fs, "title", path),
-            _ => {}
+        self.note_rest(node, base, &fs, path);
+        let early = match base {
+            "Text" | "Button" => {
+                if base == "Text" {
+                    self.heading(node, &fs, path);
+                }
+                self.words(node, &fs, "text", path);
+                None
+            }
+            "LineEdit" | "TextEdit" => {
+                self.attr_ty(node, "value", &fs, "text", Ty::Str, path);
+                self.attr_ty(node, "placeholder", &fs, "placeholder-text", Ty::Str, path);
+                None
+            }
+            "CheckBox" | "Switch" => {
+                self.attr_ty(node, "label", &fs, "text", Ty::Str, path);
+                self.attr_ty(node, "checked", &fs, "checked", Ty::Bool, path);
+                None
+            }
+            "ComboBox" => {
+                self.combobox(node, el, &fs, path);
+                None
+            }
+            "Slider" | "SpinBox" => {
+                let ty = if base == "SpinBox" {
+                    Ty::Int
+                } else {
+                    Ty::Float
+                };
+                self.attr_ty(node, "min", &fs, "minimum", ty, path);
+                self.attr_ty(node, "max", &fs, "maximum", ty, path);
+                self.attr_ty(node, "value", &fs, "value", ty, path);
+                None
+            }
+            "TouchArea" => Some(self.link(node, el, path, depth)),
+            "GroupBox" => {
+                self.attr_ty(node, "label", &fs, "title", Ty::Str, path);
+                None
+            }
+            _ => None,
+        };
+        self.flip(node, &fs, "enabled", "disabled", path);
+        self.flip(node, &fs, "visible", "hidden", path);
+        if !node.props.contains_key("label") {
+            self.attr_ty(node, "label", &fs, "accessible-label", Ty::Str, path);
+        }
+        self.actions(node, el, path);
+        if let Some(extra) = early {
+            return extra;
         }
         if base == "TextEdit" {
             let multiline = Value::String("multiline".into());
             node.props.insert("type".into(), multiline);
         }
-        let nest = base.ends_with("Layout") || base.ends_with("Box");
+        // `ComboBox`, `CheckBox` and `SpinBox` end in `Box` and are not layouts.
+        let nest = matches!(
+            base,
+            "VerticalLayout"
+                | "HorizontalLayout"
+                | "GridLayout"
+                | "VerticalBox"
+                | "HorizontalBox"
+                | "GroupBox"
+        );
         if nest {
             let children = self.kids(&subs(el), path, depth + 1);
             if base == "GridLayout" {
@@ -207,18 +334,31 @@ impl<'a> Reader<'a> {
         vec![]
     }
 
-    fn note_rest(&mut self, fs: &[Fact], el: &SyntaxNode, path: &str) {
-        if fs.iter().any(|f| f.name == "spacing") {
-            self.lose(LossKind::Tokens, path, "spacing is not a dimension token");
+    fn note_rest(&mut self, node: &mut Node, base: &str, fs: &[Fact], path: &str) {
+        if let Some(spacing) = named(fs, "spacing") {
+            match spacing
+                .expr
+                .as_ref()
+                .and_then(|expr| read_expr::spacing_token(expr, self.tokens))
+            {
+                Some(token) => {
+                    node.props.insert("gap".into(), Value::Token(token));
+                }
+                None => self.lose(LossKind::Tokens, path, "spacing is not a dimension token"),
+            }
         }
-        if fs.iter().any(|f| f.name == "font-size") {
+        if base != "Text" && named(fs, "font-size").is_some() {
             self.lose(LossKind::Layout, path, "font-size is not a heading level");
         }
-        if el
-            .children()
-            .any(|n| n.kind() == SyntaxKind::CallbackConnection)
+        if fs
+            .iter()
+            .any(|fact| fact.name == "row" || fact.name == "col")
         {
-            self.lose(LossKind::Actions, path, "a callback is not kept");
+            self.lose(
+                LossKind::Layout,
+                path,
+                "a grid's row and col are not placed",
+            );
         }
     }
 
@@ -272,29 +412,277 @@ impl<'a> Reader<'a> {
         let Some(fact) = named(facts, name) else {
             return;
         };
-        match &fact.string {
-            Some(text) => {
-                let shown = literal(&mut self.losses, path, text);
+        if let Some(text) = &fact.string {
+            let shown = literal(&mut self.losses, path, text);
+            node.children.push(Child::Text(shown));
+            return;
+        }
+        match fact
+            .expr
+            .as_ref()
+            .and_then(|expr| read_expr::read_value(expr, Ty::Str, &self.props))
+        {
+            Some(Value::String(text)) => {
+                let shown = literal(&mut self.losses, path, &text);
                 node.children.push(Child::Text(shown));
+            }
+            Some(value) => {
+                node.props.insert("text".into(), value);
             }
             None => self.lose(LossKind::Bindings, path, "the text expression is not kept"),
         }
     }
 
     fn attr(&mut self, node: &mut Node, prop: &str, facts: &[Fact], name: &str, path: &str) {
+        self.attr_ty(node, prop, facts, name, Ty::Str, path);
+    }
+
+    fn attr_ty(
+        &mut self,
+        node: &mut Node,
+        prop: &str,
+        facts: &[Fact],
+        name: &str,
+        want: Ty,
+        path: &str,
+    ) {
         let Some(fact) = named(facts, name) else {
             return;
         };
-        match &fact.string {
-            Some(text) => {
-                let shown = literal(&mut self.losses, path, text);
+        let value = if fact.string.is_some() && want == Ty::Str {
+            fact.string.clone().map(Value::String)
+        } else {
+            fact.expr
+                .as_ref()
+                .and_then(|expr| read_expr::read_value(expr, want, &self.props))
+        };
+        match value {
+            Some(Value::String(text)) => {
+                let shown = literal(&mut self.losses, path, &text);
                 node.props.insert(prop.into(), Value::String(shown));
+            }
+            Some(other) => {
+                node.props.insert(prop.into(), other);
             }
             None => {
                 let note = format!("`{name}` is not a literal");
                 self.lose(LossKind::Bindings, path, &note);
             }
         }
+    }
+
+    fn heading(&mut self, node: &mut Node, fs: &[Fact], path: &str) {
+        let Some(size) = named(fs, "font-size") else {
+            return;
+        };
+        let level = named(fs, "font-weight").and_then(|weight| {
+            size.expr
+                .as_ref()
+                .zip(weight.expr.as_ref())
+                .and_then(|(size, weight)| read_expr::heading_level(size, weight))
+        });
+        match level {
+            Some(level) => {
+                node.kind = "heading".into();
+                node.props
+                    .insert("level".into(), Value::Number(f64::from(level)));
+            }
+            None => self.lose(LossKind::Layout, path, "font-size is not a heading level"),
+        }
+    }
+
+    fn flip(&mut self, node: &mut Node, fs: &[Fact], from: &str, to: &str, path: &str) {
+        let Some(fact) = named(fs, from) else {
+            return;
+        };
+        if node.props.contains_key(to) {
+            return;
+        }
+        match fact
+            .expr
+            .as_ref()
+            .and_then(|expr| read_expr::flipped_bool(expr, &self.props))
+        {
+            Some(value) => {
+                node.props.insert(to.into(), value);
+            }
+            None => {
+                let note = format!("`{from}` is not a literal");
+                self.lose(LossKind::Bindings, path, &note);
+            }
+        }
+    }
+
+    fn combobox(&mut self, node: &mut Node, el: &SyntaxNode, fs: &[Fact], path: &str) {
+        let Some(model) = named(fs, "model") else {
+            self.lose(LossKind::Values, path, "a ComboBox model is not read");
+            return;
+        };
+        let Some(labels) = model.expr.as_ref().and_then(read_expr::string_list) else {
+            self.lose(
+                LossKind::Values,
+                path,
+                "a ComboBox model is not a list of string literals",
+            );
+            return;
+        };
+        let written = read_expr::callbacks(el, &self.props)
+            .into_iter()
+            .find_map(|callback| callback.values);
+        let values = match &written {
+            Some((_, values)) if values.len() == labels.len() => values.clone(),
+            _ => labels.clone(),
+        };
+        if let Some(index) = named(fs, "current-index") {
+            match index
+                .expr
+                .as_ref()
+                .and_then(|expr| read_expr::current_index(expr, &self.props))
+            {
+                Some(Index::At(at)) => {
+                    if let Some(value) = values.get(at) {
+                        let shown = literal(&mut self.losses, path, value.as_str());
+                        node.props.insert("value".into(), Value::String(shown));
+                    } else {
+                        self.lose(LossKind::Values, path, "current-index is outside the model");
+                    }
+                }
+                Some(Index::Path(bind)) => {
+                    node.props
+                        .insert("value".into(), Value::Bind { bind, not: false });
+                }
+                None => self.lose(LossKind::Bindings, path, "`current-index` is not a literal"),
+            }
+        }
+        for (label, value) in labels.iter().zip(values) {
+            let mut option = Node::new("option");
+            let id = self.fresh(None, "option", label, &format!("{path}/option"));
+            option.id = Some(id);
+            let shown = literal(&mut self.losses, path, value.as_str());
+            option.props.insert("value".into(), Value::String(shown));
+            let text = literal(&mut self.losses, path, label);
+            option.children.push(Child::Text(text));
+            node.children.push(Child::Node(Box::new(option)));
+        }
+    }
+
+    fn actions(&mut self, node: &mut Node, el: &SyntaxNode, path: &str) {
+        for callback in read_expr::callbacks(el, &self.props) {
+            let event = read_expr::event_of(&callback.name);
+            let mut kept = callback.values.is_some() && event.is_some();
+            let mut applied = 0;
+            for call in &callback.performs {
+                let own = node.id.as_deref() == Some(call.id.as_str());
+                if own && let Some(event) = event.filter(|name| *name != "submit") {
+                    self.bind_action(node, event, &call.action, path);
+                    kept = true;
+                    applied += 1;
+                } else if !own && matches!(callback.name.as_str(), "clicked" | "accepted") {
+                    // The generator only names another element from a form's submit.
+                    self.pending.push(Pending {
+                        id: call.id.clone(),
+                        event: "submit",
+                        action: call.action.clone(),
+                    });
+                    if callback.name == "clicked" {
+                        node.props
+                            .entry("submit".into())
+                            .or_insert(Value::Bool(true));
+                    }
+                    kept = true;
+                    applied += 1;
+                }
+            }
+            if !kept || callback.residue || applied != callback.performs.len() {
+                self.lose(LossKind::Actions, path, "a callback is not kept");
+            }
+        }
+    }
+
+    fn bind_action(&mut self, node: &mut Node, event: &str, action: &str, path: &str) {
+        if let Some(existing) = node.on.get(event) {
+            if existing != action {
+                self.lose(LossKind::Actions, path, "a callback names two actions");
+            }
+            return;
+        }
+        node.on.insert(event.into(), action.to_owned());
+    }
+
+    /// A caption `Text` above one control, in the layout `generate` wraps them in. The layout
+    /// itself is not an element: its `row` and `col` still cannot be placed.
+    fn fold_caption(&mut self, el: &SyntaxNode, parent: &str, depth: usize) -> Option<Vec<Child>> {
+        if el
+            .children()
+            .any(|child| child.kind() == SyntaxKind::CallbackConnection)
+        {
+            return None;
+        }
+        let fs = facts(el);
+        let plain = fs
+            .iter()
+            .all(|fact| matches!(fact.name.as_str(), "row" | "col" | "visible"));
+        if !plain {
+            return None;
+        }
+        let mut caption = None;
+        let mut control = None;
+        for sub in subs(el) {
+            let host = inner_host(&sub)?;
+            let child = element_of(&host)?;
+            let base = base_name(&child);
+            let caption_text =
+                base == "Text" && sub_id(&sub).is_none() && caption.is_none() && control.is_none();
+            if caption_text {
+                let text = facts(&child);
+                if text.len() == 1 && text[0].name == "text" && readable_text(&text[0], &self.props)
+                {
+                    caption = Some(text[0].clone());
+                    continue;
+                }
+            }
+            let widget = matches!(
+                base.as_str(),
+                "LineEdit" | "TextEdit" | "Slider" | "SpinBox" | "ComboBox"
+            );
+            if widget && control.is_none() {
+                control = Some((child, sub_id(&host)));
+                continue;
+            }
+            return None;
+        }
+        let (child, id) = control?;
+        let hidden = named(&fs, "visible").and_then(|fact| {
+            fact.expr
+                .as_ref()
+                .and_then(|expr| read_expr::flipped_bool(expr, &self.props))
+        });
+        if named(&fs, "visible").is_some() && hidden.is_none() {
+            return None;
+        }
+        let kids = self.one(
+            &child,
+            id,
+            parent,
+            depth,
+            Around {
+                label: caption,
+                hidden,
+            },
+        );
+        if fs
+            .iter()
+            .any(|fact| fact.name == "row" || fact.name == "col")
+            && let Some(Child::Node(node)) = kids.first()
+        {
+            let here = path_of(parent, node);
+            self.lose(
+                LossKind::Layout,
+                &here,
+                "a grid's row and col are not placed",
+            );
+        }
+        Some(kids)
     }
 
     fn blank_label(&mut self, node: &mut Node, path: &str) {
@@ -343,6 +731,52 @@ fn kind_of(base: &str) -> Option<&'static str> {
         "SpinBox" => "stepper",
         _ => return None,
     })
+}
+
+fn readable_text(fact: &Fact, props: &read_expr::Props) -> bool {
+    fact.string.is_some()
+        || fact
+            .expr
+            .as_ref()
+            .is_some_and(|expr| read_expr::read_value(expr, Ty::Str, props).is_some())
+}
+
+enum Hit {
+    Ok,
+    Clash,
+    Miss,
+}
+
+fn place(node: &mut Node, pending: &Pending) -> Hit {
+    if node.id.as_deref() == Some(pending.id.as_str()) {
+        return match node.on.get(pending.event) {
+            Some(existing) if existing == &pending.action => Hit::Ok,
+            Some(_) => Hit::Clash,
+            None => {
+                node.on.insert(pending.event.into(), pending.action.clone());
+                Hit::Ok
+            }
+        };
+    }
+    for child in &mut node.children {
+        if let Child::Node(child) = child {
+            match place(child, pending) {
+                Hit::Miss => {}
+                other => return other,
+            }
+        }
+    }
+    for list in node.slots.values_mut() {
+        for child in list {
+            if let Child::Node(child) = child {
+                match place(child, pending) {
+                    Hit::Miss => {}
+                    other => return other,
+                }
+            }
+        }
+    }
+    Hit::Miss
 }
 
 fn path_of(parent: &str, node: &Node) -> String {
@@ -428,7 +862,12 @@ fn facts(el: &SyntaxNode) -> Vec<Fact> {
             .as_ref()
             .and_then(sole_string)
             .filter(|_| raw.starts_with('"'));
-        out.push(Fact { name, raw, string });
+        out.push(Fact {
+            name,
+            raw,
+            string,
+            expr,
+        });
     }
     out
 }

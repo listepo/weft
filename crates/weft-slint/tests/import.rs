@@ -129,6 +129,214 @@ fn input_over_the_length_limit_is_a_diagnostic() {
     assert!(result.diagnostics.iter().any(|d| d.code == Code::W602));
 }
 
+fn without_source_comment(source: &str) -> String {
+    let mut out = Vec::new();
+    let mut dropping = false;
+    for line in source.lines() {
+        let trimmed = line.trim();
+        if !dropping && trimmed.starts_with("// weft:source") {
+            dropping = true;
+            continue;
+        }
+        if dropping && (trimmed.starts_with("//") || trimmed.is_empty()) {
+            continue;
+        }
+        dropping = false;
+        out.push(line);
+    }
+    out.join("\n")
+}
+
+#[test]
+fn login_without_the_source_comment_keeps_bindings_and_submit() {
+    let (catalog, tokens) = options();
+    let source = std::fs::read_to_string(here("tests/fixtures/login.slint")).unwrap();
+    let source = without_source_comment(&source);
+    assert!(!source.contains("weft:source"), "{source}");
+    let result = read_slint(&source, &import_options(&catalog, &tokens));
+    let markup = serialize(&result.document);
+    for needle in [
+        "value=\"{$.email}\"",
+        "value=\"{$.password}\"",
+        "label=\"Email\"",
+        "label=\"Password\"",
+        "disabled=\"{!$.email}\"",
+        "on-submit=\"auth.submit\"",
+        "on-press=\"nav.reset\"",
+        "on-press=\"nav.signup\"",
+        "level=\"1\"",
+        "<heading",
+        "submit=\"true\"",
+    ] {
+        assert!(markup.contains(needle), "{needle} missing in {markup}");
+    }
+    assert!(
+        !markup.contains("gap="),
+        "16px matches more than one dimension token\n{markup}"
+    );
+    let kept = [
+        LossKind::Bindings,
+        LossKind::Actions,
+        LossKind::Values,
+        LossKind::Names,
+        LossKind::Text,
+        LossKind::Hidden,
+        LossKind::Repetition,
+        LossKind::Structure,
+        LossKind::Props,
+    ];
+    assert!(
+        result.losses.iter().all(|loss| !kept.contains(&loss.kind)),
+        "{markup}\n{:?}",
+        result.losses
+    );
+    assert!(result.diagnostics.is_empty(), "{:?}", result.diagnostics);
+}
+
+#[test]
+fn signup_and_settings_without_the_source_comment_keep_bindings() {
+    let (catalog, tokens) = options();
+    let signup = recovered("tests/fixtures/signup.slint", &catalog, &tokens);
+    for needle in [
+        "value=\"{$.name}\"",
+        "value=\"{$.email}\"",
+        "value=\"{$.password}\"",
+        "value=\"{$.confirm}\"",
+        "checked=\"{$.acceptTerms}\"",
+        "label=\"Full name\"",
+        "label=\"Confirm password\"",
+        "label=\"I accept the terms of service\"",
+        "disabled=\"{!$.acceptTerms}\"",
+        "on-submit=\"auth.signup\"",
+        "on-press=\"nav.signin\"",
+        "level=\"1\"",
+        ">Create your account<",
+        "submit=\"true\"",
+    ] {
+        assert!(signup.contains(needle), "{needle} missing in {signup}");
+    }
+    assert!(
+        !signup.contains("gap="),
+        "16px matches more than one dimension token\n{signup}"
+    );
+
+    let settings = recovered("tests/fixtures/settings.slint", &catalog, &tokens);
+    for needle in [
+        "checked=\"{$.emailAlerts}\"",
+        "checked=\"{$.pushAlerts}\"",
+        "checked=\"{$.darkMode}\"",
+        "value=\"{$.language}\"",
+        "label=\"Email alerts\"",
+        "label=\"Push notifications\"",
+        "label=\"Language\"",
+        "label=\"Dark mode\"",
+        "disabled=\"{!$.dirty}\"",
+        "on-press=\"settings.save\"",
+        "level=\"1\"",
+        "level=\"2\"",
+        ">Settings<",
+        ">Notifications<",
+        "value=\"en\"",
+        "value=\"de\"",
+        "value=\"fr\"",
+        ">English<",
+        ">Deutsch<",
+        ">Français<",
+    ] {
+        assert!(settings.contains(needle), "{needle} missing in {settings}");
+    }
+}
+
+fn recovered(path: &str, catalog: &weft_core::Catalog, tokens: &IndexMap<String, Token>) -> String {
+    let source = std::fs::read_to_string(here(path)).unwrap();
+    let source = without_source_comment(&source);
+    assert!(!source.contains("weft:source"), "{source}");
+    let result = read_slint(&source, &import_options(catalog, tokens));
+    let markup = serialize(&result.document);
+    let kept = [
+        LossKind::Bindings,
+        LossKind::Actions,
+        LossKind::Values,
+        LossKind::Names,
+        LossKind::Text,
+        LossKind::Hidden,
+        LossKind::Repetition,
+        LossKind::Structure,
+        LossKind::Props,
+    ];
+    assert!(
+        result.losses.iter().all(|loss| !kept.contains(&loss.kind)),
+        "{markup}\n{:?}",
+        result.losses
+    );
+    assert!(result.diagnostics.is_empty(), "{:?}", result.diagnostics);
+    markup
+}
+
+#[test]
+fn generated_expressions_round_trip() {
+    let (catalog, tokens) = options();
+    let source = r#"export component Hello inherits Window {
+    in-out property <string> user-email;
+    in-out property <string> title-data;
+    in-out property <string> language;
+    in-out property <bool> busy;
+    in-out property <int> count;
+    VerticalLayout {
+        spacing: 24px;
+        title := Text {
+            text: root.user-email;
+            font-size: 24px;
+            font-weight: 700;
+            visible: !root.busy;
+        }
+        kept := Text { text: root.title-data; }
+        VerticalLayout {
+            Text { text: "Language"; }
+            language := ComboBox {
+                model: ["English", "Deutsch"];
+                current-index: root.language == "de" ? 1 : 0;
+                selected => { root.language = ["en", "de"][self.current-index]; root.perform("settings.save", "language"); }
+            }
+        }
+        go := Button {
+            text: "Go";
+            enabled: root.count != 0;
+            clicked => { root.perform("settings.save", "go"); }
+        }
+    }
+}
+"#;
+    let result = read_slint(source, &import_options(&catalog, &tokens));
+    let markup = serialize(&result.document);
+    for needle in [
+        "gap=\"{token.space.lg}\"",
+        "text=\"{$.user.email}\"",
+        "text=\"{$.title}\"",
+        "hidden=\"{$.busy}\"",
+        "level=\"2\"",
+        "label=\"Language\"",
+        "value=\"{$.language}\"",
+        "value=\"en\"",
+        "value=\"de\"",
+        ">English<",
+        ">Deutsch<",
+        "on-change=\"settings.save\"",
+        "disabled=\"{!$.count}\"",
+        "on-press=\"settings.save\"",
+    ] {
+        assert!(markup.contains(needle), "{needle} missing in {markup}");
+    }
+    assert!(
+        result
+            .losses
+            .iter()
+            .all(|loss| { matches!(loss.kind, LossKind::Ids | LossKind::Kinds) }),
+        "{markup}\n{:?}",
+        result.losses
+    );
+}
+
 #[test]
 fn an_unmodified_golden_round_trips_on_the_comment_path() {
     let (catalog, tokens) = options();
