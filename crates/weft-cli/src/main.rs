@@ -1,5 +1,6 @@
 //! `weft validate`, `weft fmt`, `weft explain`, and the generators and importers of SPEC §9:
-//! SwiftUI (`weft swiftui`, `weft import-swiftui`, in `swiftui.rs`) and the web targets (`weft
+//! SwiftUI (`weft swiftui`, `weft import-swiftui`, in `swiftui.rs`), Slint (`weft slint`,
+//! `weft import-slint`, in `slint.rs`) and the web targets (`weft
 //! html|react|solid`, `weft import-html|import-react|import-solid`, in `web.rs`). The project file (`weft.json`, SPEC §10) found
 //! above the document, or given with `--project`, supplies the catalog, tokens, actions and data
 //! schema, and the settings of §10.6 (`validate.mode`, `format.write`); a flag overrides the
@@ -9,6 +10,7 @@
 
 mod a2ui;
 mod convert;
+mod slint;
 mod swiftui;
 mod web;
 
@@ -29,7 +31,7 @@ use weft_core::{
 #[command(
     name = "weft",
     version,
-    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React, SolidJS and A2UI"
+    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React, SolidJS, Slint and A2UI"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -207,6 +209,38 @@ enum Command {
         project: ProjectArgs,
         /// Write `<file stem>.weft` here instead of printing (default: the project's
         /// `import.swiftui.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+    },
+    /// Generate a Slint component (Slint 1.x, `std-widgets.slint`) from a markup document.
+    Slint {
+        file: PathBuf,
+        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        #[arg(long)]
+        catalog: Option<PathBuf>,
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
+        #[arg(long)]
+        tokens: Option<PathBuf>,
+        /// Component name (`<Name>Screen`); the screen id when absent.
+        #[arg(long)]
+        name: Option<String>,
+        #[command(flatten)]
+        project: ProjectArgs,
+        /// Write `<file stem>.slint` here instead of printing (default: the project's
+        /// `export.slint.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+    },
+    /// Read a generated Slint component back into markup.
+    ImportSlint {
+        file: PathBuf,
+        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        #[arg(long)]
+        catalog: Option<PathBuf>,
+        #[command(flatten)]
+        project: ProjectArgs,
+        /// Write `<file stem>.weft` here instead of printing (default: the project's
+        /// `import.slint.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
     },
@@ -624,6 +658,38 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             out_dir,
         } => swiftui::import(
             swiftui::ImportArgs {
+                file,
+                catalog,
+                project,
+                out_dir,
+            },
+            out,
+        ),
+        Command::Slint {
+            file,
+            catalog,
+            tokens,
+            name,
+            project,
+            out_dir,
+        } => slint::export(
+            slint::ExportArgs {
+                file,
+                catalog,
+                tokens,
+                name,
+                project,
+                out_dir,
+            },
+            out,
+        ),
+        Command::ImportSlint {
+            file,
+            catalog,
+            project,
+            out_dir,
+        } => slint::import(
+            slint::ImportArgs {
                 file,
                 catalog,
                 project,

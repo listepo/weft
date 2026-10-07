@@ -17,7 +17,7 @@ The examples assume you have also made the scratch folder from the [tour](tour.m
 $ mkdir -p weft-tour
 $ cp corpus/login/screen.weft weft-tour/login.weft
 $ weft --help
-Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React, SolidJS and A2UI
+Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React, SolidJS, Slint and A2UI
 
 Usage: weft <COMMAND>
 
@@ -28,6 +28,8 @@ Commands:
   swiftui         Generate a SwiftUI view (iOS 17, macOS 14) from a markup document
   swiftui-tokens  Generate `WeftTokens.swift`, the design tokens every SwiftUI screen of a project shares
   import-swiftui  Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses
+  slint           Generate a Slint component (Slint 1.x, `std-widgets.slint`) from a markup document
+  import-slint    Read a generated Slint component back into markup
   html            Generate a static HTML page with CSS and no script from a markup document
   react           Generate a React component (JSX or TSX) from a markup document
   solid           Generate a SolidJS component (JSX or TSX) from a markup document
@@ -179,6 +181,18 @@ weft-tour/Hello.swift:/screen#screen-1/text#text-hi loss layout: `.padding` not 
 The commands use the project's catalog and tokens, or `--catalog` and `--tokens` when you give them; `weft swiftui-tokens` finds the project from the working directory. `--out-dir` writes `<name>.swift`, `WeftTokens.swift` or `<name>.weft` instead of printing. Without it, the project's `export.swiftui.outDir` or `import.swiftui.outDir` decides ([Projects](projects.md)). `--shared-tokens` and `--no-shared-tokens` override the project's `export.swiftui.sharedTokens`. A kind of the project's own catalog becomes a call of a view the app writes (`rating` → `RatingView`); the header comment of the screen file names them. The mapping table and every loss are listed in `crates/weft-swiftui/README.md`.
 
 With `--data <file>` (or the project's `export.swiftui.data`), the model also gets an initializer and a `sample` built from that JSON, and `#Preview` shows it. The importer ignores both.
+
+## `weft slint` and `weft import-slint`
+
+`weft slint` prints a Slint component for a screen (Slint 1.x, `std-widgets.slint`): one exported `Window`, one property per data path, and a `perform` callback for events. `weft import-slint` reads that file back. What the generator printed comes back unchanged:
+
+```console
+$ weft slint weft-tour/login.weft --out-dir weft-tour/ui
+$ weft import-slint weft-tour/ui/login.slint | diff - <(weft fmt weft-tour/login.weft) && echo same
+same
+```
+
+`--name` sets the component name (`SignInScreen` for `--name sign-in`); without it the name comes from the screen id. The commands use the project's catalog and tokens, or `--catalog` and `--tokens` when you give them to `weft slint`. `--out-dir` writes `<stem>.slint` or `<stem>.weft` (the input file's stem, not the component name) instead of printing. Without it, the project's `export.slint.outDir` or `import.slint.outDir` decides ([Projects](projects.md)). A screen the generator cannot express, and a Slint file it did not print, are reported on stderr and the command exits 1. The mapping is in SPEC §9 and `crates/weft-slint/README.md`.
 
 ## `weft html`, `weft react`, `weft solid`, `weft lit`, `weft css-tokens`, `weft css-base` and the importers
 

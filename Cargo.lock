@@ -4989,6 +4989,7 @@ dependencies = [
  "weft-core",
  "weft-import",
  "weft-interop",
+ "weft-slint",
  "weft-swiftui",
  "weft-web",
 ]

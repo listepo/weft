@@ -1,4 +1,4 @@
-//! `weft validate`, the generators (`weft swiftui`, `html`, `react`, `solid`) and the importers
+//! `weft validate`, the generators (`weft swiftui`, `slint`, `html`, `react`, `solid`) and the importers
 //! with a project file (SPEC §10): discovery, explicit arguments and what the project adds to the
 //! checks and the output.
 
@@ -693,4 +693,166 @@ fn css_tokens_follow_the_appearance_and_go_where_the_project_says() {
     assert_eq!(r.code, 0, "{}", r.stderr);
     assert!(!r.stdout.contains("color-scheme"), "{}", r.stdout);
     assert!(!r.stdout.contains("@media"), "{}", r.stdout);
+}
+
+fn corpus_screen(name: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(format!("../../corpus/{name}/screen.weft"))
+}
+
+/// The example project with both Slint output directories set.
+fn slint_project(name: &str) -> Scratch {
+    let s = Scratch::new(name);
+    let text = std::fs::read_to_string(s.path("weft.json")).unwrap();
+    let mut json: serde_json::Value = serde_json::from_str(&text).unwrap();
+    json["export"] = serde_json::json!({ "slint": { "outDir": "ui" } });
+    json["import"] = serde_json::json!({ "slint": { "outDir": "imported" } });
+    s.write("weft.json", &serde_json::to_string_pretty(&json).unwrap());
+    s
+}
+
+#[test]
+fn slint_writes_where_the_project_says_and_reads_back() {
+    let s = slint_project("slint");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let r = run(&[&"slint", &screen]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    let slint = std::fs::read_to_string(s.path("ui/plain.slint")).unwrap();
+    assert!(slint.starts_with("// weft:source slint\n"), "{slint}");
+
+    let formatted = run(&[&"fmt", &screen]);
+    assert_eq!(formatted.code, 0, "{}", formatted.stderr);
+    let r = run(&[&"import-slint", &s.path("ui/plain.slint")]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    let imported = std::fs::read_to_string(s.path("imported/plain.weft")).unwrap();
+    assert_eq!(imported, formatted.stdout);
+}
+
+#[test]
+fn slint_arguments_override_the_project_and_prints_when_unset() {
+    let s = slint_project("slint-args");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let elsewhere = s.path("elsewhere");
+    let r = run(&[&"slint", &screen, &"--out-dir", &elsewhere]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(elsewhere.join("plain.slint").is_file());
+    assert!(!s.path("ui").exists());
+
+    // No project and no `--out-dir`: the component is printed.
+    let r = run(&[&"slint", &screen, &"--no-project"]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    assert!(
+        r.stdout.contains("export component PlainScreen"),
+        "{}",
+        r.stdout
+    );
+    assert!(
+        r.stdout.starts_with("// weft:source slint\n"),
+        "{}",
+        r.stdout
+    );
+
+    let r = run(&[&"slint", &screen, &"--no-project", &"--name", &"sign-in"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stdout.contains("export component SignInScreen"),
+        "{}",
+        r.stdout
+    );
+    assert!(
+        r.stdout.starts_with("// weft:source slint name=sign-in\n"),
+        "{}",
+        r.stdout
+    );
+
+    // A project that does not set the directory prints too.
+    let bare = Scratch::new("slint-stdout");
+    let screen = bare.write("screens/plain.weft", PLAIN);
+    let r = run(&[&"slint", &screen]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    assert!(
+        r.stdout.contains("export component PlainScreen"),
+        "{}",
+        r.stdout
+    );
+
+    // The file was generated with the project's tokens, so the import uses that project too.
+    let r = run(&[&"import-slint", &elsewhere.join("plain.slint")]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    let imported = std::fs::read_to_string(s.path("imported/plain.weft")).unwrap();
+    let formatted = run(&[&"fmt", &s.path("screens/plain.weft"), &"--print"]);
+    assert_eq!(imported, formatted.stdout);
+}
+
+#[test]
+fn slint_round_trips_login_signup_and_settings() {
+    for name in ["login", "signup", "settings"] {
+        let screen = corpus_screen(name);
+        let formatted = run(&[&"fmt", &screen, &"--no-project"]);
+        assert_eq!(
+            (formatted.code, formatted.stderr.as_str()),
+            (0, ""),
+            "{name}"
+        );
+        let s = Scratch::new(&format!("slint-{name}"));
+        let out_dir = s.path("out");
+        let generated = run(&[&"slint", &screen, &"--no-project", &"--out-dir", &out_dir]);
+        assert_eq!(
+            (
+                generated.code,
+                generated.stdout.as_str(),
+                generated.stderr.as_str()
+            ),
+            (0, "", ""),
+            "{name}"
+        );
+        let imported = run(&[
+            &"import-slint",
+            &out_dir.join("screen.slint"),
+            &"--no-project",
+        ]);
+        assert_eq!(
+            (
+                imported.code,
+                imported.stdout.as_str(),
+                imported.stderr.as_str()
+            ),
+            (0, formatted.stdout.as_str(), ""),
+            "{name}"
+        );
+    }
+}
+
+#[test]
+fn slint_refuses_what_it_cannot_generate_and_exits_1() {
+    let s = Scratch::new("slint-refused");
+    let screen = s.write(
+        "screens/list.weft",
+        r#"<screen id="s" weft="0.1"><list id="items"><item id="one">One</item></list></screen>"#,
+    );
+    let r = run(&[&"slint", &screen, &"--out-dir", &s.path("ui")]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(r.stderr.contains("list#items"), "{}", r.stderr);
+    assert!(!s.path("ui").exists());
+
+    let broken = s.write(
+        "screens/broken.weft",
+        "<screen id=\"x\" label=\"X\" weft=\"0.1\">",
+    );
+    let r = run(&[&"slint", &broken]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(
+        r.stderr.starts_with(&broken.display().to_string()),
+        "{}",
+        r.stderr
+    );
+
+    let missing = s.path("missing.weft");
+    let r = run(&[&"slint", &missing, &"--no-project"]);
+    assert_eq!(r.code, 2, "{}", r.stderr);
+    assert!(r.stderr.contains("cannot read"), "{}", r.stderr);
+
+    let none = s.write("None.slint", "export component X inherits Window {}\n");
+    let r = run(&[&"import-slint", &none, &"--no-project"]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(r.stderr.contains("weft:source slint"), "{}", r.stderr);
 }
