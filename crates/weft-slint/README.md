@@ -4,13 +4,14 @@ Weft to Slint and back (SPEC §9, "To Slint" and "From Slint").
 
 - `generate` turns a strictly valid screen into one `.slint` file for Slint 1.x and its `std-widgets.slint`.
 - `import_slint` reads a file that `generate` printed back into the same Weft document.
+- `read_slint` (crate feature `import`) reads a file `import_slint` rejects, from the Slint syntax tree, and lists what it could not keep.
 
 ```rust
 let slint = weft_slint::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None })?;
 let document = weft_slint::import_slint(&slint, &ImportOptions { catalog: &catalog, tokens: &tokens })?;
 ```
 
-The crate is pure Rust over `weft-core` and `weft-catalog`. The Slint compiler (`slint-interpreter`) is a dev-dependency: the tests compile every generated file with it.
+The crate is pure Rust over `weft-core` and `weft-catalog`. The Slint compiler (`slint-interpreter`) is a dev-dependency: the tests compile every generated file with it. Reading a file the generator did not print uses `i-slint-compiler`'s syntax tree, behind the `import` feature, with no renderer and no backend.
 
 ## The generated file
 
@@ -71,4 +72,4 @@ A host sets and reads the data through the properties (`set_email`, `get_email` 
 
 - **Kept only in the source comment:** `state`, `required`, `error`, the field types `email` and `search`, `variant="danger"`, `tone`, `stack.align` and `wrap`, `step`, `href`, `material`, the 3D tilt. Tokens become their px values.
 - **Refused** (`GenerateError::Unsupported` with the element or binding path): a kind outside the table above; an array index that is not into a repeated model; ids or property names Slint reads as one (`a-b` and `a_b`), the reserved ids (`root`, `self`, `parent`, `true`, `false`, and `Palette`, `InputType`, `LayoutAlignment`, which the generated code names), and a data path whose `-data` form is still a `Window` property name; a non-token `gap`, a bound heading `level`, a bound `variant`, and inputs of different types writing one path.
-- **The importer** reads only files the generator printed: an edited file, one generated with other tokens, or hand-written Slint is refused (`ImportError::Edited`, `NoSource`). Reading such files with a loss table is T67.3.
+- **`import_slint`** reads only files the generator printed: an edited file, one generated with other tokens, or hand-written Slint is refused (`ImportError::Edited`, `NoSource`). **`read_slint`** reads those from the syntax tree and reports the losses in SPEC §9, "From Slint".
