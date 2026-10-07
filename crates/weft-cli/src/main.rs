@@ -67,6 +67,9 @@ struct WebExport {
     /// Leave the source comment out, whatever the project says.
     #[arg(long)]
     no_source: bool,
+    /// Overwrite the output file when it already exists.
+    #[arg(long)]
+    force: bool,
 }
 
 /// Sample data a generator shows (SPEC §9).
@@ -108,6 +111,9 @@ struct WebImport {
     /// `import.<target>.outDir`, else print).
     #[arg(long)]
     out_dir: Option<PathBuf>,
+    /// Overwrite the output file when it already exists.
+    #[arg(long)]
+    force: bool,
 }
 
 #[derive(Subcommand)]
@@ -180,6 +186,9 @@ enum Command {
         /// Put the tokens the screen uses in the screen file, so it builds on its own.
         #[arg(long)]
         no_shared_tokens: bool,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
     },
     /// Generate `WeftTokens.swift`, the design tokens every SwiftUI screen of a project shares.
     SwiftuiTokens {
@@ -196,6 +205,9 @@ enum Command {
         /// `export.swiftui.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
     },
     /// Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses.
     ImportSwiftui {
@@ -209,6 +221,9 @@ enum Command {
         /// `import.swiftui.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
     },
     /// Generate a static HTML page with CSS and no script from a markup document.
     Html {
@@ -245,6 +260,9 @@ enum Command {
         /// `export.css.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
     },
     /// Generate `weft-base.css`, the base stylesheet React, SolidJS and Lit components share with the
     /// static page.
@@ -262,6 +280,9 @@ enum Command {
         /// `export.css.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
     },
     /// Read an HTML page back into markup; what Weft cannot hold is listed on stderr as losses.
     ImportHtml(WebImport),
@@ -291,6 +312,9 @@ struct A2uiArgs {
     /// (default: the project's `export.a2ui.outDir` or `import.a2ui.outDir`, else print).
     #[arg(long)]
     out_dir: Option<PathBuf>,
+    /// Overwrite the output file when it already exists.
+    #[arg(long)]
+    force: bool,
 }
 
 impl From<A2uiArgs> for a2ui::Args {
@@ -300,6 +324,7 @@ impl From<A2uiArgs> for a2ui::Args {
             catalog: a.catalog,
             project: a.project,
             out_dir: a.out_dir,
+            force: a.force,
         }
     }
 }
@@ -575,6 +600,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             data,
             shared_tokens,
             no_shared_tokens,
+            force,
         } => swiftui::export(
             swiftui::ExportArgs {
                 file,
@@ -584,6 +610,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 out_dir,
                 data: data.data,
                 shared_tokens: (shared_tokens, no_shared_tokens),
+                force,
             },
             out,
         ),
@@ -592,6 +619,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             project,
             no_project,
             out_dir,
+            force,
         } => swiftui::export_tokens(
             swiftui::TokensArgs {
                 tokens,
@@ -600,6 +628,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                     no_project,
                 },
                 out_dir,
+                force,
             },
             out,
         ),
@@ -608,6 +637,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             project,
             no_project,
             out_dir,
+            force,
         } => web::export_css(
             swiftui::TokensArgs {
                 tokens,
@@ -616,6 +646,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                     no_project,
                 },
                 out_dir,
+                force,
             },
             out,
         ),
@@ -623,12 +654,14 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             project,
             no_project,
             out_dir,
+            force,
         } => web::export_css_base(
             ProjectArgs {
                 project,
                 no_project,
             },
             out_dir,
+            force,
             out,
         ),
         Command::ImportSwiftui {
@@ -636,12 +669,14 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             catalog,
             project,
             out_dir,
+            force,
         } => swiftui::import(
             swiftui::ImportArgs {
                 file,
                 catalog,
                 project,
                 out_dir,
+                force,
             },
             out,
         ),
@@ -698,6 +733,7 @@ fn web_export(
             tokens,
             project: common.project,
             out_dir: common.out_dir,
+            force: common.force,
             typescript,
             javascript,
             source: common.source,
@@ -717,6 +753,7 @@ fn web_import(target: web::Target, args: WebImport, out: &mut dyn Write) -> Resu
             tokens: args.tokens,
             project: args.project,
             out_dir: args.out_dir,
+            force: args.force,
         },
         out,
     )

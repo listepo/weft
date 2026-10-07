@@ -12,7 +12,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T13.1 | todo | P2 | 3 | 0% | |
 | T15.2 | todo | P3 | 2 | 0% | |
-| T71 | todo | P2 | 2 | 0% | |
 | T72 | todo | P2 | 1 | 0% | |
 | T73 | todo | P2 | 2 | 0% | |
 | T63 | todo | P2 | 1 | 0% | |
@@ -235,10 +234,6 @@ The native shell and the shared surface talk only through the slint-bindings C A
 **Out of scope.** Multiplayer and real-time collaboration, cloud storage, accounts and sharing, comments and review threads, prototyping and interaction flows, vector drawing tools and boolean shape operations, image editing, plugins for the editor, Figma file import (T14 covers the Figma round trip), a web version (later, through Slint's WebAssembly build), iOS and Android, Intel Macs, and Linux.
 
 Not started; nothing is built until the creator approves the plan of the first milestone.
-
-### T71. Rust CLI `emit` overwrites generated files unconditionally
-
-`crates/weft-cli/src/convert.rs:171-192` `std::fs::write`s over existing files with no `--force`, while the plugin scripts refuse to overwrite without `--force` (`plugins/shared/scripts/lib.ts:145-159`) — a behavior documented as a feature (`docs/exporting-jsx.md:17,25`). A hand-edited `gen/Login.jsx` is silently clobbered. Done means: the Rust CLI matches the refuse-unless-forced semantics (with a `--force` flag).
 
 ### T72. Two different `weft` commands; batch provider id assumption
 

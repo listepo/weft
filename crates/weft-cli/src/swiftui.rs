@@ -20,6 +20,8 @@ use crate::convert::{
 use crate::{DIAGNOSTICS, ProjectArgs, print, read};
 
 pub struct ExportArgs {
+    pub force: bool,
+
     pub file: PathBuf,
     pub catalog: Option<PathBuf>,
     pub tokens: Option<PathBuf>,
@@ -83,11 +85,13 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
         "export",
         "swiftui",
     );
-    emit(&swift, &args.file, dir, "swift", out)?;
+    emit(&swift, &args.file, dir, "swift", args.force, out)?;
     Ok(0)
 }
 
 pub struct TokensArgs {
+    pub force: bool,
+
     pub tokens: Option<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
@@ -110,11 +114,20 @@ pub fn export_tokens(args: TokensArgs, out: &mut dyn Write) -> Result<u8> {
         "export",
         "swiftui",
     );
-    emit(&swift, Path::new(TOKENS_FILE), dir, "swift", out)?;
+    emit(
+        &swift,
+        Path::new(TOKENS_FILE),
+        dir,
+        "swift",
+        args.force,
+        out,
+    )?;
     Ok(0)
 }
 
 pub struct ImportArgs {
+    pub force: bool,
+
     pub file: PathBuf,
     pub catalog: Option<PathBuf>,
     pub project: ProjectArgs,
@@ -133,5 +146,5 @@ pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
         "import",
         "swiftui",
     );
-    finish_import(&args.file, &result, dir, out)
+    finish_import(&args.file, &result, dir, args.force, out)
 }
