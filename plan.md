@@ -16,7 +16,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T64 | todo | P2 | 2 | 0% | |
 | T65 | todo | P2 | 1 | 0% | |
 | T66 | todo | P2 | 2 | 0% | |
-| T67 | todo | P2 | 4 | 0% | |
+| T67 | in progress | P2 | 4 | 10% | Grok Bot / grok |
 | T67.1 | todo | P2 | 2 | 0% | |
 | T67.2 | todo | P2 | 4 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
@@ -241,6 +241,15 @@ Convert a Weft screen into a Slint component (`.slint`, Slint 1.x with `std-widg
 - Unit and integration tests, Slint → Weft: read-back of every generated golden file, a reindented file, and refusal of an edited file, a tampered comment, a file without the comment, a broken comment and oversize input.
 - Format tests: every generated file matches its reviewed golden file under `crates/weft-slint/tests/fixtures/` (`WEFT_UPDATE_FIXTURES=1` rewrites them) and compiles with `slint-interpreter` without errors; the read-back document passes the Weft validator in strict mode and serializes byte-identical to the canonical input (round trip Weft → Slint → Weft) for the `login`, `signup` and `settings` corpus screens and a fixture with the other mapped controls; document text with quotes, backslashes and `\{` compiles to exactly one component.
 - `crates/weft-cli/tests/deps.rs`: `weft-slint` has no Slint crate among its normal dependencies.
+
+Execution plan:
+
+1. `crates/weft-slint` (workspace member, `publish = false`; normal dependencies `weft-core`, `weft-catalog`, `indexmap`, `thiserror`; `slint-interpreter` 1.18 as a dev-dependency only, without backends or renderers). Modules: `names` (identifiers, component names, string literals), `data` (property inference and reads), `generate`, `import`.
+2. `generate(document, &GenerateOptions { catalog, tokens, name })` → `Result<String, GenerateError>`: strict validation first, then the id and data checks, then the component; `GenerateError::Unsupported` lists every refused element or binding path.
+3. `import_slint(source, &ImportOptions { catalog, tokens })` → `Result<Document, ImportError>` from the source comment, verified by regeneration.
+4. Tests as listed above: unit tests in `names.rs` and `data.rs`, `tests/slint.rs` with the golden files, the compile check, the round trip and the refusals; the assertion in `crates/weft-cli/tests/deps.rs`.
+5. `SPEC.md` §9 "To Slint" and "From Slint" (additive), the crate `README.md`, the `slint-interpreter` row in `toolchain.md` (`rust.md` already lists it).
+6. Verify with `cargo nextest run -p weft-slint -p weft-cli`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all --check`.
 
 Done when all of the above pass under `cargo nextest run`, `cargo clippy --workspace --all-targets -- -D warnings` and `cargo fmt --all --check`, and `SPEC.md` §9 has the "To Slint" and "From Slint" rules.
 
