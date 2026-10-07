@@ -4989,6 +4989,7 @@ dependencies = [
  "weft-core",
  "weft-import",
  "weft-interop",
+ "weft-slint",
  "weft-swiftui",
  "weft-web",
 ]
@@ -5042,11 +5043,13 @@ dependencies = [
 name = "weft-slint"
 version = "0.1.0"
 dependencies = [
+ "i-slint-compiler",
  "indexmap",
  "slint-interpreter",
  "thiserror 2.0.21",
  "weft-catalog",
  "weft-core",
+ "weft-import",
 ]
 
 [[package]]

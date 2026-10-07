@@ -1,0 +1,151 @@
+// weft:source slint
+// <screen id="dashboard" label="Team dashboard" state="ready" weft="0.1">
+//   <stack id="header" direction="row" gap="{token.space.xl}" wrap="true">
+//     <heading id="title" level="1" text="{$.team.name}"/>
+//     <text id="updated" text="{$.updatedAt}" tone="muted"/>
+//   </stack>
+//   <grid id="stats" columns="3" gap="{token.space.lg}">
+//     <section id="velocity" label="Velocity">
+//       <text id="velocity-value" text="{$.stats.velocity}" tone="success"/>
+//       <slot name="header">
+//         <heading id="velocity-title" level="2">Velocity</heading>
+//       </slot>
+//     </section>
+//     <section id="bugs" label="Open bugs">
+//       <text id="bugs-value" text="{$.stats.bugs}" tone="warning"/>
+//       <slot name="header">
+//         <heading id="bugs-title" level="2">Open bugs</heading>
+//       </slot>
+//     </section>
+//     <section id="incidents" label="Incidents">
+//       <text id="incidents-value" text="{$.stats.incidents}" tone="danger"/>
+//       <slot name="header">
+//         <heading id="incidents-title" level="2">Incidents</heading>
+//       </slot>
+//     </section>
+//   </grid>
+//   <stack id="notices" direction="column" gap="{token.space.sm}">
+//     <alert id="release" tone="info">Release 2.4 ships on Friday.</alert>
+//     <alert id="backup" text="{$.backupStatus}" tone="success"/>
+//     <alert id="quota" tone="warning">
+//       <text id="quota-text">Storage is 90% full.</text>
+//       <link id="quota-link" href="https://example.com/storage">Manage storage</link>
+//     </alert>
+//   </stack>
+//   <stack id="footer" align="end" gap="{token.space.xs}">
+//     <text id="owner" tone="default">Owned by the platform team</text>
+//     <stack id="footer-links" align="start" direction="row" gap="{token.space.md}">
+//       <link id="docs" href="/docs">Docs</link>
+//       <link id="status" href="{$.statusUrl}">Status page</link>
+//     </stack>
+//   </stack>
+// </screen>
+
+import { GroupBox, Palette, VerticalBox } from "std-widgets.slint";
+
+export component DashboardScreen inherits Window {
+    title: "Team dashboard";
+    in-out property <string> team-name;
+    in-out property <string> updatedAt;
+    in-out property <string> stats-velocity;
+    in-out property <string> stats-bugs;
+    in-out property <string> stats-incidents;
+    in-out property <string> backupStatus;
+    in-out property <string> statusUrl;
+    callback perform(string, string);
+
+    dashboard := VerticalBox {
+        alignment: LayoutAlignment.start;
+        header := HorizontalLayout {
+            spacing: 32px;
+            title := Text {
+                text: root.team-name;
+                font-size: 32px;
+                font-weight: 700;
+            }
+            updated := Text {
+                text: root.updatedAt;
+            }
+        }
+        stats := GridLayout {
+            spacing: 24px;
+            velocity := GroupBox {
+                row: 0;
+                col: 0;
+                title: "Velocity";
+                VerticalBox {
+                    velocity-title := Text {
+                        text: "Velocity";
+                        font-size: 24px;
+                        font-weight: 700;
+                    }
+                    velocity-value := Text {
+                        text: root.stats-velocity;
+                    }
+                }
+            }
+            bugs := GroupBox {
+                row: 0;
+                col: 1;
+                title: "Open bugs";
+                VerticalBox {
+                    bugs-title := Text {
+                        text: "Open bugs";
+                        font-size: 24px;
+                        font-weight: 700;
+                    }
+                    bugs-value := Text {
+                        text: root.stats-bugs;
+                    }
+                }
+            }
+            incidents := GroupBox {
+                row: 0;
+                col: 2;
+                title: "Incidents";
+                VerticalBox {
+                    incidents-title := Text {
+                        text: "Incidents";
+                        font-size: 24px;
+                        font-weight: 700;
+                    }
+                    incidents-value := Text {
+                        text: root.stats-incidents;
+                    }
+                }
+            }
+        }
+        notices := VerticalLayout {
+            spacing: 8px;
+            release := VerticalLayout {
+                Text { text: "Release 2.4 ships on Friday."; }
+            }
+            backup := VerticalLayout {
+                Text { text: root.backupStatus; }
+            }
+            quota := VerticalLayout {
+                quota-text := Text {
+                    text: "Storage is 90% full.";
+                }
+                quota-link := TouchArea {
+                    Text { text: "Manage storage"; color: Palette.accent-background; }
+                }
+            }
+        }
+        footer := VerticalLayout {
+            spacing: 4px;
+            owner := Text {
+                text: "Owned by the platform team";
+            }
+            footer-links := HorizontalLayout {
+                spacing: 16px;
+                docs := TouchArea {
+                    Text { text: "Docs"; color: Palette.accent-background; }
+                }
+                status := TouchArea {
+                    Text { text: "Status page"; color: Palette.accent-background; }
+                }
+            }
+        }
+    }
+}

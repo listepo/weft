@@ -1,0 +1,45 @@
+// weft:source slint
+// <screen id="load-error" label="Load error" state="error" weft="0.1">
+//   <alert id="alert" tone="danger">
+//     <heading id="error-title" level="2">Could not load your data</heading>
+//     <text id="error-message" text="{$.error.message}"/>
+//   </alert>
+//   <stack id="actions" direction="row" gap="{token.space.sm}">
+//     <button id="retry" variant="primary" on-press="load.retry">Retry</button>
+//     <link id="support" on-press="nav.support">Contact support</link>
+//   </stack>
+// </screen>
+
+import { Button, Palette, VerticalBox } from "std-widgets.slint";
+
+export component LoadErrorScreen inherits Window {
+    title: "Load error";
+    in-out property <string> error-message;
+    callback perform(string, string);
+
+    load-error := VerticalBox {
+        alignment: LayoutAlignment.start;
+        alert := VerticalLayout {
+            error-title := Text {
+                text: "Could not load your data";
+                font-size: 24px;
+                font-weight: 700;
+            }
+            error-message := Text {
+                text: root.error-message;
+            }
+        }
+        actions := HorizontalLayout {
+            spacing: 8px;
+            retry := Button {
+                text: "Retry";
+                primary: true;
+                clicked => { root.perform("load.retry", "retry"); }
+            }
+            support := TouchArea {
+                clicked => { root.perform("nav.support", "support"); }
+                Text { text: "Contact support"; color: Palette.accent-background; }
+            }
+        }
+    }
+}

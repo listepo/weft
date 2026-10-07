@@ -72,6 +72,10 @@ pub fn generate(
         imports: BTreeSet::new(),
         forms: vec![],
         problems,
+        repeat: None,
+        aliases: vec![],
+        hooks: vec![],
+        inits: vec![],
     };
     let name = options
         .name
@@ -141,6 +145,13 @@ struct Gen<'a> {
     /// The enclosing forms' submit calls, innermost last; `None` for a form without `on-submit`.
     forms: Vec<Option<String>>,
     problems: Vec<Unsupported>,
+    /// `for <as> in <model>:` waiting for the repeated element's opening line.
+    repeat: Option<String>,
+    /// `<each as>` names in scope. An element id equal to one is left off: Slint would treat it
+    /// as the repeater variable.
+    aliases: Vec<String>,
+    hooks: Vec<String>,
+    inits: Vec<String>,
 }
 
 impl Gen<'_> {
@@ -148,6 +159,14 @@ impl Gen<'_> {
         self.out.push_str(&INDENT.repeat(depth));
         self.out.push_str(text);
         self.out.push('\n');
+    }
+
+    /// The next element opened is the body of a `for`, so the prefix has to sit on its first line.
+    fn emit(&mut self, depth: usize, text: &str) {
+        match self.repeat.take() {
+            Some(prefix) => self.line(depth, &format!("{prefix}{text}")),
+            None => self.line(depth, text),
+        }
     }
 
     fn unsupported(&mut self, node: &Node, message: &str) {
@@ -241,10 +260,12 @@ impl Gen<'_> {
 
     fn open(&mut self, depth: usize, node: &Node, widget: &str, place: &[String]) {
         let head = match &node.id {
-            Some(id) => format!("{id} := {widget} {{"),
-            None => format!("{widget} {{"),
+            Some(id) if !self.aliases.iter().any(|alias| alias == id) => {
+                format!("{id} := {widget} {{")
+            }
+            _ => format!("{widget} {{"),
         };
-        self.line(depth, &head);
+        self.emit(depth, &head);
         for p in place {
             self.line(depth + 1, p);
         }
@@ -262,13 +283,36 @@ impl Gen<'_> {
         for p in props {
             self.line(1, &p);
         }
+        let models: Vec<String> = self
+            .data
+            .models
+            .values()
+            .map(|model| format!("in-out property <{}> {};", model.slint_type(), model.name))
+            .collect();
+        for model in models {
+            self.line(1, &model);
+        }
         self.line(1, "callback perform(string, string);");
         self.out.push('\n');
+        // A MenuBar is legal only as a direct child of Window, so every menu is emitted here.
+        self.hoist_menus(root);
         self.imports.insert("VerticalBox");
         self.open(1, root, "VerticalBox", &[]);
         self.line(2, "alignment: LayoutAlignment.start;");
         self.children(root.children.iter(), 2);
         self.line(1, "}");
+        let inits = self.inits.clone();
+        if !inits.is_empty() {
+            self.line(1, "init => {");
+            for init in &inits {
+                self.line(2, init);
+            }
+            self.line(1, "}");
+        }
+        let hooks = self.hooks.clone();
+        for hook in &hooks {
+            self.line(1, hook);
+        }
         self.line(0, "}");
     }
 
@@ -426,7 +470,31 @@ impl Gen<'_> {
                 self.common(d, node, false);
                 self.handler(d, "toggled", &[Self::call(node, "change")]);
             }
-            "select" => self.select(node, depth, place),
+            "select" | "combobox" => {
+                if !self.choice(node, depth, place) {
+                    return;
+                }
+            }
+            "each" => {
+                self.each(node, depth, place);
+                return;
+            }
+            "list" => self.list(node, depth, place),
+            "item" => self.item(node, depth, place),
+            "table" => self.table(node, depth, place),
+            "tabs" => self.tabs(node, depth, place),
+            "dialog" => self.dialog(node, depth, place),
+            // Emitted beside the window's box: a MenuBar cannot sit in a layout.
+            "menu" => return,
+            "alert" => self.alert(node, depth, place),
+            "image" | "model" => {
+                // `@image-url` loads a file next to the `.slint`. A string `src` stays in the comment.
+                self.open(depth, node, "Image", place);
+                self.common(d, node, true);
+            }
+            "date-picker" | "color-picker" => self.string_input(node, depth, place),
+            "radio-group" => self.exclusive(node, depth, place, "radio", false),
+            "segmented-control" => self.exclusive(node, depth, place, "segment", true),
             "slider" | "stepper" => {
                 let (widget, ty) = if node.kind == "slider" {
                     ("Slider", Ty::Float)
@@ -473,7 +541,7 @@ impl Gen<'_> {
     /// A caption `Text` above a control that has none of its own, in a layout that takes the
     /// grid placement and `hidden`; returns the depth of the control. The caller closes it.
     fn captioned(&mut self, node: &Node, depth: usize, place: &[String]) -> usize {
-        self.line(depth, "VerticalLayout {");
+        self.emit(depth, "VerticalLayout {");
         for p in place {
             self.line(depth + 1, p);
         }
@@ -512,21 +580,21 @@ impl Gen<'_> {
         self.line(d, "}");
     }
 
-    fn select(&mut self, node: &Node, depth: usize, place: &[String]) {
+    /// `false` when nothing was opened, so the caller does not emit a closing brace.
+    fn choice(&mut self, node: &Node, depth: usize, place: &[String]) -> bool {
+        let kids: Vec<&Node> = element_children(node).collect();
+        if kids.len() == 1 && kids[0].kind == "each" {
+            return self.choice_model(node, kids[0], depth, place);
+        }
         let mut labels = vec![];
         let mut values = vec![];
         for child in &node.children {
-            let option = child.as_node().filter(|o| o.kind == "option");
-            let literal = option.and_then(|o| match o.props.get("value") {
-                Some(Value::String(v)) if !o.props.contains_key("text") => Some((o, v)),
-                _ => None,
-            });
-            let Some((option, value)) = literal else {
-                self.unsupported(
-                    node,
-                    "only options with literal values and text map to ComboBox",
-                );
-                return;
+            let Some(option) = child.as_node().filter(|o| o.kind == "option") else {
+                continue;
+            };
+            let Some(Value::String(value)) = option.props.get("value") else {
+                self.unsupported(node, "only options with literal values map to ComboBox");
+                return false;
             };
             labels.push(self.text(option));
             values.push(string(value));
@@ -557,5 +625,591 @@ impl Gen<'_> {
         self.enabled(d + 1, node);
         self.handler(d + 1, "selected", &[write, Self::call(node, "change")]);
         self.line(d, "}");
+        true
     }
+
+    fn choice_model(&mut self, node: &Node, each: &Node, depth: usize, place: &[String]) -> bool {
+        let Some(model) = self.model_expr(each) else {
+            self.unsupported(each, "the options model has no Slint form");
+            return false;
+        };
+        let d = self.captioned(node, depth, place);
+        self.imports.insert("ComboBox");
+        self.open(d, node, "ComboBox", &[]);
+        self.line(d + 1, &format!("model: {model};"));
+        self.bind_line(d + 1, node, "value", "current-value", Ty::Str);
+        self.enabled(d + 1, node);
+        self.handler(d + 1, "selected", &[Self::call(node, "change")]);
+        self.line(d, "}");
+        true
+    }
+
+    fn model_expr(&self, each: &Node) -> Option<String> {
+        let Value::Bind { bind, not: false } = each.props.get("in")? else {
+            return None;
+        };
+        self.data
+            .models
+            .get(bind)
+            .map(|model| format!("root.{}", model.name))
+    }
+
+    fn loop_alias<'a>(&self, each: &'a Node) -> Option<&'a str> {
+        match each.props.get("as")? {
+            Value::String(name) => identifier(name),
+            _ => None,
+        }
+    }
+
+    fn each(&mut self, node: &Node, depth: usize, place: &[String]) {
+        let Some(alias) = self.loop_alias(node).map(str::to_owned) else {
+            self.unsupported(node, "the loop variable is reserved in Slint");
+            return;
+        };
+        let Some(model) = self.model_expr(node) else {
+            self.unsupported(node, "the list model has no Slint form");
+            return;
+        };
+        let kids: Vec<&Node> = element_children(node).collect();
+        self.aliases.push(alias.clone());
+        match kids.as_slice() {
+            [only] => {
+                self.repeat = Some(format!("for {alias} in {model}: "));
+                self.node(only, depth, place);
+                self.repeat = None;
+            }
+            [] => {}
+            many => {
+                self.line(depth, &format!("for {alias} in {model}: VerticalLayout {{"));
+                for child in many {
+                    self.node(child, depth + 1, &[]);
+                }
+                self.line(depth, "}");
+            }
+        }
+        self.aliases.pop();
+    }
+
+    fn list(&mut self, node: &Node, depth: usize, place: &[String]) {
+        let elements: Vec<&Node> = element_children(node).collect();
+        let (eachs, items): (Vec<&Node>, Vec<&Node>) = elements
+            .iter()
+            .copied()
+            .partition(|child| child.kind == "each");
+        let empty = node.slots.get("empty");
+        // A ListView's only child element is one `for`. Anything else is a plain column.
+        let bare = eachs.len() == 1 && items.is_empty() && empty.is_none();
+        let d = depth + 1;
+        if bare {
+            self.imports.insert("ListView");
+            self.open(depth, node, "ListView", place);
+            self.common(d, node, false);
+            self.each(eachs[0], d, &[]);
+            return;
+        }
+        self.open(depth, node, "VerticalLayout", place);
+        self.common(d, node, false);
+        if let Some(each) = eachs.first() {
+            self.imports.insert("ListView");
+            self.line(d, "ListView {");
+            self.each(each, d + 1, &[]);
+            self.line(d, "}");
+            if let (Some(slot), Some(model)) = (empty, self.model_expr(each)) {
+                self.line(d, &format!("if {model}.length == 0: VerticalLayout {{"));
+                self.children(slot.iter(), d + 1);
+                self.line(d, "}");
+            }
+        } else if let Some(slot) = empty {
+            self.children(slot.iter(), d);
+        }
+        for item in items {
+            self.node(item, d, &[]);
+        }
+        for each in eachs.iter().skip(1) {
+            self.each(each, d, &[]);
+        }
+    }
+
+    fn item(&mut self, node: &Node, depth: usize, place: &[String]) {
+        let d = depth + 1;
+        let press = Self::call(node, "press");
+        let elements: Vec<&Node> = element_children(node).collect();
+        let has_text = node.props.contains_key("text")
+            || node
+                .children
+                .iter()
+                .any(|child| matches!(child, Child::Text(_)));
+        if press.is_none() && elements.is_empty() {
+            let text = self.text(node);
+            self.open(depth, node, "Text", place);
+            self.line(d, &format!("text: {text};"));
+            self.common(d, node, false);
+            return;
+        }
+        let widget = if press.is_some() {
+            "TouchArea"
+        } else {
+            "VerticalLayout"
+        };
+        self.open(depth, node, widget, place);
+        self.common(d, node, false);
+        self.handler(d, "clicked", &[press]);
+        let text = has_text.then(|| self.text(node));
+        if elements.is_empty() {
+            self.line(
+                d,
+                &format!("Text {{ text: {}; }}", text.unwrap_or_default()),
+            );
+            return;
+        }
+        if widget == "TouchArea" {
+            self.line(d, "VerticalLayout {");
+            if let Some(text) = text {
+                self.line(d + 1, &format!("Text {{ text: {text}; }}"));
+            }
+            self.children(node.children.iter(), d + 1);
+            self.line(d, "}");
+        } else if let Some(text) = text {
+            self.line(d, &format!("Text {{ text: {text}; }}"));
+            self.children(node.children.iter(), d);
+        } else {
+            self.children(node.children.iter(), d);
+        }
+    }
+
+    fn table(&mut self, node: &Node, depth: usize, place: &[String]) {
+        let elements: Vec<&Node> = element_children(node).collect();
+        let columns: Vec<&Node> = elements
+            .iter()
+            .copied()
+            .filter(|n| n.kind == "column")
+            .collect();
+        let rows: Vec<&Node> = elements
+            .iter()
+            .copied()
+            .filter(|n| n.kind == "row")
+            .collect();
+        let eachs: Vec<&Node> = elements
+            .iter()
+            .copied()
+            .filter(|n| n.kind == "each")
+            .collect();
+        let empty = node.slots.get("empty");
+        self.imports.insert("StandardTableView");
+        let d = depth + 1;
+        if empty.is_some() {
+            self.open(depth, node, "VerticalLayout", place);
+            self.common(d, node, false);
+            self.line(d, "StandardTableView {");
+            self.table_body(node, &columns, &rows, &eachs, d + 1, false);
+            self.line(d, "}");
+            self.table_empty(empty, eachs.first().copied(), d);
+        } else {
+            self.open(depth, node, "StandardTableView", place);
+            self.table_body(node, &columns, &rows, &eachs, d, true);
+        }
+    }
+
+    fn table_body(
+        &mut self,
+        node: &Node,
+        columns: &[&Node],
+        rows: &[&Node],
+        eachs: &[&Node],
+        depth: usize,
+        hidden: bool,
+    ) {
+        self.bind_line(depth, node, "label", "accessible-label", Ty::Str);
+        if hidden {
+            self.common(depth, node, false);
+        }
+        let cols: Vec<String> = columns.iter().map(|col| self.column_value(col)).collect();
+        self.line(depth, &format!("columns: [{}];", cols.join(", ")));
+        if let Some(body) = self.static_rows(rows) {
+            self.line(depth, &body);
+        }
+        if let Some(index) = rows
+            .iter()
+            .position(|row| matches!(row.props.get("selected"), Some(Value::Bool(true))))
+        {
+            self.line(depth, &format!("current-row: {index};"));
+        }
+        self.sort_handler(columns, depth, "sort-ascending");
+        self.sort_handler(columns, depth, "sort-descending");
+        if let Some(call) = row_press(rows, eachs) {
+            self.line(
+                depth,
+                &format!(
+                    "row-pointer-event(row, event, position) => {{ if event.kind == PointerEventKind.up {{ {call} }} }}"
+                ),
+            );
+        }
+    }
+
+    fn table_empty(&mut self, empty: Option<&Vec<Child>>, each: Option<&Node>, depth: usize) {
+        let Some(slot) = empty else { return };
+        if let Some(model) = each.and_then(|each| self.model_expr(each)) {
+            self.line(depth, &format!("if {model}.length == 0: VerticalLayout {{"));
+            self.children(slot.iter(), depth + 1);
+            self.line(depth, "}");
+        } else {
+            self.children(slot.iter(), depth);
+        }
+    }
+
+    fn column_value(&mut self, column: &Node) -> String {
+        let title = self.text(column);
+        let sort = match column.props.get("sort") {
+            Some(Value::String(order)) if order == "ascending" => "ascending",
+            Some(Value::String(order)) if order == "descending" => "descending",
+            _ => return format!("{{ title: {title} }}"),
+        };
+        format!("{{ title: {title}, sort-order: SortOrder.{sort} }}")
+    }
+
+    fn static_rows(&mut self, rows: &[&Node]) -> Option<String> {
+        if rows.is_empty() {
+            return None;
+        }
+        let mut rendered = Vec::new();
+        for row in rows {
+            let cells: Vec<String> = element_children(row)
+                .filter(|cell| cell.kind == "cell")
+                .map(|cell| format!("{{ text: {} }}", self.cell_text(cell)))
+                .collect();
+            rendered.push(format!("[{}]", cells.join(", ")));
+        }
+        Some(format!("rows: [{}];", rendered.join(", ")))
+    }
+
+    fn cell_text(&mut self, cell: &Node) -> String {
+        if cell.props.contains_key("text")
+            || cell
+                .children
+                .iter()
+                .any(|child| matches!(child, Child::Text(_)))
+        {
+            return self.text(cell);
+        }
+        let kids: Vec<&Node> = element_children(cell).collect();
+        if kids.len() == 1 && matches!(kids[0].kind.as_str(), "text" | "heading") {
+            return self.text(kids[0]);
+        }
+        "\"\"".into()
+    }
+
+    fn sort_handler(&mut self, columns: &[&Node], depth: usize, callback: &str) {
+        let arms: Vec<String> = columns
+            .iter()
+            .enumerate()
+            .filter_map(|(index, column)| {
+                Self::call(column, "press").map(|call| format!("if column == {index} {{ {call} }}"))
+            })
+            .collect();
+        if !arms.is_empty() {
+            self.line(
+                depth,
+                &format!("{callback}(column) => {{ {} }}", arms.join(" ")),
+            );
+        }
+    }
+
+    fn tabs(&mut self, node: &Node, depth: usize, place: &[String]) {
+        self.imports.insert("TabWidget");
+        self.open(depth, node, "TabWidget", place);
+        let d = depth + 1;
+        // A label on its own is refused: the role has to be set in the same element.
+        if node.props.contains_key("label") {
+            self.line(d, "accessible-role: AccessibleRole.tab-list;");
+        }
+        self.bind_line(d, node, "label", "accessible-label", Ty::Str);
+        self.common(d, node, false);
+        let tabs: Vec<&Node> = element_children(node)
+            .filter(|child| child.kind == "tab")
+            .collect();
+        self.tab_selection(node, &tabs, d);
+        for tab in tabs {
+            self.tab(tab, d);
+        }
+    }
+
+    fn tab_selection(&mut self, node: &Node, tabs: &[&Node], depth: usize) {
+        let ids: Vec<String> = tabs
+            .iter()
+            .map(|tab| tab.id.clone().unwrap_or_default())
+            .collect();
+        let call = Self::call(node, "change");
+        match node.props.get("selected") {
+            Some(Value::Bind { bind, not: false }) => {
+                let Some(read) = self.data.read(bind, false, Ty::Str) else {
+                    return;
+                };
+                let mut index = "0".to_owned();
+                for (at, id) in ids.iter().enumerate().skip(1).rev() {
+                    index = format!("{read} == {} ? {at} : {index}", string(id));
+                }
+                self.line(depth, &format!("current-index: {index};"));
+                let list = ids
+                    .iter()
+                    .map(|id| string(id))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                let write = self
+                    .data
+                    .two_way(bind, false, Ty::Str)
+                    .map(|target| format!("{target} = [{list}][self.current-index];"));
+                self.handler(depth, "changed current-index", &[write, call]);
+            }
+            Some(Value::String(id)) => {
+                let at = ids
+                    .iter()
+                    .position(|candidate| candidate == id)
+                    .unwrap_or(0);
+                self.line(depth, &format!("current-index: {at};"));
+                self.handler(depth, "changed current-index", &[call]);
+            }
+            _ => self.handler(depth, "changed current-index", &[call]),
+        }
+    }
+
+    fn tab(&mut self, node: &Node, depth: usize) {
+        let d = depth + 1;
+        match &node.id {
+            Some(id) => self.line(depth, &format!("{id} := Tab {{")),
+            None => self.line(depth, "Tab {"),
+        }
+        self.bind_line(d, node, "label", "title", Ty::Str);
+        self.line(d, "VerticalLayout {");
+        self.children(node.children.iter(), d + 1);
+        self.line(d, "}");
+        self.line(depth, "}");
+    }
+
+    fn dialog(&mut self, node: &Node, depth: usize, place: &[String]) {
+        let d = depth + 1;
+        self.open(depth, node, "PopupWindow", place);
+        // A modal dialog does not dismiss on an outside click; PopupWindow is not itself modal.
+        if !matches!(node.props.get("modal"), Some(Value::Bool(false))) {
+            self.line(d, "close-policy: PopupClosePolicy.no-auto-close;");
+        }
+        self.line(d, "VerticalLayout {");
+        if node.props.contains_key("label")
+            && let Some(title) = self.value(node, "label", Ty::Str)
+        {
+            self.line(d + 1, &format!("Text {{ text: {title}; }}"));
+        }
+        self.children(node.children.iter(), d + 1);
+        if let Some(actions) = node.slots.get("actions") {
+            self.imports.insert("HorizontalBox");
+            self.line(d + 1, "HorizontalBox {");
+            self.children(actions.iter(), d + 2);
+            self.line(d + 1, "}");
+        }
+        self.line(d, "}");
+        self.dialog_open(node);
+    }
+
+    fn dialog_open(&mut self, node: &Node) {
+        let Some(id) = node.id.as_deref() else { return };
+        let Some(Value::Bind { bind, not }) = node.props.get("open") else {
+            if matches!(node.props.get("open"), Some(Value::Bool(true))) {
+                self.inits.push(format!("{id}.show();"));
+            }
+            return;
+        };
+        let Some(show) = self.data.read(bind, *not, Ty::Bool) else {
+            self.unsupported(node, "`open` has no Slint form");
+            return;
+        };
+        let Some((name, bool_prop)) = self
+            .data
+            .props
+            .get(bind)
+            .map(|prop| (prop.name.clone(), prop.ty == Ty::Bool))
+        else {
+            return;
+        };
+        self.hooks.push(format!(
+            "changed {name} => {{ if {show} {{ {id}.show(); }} else {{ {id}.close(); }} }}"
+        ));
+        self.inits.push(format!("if {show} {{ {id}.show(); }}"));
+        let mut stmts = Vec::new();
+        if bool_prop {
+            stmts.push(format!("root.{name} = {not};"));
+        }
+        if let Some(call) = Self::call(node, "close") {
+            stmts.push(call);
+        }
+        if !stmts.is_empty() {
+            // `is-open` is read from the parent: inside the popup the compiler
+            // lowers the element to a window and that property is gone.
+            let shown = format!("{id}-is-open");
+            self.hooks
+                .push(format!("property <bool> {shown}: {id}.is-open;"));
+            self.hooks.push(format!(
+                "changed {shown} => {{ if !{shown} && {show} {{ {} }} }}",
+                stmts.join(" ")
+            ));
+        }
+    }
+
+    fn hoist_menus(&mut self, node: &Node) {
+        if node.kind == "menu" {
+            self.menu(node, 1, &[]);
+        }
+        for child in &node.children {
+            if let Child::Node(inner) = child {
+                self.hoist_menus(inner);
+            }
+        }
+        for slot in node.slots.values() {
+            for child in slot {
+                if let Child::Node(inner) = child {
+                    self.hoist_menus(inner);
+                }
+            }
+        }
+    }
+
+    fn menu(&mut self, node: &Node, depth: usize, place: &[String]) {
+        let d = depth + 1;
+        self.open(depth, node, "MenuBar", place);
+        self.line(d, "Menu {");
+        self.bind_line(d + 1, node, "label", "title", Ty::Str);
+        for child in element_children(node) {
+            if child.kind == "menu-item" {
+                self.menu_item(child, d + 1);
+            } else {
+                self.unsupported(child, "a menu holds menu items");
+            }
+        }
+        self.line(d, "}");
+        self.line(depth, "}");
+    }
+
+    fn menu_item(&mut self, node: &Node, depth: usize) {
+        let d = depth + 1;
+        match &node.id {
+            Some(id) => self.line(depth, &format!("{id} := MenuItem {{")),
+            None => self.line(depth, "MenuItem {"),
+        }
+        let title = self.text(node);
+        self.line(d, &format!("title: {title};"));
+        self.enabled(d, node);
+        self.handler(d, "activated", &[Self::call(node, "press")]);
+        self.line(depth, "}");
+    }
+
+    fn alert(&mut self, node: &Node, depth: usize, place: &[String]) {
+        let d = depth + 1;
+        self.open(depth, node, "VerticalLayout", place);
+        self.common(d, node, false);
+        let has_text = node.props.contains_key("text")
+            || node
+                .children
+                .iter()
+                .any(|child| matches!(child, Child::Text(_)));
+        if has_text {
+            let text = self.text(node);
+            self.line(d, &format!("Text {{ text: {text}; }}"));
+        }
+        self.children(node.children.iter(), d);
+    }
+
+    /// `DatePickerPopup` holds a `Date` and `TimePickerPopup` a `Time`. The prop is a string, so
+    /// the value stays editable; `type`, `min` and `max` have no property on `LineEdit`.
+    fn string_input(&mut self, node: &Node, depth: usize, place: &[String]) {
+        let d = self.captioned(node, depth, place);
+        self.imports.insert("LineEdit");
+        self.open(d, node, "LineEdit", &[]);
+        self.bind_line(d + 1, node, "value", "text", Ty::Str);
+        self.enabled(d + 1, node);
+        self.handler(d + 1, "edited", &[Self::call(node, "change")]);
+        self.line(d, "}");
+    }
+
+    fn exclusive(
+        &mut self,
+        node: &Node,
+        depth: usize,
+        place: &[String],
+        child_kind: &str,
+        horizontal: bool,
+    ) {
+        let d = depth + 1;
+        self.imports.insert("RadioGroup");
+        self.open(depth, node, "RadioGroup", place);
+        self.bind_line(d, node, "label", "title", Ty::Str);
+        if horizontal {
+            self.line(d, "orientation: Orientation.horizontal;");
+        }
+        self.enabled(d, node);
+        self.common(d, node, false);
+        let mut pairs = Vec::new();
+        for child in element_children(node) {
+            if child.kind != child_kind {
+                self.unsupported(child, "this group only holds its options");
+                continue;
+            }
+            let Some(Value::String(value)) = child.props.get("value") else {
+                self.unsupported(child, "the option value must be a literal");
+                continue;
+            };
+            let label = self.text(child);
+            pairs.push((label, string(value), child));
+        }
+        let selected = match node.props.get("value") {
+            Some(Value::Bind { bind, not: false }) => self.data.read(bind, false, Ty::Str),
+            Some(Value::String(value)) => Some(string(value)),
+            _ => None,
+        };
+        for (label, value, child) in &pairs {
+            let inner = d + 1;
+            match &child.id {
+                Some(id) => self.line(d, &format!("{id} := RadioButton {{")),
+                None => self.line(d, "RadioButton {"),
+            }
+            self.line(inner, &format!("text: {label};"));
+            self.enabled(inner, child);
+            if let Some(current) = &selected {
+                self.line(inner, &format!("checked: {current} == {value};"));
+            }
+            self.line(d, "}");
+        }
+        let write = match node.props.get("value") {
+            Some(Value::Bind { bind, not: false }) => self.data.two_way(bind, false, Ty::Str),
+            _ => None,
+        };
+        let assign = write.map(|target| {
+            let mut expr = pairs
+                .last()
+                .map(|(_, value, _)| value.clone())
+                .unwrap_or_else(|| "\"\"".into());
+            for (label, value, _) in pairs.iter().rev().skip(1) {
+                expr = format!("picked == {label} ? {value} : {expr}");
+            }
+            format!("{target} = {expr};")
+        });
+        if assign.is_some() {
+            let body = [assign, Self::call(node, "change")];
+            let text: Vec<&str> = body.iter().flatten().map(String::as_str).collect();
+            if !text.is_empty() {
+                self.line(d, &format!("selected(picked) => {{ {} }}", text.join(" ")));
+            }
+        } else {
+            self.handler(d, "selected", &[Self::call(node, "change")]);
+        }
+    }
+}
+
+fn row_press(rows: &[&Node], eachs: &[&Node]) -> Option<String> {
+    let found = rows.iter().copied();
+    let nested = eachs.iter().flat_map(|each| element_children(each));
+    found.chain(nested).find_map(|row| {
+        if row.kind == "row" {
+            Gen::call(row, "press")
+        } else {
+            None
+        }
+    })
 }

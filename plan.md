@@ -18,8 +18,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T64 | todo | P2 | 2 | 0% | |
 | T65 | todo | P2 | 1 | 0% | |
 | T66 | todo | P2 | 2 | 0% | |
-| T67.1 | todo | P2 | 2 | 0% | |
-| T67.2 | todo | P2 | 4 | 0% | |
+| T67.4 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
+| T67.5 | in progress | P2 | 4 | 0% | Cursor / grok 4.7 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 
@@ -186,13 +186,27 @@ T15.1 delivers `import_cem` in `weft-import` (library, tests, SPEC section 9). T
 
 There is no `.github/` in the repo; the documented merge gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md:50) runs only by hand — and T32 plans publishing from GitHub. Done means: the gate runs as a workflow on pull requests (and on main once the repo has a remote).
 
-### T67.1. CLI and project settings for Slint
+### T67.4. Slint reader for the widgets the generator now emits
 
-`weft slint <file> [--out-dir] [--tokens] [--catalog] [--name]` and `weft import-slint <file>` in `crates/weft-cli`, following `weft swiftui` and `weft import-swiftui` (exit codes, stdout, `--out-dir`), with `export.slint` and `import.slint` sections in the project file (`SPEC.md` §10.6, `crates/weft-catalog/src/settings.rs`, the regenerated `schemas/weft.schema.json`), CLI cases in `crates/weft-cli/tests/` and a `docs/cli.md` section. Depends on T67. Done when `weft import-slint` of `weft slint` output equals `weft fmt` of the input for the corpus screens.
+`read_slint` maps only the widgets T67 generated. T67.2 also emits `for`, `ListView`, `StandardTableView`, `TabWidget`, `PopupWindow`, `MenuBar`, `Image` and `RadioGroup`. Extend the element match in `crates/weft-slint/src/read.rs` so those become the Weft kinds in SPEC §9 "To Slint". Do not change how expressions and callbacks are read (T67.5 owns that, in `read_expr.rs`). Done when a generated corpus screen that uses those kinds, with its source comment removed, imports to the same kinds and ids, and anything SPEC already lists as a loss stays a loss.
 
-### T67.2. Hand-written Slint and the rest of the catalog
+Execution plan:
 
-Read Slint source that the generator did not print, or that was edited, with the `i-slint-compiler` syntax tree in the importer only (an `import` feature, as tree-sitter in `weft-swiftui`), into Weft with `{ document, losses, diagnostics }` and the loss kinds of SPEC §9; and extend the generator to `<each>` (`for … in` over a struct model), `list`, `table` (`StandardTableView`), `tabs` (`TabWidget`), `dialog`, `image`, `alert`, the pickers, `radio-group`, `segmented-control` and `combobox`. Depends on T67. Done when every corpus screen generates, compiles and round-trips, and an edited generated file imports with the expected losses.
+1. SPEC §9 "From Slint" first: one sentence per new widget, beside the loss table. Do not rewrite the binding losses.
+2. The element match in `read.rs` only. New kinds: `each` from `for`, `list` from `ListView`, `table` from `StandardTableView`, `tabs` from `TabWidget`, `dialog` from `PopupWindow`, `menu` from `Menu` / `MenuBar`, `image` and `model` from `Image`, `alert` stays a column the comment can name, `radio-group` and `segmented-control` from `RadioGroup`, `combobox` when a `ComboBox` has no literal options yet (options themselves are T67.5). An unknown element stays a `kinds` loss and its children are still visited.
+3. Tests in `crates/weft-slint/tests/import.rs` (`required-features = ["import"]`): strip the source comment from one generated golden that uses `each` and `tabs` (or `list`) and check kinds and ids. Do not edit `read_expr.rs`.
+4. Verify: `cargo nextest run -p weft-slint --features import`.
+
+### T67.5. Slint reader recovers bindings and events
+
+`read_slint` treats every non-literal expression as a bindings loss and every callback as an actions loss. Invert `root.property` (`user-email` → `$.user.email`), `<=>`, truthiness (`!= ""`, `!= 0`), `enabled` and `visible` into `disabled` and `hidden`, and `root.perform` into the element's event. Also fold a caption `Text` into the control's label, recover a heading level from `font-size` and `font-weight`, read a `ComboBox` model as options, and match a `spacing` in px to one dimension token when the value equals one. Done when `login`, with the source comment removed, round-trips its bindings and events, and the losses that remain are the ones SPEC still lists.
+
+Execution plan:
+
+1. SPEC §9 "From Slint": narrow the `bindings`, `actions`, `tokens`, `layout` and `values` rows to what is still lost after this recovery.
+2. New module `crates/weft-slint/src/read_expr.rs`. `read.rs` calls it at expression and callback sites and does not grow a second expression parser. Do not change the element-kind match (T67.4).
+3. Tests in `tests/import.rs`: `login` with the source comment deleted comes back with `$.email` and `auth.submit` (or whatever the screen names), and a spacing that equals a token is that token. `required-features = ["import"]`.
+4. Verify: `cargo nextest run -p weft-slint --features import`.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 

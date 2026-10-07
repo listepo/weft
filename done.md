@@ -779,3 +779,18 @@ Check: `cargo test -p weft-cli` — 43 passed (new: `canonical_json_without_a_pr
 `crates/weft-cli/src/convert.rs`'s shared `emit` `std::fs::write`-d over an existing target unconditionally, while the plugin scripts refuse to overwrite without `--force` — a behavior `docs/exporting-jsx.md` documents as a feature — so a hand-edited `gen/Login.jsx` was silently clobbered. Found by the 2026-10-07 audit. Fix: `emit` takes `force` and refuses an existing target with an error naming it and the flag; every generator and importer (`swiftui`, `swiftui-tokens`, `import-swiftui`, `html`/`react`/`solid`/`lit` and their importers, `css-tokens`, `css-base`, `a2ui`, `import-a2ui`) gained the matching `--force` flag, threaded through the shared `WebExport`/`WebImport`/`TokensArgs`/`Args` structs.
 Model: ZCode / GLM-5.3 · Status: done 2026-10-07 · Priority: P2 · Complexity: 2 · Files: `crates/weft-cli/src/convert.rs`, `crates/weft-cli/src/{swiftui,web,a2ui,main}.rs`, `crates/weft-cli/tests/project.rs`
 Check: `cargo test -p weft-cli` — 44 passed (new: `a_generator_refuses_to_overwrite_without_force`; two tests that regenerate into the same directory now pass `--force`); `cargo clippy -p weft-cli --all-targets -- -D warnings` and `cargo fmt --check` clean.
+
+### T67.1. CLI and project settings for Slint
+
+`weft slint` and `weft import-slint` follow the SwiftUI commands: `--out-dir` overrides `export.slint.outDir` and `import.slint.outDir`, otherwise the text is printed; `--name` sets the component name; `--force` is required to overwrite, as T71 requires of every generator. `import-slint` of `slint` output matches `weft fmt` for login, signup and settings. A screen the generator refuses exits 1.
+Check: `cargo nextest run -p weft-cli -p weft-catalog` passed after the merge with T67.2 and T67.3 (193 tests together).
+
+### T67.2. Slint generator for the rest of the catalog
+
+Every corpus screen generates, compiles with `slint-interpreter` 1.18.1, and round-trips through the source-comment importer. SPEC §9 "To Slint" maps `each`, `list`, `table`, `tabs`, `dialog`, `menu`, `image`, `model`, `alert`, the pickers, `radio-group`, `segmented-control` and `combobox`. Non-test code grew by about 1,008 lines, past the 500-line cap; the kinds, the repeater model and the round trip are tested only together, as T67 was.
+Check: `cargo nextest run -p weft-slint -p weft-cli` — the corpus goldens compile and read back.
+
+### T67.3. Hand-written Slint importer
+
+`read_slint` walks the public syntax tree of `i-slint-compiler` 1.18.1 behind the `import` feature and returns `{ document, losses, diagnostics }` when `import_slint` rejects the file. Exact generator output still round-trips on the source comment. Bindings, callbacks, captions, heading levels, ComboBox options and spacing tokens are still losses; T67.4 and T67.5 take those. Non-test code is about 649 lines, past the 500-line cap.
+Check: `cargo nextest run -p weft-slint --features import` — the edited-label, deleted-element and hand-written cases passed.

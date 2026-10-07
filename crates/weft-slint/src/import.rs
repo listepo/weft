@@ -1,6 +1,6 @@
 //! Slint → Weft for files the generator printed: the document comes from the leading
 //! `// weft:source slint` comment (SPEC §9, Provenance), and is believed only when generating
-//! from it gives the file back. Reading hand-written or edited Slint is T67.2.
+//! from it gives the file back. A file this rejects is what `read_slint` reads.
 
 use indexmap::IndexMap;
 use weft_catalog::{Token, token_types};

@@ -1,0 +1,78 @@
+// weft:source slint
+// <screen id="showroom" label="Showroom" weft="0.1">
+//   <heading id="title" level="1">Showroom</heading>
+//   <stack id="shelf" gap="{token.space.lg}">
+//     <section id="gem-section" label="Gem">
+//       <model id="gem" fallback="assets/gem.png" label="A teal gem with eight triangular faces" src="assets/gem.glb" usdz="assets/gem.usdz"/>
+//       <text id="gem-caption" text="{$.caption}"/>
+//       <button id="gem-pick" variant="primary" on-press="gem.pick">Choose this gem</button>
+//       <slot name="header">
+//         <heading id="gem-title" level="2">Gem</heading>
+//       </slot>
+//     </section>
+//     <section id="turned-section" label="Turned gem">
+//       <model id="turned" fallback="assets/gem.png" label="The same gem turned to its side" perspective="800" rotate-y="20" src="assets/gem.glb"/>
+//       <text id="turned-caption">Without a USDZ file Apple platforms show the still image.</text>
+//       <slot name="header">
+//         <heading id="turned-title" level="2">Turned</heading>
+//       </slot>
+//     </section>
+//   </stack>
+// </screen>
+
+import { Button, GroupBox, VerticalBox } from "std-widgets.slint";
+
+export component ShowroomScreen inherits Window {
+    title: "Showroom";
+    in-out property <string> caption;
+    callback perform(string, string);
+
+    showroom := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Showroom";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        shelf := VerticalLayout {
+            spacing: 24px;
+            gem-section := GroupBox {
+                title: "Gem";
+                VerticalBox {
+                    gem-title := Text {
+                        text: "Gem";
+                        font-size: 24px;
+                        font-weight: 700;
+                    }
+                    gem := Image {
+                        accessible-label: "A teal gem with eight triangular faces";
+                    }
+                    gem-caption := Text {
+                        text: root.caption;
+                    }
+                    gem-pick := Button {
+                        text: "Choose this gem";
+                        primary: true;
+                        clicked => { root.perform("gem.pick", "gem-pick"); }
+                    }
+                }
+            }
+            turned-section := GroupBox {
+                title: "Turned gem";
+                VerticalBox {
+                    turned-title := Text {
+                        text: "Turned";
+                        font-size: 24px;
+                        font-weight: 700;
+                    }
+                    turned := Image {
+                        accessible-label: "The same gem turned to its side";
+                    }
+                    turned-caption := Text {
+                        text: "Without a USDZ file Apple platforms show the still image.";
+                    }
+                }
+            }
+        }
+    }
+}
