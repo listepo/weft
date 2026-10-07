@@ -665,6 +665,7 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | `export.swiftui.sharedTokens` | boolean | `true` | Screens read the tokens from the shared `WeftTokens.swift` instead of each carrying a theme struct with the tokens it uses (§9). A screen generated without a project carries its own. |
 | `import.swiftui.outDir` | file name | standard output | Where `weft import-swiftui` writes `<file>.weft`, and where the Xcode command plugin's `import` does (next to the view when absent). |
 | `export.a2ui.outDir`, `import.a2ui.outDir` | file name | standard output | Where `weft a2ui` writes `<screen>.a2ui.json` and `weft import-a2ui` writes `<file>.weft` (§9). |
+| `export.slint.outDir`, `import.slint.outDir` | file name | standard output | Where `weft slint` writes `<screen>.slint` and `weft import-slint` writes `<file>.weft` (§9). |
 | `mcp.limits.markupChars`, `dataChars`, `patchesChars`, `projectChars` | whole number ≥ 1 | 200,000; 200,000; 200,000; 500,000 | Bounds, in UTF-16 code units, on the arguments of one MCP call. |
 | `mcp.limits.patches`, `diagnostics`, `inputElements` | whole number ≥ 1 | 100; 40; 20,000 | Patches per call, diagnostics listed per result, JSON values per call. |
 | `plugins.open-design.tokensDir` | file name | next to the design system | Where the Open Design plugin's `design-md` script writes the tokens it maps from a `DESIGN.md` or `tokens.css`. |

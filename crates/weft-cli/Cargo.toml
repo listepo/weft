@@ -20,6 +20,7 @@ weft-catalog = { workspace = true }
 weft-core = { workspace = true }
 weft-import = { workspace = true }
 weft-interop = { workspace = true }
+weft-slint = { workspace = true }
 weft-swiftui = { workspace = true }
 weft-web = { workspace = true }
 
