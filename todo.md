@@ -13,3 +13,4 @@
 - T67.1. CLI and project settings for Slint
 - T67.2. Hand-written Slint and the rest of the catalog
 - T68. Slint bindings for SwiftUI and WinUI
+- T69. Figma-like desktop design editor
