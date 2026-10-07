@@ -794,3 +794,9 @@ Check: `cargo nextest run -p weft-slint -p weft-cli` — the corpus goldens comp
 
 `read_slint` walks the public syntax tree of `i-slint-compiler` 1.18.1 behind the `import` feature and returns `{ document, losses, diagnostics }` when `import_slint` rejects the file. Exact generator output still round-trips on the source comment. Bindings, callbacks, captions, heading levels, ComboBox options and spacing tokens are still losses; T67.4 and T67.5 take those. Non-test code is about 649 lines, past the 500-line cap.
 Check: `cargo nextest run -p weft-slint --features import` — the edited-label, deleted-element and hand-written cases passed.
+
+### T72. One `weft` command again; batch ids fail at the source
+
+`packages/core/package.json` exposed a second, reduced TS `weft` bin (only `validate`/`fmt`, no project support) with a stale header comment — anyone resolving `weft` through `@weft/core` got usage errors for flags the real Rust CLI accepts. The bin is gone and `cli.ts`'s header now says what it is (a test driver, not the command; `docs/cli.md` names the real one). `bench/src/provider.ts` indexed batch results with `Number(r.custom_id.slice(1))` — a non-conforming id wrote to index `NaN` and surfaced later as "no result for rNaN"; the index is validated with `Number.isInteger` and bounds now and fails naming the id. Found by the 2026-10-07 audit.
+Model: ZCode / GLM-5.3 · Status: done 2026-10-08 · Priority: P2 · Complexity: 1 · Files: `packages/core/package.json`, `packages/core/src/cli.ts`, `bench/src/provider.ts`
+Check: `moon run core:test` — 199 passed (the TS CLI still drives them); `moon run root:typecheck root:lint` — clean.
