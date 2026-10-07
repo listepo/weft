@@ -453,7 +453,9 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             let explicit = catalog.as_deref().map(load_catalog).transpose()?;
             let catalog = explicit.or_else(|| project.as_ref().map(|p| p.catalog.clone()));
             if catalog.is_none() {
-                eprintln!("weft: no --catalog and no project; only the syntax layer was checked");
+                eprintln!(
+                    "weft: no --catalog and no project; only the syntax and shape layers were checked"
+                );
             }
             let tokens = project
                 .as_ref()
@@ -470,7 +472,19 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                     }
                 };
                 match &catalog {
-                    None => vec![],
+                    // Without a catalog the library still checks the canonical
+                    // JSON shape (W200): `--no-project broken.json` must not
+                    // exit 0 where the same document through the library, the
+                    // MCP server or the markup path gets diagnostics (T63).
+                    None => validate(
+                        &json,
+                        &ValidateOptions {
+                            catalog: None,
+                            mode,
+                            tokens: tokens.as_ref(),
+                            actions,
+                        },
+                    ),
                     Some(catalog) => {
                         let mut found = validate(
                             &json,

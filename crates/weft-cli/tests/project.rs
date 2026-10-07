@@ -694,3 +694,16 @@ fn css_tokens_follow_the_appearance_and_go_where_the_project_says() {
     assert!(!r.stdout.contains("color-scheme"), "{}", r.stdout);
     assert!(!r.stdout.contains("@media"), "{}", r.stdout);
 }
+
+/// T63: `--no-project` on canonical JSON used to skip the shape layer
+/// entirely (`vec![]`), exiting 0 where the library, the MCP server and the
+/// markup path all report W200 — and the hint claimed "the syntax layer".
+#[test]
+fn canonical_json_without_a_project_still_gets_its_shape_checked() {
+    let s = Scratch::new("json-shape");
+    let broken = s.write("broken.json", "{}");
+    let r = run(&[&"validate", &broken, &"--no-project"]);
+    assert_eq!(r.code, 1, "{}", r.stdout);
+    assert!(r.stdout.contains("W200 "), "{}", r.stdout);
+    assert!(r.stderr.contains("shape layers"), "{}", r.stderr);
+}

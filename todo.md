@@ -6,6 +6,9 @@
 - T39. Context in the document
 - T13.1. json-render export and import
 - T15.2. Surfaces for the Custom Elements Manifest importer
+- T71. Rust CLI `emit` overwrites generated files unconditionally
+- T72. Two different `weft` commands; batch provider id assumption
+- T73. CI workflow for the documented merge gate
 - T63. `weft validate` on canonical JSON skips the shape layer
 - T64. Rust CLI `emit` overwrites generated files unconditionally
 - T65. Two different `weft` commands; batch provider id assumption
