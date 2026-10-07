@@ -10,7 +10,6 @@
 - T64. Rust CLI `emit` overwrites generated files unconditionally
 - T65. Two different `weft` commands; batch provider id assumption
 - T66. CI workflow for the documented merge gate
-- T67. Weft to Slint and back
 - T67.1. CLI and project settings for Slint
 - T67.2. Hand-written Slint and the rest of the catalog
 - T68. Slint bindings for SwiftUI and WinUI

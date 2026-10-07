@@ -1,0 +1,89 @@
+// weft:source slint
+// <screen id="signup" label="Create account" weft="0.1">
+//   <form id="form" state="idle" on-submit="auth.signup">
+//     <heading id="title" level="1">Create your account</heading>
+//     <stack id="fields" gap="{token.space.md}">
+//       <field id="name" label="Full name" required="true" value="{$.name}"/>
+//       <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
+//       <field id="password" label="Password" required="true" type="password" value="{$.password}"/>
+//       <field id="confirm" label="Confirm password" required="true" type="password" value="{$.confirm}"/>
+//       <checkbox id="terms" checked="{$.acceptTerms}" label="I accept the terms of service"/>
+//     </stack>
+//     <button id="submit" disabled="{!$.acceptTerms}" submit="true" variant="primary">Create account</button>
+//     <slot name="footer">
+//       <link id="signin" on-press="nav.signin">Already have an account? Sign in</link>
+//     </slot>
+//   </form>
+// </screen>
+
+import { Button, CheckBox, HorizontalBox, LineEdit, Palette, VerticalBox } from "std-widgets.slint";
+
+export component SignupScreen inherits Window {
+    title: "Create account";
+    in-out property <string> name;
+    in-out property <string> email;
+    in-out property <string> password;
+    in-out property <string> confirm;
+    in-out property <bool> acceptTerms;
+    callback perform(string, string);
+
+    signup := VerticalBox {
+        alignment: LayoutAlignment.start;
+        form := VerticalBox {
+            title := Text {
+                text: "Create your account";
+                font-size: 32px;
+                font-weight: 700;
+            }
+            fields := VerticalLayout {
+                spacing: 16px;
+                VerticalLayout {
+                    Text { text: "Full name"; }
+                    name := LineEdit {
+                        text <=> root.name;
+                        accepted => { root.perform("auth.signup", "form"); }
+                    }
+                }
+                VerticalLayout {
+                    Text { text: "Email"; }
+                    email := LineEdit {
+                        text <=> root.email;
+                        accepted => { root.perform("auth.signup", "form"); }
+                    }
+                }
+                VerticalLayout {
+                    Text { text: "Password"; }
+                    password := LineEdit {
+                        input-type: InputType.password;
+                        text <=> root.password;
+                        accepted => { root.perform("auth.signup", "form"); }
+                    }
+                }
+                VerticalLayout {
+                    Text { text: "Confirm password"; }
+                    confirm := LineEdit {
+                        input-type: InputType.password;
+                        text <=> root.confirm;
+                        accepted => { root.perform("auth.signup", "form"); }
+                    }
+                }
+                terms := CheckBox {
+                    text: "I accept the terms of service";
+                    checked <=> root.acceptTerms;
+                }
+            }
+            submit := Button {
+                text: "Create account";
+                primary: true;
+                enabled: root.acceptTerms;
+                clicked => { root.perform("auth.signup", "form"); }
+            }
+            HorizontalBox {
+                signin := TouchArea {
+                    clicked => { root.perform("nav.signin", "signin"); }
+                    Text { text: "Already have an account? Sign in"; color: Palette.accent-background; }
+                }
+            }
+        }
+    }
+}

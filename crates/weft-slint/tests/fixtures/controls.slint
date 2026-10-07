@@ -1,0 +1,113 @@
+// weft:source slint
+// <screen id="controls" label="{$.title_text}" weft="0.1">
+//   <heading id="title" level="2">Say "hi" \{x} &amp; more</heading>
+//   <grid id="layout" columns="2" gap="{token.space.sm}">
+//     <field id="age" label="Age" placeholder="0" type="number" value="{$.age}" on-change="form.age"/>
+//     <field id="bio" label="Bio" type="multiline" value="{$.bio}"/>
+//     <slider id="volume" label="Volume" max="10" min="0" value="{$.volume}" on-change="audio.volume"/>
+//     <stepper id="count" label="Count" min="1" value="{$.count}"/>
+//   </grid>
+//   <stack id="row" direction="row" gap="{token.space.md}">
+//     <checkbox id="agree" checked="{$.agree}" label="Agree" on-change="form.agree"/>
+//     <text id="note" hidden="{!$.agree}" text="{$.note}"/>
+//     <text id="secret" hidden="true">Hidden</text>
+//   </stack>
+//   <select id="size" label="Size" value="m">
+//     <option id="size-s" value="s">Small</option>
+//     <option id="size-m" value="m">Medium</option>
+//   </select>
+//   <button id="reset" disabled="false" on-press="form.reset">Reset</button>
+// </screen>
+
+import { Button, CheckBox, ComboBox, LineEdit, Slider, SpinBox, TextEdit, VerticalBox } from "std-widgets.slint";
+
+export component ControlsScreen inherits Window {
+    title: root.title_text;
+    in-out property <string> title_text;
+    in-out property <string> age;
+    in-out property <string> bio;
+    in-out property <float> volume;
+    in-out property <int> count;
+    in-out property <bool> agree;
+    in-out property <string> note;
+    callback perform(string, string);
+
+    controls := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Say \"hi\" \\{x} & more";
+            font-size: 24px;
+            font-weight: 700;
+        }
+        layout := GridLayout {
+            spacing: 8px;
+            VerticalLayout {
+                row: 0;
+                col: 0;
+                Text { text: "Age"; }
+                age := LineEdit {
+                    input-type: InputType.number;
+                    placeholder-text: "0";
+                    text <=> root.age;
+                    edited => { root.perform("form.age", "age"); }
+                }
+            }
+            VerticalLayout {
+                row: 0;
+                col: 1;
+                Text { text: "Bio"; }
+                bio := TextEdit {
+                    text <=> root.bio;
+                }
+            }
+            VerticalLayout {
+                row: 1;
+                col: 0;
+                Text { text: "Volume"; }
+                volume := Slider {
+                    minimum: 0;
+                    maximum: 10;
+                    value <=> root.volume;
+                    changed => { root.perform("audio.volume", "volume"); }
+                }
+            }
+            VerticalLayout {
+                row: 1;
+                col: 1;
+                Text { text: "Count"; }
+                count := SpinBox {
+                    minimum: 1;
+                    value <=> root.count;
+                }
+            }
+        }
+        row := HorizontalLayout {
+            spacing: 16px;
+            agree := CheckBox {
+                text: "Agree";
+                checked <=> root.agree;
+                toggled => { root.perform("form.agree", "agree"); }
+            }
+            note := Text {
+                text: root.note;
+                visible: root.agree;
+            }
+            secret := Text {
+                text: "Hidden";
+                visible: false;
+            }
+        }
+        VerticalLayout {
+            Text { text: "Size"; }
+            size := ComboBox {
+                model: ["Small", "Medium"];
+                current-index: 1;
+            }
+        }
+        reset := Button {
+            text: "Reset";
+            enabled: true;
+            clicked => { root.perform("form.reset", "reset"); }
+        }
+    }
+}
