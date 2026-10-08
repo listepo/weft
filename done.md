@@ -1,5 +1,11 @@
 # Done
 
+### T75–T77, T79–T86, T89, T91. Cloud review findings (2026-10-08)
+
+Confirmed P1/P2 bugs and the shared Trust URL move from the 2026-10-08 cloud review, done together. SPEC §10.2 now refuses a project member whose resolved path (symbolic links followed) leaves the project directory (`W704`); the Node and CLI readers enforce that and cap `maxChars` on the read itself. SPEC §9 Trust and To A2UI restrict `openUrl` to `http`/`https`/`mailto`; `safe_url` lives in `weft-import` and A2UI export drops `javascript:` (and other) `href`/`src`. `applyPatches` returns W200 instead of throwing on a cyclic or too-deep document; `checkData` includes W709/W710; `weft fmt --write` and the TypeScript CLI write a sibling temp file and rename; Figma/Penpot `writeJson` refuses entries over 100 kB; `xcode-agents` continues after an unknown name; Bun engine tests have a 15 s `spawnSync` timeout; unused `uv` and Translate Toolkit pins are gone; `AGENTS.md` names the Rust core and the missing layout crates.
+
+Left for later: T78 Swift typecheck CI cost, T87 WASM JSX stack, T88 resolver `tree()` case, T90 unreferenced insta snapshots, T92/T93 large splits.
+
 ### T74. Slint snapshots and screenshots
 
 HTML, JSX and SwiftUI were already pinned in `weft-snapshots` and drawn in `@weft/visual`. Slint had golden `.slint` files and a compile check, and no reviewed insta snapshot and no rendered screenshot. `weft-snapshots` now pins every corpus screen and catalog example as Slint (a refusal is pinned as text). `crates/weft-slint/tests/screenshots.rs` renders every corpus screen with its `data.json` on the software renderer (fluent, light scheme) and compares the PNG with `tests/screenshots/baselines/<os>-<arch>/`. A one-pixel spacing change and a same-length word change both differ from the pristine render. A platform without a baselines folder skips the PNG comparison and still runs the mutation checks.

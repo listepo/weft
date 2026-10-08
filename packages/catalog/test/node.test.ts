@@ -1,5 +1,13 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -57,6 +65,22 @@ describe("readProject", () => {
   test("treats a member file over maxChars as unreadable", () => {
     const { diagnostics } = readProject(join(example, "weft.json"), { maxChars: 600 });
     assert.ok(diagnostics.some((d) => d.code === "W704" && d.path === "#/catalog"));
+  });
+
+  test("does not follow a symlink out of the project directory", () => {
+    const dir = mkdtempSync(join(tmpdir(), "weft-symlink-"));
+    const secret = join(tmpdir(), `weft-secret-${process.pid}.json`);
+    try {
+      writeFileSync(secret, JSON.stringify({ leaked: { $type: "color", $value: "#ff0000" } }));
+      writeFileSync(join(dir, "weft.json"), '{"tokens": "outside.json"}');
+      symlinkSync(secret, join(dir, "outside.json"));
+      const { project, diagnostics } = readProject(join(dir, "weft.json"));
+      assert.ok(diagnostics.some((d) => d.code === "W704" && d.path === "#/tokens"));
+      assert.equal(project.tokens?.get("leaked"), undefined);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+      rmSync(secret, { force: true });
+    }
   });
 
   test("reports a missing member file instead of throwing", () => {

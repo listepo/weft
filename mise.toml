@@ -17,7 +17,3 @@ bun = "1.4.2"
 "npm:@napi-rs/cli" = "3.10.6"
 # Generates the Xcode projects of plugins/xcode (the samples and the editor extension) from YAML.
 "aqua:yonaskolb/XcodeGen" = "2.46.0"
-# The pipx backend installs Python tools through uv; pinned here so `mise install` works without a global uv.
-uv = "0.12.23"
-# Translate Toolkit: localization file converters and checks (po2json, pofilter, pocount). Not in the mise registry.
-"pipx:translate-toolkit" = "3.20.0"

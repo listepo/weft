@@ -111,6 +111,26 @@ fn the_project_above_the_screen_supplies_catalog_tokens_actions_and_data() {
     );
 }
 
+#[cfg(unix)]
+#[test]
+fn a_member_file_that_is_a_symlink_out_of_the_project_is_not_read() {
+    let s = Scratch::new("symlink-escape");
+    let secret = std::env::temp_dir().join(format!("weft-secret-{}.json", std::process::id()));
+    std::fs::write(
+        &secret,
+        r##"{"leaked":{"$type":"color","$value":"#ff0000"}}"##,
+    )
+    .unwrap();
+    let link = s.path("outside.json");
+    let _ = std::fs::remove_file(&link);
+    std::os::unix::fs::symlink(&secret, &link).unwrap();
+    s.write("weft.json", r#"{"tokens":"outside.json"}"#);
+    let r = run(&[&"validate", &s.path("screens/cart.weft")]);
+    let _ = std::fs::remove_file(&secret);
+    assert!(r.stdout.contains("W704"), "{}", r.stdout);
+    assert!(r.stdout.contains("#/tokens"), "{}", r.stdout);
+}
+
 #[test]
 fn project_problems_point_into_the_project_file_and_fail_the_run() {
     let s = Scratch::new("problems");

@@ -74,11 +74,13 @@ const server = join(claudePlugin, "dist/server.js");
 const skill = join(claudePlugin, "skills/spec");
 
 let failed = false;
+let unknown = false;
 for (const name of values.agents.split(",")) {
   const agent = AGENTS[name];
   if (!agent) {
     console.error(`unknown agent "${name}" (known: ${Object.keys(AGENTS).join(", ")})`);
-    process.exit(2);
+    unknown = true;
+    continue;
   }
   const folder = join(root, agent.folder);
   const env = { ...process.env, [agent.variable]: folder };
@@ -107,4 +109,4 @@ for (const name of values.agents.split(",")) {
   cpSync(skill, target, { recursive: true });
   console.log(`registered weft with the ${name} agent of Xcode (${folder})`);
 }
-process.exit(failed ? 1 : 0);
+process.exit(unknown ? 2 : failed ? 1 : 0);

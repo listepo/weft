@@ -2,7 +2,7 @@
 // `weft validate` and `weft fmt`, reduced to what the package's own tests drive. This is NOT
 // the `weft` command: the Rust CLI (docs/cli.md) is, and shipping this under the same name in
 // bin made installs resolve usage errors for flags the real CLI accepts.
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { hasErrors } from "./diagnostics.ts";
 import { CatalogSchema, type Catalog, type Diagnostic } from "./model.ts";
@@ -55,7 +55,7 @@ export function main(argv: readonly string[], io: Io = defaultIo): number {
     }
     const formatted = serialize(result.document);
     if (parsed.values.write !== true) io.stdout(formatted);
-    else if (formatted !== text) writeFileSync(file, formatted);
+    else if (formatted !== text) writeAtomic(file, formatted);
     return 0;
   }
 
@@ -109,6 +109,21 @@ function loadCatalog(file: string, io: Io): Catalog | undefined {
     return undefined;
   }
   return result.data;
+}
+
+function writeAtomic(file: string, contents: string): void {
+  const tmp = `${file}.${process.pid}.tmp`;
+  try {
+    writeFileSync(tmp, contents);
+    renameSync(tmp, file);
+  } catch (error) {
+    try {
+      unlinkSync(tmp);
+    } catch {
+      // The temp file may already be gone.
+    }
+    throw error;
+  }
 }
 
 /** One line per diagnostic: `file:line:col code message — hint`; JSON input has a path instead of a position. */

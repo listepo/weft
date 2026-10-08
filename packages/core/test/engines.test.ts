@@ -104,6 +104,7 @@ describe("runtimes", () => {
     return spawnSync(runtime, [...args, script], {
       encoding: "utf8",
       env: { ...process.env, WEFT_ENGINE: choice },
+      timeout: 15_000,
     });
   }
 
@@ -126,6 +127,7 @@ describe("runtimes", () => {
       `Bun runs on ${choice}`,
       () => {
         const result = run("bun", ["run"], choice);
+        assert.equal(result.error, undefined, result.error?.message);
         assert.equal(result.status, 0, result.stderr);
         assert.deepEqual(JSON.parse(result.stdout), {
           engine: choice,

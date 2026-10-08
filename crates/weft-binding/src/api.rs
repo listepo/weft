@@ -8,10 +8,10 @@ use serde::Serialize;
 use serde_json::Value as Json;
 use weft_catalog::{ProjectOptions, Token, TokenProblem, load_project_text};
 use weft_core::{
-    ApplyOptions, Catalog, DataCheckOptions, Diagnostic, Document, ParseOptions, ValidateOptions,
-    apply_patches, canonicalize, check_data, check_data_json, compile_data_schema, did_you_mean,
-    format_value, parse, parse_partial, read_value, serialize, stringify, to_document, to_value,
-    validate, validate_document,
+    ApplyOptions, Catalog, Code, DataCheckOptions, Diagnostic, Document, MAX_DEPTH, ParseOptions,
+    ValidateOptions, apply_patches, canonicalize, check_data, check_data_json, compile_data_schema,
+    data_schema_diagnostics, did_you_mean, format_value, parse, parse_partial, read_value,
+    serialize, stringify, to_document, to_value, validate, validate_document,
 };
 
 use crate::boundary::{
@@ -99,16 +99,41 @@ pub fn validate_json(
     write(&diagnostics)
 }
 
+fn too_deep_document() -> Document {
+    to_document(&Json::Null)
+}
+
+fn too_deep_diagnostics() -> Vec<Diagnostic> {
+    vec![Diagnostic::new(
+        Code::W200,
+        "#",
+        format!("The document nests deeper than {MAX_DEPTH} elements."),
+        format!("at most {MAX_DEPTH} levels"),
+    )]
+}
+
 pub fn serialize_document(document: Option<&str>) -> Result<String> {
-    Ok(serialize(&read_document(document)?))
+    match read_document(document) {
+        Ok(d) => Ok(serialize(&d)),
+        Err(BindingError::TooDeep) => Ok(serialize(&too_deep_document())),
+        Err(e) => Err(e),
+    }
 }
 
 pub fn stringify_document(document: Option<&str>) -> Result<String> {
-    Ok(stringify(&read_document(document)?))
+    match read_document(document) {
+        Ok(d) => Ok(stringify(&d)),
+        Err(BindingError::TooDeep) => Ok(stringify(&too_deep_document())),
+        Err(e) => Err(e),
+    }
 }
 
 pub fn canonicalize_document(document: Option<&str>) -> Result<String> {
-    write(&canonicalize(&read_document(document)?))
+    match read_document(document) {
+        Ok(d) => write(&canonicalize(&d)),
+        Err(BindingError::TooDeep) => write(&canonicalize(&too_deep_document())),
+        Err(e) => Err(e),
+    }
 }
 
 #[derive(Serialize)]
@@ -125,7 +150,17 @@ pub fn apply(
     catalog: &Catalog,
     options: &str,
 ) -> Result<String> {
-    let document = read_document(document)?;
+    let document = match read_document(document) {
+        Ok(d) => d,
+        Err(BindingError::TooDeep) => {
+            let diagnostics = too_deep_diagnostics();
+            return write(&Patched {
+                document: None,
+                diagnostics: &diagnostics,
+            });
+        }
+        Err(e) => return Err(e),
+    };
     let patches = read_input(patches)?;
     let o = Options::read(options)?;
     let result = apply_patches(
@@ -203,13 +238,14 @@ pub fn check_data_input(
     sources: Option<&str>,
 ) -> Result<String> {
     let input = read_input(input)?;
-    let (data, _) = compile_data_schema(&read_input(schema)?);
+    let (data, problems) = compile_data_schema(&read_input(schema)?);
     let options = DataCheckOptions {
         catalog,
         data: &data,
     };
     let shape_ok = validate(&input, &ValidateOptions::default()).is_empty();
-    let diagnostics = match sources {
+    let mut diagnostics = data_schema_diagnostics(&problems);
+    diagnostics.extend(match sources {
         Some(text) if shape_ok => {
             let mut document = to_document(&input);
             let sources: Vec<Option<Src>> =
@@ -221,7 +257,7 @@ pub fn check_data_input(
             check_data(&document, &options)
         }
         _ => check_data_json(&input, &options),
-    };
+    });
     write(&diagnostics)
 }
 
@@ -540,6 +576,23 @@ mod tests {
         // A document of the wrong shape is `validate`'s to report.
         let shape = check_data_input(Some("{}"), &catalog, Some(schema), Some("[]")).unwrap();
         assert_eq!(shape, "[]");
+        let bad_schema = json(
+            &check_data_input(
+                Some(r#"{"weft":"0.1","root":{"kind":"screen","id":"s"}}"#),
+                &catalog,
+                Some("5"),
+                None,
+            )
+            .unwrap(),
+        );
+        assert_eq!(bad_schema[0]["code"], "W709");
+    }
+
+    #[test]
+    fn apply_maps_a_document_that_cannot_write_to_w200() {
+        let out = json(&apply(None, Some("[]"), &catalog(), "{}").unwrap());
+        assert!(out["document"].is_null());
+        assert_eq!(out["diagnostics"][0]["code"], "W200");
     }
 
     #[test]

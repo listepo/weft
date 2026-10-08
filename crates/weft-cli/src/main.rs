@@ -7,7 +7,7 @@
 //! above the document, or given with `--project`, supplies the catalog, tokens, actions and data
 //! schema, and the settings of §10.6 (`validate.mode`, `format.write`); a flag overrides the
 //! project, which overrides the default. `--catalog` replaces the project's catalog. Without
-//! either, `validate` checks only the syntax layer. Exit codes: 0 ok, 1 diagnostics with errors,
+//! either, `validate` checks the syntax and shape layers. Exit codes: 0 ok, 1 diagnostics with errors,
 //! 2 usage or I/O failure.
 
 mod a2ui;
@@ -442,6 +442,37 @@ fn read(file: &Path) -> Result<String> {
     std::fs::read_to_string(file).with_context(|| format!("cannot read {}", file.display()))
 }
 
+/// Writes `contents` by renaming a sibling temp file into `path`, so a crash cannot leave a
+/// half-written target (SPEC §10 tools that rewrite a file).
+fn write_atomic(path: &Path, contents: &str) -> Result<()> {
+    let name = path.file_name().unwrap_or_default();
+    let tmp = path.with_file_name(format!(
+        ".{}.tmp-{}",
+        name.to_string_lossy(),
+        std::process::id()
+    ));
+    let written = (|| {
+        std::fs::write(&tmp, contents)?;
+        std::fs::rename(&tmp, path)
+    })();
+    if written.is_err() {
+        let _ = std::fs::remove_file(&tmp);
+    }
+    written.with_context(|| format!("cannot write {}", path.display()))
+}
+
+/// SPEC §10.2: after the name is accepted, the resolved path (symbolic links followed) must stay
+/// inside `dir`. Anything else is unreadable (`W704`).
+pub(crate) fn read_project_member(dir: &Path, name: &str) -> Option<String> {
+    let root = std::fs::canonicalize(dir).ok()?;
+    let resolved = std::fs::canonicalize(root.join(name)).ok()?;
+    resolved
+        .ancestors()
+        .any(|p| p == root)
+        .then(|| std::fs::read_to_string(resolved).ok())
+        .flatten()
+}
+
 /// SPEC §10.1: the first `weft.json` in the document's directory or one above it.
 fn find_project(document: &Path) -> Option<PathBuf> {
     let absolute = std::path::absolute(document).ok()?;
@@ -487,7 +518,7 @@ fn setting<'a>(project: Option<&'a Project>, path: &[&str]) -> Option<&'a serde_
 fn load_project(file: &Path, mode: Mode) -> Result<(Project, Vec<Diagnostic>)> {
     let text = read(file)?;
     let dir = file.parent().unwrap_or(Path::new("."));
-    let read_member = |name: &str| std::fs::read_to_string(dir.join(name)).ok();
+    let read_member = |name: &str| read_project_member(dir, name);
     let loaded = load_project_text(
         &text,
         &ProjectOptions {
@@ -534,8 +565,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             if !write {
                 out.write_all(formatted.as_bytes())?;
             } else if formatted != text {
-                std::fs::write(&file, formatted)
-                    .with_context(|| format!("cannot write {}", file.display()))?;
+                write_atomic(&file, &formatted)?;
             }
             Ok(0)
         }
