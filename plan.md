@@ -16,7 +16,10 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69 | todo | P2 | 5 | 0% | |
 | T12 | todo | P2 | 3 | 0% | |
 | T16 | todo | P2 | 5 | 0% | |
-| T17 | todo | P2 | 4 | 0% | |
+| T17.0 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
+| T17.1 | todo | P2 | 4 | 0% | |
+| T17.2 | todo | P2 | 3 | 0% | |
+| T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -289,6 +292,8 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 
 ### T17. Extension catalogs
 
+Parent of T17.0–T17.3, which carry the status (the task was split this way when T17.0 was claimed). This card holds the context, scope and done criteria they share.
+
 A project can extend the core catalog with exactly one file today. Real hosts combine several sources: the core, one or more component libraries, and their own kinds. So a project needs to load several catalogs at once without their kinds colliding. Once catalogs travel between projects, two more questions need answers: how a catalog is published and found, and who keeps the registry. `research.md` §9 lists "Who keeps a registry of extension catalogs" as open; `docs/catalog-and-tokens.md` and `docs/what-is-weft.md` both say there is no registry; `docs/fragments-design.md` defers namespaces and sharing across projects to this task.
 
 **Context.**
@@ -323,7 +328,30 @@ A project can extend the core catalog with exactly one file today. Real hosts co
 5. Registry: none (a convention plus a list in the docs), a curated index in this repository, or a hosted service? Who keeps it?
 6. Should a catalog declare the base catalog versions it targets? Confirm that screens stay silent about their catalogs (SPEC §10).
 
-**Split.** T17.0: design document only. T17.1: spec and loader for several catalogs and namespaces, with fixtures. T17.2: CLI, MCP, `import-cem` namespace, settings, AGENT-SPEC and docs. T17.3: package resolution and the publishing guide, plus the registry as the creator decides.
+**Split.** T17.0: design document only. T17.1: spec and loader for several catalogs and namespaces, with fixtures. T17.2: CLI, MCP, `import-cem` namespace, settings, AGENT-SPEC and docs. T17.3: package resolution and the publishing guide, plus the registry as the creator decides. T17.1–T17.3 start only after the creator approves T17.0's design; T17.1 lands first.
+
+### T17.0. Extension catalogs: design
+
+T17's "design first" scope item, docs only: no code, no `SPEC.md`, `AGENT-SPEC.md` or catalog change. Done when the creator has approved `docs/extension-catalogs-design.md`, with T17's open questions answered.
+
+Execution plan:
+
+1. Read T17's context: `SPEC.md` §2, §5, §8, §10.2, §10.4 and §10.6, `docs/context-design.md` (the shape), `docs/fragments-design.md`, `research.md` §9, `crates/weft-catalog/src/project.rs`, the CEM importer (`crates/weft-import/src/cem.rs`, `crates/weft-cli/src/cem.rs`, the `acme-ui.json` fixture), `examples/project`, and T12.1's document schema.
+2. `research.md`: a new section "Extension catalogs (T17)" with primary sources and the date checked: Custom Elements Manifest and the custom element name rules of the HTML Standard; npm `package.json` `files`/`exports` for shipping data files; JSON Schema `$id`; Figma and Penpot shared libraries; A2UI catalogs; SwiftUI and Slint module naming; the shadcn registry. A fact backed only by secondary sources is marked **unverified**. The §9 registry row points at the proposal.
+3. `docs/extension-catalogs-design.md` in the shape of `docs/context-design.md`: the problem; namespace options (hyphen prefix, colon, collision rule only) with their cost across the grammar, parsers, generators, importers and design tools; prefix ownership; merge order and conflict rules; the catalog's own declaration; `weft.json` `catalog` as an ordered array and its precedence; diagnostic codes; publication and discovery without network access during validation; the registry model; the effect on generators, Figma/Penpot libraries, the T12 schema, MCP, `import-cem` and fragments; migration; a worked example on `examples/project` with an `acme-ui` CEM import and a hand-written extension; the decisions for the creator, each with a recommendation and alternatives.
+4. Commit, push, open a PR to `main`; T17.0 stays in progress until the creator approves.
+
+### T17.1. Extension catalogs: spec and loader
+
+T17's post-approval scope for the format and the loader, as the approved design says: `SPEC.md` §5, §10.2 (`catalog` also takes an ordered array) and §10.4, the new `W7xx` codes in §6.2 and both registries, `crates/weft-catalog/src/project.rs` loading several catalogs and keeping which catalog each kind came from, the differential fixtures, `examples/project` with two extensions, and the T12 document schema over the merged catalogs. Depends on T17.0.
+
+### T17.2. Extension catalogs: tools and docs
+
+T17's post-approval scope for the surfaces: a repeatable CLI `--catalog`, MCP `project.catalog` as an array, every catalog in `weft_capabilities` and each kind's catalog in `weft_catalog`, the `import-cem` namespace option with its `import.cem.*` key (SPEC §10.6, `settings.rs`, `schemas/weft.schema.json`), `AGENT-SPEC.md` §1 and §2.8 and the primer, `docs/projects.md` and `docs/catalog-and-tokens.md`. Depends on T17.1.
+
+### T17.3. Extension catalogs: distribution and registry
+
+T17's post-approval scope for sharing catalogs: resolving a catalog shipped in a package directory by the documented convention with no network access, the publishing guide, the registry as the creator decides, and the `research.md` §9 row answered. Depends on T17.1.
 
 ### T41. Hosted Penpot plugin
 
