@@ -300,7 +300,7 @@ export const projectCases: Record<string, ProjectCase> = {
     project: project({
       validate: { mod: "strict" },
       export: { cobol: { outDir: "ios" }, react: { outdir: "x" } },
-      import: { figma: {} },
+      import: { penpot: {} },
       mcp: { limit: {} },
     }),
     codes: ["W702", "W702", "W702", "W702", "W702"],

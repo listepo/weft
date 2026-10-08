@@ -152,6 +152,15 @@ const EXPORT: &[Setting] = &[
         Kind::Section(OUT_ONLY),
     ),
 ];
+const FIGMA_IMPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default(
+        "pluginId",
+        "The id of the Figma plugin whose plugin data holds the Weft source of each layer (the `id` of its manifest).",
+        Kind::Text,
+        "\"weft-development\"",
+    ),
+];
 const IMPORT: &[Setting] = &[
     setting(
         "html",
@@ -187,6 +196,11 @@ const IMPORT: &[Setting] = &[
         "cem",
         "Catalogs from a Custom Elements Manifest (`weft import-cem`).",
         Kind::Section(CEM_IMPORT),
+    ),
+    setting(
+        "figma",
+        "Frames of a Figma file, read through the REST API (the plugins' `figma-pull` script).",
+        Kind::Section(FIGMA_IMPORT),
     ),
 ];
 

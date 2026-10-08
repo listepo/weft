@@ -18023,7 +18023,7 @@
   },
   {
    "name": "unknown keys in tool sections only warn",
-   "project": "{\"validate\":{\"mod\":\"strict\"},\"export\":{\"cobol\":{\"outDir\":\"ios\"},\"react\":{\"outdir\":\"x\"}},\"import\":{\"figma\":{}},\"mcp\":{\"limit\":{}}}",
+   "project": "{\"validate\":{\"mod\":\"strict\"},\"export\":{\"cobol\":{\"outDir\":\"ios\"},\"react\":{\"outdir\":\"x\"}},\"import\":{\"penpot\":{}},\"mcp\":{\"limit\":{}}}",
    "codes": [
     "W702",
     "W702",
@@ -18078,10 +18078,10 @@
      {
       "code": "W702",
       "severity": "warning",
-      "message": "Unknown key \"figma\" in \"import\".",
-      "path": "#/import/figma",
-      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\", \"a2ui\", \"slint\", \"cem\"",
-      "got": "figma"
+      "message": "Unknown key \"penpot\" in \"import\".",
+      "path": "#/import/penpot",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\", \"a2ui\", \"slint\", \"cem\", \"figma\"",
+      "got": "penpot"
      },
      {
       "code": "W702",

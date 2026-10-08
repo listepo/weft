@@ -74,3 +74,19 @@ fn a_text_setting_keeps_a_non_empty_string_only() {
         );
     }
 }
+
+#[test]
+fn the_figma_import_section_keeps_its_folder_and_plugin_id() {
+    let import = json!({ "figma": { "outDir": "screens", "pluginId": "1234567890" } });
+    let loaded = load_project(&json!({ "import": import }), &ProjectOptions::default()).unwrap();
+    assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+    assert_eq!(loaded.project.settings["import"], import);
+    let loaded = load_project(
+        &json!({ "import": { "figma": { "pluginId": "" } } }),
+        &ProjectOptions::default(),
+    )
+    .unwrap();
+    let codes: Vec<_> = loaded.diagnostics.iter().map(|d| d.code.as_str()).collect();
+    assert_eq!(codes, ["W701"]);
+    assert_eq!(loaded.project.settings["import"], json!({ "figma": {} }));
+}
