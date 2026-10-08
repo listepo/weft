@@ -13,8 +13,8 @@ pub use core::{CORE_CATALOG_JSON, CatalogError, DEFAULT_TOKENS_JSON, core_catalo
 pub use diff::{CatalogChange, CatalogDiff, ChangeLevel, diff_catalogs};
 pub use document_schema::{DocumentSchemaOptions, document_schema};
 pub use project::{
-    MAX_TOKEN_FILES, PROJECT_FILE, Project, ProjectLoad, ProjectOptions, ReadFile,
-    is_project_file_name, load_project, load_project_text,
+    CatalogSource, KindSource, MAX_CATALOGS, MAX_TOKEN_FILES, PROJECT_FILE, Project, ProjectLoad,
+    ProjectOptions, ReadFile, is_project_file_name, load_project, load_project_text,
 };
 pub use resolver::{
     Appearance, MAX_CONTEXTS, RESOLVER_VERSION, TokenModifier, appearance, is_resolver,

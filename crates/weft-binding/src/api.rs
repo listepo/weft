@@ -6,7 +6,9 @@ use std::cell::RefCell;
 
 use serde::Serialize;
 use serde_json::Value as Json;
-use weft_catalog::{ProjectOptions, Token, TokenProblem, load_project_text};
+use weft_catalog::{
+    CatalogSource, KindSource, ProjectOptions, Token, TokenProblem, load_project_text,
+};
 use weft_core::{
     ApplyOptions, Catalog, DataCheckOptions, Diagnostic, Document, ParseOptions, ValidateOptions,
     apply_patches, canonicalize, check_data, check_data_json, compile_data_schema, did_you_mean,
@@ -283,6 +285,8 @@ struct LoadedAppearance<'a> {
 #[derive(Serialize)]
 struct LoadedProject<'a> {
     catalog: &'a Catalog,
+    catalogs: &'a [CatalogSource],
+    kinds: &'a indexmap::IndexMap<String, KindSource>,
     tokens: Option<Vec<(&'a String, &'a Token)>>,
     modifiers: Vec<LoadedModifier<'a>>,
     /// The appearance modifier's light and dark contexts, by name (`weft_catalog::appearance`).
@@ -319,6 +323,8 @@ pub fn load_project(text: &str, files: Option<&str>, options: &str) -> Result<St
     let project = &loaded.project;
     write(&LoadedProject {
         catalog: &project.catalog,
+        catalogs: &project.catalogs,
+        kinds: &project.kinds,
         tokens: project.tokens.as_ref().map(|t| t.iter().collect()),
         modifiers: project
             .modifiers

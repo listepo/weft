@@ -1,0 +1,110 @@
+{
+  "weft": "0.1",
+  "name": "acme-ui",
+  "version": "1.0.0",
+  "prefix": "acme",
+  "requires": {
+    "weft-core": "0.1.0"
+  },
+  "components": {
+    "acme-button": {
+      "description": "A button.",
+      "role": "generic",
+      "content": "mixed",
+      "props": {
+        "variant": {
+          "description": "Visual emphasis.",
+          "type": "enum",
+          "values": ["default", "primary", "danger"],
+          "default": "default"
+        },
+        "size": {
+          "description": "The `size` attribute.",
+          "type": "enum",
+          "values": ["small", "medium", "large"],
+          "default": "medium"
+        },
+        "disabled": {
+          "description": "The `disabled` attribute.",
+          "type": "boolean",
+          "default": false
+        },
+        "href": {
+          "description": "The `href` attribute.",
+          "type": "string"
+        }
+      },
+      "slots": {
+        "prefix": {
+          "description": "An icon before the label."
+        },
+        "suffix": {
+          "description": "An icon after the label."
+        }
+      },
+      "events": ["acme-click", "acme-focus"]
+    },
+    "acme-rating": {
+      "description": "A star rating that shows or sets a score.",
+      "role": "generic",
+      "content": "mixed",
+      "props": {
+        "value": {
+          "description": "The `value` attribute.",
+          "type": "number",
+          "default": 0.0
+        },
+        "max": {
+          "description": "The `max` attribute.",
+          "type": "number",
+          "default": 5.0
+        },
+        "readonly": {
+          "description": "The `readonly` attribute.",
+          "type": "boolean",
+          "default": false
+        },
+        "precision": {
+          "description": "The `precision` attribute.",
+          "type": "string"
+        },
+        "value-label": {
+          "description": "The `value-label` property.",
+          "type": "string",
+          "default": ""
+        }
+      },
+      "events": ["acme-change", "value-hover"]
+    },
+    "acme-card": {
+      "description": "A surface with an optional header and footer.",
+      "role": "generic",
+      "content": "mixed",
+      "props": {
+        "elevated": {
+          "description": "The `elevated` attribute.",
+          "type": "boolean"
+        }
+      },
+      "slots": {
+        "header": {
+          "description": "The header."
+        },
+        "footer": {
+          "description": "The footer."
+        }
+      }
+    },
+    "acme-badge": {
+      "description": "A small status marker.",
+      "role": "generic",
+      "content": "mixed",
+      "props": {
+        "pill": {
+          "description": "The `pill` attribute.",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -8,7 +8,7 @@ const dir = new URL("../../../examples/project/", import.meta.url);
 const file = (name: string): unknown => JSON.parse(readFileSync(new URL(name, dir), "utf8"));
 const PROJECT = {
   tokens: [file("tokens/base.tokens.json"), file("tokens/brand.tokens.json")],
-  catalog: file("catalog.json"),
+  catalog: [file("catalogs/acme-ui.catalog.json"), file("catalog.json")],
   actions: (file("weft.json") as { actions: string[] }).actions,
   data: file("data.schema.json"),
 };

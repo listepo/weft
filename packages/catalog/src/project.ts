@@ -9,8 +9,12 @@ import { toJson, wasm, wellFormed } from "@weft/core/wasm";
 import type { Token } from "./tokens.ts";
 
 export type Project = {
-  /** The core catalog, or the core catalog with the project's extension merged in. */
+  /** The core catalog, or the core catalog with the project's catalogs merged in (SPEC §10.4). */
   catalog: Catalog;
+  /** The catalogs merged over the core, in the order the project lists them. */
+  catalogs: CatalogSource[];
+  /** For every kind of `catalog`, the catalog that defined it and those that extended it. */
+  kinds: Record<string, KindSource>;
   /** Present when the project declares `tokens`; with a resolver, its default context. */
   tokens?: Map<string, Token> | undefined;
   /** The modifiers of the project's resolver, each resolved for every context (SPEC §10.3). */
@@ -24,6 +28,11 @@ export type Project = {
   /** The tool sections that passed their checks (SPEC §10.6). */
   settings: Settings;
 };
+
+/** A catalog the project loaded over the core; `source` is the file it was read from. */
+export type CatalogSource = { name: string; version: string; prefix?: string; source?: string };
+
+export type KindSource = { catalog: string; extendedBy?: string[] };
 
 /** A resolver modifier: every context's tokens, with the other modifiers at their default. */
 export type TokenModifier = {
@@ -137,6 +146,8 @@ export const PROJECT_FILE = "weft.json";
 
 type Loaded = {
   catalog: Catalog;
+  catalogs: CatalogSource[];
+  kinds: Record<string, KindSource>;
   tokens: [string, Token][] | null;
   modifiers: { name: string; default: string; contexts: [string, [string, Token][]][] }[];
   appearance: { modifier: string; light: string; dark: string } | null;
@@ -172,7 +183,12 @@ export function loadProjectText(text: string, options: ProjectOptions = {}): Pro
   }
   const wire = JSON.stringify({ strict: options.mode === "strict", prefix: options.prefix ?? "#" });
   const out = JSON.parse(wasm.loadProject(source, files, wire)) as Loaded;
-  const project: Project = { catalog: out.catalog, settings: out.settings };
+  const project: Project = {
+    catalog: out.catalog,
+    catalogs: out.catalogs,
+    kinds: out.kinds,
+    settings: out.settings,
+  };
   if (out.tokens !== null) project.tokens = new Map(out.tokens);
   if (out.modifiers.length > 0) {
     project.modifiers = out.modifiers.map((m) => ({

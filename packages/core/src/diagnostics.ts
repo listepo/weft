@@ -106,6 +106,16 @@ export const DIAGNOSTIC_CODES = {
   W708: { severity: "error", summary: "Project action name breaks the action grammar." },
   W709: { severity: "error", summary: "Data schema is malformed." },
   W710: { severity: "warning", summary: "Data schema keyword is not supported." },
+  W711: { severity: "error", summary: "Two catalogs claim the same name, prefix or kind." },
+  W712: {
+    severity: "error",
+    summary: "Catalog prefix is malformed or reserved, or a second catalog lacks one.",
+  },
+  W713: { severity: "error", summary: "Catalog defines or extends a kind it does not own." },
+  W714: {
+    severity: "warning",
+    summary: "Catalog requirement is not loaded at a compatible version.",
+  },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;

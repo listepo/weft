@@ -259,6 +259,10 @@ What each code asks of you:
 | W708 | Write the action as dot-separated names: `cart.add`. |
 | W709 | Repair the data schema at the place the message names. |
 | W710 | Rewrite the schema without that keyword (inline the `$ref`, pick one branch of `anyOf`); until then bindings there are not checked. |
+| W711 | Two catalogs claim one name, prefix or kind; the message names both. Keep one of them in `catalog`, or rename the later catalog. |
+| W712 | Give a shared catalog its own `prefix`: one lowercase segment, not `x`, `weft` or a core kind's first segment. Only the project's own catalog has none. |
+| W713 | A library defines only kinds named `<prefix>-…`; extend core and library kinds in the project's own catalog, and name its new kinds outside the libraries' prefixes. |
+| W714 | A warning: add the required catalog to `catalog`, or load a version compatible with the one `requires` names. |
 
 ### 4.1 Reading back an edit
 

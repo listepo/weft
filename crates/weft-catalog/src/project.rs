@@ -1,10 +1,12 @@
-//! The project file of SPEC §10: token layers, a catalog extension, host actions and a data
+//! The project file of SPEC §10: token layers, catalogs over the core, host actions and a data
 //! schema shared by every screen of a project. Ported from packages/catalog/src/project.ts with
 //! the same rules, paths and messages. Pure: files reach it through an injected reader. The
 //! project file and every file it names are untrusted, so problems are diagnostics, never errors;
 //! the only error is a broken embedded core catalog.
 
 use indexmap::IndexMap;
+use semver::{Comparator, Op, Version, VersionReq};
+use serde::Serialize;
 use serde_json::{Map as Object, Value as Json};
 use weft_core::{
     Catalog, Code, ComponentDef, DataSchema, Diagnostic, Mode, compile_data_schema, did_you_mean,
@@ -19,6 +21,7 @@ use crate::tokens::{Token, TokenCode, TokenProblem, load_tokens};
 
 pub const PROJECT_FILE: &str = "weft.json";
 pub const MAX_TOKEN_FILES: usize = 64;
+pub const MAX_CATALOGS: usize = 32;
 
 /// The shared resources; the tool sections follow them (`settings::SECTIONS`).
 const RESOURCES: [&str; 5] = ["$schema", "tokens", "catalog", "actions", "data"];
@@ -28,12 +31,23 @@ const JOINED: [&str; 4] = ["states", "events", "allowedChildren", "allowedParent
 const MERGED: [&str; 2] = ["props", "slots"];
 /// Element names with a fixed meaning in markup, which no component may take.
 const STRUCTURAL: [&str; 2] = ["each", "slot"];
-const CATALOG_MEMBERS: [&str; 4] = ["weft", "name", "version", "components"];
+const CATALOG_MEMBERS: [&str; 6] = [
+    "weft",
+    "name",
+    "version",
+    "prefix",
+    "requires",
+    "components",
+];
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Project {
-    /// The core catalog, or the core catalog with the project's extension merged in.
+    /// The core catalog, or the core catalog with the project's catalogs merged in (SPEC §10.4).
     pub catalog: Catalog,
+    /// The catalogs merged over the core, in the order the project lists them.
+    pub catalogs: Vec<CatalogSource>,
+    /// For every kind of `catalog`, the catalog that defined it and those that extended it.
+    pub kinds: IndexMap<String, KindSource>,
     /// Present when the project declares `tokens`; with a resolver, the default context.
     pub tokens: Option<IndexMap<String, Token>>,
     /// The modifiers of the project's resolver, each resolved for every context (SPEC §10.3);
@@ -49,6 +63,34 @@ pub struct Project {
     /// The tool sections that passed their checks (SPEC §10.6), shaped as in the file; a key that
     /// is absent takes the tool's default.
     pub settings: Object<String, Json>,
+}
+
+/// A catalog the project loaded over the core.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct CatalogSource {
+    pub name: String,
+    pub version: String,
+    /// Absent for the project catalog.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prefix: Option<String>,
+    /// The file the catalog was read from; absent for project content.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KindSource {
+    pub catalog: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub extended_by: Vec<String>,
+}
+
+fn defined_by(catalog: &str) -> KindSource {
+    KindSource {
+        catalog: catalog.to_owned(),
+        extended_by: vec![],
+    }
 }
 
 impl Project {
@@ -164,6 +206,85 @@ fn extend_definition(core: &Object<String, Json>, entry: &Object<String, Json>) 
     order_keys(Json::Object(merged))
 }
 
+/// A catalog whose own members passed their checks, and where its diagnostics point.
+struct Entry {
+    at: String,
+    weft: String,
+    source: CatalogSource,
+    requires: Vec<(String, Version)>,
+    components: Object<String, Json>,
+}
+
+/// Cargo's rule: `1.2.0` admits `>=1.2.0, <2.0.0`, and `0.1.0` admits `>=0.1.0, <0.2.0`.
+fn compatible(required: &Version, loaded: &str) -> bool {
+    let caret = VersionReq {
+        comparators: vec![Comparator {
+            op: Op::Caret,
+            major: required.major,
+            minor: Some(required.minor),
+            patch: Some(required.patch),
+            pre: required.pre.clone(),
+        }],
+    };
+    Version::parse(loaded).is_ok_and(|v| caret.matches(&v))
+}
+
+fn owns(prefix: &str, kind: &str) -> bool {
+    kind.strip_prefix(prefix)
+        .is_some_and(|rest| rest.starts_with('-'))
+}
+
+/// Why `catalog` may not define or extend `kind` (SPEC §10.4): a library defines only new kinds
+/// under its prefix, and the project catalog no new kind under a library's prefix.
+fn trespass(
+    catalog: &Entry,
+    kind: &str,
+    defined: Option<&KindSource>,
+    libraries: &[&Entry],
+) -> Option<(Code, String, String)> {
+    let name = quote(&catalog.source.name);
+    if let Some(prefix) = &catalog.source.prefix {
+        if !owns(prefix, kind) {
+            return Some((
+                Code::W713,
+                format!(
+                    "{name} owns the kinds named \"{prefix}-…\" and extends no other kind, so its entry {} is ignored.",
+                    quote(kind)
+                ),
+                format!("a new kind named \"{prefix}-…\""),
+            ));
+        }
+        // Unique prefixes already rule this out; checked on its own so that the guarantee does
+        // not rest on the other checks.
+        let owner = defined?;
+        return Some((
+            Code::W711,
+            format!(
+                "The kind {} is already defined by {}, so the definition in {name} is ignored.",
+                quote(kind),
+                quote(&owner.catalog)
+            ),
+            "a kind that no other loaded catalog defines".to_owned(),
+        ));
+    }
+    if defined.is_some() {
+        return None;
+    }
+    let library = libraries
+        .iter()
+        .find(|l| l.source.prefix.as_deref().is_some_and(|p| owns(p, kind)))?;
+    let prefix = library.source.prefix.as_deref().unwrap_or_default();
+    let owner = quote(&library.source.name);
+    Some((
+        Code::W713,
+        format!(
+            "Kinds named \"{prefix}-…\" belong to {owner}, so {name} may not define {}; the entry is ignored.",
+            quote(kind)
+        ),
+        format!("an extension of a kind {owner} defines, or a new kind outside its prefix"),
+    ))
+}
+
 fn token_expected(code: TokenCode) -> &'static str {
     match code {
         TokenCode::T001 => "a JSON object of DTCG groups and tokens",
@@ -175,6 +296,8 @@ fn token_expected(code: TokenCode) -> &'static str {
         TokenCode::T007 => "a material colour with an alpha of 0 to 1 and a blur of 0 to 100 px",
     }
 }
+
+type Merged = (Catalog, Vec<CatalogSource>, IndexMap<String, KindSource>);
 
 struct Loader<'a> {
     options: &'a ProjectOptions<'a>,
@@ -462,9 +585,98 @@ impl Loader<'_> {
         Some(actions)
     }
 
-    /// The merged catalog, or `None` when the extension is not a catalog.
-    fn extend_catalog(&mut self, extension: &Json, core: &Json) -> Option<Catalog> {
+    /// The core with the project's catalogs merged in (SPEC §10.4), or `None` when `catalog`
+    /// lists too many. Libraries merge first and the project catalog last, wherever it is listed,
+    /// so the list order changes listings and diagnostics but never the merged catalog.
+    fn catalogs(&mut self, member: &Json, core: &Json) -> Option<Merged> {
         let pointer = self.at("/catalog");
+        let listed: Vec<(String, String, &Json)> = match member {
+            Json::Array(items) if items.len() > MAX_CATALOGS => {
+                self.wrong_type(
+                    pointer,
+                    format!(
+                        "\"catalog\" lists {} catalogs; a project has at most {MAX_CATALOGS}.",
+                        items.len()
+                    ),
+                    &format!("at most {MAX_CATALOGS} catalogs"),
+                );
+                return None;
+            }
+            Json::Array(items) => items
+                .iter()
+                .enumerate()
+                .map(|(i, item)| {
+                    (
+                        format!("{pointer}/{i}"),
+                        format!("Entry {i} of \"catalog\""),
+                        item,
+                    )
+                })
+                .collect(),
+            // One catalog alone keeps the pointers it always had.
+            one => vec![(pointer, "\"catalog\"".to_owned(), one)],
+        };
+        let base = self.read_catalog(String::new(), core, None)?;
+        let mut entries: Vec<Entry> = Vec::new();
+        for (at, what, item) in listed {
+            let Some(found) = self.content(&at, item, &what) else {
+                continue;
+            };
+            let source = self.options.read.and(item.as_str()).map(str::to_owned);
+            if let Some(entry) = self.read_catalog(at, &found, source)
+                && self.claims(&entry, &entries, &base)
+            {
+                entries.push(entry);
+            }
+        }
+        self.requirements(&entries, &base);
+        let mut components = base.components.clone();
+        let mut kinds = base
+            .components
+            .keys()
+            .map(|k| (k.clone(), defined_by(&base.source.name)))
+            .collect();
+        let (libraries, project): (Vec<&Entry>, Vec<&Entry>) =
+            entries.iter().partition(|e| e.source.prefix.is_some());
+        for entry in libraries.iter().chain(&project) {
+            self.merge_catalog(
+                entry,
+                &libraries,
+                &base.source.name,
+                &mut components,
+                &mut kinds,
+            );
+        }
+        // The project catalog names the result, else the last library, so that callers reading
+        // one name see the catalog they wrote.
+        let named = project.first().copied().or(entries.last()).unwrap_or(&base);
+        let mut catalog = Object::new();
+        catalog.insert("weft".to_owned(), Json::String(named.weft.clone()));
+        catalog.insert("name".to_owned(), Json::String(named.source.name.clone()));
+        catalog.insert(
+            "version".to_owned(),
+            Json::String(named.source.version.clone()),
+        );
+        catalog.insert(
+            "components".to_owned(),
+            order_keys(Json::Object(components)),
+        );
+        // Every entry was checked on its own, so this only fails if that check is wrong.
+        let catalog = serde_json::from_value(Json::Object(catalog)).ok()?;
+        Some((
+            catalog,
+            entries.into_iter().map(|e| e.source).collect(),
+            kinds,
+        ))
+    }
+
+    /// A catalog's own members (SPEC §5), or `None` with `W706` when they have the wrong shape.
+    fn read_catalog(
+        &mut self,
+        pointer: String,
+        extension: &Json,
+        source: Option<String>,
+    ) -> Option<Entry> {
         let text = |key: &str| extension.get(key).and_then(Json::as_str).map(str::to_owned);
         let ext = extension.as_object();
         let (Some(ext), Some(weft), Some(name), Some(version), Some(Json::Object(entries))) = (
@@ -477,19 +689,191 @@ impl Loader<'_> {
             self.report_not_catalog(pointer);
             return None;
         };
-        if ext.keys().any(|k| !CATALOG_MEMBERS.contains(&k.as_str())) {
+        let prefix = ext.get("prefix");
+        let requires = ext.get("requires").map(Json::as_object);
+        if ext.keys().any(|k| !CATALOG_MEMBERS.contains(&k.as_str()))
+            || prefix.is_some_and(|p| !p.is_string())
+            || requires.is_some_and(|r| r.is_none())
+        {
             self.report_not_catalog(pointer);
             return None;
         }
-        let empty = Object::new();
-        let core_components = core
-            .get("components")
-            .and_then(Json::as_object)
-            .unwrap_or(&empty);
-        let mut components = core_components.clone();
-        for (kind, entry) in entries {
+        let mut required = Vec::new();
+        for (catalog, value) in requires.flatten().into_iter().flatten() {
+            let Some(Ok(version)) = value.as_str().map(Version::parse) else {
+                let at = format!("{pointer}/requires/{}", escape_pointer(catalog));
+                let message = format!(
+                    "The requirement on {} is not a version, so the catalog is ignored.",
+                    quote(catalog)
+                );
+                let expected = "a version such as \"1.2.0\", read by Cargo's compatibility rule";
+                self.report(
+                    Diagnostic::new(Code::W706, at, message, expected).got(value.to_string()),
+                );
+                return None;
+            };
+            required.push((catalog.clone(), version));
+        }
+        Some(Entry {
+            at: pointer,
+            weft,
+            source: CatalogSource {
+                name,
+                version,
+                prefix: prefix.and_then(Json::as_str).map(str::to_owned),
+                source,
+            },
+            requires: required,
+            components: entries.clone(),
+        })
+    }
+
+    /// The catalog's claims on its name and prefix (`W711`, `W712`). A catalog that loses one is
+    /// ignored whole, since its kinds would otherwise land under an owner it did not declare.
+    fn claims(&mut self, entry: &Entry, earlier: &[Entry], core: &Entry) -> bool {
+        let (at, name) = (&entry.at, &entry.source.name);
+        let taken = std::iter::once(core)
+            .chain(earlier)
+            .find(|e| e.source.name == *name);
+        if let Some(owner) = taken {
+            let owner = if owner.at.is_empty() {
+                "the core catalog".to_owned()
+            } else {
+                format!("the catalog at {}", quote(&owner.at))
+            };
+            let message = format!(
+                "The catalog name {} is already taken by {owner}, so this catalog is ignored.",
+                quote(name)
+            );
+            let d = Diagnostic::new(
+                Code::W711,
+                format!("{at}/name"),
+                message,
+                "a catalog name that no other loaded catalog has",
+            );
+            self.report(d.got(name));
+            return false;
+        }
+        let Some(prefix) = &entry.source.prefix else {
+            let Some(project) = earlier.iter().find(|e| e.source.prefix.is_none()) else {
+                return true;
+            };
+            let message = format!(
+                "{} has no \"prefix\", but {} is already the project catalog, so {} is ignored.",
+                quote(name),
+                quote(&project.source.name),
+                quote(name)
+            );
+            let d = Diagnostic::new(
+                Code::W712,
+                at,
+                message,
+                "a \"prefix\" on every catalog but the project's own",
+            );
+            self.report(d.hint("A shared catalog declares a \"prefix\" and owns the kinds named after it; only the project catalog has none."));
+            return false;
+        };
+        let reserved = prefix == "x"
+            || prefix == "weft"
+            || core
+                .components
+                .keys()
+                .any(|k| k.split('-').next() == Some(prefix));
+        if !is_name(prefix) || prefix.contains('-') || reserved {
+            let why = if reserved {
+                "is reserved"
+            } else {
+                "is not one lowercase name segment"
+            };
+            let message = format!(
+                "The prefix {} of {} {why}, so the catalog is ignored.",
+                quote(prefix),
+                quote(name)
+            );
+            let expected = "one lowercase segment such as \"acme\" that is not \"x\", \"weft\", a core kind or a core kind's first segment";
+            self.report(
+                Diagnostic::new(Code::W712, format!("{at}/prefix"), message, expected).got(prefix),
+            );
+            return false;
+        }
+        if let Some(owner) = earlier
+            .iter()
+            .find(|e| e.source.prefix.as_ref() == Some(prefix))
+        {
+            let message = format!(
+                "The prefix {} is already owned by {} ({}), so {} is ignored.",
+                quote(prefix),
+                quote(&owner.source.name),
+                quote(&owner.at),
+                quote(name)
+            );
+            let d = Diagnostic::new(
+                Code::W711,
+                format!("{at}/prefix"),
+                message,
+                "a prefix that no other loaded catalog declares",
+            );
+            self.report(d.got(prefix));
+            return false;
+        }
+        true
+    }
+
+    /// `W714` for each requirement no loaded catalog meets. Only a warning: the structural checks
+    /// keep the merged catalog valid either way, and this says why an entry may have failed them.
+    fn requirements(&mut self, entries: &[Entry], core: &Entry) {
+        for entry in entries {
+            for (required, version) in &entry.requires {
+                let loaded = std::iter::once(core)
+                    .chain(entries)
+                    .find(|e| e.source.name == *required)
+                    .map(|e| e.source.version.as_str());
+                if loaded.is_some_and(|v| compatible(version, v)) {
+                    continue;
+                }
+                let (catalog, needed) = (quote(&entry.source.name), quote(required));
+                let message = match loaded {
+                    None => format!("{catalog} requires {needed} {version}, which is not loaded."),
+                    Some(v) => format!("{catalog} requires {needed} {version}, but {v} is loaded."),
+                };
+                let at = format!("{}/requires/{}", entry.at, escape_pointer(required));
+                let expected = format!("{needed} loaded at a version compatible with {version}");
+                self.report(
+                    Diagnostic::new(Code::W714, at, message, expected)
+                        .got_opt(loaded.map(str::to_owned)),
+                );
+            }
+        }
+    }
+
+    /// One catalog's entries merged in: a library's whole definitions of kinds under its prefix,
+    /// or the project catalog's new kinds and its extensions, which may only widen what they
+    /// extend.
+    fn merge_catalog(
+        &mut self,
+        catalog: &Entry,
+        libraries: &[&Entry],
+        core: &str,
+        components: &mut Object<String, Json>,
+        kinds: &mut IndexMap<String, KindSource>,
+    ) {
+        let pointer = &catalog.at;
+        let kept = |owner: &str| {
+            if owner == core {
+                "its core definition".to_owned()
+            } else {
+                format!("its definition from {}", quote(owner))
+            }
+        };
+        for (kind, entry) in &catalog.components {
             let at = format!("{pointer}/components/{}", escape_pointer(kind));
-            let base = core_components.get(kind).and_then(Json::as_object);
+            if let Some((code, message, expected)) =
+                trespass(catalog, kind, kinds.get(kind), libraries)
+            {
+                self.report(Diagnostic::new(code, at, message, expected).got(kind));
+                continue;
+            }
+            let base = components.get(kind).and_then(Json::as_object);
             let invalid = |message: String, expected: &str| {
                 Diagnostic::new(Code::W706, at.clone(), message, expected).got(kind)
             };
@@ -546,11 +930,12 @@ impl Loader<'_> {
                             Code::W707,
                             at,
                             format!(
-                                "The extension of {} would break existing screens, so it keeps its core definition: {}",
+                                "The extension of {} would break existing screens, so it keeps {}: {}",
                                 quote(kind),
+                                kept(kinds.get(kind).map_or(core, |k| k.catalog.as_str())),
                                 breaking.message
                             ),
-                            "a change that only widens the core definition (SPEC §8)",
+                            "a change that only widens the definition it extends (SPEC §8)",
                         )
                         .got(breaking.path.clone()),
                     );
@@ -558,17 +943,13 @@ impl Loader<'_> {
                 }
             }
             components.insert(kind.clone(), merged);
+            match kinds.get_mut(kind) {
+                Some(source) => source.extended_by.push(catalog.source.name.clone()),
+                None => {
+                    kinds.insert(kind.clone(), defined_by(&catalog.source.name));
+                }
+            }
         }
-        let mut catalog = Object::new();
-        catalog.insert("weft".to_owned(), Json::String(weft));
-        catalog.insert("name".to_owned(), Json::String(name));
-        catalog.insert("version".to_owned(), Json::String(version));
-        catalog.insert(
-            "components".to_owned(),
-            order_keys(Json::Object(components)),
-        );
-        // Every entry was checked on its own, so this only fails if that check is wrong.
-        serde_json::from_value(Json::Object(catalog)).ok()
     }
 
     fn report_not_catalog(&mut self, pointer: String) {
@@ -576,7 +957,7 @@ impl Loader<'_> {
             Code::W706,
             pointer,
             "The catalog extension is not a catalog.",
-            "an object with \"weft\", \"name\", \"version\" and \"components\" (SPEC §5)",
+            "an object with \"weft\", \"name\", \"version\" and \"components\", and optionally \"prefix\" and \"requires\" (SPEC §5)",
         ));
     }
 }
@@ -604,8 +985,13 @@ pub fn load_project_text(
 }
 
 fn empty_project() -> Result<Project, CatalogError> {
+    let catalog = core_catalog()?;
     Ok(Project {
-        catalog: core_catalog()?,
+        kinds: (catalog.components.keys())
+            .map(|k| (k.clone(), defined_by(&catalog.name)))
+            .collect(),
+        catalog,
+        catalogs: vec![],
         tokens: None,
         modifiers: vec![],
         actions: None,
@@ -666,12 +1052,12 @@ pub fn load_project(
         project.tokens = tokens;
         project.modifiers = modifiers;
     }
-    if let Some(member) = members.get("catalog")
-        && let Some(found) = loader.content(&loader.at("/catalog"), member, "\"catalog\"")
-    {
+    if let Some(member) = members.get("catalog") {
         let core: Json = serde_json::from_str(CORE_CATALOG_JSON)?;
-        if let Some(catalog) = loader.extend_catalog(&found, &core) {
+        if let Some((catalog, catalogs, kinds)) = loader.catalogs(member, &core) {
             project.catalog = catalog;
+            project.catalogs = catalogs;
+            project.kinds = kinds;
         }
     }
     if let Some(member) = members.get("actions") {

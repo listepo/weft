@@ -203,6 +203,8 @@ type Catalog = {
   weft: "0.1";
   name: string;
   version: string;                         // semver of the catalog
+  prefix?: string;                         // owns the kinds named `<prefix>-…`; absent = a project catalog
+  requires?: Record<string, string>;       // catalog name → the version it was written against
   components: Record<string, ComponentDef>;
 };
 
@@ -237,6 +239,10 @@ type PropDef = {
 
 type SlotDef = { description: string; allowedChildren?: string[]; required?: boolean };
 ```
+
+- `name` identifies the catalog in diagnostics, in the advertisement (§8) and in `requires`. Two catalogs of one project never share a name (§10.4). A catalog published as a package uses the package name.
+- `prefix` makes the catalog a *library* that owns every kind named `<prefix>-…` (`acme` owns `acme-button`). It is one name segment, `[a-z][a-z0-9]*`, and is not `x` (opaque extensions, §8), `weft` (catalogs of this specification), a core kind or the first segment of one (`button`, `date`, `menu`, …). The core catalog has no prefix and never adds a kind whose first segment is a known library prefix. A catalog without `prefix` is a project's own catalog (§10.4).
+- `requires` lists the catalogs, `weft-core` included, and the versions the catalog was written against. A version is `MAJOR.MINOR.PATCH` (semver) and is read by Cargo's compatibility rule: `"1.2.0"` admits `>=1.2.0, <2.0.0`, and `"0.1.0"` admits `>=0.1.0, <0.2.0`; the left-most non-zero component must match. There is no range syntax.
 
 ### 5.1 Core catalog `weft-core` 0.1
 
@@ -341,7 +347,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 
 ### 6.2 Codes
 
-`mode` severity is a warning in lenient mode and an error in strict mode (§8). `W602`, `W702` and `W710` are warnings. Every other code is an error.
+`mode` severity is a warning in lenient mode and an error in strict mode (§8). `W602`, `W702`, `W710` and `W714` are warnings. Every other code is an error.
 
 | Code | Meaning |
 | --- | --- |
@@ -431,6 +437,10 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W708 | Action name in the project file breaks the action grammar. |
 | W709 | Data schema is malformed (§10.5). |
 | W710 | Data schema uses a keyword Weft does not support; that part accepts any data (§10.5). |
+| W711 | Two catalogs claim the same catalog name, prefix or kind; the later claim is ignored (§10.4). |
+| W712 | Catalog prefix is malformed or reserved, or a second catalog has no prefix; the catalog is ignored (§5, §10.4). |
+| W713 | Catalog defines or extends a kind it does not own: a library's kind outside its prefix, or a project catalog's new kind under a library's prefix (§10.4). |
+| W714 | Catalog requirement names a catalog that is not loaded, or is loaded at an incompatible version (§5, §10.4). |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
@@ -481,7 +491,7 @@ type Patch =
   - Minor: a prop stops being required; a slot stops being required; `requiresLabel` turns off; a component stops being the `root`; a prop loses `references`; `bindable` or `writable` turns on; a numeric range widens.
   - A numeric range narrows when its lower bound rises, its upper bound falls, or a bound appears; the opposite is widening. A prop field the classifier does not know is major when it changes.
   - A change to a `description` only is none.
-- A host advertises `{ weft, catalogs: [{ name, version }] }`; an agent writes only what the host advertises. A host that also checks design tokens, action names or a data schema (§10) adds `tokens`, `actions` and `data` to the advertisement, so a writer knows which of them are enforced: a category that is absent is not checked. The MCP server (`weft_capabilities`) does this; the catalog list names the core catalog first and then the project's extension when there is one.
+- A host advertises `{ weft, catalogs: [{ name, version, prefix? }] }`; an agent writes only what the host advertises. A host that also checks design tokens, action names or a data schema (§10) adds `tokens`, `actions` and `data` to the advertisement, so a writer knows which of them are enforced: a category that is absent is not checked. The catalog list names the core catalog first and then every catalog the project loaded (§10.4), in the order the project lists them, each library with its `prefix`. A kind under a library's prefix (`acme-button`) is an ordinary catalog kind, typed and checked; an `x-acme-button` element stays an opaque extension.
 
 ## 9. Mapping
 
@@ -638,7 +648,7 @@ Screens that belong together share their resources through a project file named 
 | Member | Type | Meaning |
 | --- | --- | --- |
 | `tokens` | array of file names, at most 64; or one file name | DTCG token files, in layer order (§10.3), or one DTCG resolver document that orders the sets and modifiers itself (§10.3). More than 64 is `W701`. Project content (§10.1) gives the resolver document itself. |
-| `catalog` | file name | An extension of the core catalog (§10.4). |
+| `catalog` | file name; or an array of at most 32 file names | Catalogs merged over the core catalog (§10.4). One file name is an array of one. More than 32 is `W701`. Project content (§10.1) gives a catalog, or an array of catalogs. |
 | `actions` | array of action names | The host's actions: `on-*` values are checked against them (`W308`). |
 | `data` | file name | A JSON Schema of the host data model (§10.5). |
 | `$schema` | string | Ignored; for editors, which can point it at `schemas/weft.schema.json` (§10.6). |
@@ -647,7 +657,7 @@ Screens that belong together share their resources through a project file named 
 - Every member is optional. Without `catalog` the project's catalog is the core catalog.
 - A file name is relative to the directory of the project file, uses `/` as separator and stays inside that directory: it is non-empty and has no empty or `..` segment, no leading `/`, no `\`, no `:` and no NUL. Any other name is `W703` and the file is not read.
 - Loading never stops at a problem. Each problem is a diagnostic and the rest of the project still applies: a project file that is not JSON or not an object is `W701` and the project is empty; a member of the wrong type is `W701` and is ignored, and so is an entry of `tokens` or `actions` of the wrong type; an unknown member is `W702`, a warning in both modes so that an older tool still reads a newer file; an action name that breaks the action grammar (§2.2) is `W708` and is left out; a file that cannot be read or is not JSON is `W704` and is left out.
-- Project diagnostics point into the project file with a JSON Pointer prefixed with `#`, e.g. `#/tokens/1`; for project content passed as a tool argument the pointer starts at that argument (`#/project/tokens/1`). A pointer continues into a named file as if its content stood in the project file: `#/catalog/components/rating`, `#/data/properties/user/type`. A problem of the merged token tree points at `#/tokens`. Diagnostics of a screen keep the paths of §6.1.
+- Project diagnostics point into the project file with a JSON Pointer prefixed with `#`, e.g. `#/tokens/1`; for project content passed as a tool argument the pointer starts at that argument (`#/project/tokens/1`). A pointer continues into a named file as if its content stood in the project file: `#/catalog/components/rating`, `#/catalog/1/components/acme-chip`, `#/data/properties/user/type`. A problem of the merged token tree points at `#/tokens`. Diagnostics of a screen keep the paths of §6.1.
 
 ### 10.3 Token layers and the resolver
 
@@ -667,13 +677,19 @@ Screens that belong together share their resources through a project file named 
 
 ### 10.4 Catalog extension
 
-The `catalog` file is a catalog (§5): `weft`, `name`, `version` and `components`. The project's catalog is the core catalog with the extension's components merged in, under the extension's `name` and `version`.
+Each `catalog` file is a catalog (§5): `weft`, `name`, `version` and `components`, and optionally `prefix` and `requires`. A catalog with a `prefix` is a *library*; the one catalog without a prefix is the *project catalog*. Screens never say which catalog a kind comes from: the kind's name is enough.
 
-- A kind the core catalog does not have is a new component and needs a whole definition (`description`, `role`, `content`, …). Its name follows the name grammar, is not `each` or `slot`, and does not start with `x-`, because `x-` elements are opaque to every catalog (§8).
-- A kind the core catalog has is extended. The entry may leave out `description`, `role` and `content` to keep the core's. `props` and `slots` merge by name, an entry replacing the core definition of that name (to add a variant, restate the prop with the longer `values` list). `states`, `events`, `allowedChildren` and `allowedParents` are joined: the core's values, then the new ones. Every other field replaces the core's.
-- An extension may only widen the core catalog. The merged catalog is compared with the core catalog by the rules of §8: a kind whose merged definition makes a change those rules call major (a changed role or type, a new required prop, a narrowed content model, …) is `W707`, and that kind keeps its core definition.
-- An extension that is not a catalog is `W706` and is ignored; an entry that is not a valid definition, or names a kind that breaks the rules above, is `W706` and only that entry is ignored.
+- **Claims.** In list order, a catalog whose `name` is the core's or an earlier catalog's, or whose `prefix` an earlier library declares, is `W711` and is ignored. A `prefix` that breaks the rules of §5 is `W712`, and so is a second catalog without a prefix; that catalog is ignored.
+- **Requirements.** A `requires` entry that names no loaded catalog, or one loaded at a version its rule does not admit, is `W714`, a warning; the catalog still loads.
+- **Merge.** The project's catalog starts from the core catalog. The libraries merge next, in list order, and the project catalog last, wherever it is listed, so the order changes listings and diagnostics but never the result. The merged catalog takes the project catalog's `weft`, `name` and `version`, or else the last library's.
+- **Libraries** define only new kinds named `<prefix>-…`; an entry for any other kind, including a core kind or another library's, is `W713` and is ignored. A kind already defined by another catalog is `W711` and is ignored.
+- **The project catalog** may define new kinds outside every loaded library's prefix (a new kind under one is `W713` and is ignored), and extend any kind already merged, core or library.
+- A new kind needs a whole definition (`description`, `role`, `content`, …). Its name follows the name grammar, is not `each` or `slot`, and does not start with `x-`, because `x-` elements are opaque to every catalog (§8).
+- An extended kind's entry may leave out `description`, `role` and `content` to keep the ones it extends. `props` and `slots` merge by name, an entry replacing the definition of that name (to add a variant, restate the prop with the longer `values` list). `states`, `events`, `allowedChildren` and `allowedParents` are joined: the existing values, then the new ones. Every other field replaces the existing one.
+- An extension may only widen. The merged definition is compared with the definition it extends (the core's, or the library's) by the rules of §8: a kind whose merged definition makes a change those rules call major (a changed role or type, a new required prop, a narrowed content model, …) is `W707`, and that kind keeps the definition it had.
+- A catalog that is not a catalog, including a `prefix` that is not a string or a `requires` that is not an object of versions, is `W706` and is ignored; an entry that is not a valid definition, or names a kind that breaks the rules above, is `W706` and only that entry is ignored.
 - `null` is not a value in a catalog: a member written `null` makes its entry invalid.
+- A loader records, for each kind of the merged catalog, the catalog that defined it and the catalogs that extended it, and the list of loaded catalogs with their `name`, `version`, `prefix` and source file.
 
 ### 10.5 Data schema
 
