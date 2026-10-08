@@ -18,8 +18,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T64 | todo | P2 | 2 | 0% | |
 | T65 | todo | P2 | 1 | 0% | |
 | T66 | todo | P2 | 2 | 0% | |
-| T67.4 | in progress | P2 | 3 | 95% | Cursor / grok 4.7 |
-| T67.5 | in progress | P2 | 4 | 95% | Cursor / grok 4.7 |
+| T67.4 | in progress | P2 | 3 | 100% | Cursor / grok 4.7 |
+| T67.5 | in progress | P2 | 4 | 100% | Cursor / grok 4.7 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 
@@ -197,7 +197,7 @@ Execution plan:
 3. Tests in `crates/weft-slint/tests/import.rs` (`required-features = ["import"]`): strip the source comment from one generated golden that uses `each` and `tabs` (or `list`) and check kinds and ids. Do not edit `read_expr.rs`.
 4. Verify: `cargo nextest run -p weft-slint --features import`.
 
-Progress: committed as `c1d9ea4` on `t67.4-slint-widgets`. The element match reads `for`, `ListView`, `StandardTableView`, `TabWidget`, `PopupWindow`, `MenuBar` / `Menu`, `Image` and `RadioGroup`. A source comment that names an id `alert` or `combobox` reads that `VerticalLayout` or `ComboBox` as that kind; without the comment they stay a `stack` and a `select`. Non-test Rust in `read.rs` is 394 lines added and 11 removed. `cargo fmt`, clippy with `--features import`, and 27 tests passed. Not on `main`. `dfdab5e` on `t67.6-slint-read` combines the widget match with the binding reader, but its snapshot predates `c1d9ea4`, so `alert` and `combobox` are not in that tree yet.
+Progress: the widget match, including `alert` and `combobox` from the source comment, is on `t67.6-slint-read` together with the binding reader. Without the comment, an `alert` stays a `stack` and a `combobox` stays a `select`. `cargo nextest run -p weft-slint --features import` — 30 tests passed. The change is uncommitted on that branch and not on `main`.
 
 ### T67.5. Slint reader recovers bindings and events
 
@@ -210,7 +210,7 @@ Execution plan:
 3. Tests in `tests/import.rs`: `login` with the source comment deleted comes back with `$.email` and `auth.submit` (or whatever the screen names), and a spacing that equals a token is that token. `required-features = ["import"]`.
 4. Verify: `cargo nextest run -p weft-slint --features import`.
 
-Progress: committed as `1a534ea` on `t67.5-slint-bindings`. `read_expr.rs` reads the generator's expressions back. Without the source comment, `login`, `signup` and `settings` keep their bindings and actions; `signup`'s `16px` stays unmatched because two dimension tokens share it. Non-test changes are 1019 lines added and 36 removed, over the 500-line cap. `cargo fmt`, clippy with `--features import`, and 25 tests passed. Not on `main`. `dfdab5e` on `t67.6-slint-read` has the binding reader and the `login` test (28 tests passed there; non-test diff 1412 added, 43 removed). Its snapshot predates `1a534ea`, so the `signup` and `settings` test is not in that tree yet.
+Progress: `read_expr.rs` on `t67.6-slint-read` reads the generator's expressions back. Without the source comment, `login`, `signup` and `settings` keep their bindings and actions; a `16px` spacing stays unmatched because two dimension tokens share it. `cargo nextest run -p weft-slint --features import` — 30 tests passed. The change is uncommitted on that branch and not on `main`. The non-test reader is still over the 500-line cap; the expression reader and the widget match are tested only together.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 
