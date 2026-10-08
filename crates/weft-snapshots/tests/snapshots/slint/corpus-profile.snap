@@ -1,0 +1,61 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-profile as slint
+---
+// weft:source slint
+// <screen id="profile" label="Profile" weft="0.1">
+//   <image id="avatar" label="Profile photo" src="{$.user.avatar}"/>
+//   <heading id="name" level="1" text="{$.user.name}"/>
+//   <text id="bio" text="{$.user.bio}"/>
+//   <heading id="links-title" level="2">Links</heading>
+//   <stack id="links" direction="row" gap="{token.space.md}">
+//     <link id="website" href="{$.user.website}">Website</link>
+//     <link id="github" href="{$.user.github}">GitHub</link>
+//   </stack>
+//   <button id="edit" on-press="profile.edit">Edit profile</button>
+// </screen>
+
+import { Button, Palette, VerticalBox } from "std-widgets.slint";
+
+export component ProfileScreen inherits Window {
+    title: "Profile";
+    in-out property <string> user-avatar;
+    in-out property <string> user-name;
+    in-out property <string> user-bio;
+    in-out property <string> user-website;
+    in-out property <string> user-github;
+    callback perform(string, string);
+
+    profile := VerticalBox {
+        alignment: LayoutAlignment.start;
+        avatar := Image {
+            accessible-label: "Profile photo";
+        }
+        name := Text {
+            text: root.user-name;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        bio := Text {
+            text: root.user-bio;
+        }
+        links-title := Text {
+            text: "Links";
+            font-size: 24px;
+            font-weight: 700;
+        }
+        links := HorizontalLayout {
+            spacing: 16px;
+            website := TouchArea {
+                Text { text: "Website"; color: Palette.accent-background; }
+            }
+            github := TouchArea {
+                Text { text: "GitHub"; color: Palette.accent-background; }
+            }
+        }
+        edit := Button {
+            text: "Edit profile";
+            clicked => { root.perform("profile.edit", "edit"); }
+        }
+    }
+}

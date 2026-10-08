@@ -11,7 +11,11 @@ let slint = weft_slint::generate(&document, &GenerateOptions { catalog: &catalog
 let document = weft_slint::import_slint(&slint, &ImportOptions { catalog: &catalog, tokens: &tokens })?;
 ```
 
-The crate is pure Rust over `weft-core` and `weft-catalog`. The Slint compiler (`slint-interpreter`) is a dev-dependency: the tests compile every generated file with it. Reading a file the generator did not print uses `i-slint-compiler`'s syntax tree, behind the `import` feature, with no renderer and no backend.
+The crate is pure Rust over `weft-core` and `weft-catalog`. The Slint compiler (`slint-interpreter`) is a dev-dependency: the tests compile every generated file with it. Reading a file the generator did not print uses `i-slint-compiler`'s syntax tree, behind the `import` feature, with no renderer and no backend. The screenshot tests add the testing backend's software renderer, which the library itself does not depend on.
+
+## Screenshots
+
+`tests/screenshots.rs` renders every corpus screen with its `data.json`, using the fluent style and the light color scheme, and compares the PNG with `tests/screenshots/baselines/<os>-<arch>/`. Fonts differ by operating system, so a platform without that folder skips the comparison. `WEFT_UPDATE_SCREENSHOTS=1` rewrites the baselines; look at the images before committing them. A failed comparison writes `tests/screenshots/diffs/` (not committed). The same comparison must fail when the generated spacing grows by one pixel or one word of the same length changes.
 
 ## The generated file
 

@@ -19,4 +19,5 @@ plugins/xcode/Artifacts/
 DerivedData/
 *.xcodeproj/
 packages/visual/diffs/
+crates/weft-slint/tests/screenshots/diffs/
 plugins/xcode/editor-extension/Generated/

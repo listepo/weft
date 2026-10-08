@@ -22,6 +22,10 @@ i-slint-compiler = { workspace = true, optional = true }
 weft-import = { workspace = true, optional = true }
 
 [dev-dependencies]
+i-slint-backend-testing = { workspace = true }
+i-slint-core = { workspace = true }
+png = { workspace = true }
+serde_json = { workspace = true }
 slint-interpreter = { workspace = true }
 
 [[test]]

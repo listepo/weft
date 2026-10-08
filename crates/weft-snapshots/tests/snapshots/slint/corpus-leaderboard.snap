@@ -1,0 +1,56 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-leaderboard as slint
+---
+// weft:source slint
+// <screen id="leaderboard" label="Leaderboard" weft="0.1">
+//   <heading id="title" level="1">Leaderboard</heading>
+//   <stack id="leader" direction="row" gap="{token.space.xs}">
+//     <text id="leader-label">In the lead:</text>
+//     <text id="leader-name" text="{$.players.0.name}"/>
+//   </stack>
+//   <list id="players" ordered="true">
+//     <each id="player-each" as="player" in="{$.players}">
+//       <item id="player">
+//         <text id="player-name" text="{$player.name}"/>
+//         <text id="player-score" text="{$player.score}" tone="muted"/>
+//       </item>
+//     </each>
+//   </list>
+// </screen>
+
+import { ListView, VerticalBox } from "std-widgets.slint";
+
+export component LeaderboardScreen inherits Window {
+    title: "Leaderboard";
+    in-out property <[{ name: string, score: string }]> players;
+    callback perform(string, string);
+
+    leaderboard := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Leaderboard";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        leader := HorizontalLayout {
+            spacing: 4px;
+            leader-label := Text {
+                text: "In the lead:";
+            }
+            leader-name := Text {
+                text: root.players[0].name;
+            }
+        }
+        players := ListView {
+            for player in root.players: VerticalLayout {
+                player-name := Text {
+                    text: player.name;
+                }
+                player-score := Text {
+                    text: player.score;
+                }
+            }
+        }
+    }
+}

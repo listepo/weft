@@ -1,0 +1,109 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-tilt as slint
+---
+// weft:source slint
+// <screen id="tilt" label="Card flips" weft="0.1">
+//   <heading id="title" level="1">Card flips</heading>
+//   <stack id="deck" gap="{token.space.lg}">
+//     <section id="front" label="Front side" perspective="800" rotate-y="25">
+//       <text id="front-text" text="{$.front}"/>
+//       <button id="front-flip" variant="primary" on-press="card.flip">Flip</button>
+//       <slot name="header">
+//         <heading id="front-title" level="2">Front</heading>
+//       </slot>
+//     </section>
+//     <section id="back" label="Back side" perspective="800" rotate-y="180">
+//       <text id="back-text" text="{$.back}"/>
+//       <button id="back-flip" on-press="card.flip">Flip</button>
+//       <slot name="header">
+//         <heading id="back-title" level="2">Back</heading>
+//       </slot>
+//     </section>
+//     <section id="lean" label="Leaning card" perspective="600" rotate-x="20" rotate-z="-6">
+//       <text id="lean-text">Tilted back and turned a little in the plane.</text>
+//       <field id="lean-note" label="Note" placeholder="Add a note" value="{$.note}" on-change="note.edit"/>
+//       <slot name="header">
+//         <heading id="lean-title" level="2">Leaning</heading>
+//       </slot>
+//     </section>
+//   </stack>
+// </screen>
+
+import { Button, GroupBox, LineEdit, VerticalBox } from "std-widgets.slint";
+
+export component TiltScreen inherits Window {
+    title: "Card flips";
+    in-out property <string> front;
+    in-out property <string> back;
+    in-out property <string> note;
+    callback perform(string, string);
+
+    tilt := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Card flips";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        deck := VerticalLayout {
+            spacing: 24px;
+            front := GroupBox {
+                title: "Front side";
+                VerticalBox {
+                    front-title := Text {
+                        text: "Front";
+                        font-size: 24px;
+                        font-weight: 700;
+                    }
+                    front-text := Text {
+                        text: root.front;
+                    }
+                    front-flip := Button {
+                        text: "Flip";
+                        primary: true;
+                        clicked => { root.perform("card.flip", "front-flip"); }
+                    }
+                }
+            }
+            back := GroupBox {
+                title: "Back side";
+                VerticalBox {
+                    back-title := Text {
+                        text: "Back";
+                        font-size: 24px;
+                        font-weight: 700;
+                    }
+                    back-text := Text {
+                        text: root.back;
+                    }
+                    back-flip := Button {
+                        text: "Flip";
+                        clicked => { root.perform("card.flip", "back-flip"); }
+                    }
+                }
+            }
+            lean := GroupBox {
+                title: "Leaning card";
+                VerticalBox {
+                    lean-title := Text {
+                        text: "Leaning";
+                        font-size: 24px;
+                        font-weight: 700;
+                    }
+                    lean-text := Text {
+                        text: "Tilted back and turned a little in the plane.";
+                    }
+                    VerticalLayout {
+                        Text { text: "Note"; }
+                        lean-note := LineEdit {
+                            placeholder-text: "Add a note";
+                            text <=> root.note;
+                            edited => { root.perform("note.edit", "lean-note"); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

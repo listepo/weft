@@ -1,0 +1,132 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-booking as slint
+---
+// weft:source slint
+// <screen id="booking" label="Book a trip" weft="0.1">
+//   <heading id="title" level="1">Book a trip</heading>
+//   <form id="trip" label="Trip" on-submit="trip.book">
+//     <combobox id="city" label="Destination" placeholder="Search a city" value="{$.trip.city}" on-change="trip.edit">
+//       <each id="city-each" as="city" in="{$.cities}">
+//         <option id="city-option" text="{$city.name}" value="{$city.name}"/>
+//       </each>
+//     </combobox>
+//     <date-picker id="depart" label="Departure" max="2026-12-31" min="2026-01-01" value="{$.trip.depart}" on-change="trip.edit"/>
+//     <date-picker id="checkin" label="Check-in time" type="time" value="{$.trip.checkin}"/>
+//     <date-picker id="reminder" label="Reminder" type="datetime" value="{$.trip.reminder}"/>
+//     <stepper id="guests" label="Guests" max="8" min="1" value="{$.trip.guests}" on-change="trip.edit"/>
+//     <slider id="budget" label="Budget per night" max="500" min="50" step="10" value="{$.trip.budget}" on-change="trip.edit"/>
+//     <segmented-control id="cabin" label="Cabin" value="{$.trip.cabin}" on-change="trip.edit">
+//       <segment id="cabin-economy" value="economy">Economy</segment>
+//       <segment id="cabin-business" value="business">Business</segment>
+//       <segment id="cabin-first" value="first">First</segment>
+//     </segmented-control>
+//     <color-picker id="tag" label="Trip colour" value="{$.trip.colour}" on-change="trip.edit"/>
+//     <slot name="footer">
+//       <button id="book" submit="true" variant="primary">Book</button>
+//     </slot>
+//   </form>
+// </screen>
+
+import { Button, ComboBox, HorizontalBox, LineEdit, RadioGroup, Slider, SpinBox, VerticalBox } from "std-widgets.slint";
+
+export component BookingScreen inherits Window {
+    title: "Book a trip";
+    in-out property <string> trip-city;
+    in-out property <string> trip-depart;
+    in-out property <string> trip-checkin;
+    in-out property <string> trip-reminder;
+    in-out property <int> trip-guests;
+    in-out property <float> trip-budget;
+    in-out property <string> trip-cabin;
+    in-out property <string> trip-colour;
+    in-out property <[string]> cities;
+    callback perform(string, string);
+
+    booking := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Book a trip";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        trip := VerticalBox {
+            VerticalLayout {
+                Text { text: "Destination"; }
+                city := ComboBox {
+                    model: root.cities;
+                    current-value <=> root.trip-city;
+                    selected => { root.perform("trip.edit", "city"); }
+                }
+            }
+            VerticalLayout {
+                Text { text: "Departure"; }
+                depart := LineEdit {
+                    text <=> root.trip-depart;
+                    edited => { root.perform("trip.edit", "depart"); }
+                }
+            }
+            VerticalLayout {
+                Text { text: "Check-in time"; }
+                checkin := LineEdit {
+                    text <=> root.trip-checkin;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Reminder"; }
+                reminder := LineEdit {
+                    text <=> root.trip-reminder;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Guests"; }
+                guests := SpinBox {
+                    minimum: 1;
+                    maximum: 8;
+                    value <=> root.trip-guests;
+                    edited => { root.perform("trip.edit", "guests"); }
+                }
+            }
+            VerticalLayout {
+                Text { text: "Budget per night"; }
+                budget := Slider {
+                    minimum: 50;
+                    maximum: 500;
+                    value <=> root.trip-budget;
+                    changed => { root.perform("trip.edit", "budget"); }
+                }
+            }
+            cabin := RadioGroup {
+                title: "Cabin";
+                orientation: Orientation.horizontal;
+                cabin-economy := RadioButton {
+                    text: "Economy";
+                    checked: root.trip-cabin == "economy";
+                }
+                cabin-business := RadioButton {
+                    text: "Business";
+                    checked: root.trip-cabin == "business";
+                }
+                cabin-first := RadioButton {
+                    text: "First";
+                    checked: root.trip-cabin == "first";
+                }
+                selected(picked) => { root.trip-cabin = picked == "Economy" ? "economy" : picked == "Business" ? "business" : "first"; root.perform("trip.edit", "cabin"); }
+            }
+            VerticalLayout {
+                Text { text: "Trip colour"; }
+                tag := LineEdit {
+                    text <=> root.trip-colour;
+                    edited => { root.perform("trip.edit", "tag"); }
+                }
+            }
+            HorizontalBox {
+                book := Button {
+                    text: "Book";
+                    primary: true;
+                    clicked => { root.perform("trip.book", "trip"); }
+                }
+            }
+        }
+    }
+}

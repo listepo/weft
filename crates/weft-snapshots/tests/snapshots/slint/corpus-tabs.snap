@@ -1,0 +1,87 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-tabs as slint
+---
+// weft:source slint
+// <screen id="account" label="Account" weft="0.1">
+//   <heading id="title" level="1">Account</heading>
+//   <tabs id="tabs" label="Account sections">
+//     <tab id="tab-overview" label="Overview">
+//       <text id="account-name" text="{$.account.name}"/>
+//       <text id="account-email" text="{$.account.email}"/>
+//     </tab>
+//     <tab id="tab-billing" label="Billing">
+//       <text id="plan" text="{$.billing.plan}"/>
+//       <button id="change-plan" variant="primary" on-press="billing.change">Change plan</button>
+//     </tab>
+//     <tab id="tab-team" label="Team">
+//       <list id="members">
+//         <each id="members-each" as="member" in="{$.team}">
+//           <item id="member">
+//             <text id="member-name" text="{$member.name}"/>
+//           </item>
+//         </each>
+//       </list>
+//     </tab>
+//   </tabs>
+// </screen>
+
+import { Button, ListView, TabWidget, VerticalBox } from "std-widgets.slint";
+
+export component AccountScreen inherits Window {
+    title: "Account";
+    in-out property <string> account-name;
+    in-out property <string> account-email;
+    in-out property <string> billing-plan;
+    in-out property <[{ name: string }]> team;
+    callback perform(string, string);
+
+    account := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Account";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        tabs := TabWidget {
+            accessible-role: AccessibleRole.tab-list;
+            accessible-label: "Account sections";
+            tab-overview := Tab {
+                title: "Overview";
+                VerticalLayout {
+                    account-name := Text {
+                        text: root.account-name;
+                    }
+                    account-email := Text {
+                        text: root.account-email;
+                    }
+                }
+            }
+            tab-billing := Tab {
+                title: "Billing";
+                VerticalLayout {
+                    plan := Text {
+                        text: root.billing-plan;
+                    }
+                    change-plan := Button {
+                        text: "Change plan";
+                        primary: true;
+                        clicked => { root.perform("billing.change", "change-plan"); }
+                    }
+                }
+            }
+            tab-team := Tab {
+                title: "Team";
+                VerticalLayout {
+                    members := ListView {
+                        for member in root.team: VerticalLayout {
+                            member-name := Text {
+                                text: member.name;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,5 +1,9 @@
 # Done
 
+### T74. Slint snapshots and screenshots
+
+HTML, JSX and SwiftUI were already pinned in `weft-snapshots` and drawn in `@weft/visual`. Slint had golden `.slint` files and a compile check, and no reviewed insta snapshot and no rendered screenshot. `weft-snapshots` now pins every corpus screen and catalog example as Slint (a refusal is pinned as text). `crates/weft-slint/tests/screenshots.rs` renders every corpus screen with its `data.json` on the software renderer (fluent, light scheme) and compares the PNG with `tests/screenshots/baselines/<os>-<arch>/`. A one-pixel spacing change and a same-length word change both differ from the pristine render. A platform without a baselines folder skips the PNG comparison and still runs the mutation checks.
+
 ### T1. Semantic model and specification v0
 
 The contract everything else builds on: node kinds, roles, states, slots, bindings, actions, token references, catalog shape, diagnostics, patches and versioning rules. Delivered as `SPEC.md` and the Zod model in `packages/core/src/model.ts`.
