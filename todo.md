@@ -11,4 +11,7 @@
 - T12.3. Constrained generation: benchmark
 - T16. Layout vocabulary
 - T17. Extension catalogs
+- T17.1. Extension catalogs: spec and loader
+- T17.2. Extension catalogs: tools and docs
+- T17.3. Extension catalogs: distribution and registry
 - T41. Hosted Penpot plugin
