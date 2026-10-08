@@ -1,6 +1,6 @@
 # Design: extension catalogs
 
-Status: **proposal, not approved.** Nothing here is implemented. This document is for the creator to approve, change or reject before `SPEC.md`, `AGENT-SPEC.md`, the loader and the tools change. It is T17.0, the design stage of T17. The prior art it relies on, with sources, is `research.md` §22.
+Status: **approved.** The creator approved this design and accepted the recommended answer to every open question; they are recorded under **Decisions**. Nothing here is implemented yet: T17.1–T17.3 build it. This document was T17.0, the design stage of T17. The prior art it relies on, with sources, is `research.md` §22.
 
 ## Problem
 
@@ -25,7 +25,7 @@ The design must keep the format's rules:
 - `x-<vendor>-` names stay opaque to every catalog (SPEC §8);
 - models' first-try validity, which the benchmark measures, must not suffer.
 
-## Proposal
+## Design
 
 In short:
 
@@ -174,7 +174,7 @@ Cost of each, by part of the system:
 | Models | Nothing new to learn; one more catalog kind | A new form that the benchmark has never measured; models that know XML tend to add `xmlns` declarations | Nothing new |
 | Collision safety | Prevented when catalogs load: a prefix has one owner | Prevented by syntax | Found late: two independent libraries both shipping `card` or `rating` cannot be loaded together at all |
 
-**Recommendation: A.** It changes nothing in documents, parsers or generators, matches the web's own convention, and the prefix makes ownership checkable. C is kept as the backstop (`W711`) for the cases a prefix cannot prevent. B pays for a scope the hyphen already gives, and it breaks namespace-aware XML tools or the rule that screens are silent about their catalogs.
+**Decision: A.** It changes nothing in documents, parsers or generators, matches the web's own convention, and the prefix makes ownership checkable. C is kept as the backstop (`W711`) for the cases a prefix cannot prevent. B pays for a scope the hyphen already gives, and it breaks namespace-aware XML tools or the rule that screens are silent about their catalogs.
 
 What A does not give: a kind's name does not say, syntactically, which part is the prefix. `date-picker` is a core kind, not the kind `picker` of a catalog `date`. The rule below (a prefix may not be the first segment of a core kind) removes that ambiguity for the core. And A cannot rename a library's kinds when two libraries chose the same prefix; see **Prefix ownership**.
 
@@ -182,10 +182,10 @@ What A does not give: a kind's name does not say, syntactically, which part is t
 
 **Who declares the prefix.**
 
-- *Author-declared* (recommended): the catalog file says `"prefix": "acme"`; the loader checks that every new kind it defines starts with `acme-`. The prefix travels with the catalog, so every project that loads `acme-ui` writes the same kind names, and screens, generated code, Figma components and the custom element tags agree.
+- *Author-declared* (decided): the catalog file says `"prefix": "acme"`; the loader checks that every new kind it defines starts with `acme-`. The prefix travels with the catalog, so every project that loads `acme-ui` writes the same kind names, and screens, generated code, Figma components and the custom element tags agree.
 - *Project alias*: the project file renames a catalog's prefix at load time (`{ "package": "@acme/ui", "prefix": "a" }`), as ESLint's flat config and shadcn's `components.json` let the consumer pick the namespace, and Slint's `import { Button as CoolButton }`. It fixes a clash between two libraries that chose the same prefix. The cost is that the same library has different kind names in different projects: generated SwiftUI expects `AView` in one app and `AcmeButtonView` in another, a CEM-imported kind no longer equals its custom element tag, and screens cannot move between projects. Every generator and importer would need the renaming table.
 
-**Recommendation:** author-declared only, in T17.1. A clash between two libraries' prefixes is `W711`, and the project keeps one of them. If real clashes appear, an alias can be added later as a project-file option without changing catalogs (ESLint did the reverse: user-chosen namespaces first, then `meta.namespace` so a plugin can declare one).
+**Decision:** author-declared only, in T17.1. A clash between two libraries' prefixes is `W711`, and the project keeps one of them. If real clashes appear, an alias can be added later as a project-file option without changing catalogs (ESLint did the reverse: user-chosen namespaces first, then `meta.namespace` so a plugin can declare one).
 
 **Prefix grammar.** One name segment, `[a-z][a-z0-9]*`. It is not:
 
@@ -297,9 +297,9 @@ A screen that uses a kind of a catalog that was ignored gets the usual `W401`, s
 - The catalog's `name` should equal the package name and its `version` the package version; the publishing guide says so, and the loader does not check it. The `weft_capabilities` entry carries the package and its version as `source`.
 - The top-level `weft` object leaves room for other shared resources later (fragments, tokens) without another field.
 
-Walking up to a parent `node_modules` is a deliberate, narrow exception to the rule that file names stay inside the project directory: package managers put dependencies at the workspace root, often above the folder that holds `weft.json` (`examples/project` is such a folder). The exception reads two files at fixed paths under a validated package name, and only the CLI and Node tools do it. The alternative, the project directory only, is in the decisions.
+Walking up to a parent `node_modules` is a deliberate, narrow exception to the rule that file names stay inside the project directory: package managers put dependencies at the workspace root, often above the folder that holds `weft.json` (`examples/project` is such a folder). The exception reads two files at fixed paths under a validated package name, and only the CLI and Node tools do it. The alternative, the project directory only, was rejected (decision 8).
 
-**URL with an integrity hash** is not proposed for T17. If it is wanted later, it is an explicit command, `weft catalog add <url>`, that downloads once, checks a Subresource Integrity hash (`sha384-…`), writes the file under `catalogs/` and adds a file entry with `source` and `integrity` beside it. Validation then reads only the committed file, and can check the hash offline. Nothing in the format stops this being added.
+**URL with an integrity hash** is not part of T17. If it is wanted later, it is an explicit command, `weft catalog add <url>`, that downloads once, checks a Subresource Integrity hash (`sha384-…`), writes the file under `catalogs/` and adds a file entry with `source` and `integrity` beside it. Validation then reads only the committed file, and can check the hash offline. Nothing in the format stops this being added.
 
 Validation and rendering never fetch anything, in every option.
 
@@ -308,7 +308,7 @@ Validation and rendering never fetch anything, in every option.
 Options:
 
 - **None:** a naming convention and an npm keyword only.
-- **Curated list in this repository** (recommended): a page `docs/catalogs.md` lists known catalogs with their `name`, `prefix`, package, source repository and maintainer. The creator keeps it; additions come by pull request, as shadcn keeps its directory in `apps/v4/registry/directory.json` and SchemaStore its `catalog.json`. The list doubles as the register of taken prefixes, which the core respects. Discovery outside the list uses the npm keyword `weft-catalog` (`npm search keywords:weft-catalog`), as ESLint plugins use `eslintplugin`.
+- **Curated list in this repository** (decided): a page `docs/catalogs.md` lists known catalogs with their `name`, `prefix`, package, source repository and maintainer. The creator keeps it; additions come by pull request, as shadcn keeps its directory in `apps/v4/registry/directory.json` and SchemaStore its `catalog.json`. The list doubles as the register of taken prefixes, which the core respects. Discovery outside the list uses the npm keyword `weft-catalog` (`npm search keywords:weft-catalog`), as ESLint plugins use `eslintplugin`.
 - **Curated machine-readable index** (`catalogs/index.json`): the same list as data, which a later `weft catalog search` could read offline. Worth it once the list has more than a handful of entries or a tool needs it.
 - **Hosted service:** out of T17's scope, and nothing yet needs it.
 
@@ -341,7 +341,7 @@ Nothing enforces the list: two projects can still use the same prefix for differ
 - **Catalogs from `import-cem`** keep working alone. To combine one with a project catalog, re-import it with `--prefix`; otherwise the second unprefixed catalog is `W712`, whose hint says so.
 - **`weft_capabilities`** keeps its shape; entries gain optional fields.
 
-## Implementation outline (after approval)
+## Implementation outline
 
 - **T17.1, spec and loader:** SPEC §5 (`prefix`, `requires`), §8 (the advertisement lists every catalog), §10.2 (`catalog` array), §10.4 (roles, merge steps, ownership), §6.2 (`W711`–`W714`); `crates/weft-catalog/src/project.rs` and the diagnostics registry; differential fixtures for the catalog loader; `examples/project` with `catalogs/acme-ui.catalog.json` and the widened `acme-button`, a screen using all three catalogs, and broken variants for each code; the T12 schema tests over it.
 - **T17.2, tools and docs:** repeated `--catalog`; MCP `project.catalog` array, `weft_capabilities`, `weft_catalog`; `import-cem --prefix` with `import.cem.prefix`, `settings.rs` and the regenerated `schemas/weft.schema.json`; `AGENT-SPEC.md` §1 and §2.8 and the primer; `docs/projects.md`, `docs/catalog-and-tokens.md`.
@@ -361,17 +361,19 @@ Nothing enforces the list: two projects can still use the same prefix for differ
 | Package lookup in the project directory only | Keeps §10.2 without exception, but fails for workspaces where `node_modules` sits at the repository root above `weft.json`, which is the usual layout and this repository's own. |
 | Fetching a catalog URL at validation time | Breaks the rule that validators never touch the network, and makes a screen's validity depend on a server. |
 
-## Open questions for the creator
+## Decisions
 
-1. **Namespace syntax: hyphen prefix (recommended), colon, or collision rule only?** Recommendation: hyphen prefix. Nothing in documents, parsers or generators changes, it matches custom element tags, and ownership is checkable. Alternatives: colon (`acme:button`, a 0.2 format change with every name mapping), or no namespaces with `W711` as the only protection.
-2. **Who owns the prefix: the catalog author (recommended) or the project, by alias?** Recommendation: author-declared `prefix`, checked by the loader; no aliases in T17. Alternative: a project alias per catalog entry, fixing prefix clashes at the cost of per-project kind names; or both, with the alias added later.
-3. **Who may extend which kinds?** Recommendation: libraries (catalogs with a prefix) define only their own kinds and extend nothing; only the project catalog extends core and library kinds, widen-only. Alternatives: libraries may also widen core kinds, with a union of enum values and joined lists and `W711` for any other difference; or every catalog extends anything in array order.
-4. **At most one catalog without a prefix?** Recommendation: yes, the project catalog. Alternative: any number of unprefixed catalogs, with `W711` on a clash.
-5. **The catalog declaration: `prefix` plus `requires` with Cargo-style versions, unmet requirements as a warning (`W714`)?** Recommendation: yes. Alternatives: no `requires` at all; npm-style ranges (`^1.2.0 || ^2.0.0`); an unmet requirement as an error.
-6. **`weft.json`: `catalog` as a string or an ordered array of file names and `{ "package" }` entries, at most 32, libraries merged before the project catalog wherever it stands?** Recommendation: yes. Alternative: apply strictly in array order, so a project catalog listed first could not extend library kinds.
-7. **Distribution: committed files now, packages with a `weft.catalog` field in `package.json` in T17.3?** Recommendation: yes. Alternatives: committed files only; an explicit `weft catalog add <url>` with an integrity hash (described above, not proposed for T17).
-8. **Package lookup: walk up parent `node_modules` like Node (recommended), or the project directory only?** Recommendation: walk up, reading only `package.json` and the named catalog file, as a documented exception to §10.2. Alternative: project directory only, or an explicit list of package directories in `weft.json`.
-9. **Registry: a curated list `docs/catalogs.md` that also records taken prefixes, plus the npm keyword `weft-catalog`, kept by the creator?** Recommendation: yes. Alternatives: no list at all; a machine-readable `catalogs/index.json` now; a hosted service (out of scope).
-10. **Design tools: one library build grouped by catalog now, one published design library per catalog later in T14/T40?** Recommendation: yes. Alternative: per-catalog libraries as part of T17.
-11. **Screens stay silent about their catalogs (SPEC §10)?** Recommendation: confirm. Alternative: a `catalogs` attribute on `<screen>`.
-12. **Tool defaults: a repeated `--catalog` replaces the project's list (a file named `weft-core` replaces the base), and `import-cem` has no default prefix but hints at one?** Recommendation: yes. Alternatives: `--catalog` appends to the project's list; `import-cem` infers the prefix when all tags share a first segment.
+The creator approved the design with the recommended answer to each of the twelve open questions. T17.1–T17.3 build these; an alternative is kept only where a later task may need it.
+
+1. **Namespace syntax: hyphen prefix.** A library owns the kinds named `<prefix>-…`. No grammar, parser, format version or generator change. Colon namespaces and a collision rule alone are rejected; `W711` remains as the backstop.
+2. **Prefix owner: the catalog author.** `prefix` is declared in the catalog and checked by the loader. No project aliases in T17. If prefixes clash in practice, an alias per catalog entry in `weft.json` can be added later without changing catalogs.
+3. **Who extends what.** Libraries (catalogs with a prefix) define only their own kinds and extend nothing (`W713`). Only the project catalog extends core and library kinds, widen-only (`W707` against the definition it extends).
+4. **At most one catalog without a prefix:** the project catalog. A second one is `W712`.
+5. **Catalog declaration:** optional `prefix` and `requires`; `requires` values follow Cargo's compatibility rule (`"0.1.0"` means `>=0.1.0, <0.2.0`); an unmet requirement is `W714`, a warning, and the catalog still loads.
+6. **`weft.json` `catalog`:** a file name or an ordered array of at most 32 entries, each a file name or `{ "package": "<npm name>" }`. Libraries merge in array order, then the project catalog, wherever it is listed; the order affects listings and diagnostics only.
+7. **Distribution:** committed files from T17.1; packages with a `weft.catalog` field in `package.json` in T17.3. A `weft catalog add <url>` command with an integrity hash is not part of T17 and stays possible later (see **Publication and discovery**).
+8. **Package lookup:** walk up parent `node_modules` directories as Node does, reading only the package's `package.json` and the catalog file it names; a documented exception to §10.2. Only the CLI and Node tools do it; the MCP server reads no files.
+9. **Registry:** no service. A curated `docs/catalogs.md` (name, prefix, package, source, maintainer), kept by the creator through pull requests, also records taken prefixes; discovery outside it uses the npm keyword `weft-catalog`. A machine-readable `catalogs/index.json` can follow when a tool needs it.
+10. **Design tools:** one library build grouped by catalog (a section per catalog in Figma, a path `<catalog> / <kind>` in Penpot) and `weft.library` listing every catalog. One published design library per catalog is later work for T14/T40.
+11. **Screens stay silent about their catalogs** (SPEC §10). No `catalogs` attribute on `<screen>`.
+12. **Tool defaults:** a repeated `--catalog` replaces the project's whole list, and a file named `weft-core` replaces the base; `import-cem` has no default prefix and, when every kept tag shares one first segment, prints a hint suggesting `--prefix`.

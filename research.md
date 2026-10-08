@@ -113,7 +113,7 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | Streaming and incremental generation | Open. Flat id lists in A2UI and json-render exist for progressive rendering; nested markup has to show it can do the same | `roadmap.md` |
 | Host capabilities | Answered for MCP hosts: `weft_capabilities` reports the format version, catalogs, token paths and action names the host checks (T10); other hosts are not covered | SPEC §8, `packages/mcp` |
 | Layout without becoming CSS | Open: only `stack` and `grid` | `roadmap.md` |
-| Who keeps a registry of extension catalogs | Open | `roadmap.md` |
+| Who keeps a registry of extension catalogs | Decided (T17.0), built in T17.1–T17.3: no service; a curated list in the docs kept by the creator, an npm keyword, author-declared kind prefixes | `docs/extension-catalogs-design.md`, §22 |
 | Figma as a source | Open | `roadmap.md` |
 
 ## 10. Project files (T31)
@@ -303,7 +303,7 @@ Checked on 2026-10-08. What each provider's structured-output mode accepts (recu
 
 ## 22. Extension catalogs (T17)
 
-Prior art for loading several catalogs at once: how component vocabularies are namespaced, shipped and found. Checked on 2026-10-08 unless a row says otherwise. The proposal built on it is `docs/extension-catalogs-design.md` (T17.0).
+Prior art for loading several catalogs at once: how component vocabularies are namespaced, shipped and found. Checked on 2026-10-08 unless a row says otherwise. The design built on it, approved by the creator, is `docs/extension-catalogs-design.md` (T17.0).
 
 ### Namespacing
 
