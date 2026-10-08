@@ -7,6 +7,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 65% | Claude Code / claude-opus-5-5 |
+| T14.3 | in progress | P2 | 2 | 0% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
@@ -103,6 +104,19 @@ Execution plan, stage 2 (this round; style overrides stay out until the creator 
 
 1. T14.1: the pull over the REST API — done (`done.md`).
 2. MCP / Claude Code tools through the Figma MCP server. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. The creator chose to move the Weft source to shared plugin data, which any plugin and the REST API (`plugin_data=shared`) can read: T14.2, done (`done.md`).
+3. T14.3: the creator dropped files that keep the Weft source in private plugin data (card below).
+
+### T14.3. Shared plugin data only
+
+The creator decided that files keeping the Weft source in private plugin data (built before T14.2) are not supported. Remove everything that exists only for them. Done when `@weft/figma` reads and writes shared plugin data only, the pull asks `plugin_data=shared` only, the plugin id setting and flag are gone, and the docs say only shared plugin data is supported.
+
+Execution plan:
+
+1. `packages/figma/src/data.ts`: `dataOf` reads and writes shared data under `weft` only (no fallback, no move, no clearing). `FPluginData` (`api.ts`) keeps only the shared methods, so `tsc` refuses any private plugin data call.
+2. Pull: `plugin_data=shared`, `rest.ts` reads only `sharedPluginData.weft`; drop `pluginId` from `PullOptions` and `RestOptions`, and `PLUGIN_ID` with its manifest test (it existed only for the pull's default id).
+3. Remove `--plugin-id` from the figma-pull script and `import.figma.pluginId` from `settings.rs`, its test, the TypeScript settings type, SPEC §10.6 and `docs/projects.md`; regenerate `schemas/weft.schema.json` and the catalog differential fixture.
+4. Tests: drop the fake's private data and `privateDataFor`, the older-file tests in `shared-data.test.ts`, `pull.test.ts` and the script test; keep that a build writes only shared data and that frames read back byte-identical.
+5. Docs: `packages/figma/README.md` and both figma-pull skills say only shared plugin data is supported; rebuild the plugin bundles.
 
 ### T31. Project file and shared resources
 
