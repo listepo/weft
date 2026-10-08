@@ -592,14 +592,25 @@ Losses of the A2UI conversions (A2UI v0.9, `specification/v0_9` of `a2ui-project
 | `structure` | A `dialog` is a `Modal` with a generated trigger; a `tabs` with no tab, which A2UI refuses. | Other surfaces than the first, a component that is used but not defined, a `Button` whose child is not a `Text`. |
 
 - **To json-render:** a document compiles to one json-render spec (`vercel-labs/json-render` at commit `fc2a696`, 2026-10-01, `@json-render/core` 0.21.0): `{ "root", "elements" }`, plus `"state"` when the caller gives sample data (a JSON object), written as it is. The catalog the spec is checked against is the Weft catalog itself, so the mapping is one element per element: the key and the `type` are the Weft id and kind, and `props` holds the Weft props in canonical JSON (§3; a token reference stays `{ "token": … }`), except that a binding is a json-render expression: `{ "$state": "/user/email" }` for a path from `$.`, `{ "$item": "title" }` for a field of the innermost loop variable (`""` for the whole item), `$bindState` and `$bindItem` instead on a prop the catalog marks `writable`, and a negated binding `{ "$cond": { …, "not": true }, "$then": true, "$else": false }`. `hidden` is the element's `visible`: `true` is `false`, a binding is a condition on the same path with `not` inverted. The text content of a `text` or `mixed` component that holds text only is its `text` prop; in a `mixed` component that also holds elements, each text run is a generated `text` element. Named slots are `slots`, the default slot `children`. An event is `on: { <event>: { "action": <action>, "params": { "id": <element id> } } }`, inside a repetition with `"item": { "$item": "" }` as well, which json-render resolves to the item's absolute path: what a Weft host receives with an action (§2.2). An `<each>` is an element of type `each` (a component of the exported catalog that renders its children and adds no element of its own) with props `{ "as": … }`, `repeat: { "statePath": … }` (the pointer of `in`, `{ "$item": … }` inside another repetition) and its content as `children`.
-- **From json-render:** not yet defined (T13.2).
+- **From json-render:** a spec is parsed, never run. The elements are read from `root`, each at most once; a `type` that names a kind of the catalog is that kind, with its props, `visible`, `on`, `children` and `slots` read back by the inverse of the mapping above. An element of type `each` with `repeat` is an `<each>` with its id and `visible`; an element with `repeat` whose type is not `each` (json-render's own way of repeating a container's children) holds an `<each>` around its children. The loop variable of a repetition is its `as` prop, else the first of `item`, `item2`, … that no outer repetition uses. A literal `label` is the accessible name and a literal `text` the content, through the builder every importer shares, so ids, required props and content rules hold as for the other importers. The input is bounded as the other importers are (at most 2,000,000 bytes, 200 levels and 20,000 elements; `W602`); input that is not JSON, or has no `root` naming an element, is `W601`. The result is `{ document, losses, diagnostics }`, and a document exported with no losses imports back to the same document, except that a literal `text` prop comes back as content, which json-render cannot tell apart from it.
 
-Losses of the json-render export (`vercel-labs/json-render` at commit `fc2a696`, 2026-10-01; `@json-render/core` 0.21.0). Ids, kinds, props, token references, slots, events, `hidden` and repetitions all keep their meaning; only these change:
+Losses of the json-render conversions (`vercel-labs/json-render` at commit `fc2a696`, 2026-10-01; `@json-render/core` 0.21.0). Ids, kinds, props, token references, slots, events, `hidden` and repetitions keep their meaning on export; only these change:
 
-| Loss kind | To json-render |
-| --- | --- |
-| `bindings` | A binding that reads an outer repetition, or a whole outer item: json-render reads only the innermost item. The prop is left out (for `hidden`, the element is always shown). |
-| `text` | A text run beside elements in a `mixed` component (or in an extension element) becomes a generated `text` element with a free id. |
+| Loss kind | To json-render | From json-render |
+| --- | --- | --- |
+| `ids` | None: a generated text element takes a free id. | An element key that is not a Weft id; a generated id stands in. |
+| `bindings` | A binding that reads an outer repetition, or a whole outer item: json-render reads only the innermost item. The prop is left out (for `hidden`, the element is always shown). | A pointer that is not a Weft data path; a binding on a prop the kind cannot bind. |
+| `actions` | None. | A second action bound to one event, an event the kind does not declare, an action name that is not a Weft action name, `params` other than `id` and `item`, `confirm`, `onSuccess`, `onError`, `preventDefault`, `watch`, and any event of an `each` element. |
+| `tokens` | None: a token reference is written as it is. | A token reference on a prop that takes no token, or a path that is not a token path. |
+| `hidden` | None. | A `visible` condition other than truthiness of one path (`eq`, `gt`, …, `$and`, `$or`, `$index`); the element is always shown. |
+| `values` | None. | `state` (a document holds no data); a list value; `$template`, `$computed`, `$index` and any other `$cond`. |
+| `props` | None. | A prop the kind does not declare, or a value it does not take. |
+| `kinds` | None. | A `type` that is not a kind of the catalog; its children are kept in its place. |
+| `repetition` | None. | A `repeat.statePath` that is not a Weft data path; `repeat.key`; an `as` that is not a loop variable name or is already an outer one; an `each` element without `repeat`, whose children are kept in its place. |
+| `slots` | None. | A slot the kind does not have; its elements are placed as content. |
+| `names` | None. | A required `label` missing from the input is set to `""`. |
+| `text` | A text run beside elements in a `mixed` component (or in an extension element) becomes a generated `text` element with a free id. | None. |
+| `structure` | None. | An element that is used but not defined, or used a second time. |
 
 ## 10. Projects
 
