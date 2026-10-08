@@ -41,6 +41,7 @@ Commands:
   import-solid    Read a SolidJS component (.jsx, or .tsx as TypeScript) back into markup; losses go to stderr
   a2ui            Write a markup document as A2UI v0.9 messages (basic catalog); what A2UI cannot hold is listed on stderr as losses
   import-a2ui     Read A2UI v0.9 messages (a JSON array, one object or JSON Lines) back into markup; losses go to stderr
+  import-cem      Turn a Custom Elements Manifest into a catalog that extends the project's; losses and diagnostics go to stderr
   help            Print this message or the help of the given subcommand(s)
 
 Options:
@@ -242,6 +243,24 @@ $ weft import-a2ui weft-tour/a2ui/login.a2ui.json
 ```
 
 The commands use the project's catalog, or `--catalog`. `--out-dir` writes `<name>.a2ui.json` or `<name>.weft` instead of printing, and falls back to the project's `export.a2ui.outDir` or `import.a2ui.outDir` ([Projects](projects.md)). The data of a screen is not part of it, so no `updateDataModel` message is written, and one in the input is ignored.
+
+## `weft import-cem`
+
+A web component library describes its elements in a [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-manifest) (`custom-elements.json`). `weft import-cem` turns one into a Weft catalog: each element a kind, its attributes and public fields props, its slots slots and its events events. The catalog extends the project's catalog (or `--catalog`, else the core catalog), so an element whose tag that catalog already has is left out. What a catalog cannot hold (methods, CSS parts, a type no prop takes, a renamed event, ...) is listed on stderr, one loss per line, with the diagnostics:
+
+```console
+$ weft import-cem crates/weft-import/tests/fixtures/cem/acme-ui.json --version 2.0.0 > weft-tour/acme-ui.json
+crates/weft-import/tests/fixtures/cem/acme-ui.json:#/modules/0/declarations/0 loss props: members not imported: private _hasFocus, static styles, read-only validity, method click, method focus
+crates/weft-import/tests/fixtures/cem/acme-ui.json:#/modules/0/declarations/0 loss structure: not imported: cssParts (2), cssProperties, superclass, reflects (3), event types (2)
+...
+$ printf '<acme-card id="card" weft="0.1">\n  <acme-button id="buy" variant="primary">Buy</acme-button>\n</acme-card>\n' > weft-tour/card.weft
+$ weft validate weft-tour/card.weft --catalog weft-tour/acme-ui.json --strict; echo "exit $?"
+exit 0
+```
+
+The manifest here is the test fixture of the importer, shaped like the manifest a Lit library publishes.
+
+The output is a catalog extension: name it as the project's `catalog` in `weft.json` to use the kinds beside the core ones, or pass it to `--catalog` to check documents made of its kinds alone. The manifest is read only when it is at most 10 MB, and parsed as data, never run. `--name` and `--version` name the catalog; without them the project's `import.cem.name` and `import.cem.version` do, else the file stem and `0.0.0`. `--out-dir` writes `<stem>.catalog.json` instead of printing, else the project's `import.cem.outDir` decides ([Projects](projects.md)); an existing file is left in place unless `--force` is passed. A manifest that cannot be read is `W601` and exits 1. The mapping and the losses are in SPEC §9; from TypeScript, `importCem` of `@weft/core/cem` returns the same catalog, losses and diagnostics.
 
 ## What `weft` does not do
 
