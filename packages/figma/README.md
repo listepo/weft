@@ -13,7 +13,7 @@ The mapping itself is not here. It lives in `@weft/design-tool`, which `@weft/pe
 | Step | Function | Result |
 | --- | --- | --- |
 | Library | `ensureLibrary(api, catalog, tokens, modifier?)` | A `Weft library` page holding one component set per catalog kind, plus a `Weft tokens` variable collection. Enum props and `state` are the variant axes. Each token becomes a variable: dimensions and numbers as `FLOAT` in px, colors as `COLOR`. Calling it again reuses what is already there. With a resolver `modifier`, its contexts become the collection's modes (see "Token modes" below). |
-| Weft → Figma | `buildScreen(api, document, options)` | Text-only kinds (`content` `none` or `text`) become instances of their variant. Every other kind becomes an auto-layout frame. Each layer carries its Weft source in plugin data: kind, id, props, `on` handlers, the text content of leaves, and the text and label it showed. `options.display` gives the `text` and `label` values in attribute form; `displayTexts(document)` computes it with the core. A `gap` token is bound to its variable. |
+| Weft → Figma | `buildScreen(api, document, options)` | Text-only kinds (`content` `none` or `text`) become instances of their variant. Every other kind becomes an auto-layout frame. Each layer carries its Weft source in shared plugin data (namespace `weft`, see below): kind, id, props, `on` handlers, the text content of leaves, and the text and label it showed. `options.display` gives the `text` and `label` values in attribute form; `displayTexts(document)` computes it with the core. A `gap` token is bound to its variable. |
 | Modes → resolver | `readModes(api, tokens)` | The collection's modes as a DTCG resolver document, when it has more than one. |
 | Figma → Weft | `readScreen(api, layer, options)` | Returns `{ document, losses, diagnostics }` (see "Reading a frame back" below). It is `readLayers`, which only reads layers, followed by `finishRead`, which reads typed text as values, canonicalizes and validates with the core. |
 | Plugin, main thread | `handleRequest(api, selection, message, options)` | Validates a message from the plugin UI, then builds a parsed screen or reads the selected frame. |
@@ -89,10 +89,10 @@ So the work is split:
 
 ## Pulling a frame through the REST API
 
-`pullScreen` (`@weft/figma/pull`) reads a frame without opening Figma: the plugins' `figma-pull` script runs it (`docs/claude-code-plugin.md`). It asks `GET /v1/files/:key/nodes` for the frame with `plugin_data=<plugin id>`, so each layer's Weft source comes along, then once more (`depth=1`, at most 200 ids per request) for the main components of its instances, where the catalog kind and the library style live. `rest.ts` checks every field of the response and turns the nodes into the same read-only node shape the Plugin API's nodes have (`ReadNode` in `layer.ts`), so the read-back above runs unchanged and an unedited frame comes back byte-identical.
+`pullScreen` (`@weft/figma/pull`) reads a frame without opening Figma: the plugins' `figma-pull` script runs it (`docs/claude-code-plugin.md`). It asks `GET /v1/files/:key/nodes` for the frame with `plugin_data=shared,<plugin id>`, so each layer's Weft source comes along (shared data, or the plugin's private data in a file built before the source moved), then once more (`depth=1`, at most 200 ids per request) for the main components of its instances, where the catalog kind and the library style live. `rest.ts` checks every field of the response and turns the nodes into the same read-only node shape the Plugin API's nodes have (`ReadNode` in `layer.ts`), so the read-back above runs unchanged and an unedited frame comes back byte-identical.
 
 - **The token** is a personal access token or OAuth token with the `file_content:read` scope. It goes only into the `X-Figma-Token` header; the script reads it from `FIGMA_TOKEN` and never from a flag, and every error has it replaced by `[token]`.
-- **The plugin id** is the manifest's `id` (`weft-development`, `PLUGIN_ID`), because plugin data is visible only to the plugin that wrote it. A published plugin gets the id Figma assigns; `--plugin-id` or `import.figma.pluginId` names it. With another id the frame reads as foreign layers.
+- **The plugin id** matters only for files built before the source moved to shared plugin data, whose layers hold it in private data, visible only to the plugin that wrote it. It is the manifest's `id` (`weft-development`, `PLUGIN_ID`); a published plugin gets the id Figma assigns, and `--plugin-id` or `import.figma.pluginId` names it. Such a frame read with another id comes back as foreign layers.
 - **Responses** larger than 50 MB are refused before they are parsed. 400, 403, 404 and 429 become messages that say why (with the `Retry-After` wait); the server's `err` text is shown without control characters.
 - **Variables:** the REST API names no variables without the Variables API, which needs a Full seat in an Enterprise org. A gap bound to another variable is therefore read by its value, like a typed number.
 - **Cost:** a pull is two requests (one when the frame has no instances). File-node requests are rate-limit tier 1, which allows View and Collab seats only a few requests a month.
@@ -107,7 +107,7 @@ Checked against the official documentation on 2026-10-08.
 | A personal access token is sent in the `X-Figma-Token` header. | https://developers.figma.com/docs/rest-api/personal-access-tokens/ |
 | Reading file content needs the `file_content:read` scope. | https://developers.figma.com/docs/rest-api/authentication/ |
 | `GET /v1/files/:key/nodes` takes `ids` (comma-separated, required), `depth`, `geometry`, `version` and `plugin_data` (plugin ids and/or `shared`). `:key` may be a branch key. The `nodes` map holds `{ document, components, componentSets, styles, schemaVersion }` per id, and `null` for an id that is not in the file. Errors: 400 (with `err` naming the parameter), 403 (invalid or expired token), 404 (file not found). Rate limit tier 1, scope `file_content:read`. | https://developers.figma.com/docs/rest-api/file-endpoints/ |
-| `pluginData` holds the data of the plugins named in `plugin_data`, visible only to the plugin that wrote it; `sharedPluginData` needs `shared`. `visible` defaults to `true`. | https://developers.figma.com/docs/rest-api/files/ |
+| `pluginData` holds the data of the plugins named in `plugin_data`, visible only to the plugin that wrote it; `sharedPluginData`, data visible to all plugins, needs `shared`. Both are typed `Any`. `visible` defaults to `true`. | https://developers.figma.com/docs/rest-api/files/ (`sharedPluginData` checked 2026-10-08) |
 | Frame fields and their defaults: `fills`, `strokes`, `effects` `[]`; `layoutMode` `NONE` (`HORIZONTAL`, `VERTICAL`, `GRID`); `layoutWrap` `NO_WRAP` or `WRAP`; `counterAxisAlignItems` `MIN`; `itemSpacing`, the paddings, `gridRowGap` `0`; `gridColumnCount` with `GRID`; `cornerRadius`, and `rectangleCornerRadii` for four corners; `componentId` and `componentProperties` on instances; `characters` on text; `absoluteBoundingBox`. | https://developers.figma.com/docs/rest-api/file-node-types/ |
 | A solid paint is `{ type, color: { r, g, b, a }, opacity?, boundVariables?: { color } }`; a background blur is `{ type: "BACKGROUND_BLUR", radius, visible }`; a component property is `{ type, value }`. | https://github.com/figma/rest-api-spec (`dist/api_types.ts`, main branch) |
 | 429 carries `Retry-After` in seconds. Tier 1 allows View and Collab seats up to 20 requests a month; Dev and Full seats 10 to 20 a minute. | https://developers.figma.com/docs/rest-api/rate-limits/ |
@@ -122,6 +122,16 @@ A request to the real API with a made-up token got 403 and `{"err":"Invalid toke
 - **Numbers match the Plugin API's.** The style fingerprint the plugin stored is compared with one computed from REST values (colours, radii, padding); the docs do not say both APIs print the same digits.
 
 Both are to be checked on a real file, together with the plugin itself.
+
+## Where the Weft source is stored
+
+Every mark (the layer's source, the library page and board, component kinds, token variables and their collection) is shared plugin data under the namespace `weft` (`NAMESPACE` in `src/data.ts`, the namespace Penpot's plugin uses too). Shared plugin data can be read by any plugin, by the Figma MCP server's `use_figma`, and through the REST API with `plugin_data=shared`; private plugin data (`setPluginData`) can be read only by the plugin id that wrote it.
+
+Files built before this change hold the marks in the plugin's private data. `dataOf(node)` is the one way the package reaches plugin data:
+
+- a read takes the shared value, else the private one; a value found only in private data is moved to shared data as it is read, so a frame moves when the plugin reads it (export) and the library when the next build finds it;
+- a write goes to shared data and clears the private value;
+- moving is best effort: a node that cannot be written (a REST node, a file opened read-only) still reads, and moves later.
 
 ## Limits of this stage
 
@@ -139,6 +149,7 @@ All facts were checked against the official documentation on 2026-10-05.
 | Fact | Source |
 | --- | --- |
 | Plugin data values are strings and can be read back only by the same plugin. One entry holds at most 100 kB. | https://developers.figma.com/docs/plugins/api/properties/nodes-setplugindata/ |
+| `setSharedPluginData(namespace, key, value)` writes data any plugin can read; the namespace must be at least 3 alphanumeric characters; the empty string removes the entry; one entry holds at most 100 kB. `getSharedPluginData` returns `""` for a missing key. Nodes, variables and variable collections have both (`PluginDataMixin` in `@figma/plugin-typings` 1.140.0). | https://developers.figma.com/docs/plugins/api/properties/nodes-setsharedplugindata/ (checked 2026-10-08) |
 | `layoutMode` includes `GRID`, with `gridColumnCount`, `gridRowGap` and `gridColumnGap`. `layoutWrap` applies only to horizontal and vertical layouts. | https://developers.figma.com/docs/plugins/api/properties/nodes-layoutmode/ |
 | `figma.variables.createVariable(name, collection, resolvedType)` takes the collection object. The form that takes a collection id is deprecated and throws under `documentAccess: "dynamic-page"`. | https://developers.figma.com/docs/plugins/api/properties/figma-variables-createvariable/ |
 | `setBoundVariable(field, variable)` binds a numeric field such as `itemSpacing` or a padding, and `null` unbinds it. | https://developers.figma.com/docs/plugins/api/properties/nodes-setboundvariable/ |
@@ -156,7 +167,8 @@ All facts were checked against the official documentation on 2026-10-05.
 **Unverified:** the official docs do not state these, and the package does not depend on them:
 
 - whether `/` in a variable name groups variables in Figma's UI (variables are named that way here);
-- whether plugin data is copied on duplicate or on detach.
+- whether plugin data is copied on duplicate or on detach;
+- the shape of the REST API's `sharedPluginData`: the docs type it `Any`, and the pull reads it as `pluginData` is read, an object of entries per namespace (`{ "weft": { "weft.source": "…" } }`). A pull from a real file confirms it.
 
 ## Tests
 
@@ -167,5 +179,6 @@ All facts were checked against the official documentation on 2026-10-05.
 - foreign layers and their losses;
 - the plugin message handler;
 - the pull (`test/pull.test.ts`): every corpus screen built into the fake, written as REST JSON with the documented defaults left out (`test/rest-server.ts`), served on a local port and pulled back byte-identical; a designer's edit; the requests' header and parameters; the error messages and the token's redaction; link parsing.
+- shared plugin data (`test/shared-data.test.ts`): a build writes the source only as shared data; a file whose marks are moved back to private data (`privateDataFor`, as older plugin versions stored them) reads back byte-identical, keeps its library, and ends up in shared data; `dataOf` on a node that cannot be written. The layer snapshots list shared data, and private data as `private <key>`, so a private write shows in review. The pull reads shared data whatever the plugin id, and an old file through the plugin id.
 
 `test/api-types.test.ts` assigns the official `PluginAPI` and node types to the narrow API. If the subset ever drifts from the real API, `tsc` fails.
