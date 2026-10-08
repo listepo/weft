@@ -51,8 +51,11 @@ const LAYOUT_DEFAULTS: Json = {
   cornerRadius: 0,
 };
 
-/** The REST JSON of a fake node; plugin data only when the request asked for its writer. */
-export function restJson(node: FakeNode, pluginId: string | undefined): Json {
+/** What a request asked for with `plugin_data`: the writer's private data, shared data. */
+export type Asked = { pluginId?: string | undefined; shared?: boolean };
+
+/** The REST JSON of a fake node, with the plugin data the request asked for. */
+export function restJson(node: FakeNode, asked: Asked): Json {
   const json: Json = {
     id: node.id,
     name: node.name,
@@ -60,8 +63,12 @@ export function restJson(node: FakeNode, pluginId: string | undefined): Json {
     ...(node.visible ? {} : { visible: false }),
     absoluteBoundingBox: { x: node.x, y: node.y, width: node.width, height: node.height },
   };
-  if (pluginId !== undefined && node.data.size > 0)
-    json["pluginData"] = { [pluginId]: Object.fromEntries(node.data) };
+  if (asked.pluginId !== undefined && node.data.size > 0)
+    json["pluginData"] = { [asked.pluginId]: Object.fromEntries(node.data) };
+  if (asked.shared === true && node.shared.size > 0)
+    json["sharedPluginData"] = Object.fromEntries(
+      [...node.shared].map(([namespace, entries]) => [namespace, Object.fromEntries(entries)]),
+    );
   if (node.type === "TEXT") {
     json["characters"] = node.characters;
     json["fills"] = paints(node.fills);
@@ -99,7 +106,7 @@ export function restJson(node: FakeNode, pluginId: string | undefined): Json {
     json["fills"] = paints(node.fills);
   }
   if ("children" in node && node.children !== undefined)
-    json["children"] = node.children.map((c) => restJson(c, pluginId));
+    json["children"] = node.children.map((c) => restJson(c, asked));
   return json;
 }
 
@@ -139,13 +146,14 @@ export async function serveFile(figma: FakeFigma, writer: string): Promise<FakeR
       return reply(403, JSON.stringify({ status: 403, err: "Invalid token" }));
     if (url.pathname !== `/v1/files/${FILE_KEY}/nodes`)
       return reply(404, JSON.stringify({ status: 404, err: "Not found" }));
-    const asked = (url.searchParams.get("plugin_data") ?? "").split(",").includes(writer);
+    const named = (url.searchParams.get("plugin_data") ?? "").split(",");
+    const asked: Asked = {
+      pluginId: named.includes(writer) ? writer : undefined,
+      shared: named.includes("shared"),
+    };
     const entries = (url.searchParams.get("ids") ?? "").split(",").map((id) => {
       const node = nodes.get(id);
-      return [
-        id,
-        node === undefined ? null : { document: restJson(node, asked ? writer : undefined) },
-      ];
+      return [id, node === undefined ? null : { document: restJson(node, asked) }];
     });
     reply(200, JSON.stringify({ name: "fake", nodes: Object.fromEntries(entries) }));
   });

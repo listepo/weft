@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { coreCatalog } from "@weft/catalog";
 import { serialize } from "@weft/core";
 import { afterEach, describe, test } from "vitest";
+import { NAMESPACE } from "../src/data.ts";
 import { parseTarget, PLUGIN_ID, pullScreen, PullError, type PullOptions } from "../src/pull.ts";
 import type { FakeFrame, FakeText } from "./fake-figma.ts";
 import { built, corpusMarkup, corpusNames, tokens } from "./helpers.ts";
@@ -43,14 +44,14 @@ for (const name of corpusNames) {
 }
 
 describe("the requests", () => {
-  test("carry the token in X-Figma-Token and ask for the plugin's data, then the main components", async () => {
+  test("carry the token in X-Figma-Token and ask for shared and the plugin's data, then the main components", async () => {
     const { server, options, frame } = await served(corpusMarkup("login"));
     await pullScreen(options);
     assert.equal(server.requests.length, 2);
     const [first, second] = server.requests as [URL, URL];
     assert.equal(first.pathname, `/v1/files/${FILE_KEY}/nodes`);
     assert.equal(first.searchParams.get("ids"), frame.id);
-    assert.equal(first.searchParams.get("plugin_data"), PLUGIN_ID);
+    assert.equal(first.searchParams.get("plugin_data"), `shared,${PLUGIN_ID}`);
     assert.equal(second.searchParams.get("depth"), "1");
     // The token travels only in the header.
     assert.ok(!first.href.includes(TOKEN));
@@ -80,9 +81,27 @@ describe("a designer's edit", () => {
   });
 });
 
-describe("without the plugin's data", () => {
-  test("another plugin id reads the frame as foreign layers", async () => {
-    const { options } = await served(corpusMarkup("login"));
+describe("where the Weft source is", () => {
+  test("shared plugin data reads back whatever the plugin id", async () => {
+    const markup = corpusMarkup("login");
+    const { options } = await served(markup);
+    const result = await pullScreen({ ...options, pluginId: "123456" });
+    assert.deepEqual(result.losses, []);
+    assert.equal(serialize(result.document), markup);
+  });
+
+  test("a file built before T14.2 reads back from the plugin's private data", async () => {
+    const markup = corpusMarkup("login");
+    const { figma, options } = await served(markup);
+    figma.privateDataFor(NAMESPACE);
+    const result = await pullScreen(options);
+    assert.deepEqual(result.losses, []);
+    assert.equal(serialize(result.document), markup);
+  });
+
+  test("such a file read with another plugin id is foreign layers", async () => {
+    const { figma, options } = await served(corpusMarkup("login"));
+    figma.privateDataFor(NAMESPACE);
     const result = await pullScreen({ ...options, pluginId: "123456" });
     assert.ok(result.losses.some((l) => l.kind === "ids"));
   });
