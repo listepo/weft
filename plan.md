@@ -15,7 +15,13 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T12 | todo | P2 | 3 | 0% | |
-| T16 | todo | P2 | 5 | 0% | |
+| T16.1 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
+| T16.2 | todo | P2 | 3 | 0% | |
+| T16.3 | todo | P2 | 4 | 0% | |
+| T16.4 | todo | P2 | 3 | 0% | |
+| T16.5 | todo | P2 | 3 | 0% | |
+| T16.6 | todo | P2 | 2 | 0% | |
+| T16.7 | todo | P2 | 3 | 0% | |
 | T17 | todo | P2 | 4 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
 
@@ -248,6 +254,8 @@ Today a model writes Weft markup as free text, and only the validator catches it
 
 ### T16. Layout vocabulary
 
+Parent of T16.1–T16.7, which carry the status (the task was split this way when T16.1 was claimed). This card holds the context, scope and done criteria they share.
+
 Weft has two layout kinds today. `stack` lays children out in one line, with `direction`, `gap`, cross-axis `align` and `wrap`; `grid` has a fixed number of equal `columns` and a `gap`. Most of what a layout usually says has no form in Weft: how leftover space on the main axis is shared, which child grows and which hugs its content, inner spacing, a maximum width, and how a grid reflows on a narrow screen. Screens work around these gaps, and every importer drops them as `layout` losses. The task decides how much more Weft says without becoming CSS: a small closed set that every target (web, SwiftUI, Slint, A2UI, json-render, Figma, Penpot) can draw and read back, and nothing that only CSS can express. This changes the format, so the design comes first, as in T39.
 
 **Context.**
@@ -285,7 +293,42 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 5. Sizes as `dimension` tokens only, or literal numbers too?
 6. Ship as a catalog minor within `weft` 0.1, or together with T39's 0.2?
 
-**Split.** T16.1: design (docs only). T16.2: spec, catalog, core, `AGENT-SPEC.md`, corpus. T16.3: web generators and importers, plus the reference renderer. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render. T16.7: Figma and Penpot through `design-tool`.
+**Split.** T16.1: design (docs only). T16.2: spec, catalog, core, `AGENT-SPEC.md`, corpus. T16.3: web generators and importers, plus the reference renderer. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render. T16.7: Figma and Penpot through `design-tool`. T16.2–T16.7 start only after the creator approves T16.1's design; each closes its part of T16's "Done when" for its targets, and T16.2 lands first.
+
+### T16.1. Layout vocabulary: design
+
+T16 scope item 1, docs only: no code, no `SPEC.md`, `AGENT-SPEC.md` or catalog change. Done when the creator has approved `docs/layout-design.md`, with the open questions answered.
+
+Execution plan:
+
+1. Read T16's context: `SPEC.md` §2.2, §5.1, §8 and §9, `docs/context-design.md` (the shape), `docs/figma-style-overrides-design.md` (overlap on padding), `research.md`, the corpus screens `dashboard` and `wizard-step`, and the layout code of each generator and importer named in T16's context.
+2. `research.md`: a new section "Layout (T16)" with primary sources and the date checked: A2UI v0.9 `justify`/`align`/`weight`; Figma auto layout (hug, fill, fixed, min/max, space-between, wrap, grid); Penpot flex and grid layout and sizing; SwiftUI `Spacer`, `frame`, `layoutPriority`, `ViewThatFits`, `Grid`, `LazyVGrid` adaptive items; Slint layouts, `alignment`, `*-stretch`, min/max sizes, padding; CSS flexbox, grid `auto-fill`/`minmax`, container queries; Jetpack Compose `Arrangement` and `weight`. A fact backed only by secondary sources is marked **unverified**. The §9 open-questions row points at the proposal.
+3. `docs/layout-design.md` in the shape of `docs/context-design.md`: the problem and the corpus workarounds; the candidate vocabulary (main-axis distribution on `stack`, child sizing grow/hug/fixed, padding, max width, grid reflow), each with markup, canonical JSON, catalog prop or universal attribute, token types, defaults and their §8 class, and diagnostic codes; a generate and import mapping and loss table per target (HTML, React, SolidJS, Lit, reference renderer, SwiftUI, Slint, A2UI, json-render, Figma, Penpot); versioning (catalog minor in 0.1 or with T39's 0.2); before/after on `dashboard` and `wizard-step`; the decisions for the creator, each with a recommendation and alternatives.
+4. Commit, push, open a PR to `main`; T16.1 stays in progress until the creator approves.
+
+### T16.2. Layout vocabulary: spec, catalog, core and corpus
+
+T16 scope items 2, 5 (corpus screens) and 6, as the approved design says: `SPEC.md` and the §9 rows, `AGENT-SPEC.md` and the primer, `packages/catalog/src/core.ts` and `catalog.json`, the catalog examples, `docs/catalog-and-tokens.md`, `crates/weft-core/src/rules.rs` and the differential fixtures for any universal attribute or code, `crates/weft-catalog/src/diff.rs` where the classifier needs it, and corpus screens that use every new prop or value. The §9 rows of the targets still to come state the new forms as losses until their sub-task lands. Depends on T16.1.
+
+### T16.3. Layout vocabulary: web targets and the reference renderer
+
+T16 scope items 3 to 5 for the web: static HTML and the base stylesheet, React, SolidJS and Lit through the shared render plan, the reference renderer (`packages/render-react`), the DOM and JSX importers, and the `packages/visual` web baselines. Depends on T16.2.
+
+### T16.4. Layout vocabulary: SwiftUI
+
+T16 scope items 3 to 5 for SwiftUI: `crates/weft-swiftui` generator and importer, the insta snapshots and the reviewed SwiftUI baselines. Depends on T16.2.
+
+### T16.5. Layout vocabulary: Slint
+
+T16 scope items 3 to 5 for Slint: `crates/weft-slint` generator and reader (after T67.4 and T67.5, which edit the same `read.rs`), with their snapshots and screenshots. Depends on T16.2.
+
+### T16.6. Layout vocabulary: A2UI and json-render
+
+T16 scope items 3 and 4 for `crates/weft-interop`: the A2UI export and import and the json-render export (and the T13.2 import when it has landed), with their loss rows. Depends on T16.2.
+
+### T16.7. Layout vocabulary: Figma and Penpot
+
+T16 scope items 3 to 5 for the design tools: `packages/design-tool` (`layoutView`, `read.ts`, `foreign.ts`), the Figma and Penpot builds and their layer-tree snapshots, and the round trips. Depends on T16.2.
 
 ### T17. Extension catalogs
 

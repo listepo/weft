@@ -9,6 +9,12 @@
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T12. Constrained generation
-- T16. Layout vocabulary
+- T16.1. Layout vocabulary: design
+- T16.2. Layout vocabulary: spec, catalog, core and corpus
+- T16.3. Layout vocabulary: web targets and the reference renderer
+- T16.4. Layout vocabulary: SwiftUI
+- T16.5. Layout vocabulary: Slint
+- T16.6. Layout vocabulary: A2UI and json-render
+- T16.7. Layout vocabulary: Figma and Penpot
 - T17. Extension catalogs
 - T41. Hosted Penpot plugin
