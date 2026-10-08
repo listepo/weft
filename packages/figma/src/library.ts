@@ -37,6 +37,7 @@ import type {
   FText,
   FVariable,
 } from "./api.ts";
+import { dataOf } from "./data.ts";
 import { variableValue, writeModes } from "./modes.ts";
 import { variableName } from "./tokens.ts";
 
@@ -67,12 +68,12 @@ export async function ensureLibrary(
 ): Promise<Library> {
   await loadFonts(api);
   const tag = libraryTag(catalog);
-  let page = api.root.children.find((p) => readMark(p, KEY.library) !== undefined);
+  let page = api.root.children.find((p) => readMark(dataOf(p), KEY.library) !== undefined);
   if (page === undefined) {
     page = api.createPage();
     page.name = LIBRARY_PAGE;
   }
-  page.setPluginData(KEY.library, tag);
+  dataOf(page).setPluginData(KEY.library, tag);
   await page.loadAsync();
   const notes: string[] = [];
   const library: Library = {
@@ -83,19 +84,19 @@ export async function ensureLibrary(
   };
 
   let board = page.children.find(
-    (n): n is FFrame => n.type === "FRAME" && readMark(n, KEY.library) !== undefined,
+    (n): n is FFrame => n.type === "FRAME" && readMark(dataOf(n), KEY.library) !== undefined,
   );
   if (board === undefined) {
     board = api.createFrame();
     board.name = LIBRARY_BOARD;
-    board.setPluginData(KEY.library, tag);
+    dataOf(board).setPluginData(KEY.library, tag);
     autoLayout(board, "HORIZONTAL", 32, 32);
     board.layoutWrap = "WRAP";
     board.fills = [];
     page.appendChild(board);
   }
   for (const child of board.children) {
-    const kind = readMark(child, KEY.kind);
+    const kind = readMark(dataOf(child), KEY.kind);
     const def = kind === undefined ? undefined : catalog.components[kind];
     if (kind === undefined || def === undefined || !Object.hasOwn(catalog.components, kind))
       continue;
@@ -126,15 +127,15 @@ async function ensureVariables(
 ): Promise<Map<string, FVariable>> {
   const collections = await api.variables.getLocalVariableCollectionsAsync();
   let collection: FCollection | undefined = collections.find(
-    (c) => readMark(c, KEY.library) !== undefined,
+    (c) => readMark(dataOf(c), KEY.library) !== undefined,
   );
   if (collection === undefined) {
     collection = api.variables.createVariableCollection(TOKEN_COLLECTION);
-    collection.setPluginData(KEY.library, TOKEN_COLLECTION);
+    dataOf(collection).setPluginData(KEY.library, TOKEN_COLLECTION);
   }
   const variables = new Map<string, FVariable>();
   for (const v of await api.variables.getLocalVariablesAsync()) {
-    const path = readMark(v, KEY.token);
+    const path = readMark(dataOf(v), KEY.token);
     if (path !== undefined && v.variableCollectionId === collection.id) variables.set(path, v);
   }
   for (const [path, token] of tokens) {
@@ -144,7 +145,7 @@ async function ensureVariables(
     if (variable !== undefined && variable.resolvedType !== value.type) continue;
     if (variable === undefined) {
       variable = api.variables.createVariable(variableName(path), collection, value.type);
-      variable.setPluginData(KEY.token, path);
+      dataOf(variable).setPluginData(KEY.token, path);
       variables.set(path, variable);
     }
     variable.setValueForMode(collection.defaultModeId, value.value);
@@ -166,7 +167,7 @@ function createKind(
     const c = api.createComponent();
     drawBox(api, library, c, drawing(kind, def, values));
     c.name = axes.length === 0 ? kind : variantName(values, axes);
-    c.setPluginData(KEY.kind, kind);
+    dataOf(c).setPluginData(KEY.kind, kind);
     variants.set(axes.length === 0 ? "" : c.name, c);
     return c;
   });
@@ -177,7 +178,7 @@ function createKind(
   }
   const set = api.combineAsVariants(components, board);
   set.name = kind;
-  set.setPluginData(KEY.kind, kind);
+  dataOf(set).setPluginData(KEY.kind, kind);
   autoLayout(set, "HORIZONTAL", 16, 16);
   set.layoutWrap = "WRAP";
   return { axes, variants, fallback: set.defaultVariant };

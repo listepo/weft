@@ -235,6 +235,11 @@ pub fn universal_prop(name: &str) -> Option<&'static PropDef> {
         .map(|(_, def)| def)
 }
 
+/// Every universal attribute with its definition, in the table's order.
+pub fn universal_props() -> impl Iterator<Item = (&'static str, &'static PropDef)> {
+    UNIVERSAL_PROPS.iter().map(|(name, def)| (*name, def))
+}
+
 /// Non-abstract roles of WAI-ARIA 1.2, https://www.w3.org/TR/wai-aria-1.2/#role_definitions
 pub const ARIA_ROLES: &[&str] = &[
     "alert",

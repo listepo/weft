@@ -18,6 +18,8 @@
 | cargo-insta | `cargo install cargo-insta` (optional) | Reviews changed snapshots (`cargo insta review`); the tests run without it | https://github.com/mitsuhiko/insta |
 | Xcode (`xcrun swiftc`, `xcodebuild`, `swift`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14, and builds the SwiftPM plugins, the sample projects and the Source Editor Extension (`plugins/xcode`); those tests skip without it | https://developer.apple.com/xcode/ |
 | XcodeGen | mise | Generates the `.xcodeproj` of the Xcode sample and of the Source Editor Extension from YAML (`plugins/xcode`), so no project file is committed | https://github.com/yonaskolb/XcodeGen |
+| uv | mise | Installs the Python tools of the `pipx:` backend | https://github.com/astral-sh/uv |
+| Translate Toolkit | mise (`pipx:translate-toolkit`) | Localization file converters and checks (`po2json`, `pofilter`, `pocount`) | https://github.com/translate/translate |
 | codex (optional) | https://github.com/openai/codex | `plugins/xcode/scripts/xcode-agents.ts` registers the MCP server with it; its test skips without it | https://github.com/openai/codex |
 | iOS Simulator (`xcrun simctl`) | Xcode, with the iOS 27.0 runtime and an iPhone 17 simulator | `@weft/visual` builds the generated SwiftUI screens into an app and screenshots them; skipped without it | https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device |
 | Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode (skipped without it); the browser leg of `moon run root:runtimes` fails without it | https://github.com/microsoft/playwright |
@@ -37,6 +39,8 @@
 | npm:@napi-rs/cli | global | https://github.com/napi-rs/napi-rs | Native addon builds |
 | cargo:cargo-nextest | global | https://github.com/nextest-rs/nextest | Rust test runner |
 | aqua:yonaskolb/XcodeGen | global | https://github.com/yonaskolb/XcodeGen | Xcode projects of `plugins/xcode` |
+| uv | global | https://github.com/astral-sh/uv | Backend for the `pipx:` tools |
+| pipx:translate-toolkit | global | https://github.com/translate/translate | Localization converters and checks |
 
 ## cargo
 

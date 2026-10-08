@@ -5,15 +5,16 @@
   "license": "Apache-2.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./pull": "./src/pull.ts"
   },
   "dependencies": {
     "@weft/catalog": "workspace:*",
     "@weft/core": "workspace:*",
-    "@weft/design-tool": "workspace:*"
+    "@weft/design-tool": "workspace:*",
+    "@weft/from-aria": "workspace:*"
   },
   "devDependencies": {
-    "@figma/plugin-typings": "1.140.0",
-    "@weft/from-aria": "workspace:*"
+    "@figma/plugin-typings": "1.140.0"
   }
 }

@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { loadProject } from "@weft/catalog";
+import { documentSchema } from "@weft/core/document-schema";
 import { test } from "vitest";
 import { LIMITS } from "../src/index.ts";
 import { call, connect } from "./connect.ts";
@@ -77,6 +79,18 @@ test("weft_catalog lists the project's catalog", async () => {
   assert.equal(rating.isError, false);
   const core = await call(client, "weft_catalog", { kind: "rating" });
   assert.equal(core.isError, true);
+  await close();
+});
+
+test("weft_schema gives the schema of the project's merged catalog", async () => {
+  const { client, close } = await connect();
+  const result = await call(client, "weft_schema", { project: PROJECT });
+  assert.equal(result.isError, false);
+  const { catalog } = loadProject(PROJECT).project;
+  assert.equal(result.blocks[0], documentSchema(catalog));
+  const core = await call(client, "weft_schema", {});
+  assert.notEqual(core.blocks[0], result.blocks[0]);
+  assert.ok("rating" in (JSON.parse(result.blocks[0] ?? "") as { $defs: object }).$defs);
   await close();
 });
 

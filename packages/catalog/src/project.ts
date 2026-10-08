@@ -113,6 +113,7 @@ export type Settings = {
     solid?: { outDir?: string };
     swiftui?: { outDir?: string };
     a2ui?: { outDir?: string };
+    figma?: { outDir?: string; pluginId?: string };
   };
   mcp?: { limits?: Partial<Record<LimitName, number>> };
   plugins?: Record<string, Record<string, unknown>>;

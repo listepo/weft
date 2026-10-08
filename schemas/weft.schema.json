@@ -231,6 +231,17 @@
           },
           "additionalProperties": false,
           "description": "Slint components for Slint 1.x (`weft slint`)."
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            }
+          },
+          "additionalProperties": false,
+          "description": "The JSON Schema of the canonical documents the project's catalog admits, `document.schema.json` (`weft schema`). Default folder: standard output."
         }
       },
       "additionalProperties": false,
@@ -326,6 +337,23 @@
           },
           "additionalProperties": false,
           "description": "Catalogs from a Custom Elements Manifest (`weft import-cem`)."
+        },
+        "figma": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "pluginId": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The id of the Figma plugin whose plugin data holds the Weft source of each layer (the `id` of its manifest).",
+              "default": "weft-development"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Frames of a Figma file, read through the REST API (the plugins' `figma-pull` script)."
         }
       },
       "additionalProperties": false,

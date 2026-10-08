@@ -21,6 +21,7 @@ fileGroups:
     - "/SPEC.md"
     - "/AGENT-SPEC.md"
     - "/crates/*/tests/fixtures/**/*"
+    - "/crates/weft-snapshots/tests/snapshots/document-schema/*"
   # The workspace crates both Rust builds are made of (`rust-shared`, plus the crate of each task), and the files they read from outside their own
   # folders (`include_str!` of the catalog and the default tokens). Compared with `cargo metadata` and
   # with the includes in the sources by tooling/test/inputs.test.ts, which fails when a dependency or

@@ -262,10 +262,21 @@ The manifest here is the test fixture of the importer, shaped like the manifest 
 
 The output is a catalog extension: name it as the project's `catalog` in `weft.json` to use the kinds beside the core ones, or pass it to `--catalog` to check documents made of its kinds alone. The manifest is read only when it is at most 10 MB, and parsed as data, never run. `--name` and `--version` name the catalog; without them the project's `import.cem.name` and `import.cem.version` do, else the file stem and `0.0.0`. `--out-dir` writes `<stem>.catalog.json` instead of printing, else the project's `import.cem.outDir` decides ([Projects](projects.md)); an existing file is left in place unless `--force` is passed. A manifest that cannot be read is `W601` and exits 1. The mapping and the losses are in SPEC §9; from TypeScript, `importCem` of `@weft/core/cem` returns the same catalog, losses and diagnostics.
 
+## `weft schema`
+
+A model provider's structured-output mode takes a JSON Schema and holds the model to it while it writes. `weft schema` prints the JSON Schema (2020-12) of the canonical JSON documents (SPEC section 3) your catalog admits: only its kinds, their props and allowed values, their slots, and the children each kind takes. It uses the project's catalog, found from the working directory as for `weft css-base` (or `--project`, `--no-project`), unless `--catalog` names another:
+
+```console
+$ weft schema --no-project > weft-tour/document.schema.json
+$ weft schema --project examples/project/weft.json --out-dir weft-tour/shop
+```
+
+The schema is indented JSON. `--out-dir` writes `document.schema.json` instead of printing, else the project's `export.schema.outDir` decides ([Projects](projects.md)); an existing file is left in place unless `--force` is passed. The same catalog always gives the same bytes, so the file can be committed and diffed. A document the schema admits still goes through `weft validate`: unique ids, bindings, tokens and actions are checked there (SPEC section 3.1 lists what the schema leaves out). From TypeScript, `documentSchema` of `@weft/core/document-schema` returns the same schema as compact JSON text, and so does the MCP tool `weft_schema`. `documentJsonSchema()` of `@weft/core` is not this schema: it knows no catalog and admits any kind and any prop.
+
 ## What `weft` does not do
 
 - It does not check token names, action names or bindings without a project: those checks need your app's tokens, actions and data schema, which a `weft.json` declares ([Projects](projects.md)).
-- It does not render pages with sample data, and it does not convert to or from Figma, Penpot or json-render. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
+- It does not render pages with sample data, and it does not convert to or from Figma, Penpot or json-render. Those are in the [plugin scripts](claude-code-plugin.md) and the packages; a Figma frame comes back to Weft through the plugins' `figma-pull` script.
 - It does not apply patches. [Patches](patches.md) go through the MCP server or the library.
 
 ## The Node version

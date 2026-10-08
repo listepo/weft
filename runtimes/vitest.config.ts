@@ -23,6 +23,7 @@ const needsFileSystem = [
   "packages/core/test/cli.test.ts",
   "packages/core/test/compat.test.ts",
   "packages/core/test/differential.test.ts",
+  "packages/core/test/document-schema.test.ts",
   "packages/core/test/roundtrip.test.ts",
   "packages/catalog/test/catalog-json.test.ts",
   "packages/catalog/test/differential.test.ts",

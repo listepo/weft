@@ -8,9 +8,11 @@ import {
   findBelow,
   type BuildHost,
   type Display,
+  type Marks,
 } from "@weft/design-tool";
 import type { FComponent, FFrame, FigmaApi, FInstance, FNode, FText } from "./api.ts";
 import { isContainer } from "./api.ts";
+import { dataOf } from "./data.ts";
 import { styleKey } from "./layer.ts";
 import { autoLayout, bindNumber, drawText, loadFonts, paint, type Library } from "./library.ts";
 
@@ -26,6 +28,26 @@ const SCREEN_WIDTH = 480;
 const SCREEN_GAP = 120;
 
 type Built = FFrame | FInstance | FText;
+
+/** A layer's name, visibility and Weft data, as the shared build marks it. */
+function marks(layer: FNode): Marks {
+  return {
+    id: layer.id,
+    get name() {
+      return layer.name;
+    },
+    set name(value) {
+      layer.name = value;
+    },
+    get visible() {
+      return layer.visible;
+    },
+    set visible(value) {
+      layer.visible = value;
+    },
+    ...dataOf(layer),
+  };
+}
 
 function figmaHost(api: FigmaApi, library: Library): BuildHost<Built, FComponent> {
   let right = 0;
@@ -72,7 +94,7 @@ function figmaHost(api: FigmaApi, library: Library): BuildHost<Built, FComponent
       if (parent.type === "TEXT") throw new Error("a text layer cannot hold layers");
       parent.appendChild(child);
     },
-    marks: (layer) => layer,
+    marks,
     style: (layer, withSpacing) => (layer.type === "TEXT" ? "" : styleKey(layer, withSpacing)),
     place(root, screen) {
       api.currentPage.appendChild(root);

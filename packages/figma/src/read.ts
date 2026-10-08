@@ -17,7 +17,7 @@ export { isRawText, type RawText, type ReadOptions, type ReadResult } from "@wef
  * finishes in its UI. `readScreen` does both where the core runs.
  */
 export function readLayers(api: FigmaApi, layer: FNode, options: ReadOptions): Promise<ReadResult> {
-  return readShared(figmaLayers(api)(layer), options);
+  return readShared(figmaLayers(api.variables)(layer), options);
 }
 
 /** Reads a layer back into a canonical, validated Weft document. */
