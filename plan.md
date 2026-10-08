@@ -45,8 +45,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
-| T16 | todo | P2 | 5 | 15% | |
-| T16.2 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
+| T16 | todo | P2 | 5 | 30% | |
 | T16.3 | todo | P2 | 3 | 0% | |
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.4 | todo | P2 | 4 | 0% | |
@@ -442,30 +441,6 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 **Dependencies.** T55 and T52 (done) are the precedents. T39 is independent: this ships within `weft` 0.1 (decision 9). T14's style overrides add no `style-padding` for `stack` and `grid` (decision 6). T67.4 and T67.5, which edit the same Slint `read.rs`, are done. T69's "resize within the layout rules" builds on this.
 
 **Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render. T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
-
-### T16.2. Layout vocabulary: spec, catalog, core and corpus
-
-T16 scope items 2, 5 (corpus screens) and 6 (no `weft.json` key), as `docs/layout-design.md` decides. Lands first; every other T16 sub-task builds on it.
-
-Steps:
-
-1. `SPEC.md`: §2.2 `grow` (boolean, literal only, child of a `stack`); §5.1 `justify` (default `start`, declared in the catalog), `padding`, `max-width`, `min-column-width` rows with their meaning; §6.2 `W318` (error in both modes; `<each>` transparent, unknown and extension parents skipped); §8 the catalog version; §9 every target's row lists the new forms as losses until its sub-task lands.
-2. `AGENT-SPEC.md` (one layout line, `W318` and its repair) and `packages/mcp/src/primer.ts`; `bench/src/primers.ts` stays unchanged.
-3. `packages/catalog/src/core.ts` (the props, catalog `version` 0.2.0) and the regenerated `catalog.json`; `packages/catalog/tokens/default.tokens.json` gains `size.sm`/`md`/`lg`/`xl` (240, 480, 720, 960 px); the `stack` and `grid` examples; `docs/catalog-and-tokens.md`.
-4. `crates/weft-core/src/rules.rs`: `grow` in `UNIVERSAL_PROPS` (`bindable: false`) and the `W318` check, with the differential fixtures; `crates/weft-catalog/src/diff.rs` only if the classifier misreads the change (a test asserts it is minor); the T12.1 document schema snapshots retaken.
-5. Corpus: `dashboard` and `glass` as in the design's examples, and a new non-benchmark `corpus/layout` screen; `wizard-step` unchanged. Retake and review the insta snapshots and baselines the new screens change.
-
-Size: about 200 lines of code (`rules.rs`, `core.ts`, tokens), the rest docs, fixtures and snapshots.
-
-Execution plan (Claude Code / claude-opus-5-5):
-
-1. Spec first: `SPEC.md` §2.2, §5.1, §6.2, §8 and the §9 loss rows; `AGENT-SPEC.md` (layout line, `W318`), its plugin copies through `moon run shared:build`, and `packages/mcp/src/primer.ts`.
-2. Catalog: `core.ts` props and version 0.2.0, `node src/generate.ts` for `catalog.json`, the `size` tokens, the `stack` and `grid` examples, `docs/catalog-and-tokens.md`; a `diff.test.ts` case that the change is minor. Docs that print `weft-core 0.1.0` follow.
-3. Core: `grow` in `UNIVERSAL_PROPS`, `W318` in `diagnostics.rs` and `packages/core/src/diagnostics.ts`, the check in `validate.rs` (fires on `grow="true"`, as `W313` fires on `submit="true"`); cases in `crates/weft-core/tests/codes.rs`, `validate.rs` and `packages/core/test/cases.ts`; regenerate the core and catalog differential fixtures and the T12.1 schema snapshot with `WEFT_UPDATE_FIXTURES=1`.
-4. Corpus: `dashboard` and `glass` as in the design, a new `corpus/layout` screen; retake the insta snapshots and the fixtures they feed, review them.
-5. Verify with `moon run root:changed -- --base <merge-base>`, then the full check under the shared lock.
-
-Done when: the new props and `grow` validate in strict and lenient mode, `W318` fires for `grow` outside a stack in a test, the coverage test passes with every new prop and `justify` value in the corpus, `bench/test/agent-spec.test.ts` passes, and `moon run root:changed` exits 0.
 
 ### T16.3. Layout vocabulary: web generators and the reference renderer
 
