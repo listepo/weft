@@ -15,7 +15,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T12 | todo | P2 | 3 | 0% | |
-| T16.1 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
+| T16.1 | in progress | P2 | 3 | 90% | Claude Code / claude-opus-5-5 |
 | T16.2 | todo | P2 | 3 | 0% | |
 | T16.3 | todo | P2 | 4 | 0% | |
 | T16.4 | todo | P2 | 3 | 0% | |
@@ -305,6 +305,8 @@ Execution plan:
 2. `research.md`: a new section "Layout (T16)" with primary sources and the date checked: A2UI v0.9 `justify`/`align`/`weight`; Figma auto layout (hug, fill, fixed, min/max, space-between, wrap, grid); Penpot flex and grid layout and sizing; SwiftUI `Spacer`, `frame`, `layoutPriority`, `ViewThatFits`, `Grid`, `LazyVGrid` adaptive items; Slint layouts, `alignment`, `*-stretch`, min/max sizes, padding; CSS flexbox, grid `auto-fill`/`minmax`, container queries; Jetpack Compose `Arrangement` and `weight`. A fact backed only by secondary sources is marked **unverified**. The §9 open-questions row points at the proposal.
 3. `docs/layout-design.md` in the shape of `docs/context-design.md`: the problem and the corpus workarounds; the candidate vocabulary (main-axis distribution on `stack`, child sizing grow/hug/fixed, padding, max width, grid reflow), each with markup, canonical JSON, catalog prop or universal attribute, token types, defaults and their §8 class, and diagnostic codes; a generate and import mapping and loss table per target (HTML, React, SolidJS, Lit, reference renderer, SwiftUI, Slint, A2UI, json-render, Figma, Penpot); versioning (catalog minor in 0.1 or with T39's 0.2); before/after on `dashboard` and `wizard-step`; the decisions for the creator, each with a recommendation and alternatives.
 4. Commit, push, open a PR to `main`; T16.1 stays in progress until the creator approves.
+
+Progress: steps 1–4 done. `research.md` §20 holds the prior art. `docs/layout-design.md` proposes `justify` on `stack` (`start`, `center`, `end`, `space-between`), a universal boolean `grow` with a new `W318`, `padding` and `max-width` on `stack` and `grid`, `min-column-width` on `grid`, and a `size.*` token group, with a mapping and loss table per target, the corpus plan and twelve open questions. Left: the creator's answers, then the document updated to match.
 
 ### T16.2. Layout vocabulary: spec, catalog, core and corpus
 
