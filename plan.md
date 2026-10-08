@@ -2,6 +2,36 @@
 
 An open, agent-friendly UI description format — strict markup for models, canonical JSON for tools — with a TypeScript prototype: parser, validator, catalog, renderer, importer and MCP server.
 
+## Cloud review findings (2026-10-08)
+
+New bugs, dead code and moves from a read-only Cursor cloud review of `main` at `26b84ed` (agent `bc-0243e483-4830-5d73-b2ca-cd1ce9880bed`; full report: `cloud/weft.md` in the private `listepo/roadmap` repo). They take ids T75–T93, ordered P0, P1, P2. **confirmed** means seen in the tree or reproduced; **suspected** means plausible from the code but not proven. Line numbers are as of the review. None of these is in the task table yet: to take one, add its row and write its execution plan the usual way.
+
+| ID | Priority | Kind | Status | Where | Fix |
+| --- | --- | --- | --- | --- | --- |
+| T75 | P1 | bug | confirmed (reproduced) | `packages/catalog/src/node.ts:88-93`; `crates/weft-cli/src/main.rs:487-490`; name check `crates/weft-catalog/src/project.rs:92-98` | The project file reader follows symlinks out of the project directory (a `tokens.json` symlink to a file in `/tmp` was read), against SPEC §10.2. `realpath` after `join` and refuse anything outside the project root (W703/W704). |
+| T76 | P1 | bug | confirmed (reproduced) | `crates/weft-interop/src/a2ui/export.rs:67-75`, `:405-410` | A2UI export treats any `scheme:` URL as `openUrl`, including `javascript:`, `data:` and `file:`, bypassing the SPEC §9 Trust allowlist that `crates/weft-web/src/html.rs:402-429` enforces. Reuse `safe_url` (http, https, mailto). |
+| T77 | P1 | bug | confirmed (CI run 37738285991; not reproduced locally) | `packages/core/test/engines.test.ts:103-108`, `:125-128` | `Bun runs on wasm` hung on the PR #4 runner and blocked CI: `spawnSync` has no timeout. Cap it (e.g. 15 s) and fail or skip when Bun hangs. |
+| T78 | P2 | bug | confirmed (same run) | `crates/weft-swiftui/tests/swift.rs:201-208` | The Swift typecheck tests ran 9+ minutes and were killed when the gate failed. Give nextest a timeout and a Swift module cache, or keep them out of the batch with flaky runtimes. |
+| T79 | P2 | bug | confirmed (source; live JS throw not run) | `crates/weft-binding/src/boundary.rs:128-133`; `crates/weft-binding/src/api.rs:102-128`, `:416-420`; `packages/core/src/patch.ts:21-26` | `applyPatches`, `serialize` and `canonicalize` throw when `toJson(document)` is `undefined` (cycle or too deep), but SPEC §7 says `applyPatches` never throws. Map `TooDeep` to W200 diagnostics, as `validate` does. |
+| T80 | P2 | bug | confirmed | `crates/weft-binding/src/api.rs:205-206`; `packages/core/src/data.ts:39-47` | `checkData` drops data-schema compile problems (W709/W710). Merge them into the returned diagnostics. |
+| T81 | P2 | bug | confirmed | `crates/weft-cli/src/main.rs:536-538`; `packages/core/src/cli.ts:58` | `weft fmt --write` writes in place, non-atomically. Write a sibling temp file and rename, as T69.1a plans for the editor's save. |
+| T82 | P2 | bug | confirmed | `crates/weft-interop/src/a2ui/export.rs:607-611` | A2UI export copies `image.src` into `url` with no scheme or path filter. Filter it with `safe_url`, or emit a loss. |
+| T83 | P2 | bug | confirmed | `packages/design-tool/src/keys.ts:54-55`, `:101-103` | Figma/Penpot `writeJson` has no 100 kB cap, while `readJson` drops entries over it. Refuse or split oversized writes. |
+| T84 | P2 | bug | confirmed | `plugins/xcode/scripts/xcode-agents.ts:80-81` | `xcode-agents` exits with code 2 on the first unknown `--agents` name. Log it, continue, and exit after the loop. |
+| T85 | P2 | bug | confirmed | `crates/weft-cli/src/main.rs:10` vs `:569-571` | The CLI crate docs still say "only the syntax layer" after T70. Say "syntax and shape layers". |
+| T86 | P2 | bug | suspected | `packages/catalog/src/node.ts:99-108` | `maxChars` is checked with `statSync`, then the file is read. Enforce the limit on a capped read. |
+| T87 | P2 | bug | suspected | `crates/weft-web/src/from_jsx/mod.rs:37-66` | JSX import runs on a 64 MiB stack thread only off `wasm32`. Use the same budget or iterative lowering on WASM, or document the limit. |
+| T88 | P2 | bug | suspected | `crates/weft-catalog/src/resolver.rs:52-54` vs `:102-103` | The resolver's `tree()` matches context keys case-sensitively; `appearance()` does not. Make `tree()` case-insensitive. |
+| T89 | P2 | dead code | confirmed | `mise.toml:20-23` | `pipx:translate-toolkit` 3.20.0 (and `uv`, only as its backend) is unused: no `po2json`/`pofilter`/`pocount` use anywhere. Drop the pins unless a localization task needs them. |
+| T90 | P2 | dead code | confirmed gap (orphans not listed) | `toolchain.md:18`; about 750 insta snapshots | Nothing checks for unreferenced snapshots. Run `cargo insta test --unreferenced=reject` in CI, or once and delete the orphans. |
+| T91 | P2 | move | confirmed | `safe_url` in `crates/weft-web/src/html.rs:404-429`, JSX `_url` in `jsx/runtime.rs:109-127`, Swift `weftURL` in `helpers.swift:55-60` → `weft-import` or `weft-core` | One shared Trust allowlist, so an exporter cannot skip it again (T76, T82). |
+| T92 | P2 | move | suspected | `tooling/changed.ts`, `tooling/select.ts` → the org's `scoped-check` | A fourth copy of the affected-test planner. The other copies were not checked from this repo. |
+| T93 | P2 | move | confirmed | `crates/weft-swiftui/src/import/read.rs`, `crates/weft-web/src/jsx/mod.rs` → smaller modules in the same crates | Split the two giant importer files. |
+
+Already tracked here, not added again: `find_project` and the file-reading `load_project` (`crates/weft-cli/src/main.rs:445-500`) moving into `crates/weft-catalog` is T69.1a; the two private copies of the Slint compile/data code in `crates/weft-slint/tests/` moving to a `runtime` feature is T69.1b.
+
+Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decision 3; slint-bindings should not grow a second renderer); the `dead_code` allows on shared test modules are not dead code.
+
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
