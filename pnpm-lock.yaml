@@ -232,13 +232,13 @@ importers:
       '@weft/design-tool':
         specifier: workspace:*
         version: link:../design-tool
+      '@weft/from-aria':
+        specifier: workspace:*
+        version: link:../from-aria
     devDependencies:
       '@figma/plugin-typings':
         specifier: 1.140.0
         version: 1.140.0
-      '@weft/from-aria':
-        specifier: workspace:*
-        version: link:../from-aria
 
   packages/from-aria:
     dependencies:
@@ -517,6 +517,9 @@ importers:
       '@weft/design-plugin':
         specifier: workspace:*
         version: link:../../packages/design-plugin
+      '@weft/figma':
+        specifier: workspace:*
+        version: link:../../packages/figma
       '@weft/from-aria':
         specifier: workspace:*
         version: link:../../packages/from-aria
