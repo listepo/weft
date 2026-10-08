@@ -16,7 +16,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69 | todo | P2 | 5 | 0% | |
 | T12 | todo | P2 | 3 | 0% | |
 | T16 | todo | P2 | 5 | 0% | |
-| T17.0 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
+| T17.0 | in progress | P2 | 3 | 80% | Claude Code / claude-opus-5-5 |
 | T17.1 | todo | P2 | 4 | 0% | |
 | T17.2 | todo | P2 | 3 | 0% | |
 | T17.3 | todo | P2 | 3 | 0% | |
@@ -340,6 +340,8 @@ Execution plan:
 2. `research.md`: a new section "Extension catalogs (T17)" with primary sources and the date checked: Custom Elements Manifest and the custom element name rules of the HTML Standard; npm `package.json` `files`/`exports` for shipping data files; JSON Schema `$id`; Figma and Penpot shared libraries; A2UI catalogs; SwiftUI and Slint module naming; the shadcn registry. A fact backed only by secondary sources is marked **unverified**. The §9 registry row points at the proposal.
 3. `docs/extension-catalogs-design.md` in the shape of `docs/context-design.md`: the problem; namespace options (hyphen prefix, colon, collision rule only) with their cost across the grammar, parsers, generators, importers and design tools; prefix ownership; merge order and conflict rules; the catalog's own declaration; `weft.json` `catalog` as an ordered array and its precedence; diagnostic codes; publication and discovery without network access during validation; the registry model; the effect on generators, Figma/Penpot libraries, the T12 schema, MCP, `import-cem` and fragments; migration; a worked example on `examples/project` with an `acme-ui` CEM import and a hand-written extension; the decisions for the creator, each with a recommendation and alternatives.
 4. Commit, push, open a PR to `main`; T17.0 stays in progress until the creator approves.
+
+Progress: steps 1–3 are done. `research.md` §22 holds the prior art with sources, and `docs/extension-catalogs-design.md` the proposal: hyphen prefixes declared by the catalog author (`"prefix": "acme"`), libraries that define only their own kinds while the one unprefixed project catalog extends core and library kinds widen-only, `catalog` as an ordered array of files and `{ "package" }` entries, `requires` with Cargo-style versions, codes `W711`–`W714`, packages found through a `weft.catalog` field in `package.json` with no network, and a curated list in the docs instead of a registry service. Twelve decisions for the creator close the document. Remaining: the creator's approval, and any revisions it asks for.
 
 ### T17.1. Extension catalogs: spec and loader
 

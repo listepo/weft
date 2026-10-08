@@ -113,7 +113,7 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | Streaming and incremental generation | Open. Flat id lists in A2UI and json-render exist for progressive rendering; nested markup has to show it can do the same | `roadmap.md` |
 | Host capabilities | Answered for MCP hosts: `weft_capabilities` reports the format version, catalogs, token paths and action names the host checks (T10); other hosts are not covered | SPEC §8, `packages/mcp` |
 | Layout without becoming CSS | Open: only `stack` and `grid` | `roadmap.md` |
-| Who keeps a registry of extension catalogs | Open | `roadmap.md` |
+| Who keeps a registry of extension catalogs | Proposal (T17.0, not approved): no service; a curated list in the docs, an npm keyword, author-declared kind prefixes | `docs/extension-catalogs-design.md`, §22 |
 | Figma as a source | Open | `roadmap.md` |
 
 ## 10. Project files (T31)
@@ -288,3 +288,56 @@ Checked on 2026-10-05. Apple pages were read as their documentation JSON (`devel
 | Whether `Model3D` runs on iOS | No: in the iOS 27.0 simulator SDK, `_RealityKit_SwiftUI.swiftinterface` declares `Model3D` as `@available(visionOS 1.0, *)` with `iOS`, `macOS`, `tvOS`, `watchOS` unavailable; `RealityView` is `iOS 18.0`, `macOS 15.0` | `Xcode.app/.../iPhoneSimulator27.0.sdk/System/Library/Frameworks/_RealityKit_SwiftUI.framework/.../arm64-apple-ios-simulator.swiftinterface` (Xcode on this machine, 2026-10-06) |
 | Model formats per platform | model-viewer loads glTF 2.0 (`.glb`, `.gltf`); RealityKit loads USDZ (and `.reality`); neither reads the other's format, so the element carries both paths | https://modelviewer.dev/docs/ and Apple's RealityKit documentation (the SDK interface above shows no glTF loader) |
 | Design tools cannot draw a 3D tilt | The plugin APIs give a layer a 2D `rotation` (degrees) and a 2D affine `relativeTransform`; neither has a perspective or an axis | https://developers.figma.com/docs/plugins/api/properties/nodes-rotation/ (2026-10-06); Penpot's shape `rotation` in `packages/penpot/src/api.ts` |
+
+## 22. Extension catalogs (T17)
+
+Prior art for loading several catalogs at once: how component vocabularies are namespaced, shipped and found. Checked on 2026-10-08 unless a row says otherwise. The proposal built on it is `docs/extension-catalogs-design.md` (T17.0).
+
+### Namespacing
+
+| Fact | Finding | Source (checked) |
+| --- | --- | --- |
+| Custom element names carry a hyphen, and nothing assigns prefixes | A valid custom element name contains `-`, starts with an ASCII lower alpha, has no ASCII upper alpha and is not one of eight reserved SVG/MathML names. The definition says nothing about who owns a prefix; there is no prefix registry in the standard | https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name (Living Standard, last updated 2026-10-07) |
+| Collisions on the web are now solved by scoping, not by names | The HTML Standard defines scoped registries: `new CustomElementRegistry()` makes a scoped registry, and "a node with an associated scoped CustomElementRegistry will use that registry for all its operations". So a page can use two libraries' `ui-button` in different shadow roots, while one flat document still cannot | Same page (2026-10-07) |
+| A Custom Elements Manifest names no package and no prefix | The `Package` interface has `schemaVersion`, `readme`, `modules` and `deprecated` and no `name`; the only name is each element's `tagName`. So an importer can see a prefix only by reading the tags | https://raw.githubusercontent.com/webcomponents/custom-elements-manifest/main/schema.d.ts (schema 2.1.0) |
+| A colon in an XML name means a namespace | XML 1.0: the Namespaces recommendation "assigns a meaning to names containing colon characters", so "authors should not use the colon in XML names except for namespace purposes", though processors must accept it | https://www.w3.org/TR/xml/ §2.3 (Fifth Edition, 2008-11-26) |
+| An undeclared prefix breaks namespace-aware readers | A prefix must be declared with `xmlns:prefix` on the element or an ancestor ("Prefix Declared"); a document that breaks a namespace constraint can be well-formed XML 1.0 but is not namespace-well-formed, and processors must report it | https://www.w3.org/TR/xml-names/ §4, §8 (Third Edition, 2009-12-08) |
+| ESLint: the plugin author proposes a namespace, the user may pick another | A plugin's `meta.namespace` "should match the prefix you'd like users to use"; in a config the namespace is the key of the `plugins` object, and "you don't need to use the same name that the plugin prescribes. You can specify any prefix that you'd like"; rules are written `example/rule` | https://eslint.org/docs/latest/extend/plugins and https://eslint.org/docs/latest/use/configure/plugins (v10.12.0 docs) |
+| shadcn: namespaces are chosen by the consumer | Registries are declared in `components.json` under `registries` as `@name` → URL template with `{name}`; items are addressed `@acme/button`; "Since there's no central authority, you don't need to worry about namespace collisions"; when two items write the same file, the later one wins | https://ui.shadcn.com/docs/registry/namespace |
+| Slint: library imports are renamed at the import | `import { Button as CoolButton } from "../other_theme/button.slint"` is the documented answer when two files export the same name; library paths (`@mylibrary/switch.slint`) are mapped to local directories at compile time (`with_library_paths`, `-Lmylibrary=…`), never fetched | https://releases.slint.dev/1.7.1/docs/slint/src/language/syntax/modules (1.7.1); https://docs.slint.dev/latest/docs/slint/guide/language/coding/file/ (next) |
+| Swift: the module is the unit of distribution | "A module is a single unit of code distribution … that can be imported by another module with Swift's `import` keyword" | https://github.com/swiftlang/swift-book/blob/main/TSPL.docc/LanguageGuide/AccessControl.md (main) |
+| Swift: a module name qualifies a type (`Foundation.Date`) | Common practice for resolving two modules' equal type names | **unverified** (not found in the pages read) |
+| A2UI: one catalog per surface, identified by a URI | A catalog is a JSON Schema of components, functions and themes; `catalogId` is by convention a URI and should equal the file's `$id`; the client sends `supportedCatalogIds` in preference order and the agent picks one per surface for its lifetime; a final catalog is standalone (no external references), built by a linking step; a custom catalog extends the basic one with `allOf` and `$ref`. Component names are plain (`SuggestionChips`), with no namespacing guidance | https://a2ui.org/concepts/catalogs/ (v0.9 page) |
+
+### Distribution and discovery
+
+| Fact | Finding | Source (checked) |
+| --- | --- | --- |
+| A package points at its manifest with a custom `package.json` field | "customElements": "custom-elements.json", a path relative to the package root | https://github.com/webcomponents/custom-elements-manifest (README, schema 2.1.0) |
+| npm documents no rule for custom fields | The `package.json` page documents named fields only; it does not say arbitrary fields are allowed (the CEM field above shows the practice) | https://docs.npmjs.com/cli/v11/configuring-npm/package-json (npm 11.21.0) |
+| What a published package always contains | `files` lists what is included; `package.json`, the README, the LICENSE, the `main` file and the `bin` files are always included | Same page |
+| `exports` hides every other file from module resolution, not from the disk | "When the `exports` field is defined, all subpaths of the package are encapsulated", `require('pkg/subpath.js')` throws `ERR_PACKAGE_PATH_NOT_EXPORTED`, while a direct absolute path still loads. `package.json` itself is hidden unless exported | https://nodejs.org/api/packages.html (Node v26.11.1) |
+| Node finds packages by walking up | From the requiring file's directory, Node tries `./node_modules`, then each parent's `node_modules`, up to the root of the file system | https://nodejs.org/api/modules.html, "Loading from node_modules folders" (Node v26.11.1) |
+| npm scopes are owned | Signing up or creating an organization grants "a scope that matches your user or organization name", used as a namespace for related packages | https://docs.npmjs.com/about-scopes (page edited 2023-10-23) |
+| Packages can be found by keyword | The registry search `GET /-/v1/search?text=keywords:<word>` filters by `package.json` keywords | https://github.com/npm/registry/blob/main/docs/REGISTRY-API.md |
+| ESLint uses a name prefix and keywords for discovery | Plugin packages are named `eslint-plugin-<name>` or `@<scope>/eslint-plugin-<name>` and list the keywords `eslint`, `eslintplugin`, `eslint-plugin` | https://eslint.org/docs/latest/extend/plugins (v10.12.0 docs) |
+| Integrity is a hash string | Subresource Integrity metadata is `sha256-`, `sha384-` or `sha512-` followed by a base64 digest; npm's lockfile `integrity` is "a sha512 or sha1 Standard Subresource Integrity string" | https://www.w3.org/TR/sri-2/ (Working Draft, 2026-03-20); https://docs.npmjs.com/cli/v11/configuring-npm/package-lock-json (npm 11) |
+| A bare version is a compatibility range | Cargo: "`log = "^1.2.3"` is exactly equivalent to `log = "1.2.3"`"; compatibility is decided by the left-most non-zero component, so `0.2.3` means `>=0.2.3, <0.3.0` | https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html |
+| A schema's identity is a URI, and URIs are not fetched | `$id` "MUST resolve to an absolute-URI"; implementations "SHOULD NOT assume they should perform a network operation when they encounter a network-addressable URI" and "SHOULD understand ahead of time which schemas they will be using" | https://json-schema.org/draft/2020-12/json-schema-core §8.2.1, §8.2.3, §9.1.2 (2020-12) |
+
+### Registries
+
+| Fact | Finding | Source (checked) |
+| --- | --- | --- |
+| shadcn keeps a curated directory in its repository | A registry is added by a pull request that edits `apps/v4/registry/directory.json` in `shadcn-ui/ui`, after `pnpm validate:registries`; "it will be validated and reviewed by the team"; listed registries are "built into the CLI with no additional configuration required"; a registry must be open source and public | https://ui.shadcn.com/docs/registry/registry-index; https://ui.shadcn.com/docs/directory |
+| shadcn items name their dependencies across registries | `registryDependencies` takes bare names (shadcn/ui items), `@namespace/item`, `owner/repo/item` or a URL of an item file | https://ui.shadcn.com/docs/registry/registry-item-json |
+| SchemaStore is a community-kept index of URLs | Maintained by volunteers ("owned by the community"), changed by pull requests to its GitHub repository; `catalog.json` lists `name`, `description`, `url` and `fileMatch`, which editors use to pick a schema | https://www.schemastore.org/ |
+
+### Design tools
+
+| Fact | Finding | Source (checked) |
+| --- | --- | --- |
+| Figma: a library is a published file, and its name is the file's | "A library inherits its name from the source file"; changes reach users only after publishing; Organization and Enterprise plans publish to a team or the whole organization | https://help.figma.com/hc/en-us/articles/360025508373-Publish-a-library |
+| Figma plugins import library components by key, and cannot list them | `importComponentByKeyAsync(key)` and `importComponentSetByKeyAsync(key)` load a published component; `ComponentNode.key` is that key; `TeamLibraryAPI` lists only variable collections and variables | `@figma/plugin-typings` 1.140.0 (`plugin-api.d.ts`) |
+| Penpot: any file can be published as a shared library and connected to others | Connected libraries are listed one by one in the assets panel; unpublishing disconnects them, and assets already used stay but lose the link | https://help.penpot.app/user-guide/design-systems/libraries/ |
+| Penpot plugins can connect libraries | `LibraryContext` has `local`, `connected: Library[]`, `availableLibraries()` and `connectLibrary(libraryId)` | `@penpot/plugin-types` 1.5.0 (`index.d.ts`) |
