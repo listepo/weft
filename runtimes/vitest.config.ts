@@ -19,6 +19,7 @@ if (!runtimes.includes(runtime as Runtime)) {
 // a temporary directory stay on the runtimes that have one. A new suite runs in the browser too
 // until it is listed here, so a file-reading test fails loudly instead of silently skipping it.
 const needsFileSystem = [
+  "packages/core/test/cem.test.ts",
   "packages/core/test/cli.test.ts",
   "packages/core/test/compat.test.ts",
   "packages/core/test/differential.test.ts",
