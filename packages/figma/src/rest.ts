@@ -106,14 +106,28 @@ function componentProperties(value: unknown): FComponentProperties {
 }
 
 export type RestOptions = {
-  /** The plugin whose plugin data the response carries (`plugin_data=<id>`). */
+  /**
+   * The plugin whose private plugin data the response carries (`plugin_data=shared,<id>`): files
+   * built before the Weft source moved to shared plugin data hold it there.
+   */
   pluginId: string;
   /** Main components by node id, from a second request; an instance of another is foreign. */
   components?: ReadonlyMap<string, Json> | undefined;
 };
 
+/** One owner's entries of `pluginData` (by plugin id) or `sharedPluginData` (by namespace). */
+const entries = (field: unknown, owner: string) => {
+  const data = isObject(field) ? own(field, owner) : undefined;
+  return (key: string) => (isObject(data) ? str(own(data, key), "") : "");
+};
+
+const readOnly = () => {
+  throw new Error("a node read through the REST API is read-only");
+};
+
 function baseOf(node: Json, pluginId: string) {
-  const data = isObject(node["pluginData"]) ? own(node["pluginData"], pluginId) : undefined;
+  const data = entries(node["pluginData"], pluginId);
+  const shared = node["sharedPluginData"];
   const box = isObject(node["absoluteBoundingBox"]) ? node["absoluteBoundingBox"] : {};
   return {
     id: str(node["id"], ""),
@@ -121,10 +135,10 @@ function baseOf(node: Json, pluginId: string) {
     visible: node["visible"] !== false,
     x: num(box["x"], 0),
     y: num(box["y"], 0),
-    getPluginData: (key: string) => (isObject(data) ? str(own(data, key), "") : ""),
-    setPluginData: () => {
-      throw new Error("a node read through the REST API is read-only");
-    },
+    getPluginData: data,
+    getSharedPluginData: (namespace: string, key: string) => entries(shared, namespace)(key),
+    setPluginData: readOnly,
+    setSharedPluginData: readOnly,
   };
 }
 

@@ -9,7 +9,10 @@ import { NO_VARIABLES, restNode } from "./rest.ts";
 
 export const FIGMA_API = "https://api.figma.com";
 
-/** The plugin id of `plugins/figma/manifest.json`, whose plugin data holds the Weft source. */
+/**
+ * The plugin id of `plugins/figma/manifest.json`, whose private plugin data holds the Weft source of
+ * files built before it moved to shared plugin data (`NAMESPACE`).
+ */
 export const PLUGIN_ID = "weft-development";
 
 /** A frame's JSON is far below this; a larger response is refused before it is parsed. */
@@ -90,7 +93,8 @@ async function getNodes(
 ): Promise<Record<string, unknown>> {
   const query = new URLSearchParams({
     ids: ids.join(","),
-    plugin_data: options.pluginId ?? PLUGIN_ID,
+    // Shared data holds the Weft source; the plugin's private data, files built before T14.2.
+    plugin_data: `shared,${options.pluginId ?? PLUGIN_ID}`,
   });
   if (depth !== undefined) query.set("depth", String(depth));
   const url = `${options.api ?? FIGMA_API}/v1/files/${encodeURIComponent(options.fileKey)}/nodes?${query}`;

@@ -13,6 +13,7 @@ import {
   tokenPx,
 } from "@weft/design-tool";
 import type { FCollection, FigmaApi, FRGBA, FVariable } from "./api.ts";
+import { dataOf } from "./data.ts";
 
 export function variableValue(
   token: Token | undefined,
@@ -33,7 +34,7 @@ export function writeModes(
   modifier: TokenModifier,
   notes: string[],
 ): void {
-  collection.setPluginData(KEY.modifier, modifier.name);
+  dataOf(collection).setPluginData(KEY.modifier, modifier.name);
   if (
     collection.modes.find((m) => m.modeId === collection.defaultModeId)?.name !== modifier.default
   )
@@ -81,7 +82,7 @@ export async function readModes(
   tokens: ReadonlyMap<string, Token>,
 ): Promise<Record<string, unknown> | undefined> {
   const collection = (await api.variables.getLocalVariableCollectionsAsync()).find(
-    (c) => readMark(c, KEY.library) !== undefined,
+    (c) => readMark(dataOf(c), KEY.library) !== undefined,
   );
   if (collection === undefined || collection.modes.length < 2) return undefined;
   const variables = (await api.variables.getLocalVariablesAsync()).filter(
@@ -93,7 +94,7 @@ export async function readModes(
     if (contexts.has(mode.name)) continue;
     const context = new Map(tokens);
     for (const v of variables) {
-      const path = readMark(v, KEY.token);
+      const path = readMark(dataOf(v), KEY.token);
       if (path === undefined) continue;
       const token = modeToken(tokens.get(path), v.valuesByMode[mode.modeId]);
       if (token !== undefined) context.set(path, token);
@@ -101,7 +102,7 @@ export async function readModes(
     contexts.set(mode.name, context);
     if (mode.modeId === collection.defaultModeId) fallback = mode.name;
   }
-  const name = readMark(collection, KEY.modifier) ?? "mode";
+  const name = readMark(dataOf(collection), KEY.modifier) ?? "mode";
   const first = contexts.keys().next().value as string;
   return resolverDocument({ name, default: fallback ?? first, contexts });
 }

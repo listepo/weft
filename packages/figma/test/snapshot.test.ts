@@ -4,6 +4,7 @@
 // data) a diff someone reviews. Update with `vitest -u` after reviewing the change.
 import { expect, test } from "vitest";
 import { layerTree } from "../../design-tool/test/layer-tree.ts";
+import { NAMESPACE } from "../src/data.ts";
 import type { FakeFigma, FakeFrame } from "./fake-figma.ts";
 import { built, corpusMarkup, corpusNames } from "./helpers.ts";
 
@@ -13,6 +14,7 @@ type Layer = {
   name?: string;
   children?: Layer[];
   data?: Map<string, string>;
+  shared?: Map<string, Map<string, string>>;
 };
 
 async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
@@ -26,7 +28,18 @@ async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
   return layerTree(frame, {
     children: (layer) => (layer as Layer).children,
     heading: (layer) => `${(layer as Layer).type} ${JSON.stringify((layer as Layer).name)}`,
-    skip: new Set(["id", "type", "name", "parent", "figma", "children", "data", "x", "y"]),
+    skip: new Set([
+      "id",
+      "type",
+      "name",
+      "parent",
+      "figma",
+      "children",
+      "data",
+      "shared",
+      "x",
+      "y",
+    ]),
     defaults: {
       visible: true,
       rotation: 0,
@@ -57,7 +70,13 @@ async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
       size: 12,
     },
     extra: (layer) =>
-      [...((layer as Layer).data ?? new Map())]
+      [
+        // The Weft source is shared plugin data; private data shows only if something still writes it.
+        ...((layer as Layer).shared?.get(NAMESPACE) ?? new Map<string, string>()),
+        ...[...((layer as Layer).data ?? new Map<string, string>())].map(
+          ([k, v]) => [`private ${k}`, v] as const,
+        ),
+      ]
         .sort(([a], [b]) => (a < b ? -1 : 1))
         .map(([k, v]) => `${k} = ${v}`),
     ids,

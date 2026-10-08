@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { NAMESPACE } from "@weft/figma";
 import { FIGMA_API, PLUGIN_ID } from "@weft/figma/pull";
 import { afterAll, afterEach, beforeAll, describe, test } from "vitest";
 import { built, corpusMarkup } from "../../../packages/figma/test/helpers.ts";
@@ -30,10 +31,14 @@ afterEach(async () => {
   server = undefined;
 });
 
-/** The login screen in a served fake file; the link that names its frame. */
-async function login(writer = PLUGIN_ID): Promise<{ link: string }> {
+/**
+ * The login screen in a served fake file; the link that names its frame. With `writer`, the file
+ * is one built before T14.2, its Weft source in the private plugin data of that plugin id.
+ */
+async function login(writer?: string): Promise<{ link: string }> {
   const { figma, frame } = await built(corpusMarkup("login"));
-  const served = await serveFile(figma, writer);
+  if (writer !== undefined) figma.privateDataFor(NAMESPACE);
+  const served = await serveFile(figma, writer ?? PLUGIN_ID);
   server = served;
   return {
     link: `https://www.figma.com/design/${FILE_KEY}/Login?node-id=${frame.id.replace(":", "-")}`,
@@ -86,7 +91,7 @@ describe("a pulled frame", () => {
 });
 
 describe("import.figma in weft.json", () => {
-  test("outDir places the screen and pluginId names the plugin whose data is read", async () => {
+  test("outDir places the screen and pluginId names the plugin whose private data an old file holds", async () => {
     const { link } = await login("1234567890");
     const cwd = work();
     writeFileSync(
