@@ -63,7 +63,8 @@ private func tokensCommand(for project: WeftProject, tool: URL, workDirectory: U
     .buildCommand(
         displayName: "Weft: generate WeftTokens.swift from \(project.file.lastPathComponent)",
         executable: tool,
-        arguments: ["swiftui-tokens", "--project", project.file.path, "--out-dir", workDirectory.path],
+        // The work directory holds only this plugin's outputs, which every rebuild replaces.
+        arguments: ["swiftui-tokens", "--project", project.file.path, "--out-dir", workDirectory.path, "--force"],
         inputFiles: [project.file] + project.resources,
         outputFiles: [workDirectory.appendingPathComponent("WeftTokens.swift")]
     )
@@ -86,7 +87,7 @@ private func weftCommand(for document: URL, project: WeftProject?, tool: URL, ro
     return .buildCommand(
         displayName: "Weft: generate SwiftUI from \(document.lastPathComponent)",
         executable: tool,
-        arguments: ["swiftui", document.path] + projectArguments + ["--out-dir", outDirectory.path],
+        arguments: ["swiftui", document.path] + projectArguments + ["--out-dir", outDirectory.path, "--force"],
         inputFiles: [document] + (project.map { [$0.file] + $0.resources } ?? []),
         outputFiles: [output]
     )
