@@ -304,10 +304,32 @@
           },
           "additionalProperties": false,
           "description": "Slint source files (`weft import-slint`)."
+        },
+        "cem": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The name of the imported catalog. Default: the manifest's file name without its extension."
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The version of the imported catalog.",
+              "default": "0.0.0"
+            }
+          },
+          "additionalProperties": false,
+          "description": "Catalogs from a Custom Elements Manifest (`weft import-cem`)."
         }
       },
       "additionalProperties": false,
-      "description": "Screens imported from other formats, one section per source."
+      "description": "Screens imported from other formats, and catalogs from a Custom Elements Manifest, one section per source."
     },
     "mcp": {
       "type": "object",

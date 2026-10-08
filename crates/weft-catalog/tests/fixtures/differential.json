@@ -18080,7 +18080,7 @@
       "severity": "warning",
       "message": "Unknown key \"figma\" in \"import\".",
       "path": "#/import/figma",
-      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\", \"a2ui\", \"slint\"",
+      "expected": "one of: \"html\", \"react\", \"solid\", \"swiftui\", \"a2ui\", \"slint\", \"cem\"",
       "got": "figma"
      },
      {

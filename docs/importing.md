@@ -1,4 +1,4 @@
-# Importing HTML
+# Importing HTML and component libraries
 
 Importing turns something that already exists, a web page or an accessibility snapshot, into a Weft screen, so you can start from the real thing and refine it with the [MCP tools](mcp.md) instead of writing from nothing.
 
@@ -167,6 +167,30 @@ ids, bindings, actions, tokens, layout, repetition, slots, hidden, props
 ```
 
 `fromDom` does the same for HTML in a string. Both return `{ document, losses, diagnostics }`.
+
+## A catalog from a Custom Elements Manifest
+
+A page becomes a screen; a component library becomes a catalog. A web component library that publishes a [Custom Elements Manifest](https://github.com/webcomponents/custom-elements-manifest) (`custom-elements.json`, schema 2.x) can bring its elements into Weft as kinds, so screens use `<acme-button>` with checked props and events:
+
+```console
+$ weft import-cem node_modules/acme-ui/custom-elements.json --name acme-ui --version 2.0.0 --out-dir catalogs
+```
+
+That writes `catalogs/custom-elements.catalog.json`, a catalog extension: name it as the `catalog` of your `weft.json` ([Projects](projects.md)) and the kinds sit beside the core ones. Each custom element is a kind with the role `generic` (a manifest has no roles); attributes and public, writable fields are props (`boolean`, `number`, `string`, or an `enum` of string literals); slots are slots; events are events, camelCase names becoming kebab-case. The losses on stderr list the rest: methods, private, static and read-only members, CSS parts and properties, event payload types, and any name that is not a Weft name. An element whose tag the project's catalog already has is left out, so importing again after adding the result to the project gives nothing new.
+
+From TypeScript:
+
+```ts
+import { importCem } from "@weft/core/cem";
+
+const { catalog, losses, diagnostics } = importCem(manifestText, {
+  catalog: coreCatalog, // the catalog the result extends
+  name: "acme-ui",
+  version: "2.0.0",
+});
+```
+
+The manifest is parsed as data and never run. A file over 10 MB is not read; more than 2000 elements, or more than 1000 members in one list, is cut with `W602`; input that is not a manifest of schema 2.x is `W601`. The full mapping is in SPEC §9.
 
 ## Safe input
 

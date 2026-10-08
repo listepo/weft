@@ -32,5 +32,7 @@ export {
 } from "./rules.ts";
 export { serialize } from "./serialize.ts";
 export { formatValue, readValue, type ReadValue } from "./values.ts";
+export type { CemImport, CemOptions } from "./cem.ts";
+export type { Loss, LossKind } from "./loss.ts";
 export type { ListSource, NodeSource, SourceMap } from "./source.ts";
 export { validate, type ValidateOptions } from "./validate.ts";

@@ -1,6 +1,6 @@
-//! The web importers and generators of `weft-web`, in the `web` feature only: the WebAssembly
-//! module behind `@weft/core/web` has it, so core-only consumers do not carry the HTML and JSX
-//! parsers; the native addon always does.
+//! The web importers and generators of `weft-web`, and the Custom Elements Manifest importer of
+//! `weft-import`, in the `web` feature only: the WebAssembly module behind `@weft/core/web` has
+//! it, so core-only consumers do not carry the HTML and JSX parsers; the native addon always does.
 
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
@@ -8,8 +8,8 @@ use weft_catalog::{DEFAULT_TOKENS_JSON, Token, load_tokens};
 use weft_core::to_document;
 use weft_core::{Catalog, Code, Diagnostic};
 use weft_import::{
-    BuildOptions, DISSOLVED_ROLES, ROLE_DEFAULTS, ROLE_REFINEMENTS, Sem, build_document,
-    empty_result,
+    BuildOptions, CemOptions, DISSOLVED_ROLES, ROLE_DEFAULTS, ROLE_REFINEMENTS, Sem,
+    build_document, empty_result,
 };
 use weft_web::{Framework, HtmlOptions, ImportOptions, JsxOptions};
 
@@ -253,6 +253,30 @@ pub fn import_jsx(
     ))
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CemWire {
+    name: String,
+    version: String,
+}
+
+/// `importCem`: `{catalog, losses, diagnostics}` of a Custom Elements Manifest, the catalog an
+/// extension of `base`.
+pub fn import_cem(manifest: &str, options: &str, base: &Catalog) -> Result<String> {
+    let wire: CemWire = serde_json::from_str(options).map_err(|source| BindingError::Wire {
+        what: "manifest import options",
+        source,
+    })?;
+    write(&weft_import::import_cem(
+        manifest,
+        &CemOptions {
+            name: &wire.name,
+            version: &wire.version,
+            base,
+        },
+    ))
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct JsxTables {
@@ -332,6 +356,21 @@ mod tests {
         assert_eq!(back["document"]["root"]["kind"], "screen", "{back}");
         let refused = to_html(Some(r#"{"weft":"0.1"}"#), None, "{}", &catalog).unwrap();
         assert!(refused.starts_with(r#"{"diagnostics":"#), "{refused}");
+    }
+
+    #[test]
+    fn a_manifest_comes_back_as_a_catalog_through_the_wire() {
+        let catalog = weft_catalog::core_catalog().unwrap();
+        let manifest = r#"{"schemaVersion":"2.1.0","modules":[{"kind":"javascript-module","path":"x.js","declarations":[{"kind":"class","name":"X","customElement":true,"tagName":"acme-x","attributes":[{"name":"open","type":{"text":"boolean"}}]}]}]}"#;
+        let out = import_cem(manifest, r#"{"name":"acme","version":"1.0.0"}"#, &catalog).unwrap();
+        let value: serde_json::Value = serde_json::from_str(&out).unwrap();
+        assert_eq!(value["catalog"]["name"], "acme", "{value}");
+        assert_eq!(
+            value["catalog"]["components"]["acme-x"]["props"]["open"]["type"],
+            "boolean"
+        );
+        assert!(value["losses"].is_array() && value["diagnostics"].is_array());
+        assert!(import_cem(manifest, r#"{"name":"acme"}"#, &catalog).is_err());
     }
 
     #[test]

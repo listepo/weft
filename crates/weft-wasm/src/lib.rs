@@ -115,6 +115,13 @@ impl Catalog {
         )?)
     }
 
+    /// A catalog from a Custom Elements Manifest that extends this one, with its losses.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = importCem)]
+    pub fn import_cem(&self, manifest: &str, options: &str) -> Result<String, JsError> {
+        Ok(web::import_cem(manifest, options, &self.0)?)
+    }
+
     #[wasm_bindgen(js_name = checkData)]
     pub fn check_data(
         &self,

@@ -77,9 +77,10 @@ private func convert(_ arguments: [String], tool: URL, root: URL) throws {
         if FileManager.default.fileExists(atPath: output.path) && !force {
             throw Failure(description: "\(output.path) exists; pass --force to replace it")
         }
+        // `--force` because the overwrite was decided above; weft would refuse every re-export.
         try run(
             tool, [direction.subcommand, document.path] + (project.map { ["--project", $0.file.path] } ?? ["--no-project"])
-                + ["--out-dir", directory.path])
+                + ["--out-dir", directory.path, "--force"])
         print("wrote \(output.path)")
         if direction.section == "export", let project, project.sharesTokens {
             try writeTokens(of: project, to: directory, tool: tool, force: force)
@@ -96,7 +97,7 @@ private func writeTokens(of project: WeftProject, to directory: URL, tool: URL, 
     {
         throw Failure(description: "\(output.path) exists and weft did not write it; pass --force to replace it")
     }
-    try run(tool, ["swiftui-tokens", "--project", project.file.path, "--out-dir", directory.path])
+    try run(tool, ["swiftui-tokens", "--project", project.file.path, "--out-dir", directory.path, "--force"])
     print("wrote \(output.path)")
 }
 

@@ -1,7 +1,8 @@
 //! `weft validate`, `weft fmt`, `weft explain`, and the generators and importers of SPEC §9:
 //! SwiftUI (`weft swiftui`, `weft import-swiftui`, in `swiftui.rs`), Slint (`weft slint`,
 //! `weft import-slint`, in `slint.rs`) and the web targets (`weft
-//! html|react|solid`, `weft import-html|import-react|import-solid`, in `web.rs`). The project file (`weft.json`, SPEC §10) found
+//! html|react|solid`, `weft import-html|import-react|import-solid`, in `web.rs`), and `weft
+//! import-cem`, a catalog from a Custom Elements Manifest (in `cem.rs`). The project file (`weft.json`, SPEC §10) found
 //! above the document, or given with `--project`, supplies the catalog, tokens, actions and data
 //! schema, and the settings of §10.6 (`validate.mode`, `format.write`); a flag overrides the
 //! project, which overrides the default. `--catalog` replaces the project's catalog. Without
@@ -9,6 +10,7 @@
 //! 2 usage or I/O failure.
 
 mod a2ui;
+mod cem;
 mod convert;
 mod slint;
 mod swiftui;
@@ -337,6 +339,31 @@ enum Command {
     /// Read A2UI v0.9 messages (a JSON array, one object or JSON Lines) back into markup; losses
     /// go to stderr.
     ImportA2ui(A2uiArgs),
+    /// Turn a Custom Elements Manifest into a catalog that extends the project's; losses and
+    /// diagnostics go to stderr.
+    ImportCem {
+        /// The manifest (`custom-elements.json`, schema 2.x), at most 10 MB.
+        file: PathBuf,
+        /// The catalog's name (default: the project's `import.cem.name`, else the file stem).
+        #[arg(long)]
+        name: Option<String>,
+        /// The catalog's version (default: the project's `import.cem.version`, else 0.0.0).
+        #[arg(long)]
+        version: Option<String>,
+        /// Catalog JSON the result extends; replaces the project's catalog (default: the core
+        /// catalog). Its kinds are left out of the result.
+        #[arg(long)]
+        catalog: Option<PathBuf>,
+        #[command(flatten)]
+        project: ProjectArgs,
+        /// Write `<file stem>.catalog.json` here instead of printing (default: the project's
+        /// `import.cem.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 /// A conversion to or from A2UI.
@@ -789,6 +816,26 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
         Command::ImportSolid(args) => web_import(web::Target::Solid, args, out),
         Command::A2ui(args) => a2ui::export(args.into(), out),
         Command::ImportA2ui(args) => a2ui::import(args.into(), out),
+        Command::ImportCem {
+            file,
+            name,
+            version,
+            catalog,
+            project,
+            out_dir,
+            force,
+        } => cem::import(
+            cem::Args {
+                file,
+                name,
+                version,
+                catalog,
+                project,
+                out_dir,
+                force,
+            },
+            out,
+        ),
     }
 }
 

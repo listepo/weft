@@ -38,7 +38,7 @@ pub struct CemOptions<'a> {
     pub base: &'a Catalog,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize)]
 pub struct CemImport {
     pub catalog: Catalog,
     pub losses: Vec<Loss>,
