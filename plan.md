@@ -14,7 +14,9 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T73 | todo | P2 | 2 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
-| T12 | todo | P2 | 3 | 0% | |
+| T12.1 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
+| T12.2 | todo | P2 | 3 | 0% | |
+| T12.3 | todo | P2 | 4 | 0% | |
 | T16 | todo | P2 | 5 | 0% | |
 | T17 | todo | P2 | 4 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
@@ -207,44 +209,67 @@ Not started; nothing is built until the creator approves the plan of the first m
 
 There is no `.github/` in the repo; the documented merge gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md:50) runs only by hand — and publishing from GitHub (T32) will need it. Done means: the gate runs as a workflow on pull requests (and on main once the repo has a remote).
 
-### T12. Constrained generation
+### T12.1. Constrained generation: document JSON Schema from a catalog
 
-Today a model writes Weft markup as free text, and only the validator catches its mistakes after the fact. Provider structured-output modes take a JSON Schema and constrain decoding to it (`research.md` §3 lists this as the main advantage of JSON Schema). If the schema is built from the catalog, a model writing canonical JSON (SPEC §3) cannot produce an unknown kind, an undeclared prop, a wrong enum value, an undeclared slot or a child kind that is not allowed. This task builds that schema from any catalog. It then measures whether constrained JSON beats free markup on validity and edit success, and what it costs in output tokens.
+Today a model writes Weft markup as free text, and only the validator catches its mistakes after the fact. Provider structured-output modes take a JSON Schema and constrain decoding to it (`research.md` §3 lists this as the main advantage of JSON Schema). If the schema is built from the catalog, a model writing canonical JSON (SPEC §3) cannot produce an unknown kind, an undeclared prop, a wrong enum value, an undeclared slot or a child kind that is not allowed. T12 builds that schema from any catalog (T12.1), puts it behind the bindings, CLI and MCP (T12.2), and measures whether constrained JSON beats free markup on validity and edit success, and what it costs in output tokens (T12.3). The task was split this way when T12.1 was claimed.
 
 **Context.**
 - `packages/core/src/schema.ts` already exports `documentJsonSchema()` and `catalogJsonSchema()`, generated from the Zod model in `packages/core/src/model.ts`, which knows no catalog (`kind: z.string()`, `props` a record of any `Value`). They are only tested for shape (`packages/core/test/cli.test.ts`). Behaviour changes go into the Rust crates, never into a TypeScript copy.
 - The catalog model is `Catalog`/`ComponentDef`/`PropDef`/`SlotDef` in `crates/weft-core/src/model.rs` (SPEC §5); the merged project catalog comes from `crates/weft-catalog/src/project.rs` (`Project.catalog`, SPEC §10.4).
 - The schema can express most catalog rules: prop type, enum `values`, `min`/`max`/`integer`, `required`, `bindable` (whether a `{bind, not?}` object is allowed), `{token}` for token props, `states`, `events`, slots, `content`, `allowedChildren`/`allowedParents`, and the `root` kind. These stay in the semantic layer (SPEC §6): unique ids, loop scope, `references`, text given both as content and as a prop (`W310`), a submit button outside a form, `W317`, tokens, actions and the data schema.
 - `weft validate` already accepts `.json` documents (`crates/weft-cli/src/main.rs`); `weft-binding` has `canonicalize_document`, so key order in a reply does not matter. The workspace already has `jsonschema` as a dev dependency (`crates/weft-snapshots`, used for the A2UI schemas).
-- The benchmark has no structured output: `bench/src/provider.ts` has `Provider.complete(prompt: string)` only (Anthropic Messages and batches, and an OpenAI-compatible `/chat/completions` endpoint for LM Studio). The formats are `weft`, `html`, `jsx` and `a2ui` (`bench/src/neutral.ts`, `formats.ts`); replies are taken from a code fence (`extractDocument`). The method is in `test.md` (strict validation, one repair prompt, 3 samples, a History row for every kept run); `bench/src/primers.ts` changes only as a method change.
-- The repository records nothing about what each provider supports for structured output (recursive `$ref`, `anyOf` size, schema size limits). Those facts are checked when the task is claimed and written into `research.md` with sources.
 
-**Scope.**
-- Spec: a new subsection after §3, "JSON Schema of the canonical form": how each catalog construct maps to the schema, what the schema cannot express (the semantic checks above), the dialect (2020-12), and that the generated schema is deterministic. A row in the `research.md` decisions table.
-- Generator in `crates/weft-catalog`, new module `document_schema.rs` (the name avoids a clash with `tests/schema.rs`, which generates `weft.schema.json`): `document_schema(catalog, options) -> Json`, one `$defs` entry per kind, `each`/`slot` transparent with the allowed kinds listed for each parent, project values (token names, action names) as optional `enum`s.
-- Surfaces: `documentSchema` in `weft-binding`/`weft-wasm`/`weft-node` (the `engines.test.ts` lists must still match); `@weft/core` types, with `schema.ts` delegating to the Rust core; CLI `weft schema [--catalog] [--project] [--out-dir]`; an MCP tool `weft_schema` or an argument of `weft_catalog`; `weft.json` keys for every new option (SPEC §10.6, `settings.rs`, regenerated `schemas/weft.schema.json`); `docs/cli.md`, `docs/mcp.md`, `AGENT-SPEC.md` (the MCP tool list) and the primer; rebuilt plugin `dist/` folders.
-- Benchmark: `Provider.complete(prompt, { schema? })` for Anthropic and OpenAI-compatible servers; two new formats, `weft-json` (free canonical JSON) and `weft-json-constrained`, to separate "JSON instead of markup" from "constrained instead of free"; a JSON primer and an adapter that reuses the Weft neutral tree; corpus JSON derived from `screen.weft` at run time (no second committed copy); the same repair rule; `test.md` method sections, a trial run with its History row, and a results section in the T8 evaluation report.
+**Scope.** Spec: a new subsection after §3, "JSON Schema of the canonical form": how each catalog construct maps to the schema, what the schema cannot express (the semantic checks above), the dialect (2020-12), and that the generated schema is deterministic. A row in the `research.md` decisions table. Generator in `crates/weft-catalog`, new module `document_schema.rs` (the name avoids a clash with `tests/schema.rs`, which generates `weft.schema.json`): `document_schema(catalog, options) -> Json`, one `$defs` entry per kind, `each`/`slot` transparent with the allowed kinds listed for each parent. No bindings, CLI, MCP or benchmark work.
 
-**Out of scope.** Any change to the markup format or the validator. Streaming of constrained JSON (T11 covers partial markup). Grammar-level decoding (GBNF, regex) for markup. Making constrained JSON the format agents are told to use.
+**Out of scope (all of T12).** Any change to the markup format or the validator. Streaming of constrained JSON (T11 covers partial markup). Grammar-level decoding (GBNF, regex) for markup. Making constrained JSON the format agents are told to use.
+
+**Creator's decisions (open questions 1–3 of T12).**
+1. The schema describes the catalog only: no project token, action or data-path enums for now.
+2. `x-` extension elements and attributes are left out of the constrained schema (writers run strict).
+3. The Zod `documentJsonSchema()` stays untouched in this sub-task; whether it is replaced is T12.2's question.
 
 **Done when.**
 - For the core catalog and for `examples/project`'s merged catalog, the canonical JSON of every corpus screen and catalog example validates against the generated schema.
 - A negative set is rejected by both the schema and the validator, with matching codes: unknown kind, undeclared prop, wrong enum value, child kind not allowed, undeclared slot, missing required prop, number out of range.
-- Generating the schema twice gives byte-identical output, pinned by a snapshot; the CLI, MCP and TypeScript surfaces return the same schema.
+- Generating the schema twice gives byte-identical output, pinned by a snapshot.
+
+**Dependencies.** T31 (done part: the project catalog extension). T17: once several catalogs load, the schema must cover the merged set; T12 lands first on single-extension projects.
+
+Execution plan:
+
+1. SPEC §3.1 "JSON Schema of the canonical form": the construct-to-keyword mapping (node object closed by `additionalProperties: false`, `kind` as `const`, props by type with literal, binding and token forms, `states`, `events`, slots, `content`, the allowed kinds of each list from `allowedChildren` and `allowedParents`, `each` per list, the root kind), what stays in the semantic layer, dialect 2020-12, deterministic output. `research.md` gets a T12 decisions table with its sources.
+2. `crates/weft-catalog/src/document_schema.rs`: `DocumentSchemaOptions` and `document_schema(&Catalog, &DocumentSchemaOptions) -> Json`, exported from `lib.rs`. The universal attributes come from the validator's own table in `weft-core` (a public iterator next to `universal_prop`), so the two cannot drift.
+3. Tests in `crates/weft-snapshots/tests/document_schema.rs`, which already has `jsonschema`, `insta` and the corpus helpers: the schema is valid 2020-12; the canonical JSON of every corpus screen and catalog example validates against the core schema and the `examples/project` schema (its own screens too); the negative set is rejected by both with the expected codes; two runs are byte-identical; insta snapshots of both schemas.
+4. `moon run root:changed` while iterating; the full check under the lock; close T12.1.
+
+### T12.2. Constrained generation: surfaces
+
+Put T12.1's `document_schema` behind every surface: `documentSchema` in `weft-binding`/`weft-wasm`/`weft-node` (the `engines.test.ts` lists must still match); `@weft/core` types, with `schema.ts` delegating to the Rust core; CLI `weft schema [--catalog] [--project] [--out-dir]`; an MCP tool `weft_schema` or an argument of `weft_catalog`; `weft.json` keys for every new option (SPEC §10.6, `settings.rs`, regenerated `schemas/weft.schema.json`); `docs/cli.md`, `docs/mcp.md`, `AGENT-SPEC.md` (the MCP tool list) and the primer; rebuilt plugin `dist/` folders. Done when the CLI, MCP and TypeScript surfaces return the same schema as `document_schema`.
+
+**Open questions for the creator.**
+1. Keep the generic Zod `documentJsonSchema()` alongside the catalog-aware one, or replace it? (T12 question 3.)
+2. MCP: a new `weft_schema` tool, or a `format: "json-schema"` argument on `weft_catalog`? (T12 question 4.)
+
+### T12.3. Constrained generation: benchmark
+
+Measure whether constrained JSON beats free markup on validity and edit success, and what it costs in output tokens.
+
+**Context.**
+- The benchmark has no structured output: `bench/src/provider.ts` has `Provider.complete(prompt: string)` only (Anthropic Messages and batches, and an OpenAI-compatible `/chat/completions` endpoint for LM Studio). The formats are `weft`, `html`, `jsx` and `a2ui` (`bench/src/neutral.ts`, `formats.ts`); replies are taken from a code fence (`extractDocument`). The method is in `test.md` (strict validation, one repair prompt, 3 samples, a History row for every kept run); `bench/src/primers.ts` changes only as a method change.
+- The repository records nothing about what each provider supports for structured output (recursive `$ref`, `anyOf` size, schema size limits). Those facts are checked when the task is claimed and written into `research.md` with sources.
+
+**Scope.** `Provider.complete(prompt, { schema? })` for Anthropic and OpenAI-compatible servers; two new formats, `weft-json` (free canonical JSON) and `weft-json-constrained`, to separate "JSON instead of markup" from "constrained instead of free"; a JSON primer and an adapter that reuses the Weft neutral tree; corpus JSON derived from `screen.weft` at run time (no second committed copy); the same repair rule; `test.md` method sections, a trial run with its History row, and a results section in the T8 evaluation report.
+
+**Done when.**
 - A mocked-provider test shows that the schema is sent and that the reply is scored by the same checks as every other format.
 - A trial run is in `test.md` History with its raw results in `bench/results/`, and the comparison (valid and success, first try and after repair, mean output tokens) for markup, free JSON and constrained JSON is in the evaluation report.
 
-**Dependencies.** T8 (the harness, models and evaluation report; it is in progress in `bench/src/run-tasks.ts`, so the two are sequenced). T28 step 4 (a readback method change to the same harness). T31 (done part: the project catalog extension). T17: once several catalogs load, the schema must cover the merged set; T12 can land first on single-extension projects.
+**Dependencies.** T12.1 and T12.2. T8 (the harness, models and evaluation report; it is in progress in `bench/src/run-tasks.ts`, so the two are sequenced). T28 step 4 (a readback method change to the same harness).
 
 **Open questions for the creator.**
-1. Narrow the schema with project data (token names, action names, data paths as enums), or describe the catalog only?
-2. Leave `x-` extension elements and attributes out of the constrained schema? Writers run strict, so this seems safe.
-3. Keep the generic Zod `documentJsonSchema()` alongside the catalog-aware one, or replace it?
-4. MCP: a new `weft_schema` tool, or a `format: "json-schema"` argument on `weft_catalog`?
-5. Benchmark: three-way (with the free `weft-json` format) or two-way? Which models (Anthropic plus a local LM Studio model)? What budget? Part of T8's continue/stop decision or a separate report?
-6. If a provider cannot take the schema whole (size or recursion limits): a reduced profile per provider, or report the provider as unsupported?
-
-**Split.** T12.1: spec subsection and the Rust generator with its tests. T12.2: bindings, CLI, MCP, `weft.json` keys, docs and AGENT-SPEC. T12.3: benchmark provider schema support, the two formats and primer, `test.md` method, and the trial run.
+1. Three-way (with the free `weft-json` format) or two-way? Which models (Anthropic plus a local LM Studio model)? What budget? Part of T8's continue/stop decision or a separate report? (T12 question 5.)
+2. If a provider cannot take the schema whole (size or recursion limits): a reduced profile per provider, or report the provider as unsupported? (T12 question 6.)
+3. Narrow the schema with project data (token names, action names, data paths as enums) once the measurement shows whether it is worth it? T12.1 describes the catalog only. (T12 question 1.)
 
 ### T16. Layout vocabulary
 
