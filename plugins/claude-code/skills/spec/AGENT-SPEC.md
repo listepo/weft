@@ -281,6 +281,7 @@ The instruction needs `now true while $.busy is truthy`. This line says falsy, s
 - What it shows or edits is its bindings: `{$.path}` reads, and on a writable prop also writes.
 - Content inside `<each>` appears once per item; `<slot name="empty">` shows only when a list or table has nothing to show.
 - Name things the way the document does: an action as `todo.add`, a path as `$.draft`, an element by its id.
+- Slint that was edited, or that has no `// weft:source slint` comment, comes back as a document plus losses (SPEC §9, "From Slint"). The comment is the document only when generating from it reproduces the file.
 
 ## 6. Checklist
 
