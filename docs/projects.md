@@ -145,6 +145,8 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `export.schema.outDir` | standard output | Where `weft schema` writes `document.schema.json`, the JSON Schema of the documents the project's catalog admits (`--out-dir` overrides it). |
 | `import.cem.outDir` | standard output | Where `weft import-cem` writes `<file>.catalog.json`, the catalog imported from a Custom Elements Manifest (`--out-dir` overrides it). |
 | `import.cem.name`, `import.cem.version` | the manifest's file stem; `0.0.0` | The name and version of that catalog (`--name` and `--version` override them). |
+| `import.figma.outDir` | the working directory | Where the plugins' `figma-pull` script writes `<screen id>.weft`, a Figma frame read through the REST API (an output path argument overrides it). |
+| `import.figma.pluginId` | `weft-development` | The Figma plugin whose plugin data holds the Weft source of each layer (`--plugin-id` overrides it). |
 | `mcp.limits.*` | see `packages/mcp/README.md` | The MCP server's bounds on one call: `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`. |
 | `plugins.<name>` | none | Settings of a plugin or tool Weft does not know. Weft only checks that each is an object. |
 | `plugins.open-design.tokensDir` | next to the design system | Where the Open Design plugin's `design-md` script writes the tokens it maps from a `DESIGN.md` or `tokens.css`. A file name like any other (`W703` when it is absolute or leaves the project), and an unknown key in `plugins.open-design` is `W702`. |

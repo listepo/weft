@@ -6,7 +6,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
-| T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
+| T14 | in progress | P2 | 5 | 60% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
@@ -94,10 +94,15 @@ Progress (stage 1 done, on branch `t14-figma`):
 - `docs/figma-style-overrides-design.md` waits for the creator's approval.
 - Remaining:
   - style overrides: after approval, the format extension in TS and Rust, then the Figma mapping for colors, radii and padding (only `gap` maps to a token today);
-  - CLI `weft figma pull` over the REST API;
+  - a pull from a real Figma file, to confirm the REST facts marked unverified in `packages/figma/README.md` (rotation in radians, number precision);
   - MCP / Claude Code tools (with T30);
   - a check of the plugin in the real Figma app, including the inline module script and WebAssembly in its UI iframe;
   - the open questions in the report: single components for kinds without variants, `state` as a variant axis, the manifest id, and plugin data on duplicate/detach.
+
+Execution plan, stage 2 (this round; style overrides stay out until the creator approves them):
+
+1. T14.1: the pull over the REST API — done (`done.md`).
+2. MCP / Claude Code tools through the Figma MCP server: waits for a creator decision. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. So frames built or read through it cannot carry or see the Weft source the round trip depends on. The options (move the source to shared plugin data, which the REST API also returns with `plugin_data=shared`; or keep the round trip in the Weft plugin and the pull) go to the creator.
 
 ### T31. Project file and shared resources
 

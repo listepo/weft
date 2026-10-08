@@ -276,7 +276,7 @@ The schema is indented JSON. `--out-dir` writes `document.schema.json` instead o
 ## What `weft` does not do
 
 - It does not check token names, action names or bindings without a project: those checks need your app's tokens, actions and data schema, which a `weft.json` declares ([Projects](projects.md)).
-- It does not render pages with sample data, and it does not convert to or from Figma, Penpot or json-render. Those are in the [plugin scripts](claude-code-plugin.md) and the packages.
+- It does not render pages with sample data, and it does not convert to or from Figma, Penpot or json-render. Those are in the [plugin scripts](claude-code-plugin.md) and the packages; a Figma frame comes back to Weft through the plugins' `figma-pull` script.
 - It does not apply patches. [Patches](patches.md) go through the MCP server or the library.
 
 ## The Node version

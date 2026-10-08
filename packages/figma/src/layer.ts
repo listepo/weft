@@ -1,9 +1,79 @@
 // Figma layers as the shared read-back sees them (`Layer` of @weft/design-tool). The wrapper reads
-// the node lazily, so a large file costs only what the read visits.
+// the node lazily, so a large file costs only what the read visits. It reads `ReadNode`s, the
+// read-only part of a node: Plugin API nodes are ones, and so are the REST API's once `rest.ts`
+// has checked them, so both sources share this one wrapper.
 import { KEY, readMark, type Layer, type LayerLayout } from "@weft/design-tool";
-import type { FEffect, FigmaApi, FLayout, FNode, FPaint } from "./api.ts";
-import { isContainer } from "./api.ts";
+import type {
+  FComponentProperties,
+  FEffect,
+  FLayout,
+  FMixed,
+  FOther,
+  FPaint,
+  FPluginData,
+  FRectangle,
+  FScene,
+} from "./api.ts";
 import { tokenPathOf } from "./tokens.ts";
+
+/** The layout and style fields the read-back looks at. */
+export type ReadLayout = Pick<
+  FLayout,
+  | "rotation"
+  | "layoutMode"
+  | "layoutWrap"
+  | "itemSpacing"
+  | "counterAxisAlignItems"
+  | "paddingLeft"
+  | "paddingRight"
+  | "paddingTop"
+  | "paddingBottom"
+  | "gridColumnCount"
+  | "gridRowGap"
+  | "fills"
+  | "strokes"
+  | "effects"
+  | "cornerRadius"
+  | "boundVariables"
+>;
+
+type ReadBase = FPluginData & Pick<FScene, "id" | "name" | "visible" | "x" | "y">;
+
+export type ReadContainer = ReadBase &
+  ReadLayout & {
+    readonly type: "FRAME" | "COMPONENT" | "COMPONENT_SET";
+    readonly children: readonly ReadNode[];
+  };
+
+export type ReadInstance = ReadBase &
+  ReadLayout & {
+    readonly type: "INSTANCE";
+    readonly children: readonly ReadNode[];
+    readonly componentProperties: FComponentProperties;
+    getMainComponentAsync(): Promise<(ReadBase & ReadLayout) | null>;
+  };
+
+export type ReadText = ReadBase & { readonly type: "TEXT"; readonly characters: string };
+
+export type ReadOther = ReadBase & {
+  readonly type: FRectangle["type"] | FOther["type"];
+  readonly children?: readonly ReadNode[] | undefined;
+  readonly fills?: readonly FPaint[] | FMixed | undefined;
+};
+
+/** A node as the read-back sees it; every Plugin API node (`FNode`) is one. */
+export type ReadNode = ReadContainer | ReadInstance | ReadText | ReadOther;
+
+/** Finds the design token a variable stands for; `figma.variables` is one. */
+export type VariableLookup = {
+  getVariableByIdAsync(id: string): Promise<(FPluginData & { name: string }) | null>;
+};
+
+const isReadContainer = (node: ReadNode): node is ReadContainer | ReadInstance =>
+  node.type === "FRAME" ||
+  node.type === "COMPONENT" ||
+  node.type === "COMPONENT_SET" ||
+  node.type === "INSTANCE";
 
 function paints(list: readonly FPaint[] | symbol): unknown {
   if (typeof list === "symbol") return "mixed";
@@ -22,7 +92,7 @@ const effects = (list: readonly FEffect[]): unknown =>
  * radius and padding, plus spacing on frames whose spacing is not a prop, and the effects (a
  * material's background blur) when there are any.
  */
-export function styleKey(layer: FLayout, withSpacing: boolean): string {
+export function styleKey(layer: ReadLayout, withSpacing: boolean): string {
   const key = [
     paints(layer.fills),
     paints(layer.strokes),
@@ -51,24 +121,24 @@ const NO_LAYOUT: LayerLayout = {
 };
 
 /** Wraps a node for one read; variable lookups are cached across the read. */
-export function figmaLayers(api: FigmaApi): (node: FNode) => Layer {
+export function figmaLayers(variables: VariableLookup): (node: ReadNode) => Layer {
   const paths = new Map<string, string | undefined>();
-  const wrapped = new WeakMap<FNode, Layer>();
+  const wrapped = new WeakMap<ReadNode, Layer>();
 
   const tokenOf = async (id: string | undefined): Promise<string | undefined> => {
     if (id === undefined) return undefined;
     if (paths.has(id)) return paths.get(id);
-    const variable = await api.variables.getVariableByIdAsync(id);
+    const variable = await variables.getVariableByIdAsync(id);
     const path =
       variable === null ? undefined : (readMark(variable, KEY.token) ?? tokenPathOf(variable.name));
     paths.set(id, path);
     return path;
   };
 
-  const wrap = (node: FNode): Layer => {
+  const wrap = (node: ReadNode): Layer => {
     const known = wrapped.get(node);
     if (known !== undefined) return known;
-    const container = isContainer(node) ? node : undefined;
+    const container = isReadContainer(node) ? node : undefined;
     const layer: Layer = {
       id: node.id,
       kind:

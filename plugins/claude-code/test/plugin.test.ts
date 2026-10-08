@@ -62,8 +62,8 @@ describe("plugin.json", () => {
 describe("skills", () => {
   const skills = readdirSync(join(PLUGIN, "skills"));
 
-  test("are import, export, render and spec", () => {
-    assert.deepEqual(skills.toSorted(), ["export", "import", "render", "spec"]);
+  test("are import, export, render, figma-pull and spec", () => {
+    assert.deepEqual(skills.toSorted(), ["export", "figma-pull", "import", "render", "spec"]);
   });
 
   describe.each(skills)("%s", (name) => {
@@ -123,13 +123,13 @@ describe("the plugin folder as Claude Code caches it", () => {
 
   test("every skill and the MCP config point at a file of the copy", () => {
     const references = [
-      ...["export", "import", "render"].flatMap((name) => {
+      ...["export", "import", "render", "figma-pull"].flatMap((name) => {
         const text = readFileSync(join(copy, "skills", name, "SKILL.md"), "utf8");
         return [...text.matchAll(/\$\{CLAUDE_PLUGIN_ROOT\}\/[\w./-]+/g)].map((m) => m[0]);
       }),
       ...json(join(copy, ".mcp.json")).mcpServers.weft.args,
     ];
-    assert.equal(references.length, 4);
+    assert.equal(references.length, 5);
     for (const reference of references) assert.ok(existsSync(inCopy(reference)), reference);
   });
 });
