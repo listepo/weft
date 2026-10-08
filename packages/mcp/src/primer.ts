@@ -19,6 +19,7 @@ export const primer = (
 Tools:
 - weft_capabilities: what the host accepts: the format version, the catalogs and, when the host checks them, the design token paths and action names. Write only what it lists.
 - weft_catalog: no arguments lists every component; pass kind for one component in full (props, slots, states, events).
+- weft_schema: the JSON Schema of a screen written as canonical JSON, for a host whose model output is constrained by a schema. You do not need it to write markup.
 - weft_validate: check markup. Diagnostics carry a code, a path, what was expected and often the fix in "hint".
 - weft_format: canonical markup, the one form that diffs and hashes.
 - weft_patch: edit existing markup without rewriting it. Send the current markup and a list of patches; the result is the new canonical markup, or diagnostics and nothing applied.

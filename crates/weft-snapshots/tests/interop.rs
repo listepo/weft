@@ -14,7 +14,7 @@ use serde_json::Value as Json;
 use weft_core::{Catalog, Document, Mode, ValidateOptions, has_errors, validate_document};
 use weft_interop::ImportResult;
 use weft_interop::a2ui::{from_a2ui, to_a2ui};
-use weft_interop::json_render::to_json_render;
+use weft_interop::json_render::{MAX_SOURCE_LENGTH, from_json_render, to_json_render};
 
 fn screens() -> Vec<(String, Document)> {
     let catalog = common::catalog();
@@ -352,6 +352,143 @@ fn json_render_export_validates() {
     }
 }
 
+/// Every screen goes to json-render and back to a valid document: the same document when the
+/// export lost nothing, and in any case one that a second trip leaves as it is.
+#[test]
+fn json_render_round_trip() {
+    let catalog = common::catalog();
+    let trip = |document: &Document| {
+        let spec = to_json_render(document, &catalog, None);
+        let text = serde_json::to_string(&spec.spec).unwrap();
+        (spec.losses, from_json_render(&text, &catalog))
+    };
+    let mut exact = 0;
+    for (name, document) in screens() {
+        let (lost, back) = trip(&document);
+        assert_lenient_valid(&name, &back, &catalog);
+        let markup = weft_core::serialize(&back.document);
+        if lost.is_empty() {
+            assert_eq!(weft_core::serialize(&document), markup, "{name}");
+            assert!(back.losses.is_empty(), "{name}: {:#?}", back.losses);
+            exact += 1;
+        }
+        let (_, again) = trip(&back.document);
+        assert_eq!(markup, weft_core::serialize(&again.document), "{name}");
+    }
+    assert!(exact > 40, "only {exact} screens came back unchanged");
+}
+
+#[test]
+fn json_render_import_reports_what_it_cannot_read() {
+    let catalog = common::catalog();
+    let codes = |text: &str| {
+        from_json_render(text, &catalog)
+            .diagnostics
+            .iter()
+            .map(|d| format!("{:?}", d.code))
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(codes("not json"), ["W601"]);
+    assert_eq!(codes("[]"), ["W601"]);
+    assert_eq!(codes(r#"{"root":"a","elements":{}}"#), ["W601"]);
+    let long = format!("[\"{}\"]", "x".repeat(MAX_SOURCE_LENGTH));
+    assert_eq!(codes(&long), ["W602"]);
+    // A spec written for another catalog, with json-render's own idioms: what Weft cannot say is
+    // a loss, never a failure.
+    let foreign = r#"{"root":"page","state":{"todos":[]},"elements":{
+        "page":{"type":"Card","props":{"title":"Todos"},"children":["list","gone","name","save"]},
+        "list":{"type":"list","props":{},"repeat":{"statePath":"/todos","key":"id"},
+            "children":["row"],"visible":{"$state":"/todos/length","gt":0}},
+        "row":{"type":"item","props":{"text":{"$item":"title"}},"children":[],
+            "on":{"press":[{"action":"todo.open"},{"action":"todo.log"}]}},
+        "name":{"type":"text","props":{"text":{"$template":"Hi ${/name}"}},"children":[]},
+        "save":{"type":"button","props":{"text":"Save","size":"lg"},"children":["save"],
+            "on":{"press":{"action":"save","params":{"draft":true}}}}}}"#;
+    let result = from_json_render(foreign, &catalog);
+    assert_lenient_valid("foreign", &result, &catalog);
+    let kinds: HashSet<String> = result
+        .losses
+        .iter()
+        .map(|l| format!("{:?}", l.kind))
+        .collect();
+    for kind in [
+        "Values",
+        "Kinds",
+        "Repetition",
+        "Hidden",
+        "Actions",
+        "Props",
+        "Structure",
+    ] {
+        assert!(
+            kinds.contains(kind),
+            "no {kind} loss in {:#?}",
+            result.losses
+        );
+    }
+    let markup = weft_core::serialize(&result.document);
+    assert!(markup.contains(r#"as="item" in="{$.todos}">"#), "{markup}");
+    assert!(markup.contains(r#"text="{$item.title}""#), "{markup}");
+}
+
+/// Malformed graphs are read, not followed: a cycle, a missing element, a bad key and a chain
+/// deeper than the import limit each end in a loss or `W602`, never in a panic.
+#[test]
+fn json_render_import_survives_malformed_graphs() {
+    let catalog = common::catalog();
+    let kinds = |text: &str| {
+        let result = from_json_render(text, &catalog);
+        assert_lenient_valid("malformed", &result, &catalog);
+        let mut kinds: Vec<String> = result
+            .losses
+            .iter()
+            .map(|l| format!("{:?}", l.kind))
+            .collect();
+        kinds.sort();
+        kinds.dedup();
+        (kinds, result)
+    };
+    let (lost, _) = kinds(
+        r#"{"root":"a","elements":{"a":{"type":"screen","props":{},"children":["a","b","c d"]},
+        "c d":{"type":"text","props":{"text":"Hi"},"children":[]},
+        "e":{"type":"each","props":{},"children":["f"]},"f":7}}"#,
+    );
+    assert_eq!(lost, ["Ids", "Structure"]);
+    let (lost, back) = kinds(
+        r#"{"root":"a","elements":{"a":{"type":"screen","props":{},"children":["e"]},
+        "e":{"type":"each","props":{},"children":["t"],"on":{"press":{"action":"go"}}},
+        "t":{"type":"text","props":{"text":"Hi"},"children":[]}}}"#,
+    );
+    assert_eq!(lost, ["Actions", "Repetition"], "{:#?}", back.losses);
+    assert!(weft_core::serialize(&back.document).contains(r#"<text id="t">Hi</text>"#));
+    // Deeper than a document may nest, so past every import limit too.
+    let depth = weft_core::MAX_DEPTH + 1;
+    let elements: Vec<String> = (0..depth)
+        .map(|i| {
+            format!(
+                r#""e{i}":{{"type":"stack","props":{{}},"children":["e{}"]}}"#,
+                i + 1
+            )
+        })
+        .collect();
+    let deep = format!(r#"{{"root":"e0","elements":{{{}}}}}"#, elements.join(","));
+    // A debug build needs more than the 2 MiB of a test thread at the import limit.
+    let codes = std::thread::Builder::new()
+        .stack_size(64 << 20)
+        .spawn(move || {
+            let result = from_json_render(&deep, &common::catalog());
+            result
+                .diagnostics
+                .iter()
+                .map(|d| format!("{:?}", d.code))
+                .collect::<Vec<_>>()
+        })
+        .unwrap()
+        .join()
+        .unwrap();
+    assert!(codes.contains(&"W602".to_owned()), "{codes:?}");
+}
+
 #[test]
 fn json_render_export_reports_its_losses() {
     let catalog = common::catalog();
@@ -380,7 +517,14 @@ fn json_render_export_reports_its_losses() {
     assert_eq!(kinds, ["Text", "Bindings"], "{:#?}", exported.losses);
     let tag = &exported.spec["elements"]["tag"];
     assert_eq!(tag["visible"], serde_json::json!({ "$item": "shown" }));
-    // A literal `text` prop and text content are one thing to json-render.
+    // A literal `text` prop and text content are one thing to json-render; content comes back.
     let note = &exported.spec["elements"]["note"]["props"];
     assert_eq!(note["text"], "Literal");
+    let back = from_json_render(&exported.spec.to_string(), &catalog);
+    assert_lenient_valid("losses", &back, &catalog);
+    let markup = weft_core::serialize(&back.document);
+    assert!(
+        markup.contains(r#"<text id="note">Literal</text>"#),
+        "{markup}"
+    );
 }

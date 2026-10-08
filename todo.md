@@ -4,11 +4,10 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T13.2. json-render import
 - T73. CI workflow for the documented merge gate
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
-- T12. Constrained generation
+- T12.3. Constrained generation: benchmark
 - T16. Layout vocabulary
 - T17.0. Extension catalogs: design
 - T17.1. Extension catalogs: spec and loader

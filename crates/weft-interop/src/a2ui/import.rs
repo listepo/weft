@@ -13,9 +13,7 @@ use weft_import::{
 };
 
 use crate::paths::from_pointer;
-
-/// Longest input read, in bytes.
-pub const MAX_SOURCE_LENGTH: usize = 2_000_000;
+use crate::{sem, too_long};
 
 /// A value as A2UI states it: a literal, a path into the data model, or nothing Weft can read.
 enum Dyn {
@@ -34,14 +32,6 @@ struct Im {
     truncated: bool,
 }
 
-/// An element of a named Weft kind. The role is unused once the kind is named, except that role
-/// `text` is a bare text run, which would not carry the element's id.
-fn sem(kind: &str, name: impl Into<String>) -> Sem {
-    let mut s = Sem::new(if kind == "text" { "paragraph" } else { kind }, name);
-    s.kind = Some(kind.to_owned());
-    s
-}
-
 /// Messages from a JSON array, one object, or JSON Lines (the form A2UI streams in).
 fn messages(text: &str) -> Option<Vec<Json>> {
     match parse_json(text) {
@@ -56,15 +46,10 @@ fn messages(text: &str) -> Option<Vec<Json>> {
 }
 
 pub fn from_a2ui(text: &str, catalog: &Catalog) -> ImportResult {
-    let mut diagnostics = Vec::new();
-    if text.len() > MAX_SOURCE_LENGTH {
-        limit_reached(
-            &mut diagnostics,
-            "#",
-            &format!("is longer than {MAX_SOURCE_LENGTH} bytes"),
-        );
-        return empty_result(diagnostics);
+    if let Some(result) = too_long(text) {
+        return result;
     }
+    let mut diagnostics = Vec::new();
     let Some(messages) = messages(text) else {
         let (what, expected) = (
             "The input is not JSON.",

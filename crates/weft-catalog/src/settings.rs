@@ -151,6 +151,20 @@ const EXPORT: &[Setting] = &[
         "Slint components for Slint 1.x (`weft slint`).",
         Kind::Section(OUT_ONLY),
     ),
+    setting(
+        "schema",
+        "The JSON Schema of the canonical documents the project's catalog admits, `document.schema.json` (`weft schema`). Default folder: standard output.",
+        Kind::Section(OUT_ONLY),
+    ),
+];
+const FIGMA_IMPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default(
+        "pluginId",
+        "The id of the Figma plugin whose plugin data holds the Weft source of each layer (the `id` of its manifest).",
+        Kind::Text,
+        "\"weft-development\"",
+    ),
 ];
 const IMPORT: &[Setting] = &[
     setting(
@@ -187,6 +201,11 @@ const IMPORT: &[Setting] = &[
         "cem",
         "Catalogs from a Custom Elements Manifest (`weft import-cem`).",
         Kind::Section(CEM_IMPORT),
+    ),
+    setting(
+        "figma",
+        "Frames of a Figma file, read through the REST API (the plugins' `figma-pull` script).",
+        Kind::Section(FIGMA_IMPORT),
     ),
 ];
 

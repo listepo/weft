@@ -113,7 +113,7 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | Streaming and incremental generation | Open. Flat id lists in A2UI and json-render exist for progressive rendering; nested markup has to show it can do the same | `roadmap.md` |
 | Host capabilities | Answered for MCP hosts: `weft_capabilities` reports the format version, catalogs, token paths and action names the host checks (T10); other hosts are not covered | SPEC §8, `packages/mcp` |
 | Layout without becoming CSS | Open: only `stack` and `grid` | `roadmap.md` |
-| Who keeps a registry of extension catalogs | Proposal (T17.0, not approved): no service; a curated list in the docs, an npm keyword, author-declared kind prefixes | `docs/extension-catalogs-design.md`, §22 |
+| Who keeps a registry of extension catalogs | Open | `roadmap.md` |
 | Figma as a source | Open | `roadmap.md` |
 
 ## 10. Project files (T31)
@@ -288,6 +288,18 @@ Checked on 2026-10-05. Apple pages were read as their documentation JSON (`devel
 | Whether `Model3D` runs on iOS | No: in the iOS 27.0 simulator SDK, `_RealityKit_SwiftUI.swiftinterface` declares `Model3D` as `@available(visionOS 1.0, *)` with `iOS`, `macOS`, `tvOS`, `watchOS` unavailable; `RealityView` is `iOS 18.0`, `macOS 15.0` | `Xcode.app/.../iPhoneSimulator27.0.sdk/System/Library/Frameworks/_RealityKit_SwiftUI.framework/.../arm64-apple-ios-simulator.swiftinterface` (Xcode on this machine, 2026-10-06) |
 | Model formats per platform | model-viewer loads glTF 2.0 (`.glb`, `.gltf`); RealityKit loads USDZ (and `.reality`); neither reads the other's format, so the element carries both paths | https://modelviewer.dev/docs/ and Apple's RealityKit documentation (the SDK interface above shows no glTF loader) |
 | Design tools cannot draw a 3D tilt | The plugin APIs give a layer a 2D `rotation` (degrees) and a 2D affine `relativeTransform`; neither has a perspective or an axis | https://developers.figma.com/docs/plugins/api/properties/nodes-rotation/ (2026-10-06); Penpot's shape `rotation` in `packages/penpot/src/api.ts` |
+
+## 20. Constrained generation (T12)
+
+Checked on 2026-10-08. What each provider's structured-output mode accepts (recursive `$ref`, `anyOf` size, schema size) is T12.3's to check.
+
+| Decision or fact | Basis | Source (checked) |
+| --- | --- | --- |
+| The document schema is generated from the catalog, in Rust, as a projection of the validator | One source of truth: the catalog decides what the validator accepts, so the schema is derived from the same `Catalog` and the validator's own table of universal attributes (SPEC §3.1), and the validator keeps the last word. The Zod `documentJsonSchema()` knows no catalog and stays as it is until T12.2 | decision; `crates/weft-catalog/src/document_schema.rs` |
+| Dialect 2020-12, reuse through `$defs` and `$ref` | "The `$defs` keyword reserves a location for schema authors to inline re-usable JSON Schemas" (Core §8.2.4); `$ref` is an applicator to a statically identified schema (§8.2.3.1), so one entry per kind and recursive lists cost one entry each | https://json-schema.org/draft/2020-12/json-schema-core (2026-10-08) |
+| `integer: true` maps to `"type": "integer"` | "integer" "matches any number with a zero fractional part" (Validation §6.1.1), which is the validator's own test (`fract() == 0`, `W224`), so `2.0` passes both | https://json-schema.org/draft/2020-12/json-schema-validation (2026-10-08) |
+| Grammars as `pattern`, but not the look-around ones | Patterns "SHOULD be valid according to the regular expression dialect described in" ECMA-262 and built with the `u` flag (Core §6.4). The id, binding, token and action grammars need only classes, groups and repetition; "no reference inside a literal" (`W213`) needs look-ahead and "characters XML can carry" (`W221`) needs ranges beyond the BMP, so both stay in the validator | https://json-schema.org/draft/2020-12/json-schema-core (2026-10-08); SPEC §3.1 |
+| The catalog only, no `x-` extensions | Creator's decision for T12.1: project token, action and data-path enums are left for later (revisited after T12.3 measures), and a constrained writer has no use for extensions, which strict mode would still allow | decision (T12 open questions 1 and 2) |
 
 ## 22. Extension catalogs (T17)
 

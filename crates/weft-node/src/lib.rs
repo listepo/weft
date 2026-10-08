@@ -126,6 +126,12 @@ impl Catalog {
         js(web::import_cem(&manifest, &options, &self.inner))
     }
 
+    /// The JSON Schema of the canonical documents this catalog admits, as compact JSON text.
+    #[napi]
+    pub fn document_schema(&self) -> Result<String> {
+        js(web::document_schema(&self.inner))
+    }
+
     #[napi]
     pub fn check_data(
         &self,

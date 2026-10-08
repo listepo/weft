@@ -2,7 +2,8 @@
 //! SwiftUI (`weft swiftui`, `weft import-swiftui`, in `swiftui.rs`), Slint (`weft slint`,
 //! `weft import-slint`, in `slint.rs`) and the web targets (`weft
 //! html|react|solid`, `weft import-html|import-react|import-solid`, in `web.rs`), and `weft
-//! import-cem`, a catalog from a Custom Elements Manifest (in `cem.rs`). The project file (`weft.json`, SPEC §10) found
+//! import-cem`, a catalog from a Custom Elements Manifest (in `cem.rs`), and `weft schema`, the
+//! JSON Schema of the documents a catalog admits (in `schema.rs`). The project file (`weft.json`, SPEC §10) found
 //! above the document, or given with `--project`, supplies the catalog, tokens, actions and data
 //! schema, and the settings of §10.6 (`validate.mode`, `format.write`); a flag overrides the
 //! project, which overrides the default. `--catalog` replaces the project's catalog. Without
@@ -12,6 +13,7 @@
 mod a2ui;
 mod cem;
 mod convert;
+mod schema;
 mod slint;
 mod swiftui;
 mod web;
@@ -358,6 +360,26 @@ enum Command {
         project: ProjectArgs,
         /// Write `<file stem>.catalog.json` here instead of printing (default: the project's
         /// `import.cem.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
+    },
+    /// Print the JSON Schema (2020-12) of the canonical JSON documents the project's catalog
+    /// admits, for a model whose decoder takes a schema (SPEC §3.1).
+    Schema {
+        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        #[arg(long)]
+        catalog: Option<PathBuf>,
+        /// Project file; without it, the nearest `weft.json` in or above the working directory.
+        #[arg(long, conflicts_with = "no_project")]
+        project: Option<PathBuf>,
+        /// Ignore any project file.
+        #[arg(long)]
+        no_project: bool,
+        /// Write `document.schema.json` here instead of printing (default: the project's
+        /// `export.schema.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
         /// Overwrite the output file when it already exists.
@@ -831,6 +853,24 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 version,
                 catalog,
                 project,
+                out_dir,
+                force,
+            },
+            out,
+        ),
+        Command::Schema {
+            catalog,
+            project,
+            no_project,
+            out_dir,
+            force,
+        } => schema::export(
+            schema::Args {
+                catalog,
+                project: ProjectArgs {
+                    project,
+                    no_project,
+                },
                 out_dir,
                 force,
             },
