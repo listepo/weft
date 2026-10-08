@@ -112,7 +112,7 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | Mapping to code and back | Partly: React renderer and JSX generator; SwiftUI generator and importer (T34); importers from DOM and snapshots with a documented loss table | SPEC §9, `roadmap.md` |
 | Streaming and incremental generation | Open. Flat id lists in A2UI and json-render exist for progressive rendering; nested markup has to show it can do the same | `roadmap.md` |
 | Host capabilities | Answered for MCP hosts: `weft_capabilities` reports the format version, catalogs, token paths and action names the host checks (T10); other hosts are not covered | SPEC §8, `packages/mcp` |
-| Layout without becoming CSS | Proposal, not approved: `docs/layout-design.md` (T16.1); prior art in §21 | `plan.md` T16 |
+| Layout without becoming CSS | Decided (T16.1), built in T16.2–T16.8: `justify` on `stack`, a universal `grow`, `padding` and `max-width` on `stack` and `grid`, `min-column-width` on `grid`, `size.*` tokens; no breakpoints | `docs/layout-design.md`, §21 |
 | Who keeps a registry of extension catalogs | Decided (T17.0), built in T17.1–T17.3: no service; a curated list in the docs kept by the creator, an npm keyword, author-declared kind prefixes | `docs/extension-catalogs-design.md`, §22 |
 | Figma as a source | Open | `roadmap.md` |
 

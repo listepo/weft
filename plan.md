@@ -15,10 +15,11 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
-| T16.1 | in progress | P2 | 3 | 90% | Claude Code / claude-opus-5-5 |
+| T16 | todo | P2 | 5 | 15% | |
 | T16.2 | todo | P2 | 3 | 0% | |
-| T16.3 | todo | P2 | 4 | 0% | |
-| T16.4 | todo | P2 | 3 | 0% | |
+| T16.3 | todo | P2 | 3 | 0% | |
+| T16.8 | todo | P2 | 3 | 0% | |
+| T16.4 | todo | P2 | 4 | 0% | |
 | T16.5 | todo | P2 | 3 | 0% | |
 | T16.6 | todo | P2 | 2 | 0% | |
 | T16.7 | todo | P2 | 3 | 0% | |
@@ -379,7 +380,7 @@ Measure whether constrained JSON beats free markup on validity and edit success,
 
 ### T16. Layout vocabulary
 
-Parent of T16.1–T16.7, which carry the status (the task was split this way when T16.1 was claimed). This card holds the context, scope and done criteria they share.
+Parent of T16.2–T16.8, which carry the work (the task was split this way when T16.1 was claimed). T16.1, the design, is done (`done.md`): the creator approved `docs/layout-design.md` with its twelve decisions, which T16.2–T16.8 build. This card holds the context, scope and done criteria they share.
 
 Weft has two layout kinds today. `stack` lays children out in one line, with `direction`, `gap`, cross-axis `align` and `wrap`; `grid` has a fixed number of equal `columns` and a `gap`. Most of what a layout usually says has no form in Weft: how leftover space on the main axis is shared, which child grows and which hugs its content, inner spacing, a maximum width, and how a grid reflows on a narrow screen. Screens work around these gaps, and every importer drops them as `layout` losses. The task decides how much more Weft says without becoming CSS: a small closed set that every target (web, SwiftUI, Slint, A2UI, json-render, Figma, Penpot) can draw and read back, and nothing that only CSS can express. This changes the format, so the design comes first, as in T39.
 
@@ -389,73 +390,130 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 - Generators: `crates/weft-web/src/html.rs` `layout()` and `base.css`; `crates/weft-web/src/jsx/` (React, SolidJS and Lit share one render plan, `_align` in `jsx/runtime.rs`); `packages/render-react/src/render.ts` `layoutStyle`; `crates/weft-swiftui/src/generate.rs` (`VStack`/`HStack` alignment, `LazyVGrid`, no wrap); `crates/weft-slint/src/generate.rs` (writes `spacing` only); `crates/weft-interop/src/a2ui/export.rs` and the json-render export (T13.1); `packages/design-tool/src/view.ts` `layoutView`, used by the Figma and Penpot builds (it draws `stretch` as `start`).
 - Importers: `crates/weft-web/src/dom.rs` and `from_jsx/`; `crates/weft-swiftui/src/import/read.rs`; `crates/weft-slint/src/read.rs`; `crates/weft-interop/src/a2ui/import.rs`; `packages/design-tool/src/read.ts` and `foreign.ts`. Figma `primaryAxisAlignItems` and sizing modes are already typed in `packages/figma/src/api.ts`, Penpot `horizontalSizing`/`verticalSizing` in `packages/penpot/src/api.ts`.
 - Corpus workarounds: `dashboard` separates the title and the update time with a `space.xl` gap in a wrapping row, right-aligns its footer with a column `align="end"`, and its 3-column `grid` never reflows; `wizard-step` cannot push Back and Next apart. `crates/weft-snapshots/tests/coverage.rs` fails while any catalog prop or enum value appears in no corpus screen, so new props need a corpus screen.
-- `research.md` §9 lists "Layout without becoming CSS" as open, with no prior-art section. `docs/figma-style-overrides-design.md` proposes `style-padding` (not approved) and overlaps with this task.
+- Design (done, T16.1): `docs/layout-design.md`, approved, with its **Decisions** section as the contract for the rest; prior art in `research.md` §21. Decision 6 settles the overlap with `docs/figma-style-overrides-design.md`: `padding` lives here, so T14 adds no `style-padding` for `stack` and `grid`.
 
 **Scope.**
-1. Design: a `research.md` prior-art section with URLs and dates (A2UI `justify`/`align`/`weight`, Figma auto layout hug/fill/fixed and min/max, Penpot flex/grid sizing, SwiftUI `Spacer`/`frame`/`layoutPriority`/`ViewThatFits`, Slint `alignment` and `*-stretch`, CSS flex/grid/container queries, Compose), and `docs/layout-design.md` in the shape of `docs/context-design.md`: the candidate vocabulary (main-axis distribution on `stack`, child sizing, padding, max width, grid reflow), markup and canonical JSON, catalog props versus universal attributes, token types, defaults, diagnostic codes, a mapping and loss table per target, versioning, and worked examples on `dashboard` and `wizard-step`. Nothing below starts until the creator approves the design.
+1. Design (done, T16.1): a `research.md` prior-art section with URLs and dates (A2UI `justify`/`align`/`weight`, Figma auto layout hug/fill/fixed and min/max, Penpot flex/grid sizing, SwiftUI `Spacer`/`frame`/`layoutPriority`/`ViewThatFits`, Slint `alignment` and `*-stretch`, CSS flex/grid/container queries, Compose), and `docs/layout-design.md` in the shape of `docs/context-design.md`: the candidate vocabulary (main-axis distribution on `stack`, child sizing, padding, max width, grid reflow), markup and canonical JSON, catalog props versus universal attributes, token types, defaults, diagnostic codes, a mapping and loss table per target, versioning, and worked examples on `dashboard` and `wizard-step`. Nothing below starts until the creator approves the design.
 2. Spec and catalog: `SPEC.md` §5.1 or §2.2 and the §9 mappings and loss tables; the `AGENT-SPEC.md` layout line and `packages/mcp/src/primer.ts`; `core.ts` and a regenerated `catalog.json`, the catalog examples, `docs/catalog-and-tokens.md`; for a new universal attribute or code, `crates/weft-core/src/rules.rs` and the differential fixtures.
 3. Generators: static HTML and the base stylesheet, React/SolidJS/Lit, the reference renderer, SwiftUI, Slint, A2UI, json-render, and the Figma and Penpot builds through `design-tool`.
 4. Importers: HTML/DOM, React/SolidJS, SwiftUI, Slint, A2UI and Figma/Penpot read the new vocabulary back, and the `layout` loss rows narrow.
-5. Corpus and baselines: replace the workarounds in `dashboard` and `wizard-step`, or add a screen, so coverage holds; retake and review the insta snapshots, the Figma/Penpot layer trees, and the `packages/visual` web and SwiftUI baselines.
+5. Corpus and baselines: replace the workarounds in `dashboard` and `glass` and add a non-benchmark `corpus/layout` screen, so coverage holds, leaving the benchmark screen `wizard-step` unchanged (decision 10); retake and review the insta snapshots, the Figma/Penpot layer trees, and the `packages/visual` web and SwiftUI baselines.
 6. `weft.json`: no key is expected; if the design adds a tool option (for example breakpoints that are not tokens), it gets a §10.6 row and a `settings.rs` entry in the same change.
 
 **Out of scope.** Arbitrary CSS (lengths outside tokens, absolute positioning, per-side margins, z-index). Visual style (fill, stroke, radius), which belongs to the style-overrides proposal. Animation. Changing T55's cross-axis default. `bench/src/primers.ts`, which changes only as a method change recorded in `test.md`.
 
 **Done when.**
-- The creator has approved the design.
+- The creator has approved the design (done, T16.1).
 - The new props or attributes validate in strict and lenient mode, and their codes are in `AGENT-SPEC.md` (`bench/test/agent-spec.test.ts` passes).
 - A corpus screen that uses each one passes the `packages/visual` cross-target comparison (React, SolidJS, the reference renderer) and has a reviewed SwiftUI baseline.
 - Every target either maps each new form or lists it as a loss in §9; generated code with its source comment removed reads back to the same props on every importer whose row says "maps"; the Figma and Penpot round trips keep it.
 - The full check exits 0.
 
-**Dependencies.** T55 and T52 (done) are the precedents. Coordinate with T39 (both may bump `weft` to 0.2) and with T14's style overrides (padding). Land after T67.4 and T67.5, which edit the same `read.rs`. T69's "resize within the layout rules" builds on this.
+**Dependencies.** T55 and T52 (done) are the precedents. T39 is independent: this ships within `weft` 0.1 (decision 9). T14's style overrides add no `style-padding` for `stack` and `grid` (decision 6). T67.4 and T67.5, which edit the same Slint `read.rs`, are done. T69's "resize within the layout rules" builds on this.
 
-**Open questions for the creator.**
-1. Which are in: main-axis distribution, child sizing (grow/hug/fixed), padding, max width, responsive reflow?
-2. Child sizing as a universal attribute (a format change, like tilt) or as props on the kinds that sit in a stack?
-3. Responsive behaviour: a grid that fits as many columns as a minimum width allows, breakpoints (as tokens or a `weft.json` key), or none?
-4. Padding here, or in style overrides as `style-padding`?
-5. Sizes as `dimension` tokens only, or literal numbers too?
-6. Ship as a catalog minor within `weft` 0.1, or together with T39's 0.2?
-
-**Split.** T16.1: design (docs only). T16.2: spec, catalog, core, `AGENT-SPEC.md`, corpus. T16.3: web generators and importers, plus the reference renderer. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render. T16.7: Figma and Penpot through `design-tool`. T16.2–T16.7 start only after the creator approves T16.1's design; each closes its part of T16's "Done when" for its targets, and T16.2 lands first.
-
-### T16.1. Layout vocabulary: design
-
-T16 scope item 1, docs only: no code, no `SPEC.md`, `AGENT-SPEC.md` or catalog change. Done when the creator has approved `docs/layout-design.md`, with the open questions answered.
-
-Execution plan:
-
-1. Read T16's context: `SPEC.md` §2.2, §5.1, §8 and §9, `docs/context-design.md` (the shape), `docs/figma-style-overrides-design.md` (overlap on padding), `research.md`, the corpus screens `dashboard` and `wizard-step`, and the layout code of each generator and importer named in T16's context.
-2. `research.md`: a new section "Layout (T16)" with primary sources and the date checked: A2UI v0.9 `justify`/`align`/`weight`; Figma auto layout (hug, fill, fixed, min/max, space-between, wrap, grid); Penpot flex and grid layout and sizing; SwiftUI `Spacer`, `frame`, `layoutPriority`, `ViewThatFits`, `Grid`, `LazyVGrid` adaptive items; Slint layouts, `alignment`, `*-stretch`, min/max sizes, padding; CSS flexbox, grid `auto-fill`/`minmax`, container queries; Jetpack Compose `Arrangement` and `weight`. A fact backed only by secondary sources is marked **unverified**. The §9 open-questions row points at the proposal.
-3. `docs/layout-design.md` in the shape of `docs/context-design.md`: the problem and the corpus workarounds; the candidate vocabulary (main-axis distribution on `stack`, child sizing grow/hug/fixed, padding, max width, grid reflow), each with markup, canonical JSON, catalog prop or universal attribute, token types, defaults and their §8 class, and diagnostic codes; a generate and import mapping and loss table per target (HTML, React, SolidJS, Lit, reference renderer, SwiftUI, Slint, A2UI, json-render, Figma, Penpot); versioning (catalog minor in 0.1 or with T39's 0.2); before/after on `dashboard` and `wizard-step`; the decisions for the creator, each with a recommendation and alternatives.
-4. Commit, push, open a PR to `main`; T16.1 stays in progress until the creator approves.
-
-Progress: steps 1–4 done. `research.md` §21 holds the prior art. `docs/layout-design.md` proposes `justify` on `stack` (`start`, `center`, `end`, `space-between`), a universal boolean `grow` with a new `W318`, `padding` and `max-width` on `stack` and `grid`, `min-column-width` on `grid`, and a `size.*` token group, with a mapping and loss table per target, the corpus plan and twelve open questions. Left: the creator's answers, then the document updated to match.
+**Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render. T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
 
 ### T16.2. Layout vocabulary: spec, catalog, core and corpus
 
-T16 scope items 2, 5 (corpus screens) and 6, as the approved design says: `SPEC.md` and the §9 rows, `AGENT-SPEC.md` and the primer, `packages/catalog/src/core.ts` and `catalog.json`, the catalog examples, `docs/catalog-and-tokens.md`, `crates/weft-core/src/rules.rs` and the differential fixtures for any universal attribute or code, `crates/weft-catalog/src/diff.rs` where the classifier needs it, and corpus screens that use every new prop or value. The §9 rows of the targets still to come state the new forms as losses until their sub-task lands. Depends on T16.1.
+T16 scope items 2, 5 (corpus screens) and 6 (no `weft.json` key), as `docs/layout-design.md` decides. Lands first; every other T16 sub-task builds on it.
 
-### T16.3. Layout vocabulary: web targets and the reference renderer
+Steps:
 
-T16 scope items 3 to 5 for the web: static HTML and the base stylesheet, React, SolidJS and Lit through the shared render plan, the reference renderer (`packages/render-react`), the DOM and JSX importers, and the `packages/visual` web baselines. Depends on T16.2.
+1. `SPEC.md`: §2.2 `grow` (boolean, literal only, child of a `stack`); §5.1 `justify` (default `start`, declared in the catalog), `padding`, `max-width`, `min-column-width` rows with their meaning; §6.2 `W318` (error in both modes; `<each>` transparent, unknown and extension parents skipped); §8 the catalog version; §9 every target's row lists the new forms as losses until its sub-task lands.
+2. `AGENT-SPEC.md` (one layout line, `W318` and its repair) and `packages/mcp/src/primer.ts`; `bench/src/primers.ts` stays unchanged.
+3. `packages/catalog/src/core.ts` (the props, catalog `version` 0.2.0) and the regenerated `catalog.json`; `packages/catalog/tokens/default.tokens.json` gains `size.sm`/`md`/`lg`/`xl` (240, 480, 720, 960 px); the `stack` and `grid` examples; `docs/catalog-and-tokens.md`.
+4. `crates/weft-core/src/rules.rs`: `grow` in `UNIVERSAL_PROPS` (`bindable: false`) and the `W318` check, with the differential fixtures; `crates/weft-catalog/src/diff.rs` only if the classifier misreads the change (a test asserts it is minor); the T12.1 document schema snapshots retaken.
+5. Corpus: `dashboard` and `glass` as in the design's examples, and a new non-benchmark `corpus/layout` screen; `wizard-step` unchanged. Retake and review the insta snapshots and baselines the new screens change.
+
+Size: about 200 lines of code (`rules.rs`, `core.ts`, tokens), the rest docs, fixtures and snapshots.
+
+Done when: the new props and `grow` validate in strict and lenient mode, `W318` fires for `grow` outside a stack in a test, the coverage test passes with every new prop and `justify` value in the corpus, `bench/test/agent-spec.test.ts` passes, and `moon run root:changed` exits 0.
+
+### T16.3. Layout vocabulary: web generators and the reference renderer
+
+T16 scope items 3 and 5 for the web, as the design's generate table says. Depends on T16.2.
+
+Steps:
+
+1. `crates/weft-web/src/html.rs`: `data-justify` and `data-grow` with rules in the layout stylesheet; inline `padding`, `width: 100%; max-width` and the capped `auto-fill` grid template, all through `var(--weft-…)`.
+2. The shared JSX render plan (`crates/weft-web/src/jsx/`) for React, SolidJS and Lit, with the same declarations as inline styles.
+3. `packages/render-react/src/render.ts`: `layoutStyle` for the stack and grid props, and `grow` in `renderNode` beside the tilt.
+4. §9 web rows move from loss to mapping; insta snapshots and the `packages/visual` web baselines retaken and reviewed for `dashboard`, `glass` and `layout`.
+
+Size: about 250 lines of code.
+
+Done when: the three screens pass the `packages/visual` cross-target comparison (React, SolidJS, the reference renderer), a narrow-viewport case shows the stats grid at one column and a wide one at three, and `moon run root:changed` exits 0.
+
+### T16.8. Layout vocabulary: web importers
+
+T16 scope item 4 for the web, as the design's import table says. Depends on T16.3, whose output it reads back.
+
+Steps:
+
+1. `crates/weft-web/src/dom.rs`: `data-justify`, `data-grow`, and the inline `padding`, `max-width` and grid template when they name `--weft-` properties.
+2. `crates/weft-web/src/from_jsx/`: the same conventions in inline styles.
+3. Foreign markup: `justify-content` among the four values, any positive `flex-grow` as `grow`; `space-around`, `space-evenly`, `stretch`, unequal grow ratios, raw lengths and media or container queries are `layout` losses. §9 rows updated.
+
+Size: about 250 lines of code.
+
+Done when: the generated HTML and JSX of `dashboard`, `glass` and `layout`, with the source comment removed, read back to the same props; a test covers each listed loss; `moon run root:changed` exits 0.
 
 ### T16.4. Layout vocabulary: SwiftUI
 
-T16 scope items 3 to 5 for SwiftUI: `crates/weft-swiftui` generator and importer, the insta snapshots and the reviewed SwiftUI baselines. Depends on T16.2.
+T16 scope items 3 to 5 for `crates/weft-swiftui`, as the design's tables and decisions 4 and 5 say. Depends on T16.2.
+
+Steps:
+
+1. Generator: `justify` on rows as spacers (`space-between` as `HStack(spacing: 0)` with `Spacer(minLength: <gap>)` between children, also inside `<each>`); `grow` on a row child as `.frame(maxWidth: .infinity)`; `padding` as `.padding(theme.<path>)`; `max-width` as the pair of frames; `min-column-width` as a small generated `Layout` that caps at `columns`. `justify` and `grow` in a column stay inert markers and §9 lists them.
+2. Importer: read those patterns and markers back; a `padding` or `frame` that is not a theme token stays a `layout` loss.
+3. Insta snapshots, and the reviewed SwiftUI baselines in `packages/visual` (`WEFT_SIMULATOR=own` in a worktree). If the generated `Layout` cannot match the web baseline, fall back to `GridItem(.adaptive(minimum:))` and record the difference in §9 (decision 5).
+
+Size: about 350 lines of code, including the generated `Layout` helper.
+
+Done when: the three screens compile, match their reviewed baselines, and read back to the same props with the source comment removed; `moon run root:changed` exits 0.
 
 ### T16.5. Layout vocabulary: Slint
 
-T16 scope items 3 to 5 for Slint: `crates/weft-slint` generator and reader (after T67.4 and T67.5, which edit the same `read.rs`), with their snapshots and screenshots. Depends on T16.2.
+T16 scope items 3 to 5 for `crates/weft-slint`. Depends on T16.2 (T67.4 and T67.5 are done).
+
+Steps:
+
+1. Check first whether a stack without `alignment` stretches its children in Slint 1.18.1 (`research.md` §21 marks it **unverified**); if it does, write `alignment: start` on every stack and retake the screenshots.
+2. Generator: `alignment` for `justify`, `horizontal-stretch`/`vertical-stretch: 1` for `grow` (and `0` on its siblings), `padding` and `max-width` in px; `min-column-width` is kept in the source comment and drawn with `columns`.
+3. Reader: those properties back, px values that equal exactly one dimension token as that token; other values are `layout` losses. §9 rows updated.
+
+Size: about 150 lines of code.
+
+Done when: the three screens compile, their screenshots are reviewed, and they read back to the same props without the source comment; `moon run root:changed` exits 0.
 
 ### T16.6. Layout vocabulary: A2UI and json-render
 
-T16 scope items 3 and 4 for `crates/weft-interop`: the A2UI export and import and the json-render export (and the T13.2 import when it has landed), with their loss rows. Depends on T16.2.
+T16 scope items 3 and 4 for `crates/weft-interop`. Depends on T16.2.
+
+Steps:
+
+1. A2UI export: `justify` (`spaceBetween` in A2UI's spelling) and `grow` as `weight: 1`; `padding`, `max-width` and `min-column-width` are losses.
+2. A2UI import: those back; `spaceAround`, `spaceEvenly`, `stretch` and unequal weights are `layout` losses.
+3. json-render export and import: check that the props pass through one to one and add a round-trip test for `layout`.
+4. §9 rows updated.
+
+Size: about 100 lines of code.
+
+Done when: the A2UI and json-render round trips of `layout` keep every mapped form, a test covers each listed loss, and `moon run root:changed` exits 0.
 
 ### T16.7. Layout vocabulary: Figma and Penpot
 
-T16 scope items 3 to 5 for the design tools: `packages/design-tool` (`layoutView`, `read.ts`, `foreign.ts`), the Figma and Penpot builds and their layer-tree snapshots, and the round trips. Depends on T16.2.
+T16 scope items 3 to 5 for the design tools. Depends on T16.2.
+
+Steps:
+
+1. `packages/design-tool/src/view.ts` `layoutView`: `justify` as the main-axis alignment, `grow` as fill on the parent's main axis, `padding` and `max-width` (bound to variables in Figma, px in Penpot), `min-column-width` drawn with `columns` and kept in plugin data.
+2. `read.ts` and `foreign.ts`: Weft-built layers from plugin data as now; foreign layers by the import table (four equal paddings, one token, fill as `grow`); the rest are `layout` losses.
+3. Layer-tree snapshots of the Figma and Penpot builds and the round trips for the three screens. §9 rows updated.
+
+Size: about 250 lines of code.
+
+Done when: the Figma and Penpot round trips of `dashboard`, `glass` and `layout` keep every prop, a foreign-layer test covers each listed loss, and `moon run root:changed` exits 0.
 
 ### T17. Extension catalogs
 

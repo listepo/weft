@@ -1,6 +1,6 @@
 # Design: layout vocabulary
 
-Status: **proposal, not approved.** Nothing here is implemented. This document is for the creator to approve, change or reject before `SPEC.md`, `AGENT-SPEC.md`, the catalog, the Rust core and the targets change. It is the design stage of T16 (T16.1). The prior art and its sources are in `research.md` §21.
+Status: **approved.** The creator approved this design and accepted the recommended answer to every open question; they are recorded under **Decisions**. Nothing here is implemented yet: T16.2–T16.8 build it. This document was T16.1, the design stage of T16. The prior art it relies on, with sources, is `research.md` §21.
 
 ## Problem
 
@@ -32,7 +32,7 @@ The task is to say more without becoming CSS. The design rules that bind it:
 - nothing that only CSS can express;
 - models' first-try validity, which the benchmark measures, must not suffer.
 
-## Proposal
+## Design
 
 Five additions, all ordinary props in canonical JSON, plus a token group:
 
@@ -174,7 +174,7 @@ A phone layout where the two buttons share the width uses `grow` instead:
 }
 ```
 
-`wizard-step` is one of the twelve benchmark screens and is written in four formats (`screen.weft`, `.html`, `.jsx`, `.a2ui.json`); see **Corpus and benchmark** for why the proposal leaves the file itself unchanged.
+`wizard-step` is one of the twelve benchmark screens and is written in four formats (`screen.weft`, `.html`, `.jsx`, `.a2ui.json`); see **Corpus and benchmark** for why the design leaves the file itself unchanged.
 
 ### Example: the glass panel
 
@@ -187,7 +187,7 @@ The heading, text and button now sit `space.lg` inside the frosted surface on ev
 ### `justify`
 
 - **Meaning.** The free space of a stack is its length along its direction minus its children's lengths and the gaps. `start` leaves it after the last child, `end` before the first, `center` half on each side, and `space-between` shares it equally between the children (none at the ends; a single child sits at the start). The `gap` stays the least space between two children.
-- **Where free space exists.** A row takes the full width its parent gives it, as it does on every target today, so it has free space whenever its children are narrower. A column is as tall as its children unless its parent stretches it (a row with `align="stretch"`). `justify` on a column therefore matters only inside a stretched row, which SwiftUI cannot draw today (SPEC §5.1 note); see open question 4.
+- **Where free space exists.** A row takes the full width its parent gives it, as it does on every target today, so it has free space whenever its children are narrower. A column is as tall as its children unless its parent stretches it (a row with `align="stretch"`). `justify` on a column therefore matters only inside a stretched row, which SwiftUI cannot draw today (SPEC §5.1 note); see decision 4.
 - **Catalog prop** of `stack`, because it belongs to the container. `grid` does not take it: its columns already share the width.
 - **Values.** The four that every target draws (`research.md` §21). `space-around` has no SwiftUI form; `space-evenly` has one but no screen needs it; `stretch` is what `grow` says per child. They can be added by a later minor version.
 - **Default** `start`, declared in the catalog. It is the initial value of every target, so a renderer writes nothing for it, and an importer does not write `justify="start"` back for a stack that does not say it.
@@ -200,27 +200,27 @@ The heading, text and button now sit `space.lg` inside the frosted surface on ev
 - **Boolean, literal only** (`bindable: false`): which child grows is structure, not data, like `submit`. A binding is `W217`.
 - **No default value** in the attribute table: absent means it does not grow. `grow="false"` is valid and means the same, as for every boolean prop.
 - **Why not a weight.** Figma (`layoutGrow` is 0 or 1), Penpot (`fill`) and SwiftUI (`frame(maxWidth: .infinity)`) have no ratios, so a number would be a loss on three targets. A2UI's `weight`, Compose's `weight` and Slint's `*-stretch` read in as `grow`.
-- **Fixed size is not proposed.** Hug is what every child does without `grow`; a fixed width would need a `width` token and is left for a later minor version if a screen needs it.
+- **Fixed size is not included.** Hug is what every child does without `grow`; a fixed width would need a `width` token and is left for a later minor version if a screen needs it.
 
 ### `padding`
 
-- **Meaning.** Inner spacing on all four sides of the stack or grid, inside its material surface when it has one. Equal on all sides: per-side padding is a later minor addition if needed, as the style-overrides proposal also says.
+- **Meaning.** Inner spacing on all four sides of the stack or grid, inside its material surface when it has one. Equal on all sides: per-side padding is a later minor addition if needed, as the style-overrides design also says.
 - **Catalog prop** of `stack` and `grid`, as `gap` is. Other kinds keep the padding their renderer gives them (`section`, `dialog`, `alert`); a screen that needs a padded group wraps it in a stack.
 - **Token only** (`tokenType: "dimension"`), like `gap`. `W307` when the token is not a dimension, `W306` when it is not in the token set.
-- **Overlap with T14.** `docs/figma-style-overrides-design.md` proposes `style-padding` on every component. Both cannot exist for `stack` and `grid`, by its own rule "a style attribute that would say what a catalog prop already says is not added". See open question 6.
+- **Overlap with T14.** `docs/figma-style-overrides-design.md` proposes `style-padding` on every component. Both cannot exist for `stack` and `grid`, by its own rule "a style attribute that would say what a catalog prop already says is not added". Decision 6: `padding` lives here, and `style-padding` is not added for `stack` and `grid`.
 
 ### `max-width`
 
 - **Meaning.** The element is as wide as its parent lets it be, but never wider than the token. Where it sits inside a wider parent is the parent's cross-axis `align` (a column's `align="center"` centres it). It does not make a stack in a row grow; that is `grow`.
 - **Catalog prop** of `stack` and `grid`. A readable column or a centred form is a group, so containers are where it is needed. Making it universal later is a minor change.
-- **Token only**, `dimension`. The default token set gets a `size` group (open question 7 proposes `size.sm` 240 px, `size.md` 480 px, `size.lg` 720 px, `size.xl` 960 px). Projects add their own.
+- **Token only**, `dimension`. The default token set gets a `size` group (decision 7: `size.sm` 240 px, `size.md` 480 px, `size.lg` 720 px, `size.xl` 960 px). Projects add their own.
 - No `min-width`, `height` or `max-height`: no screen needs them, and a height depends on the host's viewport, which Weft does not describe.
 
 ### `min-column-width`
 
 - **Meaning.** The grid shows `columns` columns while each can be at least the token wide, and fewer below that, down to one. Children keep their order and fill the rows left to right. Without the prop the grid keeps `columns` at every width, as today.
 - **Catalog prop** of `grid`, token only (`dimension`). `columns` stays required: it is the most columns the grid shows, and what every target without reflow draws.
-- **Container, not viewport.** The rule depends on the grid's own width, so a grid inside a sidebar reflows like one on a phone. That is why no breakpoints are proposed: they are viewport rules that SwiftUI, Slint, Figma and Penpot cannot express, and they need either token types DTCG does not have or a `weft.json` key (open question 5).
+- **Container, not viewport.** The rule depends on the grid's own width, so a grid inside a sidebar reflows like one on a phone. That is why there are no breakpoints: they are viewport rules that SwiftUI, Slint, Figma and Penpot cannot express, and they need either token types DTCG does not have or a `weft.json` key (open question 5).
 
 ### Validation and diagnostics
 
@@ -242,7 +242,7 @@ Existing codes that apply unchanged:
 
 `W318` is a semantic check, so a partial parse (§6.3) reports it like any other: the parent of an element is known as soon as the element's start tag is read.
 
-No check is proposed for combinations that are valid but have no effect (`justify` beside a child that grows, `justify` on a column that nothing stretches). They are harmless, and a warning there would be noise in the repair loop.
+No check is added for combinations that are valid but have no effect (`justify` beside a child that grows, `justify` on a column that nothing stretches). They are harmless, and a warning there would be noise in the repair loop.
 
 ### Patches
 
@@ -317,19 +317,22 @@ The benchmark's Weft primer (`bench/src/primers.ts`) does not change. `AGENT-SPE
 
 - **No syntax or shape change.** Every form is a prop in `props`. A reader that predates them warns `W402` in lenient mode, keeps the attribute (§8) and draws the old layout: the title and time sit together, the grid keeps its columns. That is the graceful fallback a minor version needs.
 - **Catalog.** Four new optional props and the enum are minor changes (§8, `diff.rs`: adding a prop is minor unless it is required; a new prop with a default is not "a default appears"). The catalog's `version` has been `0.1.0` since T3, although T50, T51 and T52.1 also added props and kinds. Open question 9 proposes bumping it to `0.2.0` with this change.
-- **Universal attribute.** `grow` extends the §2.2 table. T52 added the tilt attributes the same way within `weft` 0.1, with no format version change, so this proposal follows that precedent and ships within 0.1. The alternative is to wait for T39's `weft` 0.2.
+- **Universal attribute.** `grow` extends the §2.2 table. T52 added the tilt attributes the same way within `weft` 0.1, with no format version change, so this design follows that precedent and ships within 0.1 (decision 9).
 - **Tokens.** The `size` group is added to the default token set. It is not a format change; a project that uses its own tokens adds its own sizes.
 - **`weft.json`.** No key: nothing here is a tool option.
 
-### Implementation outline (after approval)
+### Implementation outline
+
+Each sub-task fits the 500-line limit on code; `plan.md` holds their steps and done lines.
 
 | Sub-task | Scope |
 | --- | --- |
-| T16.2 | `SPEC.md` §2.2 (`grow`), §5.1 (rows and a note per prop), §6.2 (`W318`), §8 (the catalog version), §9 (every target's mapping, with the forms not yet drawn listed as losses); `AGENT-SPEC.md` and the MCP primer; `packages/catalog/src/core.ts`, `catalog.json`, the `stack` and `grid` examples, the `size` tokens, `docs/catalog-and-tokens.md`; `crates/weft-core/src/rules.rs` (`grow` and `W318`) and the differential fixtures; `dashboard`, `glass` and `corpus/layout`. |
-| T16.3 | Static HTML and the layout stylesheet, the JSX render plan (React, SolidJS, Lit), `render-react`, `dom.rs` and `from_jsx`, the `packages/visual` web baselines. |
-| T16.4 | `crates/weft-swiftui` generator and importer, the grid layout helper if chosen, the SwiftUI baselines. |
-| T16.5 | `crates/weft-slint` generator and reader, after T67.4 and T67.5. |
-| T16.6 | `crates/weft-interop`: A2UI export and import, json-render export, and the T13.2 import if it has landed. |
+| T16.2 | `SPEC.md` §2.2 (`grow`), §5.1 (rows and a note per prop), §6.2 (`W318`), §8 (the catalog version), §9 (every target lists the new forms as losses until its sub-task lands); `AGENT-SPEC.md` and the MCP primer; `packages/catalog/src/core.ts`, `catalog.json`, the `stack` and `grid` examples, the `size` tokens, `docs/catalog-and-tokens.md`; `crates/weft-core/src/rules.rs` (`grow` and `W318`), the differential fixtures and the T12.1 document schema snapshots; `dashboard`, `glass` and `corpus/layout`. Lands first. |
+| T16.3 | Static HTML and the layout stylesheet, the JSX render plan (React, SolidJS, Lit), `render-react`, the `packages/visual` web baselines. |
+| T16.8 | `dom.rs` and `from_jsx`: the web importers, after T16.3. |
+| T16.4 | `crates/weft-swiftui` generator and importer, the generated grid `Layout`, the SwiftUI baselines. |
+| T16.5 | `crates/weft-slint` generator and reader, starting with the unverified `alignment` default. |
+| T16.6 | `crates/weft-interop`: A2UI export and import, json-render export and import. |
 | T16.7 | `packages/design-tool` (`layoutView`, `read.ts`, `foreign.ts`), the Figma and Penpot builds, their layer-tree snapshots and round trips. |
 
 ## Alternatives considered
@@ -347,17 +350,19 @@ The benchmark's Weft primer (`bench/src/primers.ts`) does not change. `AGENT-SPE
 | `margin` | Spacing between siblings is the parent's `gap`; a margin would be a second way to say it. |
 | Doing nothing (status quo) | Every importer keeps losing layout, and agents keep writing gap-based approximations that look right on one target only. |
 
-## Open questions for the creator
+## Decisions
 
-1. **Scope: which forms are in?** Recommendation: all five (`justify`, `grow`, `padding`, `max-width`, `min-column-width`); each answers a corpus workaround. Alternatives: only `justify` and `grow` now (the two that every target reads back, including A2UI), the rest in a later minor version; or drop `min-column-width` until a screen besides `dashboard` needs it.
-2. **`justify` values and name.** Recommendation: `start`, `center`, `end`, `space-between`, named `justify` as in A2UI, CSS and Penpot. Alternatives: all six of A2UI and Penpot (`space-around` would be a SwiftUI loss); another name (`distribute`).
-3. **Child sizing.** Recommendation: a universal boolean `grow`, literal only, valid only in a stack (`W318`). Alternatives: a numeric weight (lost on Figma, Penpot and SwiftUI); a `size` enum with `hug`/`fill`/`fixed` (and a `width` token for `fixed`); per-kind catalog props.
-4. **`justify` and `grow` on columns.** Recommendation: allowed in both directions with one meaning; a column has free space only when a stretched row gives it some, and SwiftUI reports both on a column as a `layout` loss, as it already cannot draw `stretch`. Alternative: rows only, with a new diagnostic for a column.
-5. **Responsive behaviour.** Recommendation: `min-column-width` on `grid`, capped by `columns`, and no breakpoints. For SwiftUI, a small generated `Layout` that applies the same rule (iOS 16; the generator targets iOS 17) rather than `GridItem(.adaptive)`, which shows more than `columns` on wide screens. Alternatives: `adaptive` with its difference listed in §9; breakpoints as tokens or in `weft.json`; no reflow at all.
-6. **Padding: here or in style overrides?** Recommendation: `padding` here, on `stack` and `grid` only, because it is layout like `gap`; the style-overrides proposal then drops `style-padding` (or keeps it only for kinds that are not `stack` or `grid`, if the creator wants padding on sections and buttons). Alternative: no `padding` here and `style-padding` on every component through T14.
-7. **Sizes: tokens only?** Recommendation: `dimension` tokens only (rule 6), and a `size` group in the default tokens: `size.sm` 240 px, `size.md` 480 px, `size.lg` 720 px, `size.xl` 960 px. Alternatives: other names or values; literal numbers in px (breaks rule 6).
-8. **`max-width`: fill up to the cap, on containers only?** Recommendation: the element fills what its parent offers up to the token, and only `stack` and `grid` take it. Alternatives: hug up to the cap (a narrow form for a short form's fields, which is rarely meant); a universal attribute.
-9. **Version.** Recommendation: ship within `weft` 0.1, as T52's tilt did, and bump the catalog to `weft-core` 0.2.0 with it (its version has stayed 0.1.0 through three minor additions). Alternatives: bundle with T39's `weft` 0.2 so readers move once; or leave the catalog version as it is.
-10. **Corpus.** Recommendation: leave the benchmark screen `wizard-step` unchanged, change `dashboard` and `glass`, and add a non-benchmark `corpus/layout` screen for the remaining values. Alternative: change `wizard-step` in all four formats as a method change recorded in `test.md`.
-11. **`W318` severity.** Recommendation: an error in both modes, because a `grow` that no target can draw is a mistake, not a newer feature. Alternative: a `mode` code (a warning for readers).
-12. **`justify` default in the catalog.** Recommendation: declare `default: "start"`, so tools and the T12 schema know it. Alternative: no declared default, with `start` stated in SPEC only, as `align` has none for columns.
+The creator approved the design with the recommended answer to each of the twelve open questions. T16.2–T16.8 build these; an alternative is kept only where a later task may need it.
+
+1. **Scope: all five forms.** `justify`, `grow`, `padding`, `max-width` and `min-column-width`, each answering a corpus workaround, plus the `size` token group.
+2. **`justify` values and name.** `start`, `center`, `end`, `space-between`, named `justify` as in A2UI, CSS and Penpot. `space-around` and `space-evenly` can come in a later minor version if a screen needs them; importers report them as `layout` losses until then.
+3. **Child sizing: a universal boolean `grow`.** Literal only, valid only on a child of a `stack` (`W318`). No weights, no `size` enum, no per-kind props. A fixed width (`width` with a dimension token) is the extension to add later if a screen needs one.
+4. **`justify` and `grow` apply in both directions** with one meaning. A column has free space only when a stretched row gives it some; SwiftUI reports both on a column as a `layout` loss, as it already cannot draw `stretch`.
+5. **Responsive: `min-column-width` on `grid`, capped by `columns`; no breakpoints.** SwiftUI draws it with a small generated `Layout` (iOS 16; the generator targets iOS 17) that applies the same rule. If that layout cannot match the web baseline, T16.4 may fall back to `GridItem(.adaptive(minimum:))` and list "more than `columns` columns on wide screens" as a §9 difference.
+6. **Padding lives here,** as `padding` on `stack` and `grid` only, because it is layout like `gap`. The style-overrides design (T14) does not add `style-padding` for `stack` and `grid`; whether other kinds get `style-padding` stays T14's question.
+7. **Sizes are `dimension` tokens only** (rule 6). The default tokens gain `size.sm` 240 px, `size.md` 480 px, `size.lg` 720 px and `size.xl` 960 px.
+8. **`max-width` fills up to the cap, on containers only.** The element takes what its parent offers up to the token; only `stack` and `grid` take it. Making it a universal attribute later is a minor change.
+9. **Version: within `weft` 0.1,** as T52's tilt attributes did, and the catalog moves to `weft-core` 0.2.0 with it (its version stayed 0.1.0 through three minor additions). No format version change, and nothing waits for T39.
+10. **Corpus.** The benchmark screen `wizard-step` stays unchanged. `dashboard` and `glass` change as shown above, and a new non-benchmark `corpus/layout` screen covers the remaining values.
+11. **`W318` is an error in both modes,** because a `grow` that no target can draw is a mistake, not a newer feature.
+12. **The catalog declares `justify`'s default** as `start`, so tools and the T12 schema know it.

@@ -9,9 +9,10 @@
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
 - T12.3. Constrained generation: benchmark
-- T16.1. Layout vocabulary: design
+- T16. Layout vocabulary
 - T16.2. Layout vocabulary: spec, catalog, core and corpus
-- T16.3. Layout vocabulary: web targets and the reference renderer
+- T16.3. Layout vocabulary: web generators and the reference renderer
+- T16.8. Layout vocabulary: web importers
 - T16.4. Layout vocabulary: SwiftUI
 - T16.5. Layout vocabulary: Slint
 - T16.6. Layout vocabulary: A2UI and json-render
