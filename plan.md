@@ -7,6 +7,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 60% | Claude Code / claude-opus-5-5 |
+| T14.2 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
@@ -102,7 +103,20 @@ Progress (stage 1 done, on branch `t14-figma`):
 Execution plan, stage 2 (this round; style overrides stay out until the creator approves them):
 
 1. T14.1: the pull over the REST API — done (`done.md`).
-2. MCP / Claude Code tools through the Figma MCP server: waits for a creator decision. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. So frames built or read through it cannot carry or see the Weft source the round trip depends on. The options (move the source to shared plugin data, which the REST API also returns with `plugin_data=shared`; or keep the round trip in the Weft plugin and the pull) go to the creator.
+2. MCP / Claude Code tools through the Figma MCP server. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. The creator chose to move the Weft source to shared plugin data, which any plugin and the REST API (`plugin_data=shared`) can read: T14.2 (card below).
+
+### T14.2. Weft source in shared plugin data
+
+Move the Weft source the Figma plugin stores on layers, components, pages, variables and collections from private plugin data (`setPluginData`, readable only by the plugin that wrote it) to shared plugin data (`setSharedPluginData` under the namespace `weft`, readable by any plugin, the Figma MCP server's `use_figma` and the REST API with `plugin_data=shared`). Files built before the change keep working. Done when a build writes only shared data, a file with only private data reads back the same and is migrated, and the REST pull reads shared data first.
+
+Execution plan:
+
+1. Check the shared plugin data API (namespace rules, size, empty string removes) and the REST `sharedPluginData` field against Figma's docs; record them with URL and date in `packages/figma/README.md`.
+2. `packages/figma/src/data.ts`: `NAMESPACE = "weft"` (Penpot's namespace too) and `dataOf(node)`, a `PluginData` view that reads shared data first and falls back to private data; a value found only in private data is moved to shared data when it is read (on load) and private data is cleared when a key is written. Migration is best effort: a node that cannot be written (a REST node, a read-only file) still reads.
+3. Route every plugin data access in `packages/figma/src` (`build.ts`, `layer.ts`, `library.ts`, `modes.ts`) through `dataOf`; add the shared methods to `FPluginData` (checked against `@figma/plugin-typings` by `api-types.test.ts`).
+4. REST: ask `plugin_data=shared,<plugin id>`; `rest.ts` reads `sharedPluginData.weft` first, then `pluginData[<plugin id>]` for frames built before the change. `import.figma.pluginId` stays for those frames.
+5. Fake Plugin API and fake REST server: shared data per namespace. Tests: a build writes only shared data (layer snapshots unchanged); a frame whose data was moved back to private reads back byte-identical and ends with only shared data; the library and token collection are found from private data; the pull reads shared data and still reads a private-only frame with the plugin id.
+6. Docs: `packages/figma/README.md`, `plugins/figma/README.md`, SPEC or docs where the storage location is described; rebuild the plugin bundles.
 
 ### T31. Project file and shared resources
 
