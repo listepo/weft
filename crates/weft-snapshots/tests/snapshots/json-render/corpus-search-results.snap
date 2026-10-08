@@ -1,0 +1,144 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-search-results as json-render
+---
+{
+  "root": "search",
+  "elements": {
+    "search": {
+      "type": "screen",
+      "props": {
+        "label": "Search"
+      },
+      "children": [
+        "form",
+        "results"
+      ]
+    },
+    "form": {
+      "type": "form",
+      "props": {},
+      "children": [
+        "bar"
+      ],
+      "on": {
+        "submit": {
+          "action": "search.run",
+          "params": {
+            "id": "form"
+          }
+        }
+      }
+    },
+    "bar": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.sm"
+        }
+      },
+      "children": [
+        "query",
+        "go"
+      ]
+    },
+    "query": {
+      "type": "field",
+      "props": {
+        "label": "Search",
+        "type": "search",
+        "value": {
+          "$bindState": "/query"
+        }
+      },
+      "children": []
+    },
+    "go": {
+      "type": "button",
+      "props": {
+        "submit": true,
+        "variant": "primary",
+        "text": "Search"
+      },
+      "children": []
+    },
+    "results": {
+      "type": "list",
+      "props": {},
+      "children": [
+        "results-each"
+      ],
+      "slots": {
+        "empty": [
+          "empty"
+        ]
+      }
+    },
+    "results-each": {
+      "type": "each",
+      "props": {
+        "as": "result"
+      },
+      "children": [
+        "result"
+      ],
+      "repeat": {
+        "statePath": "/results"
+      }
+    },
+    "result": {
+      "type": "item",
+      "props": {},
+      "children": [
+        "result-title",
+        "result-snippet",
+        "result-open"
+      ]
+    },
+    "result-title": {
+      "type": "heading",
+      "props": {
+        "level": 3,
+        "text": {
+          "$item": "title"
+        }
+      },
+      "children": []
+    },
+    "result-snippet": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$item": "snippet"
+        }
+      },
+      "children": []
+    },
+    "result-open": {
+      "type": "link",
+      "props": {
+        "text": "Open"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "results.open",
+          "params": {
+            "id": "result-open",
+            "item": {
+              "$item": ""
+            }
+          }
+        }
+      }
+    },
+    "empty": {
+      "type": "text",
+      "props": {
+        "text": "No results found"
+      },
+      "children": []
+    }
+  }
+}

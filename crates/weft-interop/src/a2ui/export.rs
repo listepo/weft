@@ -9,6 +9,8 @@ use serde_json::{Map, Value as Json, json};
 use weft_core::{Child, Document, Node, Value};
 use weft_import::{Loss, LossKind, Losses};
 
+use crate::ids::{collect_ids, fresh_id};
+use crate::number;
 use crate::paths::to_pointer;
 
 pub const CATALOG_ID: &str = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
@@ -62,23 +64,6 @@ pub fn to_a2ui(doc: &Document) -> Exported {
     }
 }
 
-fn collect_ids(n: &Node, ids: &mut HashSet<String>) {
-    ids.extend(n.id.clone());
-    for c in n.children.iter().chain(n.slots.values().flatten()) {
-        if let Child::Node(n) = c {
-            collect_ids(n, ids);
-        }
-    }
-}
-
-fn number(n: f64) -> Json {
-    if n.fract() == 0.0 && n.abs() < 1e15 {
-        json!(n as i64)
-    } else {
-        json!(n)
-    }
-}
-
 /// Whether `url` has a scheme, as the `uri` format of `openUrl` requires.
 fn absolute(url: &str) -> bool {
     url.split_once(':').is_some_and(|(scheme, _)| {
@@ -100,12 +85,7 @@ impl Ex {
     }
 
     fn fresh(&mut self, base: &str) -> String {
-        let (mut id, mut n) = (base.to_owned(), 1);
-        while !self.ids.insert(id.clone()) {
-            n += 1;
-            id = format!("{base}-{n}");
-        }
-        id
+        fresh_id(&mut self.ids, base)
     }
 
     fn fill(&mut self, at: usize, id: &str, component: &str, fields: Json) {

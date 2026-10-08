@@ -1,0 +1,191 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-tilt as json-render
+---
+{
+  "root": "tilt",
+  "elements": {
+    "tilt": {
+      "type": "screen",
+      "props": {
+        "label": "Card flips"
+      },
+      "children": [
+        "title",
+        "deck"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Card flips"
+      },
+      "children": []
+    },
+    "deck": {
+      "type": "stack",
+      "props": {
+        "gap": {
+          "token": "space.lg"
+        }
+      },
+      "children": [
+        "front",
+        "back",
+        "lean"
+      ]
+    },
+    "front": {
+      "type": "section",
+      "props": {
+        "label": "Front side",
+        "perspective": 800,
+        "rotate-y": 25
+      },
+      "children": [
+        "front-text",
+        "front-flip"
+      ],
+      "slots": {
+        "header": [
+          "front-title"
+        ]
+      }
+    },
+    "front-text": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/front"
+        }
+      },
+      "children": []
+    },
+    "front-flip": {
+      "type": "button",
+      "props": {
+        "variant": "primary",
+        "text": "Flip"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "card.flip",
+          "params": {
+            "id": "front-flip"
+          }
+        }
+      }
+    },
+    "front-title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": "Front"
+      },
+      "children": []
+    },
+    "back": {
+      "type": "section",
+      "props": {
+        "label": "Back side",
+        "perspective": 800,
+        "rotate-y": 180
+      },
+      "children": [
+        "back-text",
+        "back-flip"
+      ],
+      "slots": {
+        "header": [
+          "back-title"
+        ]
+      }
+    },
+    "back-text": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/back"
+        }
+      },
+      "children": []
+    },
+    "back-flip": {
+      "type": "button",
+      "props": {
+        "text": "Flip"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "card.flip",
+          "params": {
+            "id": "back-flip"
+          }
+        }
+      }
+    },
+    "back-title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": "Back"
+      },
+      "children": []
+    },
+    "lean": {
+      "type": "section",
+      "props": {
+        "label": "Leaning card",
+        "perspective": 600,
+        "rotate-x": 20,
+        "rotate-z": -6
+      },
+      "children": [
+        "lean-text",
+        "lean-note"
+      ],
+      "slots": {
+        "header": [
+          "lean-title"
+        ]
+      }
+    },
+    "lean-text": {
+      "type": "text",
+      "props": {
+        "text": "Tilted back and turned a little in the plane."
+      },
+      "children": []
+    },
+    "lean-note": {
+      "type": "field",
+      "props": {
+        "label": "Note",
+        "placeholder": "Add a note",
+        "value": {
+          "$bindState": "/note"
+        }
+      },
+      "children": [],
+      "on": {
+        "change": {
+          "action": "note.edit",
+          "params": {
+            "id": "lean-note"
+          }
+        }
+      }
+    },
+    "lean-title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": "Leaning"
+      },
+      "children": []
+    }
+  }
+}

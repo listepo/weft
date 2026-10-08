@@ -1,0 +1,108 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-menu as json-render
+---
+{
+  "root": "account-menu",
+  "elements": {
+    "account-menu": {
+      "type": "screen",
+      "props": {
+        "label": "Account menu"
+      },
+      "children": [
+        "signed-in",
+        "menu"
+      ]
+    },
+    "signed-in": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/user/email"
+        }
+      },
+      "children": []
+    },
+    "menu": {
+      "type": "menu",
+      "props": {
+        "label": "Account"
+      },
+      "children": [
+        "item-profile",
+        "item-settings",
+        "item-billing",
+        "item-signout"
+      ]
+    },
+    "item-profile": {
+      "type": "menu-item",
+      "props": {
+        "text": "Profile"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "nav.profile",
+          "params": {
+            "id": "item-profile"
+          }
+        }
+      }
+    },
+    "item-settings": {
+      "type": "menu-item",
+      "props": {
+        "text": "Settings"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "nav.settings",
+          "params": {
+            "id": "item-settings"
+          }
+        }
+      }
+    },
+    "item-billing": {
+      "type": "menu-item",
+      "props": {
+        "disabled": {
+          "$cond": {
+            "$state": "/isOwner",
+            "not": true
+          },
+          "$then": true,
+          "$else": false
+        },
+        "text": "Billing"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "nav.billing",
+          "params": {
+            "id": "item-billing"
+          }
+        }
+      }
+    },
+    "item-signout": {
+      "type": "menu-item",
+      "props": {
+        "text": "Sign out"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "auth.signout",
+          "params": {
+            "id": "item-signout"
+          }
+        }
+      }
+    }
+  }
+}

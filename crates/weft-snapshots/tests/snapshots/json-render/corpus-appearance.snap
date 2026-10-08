@@ -1,0 +1,182 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-appearance as json-render
+---
+{
+  "root": "appearance",
+  "elements": {
+    "appearance": {
+      "type": "screen",
+      "props": {
+        "label": "Appearance"
+      },
+      "children": [
+        "title",
+        "options"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Appearance"
+      },
+      "children": []
+    },
+    "options": {
+      "type": "stack",
+      "props": {
+        "align": "stretch",
+        "gap": {
+          "token": "space.md"
+        }
+      },
+      "children": [
+        "theme",
+        "size",
+        "contrast",
+        "columns",
+        "zoom",
+        "accent",
+        "since",
+        "font"
+      ]
+    },
+    "theme": {
+      "type": "segmented-control",
+      "props": {
+        "label": "Theme",
+        "value": {
+          "$bindState": "/theme"
+        }
+      },
+      "children": [
+        "theme-light",
+        "theme-dark",
+        "theme-auto"
+      ]
+    },
+    "theme-light": {
+      "type": "segment",
+      "props": {
+        "value": "light",
+        "text": "Light"
+      },
+      "children": []
+    },
+    "theme-dark": {
+      "type": "segment",
+      "props": {
+        "disabled": true,
+        "value": "dark",
+        "text": "Dark"
+      },
+      "children": []
+    },
+    "theme-auto": {
+      "type": "segment",
+      "props": {
+        "text": {
+          "$state": "/automatic"
+        },
+        "value": "auto"
+      },
+      "children": []
+    },
+    "size": {
+      "type": "slider",
+      "props": {
+        "label": "Text size",
+        "max": 24,
+        "min": 12,
+        "value": {
+          "$bindState": "/size"
+        }
+      },
+      "children": []
+    },
+    "contrast": {
+      "type": "slider",
+      "props": {
+        "disabled": true,
+        "label": "Contrast",
+        "value": {
+          "$bindState": "/contrast"
+        }
+      },
+      "children": []
+    },
+    "columns": {
+      "type": "stepper",
+      "props": {
+        "label": "Columns",
+        "value": {
+          "$bindState": "/columns"
+        }
+      },
+      "children": []
+    },
+    "zoom": {
+      "type": "stepper",
+      "props": {
+        "disabled": {
+          "$state": "/locked"
+        },
+        "label": "Zoom",
+        "max": 3,
+        "step": 0.5,
+        "value": {
+          "$bindState": "/zoom"
+        }
+      },
+      "children": []
+    },
+    "accent": {
+      "type": "color-picker",
+      "props": {
+        "disabled": true,
+        "label": "Accent colour",
+        "value": "#d946ef"
+      },
+      "children": []
+    },
+    "since": {
+      "type": "date-picker",
+      "props": {
+        "disabled": true,
+        "label": "Member since",
+        "type": "date",
+        "value": "2024-05-17"
+      },
+      "children": []
+    },
+    "font": {
+      "type": "combobox",
+      "props": {
+        "disabled": true,
+        "label": "Font",
+        "value": "Inter"
+      },
+      "children": [
+        "font-inter",
+        "font-mono"
+      ]
+    },
+    "font-inter": {
+      "type": "option",
+      "props": {
+        "value": "Inter",
+        "text": "Inter"
+      },
+      "children": []
+    },
+    "font-mono": {
+      "type": "option",
+      "props": {
+        "value": "Menlo",
+        "text": "Menlo"
+      },
+      "children": []
+    }
+  }
+}

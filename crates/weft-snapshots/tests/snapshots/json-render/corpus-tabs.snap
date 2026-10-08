@@ -1,0 +1,145 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-tabs as json-render
+---
+{
+  "root": "account",
+  "elements": {
+    "account": {
+      "type": "screen",
+      "props": {
+        "label": "Account"
+      },
+      "children": [
+        "title",
+        "tabs"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Account"
+      },
+      "children": []
+    },
+    "tabs": {
+      "type": "tabs",
+      "props": {
+        "label": "Account sections"
+      },
+      "children": [
+        "tab-overview",
+        "tab-billing",
+        "tab-team"
+      ]
+    },
+    "tab-overview": {
+      "type": "tab",
+      "props": {
+        "label": "Overview"
+      },
+      "children": [
+        "account-name",
+        "account-email"
+      ]
+    },
+    "account-name": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/account/name"
+        }
+      },
+      "children": []
+    },
+    "account-email": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/account/email"
+        }
+      },
+      "children": []
+    },
+    "tab-billing": {
+      "type": "tab",
+      "props": {
+        "label": "Billing"
+      },
+      "children": [
+        "plan",
+        "change-plan"
+      ]
+    },
+    "plan": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/billing/plan"
+        }
+      },
+      "children": []
+    },
+    "change-plan": {
+      "type": "button",
+      "props": {
+        "variant": "primary",
+        "text": "Change plan"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "billing.change",
+          "params": {
+            "id": "change-plan"
+          }
+        }
+      }
+    },
+    "tab-team": {
+      "type": "tab",
+      "props": {
+        "label": "Team"
+      },
+      "children": [
+        "members"
+      ]
+    },
+    "members": {
+      "type": "list",
+      "props": {},
+      "children": [
+        "members-each"
+      ]
+    },
+    "members-each": {
+      "type": "each",
+      "props": {
+        "as": "member"
+      },
+      "children": [
+        "member"
+      ],
+      "repeat": {
+        "statePath": "/team"
+      }
+    },
+    "member": {
+      "type": "item",
+      "props": {},
+      "children": [
+        "member-name"
+      ]
+    },
+    "member-name": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$item": "name"
+        }
+      },
+      "children": []
+    }
+  }
+}
