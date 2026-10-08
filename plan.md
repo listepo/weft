@@ -13,10 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T13.1 | todo | P2 | 3 | 0% | |
 | T15.2 | todo | P3 | 2 | 0% | |
 | T73 | todo | P2 | 2 | 0% | |
-| T63 | todo | P2 | 1 | 0% | |
-| T64 | todo | P2 | 2 | 0% | |
-| T65 | todo | P2 | 1 | 0% | |
-| T66 | todo | P2 | 2 | 0% | |
 | T67.4 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T67.5 | in progress | P2 | 4 | 0% | Cursor / grok 4.7 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
@@ -168,22 +164,6 @@ The json-render half of T13: export a Weft document to a json-render spec (`{ ro
 ### T15.2. Surfaces for the Custom Elements Manifest importer
 
 T15.1 delivers `import_cem` in `weft-import` (library, tests, SPEC section 9). This task makes it reachable: `weft import-cem <manifest.json> [--name] [--version] [--catalog]` prints the catalog (pretty JSON) on stdout and the losses and diagnostics on stderr, reading the file only when it is at most `MAX_MANIFEST_LENGTH` bytes; the `import.cem.outDir` setting if it fits (SPEC section 10.6); the WebAssembly and native bindings (`weft-binding`, `weft-wasm`, `weft-node`, `@weft/core` types) if the creator wants it from TypeScript; `docs/importing.md` and `docs/cli.md`. Done when a manifest file imports from the command line into a catalog that `weft validate --catalog` accepts.
-
-### T63. `weft validate` on canonical JSON skips the shape layer
-
-`crates/weft-cli/src/main.rs:472-474` returns `vec![]` when no catalog/project applies, while the library `validate()` (`crates/weft-core/src/validate.rs:36-57`) still reports `W200` shape diagnostics — so `weft validate --no-project broken.json` exits 0 where the same JSON through the library/MCP gets diagnostics, and the command's "only the syntax layer was checked" warning overstates what ran. Done means: the `None` branch calls `validate` with `catalog: None`, with a CLI test.
-
-### T64. Rust CLI `emit` overwrites generated files unconditionally
-
-`crates/weft-cli/src/convert.rs:171-192` `std::fs::write`s over existing files with no `--force`, while the plugin scripts refuse to overwrite without `--force` (`plugins/shared/scripts/lib.ts:145-159`) — a behavior documented as a feature (`docs/exporting-jsx.md:17,25`). A hand-edited `gen/Login.jsx` is silently clobbered. Done means: the Rust CLI matches the refuse-unless-forced semantics (with a `--force` flag).
-
-### T65. Two different `weft` commands; batch provider id assumption
-
-`packages/core/package.json:6-8` exposes a second, reduced TS `weft` bin (only `validate`/`fmt`, no project support) whose header comment is stale — anyone resolving `weft` through `@weft/core` gets usage errors for flags the real Rust CLI accepts. Also `bench/src/provider.ts:221` assumes the API echoes ids as `r<n>` (`out[Number(r.custom_id.slice(1))]` — a non-conforming id writes to index `NaN` and fails far from the cause). Done means: the bin points at the Rust binary or is removed, and the custom id is validated with `Number.isInteger`.
-
-### T66. CI workflow for the documented merge gate
-
-There is no `.github/` in the repo; the documented merge gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md:50) runs only by hand — and T32 plans publishing from GitHub. Done means: the gate runs as a workflow on pull requests (and on main once the repo has a remote).
 
 ### T67.4. Slint reader for the widgets the generator now emits
 
