@@ -127,6 +127,31 @@ Canonical form rules, so that equal documents are byte-equal:
 
 Literal typing needs the catalog: `level="2"` is the number `2` only because `heading.level` is declared a number. For extension elements and unknown attributes, literals stay strings.
 
+### 3.1 JSON Schema of the canonical form
+
+A catalog (§5) determines a JSON Schema of the canonical JSON documents it admits, so that a writer whose decoder takes a schema (a structured-output mode) is held to the catalog while it writes. The schema is generated from the catalog and is a projection of validation (§6), not a second definition: the validator always has the last word. The dialect is JSON Schema 2020-12 (`$schema` is `https://json-schema.org/draft/2020-12/schema`).
+
+| Catalog construct | Schema |
+| --- | --- |
+| Document | A closed object (`additionalProperties: false`) with `weft` (`const`, the format version) and `root`, both required. |
+| `root` kind | `root` is a `$ref` to the kind marked `root` (`anyOf` when several are); with none, any kind. That kind is admitted nowhere else, and its `weft` prop is not in its `props` (it is `Document.weft`). |
+| Kind | One `$defs` entry per kind, named after it: a closed object with `kind` (`const`), `id` (the id grammar as `pattern`), `props`, `on`, `slots` and `children`, in that order. `kind` and `id` are required, `props` when a prop or `label` is. `on`, `slots` and `children` are present only when the kind declares events, slots, or a content model other than `none`. |
+| Props | A closed object: the declared props, then the universal `label`, `hidden`, `state` (only when the kind declares `states`) and the tilt attributes (§2.2), sorted as canonical JSON sorts keys. `required` lists the required props, and `label` when `requiresLabel` is set. `role` is not admitted on a catalog component. |
+| Prop value | `anyOf` over the forms the prop takes. Literal: `string`; `number`, or `integer` when `integer` is set, with `minimum` and `maximum` from `min` and `max`; `boolean`; `enum` of `values` (of `states` for `state`). A token prop takes no literal but `{ token }`, and no other prop takes `{ token }`. Unless `bindable` is false, `{ bind }`; `{ bind, not: true }` only on a boolean prop that is not `writable`. Binding paths and token paths carry their grammars (§2.1) as `pattern`. `description` is the prop's. |
+| `states` | The values of `state`. |
+| `events` | `on`: a closed object with one property per declared event, the action grammar as `pattern`. |
+| `slots` | `slots`: a closed object with one property per declared slot, each an array of the elements that slot admits (no text); `required` lists the required slots. |
+| `content` | `children`: an array of strings for `text`, of the admitted elements for `nodes`, of either for `mixed`; absent for `none`. |
+| Admitted elements | A list of parent P (its children, or its slot S) admits the kinds in P's `allowedChildren` (S's for a slot), or every kind when that list is absent, keeping only kinds whose `allowedParents` is absent or names P and leaving out the `root` kind. The kinds without `allowedParents` are collected once, in `$defs/Node`. |
+| `each` | Transparent (§4.3): every list that admits `each` (P's `allowedChildren` is absent or names it) has its own entry, `each:P` or `each:P:S`, with `kind`, `id`, `props` holding exactly `in` (a binding, not negated) and `as` (the loop variable grammar), both required, and `children`: at least one element, from the same admitted elements as that list, which includes the entry itself. |
+| `description` | The component's, on its entry. |
+
+Helper entries (`Id`, `Binding`, `NegatableBinding`, `Token`, `Action`, `Node`) start with a capital letter, and the `each` entries and the shared entries of the universal attributes (`universal:label`, `universal:hidden`, …) hold a `:`, so none can clash with a kind name.
+
+The schema leaves out what it cannot express, and the validator still checks it: unique ids (`W301`), loop variables in scope and not shadowed (`W305`, `W311`), `references` (`W309`), text given both as content and as `text` (`W310`), a submit button outside a `form` (`W313`), the asset paths of a `model` (`W317`), a reference inside a literal (`W213`) and characters XML cannot carry (`W221`), whose patterns would need look-around or ranges beyond the Basic Multilingual Plane that structured-output modes do not reliably support. It describes the catalog only, so the project's tokens, actions and data schema (`W306`–`W308`, `W315`, `W316`) are not narrowed into it.
+
+It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with two exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for, and it admits no `state` on a kind that declares no states, where validation lets a bound one through. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
+
 ## 4. Structure
 
 ### 4.1 Children and the default slot
