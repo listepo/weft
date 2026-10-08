@@ -1,0 +1,276 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-dashboard as json-render
+---
+{
+  "root": "dashboard",
+  "elements": {
+    "dashboard": {
+      "type": "screen",
+      "props": {
+        "label": "Team dashboard",
+        "state": "ready"
+      },
+      "children": [
+        "header",
+        "stats",
+        "notices",
+        "footer"
+      ]
+    },
+    "header": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.xl"
+        },
+        "wrap": true
+      },
+      "children": [
+        "title",
+        "updated"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": {
+          "$state": "/team/name"
+        }
+      },
+      "children": []
+    },
+    "updated": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/updatedAt"
+        },
+        "tone": "muted"
+      },
+      "children": []
+    },
+    "stats": {
+      "type": "grid",
+      "props": {
+        "columns": 3,
+        "gap": {
+          "token": "space.lg"
+        }
+      },
+      "children": [
+        "velocity",
+        "bugs",
+        "incidents"
+      ]
+    },
+    "velocity": {
+      "type": "section",
+      "props": {
+        "label": "Velocity"
+      },
+      "children": [
+        "velocity-value"
+      ],
+      "slots": {
+        "header": [
+          "velocity-title"
+        ]
+      }
+    },
+    "velocity-value": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/stats/velocity"
+        },
+        "tone": "success"
+      },
+      "children": []
+    },
+    "velocity-title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": "Velocity"
+      },
+      "children": []
+    },
+    "bugs": {
+      "type": "section",
+      "props": {
+        "label": "Open bugs"
+      },
+      "children": [
+        "bugs-value"
+      ],
+      "slots": {
+        "header": [
+          "bugs-title"
+        ]
+      }
+    },
+    "bugs-value": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/stats/bugs"
+        },
+        "tone": "warning"
+      },
+      "children": []
+    },
+    "bugs-title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": "Open bugs"
+      },
+      "children": []
+    },
+    "incidents": {
+      "type": "section",
+      "props": {
+        "label": "Incidents"
+      },
+      "children": [
+        "incidents-value"
+      ],
+      "slots": {
+        "header": [
+          "incidents-title"
+        ]
+      }
+    },
+    "incidents-value": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/stats/incidents"
+        },
+        "tone": "danger"
+      },
+      "children": []
+    },
+    "incidents-title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": "Incidents"
+      },
+      "children": []
+    },
+    "notices": {
+      "type": "stack",
+      "props": {
+        "direction": "column",
+        "gap": {
+          "token": "space.sm"
+        }
+      },
+      "children": [
+        "release",
+        "backup",
+        "quota"
+      ]
+    },
+    "release": {
+      "type": "alert",
+      "props": {
+        "tone": "info",
+        "text": "Release 2.4 ships on Friday."
+      },
+      "children": []
+    },
+    "backup": {
+      "type": "alert",
+      "props": {
+        "text": {
+          "$state": "/backupStatus"
+        },
+        "tone": "success"
+      },
+      "children": []
+    },
+    "quota": {
+      "type": "alert",
+      "props": {
+        "tone": "warning"
+      },
+      "children": [
+        "quota-text",
+        "quota-link"
+      ]
+    },
+    "quota-text": {
+      "type": "text",
+      "props": {
+        "text": "Storage is 90% full."
+      },
+      "children": []
+    },
+    "quota-link": {
+      "type": "link",
+      "props": {
+        "href": "https://example.com/storage",
+        "text": "Manage storage"
+      },
+      "children": []
+    },
+    "footer": {
+      "type": "stack",
+      "props": {
+        "align": "end",
+        "gap": {
+          "token": "space.xs"
+        }
+      },
+      "children": [
+        "owner",
+        "footer-links"
+      ]
+    },
+    "owner": {
+      "type": "text",
+      "props": {
+        "tone": "default",
+        "text": "Owned by the platform team"
+      },
+      "children": []
+    },
+    "footer-links": {
+      "type": "stack",
+      "props": {
+        "align": "start",
+        "direction": "row",
+        "gap": {
+          "token": "space.md"
+        }
+      },
+      "children": [
+        "docs",
+        "status"
+      ]
+    },
+    "docs": {
+      "type": "link",
+      "props": {
+        "href": "/docs",
+        "text": "Docs"
+      },
+      "children": []
+    },
+    "status": {
+      "type": "link",
+      "props": {
+        "href": {
+          "$state": "/statusUrl"
+        },
+        "text": "Status page"
+      },
+      "children": []
+    }
+  }
+}

@@ -1,0 +1,99 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-glass as json-render
+---
+{
+  "root": "glass",
+  "elements": {
+    "glass": {
+      "type": "screen",
+      "props": {
+        "label": "Glass"
+      },
+      "children": [
+        "card",
+        "tiles"
+      ]
+    },
+    "card": {
+      "type": "stack",
+      "props": {
+        "direction": "column",
+        "gap": {
+          "token": "space.md"
+        },
+        "material": {
+          "token": "material.glass"
+        }
+      },
+      "children": [
+        "title",
+        "body",
+        "close"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": {
+          "$state": "/title"
+        }
+      },
+      "children": []
+    },
+    "body": {
+      "type": "text",
+      "props": {
+        "text": "The panel blurs what is behind it."
+      },
+      "children": []
+    },
+    "close": {
+      "type": "button",
+      "props": {
+        "variant": "primary",
+        "text": "Got it"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "glass.close",
+          "params": {
+            "id": "close"
+          }
+        }
+      }
+    },
+    "tiles": {
+      "type": "grid",
+      "props": {
+        "columns": 2,
+        "gap": {
+          "token": "space.sm"
+        },
+        "material": {
+          "token": "material.glass"
+        }
+      },
+      "children": [
+        "tile-light",
+        "tile-dark"
+      ]
+    },
+    "tile-light": {
+      "type": "text",
+      "props": {
+        "text": "Light"
+      },
+      "children": []
+    },
+    "tile-dark": {
+      "type": "text",
+      "props": {
+        "text": "Dark"
+      },
+      "children": []
+    }
+  }
+}

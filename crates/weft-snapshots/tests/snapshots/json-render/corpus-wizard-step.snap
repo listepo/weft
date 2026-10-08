@@ -1,0 +1,128 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-wizard-step as json-render
+---
+{
+  "root": "wizard",
+  "elements": {
+    "wizard": {
+      "type": "screen",
+      "props": {
+        "label": "Setup wizard"
+      },
+      "children": [
+        "title",
+        "progress",
+        "plan",
+        "nav"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Choose a plan"
+      },
+      "children": []
+    },
+    "progress": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/progress"
+        }
+      },
+      "children": []
+    },
+    "plan": {
+      "type": "radio-group",
+      "props": {
+        "label": "Plan",
+        "value": {
+          "$bindState": "/plan"
+        }
+      },
+      "children": [
+        "plan-free",
+        "plan-pro",
+        "plan-team"
+      ]
+    },
+    "plan-free": {
+      "type": "radio",
+      "props": {
+        "value": "free",
+        "text": "Free"
+      },
+      "children": []
+    },
+    "plan-pro": {
+      "type": "radio",
+      "props": {
+        "value": "pro",
+        "text": "Pro"
+      },
+      "children": []
+    },
+    "plan-team": {
+      "type": "radio",
+      "props": {
+        "value": "team",
+        "text": "Team"
+      },
+      "children": []
+    },
+    "nav": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.sm"
+        }
+      },
+      "children": [
+        "back",
+        "next"
+      ]
+    },
+    "back": {
+      "type": "button",
+      "props": {
+        "text": "Back"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "wizard.back",
+          "params": {
+            "id": "back"
+          }
+        }
+      }
+    },
+    "next": {
+      "type": "button",
+      "props": {
+        "disabled": {
+          "$cond": {
+            "$state": "/plan",
+            "not": true
+          },
+          "$then": true,
+          "$else": false
+        },
+        "variant": "primary",
+        "text": "Next"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "wizard.next",
+          "params": {
+            "id": "next"
+          }
+        }
+      }
+    }
+  }
+}

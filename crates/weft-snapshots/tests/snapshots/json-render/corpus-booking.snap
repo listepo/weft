@@ -1,0 +1,257 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-booking as json-render
+---
+{
+  "root": "booking",
+  "elements": {
+    "booking": {
+      "type": "screen",
+      "props": {
+        "label": "Book a trip"
+      },
+      "children": [
+        "title",
+        "trip"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Book a trip"
+      },
+      "children": []
+    },
+    "trip": {
+      "type": "form",
+      "props": {
+        "label": "Trip"
+      },
+      "children": [
+        "city",
+        "depart",
+        "checkin",
+        "reminder",
+        "guests",
+        "budget",
+        "cabin",
+        "tag"
+      ],
+      "slots": {
+        "footer": [
+          "book"
+        ]
+      },
+      "on": {
+        "submit": {
+          "action": "trip.book",
+          "params": {
+            "id": "trip"
+          }
+        }
+      }
+    },
+    "city": {
+      "type": "combobox",
+      "props": {
+        "label": "Destination",
+        "placeholder": "Search a city",
+        "value": {
+          "$bindState": "/trip/city"
+        }
+      },
+      "children": [
+        "city-each"
+      ],
+      "on": {
+        "change": {
+          "action": "trip.edit",
+          "params": {
+            "id": "city"
+          }
+        }
+      }
+    },
+    "city-each": {
+      "type": "each",
+      "props": {
+        "as": "city"
+      },
+      "children": [
+        "city-option"
+      ],
+      "repeat": {
+        "statePath": "/cities"
+      }
+    },
+    "city-option": {
+      "type": "option",
+      "props": {
+        "text": {
+          "$item": "name"
+        },
+        "value": {
+          "$item": "name"
+        }
+      },
+      "children": []
+    },
+    "depart": {
+      "type": "date-picker",
+      "props": {
+        "label": "Departure",
+        "max": "2026-12-31",
+        "min": "2026-01-01",
+        "value": {
+          "$bindState": "/trip/depart"
+        }
+      },
+      "children": [],
+      "on": {
+        "change": {
+          "action": "trip.edit",
+          "params": {
+            "id": "depart"
+          }
+        }
+      }
+    },
+    "checkin": {
+      "type": "date-picker",
+      "props": {
+        "label": "Check-in time",
+        "type": "time",
+        "value": {
+          "$bindState": "/trip/checkin"
+        }
+      },
+      "children": []
+    },
+    "reminder": {
+      "type": "date-picker",
+      "props": {
+        "label": "Reminder",
+        "type": "datetime",
+        "value": {
+          "$bindState": "/trip/reminder"
+        }
+      },
+      "children": []
+    },
+    "guests": {
+      "type": "stepper",
+      "props": {
+        "label": "Guests",
+        "max": 8,
+        "min": 1,
+        "value": {
+          "$bindState": "/trip/guests"
+        }
+      },
+      "children": [],
+      "on": {
+        "change": {
+          "action": "trip.edit",
+          "params": {
+            "id": "guests"
+          }
+        }
+      }
+    },
+    "budget": {
+      "type": "slider",
+      "props": {
+        "label": "Budget per night",
+        "max": 500,
+        "min": 50,
+        "step": 10,
+        "value": {
+          "$bindState": "/trip/budget"
+        }
+      },
+      "children": [],
+      "on": {
+        "change": {
+          "action": "trip.edit",
+          "params": {
+            "id": "budget"
+          }
+        }
+      }
+    },
+    "cabin": {
+      "type": "segmented-control",
+      "props": {
+        "label": "Cabin",
+        "value": {
+          "$bindState": "/trip/cabin"
+        }
+      },
+      "children": [
+        "cabin-economy",
+        "cabin-business",
+        "cabin-first"
+      ],
+      "on": {
+        "change": {
+          "action": "trip.edit",
+          "params": {
+            "id": "cabin"
+          }
+        }
+      }
+    },
+    "cabin-economy": {
+      "type": "segment",
+      "props": {
+        "value": "economy",
+        "text": "Economy"
+      },
+      "children": []
+    },
+    "cabin-business": {
+      "type": "segment",
+      "props": {
+        "value": "business",
+        "text": "Business"
+      },
+      "children": []
+    },
+    "cabin-first": {
+      "type": "segment",
+      "props": {
+        "value": "first",
+        "text": "First"
+      },
+      "children": []
+    },
+    "tag": {
+      "type": "color-picker",
+      "props": {
+        "label": "Trip colour",
+        "value": {
+          "$bindState": "/trip/colour"
+        }
+      },
+      "children": [],
+      "on": {
+        "change": {
+          "action": "trip.edit",
+          "params": {
+            "id": "tag"
+          }
+        }
+      }
+    },
+    "book": {
+      "type": "button",
+      "props": {
+        "submit": true,
+        "variant": "primary",
+        "text": "Book"
+      },
+      "children": []
+    }
+  }
+}

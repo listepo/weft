@@ -1,0 +1,338 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-account as json-render
+---
+{
+  "root": "account",
+  "elements": {
+    "account": {
+      "type": "screen",
+      "props": {
+        "label": "Edit account"
+      },
+      "children": [
+        "title",
+        "account-form"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Edit account"
+      },
+      "children": []
+    },
+    "account-form": {
+      "type": "form",
+      "props": {
+        "label": "Account",
+        "state": "invalid"
+      },
+      "children": [
+        "name",
+        "age",
+        "handle",
+        "bio",
+        "email",
+        "newsletter",
+        "terms",
+        "public",
+        "plan",
+        "language",
+        "internal",
+        "saved"
+      ],
+      "slots": {
+        "footer": [
+          "save",
+          "cancel",
+          "help"
+        ]
+      },
+      "on": {
+        "submit": {
+          "action": "account.save",
+          "params": {
+            "id": "account-form"
+          }
+        }
+      }
+    },
+    "name": {
+      "type": "field",
+      "props": {
+        "label": "Full name",
+        "placeholder": "Ada Lovelace",
+        "state": "valid",
+        "type": "text",
+        "value": {
+          "$bindState": "/account/name"
+        }
+      },
+      "children": [],
+      "on": {
+        "change": {
+          "action": "account.edit",
+          "params": {
+            "id": "name"
+          }
+        }
+      }
+    },
+    "age": {
+      "type": "field",
+      "props": {
+        "error": {
+          "$state": "/errors/age"
+        },
+        "label": "Age",
+        "state": "invalid",
+        "type": "number",
+        "value": {
+          "$bindState": "/account/age"
+        }
+      },
+      "children": []
+    },
+    "handle": {
+      "type": "field",
+      "props": {
+        "disabled": {
+          "$state": "/account/locked"
+        },
+        "label": "Handle",
+        "placeholder": "{handle}",
+        "value": {
+          "$bindState": "/account/handle"
+        }
+      },
+      "children": []
+    },
+    "bio": {
+      "type": "field",
+      "props": {
+        "label": "Bio",
+        "type": "multiline",
+        "value": {
+          "$bindState": "/account/bio"
+        }
+      },
+      "children": []
+    },
+    "email": {
+      "type": "field",
+      "props": {
+        "disabled": true,
+        "label": "Email",
+        "type": "email",
+        "value": {
+          "$bindState": "/account/email"
+        }
+      },
+      "children": []
+    },
+    "newsletter": {
+      "type": "checkbox",
+      "props": {
+        "checked": {
+          "$bindState": "/account/newsletter"
+        },
+        "label": "Send me the newsletter"
+      },
+      "children": [],
+      "on": {
+        "change": {
+          "action": "account.edit",
+          "params": {
+            "id": "newsletter"
+          }
+        }
+      }
+    },
+    "terms": {
+      "type": "checkbox",
+      "props": {
+        "checked": true,
+        "disabled": true,
+        "label": "Terms accepted"
+      },
+      "children": []
+    },
+    "public": {
+      "type": "switch",
+      "props": {
+        "checked": {
+          "$bindState": "/account/public"
+        },
+        "disabled": {
+          "$cond": {
+            "$state": "/account/verified",
+            "not": true
+          },
+          "$then": true,
+          "$else": false
+        },
+        "label": "Public profile"
+      },
+      "children": [],
+      "on": {
+        "change": {
+          "action": "account.edit",
+          "params": {
+            "id": "public"
+          }
+        }
+      }
+    },
+    "plan": {
+      "type": "radio-group",
+      "props": {
+        "label": "Plan",
+        "value": {
+          "$bindState": "/account/plan"
+        }
+      },
+      "children": [
+        "plan-free",
+        "plan-pro",
+        "plan-team"
+      ],
+      "on": {
+        "change": {
+          "action": "account.edit",
+          "params": {
+            "id": "plan"
+          }
+        }
+      }
+    },
+    "plan-free": {
+      "type": "radio",
+      "props": {
+        "value": "free",
+        "text": "Free"
+      },
+      "children": []
+    },
+    "plan-pro": {
+      "type": "radio",
+      "props": {
+        "text": {
+          "$state": "/labels/pro"
+        },
+        "value": "pro"
+      },
+      "children": []
+    },
+    "plan-team": {
+      "type": "radio",
+      "props": {
+        "disabled": true,
+        "value": "team",
+        "text": "Team"
+      },
+      "children": []
+    },
+    "language": {
+      "type": "select",
+      "props": {
+        "disabled": {
+          "$state": "/account/locked"
+        },
+        "label": "Language",
+        "value": {
+          "$bindState": "/account/language"
+        }
+      },
+      "children": [
+        "language-en",
+        "language-fr"
+      ],
+      "on": {
+        "change": {
+          "action": "account.edit",
+          "params": {
+            "id": "language"
+          }
+        }
+      }
+    },
+    "language-en": {
+      "type": "option",
+      "props": {
+        "value": "en",
+        "text": "English"
+      },
+      "children": []
+    },
+    "language-fr": {
+      "type": "option",
+      "props": {
+        "text": {
+          "$state": "/labels/french"
+        },
+        "value": "fr"
+      },
+      "children": []
+    },
+    "internal": {
+      "type": "text",
+      "props": {
+        "text": "Internal note: never shown."
+      },
+      "children": [],
+      "visible": false
+    },
+    "saved": {
+      "type": "alert",
+      "props": {
+        "tone": "success",
+        "text": "Your changes were saved."
+      },
+      "children": [],
+      "visible": {
+        "$state": "/saved"
+      }
+    },
+    "save": {
+      "type": "button",
+      "props": {
+        "state": "busy",
+        "submit": true,
+        "variant": "primary",
+        "text": "Save"
+      },
+      "children": []
+    },
+    "cancel": {
+      "type": "button",
+      "props": {
+        "state": "idle",
+        "text": {
+          "$state": "/labels/cancel"
+        },
+        "variant": "secondary"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "account.cancel",
+          "params": {
+            "id": "cancel"
+          }
+        }
+      }
+    },
+    "help": {
+      "type": "link",
+      "props": {
+        "href": "https://example.com/help",
+        "text": {
+          "$state": "/labels/help"
+        }
+      },
+      "children": []
+    }
+  }
+}

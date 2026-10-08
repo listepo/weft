@@ -1,0 +1,105 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-leaderboard as json-render
+---
+{
+  "root": "leaderboard",
+  "elements": {
+    "leaderboard": {
+      "type": "screen",
+      "props": {
+        "label": "Leaderboard"
+      },
+      "children": [
+        "title",
+        "leader",
+        "players"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Leaderboard"
+      },
+      "children": []
+    },
+    "leader": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.xs"
+        }
+      },
+      "children": [
+        "leader-label",
+        "leader-name"
+      ]
+    },
+    "leader-label": {
+      "type": "text",
+      "props": {
+        "text": "In the lead:"
+      },
+      "children": []
+    },
+    "leader-name": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/players/0/name"
+        }
+      },
+      "children": []
+    },
+    "players": {
+      "type": "list",
+      "props": {
+        "ordered": true
+      },
+      "children": [
+        "player-each"
+      ]
+    },
+    "player-each": {
+      "type": "each",
+      "props": {
+        "as": "player"
+      },
+      "children": [
+        "player"
+      ],
+      "repeat": {
+        "statePath": "/players"
+      }
+    },
+    "player": {
+      "type": "item",
+      "props": {},
+      "children": [
+        "player-name",
+        "player-score"
+      ]
+    },
+    "player-name": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$item": "name"
+        }
+      },
+      "children": []
+    },
+    "player-score": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$item": "score"
+        },
+        "tone": "muted"
+      },
+      "children": []
+    }
+  }
+}

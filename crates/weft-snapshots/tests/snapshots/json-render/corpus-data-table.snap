@@ -1,0 +1,194 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-data-table as json-render
+---
+{
+  "root": "users",
+  "elements": {
+    "users": {
+      "type": "screen",
+      "props": {
+        "label": "Users"
+      },
+      "children": [
+        "title",
+        "table"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Users"
+      },
+      "children": []
+    },
+    "table": {
+      "type": "table",
+      "props": {
+        "label": "Users"
+      },
+      "children": [
+        "col-name",
+        "col-email",
+        "col-role",
+        "col-actions",
+        "rows"
+      ]
+    },
+    "col-name": {
+      "type": "column",
+      "props": {
+        "sort": "ascending",
+        "text": "Name"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "users.sort",
+          "params": {
+            "id": "col-name"
+          }
+        }
+      }
+    },
+    "col-email": {
+      "type": "column",
+      "props": {
+        "sort": "none",
+        "text": "Email"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "users.sort",
+          "params": {
+            "id": "col-email"
+          }
+        }
+      }
+    },
+    "col-role": {
+      "type": "column",
+      "props": {
+        "sort": "none",
+        "text": "Role"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "users.sort",
+          "params": {
+            "id": "col-role"
+          }
+        }
+      }
+    },
+    "col-actions": {
+      "type": "column",
+      "props": {
+        "text": "Actions"
+      },
+      "children": []
+    },
+    "rows": {
+      "type": "each",
+      "props": {
+        "as": "user"
+      },
+      "children": [
+        "row"
+      ],
+      "repeat": {
+        "statePath": "/users"
+      }
+    },
+    "row": {
+      "type": "row",
+      "props": {},
+      "children": [
+        "cell-name",
+        "cell-email",
+        "cell-role",
+        "cell-actions"
+      ]
+    },
+    "cell-name": {
+      "type": "cell",
+      "props": {},
+      "children": [
+        "user-name"
+      ]
+    },
+    "user-name": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$item": "name"
+        }
+      },
+      "children": []
+    },
+    "cell-email": {
+      "type": "cell",
+      "props": {},
+      "children": [
+        "user-email"
+      ]
+    },
+    "user-email": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$item": "email"
+        }
+      },
+      "children": []
+    },
+    "cell-role": {
+      "type": "cell",
+      "props": {},
+      "children": [
+        "user-role"
+      ]
+    },
+    "user-role": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$item": "role"
+        }
+      },
+      "children": []
+    },
+    "cell-actions": {
+      "type": "cell",
+      "props": {},
+      "children": [
+        "delete"
+      ]
+    },
+    "delete": {
+      "type": "button",
+      "props": {
+        "label": {
+          "$item": "deleteLabel"
+        },
+        "variant": "danger",
+        "text": "Delete"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "users.delete",
+          "params": {
+            "id": "delete",
+            "item": {
+              "$item": ""
+            }
+          }
+        }
+      }
+    }
+  }
+}

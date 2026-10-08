@@ -1,15 +1,20 @@
 //! The conversions to and from other agent UI formats (SPEC §9) over every corpus screen and
-//! catalog example: what A2UI export writes and what it loses are pinned as reviewed snapshots,
-//! and the messages are checked against the A2UI v0.9 JSON Schemas.
+//! catalog example: what A2UI and json-render export write and what they lose are pinned as
+//! reviewed snapshots, the A2UI messages are checked against the A2UI v0.9 JSON Schemas, and the
+//! json-render specs against the structural rules of json-render's `validateSpec`.
 
 // A test crate: a failed unwrap or panic is a failed test, which is the point.
 #![allow(clippy::unwrap_used, clippy::panic)]
 
 mod common;
 
+use std::collections::HashSet;
+
+use serde_json::Value as Json;
 use weft_core::{Catalog, Document, Mode, ValidateOptions, has_errors, validate_document};
 use weft_interop::ImportResult;
 use weft_interop::a2ui::{from_a2ui, to_a2ui};
+use weft_interop::json_render::to_json_render;
 
 fn screens() -> Vec<(String, Document)> {
     let catalog = common::catalog();
@@ -238,4 +243,144 @@ fn a2ui_import_reports_what_it_cannot_read() {
     let result = from_a2ui(lone, &catalog);
     assert!(result.diagnostics.is_empty());
     assert_eq!(result.losses.len(), 2, "{:?}", result.losses);
+}
+
+fn losses_text(losses: &[weft_interop::Loss]) -> String {
+    losses
+        .iter()
+        .map(|l| format!("{:?} {}: {}\n", l.kind, l.path, l.note))
+        .collect()
+}
+
+/// The sample data next to a corpus screen, which a spec carries as its state.
+fn sample(path: &std::path::Path) -> Option<serde_json::Map<String, Json>> {
+    let text = std::fs::read_to_string(path.with_file_name("data.json")).ok()?;
+    serde_json::from_str(&text).ok()
+}
+
+/// The structural rules of `validateSpec` in `@json-render/core` 0.21.0 (`spec-validator.ts` at
+/// commit `fc2a696` of `vercel-labs/json-render`): the root and every child exist, every element
+/// is reachable and placed once, a repeat has children, reads an item only inside another repeat
+/// and, with a state, names an array there; `visible`, `on`, `repeat` and `watch` are not props.
+/// Every type is a kind of the catalog or `each`.
+fn json_render_problems(spec: &Json, catalog: &Catalog) -> Vec<String> {
+    let mut problems = Vec::new();
+    let elements = spec["elements"].as_object().unwrap();
+    let mut seen = HashSet::new();
+    let mut todo = vec![(spec["root"].as_str().unwrap().to_owned(), false)];
+    while let Some((key, in_repeat)) = todo.pop() {
+        let Some(el) = elements.get(&key) else {
+            problems.push(format!("missing_child {key}"));
+            continue;
+        };
+        if !seen.insert(key.clone()) {
+            problems.push(format!("{key} is placed twice"));
+            continue;
+        }
+        let ty = el["type"].as_str().unwrap();
+        if ty != "each" && !catalog.components.contains_key(ty) {
+            problems.push(format!("{key}: type {ty} is not in the catalog"));
+        }
+        for field in ["visible", "on", "repeat", "watch"] {
+            if !el["props"][field].is_null() {
+                problems.push(format!("{field}_in_props {key}"));
+            }
+        }
+        let repeat = &el["repeat"];
+        let children = el["children"].as_array().unwrap();
+        if !repeat.is_null() {
+            if children.is_empty() {
+                problems.push(format!("repeat_without_children {key}"));
+            }
+            match &repeat["statePath"] {
+                Json::Object(_) if !in_repeat => {
+                    problems.push(format!("repeat_item_outside_scope {key}"));
+                }
+                Json::String(p)
+                    if !spec["state"].is_null()
+                        && !spec["state"].pointer(p).is_some_and(Json::is_array) =>
+                {
+                    problems.push(format!("repeat_state_mismatch {key} {p}"));
+                }
+                _ => {}
+            }
+        }
+        let slots = el["slots"].as_object().into_iter().flatten();
+        for kid in children
+            .iter()
+            .chain(slots.flat_map(|(_, l)| l.as_array().unwrap()))
+        {
+            todo.push((
+                kid.as_str().unwrap().to_owned(),
+                in_repeat || !repeat.is_null(),
+            ));
+        }
+    }
+    for key in elements.keys().filter(|k| !seen.contains(*k)) {
+        problems.push(format!("orphaned_element {key}"));
+    }
+    problems
+}
+
+#[test]
+fn json_render_export_snapshots() {
+    let catalog = common::catalog();
+    let mut losses = String::new();
+    for (name, document) in screens() {
+        let exported = to_json_render(&document, &catalog, None);
+        if name.starts_with("corpus-") {
+            let spec = serde_json::to_string_pretty(&exported.spec).unwrap();
+            snapshot("json-render", &name, &spec);
+        }
+        if !exported.losses.is_empty() {
+            losses.push_str(&format!("{name}\n{}", losses_text(&exported.losses)));
+        }
+    }
+    snapshot("json-render-losses", "all", &losses);
+}
+
+#[test]
+fn json_render_export_validates() {
+    let catalog = common::catalog();
+    let corpus = common::corpus();
+    for (name, document) in screens() {
+        let path = corpus.iter().find(|s| s.name == name).map(|s| &s.path);
+        let state = path.and_then(|p| sample(p));
+        let spec = to_json_render(&document, &catalog, state.as_ref()).spec;
+        let problems = json_render_problems(&spec, &catalog);
+        assert!(problems.is_empty(), "{name}: {problems:#?}");
+    }
+}
+
+#[test]
+fn json_render_export_reports_its_losses() {
+    let catalog = common::catalog();
+    let markup = r#"<screen id="s" label="Groups" weft="0.1">
+  <list id="groups">
+    <each id="group-each" as="group" in="{$.groups}">
+      <item id="group">Tags <stack id="tags">
+        <each id="tag-each" as="tag" in="{$group.tags}">
+          <text id="tag" hidden="{!$tag.shown}" text="{$group.name}"/>
+        </each>
+      </stack></item>
+    </each>
+  </list>
+  <text id="note" text="Literal"/>
+</screen>
+"#;
+    let (document, diagnostics) = common::parse_strict(markup, &catalog, &common::tokens());
+    let document = document.unwrap_or_else(|| panic!("{diagnostics:#?}"));
+    let exported = to_json_render(&document, &catalog, None);
+    assert!(json_render_problems(&exported.spec, &catalog).is_empty());
+    let kinds: Vec<String> = exported
+        .losses
+        .iter()
+        .map(|l| format!("{:?}", l.kind))
+        .collect();
+    assert_eq!(kinds, ["Text", "Bindings"], "{:#?}", exported.losses);
+    let tag = &exported.spec["elements"]["tag"];
+    assert_eq!(tag["visible"], serde_json::json!({ "$item": "shown" }));
+    // A literal `text` prop and text content are one thing to json-render.
+    let note = &exported.spec["elements"]["note"]["props"];
+    assert_eq!(note["text"], "Literal");
 }

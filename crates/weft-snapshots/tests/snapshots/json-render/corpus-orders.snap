@@ -1,0 +1,202 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-orders as json-render
+---
+{
+  "root": "orders",
+  "elements": {
+    "orders": {
+      "type": "screen",
+      "props": {
+        "label": "Orders"
+      },
+      "children": [
+        "title",
+        "open-orders",
+        "archived",
+        "pending"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": "Orders"
+      },
+      "children": []
+    },
+    "open-orders": {
+      "type": "table",
+      "props": {
+        "label": "Open orders",
+        "state": "ready"
+      },
+      "children": [
+        "col-id",
+        "col-total",
+        "order-each"
+      ],
+      "slots": {
+        "empty": [
+          "no-orders"
+        ]
+      }
+    },
+    "col-id": {
+      "type": "column",
+      "props": {
+        "sort": "descending",
+        "text": "Order"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "orders.sortById",
+          "params": {
+            "id": "col-id"
+          }
+        }
+      }
+    },
+    "col-total": {
+      "type": "column",
+      "props": {
+        "sort": "none",
+        "text": {
+          "$state": "/labels/total"
+        }
+      },
+      "children": []
+    },
+    "order-each": {
+      "type": "each",
+      "props": {
+        "as": "order"
+      },
+      "children": [
+        "order"
+      ],
+      "repeat": {
+        "statePath": "/orders"
+      }
+    },
+    "order": {
+      "type": "row",
+      "props": {
+        "selected": {
+          "$item": "selected"
+        }
+      },
+      "children": [
+        "order-id",
+        "order-total"
+      ],
+      "on": {
+        "press": {
+          "action": "orders.open",
+          "params": {
+            "id": "order",
+            "item": {
+              "$item": ""
+            }
+          }
+        }
+      }
+    },
+    "order-id": {
+      "type": "cell",
+      "props": {
+        "text": {
+          "$item": "id"
+        }
+      },
+      "children": []
+    },
+    "order-total": {
+      "type": "cell",
+      "props": {},
+      "children": [
+        "order-amount"
+      ]
+    },
+    "order-amount": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$item": "total"
+        }
+      },
+      "children": []
+    },
+    "no-orders": {
+      "type": "text",
+      "props": {
+        "text": "No open orders."
+      },
+      "children": []
+    },
+    "archived": {
+      "type": "table",
+      "props": {
+        "label": "Archived orders",
+        "state": "empty"
+      },
+      "children": [
+        "col-archived"
+      ],
+      "slots": {
+        "empty": [
+          "archived-empty"
+        ]
+      }
+    },
+    "col-archived": {
+      "type": "column",
+      "props": {
+        "text": "Order"
+      },
+      "children": []
+    },
+    "archived-empty": {
+      "type": "text",
+      "props": {
+        "text": "Nothing archived yet."
+      },
+      "children": []
+    },
+    "pending": {
+      "type": "table",
+      "props": {
+        "label": "Pending orders",
+        "state": "loading"
+      },
+      "children": [
+        "col-pending",
+        "pending-row"
+      ]
+    },
+    "col-pending": {
+      "type": "column",
+      "props": {
+        "text": "Order"
+      },
+      "children": []
+    },
+    "pending-row": {
+      "type": "row",
+      "props": {
+        "selected": true
+      },
+      "children": [
+        "pending-cell"
+      ]
+    },
+    "pending-cell": {
+      "type": "cell",
+      "props": {
+        "text": "Fetching…"
+      },
+      "children": []
+    }
+  }
+}

@@ -1,0 +1,134 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-login as json-render
+---
+{
+  "root": "login",
+  "elements": {
+    "login": {
+      "type": "screen",
+      "props": {
+        "label": "Sign in"
+      },
+      "children": [
+        "form"
+      ]
+    },
+    "form": {
+      "type": "form",
+      "props": {
+        "state": "idle"
+      },
+      "children": [
+        "title",
+        "fields",
+        "submit"
+      ],
+      "slots": {
+        "footer": [
+          "reset",
+          "signup"
+        ]
+      },
+      "on": {
+        "submit": {
+          "action": "auth.submit",
+          "params": {
+            "id": "form"
+          }
+        }
+      }
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Sign in"
+      },
+      "children": []
+    },
+    "fields": {
+      "type": "stack",
+      "props": {
+        "gap": {
+          "token": "space.md"
+        }
+      },
+      "children": [
+        "email",
+        "password"
+      ]
+    },
+    "email": {
+      "type": "field",
+      "props": {
+        "label": "Email",
+        "required": true,
+        "type": "email",
+        "value": {
+          "$bindState": "/email"
+        }
+      },
+      "children": []
+    },
+    "password": {
+      "type": "field",
+      "props": {
+        "label": "Password",
+        "required": true,
+        "type": "password",
+        "value": {
+          "$bindState": "/password"
+        }
+      },
+      "children": []
+    },
+    "submit": {
+      "type": "button",
+      "props": {
+        "disabled": {
+          "$cond": {
+            "$state": "/email",
+            "not": true
+          },
+          "$then": true,
+          "$else": false
+        },
+        "submit": true,
+        "variant": "primary",
+        "text": "Sign in"
+      },
+      "children": []
+    },
+    "reset": {
+      "type": "link",
+      "props": {
+        "text": "Forgot password?"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "nav.reset",
+          "params": {
+            "id": "reset"
+          }
+        }
+      }
+    },
+    "signup": {
+      "type": "link",
+      "props": {
+        "text": "Create an account"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "nav.signup",
+          "params": {
+            "id": "signup"
+          }
+        }
+      }
+    }
+  }
+}

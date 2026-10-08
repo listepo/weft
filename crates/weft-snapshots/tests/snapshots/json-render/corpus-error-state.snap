@@ -1,0 +1,91 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-error-state as json-render
+---
+{
+  "root": "load-error",
+  "elements": {
+    "load-error": {
+      "type": "screen",
+      "props": {
+        "label": "Load error",
+        "state": "error"
+      },
+      "children": [
+        "alert",
+        "actions"
+      ]
+    },
+    "alert": {
+      "type": "alert",
+      "props": {
+        "tone": "danger"
+      },
+      "children": [
+        "error-title",
+        "error-message"
+      ]
+    },
+    "error-title": {
+      "type": "heading",
+      "props": {
+        "level": 2,
+        "text": "Could not load your data"
+      },
+      "children": []
+    },
+    "error-message": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/error/message"
+        }
+      },
+      "children": []
+    },
+    "actions": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.sm"
+        }
+      },
+      "children": [
+        "retry",
+        "support"
+      ]
+    },
+    "retry": {
+      "type": "button",
+      "props": {
+        "variant": "primary",
+        "text": "Retry"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "load.retry",
+          "params": {
+            "id": "retry"
+          }
+        }
+      }
+    },
+    "support": {
+      "type": "link",
+      "props": {
+        "text": "Contact support"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "nav.support",
+          "params": {
+            "id": "support"
+          }
+        }
+      }
+    }
+  }
+}

@@ -566,6 +566,16 @@ Losses of the A2UI conversions (A2UI v0.9, `specification/v0_9` of `a2ui-project
 | `text` | Text with no place in the content model is dropped. | Likewise. |
 | `structure` | A `dialog` is a `Modal` with a generated trigger; a `tabs` with no tab, which A2UI refuses. | Other surfaces than the first, a component that is used but not defined, a `Button` whose child is not a `Text`. |
 
+- **To json-render:** a document compiles to one json-render spec (`vercel-labs/json-render` at commit `fc2a696`, 2026-10-01, `@json-render/core` 0.21.0): `{ "root", "elements" }`, plus `"state"` when the caller gives sample data (a JSON object), written as it is. The catalog the spec is checked against is the Weft catalog itself, so the mapping is one element per element: the key and the `type` are the Weft id and kind, and `props` holds the Weft props in canonical JSON (§3; a token reference stays `{ "token": … }`), except that a binding is a json-render expression: `{ "$state": "/user/email" }` for a path from `$.`, `{ "$item": "title" }` for a field of the innermost loop variable (`""` for the whole item), `$bindState` and `$bindItem` instead on a prop the catalog marks `writable`, and a negated binding `{ "$cond": { …, "not": true }, "$then": true, "$else": false }`. `hidden` is the element's `visible`: `true` is `false`, a binding is a condition on the same path with `not` inverted. The text content of a `text` or `mixed` component that holds text only is its `text` prop; in a `mixed` component that also holds elements, each text run is a generated `text` element. Named slots are `slots`, the default slot `children`. An event is `on: { <event>: { "action": <action>, "params": { "id": <element id> } } }`, inside a repetition with `"item": { "$item": "" }` as well, which json-render resolves to the item's absolute path: what a Weft host receives with an action (§2.2). An `<each>` is an element of type `each` (a component of the exported catalog that renders its children and adds no element of its own) with props `{ "as": … }`, `repeat: { "statePath": … }` (the pointer of `in`, `{ "$item": … }` inside another repetition) and its content as `children`.
+- **From json-render:** not yet defined (T13.2).
+
+Losses of the json-render export (`vercel-labs/json-render` at commit `fc2a696`, 2026-10-01; `@json-render/core` 0.21.0). Ids, kinds, props, token references, slots, events, `hidden` and repetitions all keep their meaning; only these change:
+
+| Loss kind | To json-render |
+| --- | --- |
+| `bindings` | A binding that reads an outer repetition, or a whole outer item: json-render reads only the innermost item. The prop is left out (for `hidden`, the element is always shown). |
+| `text` | A text run beside elements in a `mixed` component (or in an extension element) becomes a generated `text` element with a free id. |
+
 ## 10. Projects
 
 Screens that belong together share their resources through a project file named `weft.json`. A screen names neither its project nor its resources.

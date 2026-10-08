@@ -1,0 +1,313 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-inbox as json-render
+---
+{
+  "root": "inbox",
+  "elements": {
+    "inbox": {
+      "type": "screen",
+      "props": {
+        "label": "Inbox",
+        "state": "loading"
+      },
+      "children": [
+        "folders",
+        "message-actions",
+        "compose"
+      ]
+    },
+    "folders": {
+      "type": "tabs",
+      "props": {
+        "selected": {
+          "$bindState": "/folder"
+        }
+      },
+      "children": [
+        "tab-inbox",
+        "tab-drafts",
+        "tab-sent"
+      ],
+      "on": {
+        "change": {
+          "action": "inbox.folder",
+          "params": {
+            "id": "folders"
+          }
+        }
+      }
+    },
+    "tab-inbox": {
+      "type": "tab",
+      "props": {
+        "label": "Inbox"
+      },
+      "children": [
+        "messages"
+      ]
+    },
+    "messages": {
+      "type": "list",
+      "props": {
+        "ordered": true,
+        "state": "ready"
+      },
+      "children": [
+        "message-each"
+      ],
+      "slots": {
+        "empty": [
+          "no-messages"
+        ]
+      }
+    },
+    "message-each": {
+      "type": "each",
+      "props": {
+        "as": "message"
+      },
+      "children": [
+        "message"
+      ],
+      "repeat": {
+        "statePath": "/messages"
+      }
+    },
+    "message": {
+      "type": "item",
+      "props": {
+        "text": {
+          "$item": "subject"
+        }
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "inbox.open",
+          "params": {
+            "id": "message",
+            "item": {
+              "$item": ""
+            }
+          }
+        }
+      }
+    },
+    "no-messages": {
+      "type": "text",
+      "props": {
+        "text": "No messages."
+      },
+      "children": []
+    },
+    "tab-drafts": {
+      "type": "tab",
+      "props": {
+        "label": {
+          "$state": "/labels/drafts"
+        }
+      },
+      "children": [
+        "drafts"
+      ]
+    },
+    "drafts": {
+      "type": "list",
+      "props": {
+        "state": "empty"
+      },
+      "children": [],
+      "slots": {
+        "empty": [
+          "drafts-empty"
+        ]
+      }
+    },
+    "drafts-empty": {
+      "type": "stack",
+      "props": {
+        "align": "center",
+        "direction": "column",
+        "gap": {
+          "token": "space.sm"
+        }
+      },
+      "children": [
+        "no-drafts",
+        "no-drafts-hint"
+      ]
+    },
+    "no-drafts": {
+      "type": "text",
+      "props": {
+        "text": "No drafts."
+      },
+      "children": []
+    },
+    "no-drafts-hint": {
+      "type": "text",
+      "props": {
+        "text": "Messages you start appear here."
+      },
+      "children": []
+    },
+    "tab-sent": {
+      "type": "tab",
+      "props": {
+        "label": "Sent"
+      },
+      "children": [
+        "sent"
+      ]
+    },
+    "sent": {
+      "type": "list",
+      "props": {
+        "state": "loading"
+      },
+      "children": [
+        "sent-loading"
+      ]
+    },
+    "sent-loading": {
+      "type": "item",
+      "props": {
+        "text": "Loading…"
+      },
+      "children": []
+    },
+    "message-actions": {
+      "type": "menu",
+      "props": {
+        "label": "Message actions"
+      },
+      "children": [
+        "archive",
+        "delete"
+      ]
+    },
+    "archive": {
+      "type": "menu-item",
+      "props": {
+        "text": {
+          "$state": "/labels/archive"
+        }
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "inbox.archive",
+          "params": {
+            "id": "archive"
+          }
+        }
+      }
+    },
+    "delete": {
+      "type": "menu-item",
+      "props": {
+        "disabled": {
+          "$cond": {
+            "$state": "/selection",
+            "not": true
+          },
+          "$then": true,
+          "$else": false
+        },
+        "text": "Delete"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "inbox.delete",
+          "params": {
+            "id": "delete"
+          }
+        }
+      }
+    },
+    "compose": {
+      "type": "dialog",
+      "props": {
+        "label": "New message",
+        "modal": false,
+        "open": {
+          "$bindState": "/composing"
+        }
+      },
+      "children": [
+        "compose-form"
+      ],
+      "slots": {
+        "actions": [
+          "send"
+        ]
+      },
+      "on": {
+        "close": {
+          "action": "inbox.closeCompose",
+          "params": {
+            "id": "compose"
+          }
+        }
+      }
+    },
+    "compose-form": {
+      "type": "form",
+      "props": {
+        "state": "submitting"
+      },
+      "children": [
+        "to",
+        "body"
+      ],
+      "on": {
+        "submit": {
+          "action": "inbox.send",
+          "params": {
+            "id": "compose-form"
+          }
+        }
+      }
+    },
+    "to": {
+      "type": "field",
+      "props": {
+        "label": "To",
+        "type": "email",
+        "value": {
+          "$bindState": "/draft/to"
+        }
+      },
+      "children": []
+    },
+    "body": {
+      "type": "field",
+      "props": {
+        "label": "Message",
+        "type": "multiline",
+        "value": {
+          "$bindState": "/draft/body"
+        }
+      },
+      "children": []
+    },
+    "send": {
+      "type": "button",
+      "props": {
+        "variant": "primary",
+        "text": "Send"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "inbox.send",
+          "params": {
+            "id": "send"
+          }
+        }
+      }
+    }
+  }
+}
