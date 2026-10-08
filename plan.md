@@ -17,7 +17,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16 | todo | P2 | 5 | 0% | |
 | T17 | todo | P2 | 4 | 20% | |
-| T17.1 | todo | P2 | 4 | 0% | |
+| T17.1 | in progress | P2 | 4 | 0% | Claude Code / claude-opus-5-5 |
 | T17.2 | todo | P2 | 3 | 0% | |
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
@@ -455,6 +455,14 @@ T17's format and loader, by decisions 1–6 and 11 of `docs/extension-catalogs-d
 - Differential fixtures for the catalog loader (regenerate with `WEFT_UPDATE_FIXTURES=1`).
 - `examples/project`: `catalogs/acme-ui.catalog.json`, the `import-cem` output of the `acme-ui.json` fixture with `prefix: "acme"` and `requires` added by hand (T17.2 regenerates it with `--prefix` and must produce the same file); `catalog.json` gains `requires` and widens `acme-button.variant`; `weft.json` lists both; a screen uses kinds of all three catalogs; broken project variants give each new code. The T12 document schema tests cover the merged catalog.
 - Done when T17's first three done criteria hold for the loader (both extensions validate in strict mode; a kind claimed by two catalogs names both; the TypeScript and Rust fixtures agree) and `cargo nextest`, clippy and the TypeScript tests pass.
+
+**Execution plan.**
+1. `crates/weft-core` and `packages/core`: register `W711`–`W713` (errors) and `W714` (warning); their `codes.rs` lists; `AGENT-SPEC.md` gets a fix line per code, since the guide must cover every code (§1 and §2.8 stay with T17.2).
+2. `crates/weft-catalog/src/project.rs`: `catalog` as one entry or an array of at most 32 (`W701`), pointers `#/catalog/<i>` for arrays. Pass 1 in array order reads each catalog, checks its shape (`prefix`, `requires` added to `CATALOG_MEMBERS`), name and prefix claims (`W711`, `W712`) and the one unprefixed catalog (`W712`); then `requires` against the loaded set with `semver`'s caret rule (`W714`); then merge libraries (own kinds only, `W713`, `W711`) and last the project catalog (extends core and library kinds widen-only against the definition it extends, no new kind under a library prefix). `Project` gains `catalogs` (name, version, prefix, source) and `kinds` (defining catalog, extended by). The extension merge code is reused, not copied.
+3. `crates/weft-binding` and `packages/catalog/src/project.ts`: carry `catalogs` and `kinds` across the WebAssembly boundary.
+4. Tests: project cases in `packages/catalog/test/project-cases.ts` for each new code and for arrays, content arrays and provenance; the differential expectation on both sides gains `catalogs` and the non-core `kinds`; regenerate `crates/weft-catalog/tests/fixtures/differential.json` with `WEFT_UPDATE_FIXTURES=1`.
+5. `examples/project`: `catalogs/acme-ui.catalog.json` (the `import-cem` output with `prefix` and `requires` added), `catalog.json` with `requires` and the widened `acme-button.variant`, `weft.json` lists both, a new screen using kinds of all three catalogs; the SwiftUI test views and the snapshot goldens follow; the T12 document schema tests pin the merged catalog.
+6. `SPEC.md` §5, §6.2, §8, §10.2, §10.4. Verify with `moon run root:changed`, then the full check once.
 
 ### T17.2. Extension catalogs: tools and docs
 
