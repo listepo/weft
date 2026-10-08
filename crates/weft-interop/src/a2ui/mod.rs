@@ -4,5 +4,6 @@
 mod export;
 mod import;
 
+pub use crate::MAX_SOURCE_LENGTH;
 pub use export::{CATALOG_ID, Exported, to_a2ui};
-pub use import::{MAX_SOURCE_LENGTH, from_a2ui};
+pub use import::from_a2ui;

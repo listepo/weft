@@ -10,7 +10,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T13.2 | todo | P2 | 3 | 0% | |
 | T73 | todo | P2 | 2 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
@@ -157,10 +156,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
-
-### T13.2. json-render import
-
-Read a json-render spec back into a Weft document in `crates/weft-interop` (`from_json_render(text, catalog)`), with "From json-render" and its loss column in SPEC §9. The input is untrusted: bounded like the other importers (`W602`), `W601` for input that is not a spec, never a panic. Reuse the `weft-import` role tree and builder and `paths.rs`. Done when every corpus screen exported by T13.1 imports back to the same document (a literal `text` prop comes back as content, which json-render cannot tell apart), a second trip changes nothing, and a spec written for another catalog imports with its losses listed. A working draft (importer, SPEC text and tests, about 420 lines of code) is on the local branch `t13.2-json-render-import`, not pushed and not reviewed.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 
