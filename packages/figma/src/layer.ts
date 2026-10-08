@@ -14,6 +14,7 @@ import type {
   FRectangle,
   FScene,
 } from "./api.ts";
+import { dataOf } from "./data.ts";
 import { tokenPathOf } from "./tokens.ts";
 
 /** The layout and style fields the read-back looks at. */
@@ -130,7 +131,9 @@ export function figmaLayers(variables: VariableLookup): (node: ReadNode) => Laye
     if (paths.has(id)) return paths.get(id);
     const variable = await variables.getVariableByIdAsync(id);
     const path =
-      variable === null ? undefined : (readMark(variable, KEY.token) ?? tokenPathOf(variable.name));
+      variable === null
+        ? undefined
+        : (readMark(dataOf(variable), KEY.token) ?? tokenPathOf(variable.name));
     paths.set(id, path);
     return path;
   };
@@ -200,10 +203,9 @@ export function figmaLayers(variables: VariableLookup): (node: ReadNode) => Laye
         if (node.type !== "INSTANCE") return undefined;
         const main = await node.getMainComponentAsync();
         if (main === null) return undefined;
-        return { kind: readMark(main, KEY.kind), style: styleKey(main, true) };
+        return { kind: readMark(dataOf(main), KEY.kind), style: styleKey(main, true) };
       },
-      getPluginData: (key) => node.getPluginData(key),
-      setPluginData: (key, value) => node.setPluginData(key, value),
+      ...dataOf(node),
     };
     wrapped.set(node, layer);
     return layer;
