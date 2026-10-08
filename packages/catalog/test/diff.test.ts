@@ -24,3 +24,14 @@ test("diffCatalogs of the core catalog with itself is none", () => {
     changes: [],
   });
 });
+
+test("the layout props of weft-core 0.2.0 are a minor change", () => {
+  const previous = structuredClone(coreCatalog);
+  for (const name of ["justify", "padding", "max-width"])
+    delete previous.components["stack"]!.props![name];
+  for (const name of ["min-column-width", "padding", "max-width"])
+    delete previous.components["grid"]!.props![name];
+  const result = diffCatalogs(previous, coreCatalog);
+  assert.equal(result.level, "minor");
+  assert.equal(result.changes.length, 6);
+});

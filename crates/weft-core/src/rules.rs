@@ -184,7 +184,7 @@ pub fn asset_problem(value: &str, extensions: &[&str]) -> Option<&'static str> {
 
 /// Universal attributes of SPEC §2.2 other than `id` and `on-*`; `state` values come from the
 /// component.
-static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 8]> = LazyLock::new(|| {
+static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 9]> = LazyLock::new(|| {
     let mut role = PropDef::new("ARIA role of an extension element.", PropType::String);
     role.bindable = Some(false);
     // Literal only: a renderer writes the matrix once, and a design tool draws one fixed projection.
@@ -198,6 +198,12 @@ static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 8]> = LazyLock::new(|| {
     let mut perspective = PropDef::new("Viewer distance of a 3D tilt, in px.", PropType::Number);
     perspective.min = Some(1.0);
     perspective.bindable = Some(false);
+    // Literal only: which child takes the free space is structure, not data (SPEC §2.2).
+    let mut grow = PropDef::new(
+        "Takes a share of the parent stack's free space.",
+        PropType::Boolean,
+    );
+    grow.bindable = Some(false);
     [
         ("label", PropDef::new("Accessible name.", PropType::String)),
         (
@@ -222,6 +228,7 @@ static UNIVERSAL_PROPS: LazyLock<[(&str, PropDef); 8]> = LazyLock::new(|| {
             angle("Rotation in the screen plane, in degrees."),
         ),
         ("perspective", perspective),
+        ("grow", grow),
     ]
 });
 

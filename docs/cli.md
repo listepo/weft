@@ -66,11 +66,11 @@ Without `--catalog` or a project only the syntax layer runs (is it well-formed W
 ```console
 $ weft validate compat/unknown-element.weft --catalog packages/catalog/catalog.json; echo "exit $?"
 compat/unknown-element.weft:2:31 W403 Version 0.2 is newer than 0.1; unknown content is read as extensions.
-compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.1.0. — use a catalog component, or an extension named x-<vendor>-hologram
+compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.2.0. — use a catalog component, or an extension named x-<vendor>-hologram
 exit 0
 $ weft validate compat/unknown-element.weft --catalog packages/catalog/catalog.json --strict; echo "exit $?"
 compat/unknown-element.weft:2:31 W403 Version 0.2 is newer than 0.1; unknown content is read as extensions.
-compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.1.0. — use a catalog component, or an extension named x-<vendor>-hologram
+compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.2.0. — use a catalog component, or an extension named x-<vendor>-hologram
 exit 1
 ```
 

@@ -23,8 +23,9 @@ description: corpus-dashboard as json-render
       "props": {
         "direction": "row",
         "gap": {
-          "token": "space.xl"
+          "token": "space.md"
         },
+        "justify": "space-between",
         "wrap": true
       },
       "children": [
@@ -58,6 +59,9 @@ description: corpus-dashboard as json-render
         "columns": 3,
         "gap": {
           "token": "space.lg"
+        },
+        "min-column-width": {
+          "token": "size.sm"
         }
       },
       "children": [
@@ -168,6 +172,9 @@ description: corpus-dashboard as json-render
         "direction": "column",
         "gap": {
           "token": "space.sm"
+        },
+        "max-width": {
+          "token": "size.lg"
         }
       },
       "children": [
@@ -223,9 +230,12 @@ description: corpus-dashboard as json-render
       "type": "stack",
       "props": {
         "align": "end",
+        "direction": "row",
         "gap": {
-          "token": "space.xs"
-        }
+          "token": "space.md"
+        },
+        "justify": "space-between",
+        "wrap": true
       },
       "children": [
         "owner",

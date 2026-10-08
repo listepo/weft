@@ -1,0 +1,63 @@
+// weft:source slint
+// <screen id="layout" label="Layout" weft="0.1">
+//   <stack id="toolbar" direction="row" gap="{token.space.sm}" justify="start">
+//     <field id="search" grow="true" label="Search" type="search" value="{$.query}"/>
+//     <button id="filter" on-press="list.filter">Filter</button>
+//   </stack>
+//   <stack id="pager" direction="row" gap="{token.space.sm}" justify="center">
+//     <link id="previous" on-press="list.previous">Previous</link>
+//     <link id="next" on-press="list.next">Next</link>
+//   </stack>
+//   <stack id="actions" direction="row" gap="{token.space.sm}" justify="end">
+//     <button id="cancel" on-press="list.cancel">Cancel</button>
+//     <button id="save" variant="primary" on-press="list.save">Save</button>
+//   </stack>
+// </screen>
+
+import { Button, LineEdit, Palette, VerticalBox } from "std-widgets.slint";
+
+export component LayoutScreen inherits Window {
+    title: "Layout";
+    in-out property <string> query;
+    callback perform(string, string);
+
+    layout := VerticalBox {
+        alignment: LayoutAlignment.start;
+        toolbar := HorizontalLayout {
+            spacing: 8px;
+            VerticalLayout {
+                Text { text: "Search"; }
+                search := LineEdit {
+                    text <=> root.query;
+                }
+            }
+            filter := Button {
+                text: "Filter";
+                clicked => { root.perform("list.filter", "filter"); }
+            }
+        }
+        pager := HorizontalLayout {
+            spacing: 8px;
+            previous := TouchArea {
+                clicked => { root.perform("list.previous", "previous"); }
+                Text { text: "Previous"; color: Palette.accent-background; }
+            }
+            next := TouchArea {
+                clicked => { root.perform("list.next", "next"); }
+                Text { text: "Next"; color: Palette.accent-background; }
+            }
+        }
+        actions := HorizontalLayout {
+            spacing: 8px;
+            cancel := Button {
+                text: "Cancel";
+                clicked => { root.perform("list.cancel", "cancel"); }
+            }
+            save := Button {
+                text: "Save";
+                primary: true;
+                clicked => { root.perform("list.save", "save"); }
+            }
+        }
+    }
+}

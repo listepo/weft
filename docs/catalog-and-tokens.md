@@ -59,7 +59,7 @@ An agent that is told which catalog the host uses (`weft_catalog` reports it) wr
 
 ### Versioning a catalog
 
-A catalog has its own version. Adding something is a minor change; removing or tightening something is a major change, because a screen that was valid could stop being valid. `diffCatalogs` classifies a change by the rule in [SPEC §8](../SPEC.md#8-versioning-and-extensibility). From a file inside a workspace package (see the note in the [index](README.md)):
+A catalog has its own version. Adding something is a minor change; removing or tightening something is a major change, because a screen that was valid could stop being valid. The core catalog is `weft-core` 0.2.0: it moved from 0.1.0 when its stacks and grids gained `justify`, `padding`, `max-width` and `min-column-width`, a minor change. `diffCatalogs` classifies a change by the rule in [SPEC §8](../SPEC.md#8-versioning-and-extensibility). From a file inside a workspace package (see the note in the [index](README.md)):
 
 ```console
 $ cat > plugins/shared/scratch/diff.ts <<'EOF'
@@ -80,7 +80,7 @@ minor components.button.props.variant.values: Enum value "ghost" was added.
 
 Tokens are a file in the W3C Design Tokens format (DTCG 2025.10), the format design tools export. A screen never holds a color or a size; it holds a reference such as `gap="{token.space.md}"`, so changing `space.md` in one place changes every screen. A designer can own that file.
 
-`packages/catalog/tokens/default.tokens.json` is the default set: spacing (`space.xs` to `space.xl`), radii, font sizes and a few colors, with aliases such as `color.action.danger` pointing at `color.red`. `loadTokens` reads a file, resolves aliases and returns the tokens and any problems it found, never throwing on bad input. Props that take a token say which type they accept (`gap` takes a `dimension`), and the validator checks both the name and the type.
+`packages/catalog/tokens/default.tokens.json` is the default set: spacing (`space.xs` to `space.xl`), widths for `max-width` and `min-column-width` (`size.sm` 240 px to `size.xl` 960 px), radii, font sizes and a few colors, with aliases such as `color.action.danger` pointing at `color.red`. `loadTokens` reads a file, resolves aliases and returns the tokens and any problems it found, never throwing on bad input. Props that take a token say which type they accept (`gap` takes a `dimension`), and the validator checks both the name and the type.
 
 The `weft` command and the MCP server do not know your tokens, so they accept any well-formed reference. To check names, give the validator the token map. It does the same for the list of action names your app has. This script checks the login screen four ways:
 

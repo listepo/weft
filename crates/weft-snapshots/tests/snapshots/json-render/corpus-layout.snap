@@ -1,0 +1,150 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-layout as json-render
+---
+{
+  "root": "layout",
+  "elements": {
+    "layout": {
+      "type": "screen",
+      "props": {
+        "label": "Layout"
+      },
+      "children": [
+        "toolbar",
+        "pager",
+        "actions"
+      ]
+    },
+    "toolbar": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.sm"
+        },
+        "justify": "start"
+      },
+      "children": [
+        "search",
+        "filter"
+      ]
+    },
+    "search": {
+      "type": "field",
+      "props": {
+        "grow": true,
+        "label": "Search",
+        "type": "search",
+        "value": {
+          "$bindState": "/query"
+        }
+      },
+      "children": []
+    },
+    "filter": {
+      "type": "button",
+      "props": {
+        "text": "Filter"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "list.filter",
+          "params": {
+            "id": "filter"
+          }
+        }
+      }
+    },
+    "pager": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.sm"
+        },
+        "justify": "center"
+      },
+      "children": [
+        "previous",
+        "next"
+      ]
+    },
+    "previous": {
+      "type": "link",
+      "props": {
+        "text": "Previous"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "list.previous",
+          "params": {
+            "id": "previous"
+          }
+        }
+      }
+    },
+    "next": {
+      "type": "link",
+      "props": {
+        "text": "Next"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "list.next",
+          "params": {
+            "id": "next"
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.sm"
+        },
+        "justify": "end"
+      },
+      "children": [
+        "cancel",
+        "save"
+      ]
+    },
+    "cancel": {
+      "type": "button",
+      "props": {
+        "text": "Cancel"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "list.cancel",
+          "params": {
+            "id": "cancel"
+          }
+        }
+      }
+    },
+    "save": {
+      "type": "button",
+      "props": {
+        "variant": "primary",
+        "text": "Save"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "list.save",
+          "params": {
+            "id": "save"
+          }
+        }
+      }
+    }
+  }
+}

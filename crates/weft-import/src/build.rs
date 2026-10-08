@@ -28,6 +28,7 @@ const UNIVERSAL: &[&str] = &[
     "rotate-y",
     "rotate-z",
     "perspective",
+    "grow",
 ];
 /// The repetition construct (SPEC §4); not a catalog kind.
 const EACH: &str = "each";
@@ -245,10 +246,10 @@ fn set_prop(
         }
         return;
     }
-    // A tilt is a universal attribute with a definition of its own (SPEC §2.2).
+    // A tilt and `grow` are universal attributes with a definition of their own (SPEC §2.2).
     let Some(pd) = def
         .prop(name)
-        .or_else(|| universal_prop(name).filter(|_| TILT_PROPS.contains(&name)))
+        .or_else(|| universal_prop(name).filter(|_| TILT_PROPS.contains(&name) || name == "grow"))
     else {
         return;
     };

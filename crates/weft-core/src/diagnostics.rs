@@ -120,6 +120,7 @@ codes! {
     W315 => Error, "Binding path not declared in the data schema.";
     W316 => Error, "Bound data has a type the attribute does not take.";
     W317 => Error, "Asset path of a `model` is not an allowed path.";
+    W318 => Error, "`grow` on an element whose parent is not a `stack`.";
     W401 => Mode, "Unknown element.";
     W402 => Mode, "Unknown attribute.";
     W403 => Mode, "Newer minor version of the format.";
