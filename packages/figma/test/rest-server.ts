@@ -51,11 +51,8 @@ const LAYOUT_DEFAULTS: Json = {
   cornerRadius: 0,
 };
 
-/** What a request asked for with `plugin_data`: the writer's private data, shared data. */
-export type Asked = { pluginId?: string | undefined; shared?: boolean };
-
-/** The REST JSON of a fake node, with the plugin data the request asked for. */
-export function restJson(node: FakeNode, asked: Asked): Json {
+/** The REST JSON of a fake node; shared plugin data when the request asked for it. */
+export function restJson(node: FakeNode, shared: boolean): Json {
   const json: Json = {
     id: node.id,
     name: node.name,
@@ -63,9 +60,7 @@ export function restJson(node: FakeNode, asked: Asked): Json {
     ...(node.visible ? {} : { visible: false }),
     absoluteBoundingBox: { x: node.x, y: node.y, width: node.width, height: node.height },
   };
-  if (asked.pluginId !== undefined && node.data.size > 0)
-    json["pluginData"] = { [asked.pluginId]: Object.fromEntries(node.data) };
-  if (asked.shared === true && node.shared.size > 0)
+  if (shared && node.shared.size > 0)
     json["sharedPluginData"] = Object.fromEntries(
       [...node.shared].map(([namespace, entries]) => [namespace, Object.fromEntries(entries)]),
     );
@@ -106,7 +101,7 @@ export function restJson(node: FakeNode, asked: Asked): Json {
     json["fills"] = paints(node.fills);
   }
   if ("children" in node && node.children !== undefined)
-    json["children"] = node.children.map((c) => restJson(c, asked));
+    json["children"] = node.children.map((c) => restJson(c, shared));
   return json;
 }
 
@@ -130,7 +125,7 @@ export type FakeRest = {
 };
 
 /** Serves the fake file; a request without the right token gets a 403, as the real API does. */
-export async function serveFile(figma: FakeFigma, writer: string): Promise<FakeRest> {
+export async function serveFile(figma: FakeFigma): Promise<FakeRest> {
   const nodes = index(figma);
   const state: Omit<FakeRest, "api" | "close"> = { requests: [] };
   const server: Server = createServer((request, response) => {
@@ -146,14 +141,10 @@ export async function serveFile(figma: FakeFigma, writer: string): Promise<FakeR
       return reply(403, JSON.stringify({ status: 403, err: "Invalid token" }));
     if (url.pathname !== `/v1/files/${FILE_KEY}/nodes`)
       return reply(404, JSON.stringify({ status: 404, err: "Not found" }));
-    const named = (url.searchParams.get("plugin_data") ?? "").split(",");
-    const asked: Asked = {
-      pluginId: named.includes(writer) ? writer : undefined,
-      shared: named.includes("shared"),
-    };
+    const shared = (url.searchParams.get("plugin_data") ?? "").split(",").includes("shared");
     const entries = (url.searchParams.get("ids") ?? "").split(",").map((id) => {
       const node = nodes.get(id);
-      return [id, node === undefined ? null : { document: restJson(node, asked) }];
+      return [id, node === undefined ? null : { document: restJson(node, shared) }];
     });
     reply(200, JSON.stringify({ name: "fake", nodes: Object.fromEntries(entries) }));
   });

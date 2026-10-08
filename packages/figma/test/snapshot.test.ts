@@ -13,7 +13,6 @@ type Layer = {
   type?: string;
   name?: string;
   children?: Layer[];
-  data?: Map<string, string>;
   shared?: Map<string, Map<string, string>>;
 };
 
@@ -28,18 +27,7 @@ async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
   return layerTree(frame, {
     children: (layer) => (layer as Layer).children,
     heading: (layer) => `${(layer as Layer).type} ${JSON.stringify((layer as Layer).name)}`,
-    skip: new Set([
-      "id",
-      "type",
-      "name",
-      "parent",
-      "figma",
-      "children",
-      "data",
-      "shared",
-      "x",
-      "y",
-    ]),
+    skip: new Set(["id", "type", "name", "parent", "figma", "children", "shared", "x", "y"]),
     defaults: {
       visible: true,
       rotation: 0,
@@ -70,13 +58,7 @@ async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
       size: 12,
     },
     extra: (layer) =>
-      [
-        // The Weft source is shared plugin data; private data shows only if something still writes it.
-        ...((layer as Layer).shared?.get(NAMESPACE) ?? new Map<string, string>()),
-        ...[...((layer as Layer).data ?? new Map<string, string>())].map(
-          ([k, v]) => [`private ${k}`, v] as const,
-        ),
-      ]
+      [...((layer as Layer).shared?.get(NAMESPACE) ?? new Map<string, string>())]
         .sort(([a], [b]) => (a < b ? -1 : 1))
         .map(([k, v]) => `${k} = ${v}`),
     ids,

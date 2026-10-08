@@ -344,12 +344,6 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
-            },
-            "pluginId": {
-              "type": "string",
-              "minLength": 1,
-              "description": "The id of the Figma plugin whose plugin data holds the Weft source of each layer (the `id` of its manifest).",
-              "default": "weft-development"
             }
           },
           "additionalProperties": false,
