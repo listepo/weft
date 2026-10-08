@@ -49,6 +49,7 @@
 | serde | local | https://github.com/serde-rs/serde | Catalog and model (de)serialization |
 | serde_json | local | https://github.com/serde-rs/json | JSON documents, patches and catalogs; `preserve_order` keeps key order |
 | indexmap | local | https://github.com/indexmap-rs/indexmap | Ordered maps for props, slots and tokens |
+| semver | local | https://github.com/dtolnay/semver | Cargo's compatibility rule for a catalog's `requires` (weft-catalog); no default features |
 | ryu-js | local | https://github.com/boa-dev/ryu-js | Numbers printed as JavaScript prints them, so both cores emit the same bytes |
 | thiserror | local | https://github.com/dtolnay/thiserror | Typed errors in weft-core |
 | anyhow | local | https://github.com/dtolnay/anyhow | Errors in the `weft` binary |

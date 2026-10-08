@@ -7,7 +7,7 @@
 use serde_json::{Map as Object, Value as Json, json};
 use weft_core::{Code, Diagnostic, did_you_mean, one_of};
 
-use crate::project::{MAX_TOKEN_FILES, escape_pointer, is_project_file_name, quote};
+use crate::project::{MAX_CATALOGS, MAX_TOKEN_FILES, escape_pointer, is_project_file_name, quote};
 
 /// The kind of value a setting holds.
 pub(crate) enum Kind {
@@ -586,8 +586,15 @@ pub fn project_file_schema() -> Json {
         "description": "DTCG token files, in layer order: a later file overrides an earlier one; or one DTCG resolver document (`*.resolver.json`) whose modifiers give contexts such as light and dark (SPEC §10.3).",
     }));
     properties.insert("catalog".to_owned(), json!({
-        "$ref": "#/$defs/fileName",
-        "description": "A catalog that extends the core catalog with the project's kinds, props and variants (SPEC §10.4).",
+        "oneOf": [
+            {
+                "type": "array",
+                "maxItems": MAX_CATALOGS,
+                "items": { "$ref": "#/$defs/fileName" },
+            },
+            { "$ref": "#/$defs/fileName" },
+        ],
+        "description": "Catalogs merged over the core catalog: libraries, each owning the kinds under its prefix, and at most one project catalog without a prefix that adds the project's kinds, props and variants (SPEC §10.4).",
     }));
     properties.insert(
         "actions".to_owned(),

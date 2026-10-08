@@ -146,6 +146,10 @@ codes! {
     W708 => Error, "Project action name breaks the action grammar.";
     W709 => Error, "Data schema is malformed.";
     W710 => Warning, "Data schema keyword is not supported.";
+    W711 => Error, "Two catalogs claim the same name, prefix or kind.";
+    W712 => Error, "Catalog prefix is malformed or reserved, or a second catalog lacks one.";
+    W713 => Error, "Catalog defines or extends a kind it does not own.";
+    W714 => Warning, "Catalog requirement is not loaded at a compatible version.";
 }
 
 impl Code {

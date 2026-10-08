@@ -52,8 +52,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16.5 | todo | P2 | 3 | 0% | |
 | T16.6 | todo | P2 | 2 | 0% | |
 | T16.7 | todo | P2 | 3 | 0% | |
-| T17 | todo | P2 | 4 | 20% | |
-| T17.1 | todo | P2 | 4 | 0% | |
+| T17 | todo | P2 | 4 | 50% | |
 | T17.2 | todo | P2 | 3 | 0% | |
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
@@ -546,7 +545,7 @@ Done when: the Figma and Penpot round trips of `dashboard`, `glass` and `layout`
 
 ### T17. Extension catalogs
 
-Parent of T17.1–T17.3, which carry the work (the task was split this way when T17.0 was claimed). T17.0, the design, is done (`done.md`): the creator approved `docs/extension-catalogs-design.md` with its twelve decisions, which T17.1–T17.3 build. This card holds the context, scope and done criteria they share.
+Parent of T17.1–T17.3, which carry the work (the task was split this way when T17.0 was claimed). T17.0, the design, and T17.1, the spec and loader, are done (`done.md`); for T17.0 the creator approved `docs/extension-catalogs-design.md` with its twelve decisions, which T17.1–T17.3 build. This card holds the context, scope and done criteria they share.
 
 A project can extend the core catalog with exactly one file today. Real hosts combine several sources: the core, one or more component libraries, and their own kinds. So a project needs to load several catalogs at once without their kinds colliding. Once catalogs travel between projects, two more questions need answers: how a catalog is published and found, and who keeps the registry. `research.md` §9 lists "Who keeps a registry of extension catalogs" as open; `docs/catalog-and-tokens.md` and `docs/what-is-weft.md` both say there is no registry; `docs/fragments-design.md` defers namespaces and sharing across projects to this task.
 
@@ -576,17 +575,7 @@ A project can extend the core catalog with exactly one file today. Real hosts co
 
 **Decisions** (creator, recorded in `docs/extension-catalogs-design.md`): hyphen prefixes declared by the catalog author (`"prefix": "acme"`), no aliases; libraries define only their own kinds, and the one catalog without a prefix, the project catalog, alone extends core and library kinds, widen-only; `requires` with Cargo's compatibility rule, unmet as the warning `W714`; `catalog` as a file name or an ordered array of at most 32 file and `{ "package" }` entries, libraries merged before the project catalog; new codes `W711`–`W714`; committed files first, npm packages with a `weft.catalog` field later, found by walking up `node_modules`, never over the network; a curated `docs/catalogs.md` and the npm keyword `weft-catalog` instead of a registry service; one design-tool build grouped by catalog; screens stay silent about their catalogs; a repeated `--catalog` replaces the list, and `import-cem` gets `--prefix` with a hint when it is absent.
 
-**Split.** T17.0: design (done). T17.1: spec and loader for several catalogs and prefixes, with fixtures. T17.2: CLI, MCP, `import-cem --prefix`, settings, design tools, AGENT-SPEC and docs. T17.3: package entries and lookup, the publishing guide and the curated list. T17.1 lands first; T17.2 and T17.3 build on it.
-
-### T17.1. Extension catalogs: spec and loader
-
-T17's format and loader, by decisions 1–6 and 11 of `docs/extension-catalogs-design.md`. File entries only; package entries come with T17.3.
-
-- `SPEC.md`: §5 gains the optional `prefix` (one name segment; not `x`, `weft`, a core kind or a core kind's first segment) and `requires` (catalog name → version, Cargo's compatibility rule); §8, the advertisement lists every catalog; §10.2, `catalog` is a file name or an ordered array of at most 32 file names (`W701` beyond); §10.4, the library and project-catalog roles and the three merge steps (core, libraries in order, the project catalog last, widen-only against the definition it extends); §6.2, `W711` (two catalogs claim one name, prefix or kind, naming both), `W712` (bad or reserved prefix, or a second catalog without one), `W713` (a kind outside its owner), `W714` (unmet `requires`, a warning).
-- `crates/weft-catalog/src/project.rs`: several catalogs, `CATALOG_MEMBERS` with `prefix` and `requires`; `Project` keeps the loaded catalogs (`name`, `version`, `prefix`, `source`) and, per kind, the defining catalog and the catalogs that extended it; the merged `Catalog` keeps the project catalog's name and version (else the last library's). Never panics. The diagnostics registry in both engines.
-- Differential fixtures for the catalog loader (regenerate with `WEFT_UPDATE_FIXTURES=1`).
-- `examples/project`: `catalogs/acme-ui.catalog.json`, the `import-cem` output of the `acme-ui.json` fixture with `prefix: "acme"` and `requires` added by hand (T17.2 regenerates it with `--prefix` and must produce the same file); `catalog.json` gains `requires` and widens `acme-button.variant`; `weft.json` lists both; a screen uses kinds of all three catalogs; broken project variants give each new code. The T12 document schema tests cover the merged catalog.
-- Done when T17's first three done criteria hold for the loader (both extensions validate in strict mode; a kind claimed by two catalogs names both; the TypeScript and Rust fixtures agree) and `cargo nextest`, clippy and the TypeScript tests pass.
+**Split.** T17.0: design (done). T17.1: spec and loader for several catalogs and prefixes, with fixtures (done). T17.2: CLI, MCP, `import-cem --prefix`, settings, design tools, AGENT-SPEC and docs. T17.3: package entries and lookup, the publishing guide and the curated list. T17.1 lands first; T17.2 and T17.3 build on it.
 
 ### T17.2. Extension catalogs: tools and docs
 

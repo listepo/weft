@@ -17,7 +17,6 @@
 - T16.6. Layout vocabulary: A2UI and json-render
 - T16.7. Layout vocabulary: Figma and Penpot
 - T17. Extension catalogs
-- T17.1. Extension catalogs: spec and loader
 - T17.2. Extension catalogs: tools and docs
 - T17.3. Extension catalogs: distribution and registry
 - T41. Hosted Penpot plugin

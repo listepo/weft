@@ -1,7 +1,8 @@
 {
   "weft": "0.1",
   "name": "shop",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "requires": { "weft-core": "0.2.0", "acme-ui": "1.0.0" },
   "components": {
     "rating": {
       "description": "Shows a score from 0 to 5 as stars; the label says the score in words.",
@@ -30,6 +31,16 @@
           "type": "enum",
           "values": ["primary", "secondary", "danger", "ghost"],
           "default": "secondary"
+        }
+      }
+    },
+    "acme-button": {
+      "props": {
+        "variant": {
+          "description": "Visual emphasis: primary for the main action, danger for destructive ones, ghost for quiet ones.",
+          "type": "enum",
+          "values": ["default", "primary", "danger", "ghost"],
+          "default": "default"
         }
       }
     }

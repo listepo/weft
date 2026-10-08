@@ -50,6 +50,10 @@ fn projects_match_the_typescript_package() {
             .filter(|(kind, def)| core.get(kind.as_str()) != Some(def))
             .map(|(kind, def)| json!([kind, def]))
             .collect();
+        let kinds: Vec<Json> = (project.kinds.iter())
+            .filter(|(_, k)| k.catalog != "weft-core" || !k.extended_by.is_empty())
+            .map(|(kind, k)| json!([kind, k]))
+            .collect();
         let tokens = project.tokens.as_ref().map(|tokens| {
             tokens
                 .iter()
@@ -62,6 +66,8 @@ fn projects_match_the_typescript_package() {
                 "version": project.catalog.version,
                 "changed": changed,
             },
+            "catalogs": project.catalogs,
+            "kinds": kinds,
             "tokens": tokens,
             "actions": project.actions,
             "data": project.data.is_some(),

@@ -4,7 +4,7 @@ description: the document JSON Schema of project-shop
 ---
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "A Weft 0.1 document in canonical JSON (SPEC §3) for catalog shop 1.0.0. Checks the validator makes beyond this schema are listed in SPEC §3.1.",
+  "description": "A Weft 0.1 document in canonical JSON (SPEC §3) for catalog shop 1.1.0. Checks the validator makes beyond this schema are listed in SPEC §3.1.",
   "type": "object",
   "properties": {
     "weft": {
@@ -59,6 +59,18 @@ description: the document JSON Schema of project-shop
     },
     "Node": {
       "anyOf": [
+        {
+          "$ref": "#/$defs/acme-badge"
+        },
+        {
+          "$ref": "#/$defs/acme-button"
+        },
+        {
+          "$ref": "#/$defs/acme-card"
+        },
+        {
+          "$ref": "#/$defs/acme-rating"
+        },
         {
           "$ref": "#/$defs/alert"
         },
@@ -157,6 +169,468 @@ description: the document JSON Schema of project-shop
         "token"
       ],
       "additionalProperties": false
+    },
+    "acme-badge": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "acme-badge"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "pill": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "The `pill` attribute."
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-badge"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A small status marker."
+    },
+    "acme-button": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "acme-button"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "The `disabled` attribute."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "href": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `href` attribute."
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "size": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "small",
+                    "medium",
+                    "large"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `size` attribute."
+            },
+            "variant": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "default",
+                    "primary",
+                    "danger",
+                    "ghost"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Visual emphasis: primary for the main action, danger for destructive ones, ghost for quiet ones."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "acme-click": {
+              "$ref": "#/$defs/Action"
+            },
+            "acme-focus": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "prefix": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/each:acme-button:prefix"
+                  }
+                ]
+              },
+              "description": "An icon before the label."
+            },
+            "suffix": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/each:acme-button:suffix"
+                  }
+                ]
+              },
+              "description": "An icon after the label."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-button"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A button."
+    },
+    "acme-card": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "acme-card"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "elevated": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "The `elevated` attribute."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "footer": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/each:acme-card:footer"
+                  }
+                ]
+              },
+              "description": "The footer."
+            },
+            "header": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/each:acme-card:header"
+                  }
+                ]
+              },
+              "description": "The header."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-card"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A surface with an optional header and footer."
+    },
+    "acme-rating": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "acme-rating"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "max": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `max` attribute."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "precision": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `precision` attribute."
+            },
+            "readonly": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "The `readonly` attribute."
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `value` attribute."
+            },
+            "value-label": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `value-label` property."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "acme-change": {
+              "$ref": "#/$defs/Action"
+            },
+            "value-hover": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-rating"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A star rating that shows or sets a score."
     },
     "alert": {
       "type": "object",
@@ -1004,6 +1478,406 @@ description: the document JSON Schema of project-shop
       ],
       "additionalProperties": false,
       "description": "A window above the screen for confirmations and short tasks; put its buttons in `actions`."
+    },
+    "each:acme-badge": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-badge"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:acme-button": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-button"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:acme-button:prefix": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-button:prefix"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:acme-button:suffix": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-button:suffix"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:acme-card": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-card"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:acme-card:footer": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-card:footer"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:acme-card:header": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-card:header"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:acme-rating": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:acme-rating"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
     },
     "each:alert": {
       "type": "object",

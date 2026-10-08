@@ -12,7 +12,7 @@ const dir = new URL("../../../examples/project/", import.meta.url);
 const file = (name: string): unknown => JSON.parse(readFileSync(new URL(name, dir), "utf8"));
 const PROJECT = {
   tokens: [file("tokens/base.tokens.json"), file("tokens/brand.tokens.json")],
-  catalog: file("catalog.json"),
+  catalog: [file("catalogs/acme-ui.catalog.json"), file("catalog.json")],
   actions: (file("weft.json") as { actions: string[] }).actions,
   data: file("data.schema.json"),
 };
@@ -73,7 +73,7 @@ test("project problems come first, with paths into the argument", async () => {
 test("weft_catalog lists the project's catalog", async () => {
   const { client, close } = await connect();
   const index = await call(client, "weft_catalog", { project: PROJECT });
-  assert.match(index.blocks[0] ?? "", /^catalog shop 1\.0\.0/);
+  assert.match(index.blocks[0] ?? "", /^catalog shop 1\.1\.0/);
   assert.match(index.blocks[0] ?? "", /\nrating \|/);
   const rating = await call(client, "weft_catalog", { kind: "rating", project: PROJECT });
   assert.equal(rating.isError, false);
