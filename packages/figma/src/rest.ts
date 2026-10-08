@@ -106,28 +106,18 @@ function componentProperties(value: unknown): FComponentProperties {
 }
 
 export type RestOptions = {
-  /**
-   * The plugin whose private plugin data the response carries (`plugin_data=shared,<id>`): files
-   * built before the Weft source moved to shared plugin data hold it there.
-   */
-  pluginId: string;
   /** Main components by node id, from a second request; an instance of another is foreign. */
   components?: ReadonlyMap<string, Json> | undefined;
 };
 
-/** One owner's entries of `pluginData` (by plugin id) or `sharedPluginData` (by namespace). */
-const entries = (field: unknown, owner: string) => {
-  const data = isObject(field) ? own(field, owner) : undefined;
-  return (key: string) => (isObject(data) ? str(own(data, key), "") : "");
-};
-
-const readOnly = () => {
-  throw new Error("a node read through the REST API is read-only");
-};
-
-function baseOf(node: Json, pluginId: string) {
-  const data = entries(node["pluginData"], pluginId);
+/** A value of `sharedPluginData` (`plugin_data=shared`), an object of entries per namespace. */
+function sharedEntry(node: Json, namespace: string, key: string): string {
   const shared = node["sharedPluginData"];
+  const entries = isObject(shared) ? own(shared, namespace) : undefined;
+  return isObject(entries) ? str(own(entries, key), "") : "";
+}
+
+function baseOf(node: Json) {
   const box = isObject(node["absoluteBoundingBox"]) ? node["absoluteBoundingBox"] : {};
   return {
     id: str(node["id"], ""),
@@ -135,17 +125,17 @@ function baseOf(node: Json, pluginId: string) {
     visible: node["visible"] !== false,
     x: num(box["x"], 0),
     y: num(box["y"], 0),
-    getPluginData: data,
-    getSharedPluginData: (namespace: string, key: string) => entries(shared, namespace)(key),
-    setPluginData: readOnly,
-    setSharedPluginData: readOnly,
+    getSharedPluginData: (namespace: string, key: string) => sharedEntry(node, namespace, key),
+    setSharedPluginData: () => {
+      throw new Error("a node read through the REST API is read-only");
+    },
   };
 }
 
 /** The REST JSON of one node as a `ReadNode`; anything that is not a node reads as an empty one. */
 export function restNode(value: unknown, options: RestOptions): ReadNode {
   const node = isObject(value) ? value : {};
-  const base = baseOf(node, options.pluginId);
+  const base = baseOf(node);
   let children: ReadNode[] | undefined;
   const kids = () => (children ??= list(node["children"]).map((c) => restNode(c, options)));
   const type = str(node["type"], "");
@@ -162,7 +152,7 @@ export function restNode(value: unknown, options: RestOptions): ReadNode {
       getMainComponentAsync: async () => {
         const id = node["componentId"];
         const main = typeof id === "string" ? options.components?.get(id) : undefined;
-        return main === undefined ? null : { ...baseOf(main, options.pluginId), ...layout(main) };
+        return main === undefined ? null : { ...baseOf(main), ...layout(main) };
       },
     };
     return instance;

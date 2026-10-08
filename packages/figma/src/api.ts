@@ -45,10 +45,8 @@ export type FBindable =
   | "bottomLeftRadius"
   | "bottomRightRadius";
 
-/** Plugin data; the conversions reach it only through `dataOf` (`data.ts`). */
+/** Shared plugin data, reached only through `dataOf` (`data.ts`); private plugin data is not used. */
 export interface FPluginData {
-  getPluginData(key: string): string;
-  setPluginData(key: string, value: string): void;
   getSharedPluginData(namespace: string, key: string): string;
   setSharedPluginData(namespace: string, key: string, value: string): void;
 }

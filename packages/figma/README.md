@@ -89,10 +89,9 @@ So the work is split:
 
 ## Pulling a frame through the REST API
 
-`pullScreen` (`@weft/figma/pull`) reads a frame without opening Figma: the plugins' `figma-pull` script runs it (`docs/claude-code-plugin.md`). It asks `GET /v1/files/:key/nodes` for the frame with `plugin_data=shared,<plugin id>`, so each layer's Weft source comes along (shared data, or the plugin's private data in a file built before the source moved), then once more (`depth=1`, at most 200 ids per request) for the main components of its instances, where the catalog kind and the library style live. `rest.ts` checks every field of the response and turns the nodes into the same read-only node shape the Plugin API's nodes have (`ReadNode` in `layer.ts`), so the read-back above runs unchanged and an unedited frame comes back byte-identical.
+`pullScreen` (`@weft/figma/pull`) reads a frame without opening Figma: the plugins' `figma-pull` script runs it (`docs/claude-code-plugin.md`). It asks `GET /v1/files/:key/nodes` for the frame with `plugin_data=shared`, so each layer's Weft source comes along in its shared plugin data, then once more (`depth=1`, at most 200 ids per request) for the main components of its instances, where the catalog kind and the library style live. `rest.ts` checks every field of the response and turns the nodes into the same read-only node shape the Plugin API's nodes have (`ReadNode` in `layer.ts`), so the read-back above runs unchanged and an unedited frame comes back byte-identical.
 
 - **The token** is a personal access token or OAuth token with the `file_content:read` scope. It goes only into the `X-Figma-Token` header; the script reads it from `FIGMA_TOKEN` and never from a flag, and every error has it replaced by `[token]`.
-- **The plugin id** matters only for files built before the source moved to shared plugin data, whose layers hold it in private data, visible only to the plugin that wrote it. It is the manifest's `id` (`weft-development`, `PLUGIN_ID`); a published plugin gets the id Figma assigns, and `--plugin-id` or `import.figma.pluginId` names it. Such a frame read with another id comes back as foreign layers.
 - **Responses** larger than 50 MB are refused before they are parsed. 400, 403, 404 and 429 become messages that say why (with the `Retry-After` wait); the server's `err` text is shown without control characters.
 - **Variables:** the REST API names no variables without the Variables API, which needs a Full seat in an Enterprise org. A gap bound to another variable is therefore read by its value, like a typed number.
 - **Cost:** a pull is two requests (one when the frame has no instances). File-node requests are rate-limit tier 1, which allows View and Collab seats only a few requests a month.
@@ -127,11 +126,7 @@ Both are to be checked on a real file, together with the plugin itself.
 
 Every mark (the layer's source, the library page and board, component kinds, token variables and their collection) is shared plugin data under the namespace `weft` (`NAMESPACE` in `src/data.ts`, the namespace Penpot's plugin uses too). Shared plugin data can be read by any plugin, by the Figma MCP server's `use_figma`, and through the REST API with `plugin_data=shared`; private plugin data (`setPluginData`) can be read only by the plugin id that wrote it.
 
-Files built before this change hold the marks in the plugin's private data. `dataOf(node)` is the one way the package reaches plugin data:
-
-- a read takes the shared value, else the private one; a value found only in private data is moved to shared data as it is read, so a frame moves when the plugin reads it (export) and the library when the next build finds it;
-- a write goes to shared data and clears the private value;
-- moving is best effort: a node that cannot be written (a REST node, a file opened read-only) still reads, and moves later.
+Only shared plugin data is supported. `dataOf(node)` is the one way the package reaches plugin data, and it reads and writes shared data only; the narrow API (`FPluginData` in `src/api.ts`) has no private calls. A file whose Weft source sits in private plugin data, as the plugin's first versions stored it, reads as foreign layers; rebuild it with the current plugin.
 
 ## Limits of this stage
 
@@ -179,6 +174,6 @@ All facts were checked against the official documentation on 2026-10-05.
 - foreign layers and their losses;
 - the plugin message handler;
 - the pull (`test/pull.test.ts`): every corpus screen built into the fake, written as REST JSON with the documented defaults left out (`test/rest-server.ts`), served on a local port and pulled back byte-identical; a designer's edit; the requests' header and parameters; the error messages and the token's redaction; link parsing.
-- shared plugin data (`test/shared-data.test.ts`): a build writes the source only as shared data; a file whose marks are moved back to private data (`privateDataFor`, as older plugin versions stored them) reads back byte-identical, keeps its library, and ends up in shared data; `dataOf` on a node that cannot be written. The layer snapshots list shared data, and private data as `private <key>`, so a private write shows in review. The pull reads shared data whatever the plugin id, and an old file through the plugin id.
+- shared plugin data (`test/shared-data.test.ts`): a build writes the source only as shared data under `weft`, and the frame reads back byte-identical. The layer snapshots list the shared data. The pull asks for shared data only, and a frame without it reads as foreign layers.
 
 `test/api-types.test.ts` assigns the official `PluginAPI` and node types to the narrow API. If the subset ever drifts from the real API, `tsc` fails.

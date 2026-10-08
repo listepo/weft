@@ -7,6 +7,7 @@
 - T73. CI workflow for the documented merge gate
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
+- T69.1. Editor skeleton
 - T12.3. Constrained generation: benchmark
 - T16. Layout vocabulary
 - T17. Extension catalogs
