@@ -8,7 +8,6 @@
 - T73. CI workflow for the documented merge gate
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
-- T12.1. Constrained generation: document JSON Schema from a catalog
 - T12.2. Constrained generation: surfaces
 - T12.3. Constrained generation: benchmark
 - T16. Layout vocabulary
