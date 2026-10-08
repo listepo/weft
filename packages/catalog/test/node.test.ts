@@ -83,6 +83,21 @@ describe("readProject", () => {
     }
   });
 
+  test("does not follow a catalog list entry that links out of the project directory", () => {
+    const dir = mkdtempSync(join(tmpdir(), "weft-symlink-catalog-"));
+    const outside = join(tmpdir(), `weft-outside-catalog-${process.pid}.json`);
+    try {
+      writeFileSync(outside, "{}");
+      writeFileSync(join(dir, "weft.json"), '{"catalog": ["outside.json"]}');
+      symlinkSync(outside, join(dir, "outside.json"));
+      const { diagnostics } = readProject(join(dir, "weft.json"));
+      assert.ok(diagnostics.some((d) => d.code === "W704" && d.path === "#/catalog/0"));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+      rmSync(outside, { force: true });
+    }
+  });
+
   test("reports a missing member file instead of throwing", () => {
     const dir = mkdtempSync(join(tmpdir(), "weft-read-"));
     try {

@@ -131,6 +131,21 @@ fn a_member_file_that_is_a_symlink_out_of_the_project_is_not_read() {
     assert!(r.stdout.contains("#/tokens"), "{}", r.stdout);
 }
 
+#[cfg(unix)]
+#[test]
+fn a_catalog_list_entry_that_is_a_symlink_out_of_the_project_is_not_read() {
+    let s = Scratch::new("symlink-catalog");
+    let outside =
+        std::env::temp_dir().join(format!("weft-outside-catalog-{}.json", std::process::id()));
+    let link = s.path("catalogs/acme-ui.catalog.json");
+    std::fs::rename(&link, &outside).unwrap();
+    std::os::unix::fs::symlink(&outside, &link).unwrap();
+    let r = run(&[&"validate", &s.path("screens/order.weft")]);
+    let _ = std::fs::remove_file(&outside);
+    assert!(r.stdout.contains("W704"), "{}", r.stdout);
+    assert!(r.stdout.contains("#/catalog/0"), "{}", r.stdout);
+}
+
 #[test]
 fn project_problems_point_into_the_project_file_and_fail_the_run() {
     let s = Scratch::new("problems");
