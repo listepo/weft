@@ -1,5 +1,6 @@
 //! The Open Design plugin's setting is checked by the settings table like any other section
-//! (SPEC §10.6); the plugins the table does not list stay unchecked objects.
+//! (SPEC §10.6); the plugins the table does not list stay unchecked objects. Text settings
+//! (`import.cem.name`) keep only a non-empty string.
 
 // A test crate: a failed unwrap or panic is a failed test, which is the point.
 #![allow(clippy::unwrap_used, clippy::panic)]
@@ -50,4 +51,26 @@ fn other_plugins_stay_unchecked_objects() {
     let (codes, kept) = load(&json!({ "my-plugin": 1 }));
     assert_eq!(codes, ["W701"]);
     assert_eq!(kept, json!({}));
+}
+
+#[test]
+fn a_text_setting_keeps_a_non_empty_string_only() {
+    let import = json!({ "cem": { "outDir": "catalogs", "name": "acme-ui", "version": "2.1.0" } });
+    let loaded = load_project(&json!({ "import": import }), &ProjectOptions::default()).unwrap();
+    assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+    assert_eq!(loaded.project.settings["import"], import);
+    for bad in [json!(""), json!(1), json!(null)] {
+        let loaded = load_project(
+            &json!({ "import": { "cem": { "name": bad } } }),
+            &ProjectOptions::default(),
+        )
+        .unwrap();
+        let codes: Vec<_> = loaded.diagnostics.iter().map(|d| d.code.as_str()).collect();
+        assert_eq!(codes, ["W701"], "{bad}");
+        assert_eq!(
+            loaded.project.settings["import"],
+            json!({ "cem": {} }),
+            "{bad}"
+        );
+    }
 }

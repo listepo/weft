@@ -16,6 +16,8 @@ pub(crate) enum Kind {
     /// One of these strings.
     OneOf(&'static [&'static str]),
     Bool,
+    /// A string that is not empty.
+    Text,
     /// A file or directory name relative to the project file (SPEC §10.2).
     File,
     /// Token files: an array of such names, at most `MAX_TOKEN_FILES`, or one resolver document's
@@ -92,6 +94,20 @@ const JSX_EXPORT: &[Setting] = &[
     with_default("source", SOURCE, Kind::Bool, "false"),
 ];
 const OUT_ONLY: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
+const CEM_IMPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    setting(
+        "name",
+        "The name of the imported catalog. Default: the manifest's file name without its extension.",
+        Kind::Text,
+    ),
+    with_default(
+        "version",
+        "The version of the imported catalog.",
+        Kind::Text,
+        "\"0.0.0\"",
+    ),
+];
 
 /// One section per target (SPEC §10.6 lists the names reserved for targets in progress).
 const EXPORT: &[Setting] = &[
@@ -166,6 +182,11 @@ const IMPORT: &[Setting] = &[
         "slint",
         "Slint source files (`weft import-slint`).",
         Kind::Section(OUT_ONLY),
+    ),
+    setting(
+        "cem",
+        "Catalogs from a Custom Elements Manifest (`weft import-cem`).",
+        Kind::Section(CEM_IMPORT),
     ),
 ];
 
@@ -276,7 +297,7 @@ pub(crate) const SECTIONS: &[Setting] = &[
     ),
     setting(
         "import",
-        "Screens imported from other formats, one section per source.",
+        "Screens imported from other formats, and catalogs from a Custom Elements Manifest, one section per source.",
         Kind::Section(IMPORT),
     ),
     setting(
@@ -361,6 +382,16 @@ pub(crate) fn sanitize(
                 None
             }
         }
+        Kind::Text => match value.as_str() {
+            Some(text) if !text.is_empty() => Some(value.clone()),
+            _ => {
+                report(wrong(
+                    format!("{} must be a non-empty string.", quote(&dotted)),
+                    "a non-empty string",
+                ));
+                None
+            }
+        },
         Kind::Count => match value.as_u64() {
             Some(n) if (1..=MAX_COUNT).contains(&n) => Some(value.clone()),
             _ => {
@@ -476,6 +507,7 @@ fn schema_of(setting: &Setting) -> Json {
         Kind::Section(children) => section_schema(children),
         Kind::OneOf(values) => json!({ "enum": values }),
         Kind::Bool => json!({ "type": "boolean" }),
+        Kind::Text => json!({ "type": "string", "minLength": 1 }),
         Kind::File => json!({ "$ref": "#/$defs/fileName" }),
         Kind::TokenFiles => json!({
             "oneOf": [
