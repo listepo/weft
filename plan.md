@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T13.2 | todo | P2 | 3 | 0% | |
+| T13.2 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
 | T73 | todo | P2 | 2 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
@@ -161,6 +161,15 @@ Progress: the design proposal is in `docs/context-design.md` and awaits the crea
 ### T13.2. json-render import
 
 Read a json-render spec back into a Weft document in `crates/weft-interop` (`from_json_render(text, catalog)`), with "From json-render" and its loss column in SPEC §9. The input is untrusted: bounded like the other importers (`W602`), `W601` for input that is not a spec, never a panic. Reuse the `weft-import` role tree and builder and `paths.rs`. Done when every corpus screen exported by T13.1 imports back to the same document (a literal `text` prop comes back as content, which json-render cannot tell apart), a second trip changes nothing, and a spec written for another catalog imports with its losses listed. A working draft (importer, SPEC text and tests, about 420 lines of code) is on the local branch `t13.2-json-render-import`, not pushed and not reviewed.
+
+Execution plan:
+
+1. Bring the draft (`json_render/import.rs`, the shared `sem` helper, the import tests) onto `main`, where T13.1 is the merged export; keep the export column of the SPEC §9 loss table as merged.
+2. `SPEC.md` §9 "From json-render" and the import column of the loss table, in the same commit as the code.
+3. Review the draft: untrusted input never panics; input is bounded like the other importers (source length, `MAX_DEPTH`, `MAX_NODES`, `W602`); not JSON or no `root` is `W601`; each loss is in the SPEC table; at most 500 lines of code.
+4. Tests in `crates/weft-snapshots/tests/interop.rs`: every corpus screen and catalog example exported by T13.1 imports back to the same document, a second trip changes nothing, a spec written for another catalog imports with its losses listed, and bad or oversized input gives diagnostics.
+5. No CLI command or `weft.json` key (as for T13.1).
+6. Verify with `moon run root:changed`, then the full check.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 
