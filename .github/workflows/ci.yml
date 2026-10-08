@@ -1,0 +1,41 @@
+# The documented merge gate (README.md: "a change merges only after it exits 0"),
+# run on every pull request and push to main. mise installs the pinned toolchain
+# (moon, the Rust toolchain with wasm32, deno, bun); pnpm owns the dependencies;
+# moon runs the tasks with its own caching. The browser leg of root:runtimes
+# needs the Playwright Chromium, installed once per run until moon learns to.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    # macOS, the environment the committed artifacts (the plugins' wasm-web
+    # bundles) are built on: a linux runner builds byte-different wasm, and the
+    # bundle test compares bytes. Xcode 27 through pyrlyn/ci's setup-xcode —
+    # the same pin every pyrlyn repo runs, so the build-tool plugin's verbose
+    # output behaves as it does in development (Xcode 26.x hides it).
+    runs-on: xcode-27
+    steps:
+      # Full history: moon's change detection diffs against the merge base and
+      # a shallow checkout makes that fail (git exits 128 on the missing base).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      - uses: pyrlyn/ci/.github/actions/setup-xcode@87cca51e2e995af39b78e6938bc89a82a844f4e2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install chromium
+      - name: The merge gate
+        env:
+          # The runner is darwin-arm64 but is not the machine the reviewed
+          # baselines were taken on; naming itself skips exactly those
+          # comparisons and keeps everything else (live-vs-live, a11y) running.
+          WEFT_BASELINE_PLATFORM: github-runner
+        run: |
+          moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes

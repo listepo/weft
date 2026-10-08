@@ -6,7 +6,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compare, type CompareOptions, type Comparison } from "./compare.ts";
 
-export const PLATFORM = `${process.platform}-${process.arch}`;
+// `WEFT_BASELINE_PLATFORM` renames the platform when the machine lies about it:
+// a GitHub macOS runner is darwin-arm64 but renders fonts unlike the machine
+// the baselines were reviewed on, so CI names itself and the suites take the
+// designed no-reviewed-baselines skip instead of failing on pixel drift.
+export const PLATFORM = process.env.WEFT_BASELINE_PLATFORM ?? `${process.platform}-${process.arch}`;
 export const BASELINES = fileURLToPath(new URL(`../baselines/${PLATFORM}/`, import.meta.url));
 
 export type BaselineResult =
