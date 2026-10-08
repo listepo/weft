@@ -1,6 +1,6 @@
 # The MCP server
 
-`@weft/mcp` is a small server for the [Model Context Protocol](https://modelcontextprotocol.io) that gives an AI agent six tools to read, check, edit and preview Weft screens. It is the safest way to let a model work on a screen: every answer comes from the same validator you use yourself, and the agent never has to guess whether its markup is valid.
+`@weft/mcp` is a small server for the [Model Context Protocol](https://modelcontextprotocol.io) that gives an AI agent eight tools to read, check, edit and preview Weft screens. It is the safest way to let a model work on a screen: every answer comes from the same validator you use yourself, and the agent never has to guess whether its markup is valid.
 
 The server works only on text passed in tool calls. It reads no files, and opens no network connections. Reading and writing files is the agent's job, or the [plugin's scripts](claude-code-plugin.md).
 
@@ -11,6 +11,7 @@ The server works only on text passed in tool calls. It reads no files, and opens
 | `weft_primer` | none | A short primer: the syntax rules, value forms, patch forms and how to use the other tools. An agent calls it first. |
 | `weft_capabilities` | none | What the host accepts: `{"weft", "catalogs": [{name, version}]}`, plus the token paths and action names when the host checks them. |
 | `weft_catalog` | `kind` (optional) | Without `kind`, one line per component. With `kind`, that component's full definition. |
+| `weft_schema` | none | The JSON Schema (2020-12) of a screen written as canonical JSON with the host's catalog, as compact JSON text: the same bytes as `documentSchema` of `@weft/core/document-schema`. For a model whose output a provider constrains to a schema; an agent writing markup does not need it. |
 | `weft_validate` | `markup`, `strict` (optional) | `{"valid": true/false, "diagnostics": […]}`. |
 | `weft_format` | `markup` | The canonical markup, or the diagnostics when the markup has errors. |
 | `weft_patch` | `markup`, `patches` | The patched screen in canonical form, or diagnostics and nothing applied. The result is checked strictly. |

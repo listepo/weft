@@ -152,6 +152,8 @@ The schema leaves out what it cannot express, and the validator still checks it:
 
 It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with two exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for, and it admits no `state` on a kind that declares no states, where validation lets a bound one through. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
 
+`weft schema` prints the schema of the project's catalog (or of `--catalog`) indented, or writes it as `document.schema.json` (§10.6); `documentSchema` of `@weft/core/document-schema` and the MCP tool `weft_schema` return the same schema as compact JSON text, byte for byte what the generator writes. The schema of §3 that `documentJsonSchema()` of `@weft/core` returns is a different one: it knows no catalog and admits any kind and any prop.
+
 ## 4. Structure
 
 ### 4.1 Children and the default slot
@@ -712,6 +714,7 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | `import.swiftui.outDir` | file name | standard output | Where `weft import-swiftui` writes `<file>.weft`, and where the Xcode command plugin's `import` does (next to the view when absent). |
 | `export.a2ui.outDir`, `import.a2ui.outDir` | file name | standard output | Where `weft a2ui` writes `<screen>.a2ui.json` and `weft import-a2ui` writes `<file>.weft` (§9). |
 | `export.slint.outDir`, `import.slint.outDir` | file name | standard output | Where `weft slint` writes `<screen>.slint` and `weft import-slint` writes `<file>.weft` (§9). |
+| `export.schema.outDir` | file name | standard output | Where `weft schema` writes `document.schema.json`, the JSON Schema of the canonical documents the project's catalog admits (§3.1). |
 | `import.cem.outDir` | file name | standard output | Where `weft import-cem` writes `<file>.catalog.json`, the catalog imported from a Custom Elements Manifest (§9). |
 | `import.cem.name`, `import.cem.version` | non-empty string | the manifest's file name without its extension; `"0.0.0"` | The `name` and `version` of the catalog `weft import-cem` writes. |
 | `mcp.limits.markupChars`, `dataChars`, `patchesChars`, `projectChars` | whole number ≥ 1 | 200,000; 200,000; 200,000; 500,000 | Bounds, in UTF-16 code units, on the arguments of one MCP call. |

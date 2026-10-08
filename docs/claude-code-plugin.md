@@ -9,7 +9,7 @@ The `weft` plugin makes Claude Code, including Claude Code Desktop, good at Weft
 | `/weft:render <screen.weft> [out.html] [--data data.json] [--tokens tokens.json]` | Turns a screen into an HTML page and opens it in the browser pane of Claude Code Desktop. |
 | `weft:spec` (a skill, not a command) | Teaches Claude the format from [AGENT-SPEC.md](../AGENT-SPEC.md), so it writes, patches and repairs valid markup. Claude loads it whenever you ask for work on a `.weft` file. |
 
-The plugin's MCP server gives Claude `weft_primer`, `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch` and `weft_render`. The three commands read and write files through small scripts; the server never touches files.
+The plugin's MCP server gives Claude `weft_primer`, `weft_catalog`, `weft_schema`, `weft_validate`, `weft_format`, `weft_patch` and `weft_render`. The three commands read and write files through small scripts; the server never touches files.
 
 ## Install
 
