@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T13.1 | todo | P2 | 3 | 0% | |
+| T13.1 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
 | T73 | todo | P2 | 2 | 0% | |
 | T67.4 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T67.5 | in progress | P2 | 4 | 0% | Cursor / grok 4.7 |
@@ -159,6 +159,15 @@ Progress: the design proposal is in `docs/context-design.md` and awaits the crea
 ### T13.1. json-render export and import
 
 The json-render half of T13: export a Weft document to a json-render spec (`{ root, elements, state }`, the Weft catalog as the json-render catalog) and import one back, with a loss table in SPEC §9, in `crates/weft-interop`. Done when every corpus screen converts both ways and the losses are listed.
+
+Execution plan:
+
+1. Primary source: `vercel-labs/json-render` at commit `fc2a696` (2026-10-01) and `@json-render/core` 0.21.0 on npm. A spec is `{ root, elements, state? }`; an element is `{ type, props, children?, slots?, visible?, on?, repeat?, watch? }`; props read data with `$state`, `$item`, `$bindState`, `$bindItem` and `$cond` (JSON Pointers); `repeat` repeats an element's children over a state array. This matches the card.
+2. `SPEC.md` §9 first, in the same commit as the code: "To json-render", "From json-render" and a loss table. The element `type` is the Weft kind and the props are Weft's own (tokens as `{ "token": … }`), so the mapping is one to one: bindings become `$state`/`$item` (`$bindState`/`$bindItem` on writable props, `$cond` for a negated one), `hidden` is `visible`, `on-*` is `on` with the element id and loop item as params, `<each>` is an element of type `each` with `repeat`, named slots are `slots`, text content is the `text` prop.
+3. Code in `crates/weft-interop/src/json_render/` (`export.rs`, `import.rs`): `to_json_render(document, catalog, state)` and `from_json_render(text, catalog)`. The importer reuses the `weft-import` role tree and builder (ids, required props, validation, losses), the shared pointer conversion in `paths.rs`, and the A2UI importer's kind helper, moved to the crate root. Input is bounded (`W602`) and never panics; not JSON or no `root` is `W601`.
+4. Tests in `crates/weft-snapshots/tests/interop.rs`: every corpus screen and catalog example exports to a structurally valid spec (the checks of json-render's `validateSpec`), imports back to a valid document equal to the original where the export reported no loss, and is stable on a second trip; snapshots pin specs and losses; bad input gives diagnostics.
+5. If the code goes over 500 lines, import splits off as a new sub-task. The CLI commands and `weft.json` keys are not part of this card.
+6. Verify with `moon run root:changed`, then the full check.
 
 ### T67.4. Slint reader for the widgets the generator now emits
 
