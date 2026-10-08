@@ -9,8 +9,8 @@ use semver::{Comparator, Op, Version, VersionReq};
 use serde::Serialize;
 use serde_json::{Map as Object, Value as Json};
 use weft_core::{
-    Catalog, Code, ComponentDef, DataSchema, Diagnostic, Mode, compile_data_schema, did_you_mean,
-    is_action, is_name, one_of, order_keys, parse_json,
+    Catalog, Code, ComponentDef, DataSchema, Diagnostic, Mode, compile_data_schema,
+    data_schema_diagnostics, did_you_mean, is_action, is_name, one_of, order_keys, parse_json,
 };
 
 use crate::core::{CORE_CATALOG_JSON, CatalogError, core_catalog};
@@ -1069,14 +1069,10 @@ pub fn load_project(
         let (schema, problems) = compile_data_schema(&found);
         project.data = Some(schema);
         project.data_source = Some(found);
-        for p in problems {
-            let expected = if p.code == Code::W709 {
-                "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
-            } else {
-                "\"type\", \"properties\", \"additionalProperties\" or \"items\""
-            };
-            let path = loader.at(&format!("/data{}", p.pointer));
-            loader.report(Diagnostic::new(p.code, path, p.message, expected));
+        for mut d in data_schema_diagnostics(&problems) {
+            // The helper points into the schema; a project points into its `data` member.
+            d.path = loader.at(&format!("/data{}", &d.path[1..]));
+            loader.report(d);
         }
     }
     for section in SECTIONS {

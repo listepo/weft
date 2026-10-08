@@ -6,11 +6,10 @@ import { screen } from "./cases.ts";
 import { dataCases } from "./data-cases.ts";
 
 function run(schema: unknown, markup: string): Diagnostic[] {
-  const { schema: data, problems } = compileDataSchema(schema);
+  const { schema: data } = compileDataSchema(schema);
   const { document, source } = parse(markup, { catalog });
   assert.ok(document, "the case markup parses");
-  const found = checkData(document, { catalog, data, source });
-  return [...problems.map((p) => ({ code: p.code }) as Diagnostic), ...found];
+  return checkData(document, { catalog, data, source });
 }
 
 for (const [name, c] of Object.entries(dataCases)) {
@@ -75,6 +74,13 @@ describe("compileDataSchema", () => {
     for (const bad of [null, 1, "x", [], { type: {} }, { properties: null }, { items: 7 }]) {
       assert.doesNotThrow(() => compileDataSchema(bad));
     }
+  });
+
+  test("checkData includes schema compile problems", () => {
+    const { schema: data } = compileDataSchema(5);
+    const { document } = parse(screen('<text id="t" text="{$.a}"/>'), { catalog });
+    assert.ok(document);
+    assert.ok(checkData(document, { catalog, data }).some((d) => d.code === "W709"));
   });
 
   test("points problems into the schema", () => {

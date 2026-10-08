@@ -99,7 +99,11 @@ export function readSource(layer: PluginData): Source | undefined {
 }
 
 export function writeJson(layer: PluginData, key: string, value: unknown): void {
-  layer.setPluginData(key, JSON.stringify(value));
+  const raw = JSON.stringify(value);
+  if (raw.length > MAX_ENTRY) {
+    throw new Error(`plugin data for ${key} is longer than ${MAX_ENTRY} bytes`);
+  }
+  layer.setPluginData(key, raw);
 }
 
 export function readVersion(layer: PluginData): string | undefined {

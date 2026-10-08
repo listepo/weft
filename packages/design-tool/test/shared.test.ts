@@ -8,6 +8,7 @@ import {
   drawing,
   findBelow,
   handleRequest,
+  KEY,
   layoutView,
   MAX_TOKENS,
   planeTurn,
@@ -15,6 +16,8 @@ import {
   resolverDocument,
   tokenColor,
   variantAxes,
+  writeJson,
+  type PluginData,
   type PluginTool,
 } from "../src/index.ts";
 import { loadResolver } from "./modes.ts";
@@ -198,5 +201,21 @@ describe("the flat part of a tilt", () => {
     assert.equal(turn({ "rotate-z": 0 }), 0);
     assert.equal(turn({ "rotate-x": 40, "rotate-y": 30, perspective: 500 }), 0);
     assert.equal(planeTurn(undefined), 0);
+  });
+});
+
+describe("plugin data size", () => {
+  test("writeJson refuses an entry over 100 kB", () => {
+    const stored = new Map<string, string>();
+    const layer: PluginData = {
+      getPluginData: (key) => stored.get(key) ?? "",
+      setPluginData: (key, value) => {
+        stored.set(key, value);
+      },
+    };
+    writeJson(layer, KEY.source, { kind: "button" });
+    assert.equal(stored.get(KEY.source), JSON.stringify({ kind: "button" }));
+    assert.throws(() => writeJson(layer, KEY.source, "x".repeat(100_000)), /longer than 100000/);
+    assert.equal(stored.get(KEY.source), JSON.stringify({ kind: "button" }));
   });
 });

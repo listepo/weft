@@ -6,7 +6,8 @@
 
 use serde_json::{Value as Json, json};
 use weft_core::{
-    Catalog, DataCheckOptions, ParseOptions, check_data, compile_data_schema, parse, parse_json,
+    Catalog, DataCheckOptions, ParseOptions, check_data, compile_data_schema,
+    data_schema_diagnostics, parse, parse_json,
 };
 
 const FIXTURE: &str = include_str!("fixtures/differential.json");
@@ -34,15 +35,16 @@ fn data_checks_match_the_typescript_core() {
                 ..Default::default()
             },
         );
-        let diagnostics = parsed.document.as_ref().map_or_else(Vec::new, |d| {
-            check_data(
+        let mut diagnostics = data_schema_diagnostics(&problems);
+        if let Some(d) = parsed.document.as_ref() {
+            diagnostics.extend(check_data(
                 d,
                 &DataCheckOptions {
                     catalog,
                     data: &schema,
                 },
-            )
-        });
+            ));
+        }
         let problems: Vec<Json> = problems
             .iter()
             .map(|p| json!({ "code": p.code.as_str(), "pointer": p.pointer, "message": p.message }))

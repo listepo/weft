@@ -437,6 +437,16 @@ test("hostile input never throws", () => {
   );
 });
 
+test("a cyclic document is W200, not a throw", () => {
+  const cyclic = { weft: "0.1", root: { kind: "screen", id: "s" } } as Document & {
+    extra?: unknown;
+  };
+  cyclic.extra = cyclic;
+  const result = applyPatches(cyclic, [], options);
+  assert.equal(result.document, undefined);
+  assert.ok(result.diagnostics.some((d) => d.code === "W200"));
+});
+
 // ---- property test: random patch sequences over generated documents ----
 
 type Spec = { kind: "stack"; children: Spec[] } | { kind: "button" } | { kind: "link" };

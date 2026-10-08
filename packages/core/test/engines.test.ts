@@ -104,6 +104,7 @@ describe("runtimes", () => {
     return spawnSync(runtime, [...args, script], {
       encoding: "utf8",
       env: { ...process.env, WEFT_ENGINE: choice },
+      timeout: 15_000,
     });
   }
 
@@ -126,6 +127,8 @@ describe("runtimes", () => {
       `Bun runs on ${choice}`,
       () => {
         const result = run("bun", ["run"], choice);
+        // A hung Bun is killed by the timeout and surfaces here instead of blocking the run.
+        assert.ifError(result.error);
         assert.equal(result.status, 0, result.stderr);
         assert.deepEqual(JSON.parse(result.stdout), {
           engine: choice,

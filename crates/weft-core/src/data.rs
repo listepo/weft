@@ -90,6 +90,26 @@ pub fn compile_data_schema(json: &Json) -> (DataSchema, Vec<DataSchemaProblem>) 
     (schema, problems)
 }
 
+/// Compile problems as diagnostics, so `checkData` and a project file report the same codes.
+pub fn data_schema_diagnostics(problems: &[DataSchemaProblem]) -> Vec<Diagnostic> {
+    problems
+        .iter()
+        .map(|p| {
+            let expected = if p.code == Code::W709 {
+                "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+            } else {
+                "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+            };
+            let path = if p.pointer.is_empty() {
+                "#".to_owned()
+            } else {
+                format!("#{}", p.pointer)
+            };
+            Diagnostic::new(p.code, path, p.message.clone(), expected)
+        })
+        .collect()
+}
+
 fn malformed(problems: &mut Vec<DataSchemaProblem>, pointer: String, message: String) {
     problems.push(DataSchemaProblem {
         code: Code::W709,

@@ -1,5 +1,13 @@
 # Done
 
+### T75–T77, T79–T86, T89, T91. Cloud review findings (2026-10-08)
+
+Confirmed P1/P2 bugs and the shared Trust URL move from the 2026-10-08 cloud review, done together. SPEC §10.2 now refuses a project member whose resolved path (symbolic links followed) leaves the project directory (`W704`); the Node and CLI readers enforce that for every member, each entry of a `catalog` list included, and cap `maxChars` on the read itself. SPEC §9 Trust and To A2UI restrict `openUrl` to `http`/`https`/`mailto`; `safe_url` lives in `weft-import` (the generated JSX `_url` and Swift `weftURL` stay language-specific copies of the same rule) and A2UI export drops `javascript:` (and other) `href`/`src`. `applyPatches` returns W200 instead of throwing on a cyclic or too-deep document; `checkData` includes W709/W710; `weft fmt --write` and the TypeScript CLI write a sibling temp file and rename; Figma/Penpot `writeJson` refuses entries over 100 kB; `xcode-agents` continues after an unknown name; Bun engine tests have a 15 s `spawnSync` timeout; `AGENTS.md` names the Rust core and the missing layout crates.
+
+T89 is closed without a change: the creator keeps the `uv` and Translate Toolkit pins in `mise.toml` and `toolchain.md` on purpose.
+
+Left for later: T78 Swift typecheck CI cost, T87 WASM JSX stack, T88 resolver `tree()` case, T90 unreferenced insta snapshots, T92/T93 large splits.
+
 ### T74. Slint snapshots and screenshots
 
 HTML, JSX and SwiftUI were already pinned in `weft-snapshots` and drawn in `@weft/visual`. Slint had golden `.slint` files and a compile check, and no reviewed insta snapshot and no rendered screenshot. `weft-snapshots` now pins every corpus screen and catalog example as Slint (a refusal is pinned as text). `crates/weft-slint/tests/screenshots.rs` renders every corpus screen with its `data.json` on the software renderer (fluent, light scheme) and compares the PNG with `tests/screenshots/baselines/<os>-<arch>/`. A one-pixel spacing change and a same-length word change both differ from the pristine render. A platform without a baselines folder skips the PNG comparison and still runs the mutation checks.
@@ -984,6 +992,7 @@ Check: `cargo nextest run -p weft-slint --features import` — the edited-label,
 `packages/core/package.json` exposed a second, reduced TS `weft` bin (only `validate`/`fmt`, no project support) with a stale header comment — anyone resolving `weft` through `@weft/core` got usage errors for flags the real Rust CLI accepts. The bin is gone and `cli.ts`'s header now says what it is (a test driver, not the command; `docs/cli.md` names the real one). `bench/src/provider.ts` indexed batch results with `Number(r.custom_id.slice(1))` — a non-conforming id wrote to index `NaN` and surfaced later as "no result for rNaN"; the index is validated with `Number.isInteger` and bounds now and fails naming the id. Found by the 2026-10-07 audit.
 Model: ZCode / GLM-5.3 · Status: done 2026-10-08 · Priority: P2 · Complexity: 1 · Files: `packages/core/package.json`, `packages/core/src/cli.ts`, `bench/src/provider.ts`
 Check: `moon run core:test` — 199 passed (the TS CLI still drives them); `moon run root:typecheck root:lint` — clean.
+
 ### T73. A CI workflow runs the documented merge gate
 
 The repo had no `.github/` at all: the documented gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md) ran only by hand, and publishing from GitHub (T32) would have shipped without it. `.github/workflows/ci.yml` now runs the gate on every pull request and push to main: mise installs the pinned toolchain (moon, Rust with wasm32, deno, bun), pnpm installs the dependencies with the frozen lockfile, the Playwright Chromium is installed for the browser leg of `root:runtimes`, and both actions are pinned to full commit SHAs. The first runs of the workflow are its own shakedown: a tooling failure on the runner is fixed on this branch, a gate failure is the gate working.
