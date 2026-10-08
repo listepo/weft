@@ -14,6 +14,10 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T73 | todo | P2 | 2 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
+| T12 | todo | P2 | 3 | 0% | |
+| T16 | todo | P2 | 5 | 0% | |
+| T17 | todo | P2 | 4 | 0% | |
+| T41 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
 
@@ -202,3 +206,156 @@ Not started; nothing is built until the creator approves the plan of the first m
 ### T73. CI workflow for the documented merge gate
 
 There is no `.github/` in the repo; the documented merge gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md:50) runs only by hand — and publishing from GitHub (T32) will need it. Done means: the gate runs as a workflow on pull requests (and on main once the repo has a remote).
+
+### T12. Constrained generation
+
+Today a model writes Weft markup as free text, and only the validator catches its mistakes after the fact. Provider structured-output modes take a JSON Schema and constrain decoding to it (`research.md` §3 lists this as the main advantage of JSON Schema). If the schema is built from the catalog, a model writing canonical JSON (SPEC §3) cannot produce an unknown kind, an undeclared prop, a wrong enum value, an undeclared slot or a child kind that is not allowed. This task builds that schema from any catalog. It then measures whether constrained JSON beats free markup on validity and edit success, and what it costs in output tokens.
+
+**Context.**
+- `packages/core/src/schema.ts` already exports `documentJsonSchema()` and `catalogJsonSchema()`, generated from the Zod model in `packages/core/src/model.ts`, which knows no catalog (`kind: z.string()`, `props` a record of any `Value`). They are only tested for shape (`packages/core/test/cli.test.ts`). Behaviour changes go into the Rust crates, never into a TypeScript copy.
+- The catalog model is `Catalog`/`ComponentDef`/`PropDef`/`SlotDef` in `crates/weft-core/src/model.rs` (SPEC §5); the merged project catalog comes from `crates/weft-catalog/src/project.rs` (`Project.catalog`, SPEC §10.4).
+- The schema can express most catalog rules: prop type, enum `values`, `min`/`max`/`integer`, `required`, `bindable` (whether a `{bind, not?}` object is allowed), `{token}` for token props, `states`, `events`, slots, `content`, `allowedChildren`/`allowedParents`, and the `root` kind. These stay in the semantic layer (SPEC §6): unique ids, loop scope, `references`, text given both as content and as a prop (`W310`), a submit button outside a form, `W317`, tokens, actions and the data schema.
+- `weft validate` already accepts `.json` documents (`crates/weft-cli/src/main.rs`); `weft-binding` has `canonicalize_document`, so key order in a reply does not matter. The workspace already has `jsonschema` as a dev dependency (`crates/weft-snapshots`, used for the A2UI schemas).
+- The benchmark has no structured output: `bench/src/provider.ts` has `Provider.complete(prompt: string)` only (Anthropic Messages and batches, and an OpenAI-compatible `/chat/completions` endpoint for LM Studio). The formats are `weft`, `html`, `jsx` and `a2ui` (`bench/src/neutral.ts`, `formats.ts`); replies are taken from a code fence (`extractDocument`). The method is in `test.md` (strict validation, one repair prompt, 3 samples, a History row for every kept run); `bench/src/primers.ts` changes only as a method change.
+- The repository records nothing about what each provider supports for structured output (recursive `$ref`, `anyOf` size, schema size limits). Those facts are checked when the task is claimed and written into `research.md` with sources.
+
+**Scope.**
+- Spec: a new subsection after §3, "JSON Schema of the canonical form": how each catalog construct maps to the schema, what the schema cannot express (the semantic checks above), the dialect (2020-12), and that the generated schema is deterministic. A row in the `research.md` decisions table.
+- Generator in `crates/weft-catalog`, new module `document_schema.rs` (the name avoids a clash with `tests/schema.rs`, which generates `weft.schema.json`): `document_schema(catalog, options) -> Json`, one `$defs` entry per kind, `each`/`slot` transparent with the allowed kinds listed for each parent, project values (token names, action names) as optional `enum`s.
+- Surfaces: `documentSchema` in `weft-binding`/`weft-wasm`/`weft-node` (the `engines.test.ts` lists must still match); `@weft/core` types, with `schema.ts` delegating to the Rust core; CLI `weft schema [--catalog] [--project] [--out-dir]`; an MCP tool `weft_schema` or an argument of `weft_catalog`; `weft.json` keys for every new option (SPEC §10.6, `settings.rs`, regenerated `schemas/weft.schema.json`); `docs/cli.md`, `docs/mcp.md`, `AGENT-SPEC.md` (the MCP tool list) and the primer; rebuilt plugin `dist/` folders.
+- Benchmark: `Provider.complete(prompt, { schema? })` for Anthropic and OpenAI-compatible servers; two new formats, `weft-json` (free canonical JSON) and `weft-json-constrained`, to separate "JSON instead of markup" from "constrained instead of free"; a JSON primer and an adapter that reuses the Weft neutral tree; corpus JSON derived from `screen.weft` at run time (no second committed copy); the same repair rule; `test.md` method sections, a trial run with its History row, and a results section in the T8 evaluation report.
+
+**Out of scope.** Any change to the markup format or the validator. Streaming of constrained JSON (T11 covers partial markup). Grammar-level decoding (GBNF, regex) for markup. Making constrained JSON the format agents are told to use.
+
+**Done when.**
+- For the core catalog and for `examples/project`'s merged catalog, the canonical JSON of every corpus screen and catalog example validates against the generated schema.
+- A negative set is rejected by both the schema and the validator, with matching codes: unknown kind, undeclared prop, wrong enum value, child kind not allowed, undeclared slot, missing required prop, number out of range.
+- Generating the schema twice gives byte-identical output, pinned by a snapshot; the CLI, MCP and TypeScript surfaces return the same schema.
+- A mocked-provider test shows that the schema is sent and that the reply is scored by the same checks as every other format.
+- A trial run is in `test.md` History with its raw results in `bench/results/`, and the comparison (valid and success, first try and after repair, mean output tokens) for markup, free JSON and constrained JSON is in the evaluation report.
+
+**Dependencies.** T8 (the harness, models and evaluation report; it is in progress in `bench/src/run-tasks.ts`, so the two are sequenced). T28 step 4 (a readback method change to the same harness). T31 (done part: the project catalog extension). T17: once several catalogs load, the schema must cover the merged set; T12 can land first on single-extension projects.
+
+**Open questions for the creator.**
+1. Narrow the schema with project data (token names, action names, data paths as enums), or describe the catalog only?
+2. Leave `x-` extension elements and attributes out of the constrained schema? Writers run strict, so this seems safe.
+3. Keep the generic Zod `documentJsonSchema()` alongside the catalog-aware one, or replace it?
+4. MCP: a new `weft_schema` tool, or a `format: "json-schema"` argument on `weft_catalog`?
+5. Benchmark: three-way (with the free `weft-json` format) or two-way? Which models (Anthropic plus a local LM Studio model)? What budget? Part of T8's continue/stop decision or a separate report?
+6. If a provider cannot take the schema whole (size or recursion limits): a reduced profile per provider, or report the provider as unsupported?
+
+**Split.** T12.1: spec subsection and the Rust generator with its tests. T12.2: bindings, CLI, MCP, `weft.json` keys, docs and AGENT-SPEC. T12.3: benchmark provider schema support, the two formats and primer, `test.md` method, and the trial run.
+
+### T16. Layout vocabulary
+
+Weft has two layout kinds today. `stack` lays children out in one line, with `direction`, `gap`, cross-axis `align` and `wrap`; `grid` has a fixed number of equal `columns` and a `gap`. Most of what a layout usually says has no form in Weft: how leftover space on the main axis is shared, which child grows and which hugs its content, inner spacing, a maximum width, and how a grid reflows on a narrow screen. Screens work around these gaps, and every importer drops them as `layout` losses. The task decides how much more Weft says without becoming CSS: a small closed set that every target (web, SwiftUI, Slint, A2UI, json-render, Figma, Penpot) can draw and read back, and nothing that only CSS can express. This changes the format, so the design comes first, as in T39.
+
+**Context.**
+- `SPEC.md` §5.1 holds the `stack`/`grid` rows and the `stack.align` note (T55 set its default: a row centres its children, a column keeps its host's layout). §2.2 holds the universal attributes; T52's tilt attributes are the precedent for a per-child attribute. §8: a new prop is a minor catalog change, a new or changed default is major. §9 loss tables: the SwiftUI importer drops `padding` and `frame`, Slint loses grid `row`/`col` placement, A2UI export loses `columns` and `wrap`, A2UI import notes `justify` other than `start` and `weight`.
+- Catalog: `packages/catalog/src/core.ts` generates `packages/catalog/catalog.json`, embedded by `crates/weft-catalog/src/core.rs`; examples `packages/catalog/examples/stack.weft` and `grid.weft`; change classifier `crates/weft-catalog/src/diff.rs`.
+- Generators: `crates/weft-web/src/html.rs` `layout()` and `base.css`; `crates/weft-web/src/jsx/` (React, SolidJS and Lit share one render plan, `_align` in `jsx/runtime.rs`); `packages/render-react/src/render.ts` `layoutStyle`; `crates/weft-swiftui/src/generate.rs` (`VStack`/`HStack` alignment, `LazyVGrid`, no wrap); `crates/weft-slint/src/generate.rs` (writes `spacing` only); `crates/weft-interop/src/a2ui/export.rs` and the json-render export (T13.1); `packages/design-tool/src/view.ts` `layoutView`, used by the Figma and Penpot builds (it draws `stretch` as `start`).
+- Importers: `crates/weft-web/src/dom.rs` and `from_jsx/`; `crates/weft-swiftui/src/import/read.rs`; `crates/weft-slint/src/read.rs`; `crates/weft-interop/src/a2ui/import.rs`; `packages/design-tool/src/read.ts` and `foreign.ts`. Figma `primaryAxisAlignItems` and sizing modes are already typed in `packages/figma/src/api.ts`, Penpot `horizontalSizing`/`verticalSizing` in `packages/penpot/src/api.ts`.
+- Corpus workarounds: `dashboard` separates the title and the update time with a `space.xl` gap in a wrapping row, right-aligns its footer with a column `align="end"`, and its 3-column `grid` never reflows; `wizard-step` cannot push Back and Next apart. `crates/weft-snapshots/tests/coverage.rs` fails while any catalog prop or enum value appears in no corpus screen, so new props need a corpus screen.
+- `research.md` §9 lists "Layout without becoming CSS" as open, with no prior-art section. `docs/figma-style-overrides-design.md` proposes `style-padding` (not approved) and overlaps with this task.
+
+**Scope.**
+1. Design: a `research.md` prior-art section with URLs and dates (A2UI `justify`/`align`/`weight`, Figma auto layout hug/fill/fixed and min/max, Penpot flex/grid sizing, SwiftUI `Spacer`/`frame`/`layoutPriority`/`ViewThatFits`, Slint `alignment` and `*-stretch`, CSS flex/grid/container queries, Compose), and `docs/layout-design.md` in the shape of `docs/context-design.md`: the candidate vocabulary (main-axis distribution on `stack`, child sizing, padding, max width, grid reflow), markup and canonical JSON, catalog props versus universal attributes, token types, defaults, diagnostic codes, a mapping and loss table per target, versioning, and worked examples on `dashboard` and `wizard-step`. Nothing below starts until the creator approves the design.
+2. Spec and catalog: `SPEC.md` §5.1 or §2.2 and the §9 mappings and loss tables; the `AGENT-SPEC.md` layout line and `packages/mcp/src/primer.ts`; `core.ts` and a regenerated `catalog.json`, the catalog examples, `docs/catalog-and-tokens.md`; for a new universal attribute or code, `crates/weft-core/src/rules.rs` and the differential fixtures.
+3. Generators: static HTML and the base stylesheet, React/SolidJS/Lit, the reference renderer, SwiftUI, Slint, A2UI, json-render, and the Figma and Penpot builds through `design-tool`.
+4. Importers: HTML/DOM, React/SolidJS, SwiftUI, Slint, A2UI and Figma/Penpot read the new vocabulary back, and the `layout` loss rows narrow.
+5. Corpus and baselines: replace the workarounds in `dashboard` and `wizard-step`, or add a screen, so coverage holds; retake and review the insta snapshots, the Figma/Penpot layer trees, and the `packages/visual` web and SwiftUI baselines.
+6. `weft.json`: no key is expected; if the design adds a tool option (for example breakpoints that are not tokens), it gets a §10.6 row and a `settings.rs` entry in the same change.
+
+**Out of scope.** Arbitrary CSS (lengths outside tokens, absolute positioning, per-side margins, z-index). Visual style (fill, stroke, radius), which belongs to the style-overrides proposal. Animation. Changing T55's cross-axis default. `bench/src/primers.ts`, which changes only as a method change recorded in `test.md`.
+
+**Done when.**
+- The creator has approved the design.
+- The new props or attributes validate in strict and lenient mode, and their codes are in `AGENT-SPEC.md` (`bench/test/agent-spec.test.ts` passes).
+- A corpus screen that uses each one passes the `packages/visual` cross-target comparison (React, SolidJS, the reference renderer) and has a reviewed SwiftUI baseline.
+- Every target either maps each new form or lists it as a loss in §9; generated code with its source comment removed reads back to the same props on every importer whose row says "maps"; the Figma and Penpot round trips keep it.
+- The full check exits 0.
+
+**Dependencies.** T55 and T52 (done) are the precedents. Coordinate with T39 (both may bump `weft` to 0.2) and with T14's style overrides (padding). Land after T67.4 and T67.5, which edit the same `read.rs`. T69's "resize within the layout rules" builds on this.
+
+**Open questions for the creator.**
+1. Which are in: main-axis distribution, child sizing (grow/hug/fixed), padding, max width, responsive reflow?
+2. Child sizing as a universal attribute (a format change, like tilt) or as props on the kinds that sit in a stack?
+3. Responsive behaviour: a grid that fits as many columns as a minimum width allows, breakpoints (as tokens or a `weft.json` key), or none?
+4. Padding here, or in style overrides as `style-padding`?
+5. Sizes as `dimension` tokens only, or literal numbers too?
+6. Ship as a catalog minor within `weft` 0.1, or together with T39's 0.2?
+
+**Split.** T16.1: design (docs only). T16.2: spec, catalog, core, `AGENT-SPEC.md`, corpus. T16.3: web generators and importers, plus the reference renderer. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render. T16.7: Figma and Penpot through `design-tool`.
+
+### T17. Extension catalogs
+
+A project can extend the core catalog with exactly one file today. Real hosts combine several sources: the core, one or more component libraries, and their own kinds. So a project needs to load several catalogs at once without their kinds colliding. Once catalogs travel between projects, two more questions need answers: how a catalog is published and found, and who keeps the registry. `research.md` §9 lists "Who keeps a registry of extension catalogs" as open; `docs/catalog-and-tokens.md` and `docs/what-is-weft.md` both say there is no registry; `docs/fragments-design.md` defers namespaces and sharing across projects to this task.
+
+**Context.**
+- SPEC §10.2: `catalog` is one file name. §10.4 merges that one extension into the core catalog: new kinds need a whole definition, core kinds are extended by merge or join, the extension may only widen the core (§8 rules via `crates/weft-catalog/src/diff.rs`), codes `W706` (invalid) and `W707` (narrows), and the merged catalog takes the extension's `name` and `version`.
+- Code: `Loader::extend_catalog` and `extend_definition` in `crates/weft-catalog/src/project.rs`. `Project.catalog` is a single `Catalog` with no record of which catalog each kind came from. The CLI's `--catalog` loads one whole catalog that replaces the project's (`load_catalog` in `crates/weft-cli/src/main.rs`). `weft_capabilities` already returns `catalogs: [{ name, version }]`, the core first and then the extension (T10); `weft_catalog` lists kinds with no source.
+- Kind names follow `[a-z][a-z0-9]*(-[a-z0-9]+)*` (SPEC §2), so there is no `:`. `x-<vendor>-` names are opaque extensions that no catalog may define (§8, §10.4).
+- T15.1/T15.2 import a Custom Elements Manifest into an extension whose kinds are the custom-element tags (`acme-button`), with `--name`/`--version`/`--catalog` and the `import.cem.*` settings (`crates/weft-import/src/cem.rs`, `crates/weft-cli/src/cem.rs`, fixture `crates/weft-import/tests/fixtures/cem/acme-ui.json`). A library catalog and a project catalog cannot be used together today.
+- Generators already name extension kinds by convention (SwiftUI: `promo-card` becomes `PromoCardView`, SPEC §9); the Figma and Penpot libraries build one component set per kind.
+- `@weft/catalog` is `private` in `packages/catalog/package.json`; nothing is published anywhere yet.
+- Documents and validators never touch the network (AGENTS.md). Project file names stay inside the project directory (§10.2, `W703`), which rules out reading a `node_modules` in a parent folder.
+
+**Scope.**
+- Design first: `docs/extension-catalogs-design.md`, in the shape of `docs/context-design.md`, goes to the creator before any code. It covers the namespace syntax with alternatives; merge order and conflict rules across several extensions; which kinds a catalog may extend (core only, or also another extension's); the catalog's own declaration (prefix, the base versions it targets); the publication format and discovery; the registry model; and the effect on generators, the Figma and Penpot libraries, the T12 schema, and fragments (T31 part B).
+- After approval: SPEC §5, §10.2 (`catalog` also takes an ordered array), §10.4, and new `W7xx` codes for cross-catalog conflicts; the loader keeps which catalog each kind came from, with differential fixtures; CLI `--catalog` can be repeated; MCP `project.catalog` accepts an array, `weft_capabilities` lists every catalog, `weft_catalog` shows each kind's catalog; `import-cem` gets a namespace option with its `import.cem.*` key (SPEC §10.6, `settings.rs`, `schemas/weft.schema.json`); `AGENT-SPEC.md` §1 and §2.8 and the primer; `docs/projects.md`, `docs/catalog-and-tokens.md`, and a publishing guide; the `research.md` §9 row answered.
+
+**Out of scope.** Hosting a registry service. Network fetching during validation or rendering. Changing the `x-` extension rules. Fragments themselves (T31 part B). New generator features beyond naming namespaced kinds.
+
+**Done when.**
+- `examples/project` loads the core plus two extensions (one imported from `acme-ui.json`, one written by hand), and kinds from both validate in strict mode.
+- A kind defined by two catalogs gets a diagnostic that names both catalogs, never a panic.
+- `weft_capabilities` lists all three catalogs; the TypeScript and Rust differential fixtures agree.
+- A catalog shipped in a package directory resolves by the documented convention with no network access.
+- `schemas/weft.schema.json` is regenerated; SPEC, AGENT-SPEC and the docs are updated.
+
+**Dependencies.** Done: T31 (project file and settings), T15.1/T15.2 (CEM import), T10 (capabilities). T12: its schema must cover the merged catalogs. Affected: T14/T40 (one design-tool library per catalog), T44 (SwiftUI custom views), T69 milestone 4 (catalog kinds as components), the fragments design (T31 part B).
+
+**Open questions for the creator.**
+1. Namespace syntax: a hyphen prefix (`acme-button`, like custom elements; no grammar change, every generator already handles it), a colon (`acme:button`; changes the §2 grammar, both parsers, the format version and every generator's naming), or a collision rule only, with no namespaces?
+2. Who owns the prefix: the catalog author (declared in the catalog and checked), or the project (an alias at load time, so it can fix a collision)?
+3. May an extension extend another extension's kinds, or only core kinds? When two extensions widen the same core prop (`button.variant`), is that a union or a conflict?
+4. Distribution: a field in an npm package, a file committed to the repository, or a URL with an integrity hash fetched only by an explicit command (for example `weft catalog add`)?
+5. Registry: none (a convention plus a list in the docs), a curated index in this repository, or a hosted service? Who keeps it?
+6. Should a catalog declare the base catalog versions it targets? Confirm that screens stay silent about their catalogs (SPEC §10).
+
+**Split.** T17.0: design document only. T17.1: spec and loader for several catalogs and namespaces, with fixtures. T17.2: CLI, MCP, `import-cem` namespace, settings, AGENT-SPEC and docs. T17.3: package resolution and the publishing guide, plus the registry as the creator decides.
+
+### T41. Hosted Penpot plugin
+
+Penpot installs a plugin only from the URL of its `manifest.json`, and plugins are hosted outside Penpot. Today the Weft Penpot plugin is available only to someone who clones the repository and runs `moon run penpot-plugin:serve`. The repository is public on GitHub (`listepo/weft`), so CI can build the plugin and publish `dist/` on GitHub Pages, which serves the files with the right content types and `Access-Control-Allow-Origin: *`.
+
+**Context.**
+- `plugins/penpot`: `build.ts` runs the shared `@weft/design-plugin` build and writes `dist/manifest.json`, `plugin.js` (the SES sandbox script, no WebAssembly) and `ui.html` (the core inlined). `manifest.json` uses version 2, so paths resolve from the manifest's folder and a subpath works; it has `name`, `description`, `code` and `permissions`, but no `icon`. `moon.yml` has `build` (depends on `root:wasm`, `runInCI: false`) and `serve` (`serve.config.ts`, port 4400, `cors: true`). `dist/` is gitignored; `test/bundle.test.ts` builds into a temp folder and checks the manifest.
+- `plugins/penpot/README.md` says hosting is T41 and that nobody has checked whether a real Penpot needs the CORS header; `packages/penpot/README.md` lists hosting among the unverified items, and T40's result in `done.md` leaves hosting open. The plugin's UI needs no network access.
+- Plugin identity: Penpot derives `host` from the manifest URL and gives each install a random id, unless a plugin with the same name and host is already registered. Weft keeps shared plugin data under the `weft` namespace, so boards built with a localhost install stay readable from the hosted one.
+- GitHub: `main` has no `.github/` folder, and nothing mentions Pages. Open PR #4 (T73) adds `.github/workflows/ci.yml` (the merge gate on pull requests and pushes to `main`, `runs-on: xcode-27`, actions pinned to commit SHAs, `permissions: contents: read`) and moves XcodeGen to `mise.osx.toml` so `mise install` works on Linux. Pages is not enabled (`GET /repos/listepo/weft/pages` returns 404).
+
+**Scope.**
+- A Pages deploy job next to T73's gate: only on pushes to `main`, after the gate passes; builds with `moon run penpot-plugin:build` and publishes `plugins/penpot/dist` under a fixed path through `actions/upload-pages-artifact` and `actions/deploy-pages`, pinned to SHAs; `pages: write` and `id-token: write` on that job only, the `github-pages` environment, and a concurrency group so two deploys never race.
+- A check step after the deploy: fetch `manifest.json`, `plugin.js` and `ui.html` from the Pages URL and fail unless each returns 200 with a JSON, JavaScript or HTML content type and `Access-Control-Allow-Origin: *`.
+- An offline Vitest test that reads the workflow and pins that the deploy runs only on `main` after the gate, builds the Penpot plugin, publishes exactly its `dist/`, and pins every action to a SHA.
+- An `icon` in `manifest.json` if Penpot's plugin manager needs one; the build copies it into `dist/`, and `bundle.test.ts` checks it.
+- Docs: `plugins/penpot/README.md` gives the install URL first and keeps local serving for development; the root `README.md` mentions the URL; `packages/penpot/README.md` moves hosting from unverified to verified, with the date.
+- No new tool option, so no `weft.json` key.
+
+**Out of scope.** Listing the plugin in Penpot's own plugin catalogue. Hosting the Figma plugin. Versioned or per-PR preview deployments. A custom domain. T40's other open checks in a real Penpot (async variants, tokens, grid cells, plugin data on copies, UI theme).
+
+**Done when.**
+- A push to `main` deploys, and the check step passes.
+- Penpot (design.penpot.app) installs the plugin from the Pages URL in its plugin manager, and Build and Export both work on a corpus screen.
+- `plugins/penpot/README.md` gives that URL.
+- The full check exits 0.
+
+**Dependencies.** T73: extend its `ci.yml` rather than adding a second gate; T73 also makes `mise install` work on Linux. The creator enables Pages with the source set to "GitHub Actions" (a repository setting; agents do not change it).
+
+**Open questions for the creator.**
+1. URL: `https://listepo.github.io/weft/penpot/manifest.json` (a subpath, leaving room for other pages) or the site root?
+2. Deploy on every push to `main`, or only on a release tag, so users never get an unreleased plugin?
+3. Runner for the deploy build: GitHub-hosted `ubuntu-latest` or the gate's `xcode-27` runner?
+4. A repository has one Pages site and each deploy replaces it whole: should the deploy assemble a site now (an index page, room for docs or a `render-react` gallery)?
+5. Which icon should the plugin manager show?
