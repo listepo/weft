@@ -1,4 +1,4 @@
-//! `weft validate`, the generators (`weft swiftui`, `slint`, `html`, `react`, `solid`) and the importers
+//! `weft validate`, the generators (`weft swiftui`, `slint`, `html`, `react`, `solid`, `schema`) and the importers
 //! with a project file (SPEC §10): discovery, explicit arguments and what the project adds to the
 //! checks and the output.
 
@@ -899,4 +899,97 @@ fn slint_refuses_what_it_cannot_generate_and_exits_1() {
     let r = run(&[&"import-slint", &none, &"--no-project"]);
     assert_eq!((r.code, r.stdout.as_str()), (1, ""));
     assert!(r.stderr.contains("weft:source slint"), "{}", r.stderr);
+}
+
+/// What `weft schema` must print for `catalog`: the generator's schema, indented, one newline.
+fn generated_schema(catalog: &weft_core::Catalog) -> String {
+    let schema = weft_catalog::document_schema(catalog, &Default::default());
+    format!("{}\n", serde_json::to_string_pretty(&schema).unwrap())
+}
+
+#[test]
+fn schema_prints_the_generator_s_schema_of_the_project_catalog() {
+    let read = |name: &str| std::fs::read_to_string(Path::new(EXAMPLE).join(name)).ok();
+    let project = weft_catalog::load_project_text(
+        &std::fs::read_to_string(Path::new(EXAMPLE).join("weft.json")).unwrap(),
+        &weft_catalog::ProjectOptions {
+            read: Some(&read),
+            ..Default::default()
+        },
+    )
+    .unwrap()
+    .project;
+    let shop = generated_schema(&project.catalog);
+    let core = generated_schema(&weft_catalog::core_catalog().unwrap());
+    assert_ne!(shop, core);
+
+    // Found from the working directory, as for `weft css-base`.
+    let r = run_in(Path::new(EXAMPLE), &[&"schema"]);
+    assert_eq!(
+        (r.code, r.stdout.as_str()),
+        (0, shop.as_str()),
+        "{}",
+        r.stderr
+    );
+    let screens = Path::new(EXAMPLE).join("screens");
+    assert_eq!(run_in(&screens, &[&"schema"]).stdout, shop);
+    let r = run(&[
+        &"schema",
+        &"--project",
+        &Path::new(EXAMPLE).join("weft.json"),
+    ]);
+    assert_eq!(r.stdout, shop);
+
+    let r = run_in(Path::new(EXAMPLE), &[&"schema", &"--no-project"]);
+    assert_eq!(
+        (r.code, r.stdout.as_str()),
+        (0, core.as_str()),
+        "{}",
+        r.stderr
+    );
+    let catalog = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../packages/catalog/catalog.json"
+    );
+    let r = run_in(Path::new(EXAMPLE), &[&"schema", &"--catalog", &catalog]);
+    assert_eq!(r.stdout, core);
+}
+
+#[test]
+fn schema_writes_where_the_project_says_and_keeps_an_existing_file() {
+    let s = Scratch::new("schema");
+    with_settings(
+        &s,
+        serde_json::json!({ "export": { "schema": { "outDir": "gen" } } }),
+    );
+    let r = run_in(&s.0, &[&"schema"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, ""), "{}", r.stderr);
+    let written = s.path("gen/document.schema.json");
+    let first = std::fs::read_to_string(&written).unwrap();
+    // `--out-dir` wins over the setting and is relative to the working directory.
+    let r = run_in(&s.0, &[&"schema", &"--out-dir", &"flag"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, ""), "{}", r.stderr);
+    assert_eq!(
+        std::fs::read_to_string(s.path("flag/document.schema.json")).unwrap(),
+        first
+    );
+
+    let r = run_in(&s.0, &[&"schema"]);
+    assert_eq!(r.code, 2);
+    assert!(r.stderr.contains("--force"), "{}", r.stderr);
+    assert_eq!(std::fs::read_to_string(&written).unwrap(), first);
+
+    let r = run_in(
+        &s.0,
+        &[
+            &"schema",
+            &"--force",
+            &"--no-project",
+            &"--out-dir",
+            &s.path("gen"),
+        ],
+    );
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    let core = generated_schema(&weft_catalog::core_catalog().unwrap());
+    assert_eq!(std::fs::read_to_string(&written).unwrap(), core);
 }

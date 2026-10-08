@@ -151,6 +151,11 @@ const EXPORT: &[Setting] = &[
         "Slint components for Slint 1.x (`weft slint`).",
         Kind::Section(OUT_ONLY),
     ),
+    setting(
+        "schema",
+        "The JSON Schema of the canonical documents the project's catalog admits, `document.schema.json` (`weft schema`). Default folder: standard output.",
+        Kind::Section(OUT_ONLY),
+    ),
 ];
 const FIGMA_IMPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),

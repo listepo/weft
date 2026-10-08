@@ -10,7 +10,7 @@ The `weft` plugin makes Claude Code, including Claude Code Desktop, good at Weft
 | `/weft:figma-pull <figma link> [out.weft]` | Reads a frame of a Figma file through the Figma REST API back into a Weft screen and prints what was lost. The access token comes from the `FIGMA_TOKEN` environment variable; see [the Figma package](../packages/figma/README.md#pulling-a-frame-through-the-rest-api). |
 | `weft:spec` (a skill, not a command) | Teaches Claude the format from [AGENT-SPEC.md](../AGENT-SPEC.md), so it writes, patches and repairs valid markup. Claude loads it whenever you ask for work on a `.weft` file. |
 
-The plugin's MCP server gives Claude `weft_primer`, `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch` and `weft_render`. The four commands read and write files through small scripts; the server never touches files.
+The plugin's MCP server gives Claude `weft_primer`, `weft_catalog`, `weft_schema`, `weft_validate`, `weft_format`, `weft_patch` and `weft_render`. The four commands read and write files through small scripts; the server never touches files.
 
 ## Install
 

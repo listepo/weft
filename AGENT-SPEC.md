@@ -13,6 +13,7 @@ The examples are valid in strict mode against the core catalog `weft-core` 0.1 a
 | The action names (`auth.submit`, `nav.back`) | The values of `on-<event>`. When the host lists actions, use only those (`W308`). |
 | The design tokens (`space.md`, `color.accent`) | The values of token props. When the host lists tokens, use only those (`W306`). |
 | The format version and catalogs it reads | `weft="0.1"` on the root; write nothing a host does not advertise. |
+| The document schema (`weft_schema`, or `weft schema`) | Only when the host constrains your output to a JSON Schema: the canonical JSON (SPEC §3) its catalog admits. You then write that JSON instead of markup, and validate it all the same: the schema cannot check unique ids, bindings, tokens or actions (SPEC §3.1). |
 
 Validate in **strict** mode before you answer: unknown elements and attributes are warnings for readers but errors for writers.
 

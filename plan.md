@@ -13,7 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T73 | todo | P2 | 2 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
-| T12.2 | todo | P2 | 3 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16 | todo | P2 | 5 | 0% | |
 | T17 | todo | P2 | 4 | 0% | |
@@ -207,14 +206,6 @@ Not started; nothing is built until the creator approves the plan of the first m
 ### T73. CI workflow for the documented merge gate
 
 There is no `.github/` in the repo; the documented merge gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md:50) runs only by hand — and publishing from GitHub (T32) will need it. Done means: the gate runs as a workflow on pull requests (and on main once the repo has a remote).
-
-### T12.2. Constrained generation: surfaces
-
-Put T12.1's `document_schema` behind every surface: `documentSchema` in `weft-binding`/`weft-wasm`/`weft-node` (the `engines.test.ts` lists must still match); `@weft/core` types, with `schema.ts` delegating to the Rust core; CLI `weft schema [--catalog] [--project] [--out-dir]`; an MCP tool `weft_schema` or an argument of `weft_catalog`; `weft.json` keys for every new option (SPEC §10.6, `settings.rs`, regenerated `schemas/weft.schema.json`); `docs/cli.md`, `docs/mcp.md`, `AGENT-SPEC.md` (the MCP tool list) and the primer; rebuilt plugin `dist/` folders. Done when the CLI, MCP and TypeScript surfaces return the same schema as `document_schema`.
-
-**Open questions for the creator.**
-1. Keep the generic Zod `documentJsonSchema()` alongside the catalog-aware one, or replace it? (T12 question 3.)
-2. MCP: a new `weft_schema` tool, or a `format: "json-schema"` argument on `weft_catalog`? (T12 question 4.)
 
 ### T12.3. Constrained generation: benchmark
 

@@ -122,6 +122,13 @@ impl Catalog {
         Ok(web::import_cem(manifest, options, &self.0)?)
     }
 
+    /// The JSON Schema of the canonical documents this catalog admits, as compact JSON text.
+    #[cfg(feature = "web")]
+    #[wasm_bindgen(js_name = documentSchema)]
+    pub fn document_schema(&self) -> Result<String, JsError> {
+        Ok(web::document_schema(&self.0)?)
+    }
+
     #[wasm_bindgen(js_name = checkData)]
     pub fn check_data(
         &self,
