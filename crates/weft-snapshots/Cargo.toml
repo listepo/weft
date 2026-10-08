@@ -17,6 +17,7 @@ serde_json = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
 weft-interop = { workspace = true }
+weft-slint = { workspace = true }
 weft-swiftui = { workspace = true }
 weft-web = { workspace = true }
 

@@ -1,0 +1,5 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: example-dialog as slint
+---
+refused: cannot generate Slint: screen#root: the id is reserved in Slint

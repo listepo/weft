@@ -1,0 +1,67 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-confirm-dialog as slint
+---
+// weft:source slint
+// <screen id="files" label="File" weft="0.1">
+//   <heading id="title" level="1">Quarterly report</heading>
+//   <button id="delete-file" variant="danger" on-press="dialog.open">Delete file</button>
+//   <dialog id="confirm" label="Delete file?" open="{$.confirmOpen}" on-close="dialog.close">
+//     <text id="warning">This cannot be undone.</text>
+//     <text id="filename" text="{$.file.name}"/>
+//     <slot name="actions">
+//       <button id="cancel" on-press="dialog.close">Cancel</button>
+//       <button id="confirm-delete" variant="danger" on-press="file.delete">Delete</button>
+//     </slot>
+//   </dialog>
+// </screen>
+
+import { Button, HorizontalBox, VerticalBox } from "std-widgets.slint";
+
+export component FilesScreen inherits Window {
+    title: "File";
+    in-out property <bool> confirmOpen;
+    in-out property <string> file-name;
+    callback perform(string, string);
+
+    files := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Quarterly report";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        delete-file := Button {
+            text: "Delete file";
+            clicked => { root.perform("dialog.open", "delete-file"); }
+        }
+        confirm := PopupWindow {
+            close-policy: PopupClosePolicy.no-auto-close;
+            VerticalLayout {
+                Text { text: "Delete file?"; }
+                warning := Text {
+                    text: "This cannot be undone.";
+                }
+                filename := Text {
+                    text: root.file-name;
+                }
+                HorizontalBox {
+                    cancel := Button {
+                        text: "Cancel";
+                        clicked => { root.perform("dialog.close", "cancel"); }
+                    }
+                    confirm-delete := Button {
+                        text: "Delete";
+                        clicked => { root.perform("file.delete", "confirm-delete"); }
+                    }
+                }
+            }
+        }
+    }
+    init => {
+        if root.confirmOpen { confirm.show(); }
+    }
+    changed confirmOpen => { if root.confirmOpen { confirm.show(); } else { confirm.close(); } }
+    property <bool> confirm-is-open: confirm.is-open;
+    changed confirm-is-open => { if !confirm-is-open && root.confirmOpen { root.confirmOpen = false; root.perform("dialog.close", "confirm"); } }
+}

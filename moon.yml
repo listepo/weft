@@ -185,6 +185,8 @@ tasks:
     inputs:
       [
         "/crates/**/*",
+        # A failed screenshot writes here; hashing it would change the task hash mid-run.
+        "!/crates/weft-slint/tests/screenshots/diffs/**",
         "/Cargo.toml",
         "/Cargo.lock",
         "/packages/catalog/catalog.json",
@@ -196,4 +198,11 @@ tasks:
       ]
   rust-lint:
     script: "cargo clippy --workspace --all-targets --all-features -- -D warnings && cargo fmt --all --check"
-    inputs: ["/crates/**/*", "/Cargo.toml", "/Cargo.lock", "/clippy.toml"]
+    inputs:
+      [
+        "/crates/**/*",
+        "!/crates/weft-slint/tests/screenshots/diffs/**",
+        "/Cargo.toml",
+        "/Cargo.lock",
+        "/clippy.toml",
+      ]

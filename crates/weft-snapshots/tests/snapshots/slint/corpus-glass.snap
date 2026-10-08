@@ -1,0 +1,57 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-glass as slint
+---
+// weft:source slint
+// <screen id="glass" label="Glass" weft="0.1">
+//   <stack id="card" direction="column" gap="{token.space.md}" material="{token.material.glass}">
+//     <heading id="title" level="2" text="{$.title}"/>
+//     <text id="body">The panel blurs what is behind it.</text>
+//     <button id="close" variant="primary" on-press="glass.close">Got it</button>
+//   </stack>
+//   <grid id="tiles" columns="2" gap="{token.space.sm}" material="{token.material.glass}">
+//     <text id="tile-light">Light</text>
+//     <text id="tile-dark">Dark</text>
+//   </grid>
+// </screen>
+
+import { Button, VerticalBox } from "std-widgets.slint";
+
+export component GlassScreen inherits Window {
+    title: "Glass";
+    in-out property <string> title-data;
+    callback perform(string, string);
+
+    glass := VerticalBox {
+        alignment: LayoutAlignment.start;
+        card := VerticalLayout {
+            spacing: 16px;
+            title := Text {
+                text: root.title-data;
+                font-size: 24px;
+                font-weight: 700;
+            }
+            body := Text {
+                text: "The panel blurs what is behind it.";
+            }
+            close := Button {
+                text: "Got it";
+                primary: true;
+                clicked => { root.perform("glass.close", "close"); }
+            }
+        }
+        tiles := GridLayout {
+            spacing: 8px;
+            tile-light := Text {
+                row: 0;
+                col: 0;
+                text: "Light";
+            }
+            tile-dark := Text {
+                row: 0;
+                col: 1;
+                text: "Dark";
+            }
+        }
+    }
+}

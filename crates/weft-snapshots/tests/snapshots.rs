@@ -1,8 +1,8 @@
 //! What every generator writes for every corpus screen and catalog example, pinned as reviewed
 //! insta snapshots under `tests/snapshots/<target>/<screen>.snap`: canonical JSON, the static
-//! HTML page, React and SolidJS components as JSX and TSX, Lit elements, and SwiftUI; and for every corpus
-//! screen, the static page and SwiftUI generated with its sample data (`html-data`,
-//! `swiftui-data`). The differential and
+//! HTML page, React and SolidJS components as JSX and TSX, Lit elements, SwiftUI and Slint; and
+//! for every corpus screen, the static page and SwiftUI generated with its sample data
+//! (`html-data`, `swiftui-data`). The differential and
 //! round-trip tests prove the outputs agree with each other; these make any change to an output a
 //! diff someone reviews (`cargo insta review`) instead of a silent drift.
 
@@ -139,6 +139,21 @@ fn solid_tsx() {
 #[test]
 fn lit_js() {
     snapshot_all("lit-js", jsx(Framework::Lit, false));
+}
+
+#[test]
+fn slint() {
+    let catalog = common::catalog();
+    let tokens = common::tokens();
+    snapshot_all("slint", |document| {
+        let options = weft_slint::GenerateOptions {
+            catalog: &catalog,
+            tokens: &tokens,
+            name: None,
+        };
+        // A refusal is an output too: pinning its message keeps the reason reviewed.
+        weft_slint::generate(document, &options).unwrap_or_else(|e| format!("refused: {e}\n"))
+    });
 }
 
 #[test]

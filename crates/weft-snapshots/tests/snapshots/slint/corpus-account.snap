@@ -1,0 +1,173 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-account as slint
+---
+// weft:source slint
+// <screen id="account" label="Edit account" weft="0.1">
+//   <heading id="title" level="1">Edit account</heading>
+//   <form id="account-form" label="Account" state="invalid" on-submit="account.save">
+//     <field id="name" label="Full name" placeholder="Ada Lovelace" state="valid" type="text" value="{$.account.name}" on-change="account.edit"/>
+//     <field id="age" error="{$.errors.age}" label="Age" state="invalid" type="number" value="{$.account.age}"/>
+//     <field id="handle" disabled="{$.account.locked}" label="Handle" placeholder="{{handle}" value="{$.account.handle}"/>
+//     <field id="bio" label="Bio" type="multiline" value="{$.account.bio}"/>
+//     <field id="email" disabled="true" label="Email" type="email" value="{$.account.email}"/>
+//     <checkbox id="newsletter" checked="{$.account.newsletter}" label="Send me the newsletter" on-change="account.edit"/>
+//     <checkbox id="terms" checked="true" disabled="true" label="Terms accepted"/>
+//     <switch id="public" checked="{$.account.public}" disabled="{!$.account.verified}" label="Public profile" on-change="account.edit"/>
+//     <radio-group id="plan" label="Plan" value="{$.account.plan}" on-change="account.edit">
+//       <radio id="plan-free" value="free">Free</radio>
+//       <radio id="plan-pro" text="{$.labels.pro}" value="pro"/>
+//       <radio id="plan-team" disabled="true" value="team">Team</radio>
+//     </radio-group>
+//     <select id="language" disabled="{$.account.locked}" label="Language" value="{$.account.language}" on-change="account.edit">
+//       <option id="language-en" value="en">English</option>
+//       <option id="language-fr" text="{$.labels.french}" value="fr"/>
+//     </select>
+//     <text id="internal" hidden="true">Internal note: never shown.</text>
+//     <alert id="saved" hidden="{!$.saved}" tone="success">Your changes were saved.</alert>
+//     <slot name="footer">
+//       <button id="save" state="busy" submit="true" variant="primary">Save</button>
+//       <button id="cancel" state="idle" text="{$.labels.cancel}" variant="secondary" on-press="account.cancel"/>
+//       <link id="help" href="https://example.com/help" text="{$.labels.help}"/>
+//     </slot>
+//   </form>
+// </screen>
+
+import { Button, CheckBox, ComboBox, HorizontalBox, LineEdit, Palette, RadioGroup, Switch, TextEdit, VerticalBox } from "std-widgets.slint";
+
+export component AccountScreen inherits Window {
+    title: "Edit account";
+    in-out property <string> account-name;
+    in-out property <string> errors-age;
+    in-out property <string> account-age;
+    in-out property <bool> account-locked;
+    in-out property <string> account-handle;
+    in-out property <string> account-bio;
+    in-out property <string> account-email;
+    in-out property <bool> account-newsletter;
+    in-out property <bool> account-public;
+    in-out property <bool> account-verified;
+    in-out property <string> account-plan;
+    in-out property <string> labels-pro;
+    in-out property <string> account-language;
+    in-out property <string> labels-french;
+    in-out property <bool> saved;
+    in-out property <string> labels-cancel;
+    in-out property <string> labels-help;
+    callback perform(string, string);
+
+    account := VerticalBox {
+        alignment: LayoutAlignment.start;
+        title := Text {
+            text: "Edit account";
+            font-size: 32px;
+            font-weight: 700;
+        }
+        account-form := VerticalBox {
+            VerticalLayout {
+                Text { text: "Full name"; }
+                name := LineEdit {
+                    placeholder-text: "Ada Lovelace";
+                    text <=> root.account-name;
+                    accepted => { root.perform("account.save", "account-form"); }
+                    edited => { root.perform("account.edit", "name"); }
+                }
+            }
+            VerticalLayout {
+                Text { text: "Age"; }
+                age := LineEdit {
+                    input-type: InputType.number;
+                    text <=> root.account-age;
+                    accepted => { root.perform("account.save", "account-form"); }
+                }
+            }
+            VerticalLayout {
+                Text { text: "Handle"; }
+                handle := LineEdit {
+                    placeholder-text: "{handle}";
+                    text <=> root.account-handle;
+                    enabled: !root.account-locked;
+                    accepted => { root.perform("account.save", "account-form"); }
+                }
+            }
+            VerticalLayout {
+                Text { text: "Bio"; }
+                bio := TextEdit {
+                    text <=> root.account-bio;
+                }
+            }
+            VerticalLayout {
+                Text { text: "Email"; }
+                email := LineEdit {
+                    text <=> root.account-email;
+                    enabled: false;
+                    accepted => { root.perform("account.save", "account-form"); }
+                }
+            }
+            newsletter := CheckBox {
+                text: "Send me the newsletter";
+                checked <=> root.account-newsletter;
+                toggled => { root.perform("account.edit", "newsletter"); }
+            }
+            terms := CheckBox {
+                text: "Terms accepted";
+                checked: true;
+                enabled: false;
+            }
+            public := Switch {
+                text: "Public profile";
+                checked <=> root.account-public;
+                enabled: root.account-verified;
+                toggled => { root.perform("account.edit", "public"); }
+            }
+            plan := RadioGroup {
+                title: "Plan";
+                plan-free := RadioButton {
+                    text: "Free";
+                    checked: root.account-plan == "free";
+                }
+                plan-pro := RadioButton {
+                    text: root.labels-pro;
+                    checked: root.account-plan == "pro";
+                }
+                plan-team := RadioButton {
+                    text: "Team";
+                    enabled: false;
+                    checked: root.account-plan == "team";
+                }
+                selected(picked) => { root.account-plan = picked == "Free" ? "free" : picked == root.labels-pro ? "pro" : "team"; root.perform("account.edit", "plan"); }
+            }
+            VerticalLayout {
+                Text { text: "Language"; }
+                language := ComboBox {
+                    model: ["English", root.labels-french];
+                    current-index: root.account-language == "fr" ? 1 : 0;
+                    enabled: !root.account-locked;
+                    selected => { root.account-language = ["en", "fr"][self.current-index]; root.perform("account.edit", "language"); }
+                }
+            }
+            internal := Text {
+                text: "Internal note: never shown.";
+                visible: false;
+            }
+            saved := VerticalLayout {
+                visible: root.saved;
+                Text { text: "Your changes were saved."; }
+            }
+            HorizontalBox {
+                save := Button {
+                    text: "Save";
+                    primary: true;
+                    clicked => { root.perform("account.save", "account-form"); }
+                }
+                cancel := Button {
+                    text: root.labels-cancel;
+                    clicked => { root.perform("account.cancel", "cancel"); }
+                }
+                help := TouchArea {
+                    Text { text: root.labels-help; color: Palette.accent-background; }
+                }
+            }
+        }
+    }
+}

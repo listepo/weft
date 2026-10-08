@@ -1,0 +1,78 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-search-results as slint
+---
+// weft:source slint
+// <screen id="search" label="Search" weft="0.1">
+//   <form id="form" on-submit="search.run">
+//     <stack id="bar" direction="row" gap="{token.space.sm}">
+//       <field id="query" label="Search" type="search" value="{$.query}"/>
+//       <button id="go" submit="true" variant="primary">Search</button>
+//     </stack>
+//   </form>
+//   <list id="results">
+//     <each id="results-each" as="result" in="{$.results}">
+//       <item id="result">
+//         <heading id="result-title" level="3" text="{$result.title}"/>
+//         <text id="result-snippet" text="{$result.snippet}"/>
+//         <link id="result-open" on-press="results.open">Open</link>
+//       </item>
+//     </each>
+//     <slot name="empty">
+//       <text id="empty">No results found</text>
+//     </slot>
+//   </list>
+// </screen>
+
+import { Button, LineEdit, ListView, Palette, VerticalBox } from "std-widgets.slint";
+
+export component SearchScreen inherits Window {
+    title: "Search";
+    in-out property <string> query;
+    in-out property <[{ title: string, snippet: string }]> results;
+    callback perform(string, string);
+
+    search := VerticalBox {
+        alignment: LayoutAlignment.start;
+        form := VerticalBox {
+            bar := HorizontalLayout {
+                spacing: 8px;
+                VerticalLayout {
+                    Text { text: "Search"; }
+                    query := LineEdit {
+                        text <=> root.query;
+                        accepted => { root.perform("search.run", "form"); }
+                    }
+                }
+                go := Button {
+                    text: "Search";
+                    primary: true;
+                    clicked => { root.perform("search.run", "form"); }
+                }
+            }
+        }
+        results := VerticalLayout {
+            ListView {
+                for result in root.results: VerticalLayout {
+                    result-title := Text {
+                        text: result.title;
+                        font-size: 19px;
+                        font-weight: 700;
+                    }
+                    result-snippet := Text {
+                        text: result.snippet;
+                    }
+                    result-open := TouchArea {
+                        clicked => { root.perform("results.open", "result-open"); }
+                        Text { text: "Open"; color: Palette.accent-background; }
+                    }
+                }
+            }
+            if root.results.length == 0: VerticalLayout {
+                empty := Text {
+                    text: "No results found";
+                }
+            }
+        }
+    }
+}
