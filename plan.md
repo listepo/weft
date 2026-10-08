@@ -6,7 +6,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
-| T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
+| T14 | in progress | P2 | 5 | 50% | Claude Code / claude-opus-5-5 |
+| T14.1 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
@@ -99,6 +100,25 @@ Progress (stage 1 done, on branch `t14-figma`):
   - MCP / Claude Code tools (with T30);
   - a check of the plugin in the real Figma app, including the inline module script and WebAssembly in its UI iframe;
   - the open questions in the report: single components for kinds without variants, `state` as a variant axis, the manifest id, and plugin data on duplicate/detach.
+
+Execution plan, stage 2 (this round; style overrides stay out until the creator approves them):
+
+1. T14.1: the pull over the REST API (card below).
+2. MCP / Claude Code tools through the Figma MCP server: waits for a creator decision. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. So frames built or read through it cannot carry or see the Weft source the round trip depends on. The options (move the source to shared plugin data, which the REST API also returns with `plugin_data=shared`; or keep the round trip in the Weft plugin and the pull) go to the creator.
+
+### T14.1. Figma pull over the REST API
+
+Read a frame of a Figma file through the REST API and turn it back into Weft with the existing read-back, so a screen built by the plugin comes back byte-identical without opening Figma. Done when the pull reads a frame served by a fake HTTP server (built from the corpus through the fake Plugin API) back byte-identical, the token never appears in output or errors, and the command and its `weft.json` keys are documented.
+
+Execution plan:
+
+1. Check the endpoints, auth header, plugin data parameter, limits and errors against Figma's official REST docs; record each fact with its URL and date in `packages/figma/README.md`.
+2. `packages/figma/src/layer.ts`: `figmaLayers` and `styleKey` read a narrow read-only node shape (`ReadNode`) that Plugin API nodes satisfy, so REST nodes reuse the same wrapper instead of a second copy.
+3. `packages/figma/src/rest.ts` (subpath `@weft/figma/rest`, kept out of the plugin bundle): parse a `GET /v1/files/:key/nodes` response (`plugin_data=<plugin id>`) into `ReadNode`s, checking every field as untrusted input; fetch the frame, then the main components of its instances in one more request; bound the response size; map 400/403/404/429 to clear errors with the token redacted; parse a `figma.com` URL into a file key and node id.
+4. `plugins/shared/scripts/figma-pull.ts` (bundled as `dist/figma-pull.js`): `figma-pull <figma URL | file key> [out.weft] [--node <id>] [--plugin-id <id>] [--force] [--project weft.json | --no-project]`. The token comes only from `FIGMA_TOKEN`; requests go only to `https://api.figma.com`. Prints the loss table like `import`.
+5. Settings: `import.figma.outDir` and `import.figma.pluginId` (SPEC §10.6 rows, `crates/weft-catalog/src/settings.rs`, regenerated schema, the TypeScript `Settings` type).
+6. A `/weft:figma-pull` skill for Claude Code and Cursor.
+7. Tests: corpus screens through a local HTTP server byte-identical; a designer edit; URL parsing; errors and redaction; the script's exit codes. Docs: `docs/cli.md`, `docs/claude-code-plugin.md`, `packages/figma/README.md`.
 
 ### T31. Project file and shared resources
 
