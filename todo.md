@@ -4,7 +4,6 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T73. CI workflow for the documented merge gate
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
