@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
 import { parse } from "@weft/core";
+import { documentSchema } from "@weft/core/document-schema";
 import { parseAriaSnapshot } from "@weft/render-react";
 import { LIMITS, PRIMER } from "../src/index.ts";
 import { call, connect } from "./connect.ts";
@@ -14,7 +15,7 @@ const GOOD = `<screen id="s" label="Demo" weft="0.1">
 type Diagnostics = { valid?: boolean; diagnostics: { code: string; hint?: string }[] };
 const json = (text: string | undefined) => JSON.parse(text ?? "null") as Diagnostics;
 
-test("lists exactly the seven tools, each written for a model", async () => {
+test("lists exactly the eight tools, each written for a model", async () => {
   const { client, close } = await connect();
   const { tools } = await client.listTools();
   assert.deepEqual(tools.map((t) => t.name).toSorted(), [
@@ -24,6 +25,7 @@ test("lists exactly the seven tools, each written for a model", async () => {
     "weft_patch",
     "weft_primer",
     "weft_render",
+    "weft_schema",
     "weft_validate",
   ]);
   for (const tool of tools) {
@@ -45,12 +47,24 @@ test("weft_primer returns the primer and mentions every tool", async () => {
   for (const name of [
     "weft_capabilities",
     "weft_catalog",
+    "weft_schema",
     "weft_validate",
     "weft_format",
     "weft_patch",
     "weft_render",
   ])
     assert.ok(PRIMER.includes(name), name);
+  await close();
+});
+
+test("weft_schema returns the document schema of the host's catalog, as documentSchema writes it", async () => {
+  const { client, close } = await connect();
+  const result = await call(client, "weft_schema", {});
+  assert.equal(result.isError, false);
+  // Byte for byte: @weft/core pins documentSchema to the Rust generator's snapshot.
+  assert.equal(result.blocks[0], documentSchema(coreCatalog));
+  const schema = JSON.parse(result.blocks[0] ?? "") as { $defs: Record<string, unknown> };
+  assert.ok("button" in schema.$defs);
   await close();
 });
 
@@ -299,6 +313,7 @@ test("tool inputs are schema-validated and size-limited; nothing throws", async 
     ["weft_render", { markup: GOOD, data: { big: "x".repeat(LIMITS.dataChars) } }],
     ["weft_catalog", { kind: 7 }],
     ["weft_catalog", { kind: "x".repeat(101) }],
+    ["weft_schema", { project: 7 }],
     ["weft_nonexistent", {}],
   ];
   for (const [name, args] of cases) {

@@ -142,6 +142,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `import.swiftui.outDir` | standard output | Where `weft import-swiftui` writes `<file>.weft`, and the Xcode command plugin's `import` (next to the view when absent; `--out-dir` overrides it). |
 | `export.a2ui.outDir`, `import.a2ui.outDir` | standard output | Where `weft a2ui` writes `<screen>.a2ui.json` and `weft import-a2ui` writes `<file>.weft` (`--out-dir` overrides them). |
 | `export.slint.outDir`, `import.slint.outDir` | standard output | Where `weft slint` writes `<screen>.slint` and `weft import-slint` writes `<file>.weft` (`--out-dir` overrides them). |
+| `export.schema.outDir` | standard output | Where `weft schema` writes `document.schema.json`, the JSON Schema of the documents the project's catalog admits (`--out-dir` overrides it). |
 | `import.cem.outDir` | standard output | Where `weft import-cem` writes `<file>.catalog.json`, the catalog imported from a Custom Elements Manifest (`--out-dir` overrides it). |
 | `import.cem.name`, `import.cem.version` | the manifest's file stem; `0.0.0` | The name and version of that catalog (`--name` and `--version` override them). |
 | `mcp.limits.*` | see `packages/mcp/README.md` | The MCP server's bounds on one call: `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`. |

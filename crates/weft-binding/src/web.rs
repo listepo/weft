@@ -1,10 +1,12 @@
-//! The web importers and generators of `weft-web`, and the Custom Elements Manifest importer of
-//! `weft-import`, in the `web` feature only: the WebAssembly module behind `@weft/core/web` has
-//! it, so core-only consumers do not carry the HTML and JSX parsers; the native addon always does.
+//! The web importers and generators of `weft-web`, the Custom Elements Manifest importer of
+//! `weft-import` and the document JSON Schema generator of `weft-catalog`, in the `web` feature
+//! only: the WebAssembly module behind `@weft/core/web` has them, so core-only consumers do not
+//! carry the HTML and JSX parsers or the schema generator (about 110 KB, a tool-side feature no
+//! browser validation needs); the native addon always does.
 
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use weft_catalog::{DEFAULT_TOKENS_JSON, Token, load_tokens};
+use weft_catalog::{DEFAULT_TOKENS_JSON, DocumentSchemaOptions, Token, load_tokens};
 use weft_core::to_document;
 use weft_core::{Catalog, Code, Diagnostic};
 use weft_import::{
@@ -277,6 +279,16 @@ pub fn import_cem(manifest: &str, options: &str, base: &Catalog) -> Result<Strin
     ))
 }
 
+/// `documentSchema`: the JSON Schema of the canonical documents `catalog` admits (SPEC §3.1), as
+/// compact JSON text. The text crosses as it is: a float bound (`1.0`) would lose its form in a
+/// JavaScript round trip, and every surface promises the generator's bytes.
+pub fn document_schema(catalog: &Catalog) -> Result<String> {
+    write(&weft_catalog::document_schema(
+        catalog,
+        &DocumentSchemaOptions::default(),
+    ))
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct JsxTables {
@@ -371,6 +383,16 @@ mod tests {
         );
         assert!(value["losses"].is_array() && value["diagnostics"].is_array());
         assert!(import_cem(manifest, r#"{"name":"acme"}"#, &catalog).is_err());
+    }
+
+    #[test]
+    fn the_document_schema_is_the_generator_s_compact_text() {
+        let catalog = weft_catalog::core_catalog().unwrap();
+        let schema = weft_catalog::document_schema(&catalog, &DocumentSchemaOptions::default());
+        assert_eq!(
+            document_schema(&catalog).unwrap(),
+            serde_json::to_string(&schema).unwrap()
+        );
     }
 
     #[test]

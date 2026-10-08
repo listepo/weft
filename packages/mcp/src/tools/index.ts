@@ -6,6 +6,7 @@ import { registerFormat } from "./format.ts";
 import { registerPatch } from "./patch.ts";
 import { registerPrimer } from "./primer.ts";
 import { registerRender } from "./render.ts";
+import { registerSchema } from "./schema.ts";
 import { registerValidate } from "./validate.ts";
 
 /** A tool is one `(server, context, settings)` registration. */
@@ -17,6 +18,7 @@ export const TOOLS: readonly ((
   registerPrimer,
   registerCapabilities,
   registerCatalog,
+  registerSchema,
   registerValidate,
   registerFormat,
   registerPatch,

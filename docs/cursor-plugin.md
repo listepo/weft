@@ -9,7 +9,7 @@ The `weft` plugin for Cursor does what the [Claude Code plugin](claude-code-plug
 | `/weft-render <screen.weft> [out.html] [--data data.json] [--tokens tokens.json]` | Turns a screen into an HTML page and opens it in Cursor's built-in browser. |
 | `weft-spec` (not typed) | Teaches the agent the format from [AGENT-SPEC.md](../AGENT-SPEC.md), so it writes, patches and repairs valid markup. |
 
-The MCP server gives the agent `weft_primer`, `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch` and `weft_render`. The skills read and write files through small scripts; the server never touches files. The scripts are the ones described in [the Claude Code page](claude-code-plugin.md#what-the-commands-run): they never replace a file unless you pass `--force`, and exit with 0 (done), 1 (the input has errors) or 2 (usage or file problem).
+The MCP server gives the agent `weft_primer`, `weft_catalog`, `weft_schema`, `weft_validate`, `weft_format`, `weft_patch` and `weft_render`. The skills read and write files through small scripts; the server never touches files. The scripts are the ones described in [the Claude Code page](claude-code-plugin.md#what-the-commands-run): they never replace a file unless you pass `--force`, and exit with 0 (done), 1 (the input has errors) or 2 (usage or file problem).
 
 ## Install
 
