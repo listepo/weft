@@ -13,7 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T73 | todo | P2 | 2 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
-| T12.2 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16 | todo | P2 | 5 | 0% | |
 | T17 | todo | P2 | 4 | 0% | |
@@ -202,23 +201,6 @@ Not started; nothing is built until the creator approves the plan of the first m
 ### T73. CI workflow for the documented merge gate
 
 There is no `.github/` in the repo; the documented merge gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md:50) runs only by hand — and publishing from GitHub (T32) will need it. Done means: the gate runs as a workflow on pull requests (and on main once the repo has a remote).
-
-### T12.2. Constrained generation: surfaces
-
-Put T12.1's `document_schema` behind every surface: `documentSchema` in `weft-binding`/`weft-wasm`/`weft-node` (the `engines.test.ts` lists must still match); `@weft/core` types, with `schema.ts` delegating to the Rust core; CLI `weft schema [--catalog] [--project] [--out-dir]`; an MCP tool `weft_schema` or an argument of `weft_catalog`; `weft.json` keys for every new option (SPEC §10.6, `settings.rs`, regenerated `schemas/weft.schema.json`); `docs/cli.md`, `docs/mcp.md`, `AGENT-SPEC.md` (the MCP tool list) and the primer; rebuilt plugin `dist/` folders. Done when the CLI, MCP and TypeScript surfaces return the same schema as `document_schema`.
-
-**Creator defaults (can change).**
-1. The generic Zod `documentJsonSchema()` stays as it is, beside the catalog-aware schema; the docs say how the two differ. (T12 question 3.)
-2. MCP: a separate `weft_schema` tool, not an argument of `weft_catalog`. (T12 question 4.)
-
-Execution plan:
-
-1. Binding: `document_schema` in `weft-binding` (a `Catalog` method, like `checkData`), exported by both `weft-wasm` and `weft-node` so `engines.test.ts` still matches. Measure what it adds to the core-only WebAssembly module and put it in the core module or behind the `web` feature (as `importCem` is), recording the choice and the numbers here.
-2. `@weft/core`: `documentSchema(catalog)` returning the schema's JSON text exactly as Rust writes it (a float bound stays `1.0`, which `JSON.stringify` would rewrite); `schema.ts` documents how it differs from the Zod `documentJsonSchema()`. Tests: the text equals the pinned snapshot of the core catalog and of `examples/project` on both engines.
-3. CLI `weft schema [--catalog] [--project | --no-project] [--out-dir] [--force]` (`crates/weft-cli/src/schema.rs`): the project found from the working directory, its merged catalog unless `--catalog`; pretty JSON on stdout, or `document.schema.json` in `--out-dir`, else `export.schema.outDir`, refusing to overwrite without `--force`. Setting `export.schema.outDir`: SPEC §10.6 row, `settings.rs`, regenerated `schemas/weft.schema.json`, `docs/projects.md`, a settings test. Tests: byte-identical to `document_schema` for the core catalog and `examples/project`; `--out-dir`/setting/`--force`.
-4. MCP `weft_schema` (`packages/mcp/src/tools/schema.ts`): optional `project`, returns the same text as `documentSchema`; tests against the snapshots; the primer lists it.
-5. Docs: SPEC §3.1 (the surfaces), `docs/cli.md`, `docs/mcp.md`, `packages/mcp/README.md`, `AGENT-SPEC.md` (and its plugin copies), plugin READMEs and skill tables; `moon run shared:build` for the plugin `dist/` folders.
-6. Verify: `moon run root:changed`, then the full check under the lock with `WEFT_SIMULATOR=own`.
 
 ### T12.3. Constrained generation: benchmark
 
