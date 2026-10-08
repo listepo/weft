@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T13.1 | todo | P2 | 3 | 0% | |
-| T15.2 | todo | P3 | 2 | 0% | |
+| T15.2 | in progress | P3 | 2 | 5% | Claude Code / claude-opus-5-5 |
 | T73 | todo | P2 | 2 | 0% | |
 | T67.4 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T67.5 | in progress | P2 | 4 | 0% | Cursor / grok 4.7 |
@@ -164,6 +164,15 @@ The json-render half of T13: export a Weft document to a json-render spec (`{ ro
 ### T15.2. Surfaces for the Custom Elements Manifest importer
 
 T15.1 delivers `import_cem` in `weft-import` (library, tests, SPEC section 9). This task makes it reachable: `weft import-cem <manifest.json> [--name] [--version] [--catalog]` prints the catalog (pretty JSON) on stdout and the losses and diagnostics on stderr, reading the file only when it is at most `MAX_MANIFEST_LENGTH` bytes; the `import.cem.outDir` setting if it fits (SPEC section 10.6); the WebAssembly and native bindings (`weft-binding`, `weft-wasm`, `weft-node`, `@weft/core` types) if the creator wants it from TypeScript; `docs/importing.md` and `docs/cli.md`. Done when a manifest file imports from the command line into a catalog that `weft validate --catalog` accepts.
+
+Execution plan (the creator chose both the command line and TypeScript):
+
+1. SPEC first: §9 "From a Custom Elements Manifest" names the surfaces (`weft import-cem`, `importCem` of `@weft/core/cem`); §10.6 gets the `import.cem` rows (`outDir`, `name`, `version`).
+2. Settings: an `import.cem` section in `crates/weft-catalog/src/settings.rs` (`outDir` a file name, `name` and `version` non-empty text), regenerate `schemas/weft.schema.json`.
+3. CLI: `crates/weft-cli/src/cem.rs` and an `ImportCem` command in `main.rs`, reusing `convert::{project, catalog, out_dir, emit, report_losses}`: the base catalog is `--catalog`, else the project's, else the core one; `--name`/`--version` > `import.cem.name`/`version` > the manifest's file stem / `0.0.0`; the file is read only when its size is at most `MAX_MANIFEST_LENGTH`; pretty catalog JSON to stdout or `<stem>.catalog.json` in `--out-dir` > `import.cem.outDir`; losses and diagnostics to stderr.
+4. Bindings: `import_cem` in `weft-binding` (the `web` feature, beside the other importers), `Catalog.importCem` in `weft-wasm` and `weft-node` (the catalog is the base); `@weft/core/cem` wrapper and types, with `Loss`/`LossKind` shared with `@weft/from-aria` instead of copied.
+5. Tests: CLI end to end in `crates/weft-cli/tests/cem.rs` (import the `acme-ui` fixture, then `weft validate --catalog` on a document of its kinds exits 0; settings precedence; oversized file refused), a binding test, `packages/core/test/cem.test.ts`.
+6. Docs: `docs/importing.md`, `docs/cli.md`, `docs/projects.md`. Verify with `moon run root:changed`, then the full check.
 
 ### T67.4. Slint reader for the widgets the generator now emits
 
