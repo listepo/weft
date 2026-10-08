@@ -1,6 +1,7 @@
 //! The Open Design plugin's setting is checked by the settings table like any other section
 //! (SPEC §10.6); the plugins the table does not list stay unchecked objects. Text settings
-//! (`import.cem.name`) keep only a non-empty string.
+//! (`import.cem.name`) keep only a non-empty string, and a folder (`export.schema.outDir`) only a
+//! file name that stays in the project.
 
 // A test crate: a failed unwrap or panic is a failed test, which is the point.
 #![allow(clippy::unwrap_used, clippy::panic)]
@@ -70,6 +71,53 @@ fn a_text_setting_keeps_a_non_empty_string_only() {
         assert_eq!(
             loaded.project.settings["import"],
             json!({ "cem": {} }),
+            "{bad}"
+        );
+    }
+}
+
+#[test]
+fn the_figma_import_section_keeps_its_folder_only() {
+    let import = json!({ "figma": { "outDir": "screens" } });
+    let loaded = load_project(&json!({ "import": import }), &ProjectOptions::default()).unwrap();
+    assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+    assert_eq!(loaded.project.settings["import"], import);
+    // The pull reads shared plugin data only, so no plugin id is configured.
+    let loaded = load_project(
+        &json!({ "import": { "figma": { "pluginId": "1234567890" } } }),
+        &ProjectOptions::default(),
+    )
+    .unwrap();
+    let codes: Vec<_> = loaded.diagnostics.iter().map(|d| d.code.as_str()).collect();
+    assert_eq!(codes, ["W702"]);
+}
+
+#[test]
+fn the_schema_out_dir_is_a_checked_file_name() {
+    let export = json!({ "schema": { "outDir": "schemas/generated" } });
+    let loaded = load_project(&json!({ "export": export }), &ProjectOptions::default()).unwrap();
+    assert!(loaded.diagnostics.is_empty(), "{:?}", loaded.diagnostics);
+    assert_eq!(loaded.project.settings["export"], export);
+    for (bad, code) in [
+        (json!("../out"), "W703"),
+        (json!(1), "W701"),
+        (json!({ "outDir": "x", "pretty": true }), "W702"),
+    ] {
+        let section = if bad.is_object() {
+            bad.clone()
+        } else {
+            json!({ "outDir": bad })
+        };
+        let loaded = load_project(
+            &json!({ "export": { "schema": section } }),
+            &ProjectOptions::default(),
+        )
+        .unwrap();
+        let codes: Vec<_> = loaded.diagnostics.iter().map(|d| d.code.as_str()).collect();
+        assert_eq!(codes, [code], "{bad}");
+        assert_eq!(
+            loaded.project.settings["export"]["schema"].get("pretty"),
+            None,
             "{bad}"
         );
     }

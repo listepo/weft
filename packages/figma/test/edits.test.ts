@@ -15,7 +15,7 @@ import {
   FakeFigma,
   type FakeText,
 } from "./fake-figma.ts";
-import { buildScreen, ensureLibrary, isRawText, readLayers } from "../src/index.ts";
+import { buildScreen, dataOf, ensureLibrary, isRawText, readLayers } from "../src/index.ts";
 import { built, corpusMarkup, parseStrict, read, tokens } from "./helpers.ts";
 
 const login = corpusMarkup("login");
@@ -31,7 +31,7 @@ const text = (figma: FakeFigma, frame: FakeFrame, layer: string, name = "text"):
   figma.find<FakeText>(figma.find(frame, layer), name);
 
 function variable(figma: FakeFigma, path: string) {
-  const found = figma.variables.all.find((v) => v.getPluginData("weft.token") === path);
+  const found = figma.variables.all.find((v) => dataOf(v).getPluginData("weft.token") === path);
   if (found === undefined) throw new Error(`no variable for ${path}`);
   return found;
 }

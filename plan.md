@@ -6,15 +6,15 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
 | T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
-| T14 | in progress | P2 | 5 | 45% | Claude Code / claude-opus-5-5 |
+| T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
-| T13.2 | todo | P2 | 3 | 0% | |
 | T73 | todo | P2 | 2 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
-| T12 | todo | P2 | 3 | 0% | |
+| T69.1 | todo | P2 | 4 | 0% | |
+| T12.3 | todo | P2 | 4 | 0% | |
 | T16.1 | in progress | P2 | 3 | 90% | Claude Code / claude-opus-5-5 |
 | T16.2 | todo | P2 | 3 | 0% | |
 | T16.3 | todo | P2 | 4 | 0% | |
@@ -22,7 +22,10 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T16.5 | todo | P2 | 3 | 0% | |
 | T16.6 | todo | P2 | 2 | 0% | |
 | T16.7 | todo | P2 | 3 | 0% | |
-| T17 | todo | P2 | 4 | 0% | |
+| T17 | todo | P2 | 4 | 20% | |
+| T17.1 | todo | P2 | 4 | 0% | |
+| T17.2 | todo | P2 | 3 | 0% | |
+| T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -101,10 +104,16 @@ Progress (stage 1 done, on branch `t14-figma`):
 - `docs/figma-style-overrides-design.md` waits for the creator's approval.
 - Remaining:
   - style overrides: after approval, the format extension in TS and Rust, then the Figma mapping for colors, radii and padding (only `gap` maps to a token today);
-  - CLI `weft figma pull` over the REST API;
-  - MCP / Claude Code tools (with T30);
+  - a pull from a real Figma file, to confirm the REST facts marked unverified in `packages/figma/README.md` (rotation in radians, number precision, the shape of `sharedPluginData`);
+  - MCP / Claude Code tools (with T30): the source is shared plugin data now (T14.2); still to check that `use_figma` can read and write it;
   - a check of the plugin in the real Figma app, including the inline module script and WebAssembly in its UI iframe;
   - the open questions in the report: single components for kinds without variants, `state` as a variant axis, the manifest id, and plugin data on duplicate/detach.
+
+Execution plan, stage 2 (this round; style overrides stay out until the creator approves them):
+
+1. T14.1: the pull over the REST API — done (`done.md`).
+2. MCP / Claude Code tools through the Figma MCP server. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. The creator chose to move the Weft source to shared plugin data, which any plugin and the REST API (`plugin_data=shared`) can read: T14.2, done (`done.md`).
+3. T14.3: the creator dropped files that keep the Weft source in private plugin data; only shared plugin data is supported — done (`done.md`).
 
 ### T31. Project file and shared resources
 
@@ -164,10 +173,6 @@ Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` ch
 
 Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
 
-### T13.2. json-render import
-
-Read a json-render spec back into a Weft document in `crates/weft-interop` (`from_json_render(text, catalog)`), with "From json-render" and its loss column in SPEC §9. The input is untrusted: bounded like the other importers (`W602`), `W601` for input that is not a spec, never a panic. Reuse the `weft-import` role tree and builder and `paths.rs`. Done when every corpus screen exported by T13.1 imports back to the same document (a literal `text` prop comes back as content, which json-render cannot tell apart), a second trip changes nothing, and a spec written for another catalog imports with its losses listed. A working draft (importer, SPEC text and tests, about 420 lines of code) is on the local branch `t13.2-json-render-import`, not pushed and not reviewed.
-
 ### T68. Slint bindings for SwiftUI and WinUI
 
 Research how Slint embeds into native apps (the `slint::platform` custom platform, the software renderer, the window adapter, input and accessibility) and whether Slint has official bindings for SwiftUI (macOS, iOS) or WinUI 3 in `slint-ui/slint`, its code and its open pull requests. If official bindings exist, record where and use them. If not, build them as a separate project, `~/GitHub/listepo/apps/slint-bindings`, in the public repository `listepo/slint-bindings` (https://github.com/listepo/slint-bindings), pushed to `main`: a Rust core (`slint-bindings-core`) and a C ABI (`slint-bindings-ffi`), a Swift package that hosts a Slint component in SwiftUI through `NSViewRepresentable`, and a WinUI 3 package for Windows. Weft consumes those bindings and does not keep its own embedding: the Weft desktop work builds on T67 (the Slint the screens become) and on this project. Done when the research with its sources is written down in that repository, and a Slint component generated by T67 shows and takes input inside a SwiftUI window on macOS through the bindings; the WinUI 3 half is checked on Windows.
@@ -176,7 +181,7 @@ Research how Slint embeds into native apps (the `slint::platform` custom platfor
 
 A desktop design editor in the spirit of Figma for Weft documents, on macOS and Windows. Weft is the document format: an editor document is a set of Weft screens (`.weft`, canonical markup and JSON, SPEC §2–§3) with the project's catalog and tokens (SPEC §10), so whatever the editor saves validates, formats and converts with the existing tools, and agents edit the same files through the CLI and MCP server.
 
-**Prerequisite: the Slint bindings.** The macOS (Swift) and Windows (WinUI 3) integration MUST use the Slint bindings of T68: the project `~/GitHub/listepo/apps/slint-bindings`, repository `listepo/slint-bindings` (https://github.com/listepo/slint-bindings), with its crates `slint-bindings-core` (custom `slint::platform`, software renderer, window adapter, input) and `slint-bindings-ffi` (C ABI), its `swift/` package (a Slint surface in SwiftUI through `NSViewRepresentable`) and its `windows/` package (the same surface in WinUI 3). No separate or ad-hoc embedding lives in Weft. A gap found there (input, IME, focus, DPI, accessibility, rendering, lifecycle) is fixed in slint-bindings and consumed from it, never worked around here. Depends on T68, on T67 (Weft → Slint) and on T67.2 (the rest of the catalog and the read-back of edited Slint).
+**Prerequisite: the Slint bindings.** The macOS (Swift) and Windows (WinUI 3) integration MUST use the Slint bindings of T68: the project `~/GitHub/listepo/apps/slint-bindings`, repository `listepo/slint-bindings` (https://github.com/listepo/slint-bindings), with its crates `slint-bindings-core` (custom `slint::platform`, software renderer, window adapter, input) and `slint-bindings-ffi` (C ABI), its `swift/` package (a Slint surface in SwiftUI through `NSViewRepresentable`) and its `windows/` package (the same surface in WinUI 3). No separate or ad-hoc embedding lives in Weft. A gap found there (input, IME, focus, DPI, accessibility, rendering, lifecycle) is fixed in slint-bindings and consumed from it, never worked around here. Depends on T68. Weft → Slint is done: T67 and T67.1–T67.5 (`done.md`) cover the whole catalog and the read-back of edited Slint.
 
 **Architecture split.**
 
@@ -207,50 +212,170 @@ The native shell and the shared surface talk only through the slint-bindings C A
 
 **Out of scope.** Multiplayer and real-time collaboration, cloud storage, accounts and sharing, comments and review threads, prototyping and interaction flows, vector drawing tools and boolean shape operations, image editing, plugins for the editor, Figma file import (T14 covers the Figma round trip), a web version (later, through Slint's WebAssembly build), iOS and Android, Intel Macs, and Linux.
 
-Not started; nothing is built until the creator approves the plan of the first milestone.
+Not started. The plan of the first milestone is T69.1; nothing is built until the creator approves it.
+
+### T69.1. Editor skeleton
+
+Milestone 1 of T69: a native window on macOS and on Windows hosts one Slint surface through slint-bindings, shows one corpus screen rendered by `weft-slint`, and opens and saves `.weft` files through the native file dialogs. This card is the plan for the creator's approval; nothing is built before that. It splits into five sub-tasks, T69.1a–T69.1e, each within the 500-line limit and each claimed as its own row with the plan below. Facts were checked on 2026-10-08; sources are at the end of the card.
+
+**What exists today.**
+
+- Weft: `weft-slint` generates every corpus screen, and the generated files compile with `slint-interpreter` 1.18.1 (T67–T67.5). The interpreter is a dev-dependency only. Two private copies of a compile helper live in `crates/weft-slint/tests/slint.rs` and `tests/screenshots.rs`, and the second also feeds `data.json` into a component's properties (about 150 lines). Project discovery (`find_project`) and the file-reading project loader are private to `crates/weft-cli/src/main.rs`. The workspace forbids `unsafe_code`; `weft-node` overrides it with its own `[lints]`.
+- The name WeftEditor and the bundle id `dev.weft.editor` already belong to the host app of the Source Editor Extension (`plugins/xcode/editor-extension/project.yml`), which also exports the file type `dev.weft.screen`.
+- slint-bindings (`listepo/slint-bindings`, `main` at `2b9fa96`): the table under "What M1 needs from T68".
+
+**Architecture (recommended).**
+
+```text
+studio/macos (SwiftUI + AppKit)                studio/windows (WinUI 3, C#)
+  menus, NSOpenPanel, NSSavePanel                MenuBar, FileOpenPicker, FileSavePicker
+  SlintNSView (from slint-bindings)              SlintPanel (from slint-bindings)
+     │ ws_* editor API   │ sb_* surface             │ ws_*            │ sb_*
+     └──────── one Rust library: libweft_studio_ffi (.a on macOS, .dll on Windows) ────────┘
+        crates/weft-studio-ffi   ws_* C ABI; links slint-bindings-ffi, so sb_* ship in the same library
+        crates/weft-studio       document core: open, save, project, render input (no Slint)
+        crates/weft-slint        generate; new `runtime` feature: interpreter compile and sample data
+        slint-bindings-core/-ffi (git dependency): host-driven platform, EmbeddedHost, SbHost
+```
+
+- Rust owns the document and the Slint component. A shell holds two opaque handles, `WsEditor*` for the document and `SbHost*` for the surface, and never sees Weft markup or Slint source. The existing slint-bindings views draw the surface and feed it input; the shells add only chrome and dialogs, so no editor logic is written twice.
+- One Rust library per app. Two Rust static libraries in one app would each carry a copy of Slint, and the screen component would not find the platform that slint-bindings installed.
+
+**Where the code lives.**
+
+| Path | What it holds |
+| --- | --- |
+| `crates/weft-studio` | The document core and the editor API as Rust types. No Slint, no FFI, the workspace lints unchanged. |
+| `crates/weft-studio-ffi` | The `ws_*` C ABI. `crate-type = ["rlib"]`; the static library and the DLL are built on demand, as slint-bindings' justfile does. Its own `[lints]` set `unsafe_code = "deny"` and allow it only in the `extern "C"` module, as `weft-node` does. Committed `include/weft_studio.h` (cbindgen) and `NativeMethods.g.cs` (csbindgen), both checked by a drift test, as `scull-ffi` does. |
+| `studio/macos` | XcodeGen `project.yml` (as `plugins/xcode` uses it), the SwiftUI app WeftStudio, bundle id `dev.weft.studio`, macOS 14, arm64 only. |
+| `studio/windows` | `WeftStudio.WinUI` (.NET 10, Windows App SDK 2.5.1 like the slint-bindings control, unpackaged, x64 and ARM64) and `WeftStudio.Tests`. |
+| `studio/test`, `studio/moon.yml` | Vitest drivers that build and smoke-test each shell and skip with a message on the other OS or without its toolchain, as `plugins/xcode/test` does; the task `studio:test`. |
+
+**Depending on slint-bindings.** Recommended: a Cargo git dependency on `slint-bindings-core` and `slint-bindings-ffi` from https://github.com/listepo/slint-bindings, pinned by `rev`. That rev is the only pin. The Swift package and the C# control come from the checkout Cargo made of the same commit: `cargo metadata` gives the `manifest_path` of `slint-bindings-ffi`, and a script passes the checkout to XcodeGen as `${SLINT_BINDINGS_DIR}` (a local package) and to MSBuild as a generated, gitignored `.props` file (a `ProjectReference`). For co-development, a gitignored `.cargo/config.toml` `[patch]` points at a sibling checkout and moves all three languages at once, the way ketch consumes `file-backup` (`rust.md`, "Shared crates across projects"). Rejected: a path dependency (`rust.md`: a bare path breaks every standalone checkout and CI run of a public repo); a published crate (slint-bindings is `publish = false`, and its core depends on the vendored `slint-embed` path crate); a git submodule (every agent worktree would need its own `git submodule update`). When slint-bindings ships packages (its T9: XCFramework, NuGet), the shells switch to them.
+
+**Build and checks.**
+
+- macOS: XcodeGen 2.46.0 (already in `mise.toml`). A pre-build script phase runs `cargo rustc -p weft-studio-ffi --crate-type staticlib --target aarch64-apple-darwin` (`--release` for Release); the app links that library and the frameworks slint-bindings' `Package.swift` lists (AppKit, CoreFoundation, CoreGraphics, CoreText, Foundation). Signed ad hoc, no App Sandbox in M1 (decision 5).
+- Windows: `dotnet build studio/windows`; a `BeforeBuild` target runs `cargo rustc -p weft-studio-ffi --crate-type cdylib --target x86_64-pc-windows-msvc` (or `aarch64-pc-windows-msvc`) and copies the DLL next to the app.
+- moon: `root:rust-test` and `root:rust-lint` already cover `crates/**` with `--workspace --all-features`, so the core, the runtime feature and the headless FFI tests run in the full check on any OS (the software platform needs no window). `studio` joins `.moon/workspace.yml` and `pnpm-workspace.yaml`; `studio:test` runs the macOS legs on a Mac with Xcode and the Windows legs on Windows with the .NET SDK. The full check runs on macOS by hand today, and the open T73 pull request (#4) adds a macOS runner only, so nothing automated builds the Windows shell (decision 4).
+
+**Slint at run time: interpreter, not compile-time `.slint`.** `slint-build` compiles `.slint` files when the app is built; the editor opens files the user picks at run time, so only `slint-interpreter` fits. It loads `.slint` source at run time (`Compiler::build_from_source`, `ComponentDefinition::create`), and its `ComponentInstance` implements `ComponentHandle`, which is the bound of slint-bindings' `EmbeddedHost<C: ComponentHandle>`: an interpreted screen goes into the existing host unchanged. The build is `async`, but only truly so with a file loader; without one a poll loop is enough, as Weft's tests already do. Features: `compat-1-18` and `std` without defaults (no backend, no renderer), because slint-bindings supplies the platform and the software renderer. Both repositories must resolve to one `i-slint-core`: slint-bindings pins `=1.18.1` and Weft's lockfile has 1.18.1. Style `fluent` on both platforms, as the screenshot baselines use. For later milestones: several screens on one surface (M2) cannot use `ComponentContainer` or `component-factory`, because in 1.18.1 the compiler removes both from its builtin register unless experimental features are on, and `slint::ComponentFactory` is `#[doc(hidden)]` and deprecated as "made public by mistake". M2 will compile one source that holds the editor's own components and the screens as sub-components, with a `weft-slint` option to emit a plain component instead of `inherits Window`. M1 needs neither, and the API below leaves room for both.
+
+**Editor API v0** (`include/weft_studio.h`):
+
+```c
+typedef struct WsEditor WsEditor;
+typedef void (*WsEventFn)(void *user_data, const char *event_json);
+
+uint32_t ws_api_version(void);                                    /* 0; a shell refuses any other */
+WsEditor *ws_editor_new(WsEventFn on_event, void *user_data);
+void ws_editor_free(WsEditor *editor);
+bool ws_open(WsEditor *editor, const char *path);                 /* UTF-8 path from the native dialog */
+bool ws_save(WsEditor *editor, const char *path);                 /* NULL: the current path */
+char *ws_state_json(const WsEditor *editor);                      /* free with ws_string_free */
+struct SbHost *ws_surface_new(WsEditor *editor, uint32_t width, uint32_t height, float scale);
+void ws_string_free(char *text);
+const char *ws_last_error(void);
+```
+
+- **Threads.** Every call comes from the thread that created the editor (the UI thread), as slint-bindings requires. Slint calls back synchronously while it dispatches input.
+- **Errors.** A failed call returns `false` or `NULL` and leaves a message for `ws_last_error` (thread-local, valid until the next call). Every entry point catches panics; a null pointer or a string that is not UTF-8 is an error.
+- **Open.** Reads the file (at most 2 MB, the bound `weft-slint` puts on Slint input), finds and loads the project (SPEC §10.1–§10.2, never fatal: project diagnostics are kept), and parses the markup with the project's catalog and tokens, leniently. A syntax error refuses the open with its diagnostics; a document with validation errors opens and cannot render. M1 opens `.weft` markup only, not canonical JSON.
+- **Save.** Writes `serialize(document)` atomically (a temporary file in the same directory, then a rename), so a saved file is canonical and `weft fmt` leaves it unchanged; an unedited canonical file saves byte-identical. Saving to another path makes it the document's path.
+- **State.** `{"v":0,"path":…,"title":…,"screen":…,"dirty":false,"diagnostics":[…]}`; `title` is the file name, `dirty` is always false until M3 brings edits.
+- **Surface.** `ws_surface_new` generates Slint from the document (`weft_slint::generate` with the project's catalog and tokens), compiles it with the interpreter, fills the data properties from the project's `render.data` sample data when it is set (SPEC §10.6; no new setting), connects `perform(action, id)` to an `action` event, and returns a new `SbHost` that the shell owns and frees with `sb_host_free`. A refused screen returns `NULL` with the generator's message. The editor keeps only a weak handle to the component.
+- **Events** (JSON with `"v":0`): `{"type":"changed"}` after an open or a save (the shell reads `ws_state_json` for the title), and `{"type":"action","action":…,"id":…}` when the screen calls `perform`. Input reaches the screen through the `sb_host_*` calls of the slint-bindings views; M1 is a live preview (decision 7).
+- **Later, without changing v0:** `ws_apply_patches` (SPEC §7 through `weft_core::apply_patches`; undo and redo as inverse patches), selection, and selection events (M2–M3).
+
+**What M1 needs from T68.**
+
+| Need | slint-bindings today (`2b9fa96`) | Gap | Blocks |
+| --- | --- | --- | --- |
+| A host-driven platform: software renderer into a host buffer, resize and scale, pointer, key and focus input, timers | `slint-bindings-core` `EmbeddedHost<C: ComponentHandle>`, tested; 1.0 ms per changed frame and 8.4 ms for the first at 1600×1200 (release, Apple Silicon) | none | — |
+| An interpreted component in that host | `EmbeddedHost` is generic, but nothing hosts a `slint_interpreter::ComponentInstance` | G1: a test in slint-bindings that hosts one (its T11 starts there) | T69.1c |
+| A C ABI host over any component, made by another crate | `SbHost` wraps `EmbeddedHost<DemoForm>`; `sb_demo_new` is the only constructor, and the type is private | G2: `SbHost` over an interpreted component, plus a public Rust constructor (`SbHost::into_raw`) so a downstream crate returns `SbHost*`; the `sb_*` symbols stay exported when `slint-bindings-ffi` is linked as an rlib into another library | T69.1c |
+| A SwiftUI/AppKit view for a host made elsewhere, usable from another package | `SlintNSView` creates its own demo `SlintHost`; the library target links `../target/debug/libslint_bindings_ffi.a` through `unsafeFlags`, which SwiftPM refuses in a package another package depends on | G3: `SlintNSView` and `SlintHost` take the host from the caller; the library target links no Rust library (the app does); the `sb_demo_*` calls leave the library target | T69.1d |
+| A WinUI 3 control for a host made elsewhere | A skeleton never compiled (its T6); `SlintPanel` creates its own host | G4: it builds and runs on Windows (T6) and takes the host from the caller | T69.1e |
+| One Slint version | `=1.18.1` exact pins; Weft at 1.18.1 | none; upgrades move together | — |
+| Keyboard map and IME, popups, accessibility, GPU, packaging | its T4, T10, T14, T7–T8, T9, all todo | not needed for M1: ASCII typing works, and M1 only shows the screen | — |
+| The FFI guard (panic catch, last error) | private in `slint-bindings-ffi` | optional: public, so `ws_*` reuse it and share `sb_last_error`; otherwise `weft-studio-ffi` keeps a copy of about 30 lines | — |
+
+T68's done criteria ("a Slint component generated by T67 shows and takes input inside a SwiftUI window") cover G1 and part of G2, not G3 or G4 (decision 3). slint-bindings' own plan overlaps Weft: its T12 builds `slint-bindings-weft`, a second Weft → Slint mapping beside `weft-slint`, and its T16 a Slint desktop app for Weft beside T69.
+
+**Sub-tasks** (order: T69.1a and T69.1b now and in parallel; T69.1c after G1–G2; T69.1d after T69.1c and G3; T69.1e after T69.1c, G4 and decision 4):
+
+- **T69.1a. Document core** (`crates/weft-studio`, about 300 lines). Move `find_project` and the file-reading project loader from `crates/weft-cli/src/main.rs` into `weft-catalog` and switch the CLI to them, with no change in behaviour. Then `Editor` with `open`, `save`, `state` and `render_input` (the Slint source and the sample data), and an error type with distinct variants (I/O, too large, syntax with diagnostics, generation refused). Done when `crates/weft-studio/tests/editor.rs` passes: every corpus screen opens, renders its input and saves byte-identical into a temporary directory; a non-canonical file saves as `weft fmt` prints it; a syntax error refuses the open with its diagnostics; a strictly invalid document opens and its render is refused with the generator's message; `render.data` feeds the data; a project with errors still opens and reports them; a file over the limit is refused; a failed save leaves the original untouched and no temporary file behind. `crates/weft-cli/tests/deps.rs` asserts that `weft-studio` has no Slint crate, and the CLI tests stay green.
+- **T69.1b. Slint runtime** (`crates/weft-slint` feature `runtime`, about 250 lines, mostly moved). `runtime::compile(source, style)` and `runtime::apply_data(instance, source, data)` replace the two test copies and return problems instead of panicking, because the data is untrusted. `slint-interpreter` becomes an optional dependency of the feature; the `deps.rs` optional list gains it. Done when `tests/slint.rs` and `tests/screenshots.rs` use the feature and keep passing against their baselines, and a value of the wrong type is a reported problem, not a panic.
+- **T69.1c. Editor C ABI** (`crates/weft-studio-ffi`, about 350 lines). The git dependency, the `ws_*` calls above, the header and the C# bindings with their drift test (cbindgen and csbindgen, both in `rust.md`), and the `toolchain.md` rows. Done when `tests/e2e.rs` passes headless: `login` opens, `ws_surface_new` at 480×800 and scale 1 renders pixels that are not all transparent through `sb_host_render`; a press and release over the submit button raise one `action` event with the screen's action and id; a save round-trips through the ABI; null pointers, a path that is not UTF-8, a missing file and a refused screen return `false` or `NULL` with a message; `cargo metadata` shows one `i-slint-core`; and the macOS static library exports both `ws_open` and `sb_host_render` (`nm`). Measure the open-to-first-frame time of the largest corpus screen in release and record it here; above 500 ms, cache the compiled definition per source.
+- **T69.1d. macOS shell** (`studio/macos`, about 350 lines of Swift). One window per document, a File menu with Open… (⌘O), Save (⌘S) and Save As… (⇧⌘S), `NSOpenPanel` and `NSSavePanel` filtered to `.weft` (the app imports `dev.weft.screen`, which the editor extension exports) behind a small `FilePicking` protocol, an alert with the last error and the diagnostics, the window title from the state, and slint-bindings' `SlintNSView` with the host from `ws_surface_new`. Done when Swift Testing unit tests of the document model pass with a fake picker; an XCUITest launches the app with a corpus screen as a launch argument, finds the window titled `screen.weft`, sees a surface screenshot that is not one colour, and Save As through the fake picker writes the same bytes; and `studio/test/macos.test.ts` runs XcodeGen, `xcodebuild build` and `xcodebuild test` (arm64). A manual checklist in `studio/README.md` covers the real dialogs, a Retina display and live resize.
+- **T69.1e. Windows shell** (`studio/windows`, about 350 lines of C#). `MainWindow` with a `MenuBar` (Open Ctrl+O, Save Ctrl+S, Save As Ctrl+Shift+S as `KeyboardAccelerator`s), `FileOpenPicker` and `FileSavePicker` from `Microsoft.Windows.Storage.Pickers` (Windows App SDK 1.8 and later: constructed with `AppWindow.Id`, the result's `Path` is the file) behind an `IFilePicker` interface, a `ContentDialog` for errors, slint-bindings' `SlintPanel` with the host from `ws_surface_new`, and P/Invoke from the generated `NativeMethods.g.cs`. Done when MSTest unit tests of the document model pass with a fake picker; a FlaUI (UIA3) smoke test launches the app with a corpus screen, checks the window title and a panel capture that is not one colour, and Save As writes the same bytes; and `studio/test/windows.test.ts` runs `dotnet build` and `dotnet test` on Windows.
+
+**Done when** the four checks above pass on their platforms, the full check exits 0, every corpus screen opens and renders in both apps through the native open dialog and saves through the native save dialog (byte-identical when unedited), and neither shell contains embedding code of its own: the surfaces are slint-bindings' `SlintNSView` and `SlintPanel`.
+
+**Decisions for the creator** (recommendation first):
+
+1. **Name.** WeftStudio: folder `studio/`, crates `weft-studio` and `weft-studio-ffi`, bundle id `dev.weft.studio`, because WeftEditor and `dev.weft.editor` are taken by the Xcode extension's host app. The alternative is to rename that app.
+2. **The slint-bindings dependency.** A git dependency pinned by `rev`, with the Swift and C# parts found through `cargo metadata`, as above. Alternatives: a submodule, or waiting for slint-bindings' packages (its T9, milestone M4).
+3. **T68's scope.** Add G1–G4 to T68's done criteria, or as tasks in slint-bindings, because T69.1c–e cannot start without them. Drop or re-scope slint-bindings T12 (`slint-bindings-weft`) and T16 (a Slint desktop app for Weft): they duplicate `weft-slint` and T69.
+4. **Windows verification.** No one in this workspace has built the WinUI code yet, and there is no Windows runner. Recommended: a Windows job after T73 lands (`cargo nextest run -p weft-studio -p weft-studio-ffi` and the Windows leg of `studio:test`), as its own task. The alternative is the creator's Windows machine, by hand.
+5. **App Sandbox.** M1 runs unsandboxed with ad hoc signing. A sandboxed app that `NSOpenPanel` gives one file cannot read the `weft.json`, tokens and catalog in the directories above it (SPEC §10.1) — **unverified**, from Apple's App Sandbox guide, whose page renders by script. Choose in milestone 6: open a project folder, or ask for its directory.
+6. **Save.** Always canonical; the alternative keeps the original bytes of an unedited non-canonical file.
+7. **Input in M1.** A live preview: pointer and keyboard reach the screen, and its `perform` calls arrive as `action` events. The alternative is a static picture until M2's selection mode.
+8. **Style.** `fluent` on both platforms, with no `weft.json` key while it is not a user option. The alternative is the platform style (`cupertino` on macOS).
+9. **Slint licence for distributed builds.** The Royalty-free licence 2.0 needs the `AboutSlint` widget in an About dialog reachable from the top-level menu, or the Slint badge on the public download page; GPLv3 is the other no-cost licence. With native-only chrome, the badge. Decide before milestone 6; M1 ships nothing.
+10. **Sample data.** Only the existing `render.data` key. The alternative, a `data.json` beside the screen as the corpus has, is a new convention and needs a SPEC change.
+
+**Risks.**
+
+- Open latency: every open compiles the screen and `std-widgets`; T69.1c measures it and caches the compiled definition if it is slow.
+- App size: the interpreter carries the Slint compiler.
+- Slint upgrades must move Weft and slint-bindings together (exact pins there; T69.1c checks for one `i-slint-core`).
+- CPU rendering of large windows until slint-bindings' GPU milestone (its T7–T8).
+- The surface is invisible to VoiceOver and Narrator until slint-bindings T14, so the UI tests check it by screenshot.
+- `#[no_mangle]` functions of an rlib can be left out of a library that never references the crate; T69.1c references it and checks the exports.
+- `slint-embed` is a path dependency inside the slint-bindings repository, under `flutter/`; T69.1c confirms that it resolves from the git checkout.
+
+**Not in M1:** editing, patches, undo and redo, more than one screen, the canvas, selection, the layers tree and the inspector, recent files and the document browser, settings, autosave, canonical JSON documents, sandboxing, signing and packaging, GPU rendering, IME beyond ASCII, accessibility.
+
+**Sources** (checked 2026-10-08):
+
+- slint-interpreter 1.18.1: run-time loading, `ComponentInstance` implements `ComponentHandle`, the async build: https://docs.rs/slint-interpreter/1.18.1/slint_interpreter/
+- Slint 1.18.1, experimental `ComponentContainer` and `component-factory`: https://github.com/slint-ui/slint/blob/v1.18.1/internal/compiler/typeregister.rs (`builtin` removes both) and https://github.com/slint-ui/slint/blob/v1.18.1/api/rs/slint/lib.rs (`ComponentFactory` hidden and deprecated)
+- Slint licences 1.18.1: https://github.com/slint-ui/slint/blob/v1.18.1/LICENSE.md and https://github.com/slint-ui/slint/blob/v1.18.1/LICENSES/LicenseRef-Slint-Royalty-free-2.0.md
+- Cargo git dependencies (found anywhere in the repository, locked in `Cargo.lock`): https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html
+- SwiftPM 6.4.0, unsafe flags make a product ineligible for other packages: https://github.com/swiftlang/swift-package-manager/blob/swift-6.4.0-RELEASE/Sources/Runtimes/PackageDescription/BuildSettings.swift
+- XcodeGen 2.46.0, `${VARIABLE}` in the spec and local packages: https://github.com/yonaskolb/XcodeGen/blob/2.46.0/Docs/ProjectSpec.md
+- Windows App SDK pickers (1.8 and later, `AppWindow.Id`, `PickFileResult.Path`; page dated 2026-07-15): https://learn.microsoft.com/en-us/windows/apps/develop/files/using-file-folder-pickers
+- FlaUI v5.0.0 (2025-02-25; repository active, last push 2026-08-13): https://github.com/FlaUI/FlaUI
+- slint-bindings at `2b9fa96` (2026-10-07): its `README.md`, `plan.md`, `done.md` (T2 frame times), `crates/slint-bindings-core/src/host.rs`, `crates/slint-bindings-ffi/src/lib.rs`, `swift/Package.swift`, `swift/Sources/SlintBindings/`, `windows/README.md`: https://github.com/listepo/slint-bindings/tree/2b9fa96b17464a628970ce1e1d6628b8c2580b30
+- Apple App Sandbox, user-selected files (**unverified**: the page renders by script): https://developer.apple.com/documentation/security/accessing-files-from-the-macos-app-sandbox
 
 ### T73. CI workflow for the documented merge gate
 
 There is no `.github/` in the repo; the documented merge gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md:50) runs only by hand — and publishing from GitHub (T32) will need it. Done means: the gate runs as a workflow on pull requests (and on main once the repo has a remote).
 
-### T12. Constrained generation
+### T12.3. Constrained generation: benchmark
 
-Today a model writes Weft markup as free text, and only the validator catches its mistakes after the fact. Provider structured-output modes take a JSON Schema and constrain decoding to it (`research.md` §3 lists this as the main advantage of JSON Schema). If the schema is built from the catalog, a model writing canonical JSON (SPEC §3) cannot produce an unknown kind, an undeclared prop, a wrong enum value, an undeclared slot or a child kind that is not allowed. This task builds that schema from any catalog. It then measures whether constrained JSON beats free markup on validity and edit success, and what it costs in output tokens.
+Measure whether constrained JSON beats free markup on validity and edit success, and what it costs in output tokens.
+
+**Out of scope (all of T12).** Any change to the markup format or the validator. Streaming of constrained JSON (T11 covers partial markup). Grammar-level decoding (GBNF, regex) for markup. Making constrained JSON the format agents are told to use.
 
 **Context.**
-- `packages/core/src/schema.ts` already exports `documentJsonSchema()` and `catalogJsonSchema()`, generated from the Zod model in `packages/core/src/model.ts`, which knows no catalog (`kind: z.string()`, `props` a record of any `Value`). They are only tested for shape (`packages/core/test/cli.test.ts`). Behaviour changes go into the Rust crates, never into a TypeScript copy.
-- The catalog model is `Catalog`/`ComponentDef`/`PropDef`/`SlotDef` in `crates/weft-core/src/model.rs` (SPEC §5); the merged project catalog comes from `crates/weft-catalog/src/project.rs` (`Project.catalog`, SPEC §10.4).
-- The schema can express most catalog rules: prop type, enum `values`, `min`/`max`/`integer`, `required`, `bindable` (whether a `{bind, not?}` object is allowed), `{token}` for token props, `states`, `events`, slots, `content`, `allowedChildren`/`allowedParents`, and the `root` kind. These stay in the semantic layer (SPEC §6): unique ids, loop scope, `references`, text given both as content and as a prop (`W310`), a submit button outside a form, `W317`, tokens, actions and the data schema.
-- `weft validate` already accepts `.json` documents (`crates/weft-cli/src/main.rs`); `weft-binding` has `canonicalize_document`, so key order in a reply does not matter. The workspace already has `jsonschema` as a dev dependency (`crates/weft-snapshots`, used for the A2UI schemas).
 - The benchmark has no structured output: `bench/src/provider.ts` has `Provider.complete(prompt: string)` only (Anthropic Messages and batches, and an OpenAI-compatible `/chat/completions` endpoint for LM Studio). The formats are `weft`, `html`, `jsx` and `a2ui` (`bench/src/neutral.ts`, `formats.ts`); replies are taken from a code fence (`extractDocument`). The method is in `test.md` (strict validation, one repair prompt, 3 samples, a History row for every kept run); `bench/src/primers.ts` changes only as a method change.
 - The repository records nothing about what each provider supports for structured output (recursive `$ref`, `anyOf` size, schema size limits). Those facts are checked when the task is claimed and written into `research.md` with sources.
 
-**Scope.**
-- Spec: a new subsection after §3, "JSON Schema of the canonical form": how each catalog construct maps to the schema, what the schema cannot express (the semantic checks above), the dialect (2020-12), and that the generated schema is deterministic. A row in the `research.md` decisions table.
-- Generator in `crates/weft-catalog`, new module `document_schema.rs` (the name avoids a clash with `tests/schema.rs`, which generates `weft.schema.json`): `document_schema(catalog, options) -> Json`, one `$defs` entry per kind, `each`/`slot` transparent with the allowed kinds listed for each parent, project values (token names, action names) as optional `enum`s.
-- Surfaces: `documentSchema` in `weft-binding`/`weft-wasm`/`weft-node` (the `engines.test.ts` lists must still match); `@weft/core` types, with `schema.ts` delegating to the Rust core; CLI `weft schema [--catalog] [--project] [--out-dir]`; an MCP tool `weft_schema` or an argument of `weft_catalog`; `weft.json` keys for every new option (SPEC §10.6, `settings.rs`, regenerated `schemas/weft.schema.json`); `docs/cli.md`, `docs/mcp.md`, `AGENT-SPEC.md` (the MCP tool list) and the primer; rebuilt plugin `dist/` folders.
-- Benchmark: `Provider.complete(prompt, { schema? })` for Anthropic and OpenAI-compatible servers; two new formats, `weft-json` (free canonical JSON) and `weft-json-constrained`, to separate "JSON instead of markup" from "constrained instead of free"; a JSON primer and an adapter that reuses the Weft neutral tree; corpus JSON derived from `screen.weft` at run time (no second committed copy); the same repair rule; `test.md` method sections, a trial run with its History row, and a results section in the T8 evaluation report.
-
-**Out of scope.** Any change to the markup format or the validator. Streaming of constrained JSON (T11 covers partial markup). Grammar-level decoding (GBNF, regex) for markup. Making constrained JSON the format agents are told to use.
+**Scope.** `Provider.complete(prompt, { schema? })` for Anthropic and OpenAI-compatible servers; two new formats, `weft-json` (free canonical JSON) and `weft-json-constrained`, to separate "JSON instead of markup" from "constrained instead of free"; a JSON primer and an adapter that reuses the Weft neutral tree; corpus JSON derived from `screen.weft` at run time (no second committed copy); the same repair rule; `test.md` method sections, a trial run with its History row, and a results section in the T8 evaluation report.
 
 **Done when.**
-- For the core catalog and for `examples/project`'s merged catalog, the canonical JSON of every corpus screen and catalog example validates against the generated schema.
-- A negative set is rejected by both the schema and the validator, with matching codes: unknown kind, undeclared prop, wrong enum value, child kind not allowed, undeclared slot, missing required prop, number out of range.
-- Generating the schema twice gives byte-identical output, pinned by a snapshot; the CLI, MCP and TypeScript surfaces return the same schema.
 - A mocked-provider test shows that the schema is sent and that the reply is scored by the same checks as every other format.
 - A trial run is in `test.md` History with its raw results in `bench/results/`, and the comparison (valid and success, first try and after repair, mean output tokens) for markup, free JSON and constrained JSON is in the evaluation report.
 
-**Dependencies.** T8 (the harness, models and evaluation report; it is in progress in `bench/src/run-tasks.ts`, so the two are sequenced). T28 step 4 (a readback method change to the same harness). T31 (done part: the project catalog extension). T17: once several catalogs load, the schema must cover the merged set; T12 can land first on single-extension projects.
+**Dependencies.** T12.1 and T12.2. T8 (the harness, models and evaluation report; it is in progress in `bench/src/run-tasks.ts`, so the two are sequenced). T28 step 4 (a readback method change to the same harness).
 
 **Open questions for the creator.**
-1. Narrow the schema with project data (token names, action names, data paths as enums), or describe the catalog only?
-2. Leave `x-` extension elements and attributes out of the constrained schema? Writers run strict, so this seems safe.
-3. Keep the generic Zod `documentJsonSchema()` alongside the catalog-aware one, or replace it?
-4. MCP: a new `weft_schema` tool, or a `format: "json-schema"` argument on `weft_catalog`?
-5. Benchmark: three-way (with the free `weft-json` format) or two-way? Which models (Anthropic plus a local LM Studio model)? What budget? Part of T8's continue/stop decision or a separate report?
-6. If a provider cannot take the schema whole (size or recursion limits): a reduced profile per provider, or report the provider as unsupported?
-
-**Split.** T12.1: spec subsection and the Rust generator with its tests. T12.2: bindings, CLI, MCP, `weft.json` keys, docs and AGENT-SPEC. T12.3: benchmark provider schema support, the two formats and primer, `test.md` method, and the trial run.
+1. Three-way (with the free `weft-json` format) or two-way? Which models (Anthropic plus a local LM Studio model)? What budget? Part of T8's continue/stop decision or a separate report? (T12 question 5.)
+2. If a provider cannot take the schema whole (size or recursion limits): a reduced profile per provider, or report the provider as unsupported? (T12 question 6.)
+3. Narrow the schema with project data (token names, action names, data paths as enums) once the measurement shows whether it is worth it? T12.1 describes the catalog only. (T12 question 1.)
 
 ### T16. Layout vocabulary
 
@@ -306,7 +431,7 @@ Execution plan:
 3. `docs/layout-design.md` in the shape of `docs/context-design.md`: the problem and the corpus workarounds; the candidate vocabulary (main-axis distribution on `stack`, child sizing grow/hug/fixed, padding, max width, grid reflow), each with markup, canonical JSON, catalog prop or universal attribute, token types, defaults and their §8 class, and diagnostic codes; a generate and import mapping and loss table per target (HTML, React, SolidJS, Lit, reference renderer, SwiftUI, Slint, A2UI, json-render, Figma, Penpot); versioning (catalog minor in 0.1 or with T39's 0.2); before/after on `dashboard` and `wizard-step`; the decisions for the creator, each with a recommendation and alternatives.
 4. Commit, push, open a PR to `main`; T16.1 stays in progress until the creator approves.
 
-Progress: steps 1–4 done. `research.md` §20 holds the prior art. `docs/layout-design.md` proposes `justify` on `stack` (`start`, `center`, `end`, `space-between`), a universal boolean `grow` with a new `W318`, `padding` and `max-width` on `stack` and `grid`, `min-column-width` on `grid`, and a `size.*` token group, with a mapping and loss table per target, the corpus plan and twelve open questions. Left: the creator's answers, then the document updated to match.
+Progress: steps 1–4 done. `research.md` §21 holds the prior art. `docs/layout-design.md` proposes `justify` on `stack` (`start`, `center`, `end`, `space-between`), a universal boolean `grow` with a new `W318`, `padding` and `max-width` on `stack` and `grid`, `min-column-width` on `grid`, and a `size.*` token group, with a mapping and loss table per target, the corpus plan and twelve open questions. Left: the creator's answers, then the document updated to match.
 
 ### T16.2. Layout vocabulary: spec, catalog, core and corpus
 
@@ -334,6 +459,8 @@ T16 scope items 3 to 5 for the design tools: `packages/design-tool` (`layoutView
 
 ### T17. Extension catalogs
 
+Parent of T17.1–T17.3, which carry the work (the task was split this way when T17.0 was claimed). T17.0, the design, is done (`done.md`): the creator approved `docs/extension-catalogs-design.md` with its twelve decisions, which T17.1–T17.3 build. This card holds the context, scope and done criteria they share.
+
 A project can extend the core catalog with exactly one file today. Real hosts combine several sources: the core, one or more component libraries, and their own kinds. So a project needs to load several catalogs at once without their kinds colliding. Once catalogs travel between projects, two more questions need answers: how a catalog is published and found, and who keeps the registry. `research.md` §9 lists "Who keeps a registry of extension catalogs" as open; `docs/catalog-and-tokens.md` and `docs/what-is-weft.md` both say there is no registry; `docs/fragments-design.md` defers namespaces and sharing across projects to this task.
 
 **Context.**
@@ -343,11 +470,11 @@ A project can extend the core catalog with exactly one file today. Real hosts co
 - T15.1/T15.2 import a Custom Elements Manifest into an extension whose kinds are the custom-element tags (`acme-button`), with `--name`/`--version`/`--catalog` and the `import.cem.*` settings (`crates/weft-import/src/cem.rs`, `crates/weft-cli/src/cem.rs`, fixture `crates/weft-import/tests/fixtures/cem/acme-ui.json`). A library catalog and a project catalog cannot be used together today.
 - Generators already name extension kinds by convention (SwiftUI: `promo-card` becomes `PromoCardView`, SPEC §9); the Figma and Penpot libraries build one component set per kind.
 - `@weft/catalog` is `private` in `packages/catalog/package.json`; nothing is published anywhere yet.
-- Documents and validators never touch the network (AGENTS.md). Project file names stay inside the project directory (§10.2, `W703`), which rules out reading a `node_modules` in a parent folder.
+- Documents and validators never touch the network (AGENTS.md). Project file names stay inside the project directory (§10.2, `W703`); decision 8 makes package lookup in parent `node_modules` folders a narrow, documented exception.
 
 **Scope.**
-- Design first: `docs/extension-catalogs-design.md`, in the shape of `docs/context-design.md`, goes to the creator before any code. It covers the namespace syntax with alternatives; merge order and conflict rules across several extensions; which kinds a catalog may extend (core only, or also another extension's); the catalog's own declaration (prefix, the base versions it targets); the publication format and discovery; the registry model; and the effect on generators, the Figma and Penpot libraries, the T12 schema, and fragments (T31 part B).
-- After approval: SPEC §5, §10.2 (`catalog` also takes an ordered array), §10.4, and new `W7xx` codes for cross-catalog conflicts; the loader keeps which catalog each kind came from, with differential fixtures; CLI `--catalog` can be repeated; MCP `project.catalog` accepts an array, `weft_capabilities` lists every catalog, `weft_catalog` shows each kind's catalog; `import-cem` gets a namespace option with its `import.cem.*` key (SPEC §10.6, `settings.rs`, `schemas/weft.schema.json`); `AGENT-SPEC.md` §1 and §2.8 and the primer; `docs/projects.md`, `docs/catalog-and-tokens.md`, and a publishing guide; the `research.md` §9 row answered.
+- Design (done, T17.0): `docs/extension-catalogs-design.md`, approved, with its **Decisions** section as the contract for the rest.
+- Build: SPEC §5, §10.2 (`catalog` also takes an ordered array), §10.4, and new `W7xx` codes for cross-catalog conflicts; the loader keeps which catalog each kind came from, with differential fixtures; CLI `--catalog` can be repeated; MCP `project.catalog` accepts an array, `weft_capabilities` lists every catalog, `weft_catalog` shows each kind's catalog; `import-cem` gets a namespace option with its `import.cem.*` key (SPEC §10.6, `settings.rs`, `schemas/weft.schema.json`); `AGENT-SPEC.md` §1 and §2.8 and the primer; `docs/projects.md`, `docs/catalog-and-tokens.md`, and a publishing guide; the `research.md` §9 row answered.
 
 **Out of scope.** Hosting a registry service. Network fetching during validation or rendering. Changing the `x-` extension rules. Fragments themselves (T31 part B). New generator features beyond naming namespaced kinds.
 
@@ -360,15 +487,39 @@ A project can extend the core catalog with exactly one file today. Real hosts co
 
 **Dependencies.** Done: T31 (project file and settings), T15.1/T15.2 (CEM import), T10 (capabilities). T12: its schema must cover the merged catalogs. Affected: T14/T40 (one design-tool library per catalog), T44 (SwiftUI custom views), T69 milestone 4 (catalog kinds as components), the fragments design (T31 part B).
 
-**Open questions for the creator.**
-1. Namespace syntax: a hyphen prefix (`acme-button`, like custom elements; no grammar change, every generator already handles it), a colon (`acme:button`; changes the §2 grammar, both parsers, the format version and every generator's naming), or a collision rule only, with no namespaces?
-2. Who owns the prefix: the catalog author (declared in the catalog and checked), or the project (an alias at load time, so it can fix a collision)?
-3. May an extension extend another extension's kinds, or only core kinds? When two extensions widen the same core prop (`button.variant`), is that a union or a conflict?
-4. Distribution: a field in an npm package, a file committed to the repository, or a URL with an integrity hash fetched only by an explicit command (for example `weft catalog add`)?
-5. Registry: none (a convention plus a list in the docs), a curated index in this repository, or a hosted service? Who keeps it?
-6. Should a catalog declare the base catalog versions it targets? Confirm that screens stay silent about their catalogs (SPEC §10).
+**Decisions** (creator, recorded in `docs/extension-catalogs-design.md`): hyphen prefixes declared by the catalog author (`"prefix": "acme"`), no aliases; libraries define only their own kinds, and the one catalog without a prefix, the project catalog, alone extends core and library kinds, widen-only; `requires` with Cargo's compatibility rule, unmet as the warning `W714`; `catalog` as a file name or an ordered array of at most 32 file and `{ "package" }` entries, libraries merged before the project catalog; new codes `W711`–`W714`; committed files first, npm packages with a `weft.catalog` field later, found by walking up `node_modules`, never over the network; a curated `docs/catalogs.md` and the npm keyword `weft-catalog` instead of a registry service; one design-tool build grouped by catalog; screens stay silent about their catalogs; a repeated `--catalog` replaces the list, and `import-cem` gets `--prefix` with a hint when it is absent.
 
-**Split.** T17.0: design document only. T17.1: spec and loader for several catalogs and namespaces, with fixtures. T17.2: CLI, MCP, `import-cem` namespace, settings, AGENT-SPEC and docs. T17.3: package resolution and the publishing guide, plus the registry as the creator decides.
+**Split.** T17.0: design (done). T17.1: spec and loader for several catalogs and prefixes, with fixtures. T17.2: CLI, MCP, `import-cem --prefix`, settings, design tools, AGENT-SPEC and docs. T17.3: package entries and lookup, the publishing guide and the curated list. T17.1 lands first; T17.2 and T17.3 build on it.
+
+### T17.1. Extension catalogs: spec and loader
+
+T17's format and loader, by decisions 1–6 and 11 of `docs/extension-catalogs-design.md`. File entries only; package entries come with T17.3.
+
+- `SPEC.md`: §5 gains the optional `prefix` (one name segment; not `x`, `weft`, a core kind or a core kind's first segment) and `requires` (catalog name → version, Cargo's compatibility rule); §8, the advertisement lists every catalog; §10.2, `catalog` is a file name or an ordered array of at most 32 file names (`W701` beyond); §10.4, the library and project-catalog roles and the three merge steps (core, libraries in order, the project catalog last, widen-only against the definition it extends); §6.2, `W711` (two catalogs claim one name, prefix or kind, naming both), `W712` (bad or reserved prefix, or a second catalog without one), `W713` (a kind outside its owner), `W714` (unmet `requires`, a warning).
+- `crates/weft-catalog/src/project.rs`: several catalogs, `CATALOG_MEMBERS` with `prefix` and `requires`; `Project` keeps the loaded catalogs (`name`, `version`, `prefix`, `source`) and, per kind, the defining catalog and the catalogs that extended it; the merged `Catalog` keeps the project catalog's name and version (else the last library's). Never panics. The diagnostics registry in both engines.
+- Differential fixtures for the catalog loader (regenerate with `WEFT_UPDATE_FIXTURES=1`).
+- `examples/project`: `catalogs/acme-ui.catalog.json`, the `import-cem` output of the `acme-ui.json` fixture with `prefix: "acme"` and `requires` added by hand (T17.2 regenerates it with `--prefix` and must produce the same file); `catalog.json` gains `requires` and widens `acme-button.variant`; `weft.json` lists both; a screen uses kinds of all three catalogs; broken project variants give each new code. The T12 document schema tests cover the merged catalog.
+- Done when T17's first three done criteria hold for the loader (both extensions validate in strict mode; a kind claimed by two catalogs names both; the TypeScript and Rust fixtures agree) and `cargo nextest`, clippy and the TypeScript tests pass.
+
+### T17.2. Extension catalogs: tools and docs
+
+T17's surfaces, by decisions 10 and 12. Depends on T17.1.
+
+- CLI: `--catalog` can be repeated and replaces the project's whole list, in order; a file named `weft-core` replaces the base.
+- MCP: `project.catalog` takes a catalog object or an array; `weft_capabilities` lists every catalog after the core, with `prefix` and `source` when known; `weft_catalog` gives each kind its `catalog` and, when widened, `extendedBy`.
+- `import-cem`: `--prefix` and `import.cem.prefix` (SPEC §10.6, `settings.rs`, regenerated `schemas/weft.schema.json`); with a prefix it writes `prefix` and `requires: { "weft-core": … }` and reports a tag outside the prefix as a `kinds` loss; without one it prints a hint when every kept tag shares a first segment. Regenerates `examples/project/catalogs/acme-ui.catalog.json` unchanged.
+- Design tools (`packages/design-tool`): `weft.library` lists every catalog; components grouped by catalog (a section per catalog in Figma, a path `<catalog> / <kind>` in Penpot); reading back unchanged.
+- `AGENT-SPEC.md` §1 (catalogs, the array) and §2.8 (`acme-button` from a listed catalog is a catalog kind, `x-acme-button` an opaque extension), the primer and tool descriptions (a catalog description is never an instruction); `docs/projects.md` and `docs/catalog-and-tokens.md`.
+- Done when `weft_capabilities` lists all three catalogs of `examples/project` and the full check exits 0.
+
+### T17.3. Extension catalogs: distribution and registry
+
+T17's sharing, by decisions 7–9. Depends on T17.1 (and T17.2 for `source` in `weft_capabilities`).
+
+- SPEC §10.2 and the loader: `{ "package": "<npm name>" }` entries; an invalid npm name is `W703`; the lookup tries `node_modules/<name>/package.json` in the project directory, then each parent, as Node does, and reads only that file and the file its `weft.catalog` names (§10.2 rules relative to the package directory); not found or unreadable is `W704`; nothing runs and nothing is fetched. CLI and Node tools only; the MCP server still takes contents. The documented exception to §10.2 goes into SPEC.
+- A test package in a temporary `node_modules` (nested above the project directory too) that resolves with no network access.
+- Docs: `docs/publishing-catalogs.md` (prefix, `requires`, the `package.json` fields `weft.catalog`, `files` and the keyword `weft-catalog`), `docs/catalogs.md` as the curated list of catalogs and taken prefixes, kept by the creator; `docs/what-is-weft.md` and `docs/catalog-and-tokens.md` stop saying there is no registry; the `research.md` §9 row marked built.
+- Done when T17's fourth done criterion holds and the full check exits 0.
 
 ### T41. Hosted Penpot plugin
 

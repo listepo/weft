@@ -31,7 +31,7 @@ const newId = () => `1:${nextId++}`;
 
 type Owner = { children: FakeNode[] };
 
-abstract class FakeBase {
+export abstract class FakeBase {
   id = newId();
   name = "";
   visible = true;
@@ -41,14 +41,20 @@ abstract class FakeBase {
   width = 100;
   height = 100;
   parent: Owner | undefined;
-  readonly data = new Map<string, string>();
+  /** Shared plugin data, by namespace; the package uses no private plugin data. */
+  readonly shared = new Map<string, Map<string, string>>();
 
-  getPluginData(key: string): string {
-    return this.data.get(key) ?? "";
+  getSharedPluginData(namespace: string, key: string): string {
+    return this.shared.get(namespace)?.get(key) ?? "";
   }
-  setPluginData(key: string, value: string): void {
-    if (value === "") this.data.delete(key);
-    else this.data.set(key, value);
+  setSharedPluginData(namespace: string, key: string, value: string): void {
+    // The real API refuses a namespace shorter than 3 alphanumeric characters.
+    if (!/^[A-Za-z0-9]{3,}$/.test(namespace)) throw new Error(`bad namespace ${namespace}`);
+    const entries = this.shared.get(namespace) ?? new Map<string, string>();
+    if (value === "") entries.delete(key);
+    else entries.set(key, value);
+    if (entries.size === 0) this.shared.delete(namespace);
+    else this.shared.set(namespace, entries);
   }
   remove(): void {
     if (this.parent === undefined) return;
@@ -64,7 +70,7 @@ abstract class FakeBase {
     to.rotation = this.rotation;
     to.width = this.width;
     to.height = this.height;
-    for (const [k, v] of this.data) to.data.set(k, v);
+    for (const [ns, entries] of this.shared) to.shared.set(ns, new Map(entries));
   }
 }
 
@@ -303,11 +309,11 @@ export class FakeInstance extends FakeLayout implements FInstance {
         c instanceof FakeText ? [[c.name, c.characters] as const] : [],
       ),
     );
-    const data = new Map(this.data);
+    const shared = new Map(this.shared);
     this.clearChildren();
     main.copyLayout(this);
-    this.data.clear();
-    for (const [k, v] of data) this.data.set(k, v);
+    this.shared.clear();
+    for (const [ns, entries] of shared) this.shared.set(ns, entries);
     for (const child of this.children)
       if (child instanceof FakeText && texts.has(child.name)) {
         this.figma.requireFont(child.fontName);
@@ -514,5 +520,15 @@ export class FakeFigma implements FigmaApi {
     const [found] = this.findAll(root, name);
     if (found === undefined) throw new Error(`no layer named ${name}`);
     return found as T;
+  }
+  /** Every page, layer, variable and collection that can hold plugin data. */
+  everyDataHolderFor(): FakeBase[] {
+    const out: FakeBase[] = [...this.variables.collections, ...this.variables.all];
+    const walk = (n: FakeNode | FakePage) => {
+      out.push(n);
+      for (const c of ("children" in n ? n.children : undefined) ?? []) walk(c);
+    };
+    for (const page of this.root.children) walk(page);
+    return out;
   }
 }

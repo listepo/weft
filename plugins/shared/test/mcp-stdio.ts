@@ -66,5 +66,6 @@ export const WEFT_TOOLS = [
   "weft_patch",
   "weft_primer",
   "weft_render",
+  "weft_schema",
   "weft_validate",
 ];

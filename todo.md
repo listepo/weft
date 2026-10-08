@@ -4,11 +4,11 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T13.2. json-render import
 - T73. CI workflow for the documented merge gate
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
-- T12. Constrained generation
+- T69.1. Editor skeleton
+- T12.3. Constrained generation: benchmark
 - T16.1. Layout vocabulary: design
 - T16.2. Layout vocabulary: spec, catalog, core and corpus
 - T16.3. Layout vocabulary: web targets and the reference renderer
@@ -17,4 +17,7 @@
 - T16.6. Layout vocabulary: A2UI and json-render
 - T16.7. Layout vocabulary: Figma and Penpot
 - T17. Extension catalogs
+- T17.1. Extension catalogs: spec and loader
+- T17.2. Extension catalogs: tools and docs
+- T17.3. Extension catalogs: distribution and registry
 - T41. Hosted Penpot plugin

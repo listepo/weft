@@ -127,6 +127,33 @@ Canonical form rules, so that equal documents are byte-equal:
 
 Literal typing needs the catalog: `level="2"` is the number `2` only because `heading.level` is declared a number. For extension elements and unknown attributes, literals stay strings.
 
+### 3.1 JSON Schema of the canonical form
+
+A catalog (§5) determines a JSON Schema of the canonical JSON documents it admits, so that a writer whose decoder takes a schema (a structured-output mode) is held to the catalog while it writes. The schema is generated from the catalog and is a projection of validation (§6), not a second definition: the validator always has the last word. The dialect is JSON Schema 2020-12 (`$schema` is `https://json-schema.org/draft/2020-12/schema`).
+
+| Catalog construct | Schema |
+| --- | --- |
+| Document | A closed object (`additionalProperties: false`) with `weft` (`const`, the format version) and `root`, both required. |
+| `root` kind | `root` is a `$ref` to the kind marked `root` (`anyOf` when several are); with none, any kind. That kind is admitted nowhere else, and its `weft` prop is not in its `props` (it is `Document.weft`). |
+| Kind | One `$defs` entry per kind, named after it: a closed object with `kind` (`const`), `id` (the id grammar as `pattern`), `props`, `on`, `slots` and `children`, in that order. `kind` and `id` are required, `props` when a prop or `label` is. `on`, `slots` and `children` are present only when the kind declares events, slots, or a content model other than `none`. |
+| Props | A closed object: the declared props, then the universal `label`, `hidden`, `state` (only when the kind declares `states`) and the tilt attributes (§2.2), sorted as canonical JSON sorts keys. `required` lists the required props, and `label` when `requiresLabel` is set. `role` is not admitted on a catalog component. |
+| Prop value | `anyOf` over the forms the prop takes. Literal: `string`; `number`, or `integer` when `integer` is set, with `minimum` and `maximum` from `min` and `max`; `boolean`; `enum` of `values` (of `states` for `state`). A token prop takes no literal but `{ token }`, and no other prop takes `{ token }`. Unless `bindable` is false, `{ bind }`; `{ bind, not: true }` only on a boolean prop that is not `writable`. Binding paths and token paths carry their grammars (§2.1) as `pattern`. `description` is the prop's. |
+| `states` | The values of `state`. |
+| `events` | `on`: a closed object with one property per declared event, the action grammar as `pattern`. |
+| `slots` | `slots`: a closed object with one property per declared slot, each an array of the elements that slot admits (no text); `required` lists the required slots. |
+| `content` | `children`: an array of strings for `text`, of the admitted elements for `nodes`, of either for `mixed`; absent for `none`. |
+| Admitted elements | A list of parent P (its children, or its slot S) admits the kinds in P's `allowedChildren` (S's for a slot), or every kind when that list is absent, keeping only kinds whose `allowedParents` is absent or names P and leaving out the `root` kind. The kinds without `allowedParents` are collected once, in `$defs/Node`. |
+| `each` | Transparent (§4.3): every list that admits `each` (P's `allowedChildren` is absent or names it) has its own entry, `each:P` or `each:P:S`, with `kind`, `id`, `props` holding exactly `in` (a binding, not negated) and `as` (the loop variable grammar), both required, and `children`: at least one element, from the same admitted elements as that list, which includes the entry itself. |
+| `description` | The component's, on its entry. |
+
+Helper entries (`Id`, `Binding`, `NegatableBinding`, `Token`, `Action`, `Node`) start with a capital letter, and the `each` entries and the shared entries of the universal attributes (`universal:label`, `universal:hidden`, …) hold a `:`, so none can clash with a kind name.
+
+The schema leaves out what it cannot express, and the validator still checks it: unique ids (`W301`), loop variables in scope and not shadowed (`W305`, `W311`), `references` (`W309`), text given both as content and as `text` (`W310`), a submit button outside a `form` (`W313`), the asset paths of a `model` (`W317`), a reference inside a literal (`W213`) and characters XML cannot carry (`W221`), whose patterns would need look-around or ranges beyond the Basic Multilingual Plane that structured-output modes do not reliably support. It describes the catalog only, so the project's tokens, actions and data schema (`W306`–`W308`, `W315`, `W316`) are not narrowed into it.
+
+It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with two exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for, and it admits no `state` on a kind that declares no states, where validation lets a bound one through. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
+
+`weft schema` prints the schema of the project's catalog (or of `--catalog`) indented, or writes it as `document.schema.json` (§10.6); `documentSchema` of `@weft/core/document-schema` and the MCP tool `weft_schema` return the same schema as compact JSON text, byte for byte what the generator writes. The schema of §3 that `documentJsonSchema()` of `@weft/core` returns is a different one: it knows no catalog and admits any kind and any prop.
+
 ## 4. Structure
 
 ### 4.1 Children and the default slot
@@ -567,14 +594,25 @@ Losses of the A2UI conversions (A2UI v0.9, `specification/v0_9` of `a2ui-project
 | `structure` | A `dialog` is a `Modal` with a generated trigger; a `tabs` with no tab, which A2UI refuses. | Other surfaces than the first, a component that is used but not defined, a `Button` whose child is not a `Text`. |
 
 - **To json-render:** a document compiles to one json-render spec (`vercel-labs/json-render` at commit `fc2a696`, 2026-10-01, `@json-render/core` 0.21.0): `{ "root", "elements" }`, plus `"state"` when the caller gives sample data (a JSON object), written as it is. The catalog the spec is checked against is the Weft catalog itself, so the mapping is one element per element: the key and the `type` are the Weft id and kind, and `props` holds the Weft props in canonical JSON (§3; a token reference stays `{ "token": … }`), except that a binding is a json-render expression: `{ "$state": "/user/email" }` for a path from `$.`, `{ "$item": "title" }` for a field of the innermost loop variable (`""` for the whole item), `$bindState` and `$bindItem` instead on a prop the catalog marks `writable`, and a negated binding `{ "$cond": { …, "not": true }, "$then": true, "$else": false }`. `hidden` is the element's `visible`: `true` is `false`, a binding is a condition on the same path with `not` inverted. The text content of a `text` or `mixed` component that holds text only is its `text` prop; in a `mixed` component that also holds elements, each text run is a generated `text` element. Named slots are `slots`, the default slot `children`. An event is `on: { <event>: { "action": <action>, "params": { "id": <element id> } } }`, inside a repetition with `"item": { "$item": "" }` as well, which json-render resolves to the item's absolute path: what a Weft host receives with an action (§2.2). An `<each>` is an element of type `each` (a component of the exported catalog that renders its children and adds no element of its own) with props `{ "as": … }`, `repeat: { "statePath": … }` (the pointer of `in`, `{ "$item": … }` inside another repetition) and its content as `children`.
-- **From json-render:** not yet defined (T13.2).
+- **From json-render:** a spec is parsed, never run. The elements are read from `root`, each at most once; a `type` that names a kind of the catalog is that kind, with its props, `visible`, `on`, `children` and `slots` read back by the inverse of the mapping above. An element of type `each` with `repeat` is an `<each>` with its id and `visible`; an element with `repeat` whose type is not `each` (json-render's own way of repeating a container's children) holds an `<each>` around its children. The loop variable of a repetition is its `as` prop, else the first of `item`, `item2`, … that no outer repetition uses. A literal `label` is the accessible name and a literal `text` the content, through the builder every importer shares, so ids, required props and content rules hold as for the other importers. The input is bounded as the other importers are (at most 2,000,000 bytes, 200 levels and 20,000 elements; `W602`); input that is not JSON, or has no `root` naming an element, is `W601`. The result is `{ document, losses, diagnostics }`, and a document exported with no losses imports back to the same document, except that a literal `text` prop comes back as content, which json-render cannot tell apart from it.
 
-Losses of the json-render export (`vercel-labs/json-render` at commit `fc2a696`, 2026-10-01; `@json-render/core` 0.21.0). Ids, kinds, props, token references, slots, events, `hidden` and repetitions all keep their meaning; only these change:
+Losses of the json-render conversions (`vercel-labs/json-render` at commit `fc2a696`, 2026-10-01; `@json-render/core` 0.21.0). Ids, kinds, props, token references, slots, events, `hidden` and repetitions keep their meaning on export; only these change:
 
-| Loss kind | To json-render |
-| --- | --- |
-| `bindings` | A binding that reads an outer repetition, or a whole outer item: json-render reads only the innermost item. The prop is left out (for `hidden`, the element is always shown). |
-| `text` | A text run beside elements in a `mixed` component (or in an extension element) becomes a generated `text` element with a free id. |
+| Loss kind | To json-render | From json-render |
+| --- | --- | --- |
+| `ids` | None: a generated text element takes a free id. | An element key that is not a Weft id; a generated id stands in. |
+| `bindings` | A binding that reads an outer repetition, or a whole outer item: json-render reads only the innermost item. The prop is left out (for `hidden`, the element is always shown). | A pointer that is not a Weft data path; a binding on a prop the kind cannot bind. |
+| `actions` | None. | A second action bound to one event, an event the kind does not declare, an action name that is not a Weft action name, `params` other than `id` and `item`, `confirm`, `onSuccess`, `onError`, `preventDefault`, `watch`, and any event of an `each` element. |
+| `tokens` | None: a token reference is written as it is. | A token reference on a prop that takes no token, or a path that is not a token path. |
+| `hidden` | None. | A `visible` condition other than truthiness of one path (`eq`, `gt`, …, `$and`, `$or`, `$index`); the element is always shown. |
+| `values` | None. | `state` (a document holds no data); a list value; `$template`, `$computed`, `$index` and any other `$cond`. |
+| `props` | None. | A prop the kind does not declare, or a value it does not take. |
+| `kinds` | None. | A `type` that is not a kind of the catalog; its children are kept in its place. |
+| `repetition` | None. | A `repeat.statePath` that is not a Weft data path; `repeat.key`; an `as` that is not a loop variable name or is already an outer one; an `each` element without `repeat`, whose children are kept in its place. |
+| `slots` | None. | A slot the kind does not have; its elements are placed as content. |
+| `names` | None. | A required `label` missing from the input is set to `""`. |
+| `text` | A text run beside elements in a `mixed` component (or in an extension element) becomes a generated `text` element with a free id. | None. |
+| `structure` | None. | An element that is used but not defined, or used a second time. |
 
 ## 10. Projects
 
@@ -676,8 +714,10 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | `import.swiftui.outDir` | file name | standard output | Where `weft import-swiftui` writes `<file>.weft`, and where the Xcode command plugin's `import` does (next to the view when absent). |
 | `export.a2ui.outDir`, `import.a2ui.outDir` | file name | standard output | Where `weft a2ui` writes `<screen>.a2ui.json` and `weft import-a2ui` writes `<file>.weft` (§9). |
 | `export.slint.outDir`, `import.slint.outDir` | file name | standard output | Where `weft slint` writes `<screen>.slint` and `weft import-slint` writes `<file>.weft` (§9). |
+| `export.schema.outDir` | file name | standard output | Where `weft schema` writes `document.schema.json`, the JSON Schema of the canonical documents the project's catalog admits (§3.1). |
 | `import.cem.outDir` | file name | standard output | Where `weft import-cem` writes `<file>.catalog.json`, the catalog imported from a Custom Elements Manifest (§9). |
 | `import.cem.name`, `import.cem.version` | non-empty string | the manifest's file name without its extension; `"0.0.0"` | The `name` and `version` of the catalog `weft import-cem` writes. |
+| `import.figma.outDir` | file name | the working directory | Where the `figma-pull` script of the plugins writes `<screen id>.weft`, a frame read through the Figma REST API. |
 | `mcp.limits.markupChars`, `dataChars`, `patchesChars`, `projectChars` | whole number ≥ 1 | 200,000; 200,000; 200,000; 500,000 | Bounds, in UTF-16 code units, on the arguments of one MCP call. |
 | `mcp.limits.patches`, `diagnostics`, `inputElements` | whole number ≥ 1 | 100; 40; 20,000 | Patches per call, diagnostics listed per result, JSON values per call. |
 | `plugins.open-design.tokensDir` | file name | next to the design system | Where the Open Design plugin's `design-md` script writes the tokens it maps from a `DESIGN.md` or `tokens.css`. |
@@ -686,5 +726,5 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 - File names follow §10.2 and are relative to the project file; a directory name has no trailing `/`.
 - A setting of the wrong type is `W701` and the default applies; a bad file name is `W703`; an unknown key in a section is `W702`, a warning. Tools read only the settings that passed these checks.
 - `schemas/weft.schema.json` is the JSON Schema (2020-12) of the project file. It is generated from the same table the loader checks against, so the two cannot disagree; editors that follow `$schema` complete and check every key.
-- **Adding a setting.** A tool option that a user can set gets a key here in the same change: a row in this table, an entry in the loader's table (`crates/weft-catalog/src/settings.rs`), which regenerates the schema, and the tool reading it with the precedence above. A new export or import target adds its section under `export.<target>` or `import.<target>`. The names reserved for targets in progress are `export.figma` and `import.figma` (T14, where a rem base and the token strategy belong), and `export.penpot` and `import.penpot`. Until a target's section lands, its key is unknown and warns.
+- **Adding a setting.** A tool option that a user can set gets a key here in the same change: a row in this table, an entry in the loader's table (`crates/weft-catalog/src/settings.rs`), which regenerates the schema, and the tool reading it with the precedence above. A new export or import target adds its section under `export.<target>` or `import.<target>`. The names reserved for targets in progress are `export.figma` (T14, where a rem base and the token strategy belong), `export.penpot` and `import.penpot`. Until a target's section lands, its key is unknown and warns.
 

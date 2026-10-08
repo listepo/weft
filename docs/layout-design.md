@@ -1,6 +1,6 @@
 # Design: layout vocabulary
 
-Status: **proposal, not approved.** Nothing here is implemented. This document is for the creator to approve, change or reject before `SPEC.md`, `AGENT-SPEC.md`, the catalog, the Rust core and the targets change. It is the design stage of T16 (T16.1). The prior art and its sources are in `research.md` §20.
+Status: **proposal, not approved.** Nothing here is implemented. This document is for the creator to approve, change or reject before `SPEC.md`, `AGENT-SPEC.md`, the catalog, the Rust core and the targets change. It is the design stage of T16 (T16.1). The prior art and its sources are in `research.md` §21.
 
 ## Problem
 
@@ -189,7 +189,7 @@ The heading, text and button now sit `space.lg` inside the frosted surface on ev
 - **Meaning.** The free space of a stack is its length along its direction minus its children's lengths and the gaps. `start` leaves it after the last child, `end` before the first, `center` half on each side, and `space-between` shares it equally between the children (none at the ends; a single child sits at the start). The `gap` stays the least space between two children.
 - **Where free space exists.** A row takes the full width its parent gives it, as it does on every target today, so it has free space whenever its children are narrower. A column is as tall as its children unless its parent stretches it (a row with `align="stretch"`). `justify` on a column therefore matters only inside a stretched row, which SwiftUI cannot draw today (SPEC §5.1 note); see open question 4.
 - **Catalog prop** of `stack`, because it belongs to the container. `grid` does not take it: its columns already share the width.
-- **Values.** The four that every target draws (`research.md` §20). `space-around` has no SwiftUI form; `space-evenly` has one but no screen needs it; `stretch` is what `grow` says per child. They can be added by a later minor version.
+- **Values.** The four that every target draws (`research.md` §21). `space-around` has no SwiftUI form; `space-evenly` has one but no screen needs it; `stretch` is what `grow` says per child. They can be added by a later minor version.
 - **Default** `start`, declared in the catalog. It is the initial value of every target, so a renderer writes nothing for it, and an importer does not write `justify="start"` back for a stack that does not say it.
 - **Bindable** like `align`.
 
@@ -266,10 +266,10 @@ Every target keeps the props it cannot draw: the code generators in their source
 
 Notes on the table:
 
-- **Web values.** The exact CSS is T16.3's to settle against the `packages/visual` cross-target comparison; the table fixes the intent. The grid formula is a known pattern built only from `repeat`, `auto-fill`, `minmax`, `max` and `calc`, all in CSS Grid Level 1 and CSS Values (`research.md` §20).
+- **Web values.** The exact CSS is T16.3's to settle against the `packages/visual` cross-target comparison; the table fixes the intent. The grid formula is a known pattern built only from `repeat`, `auto-fill`, `minmax`, `max` and `calc`, all in CSS Grid Level 1 and CSS Values (`research.md` §21).
 - **SwiftUI spacers and `<each>`.** `space-between` over children that come from an `<each>` needs a spacer between repeated items but not after the last one; the generator already enumerates the items, so it can test the index. T16.4 owns this.
 - **SwiftUI growth.** Several flexible children in an `HStack` share the space roughly equally; SwiftUI measures the least flexible first, so children with very different content minimums may not end up exactly equal. The visual baselines decide whether that is close enough.
-- **Slint's default.** `LayoutAlignment` lists `stretch` first and the layout's `alignment` declares no default (`research.md` §20), while Weft's stacks do not stretch. Whether the Slint generator should write `alignment: start` on every stack today was not checked for this proposal (**unverified**); T16.5 checks it against its screenshots.
+- **Slint's default.** `LayoutAlignment` lists `stretch` first and the layout's `alignment` declares no default (`research.md` §21), while Weft's stacks do not stretch. Whether the Slint generator should write `alignment: start` on every stack today was not checked for this proposal (**unverified**); T16.5 checks it against its screenshots.
 - **Design tools without a token.** Figma binds `padding` and `max-width` to variables (`VariableBindableNodeField` lists the paddings and `maxWidth`). Penpot gets values; the prop itself is in plugin data, as `gap` is today.
 
 ### Effect on targets: importing

@@ -4,6 +4,7 @@
 // data) a diff someone reviews. Update with `vitest -u` after reviewing the change.
 import { expect, test } from "vitest";
 import { layerTree } from "../../design-tool/test/layer-tree.ts";
+import { NAMESPACE } from "../src/data.ts";
 import type { FakeFigma, FakeFrame } from "./fake-figma.ts";
 import { built, corpusMarkup, corpusNames } from "./helpers.ts";
 
@@ -12,7 +13,7 @@ type Layer = {
   type?: string;
   name?: string;
   children?: Layer[];
-  data?: Map<string, string>;
+  shared?: Map<string, Map<string, string>>;
 };
 
 async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
@@ -26,7 +27,7 @@ async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
   return layerTree(frame, {
     children: (layer) => (layer as Layer).children,
     heading: (layer) => `${(layer as Layer).type} ${JSON.stringify((layer as Layer).name)}`,
-    skip: new Set(["id", "type", "name", "parent", "figma", "children", "data", "x", "y"]),
+    skip: new Set(["id", "type", "name", "parent", "figma", "children", "shared", "x", "y"]),
     defaults: {
       visible: true,
       rotation: 0,
@@ -57,7 +58,7 @@ async function tree(figma: FakeFigma, frame: FakeFrame): Promise<string> {
       size: 12,
     },
     extra: (layer) =>
-      [...((layer as Layer).data ?? new Map())]
+      [...((layer as Layer).shared?.get(NAMESPACE) ?? new Map<string, string>())]
         .sort(([a], [b]) => (a < b ? -1 : 1))
         .map(([k, v]) => `${k} = ${v}`),
     ids,
