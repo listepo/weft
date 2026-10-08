@@ -16,7 +16,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16 | todo | P2 | 5 | 15% | |
-| T16.2 | todo | P2 | 3 | 0% | |
+| T16.2 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T16.3 | todo | P2 | 3 | 0% | |
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.4 | todo | P2 | 4 | 0% | |
@@ -426,6 +426,14 @@ Steps:
 5. Corpus: `dashboard` and `glass` as in the design's examples, and a new non-benchmark `corpus/layout` screen; `wizard-step` unchanged. Retake and review the insta snapshots and baselines the new screens change.
 
 Size: about 200 lines of code (`rules.rs`, `core.ts`, tokens), the rest docs, fixtures and snapshots.
+
+Execution plan (Claude Code / claude-opus-5-5):
+
+1. Spec first: `SPEC.md` §2.2, §5.1, §6.2, §8 and the §9 loss rows; `AGENT-SPEC.md` (layout line, `W318`), its plugin copies through `moon run shared:build`, and `packages/mcp/src/primer.ts`.
+2. Catalog: `core.ts` props and version 0.2.0, `node src/generate.ts` for `catalog.json`, the `size` tokens, the `stack` and `grid` examples, `docs/catalog-and-tokens.md`; a `diff.test.ts` case that the change is minor. Docs that print `weft-core 0.1.0` follow.
+3. Core: `grow` in `UNIVERSAL_PROPS`, `W318` in `diagnostics.rs` and `packages/core/src/diagnostics.ts`, the check in `validate.rs` (fires on `grow="true"`, as `W313` fires on `submit="true"`); cases in `crates/weft-core/tests/codes.rs`, `validate.rs` and `packages/core/test/cases.ts`; regenerate the core and catalog differential fixtures and the T12.1 schema snapshot with `WEFT_UPDATE_FIXTURES=1`.
+4. Corpus: `dashboard` and `glass` as in the design, a new `corpus/layout` screen; retake the insta snapshots and the fixtures they feed, review them.
+5. Verify with `moon run root:changed -- --base <merge-base>`, then the full check under the shared lock.
 
 Done when: the new props and `grow` validate in strict and lenient mode, `W318` fires for `grow` outside a stack in a test, the coverage test passes with every new prop and `justify` value in the corpus, `bench/test/agent-spec.test.ts` passes, and `moon run root:changed` exits 0.
 
