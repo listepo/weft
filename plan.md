@@ -197,7 +197,7 @@ Execution plan:
 3. Tests in `crates/weft-slint/tests/import.rs` (`required-features = ["import"]`): strip the source comment from one generated golden that uses `each` and `tabs` (or `list`) and check kinds and ids. Do not edit `read_expr.rs`.
 4. Verify: `cargo nextest run -p weft-slint --features import`.
 
-Progress: the widget match, including `alert` and `combobox` from the source comment, is on `t67.6-slint-read` together with the binding reader. Without the comment, an `alert` stays a `stack` and a `combobox` stays a `select`. `cargo nextest run -p weft-slint --features import` — 30 tests passed. The change is uncommitted on that branch and not on `main`.
+Progress: closed on `t67.6-slint-read` (`7e08029`, task close `c63abde`). Without the comment, an `alert` stays a `stack` and a `combobox` stays a `select`. `cargo nextest run -p weft-slint --features import` — 30 tests passed. Not on `main`.
 
 ### T67.5. Slint reader recovers bindings and events
 
@@ -210,7 +210,7 @@ Execution plan:
 3. Tests in `tests/import.rs`: `login` with the source comment deleted comes back with `$.email` and `auth.submit` (or whatever the screen names), and a spacing that equals a token is that token. `required-features = ["import"]`.
 4. Verify: `cargo nextest run -p weft-slint --features import`.
 
-Progress: `read_expr.rs` on `t67.6-slint-read` reads the generator's expressions back. Without the source comment, `login`, `signup` and `settings` keep their bindings and actions; a `16px` spacing stays unmatched because two dimension tokens share it. `cargo nextest run -p weft-slint --features import` — 30 tests passed. The change is uncommitted on that branch and not on `main`. The non-test reader is still over the 500-line cap; the expression reader and the widget match are tested only together.
+Progress: closed on `t67.6-slint-read` (`7e08029`, task close `c63abde`). Without the source comment, `login`, `signup` and `settings` keep their bindings and actions; a `16px` spacing stays unmatched because two dimension tokens share it. `cargo nextest run -p weft-slint --features import` — 30 tests passed. Not on `main`. The non-test reader is past the 500-line cap; the expression reader and the widget match are tested only together.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 
