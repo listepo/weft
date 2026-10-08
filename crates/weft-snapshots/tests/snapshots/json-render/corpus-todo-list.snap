@@ -1,0 +1,150 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-todo-list as json-render
+---
+{
+  "root": "todos",
+  "elements": {
+    "todos": {
+      "type": "screen",
+      "props": {
+        "label": "Tasks"
+      },
+      "children": [
+        "title",
+        "add-form",
+        "list",
+        "remaining"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Tasks"
+      },
+      "children": []
+    },
+    "add-form": {
+      "type": "form",
+      "props": {},
+      "children": [
+        "add-row"
+      ],
+      "on": {
+        "submit": {
+          "action": "todo.add",
+          "params": {
+            "id": "add-form"
+          }
+        }
+      }
+    },
+    "add-row": {
+      "type": "stack",
+      "props": {
+        "direction": "row",
+        "gap": {
+          "token": "space.sm"
+        }
+      },
+      "children": [
+        "draft",
+        "add"
+      ]
+    },
+    "draft": {
+      "type": "field",
+      "props": {
+        "label": "New task",
+        "value": {
+          "$bindState": "/draft"
+        }
+      },
+      "children": []
+    },
+    "add": {
+      "type": "button",
+      "props": {
+        "disabled": {
+          "$cond": {
+            "$state": "/draft",
+            "not": true
+          },
+          "$then": true,
+          "$else": false
+        },
+        "submit": true,
+        "variant": "primary",
+        "text": "Add"
+      },
+      "children": []
+    },
+    "list": {
+      "type": "list",
+      "props": {},
+      "children": [
+        "todo-each"
+      ]
+    },
+    "todo-each": {
+      "type": "each",
+      "props": {
+        "as": "todo"
+      },
+      "children": [
+        "todo"
+      ],
+      "repeat": {
+        "statePath": "/todos"
+      }
+    },
+    "todo": {
+      "type": "item",
+      "props": {},
+      "children": [
+        "todo-done",
+        "todo-remove"
+      ]
+    },
+    "todo-done": {
+      "type": "checkbox",
+      "props": {
+        "checked": {
+          "$bindItem": "done"
+        },
+        "label": {
+          "$item": "title"
+        }
+      },
+      "children": []
+    },
+    "todo-remove": {
+      "type": "button",
+      "props": {
+        "text": "Remove"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "todo.remove",
+          "params": {
+            "id": "todo-remove",
+            "item": {
+              "$item": ""
+            }
+          }
+        }
+      }
+    },
+    "remaining": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/remainingLabel"
+        }
+      },
+      "children": []
+    }
+  }
+}

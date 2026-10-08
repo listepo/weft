@@ -1,0 +1,118 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-confirm-dialog as json-render
+---
+{
+  "root": "files",
+  "elements": {
+    "files": {
+      "type": "screen",
+      "props": {
+        "label": "File"
+      },
+      "children": [
+        "title",
+        "delete-file",
+        "confirm"
+      ]
+    },
+    "title": {
+      "type": "heading",
+      "props": {
+        "level": 1,
+        "text": "Quarterly report"
+      },
+      "children": []
+    },
+    "delete-file": {
+      "type": "button",
+      "props": {
+        "variant": "danger",
+        "text": "Delete file"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "dialog.open",
+          "params": {
+            "id": "delete-file"
+          }
+        }
+      }
+    },
+    "confirm": {
+      "type": "dialog",
+      "props": {
+        "label": "Delete file?",
+        "open": {
+          "$bindState": "/confirmOpen"
+        }
+      },
+      "children": [
+        "warning",
+        "filename"
+      ],
+      "slots": {
+        "actions": [
+          "cancel",
+          "confirm-delete"
+        ]
+      },
+      "on": {
+        "close": {
+          "action": "dialog.close",
+          "params": {
+            "id": "confirm"
+          }
+        }
+      }
+    },
+    "warning": {
+      "type": "text",
+      "props": {
+        "text": "This cannot be undone."
+      },
+      "children": []
+    },
+    "filename": {
+      "type": "text",
+      "props": {
+        "text": {
+          "$state": "/file/name"
+        }
+      },
+      "children": []
+    },
+    "cancel": {
+      "type": "button",
+      "props": {
+        "text": "Cancel"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "dialog.close",
+          "params": {
+            "id": "cancel"
+          }
+        }
+      }
+    },
+    "confirm-delete": {
+      "type": "button",
+      "props": {
+        "variant": "danger",
+        "text": "Delete"
+      },
+      "children": [],
+      "on": {
+        "press": {
+          "action": "file.delete",
+          "params": {
+            "id": "confirm-delete"
+          }
+        }
+      }
+    }
+  }
+}
