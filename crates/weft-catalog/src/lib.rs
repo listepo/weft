@@ -3,6 +3,7 @@
 
 mod core;
 mod diff;
+mod document_schema;
 mod project;
 mod resolver;
 mod settings;
@@ -10,6 +11,7 @@ mod tokens;
 
 pub use core::{CORE_CATALOG_JSON, CatalogError, DEFAULT_TOKENS_JSON, core_catalog};
 pub use diff::{CatalogChange, CatalogDiff, ChangeLevel, diff_catalogs};
+pub use document_schema::{DocumentSchemaOptions, document_schema};
 pub use project::{
     MAX_TOKEN_FILES, PROJECT_FILE, Project, ProjectLoad, ProjectOptions, ReadFile,
     is_project_file_name, load_project, load_project_text,

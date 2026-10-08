@@ -1,0 +1,4464 @@
+---
+source: crates/weft-snapshots/tests/document_schema.rs
+description: the document JSON Schema of weft-core
+---
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A Weft 0.1 document in canonical JSON (SPEC §3) for catalog weft-core 0.1.0. Checks the validator makes beyond this schema are listed in SPEC §3.1.",
+  "type": "object",
+  "properties": {
+    "weft": {
+      "const": "0.1"
+    },
+    "root": {
+      "$ref": "#/$defs/screen"
+    }
+  },
+  "required": [
+    "weft",
+    "root"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "Action": {
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)*$"
+    },
+    "Binding": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "type": "string",
+          "pattern": "^\\$(?:(?:\\.(?:[A-Za-z_][A-Za-z0-9_]*|0|[1-9][0-9]*))+|[A-Za-z_][A-Za-z0-9_]*(?:\\.(?:[A-Za-z_][A-Za-z0-9_]*|0|[1-9][0-9]*))*)$"
+        }
+      },
+      "required": [
+        "bind"
+      ],
+      "additionalProperties": false
+    },
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+    },
+    "NegatableBinding": {
+      "type": "object",
+      "properties": {
+        "bind": {
+          "type": "string",
+          "pattern": "^\\$(?:(?:\\.(?:[A-Za-z_][A-Za-z0-9_]*|0|[1-9][0-9]*))+|[A-Za-z_][A-Za-z0-9_]*(?:\\.(?:[A-Za-z_][A-Za-z0-9_]*|0|[1-9][0-9]*))*)$"
+        },
+        "not": {
+          "const": true
+        }
+      },
+      "required": [
+        "bind"
+      ],
+      "additionalProperties": false
+    },
+    "Node": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/alert"
+        },
+        {
+          "$ref": "#/$defs/button"
+        },
+        {
+          "$ref": "#/$defs/checkbox"
+        },
+        {
+          "$ref": "#/$defs/color-picker"
+        },
+        {
+          "$ref": "#/$defs/combobox"
+        },
+        {
+          "$ref": "#/$defs/date-picker"
+        },
+        {
+          "$ref": "#/$defs/dialog"
+        },
+        {
+          "$ref": "#/$defs/field"
+        },
+        {
+          "$ref": "#/$defs/form"
+        },
+        {
+          "$ref": "#/$defs/grid"
+        },
+        {
+          "$ref": "#/$defs/heading"
+        },
+        {
+          "$ref": "#/$defs/image"
+        },
+        {
+          "$ref": "#/$defs/link"
+        },
+        {
+          "$ref": "#/$defs/list"
+        },
+        {
+          "$ref": "#/$defs/menu"
+        },
+        {
+          "$ref": "#/$defs/model"
+        },
+        {
+          "$ref": "#/$defs/radio-group"
+        },
+        {
+          "$ref": "#/$defs/section"
+        },
+        {
+          "$ref": "#/$defs/segmented-control"
+        },
+        {
+          "$ref": "#/$defs/select"
+        },
+        {
+          "$ref": "#/$defs/slider"
+        },
+        {
+          "$ref": "#/$defs/stack"
+        },
+        {
+          "$ref": "#/$defs/stepper"
+        },
+        {
+          "$ref": "#/$defs/switch"
+        },
+        {
+          "$ref": "#/$defs/table"
+        },
+        {
+          "$ref": "#/$defs/tabs"
+        },
+        {
+          "$ref": "#/$defs/text"
+        }
+      ]
+    },
+    "Token": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*$"
+        }
+      },
+      "required": [
+        "token"
+      ],
+      "additionalProperties": false
+    },
+    "alert": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "alert"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            },
+            "tone": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "info",
+                    "success",
+                    "warning",
+                    "danger"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Severity of the message."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:alert"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A message that tells the user about a result or problem, announced to assistive technology."
+    },
+    "button": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "button"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the button non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "idle",
+                    "busy"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "One of the component's states."
+            },
+            "submit": {
+              "type": "boolean",
+              "description": "Set to true to make the button submit its enclosing form, firing the form's `submit` event; such a button needs no `on-press`."
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            },
+            "variant": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "primary",
+                    "secondary",
+                    "danger"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Visual emphasis: primary for the main action, danger for destructive ones."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "press": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "Triggers an action when pressed; use it for submitting, confirming and other commands."
+    },
+    "cell": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "cell"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:cell"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "One data cell of a table row; it can hold text and other components."
+    },
+    "checkbox": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "checkbox"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "checked": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Whether the control is on; bind it to a boolean to read and write it."
+            },
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the checkbox non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A box the user ticks or clears to turn one independent option on or off."
+    },
+    "color-picker": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "color-picker"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the colour picker non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The chosen colour as #rrggbb; bind it to read and write the choice."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "Chooses a colour; the value is written as a lowercase hex colour such as #3b82f6."
+    },
+    "column": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "column"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "sort": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "none",
+                    "ascending",
+                    "descending"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The sort direction currently applied to this column."
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "press": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A column header of a table; its content is the header text."
+    },
+    "combobox": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "combobox"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the combobox non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "placeholder": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Hint text shown while the input is empty; it does not replace the label."
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text of the input; bind it to read and write what the user typed or picked."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/option"
+              },
+              {
+                "$ref": "#/$defs/each:combobox"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A text input with suggested options, for a value the user may type or pick; use select when only the listed options are valid."
+    },
+    "date-picker": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "date-picker"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the picker non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "max": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The latest allowed value, in the format of `type`."
+            },
+            "min": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The earliest allowed value, in the format of `type`."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "type": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "date",
+                    "time",
+                    "datetime"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "What is chosen: `date` as yyyy-mm-dd, `time` as hh:mm, `datetime` as yyyy-mm-ddThh:mm."
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The chosen date or time in the format of `type`; bind it to read and write it."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "Chooses a date, a time or both; the value is written as text in a fixed format."
+    },
+    "dialog": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "dialog"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "modal": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "When true the rest of the screen is blocked while the dialog is open."
+            },
+            "open": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Whether the dialog is shown; bind it to read and write visibility."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "close": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "actions": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/each:dialog:actions"
+                  }
+                ]
+              },
+              "description": "The buttons that answer the dialog, such as Cancel and Confirm."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:dialog"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A window above the screen for confirmations and short tasks; put its buttons in `actions`."
+    },
+    "each:alert": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:alert"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:cell": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:cell"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:combobox": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/option"
+              },
+              {
+                "$ref": "#/$defs/each:combobox"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:dialog": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:dialog"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:dialog:actions": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:dialog:actions"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:form": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:form"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:form:footer": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:form:footer"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:grid": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:grid"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:item": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:item"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:list": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/item"
+              },
+              {
+                "$ref": "#/$defs/each:list"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:list:empty": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/item"
+              },
+              {
+                "$ref": "#/$defs/each:list:empty"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:menu": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/menu-item"
+              },
+              {
+                "$ref": "#/$defs/each:menu"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:radio-group": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/radio"
+              },
+              {
+                "$ref": "#/$defs/each:radio-group"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:screen": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:screen"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:section": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:section"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:section:header": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:section:header"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:segmented-control": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/segment"
+              },
+              {
+                "$ref": "#/$defs/each:segmented-control"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:select": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/option"
+              },
+              {
+                "$ref": "#/$defs/each:select"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:stack": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:stack"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:tab": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:tab"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:table": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/column"
+              },
+              {
+                "$ref": "#/$defs/row"
+              },
+              {
+                "$ref": "#/$defs/each:table"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "each:table:empty": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "each"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "as": {
+              "type": "string",
+              "pattern": "^[a-z][A-Za-z0-9]*$"
+            },
+            "in": {
+              "$ref": "#/$defs/Binding"
+            }
+          },
+          "required": [
+            "as",
+            "in"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/column"
+              },
+              {
+                "$ref": "#/$defs/row"
+              },
+              {
+                "$ref": "#/$defs/each:table:empty"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props",
+        "children"
+      ],
+      "additionalProperties": false,
+      "description": "Repeats its elements once per item of the array `in` is bound to, with the item named by `as` (SPEC §4.3)."
+    },
+    "field": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "field"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the field non-interactive."
+            },
+            "error": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "An error message to show for this field; set it when the value is invalid."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "placeholder": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Hint text shown while the field is empty; it does not replace the label."
+            },
+            "required": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true when the user must fill the field in."
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "valid",
+                    "invalid"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "One of the component's states."
+            },
+            "type": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "text",
+                    "email",
+                    "password",
+                    "number",
+                    "search",
+                    "multiline"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "What kind of text is entered; it selects the keyboard and masking."
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The current text; bind it to a path to read and write the input."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A single-value text input such as an email, password, number or multi-line note."
+    },
+    "form": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "form"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "idle",
+                    "submitting",
+                    "invalid"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "One of the component's states."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "submit": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "footer": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/each:form:footer"
+                  }
+                ]
+              },
+              "description": "Actions of the form, typically the submit and cancel buttons."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:form"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "Groups input controls that are submitted together; the `submit` event fires when the user submits it."
+    },
+    "grid": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "grid"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "columns": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1.0
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Number of equal columns in the grid, at least 1."
+            },
+            "gap": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Space between grid cells, as a dimension token."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "material": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Frosted-glass surface behind the grid, as a material token: a background blur and a tint."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "required": [
+            "columns"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:grid"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "Lays its children out in a fixed number of equal columns; use it for card galleries and dashboards."
+    },
+    "heading": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "heading"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "level": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1.0,
+                  "maximum": 6.0
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Heading level from 1 to 6; use 1 for the screen title."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            }
+          },
+          "required": [
+            "level"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A title for the content that follows it; the level orders headings from 1 (most important) to 6."
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "image"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "src": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Where the image is loaded from, a URL or a binding to one."
+            }
+          },
+          "required": [
+            "label",
+            "src"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A picture; always give a label that describes it for people who cannot see it."
+    },
+    "item": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "item"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "press": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:item"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "One entry of a list; it can hold text and other components and may be pressed."
+    },
+    "link": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "link"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "href": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The destination URL; leave it out when navigation is handled by `on-press`."
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "press": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "Navigates to another place; use a button instead for actions that change data."
+    },
+    "list": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "list"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "ordered": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true when the order of the items is meaningful."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ready",
+                    "loading",
+                    "empty"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "One of the component's states."
+            }
+          },
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "empty": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/item"
+                  },
+                  {
+                    "$ref": "#/$defs/each:list:empty"
+                  }
+                ]
+              },
+              "description": "Content shown instead of the items when there are none, such as \"No results found\"."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/item"
+              },
+              {
+                "$ref": "#/$defs/each:list"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A sequence of items; use it for feeds and collections, with `ordered` when the order matters."
+    },
+    "menu": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "menu"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/menu-item"
+              },
+              {
+                "$ref": "#/$defs/each:menu"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A list of commands the user can pick from, such as an actions or overflow menu."
+    },
+    "menu-item": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "menu-item"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the command non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "press": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "One command inside a menu; its content is the visible text."
+    },
+    "model": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "model"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "fallback": {
+              "type": "string",
+              "description": "A still image (.png, .jpg, .jpeg, .webp) shown while the model loads, where it cannot be shown, and in design tools; same path rules as src."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "src": {
+              "type": "string",
+              "description": "The glTF binary or JSON file (.glb, .gltf) the web shows; a path relative to the project or an https URL, never a binding."
+            },
+            "usdz": {
+              "type": "string",
+              "description": "The USDZ file (.usdz) Apple platforms show; a path relative to the project or an https URL, never a binding."
+            }
+          },
+          "required": [
+            "fallback",
+            "label",
+            "src"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A 3D model the user can turn; give it a still fallback image and a label that describes what it shows."
+    },
+    "option": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "option"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The value the select or combobox takes when this option is chosen."
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "One choice inside a select or combobox; its content is the visible text."
+    },
+    "radio": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "radio"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make this choice non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The value the group takes when this radio is selected."
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "One choice inside a radio group; its content is the visible label."
+    },
+    "radio-group": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "radio-group"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `value` of the selected radio; bind it to read and write the choice."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/radio"
+              },
+              {
+                "$ref": "#/$defs/each:radio-group"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A set of radio options of which exactly one can be chosen."
+    },
+    "row": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "row"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "selected": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true when the row is selected."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "press": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/cell"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "One row of a table, made of cells in the order of the columns."
+    },
+    "screen": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "screen"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ready",
+                    "loading",
+                    "error"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "One of the component's states."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:screen"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "The root of every document: one full screen of UI, carrying the format version."
+    },
+    "section": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "section"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "header": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/each:section:header"
+                  }
+                ]
+              },
+              "description": "Optional header content shown above the section body, such as a heading."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:section"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A named region of the screen that groups related content; use it to divide a screen into labelled parts."
+    },
+    "segment": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "segment"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make this segment non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The value the control takes when this segment is chosen."
+            }
+          },
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "One choice inside a segmented control; its content is the visible text."
+    },
+    "segmented-control": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "segmented-control"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `value` of the chosen segment; bind it to read and write the choice."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/segment"
+              },
+              {
+                "$ref": "#/$defs/each:segmented-control"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A row of joined segments of which exactly one can be chosen; use it for a few short, mutually exclusive choices that switch a view or mode."
+    },
+    "select": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "select"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the select non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `value` of the chosen option; bind it to read and write the choice."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/option"
+              },
+              {
+                "$ref": "#/$defs/each:select"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A drop-down that lets the user choose one option from a longer list."
+    },
+    "slider": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "slider"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the slider non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "max": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The largest value the slider allows; the default is 100."
+            },
+            "min": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The smallest value the slider allows; the default is 0."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "step": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The distance between values the slider moves in; the default is 1."
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The current number; bind it to read and write the choice."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A thumb the user drags along a range to choose a number; use it when the exact value matters less than the position."
+    },
+    "stack": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "stack"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "align": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "start",
+                    "center",
+                    "end",
+                    "stretch"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "How children are aligned across the main direction."
+            },
+            "direction": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "column",
+                    "row"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Whether children flow down a column or along a row."
+            },
+            "gap": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Space between children, as a dimension token."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "material": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Frosted-glass surface behind the stack, as a material token: a background blur and a tint."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "wrap": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to let children wrap onto further lines when they do not fit."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:stack"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "Lays its children out in one line, as a column or a row; use it for most vertical or horizontal grouping."
+    },
+    "stepper": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "stepper"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the stepper non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "max": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The largest value the stepper allows; without it the value has no upper bound."
+            },
+            "min": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The smallest value the stepper allows; without it the value has no lower bound."
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "step": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The amount one press adds or subtracts; the default is 1."
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The current number; bind it to read and write the count."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A number the user raises or lowers by a fixed step with plus and minus buttons; use it for small counts such as a quantity."
+    },
+    "switch": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "switch"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "checked": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Whether the control is on; bind it to a boolean to read and write it."
+            },
+            "disabled": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "$ref": "#/$defs/NegatableBinding"
+                }
+              ],
+              "description": "Set to true to make the switch non-interactive."
+            },
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "A toggle that applies a setting immediately; prefer it over a checkbox for on/off settings."
+    },
+    "tab": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "tab"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Node"
+              },
+              {
+                "$ref": "#/$defs/each:tab"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "One panel of a tabs component: its label becomes the tab title and its content the panel."
+    },
+    "table": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "table"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ready",
+                    "loading",
+                    "empty"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "One of the component's states."
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false
+        },
+        "slots": {
+          "type": "object",
+          "properties": {
+            "empty": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Node"
+                  },
+                  {
+                    "$ref": "#/$defs/column"
+                  },
+                  {
+                    "$ref": "#/$defs/row"
+                  },
+                  {
+                    "$ref": "#/$defs/each:table:empty"
+                  }
+                ]
+              },
+              "description": "Content shown instead of the rows when there are none, such as \"No results found\"."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/column"
+              },
+              {
+                "$ref": "#/$defs/row"
+              },
+              {
+                "$ref": "#/$defs/each:table"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "props"
+      ],
+      "additionalProperties": false,
+      "description": "Tabular data with column headers and rows; always give it a label."
+    },
+    "tabs": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "tabs"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "selected": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The `id` of the selected `tab`; bind it to read and write the active tab."
+            }
+          },
+          "additionalProperties": false
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "change": {
+              "$ref": "#/$defs/Action"
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tab"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "Switches between alternative panels, one visible at a time; each panel is a `tab` child."
+    },
+    "text": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "text"
+        },
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "props": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "$ref": "#/$defs/universal:hidden"
+            },
+            "label": {
+              "$ref": "#/$defs/universal:label"
+            },
+            "perspective": {
+              "$ref": "#/$defs/universal:perspective"
+            },
+            "rotate-x": {
+              "$ref": "#/$defs/universal:rotate-x"
+            },
+            "rotate-y": {
+              "$ref": "#/$defs/universal:rotate-y"
+            },
+            "rotate-z": {
+              "$ref": "#/$defs/universal:rotate-z"
+            },
+            "text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both."
+            },
+            "tone": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "default",
+                    "muted",
+                    "success",
+                    "warning",
+                    "danger"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Semantic colouring of the text; muted for secondary text, danger for errors."
+            }
+          },
+          "additionalProperties": false
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false,
+      "description": "A run of plain text such as a paragraph, caption or message."
+    },
+    "universal:hidden": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/NegatableBinding"
+        }
+      ],
+      "description": "Not rendered and not exposed."
+    },
+    "universal:label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/Binding"
+        }
+      ],
+      "description": "Accessible name."
+    },
+    "universal:perspective": {
+      "type": "number",
+      "minimum": 1.0,
+      "description": "Viewer distance of a 3D tilt, in px."
+    },
+    "universal:rotate-x": {
+      "type": "number",
+      "minimum": -360.0,
+      "maximum": 360.0,
+      "description": "Rotation about the horizontal axis, in degrees."
+    },
+    "universal:rotate-y": {
+      "type": "number",
+      "minimum": -360.0,
+      "maximum": 360.0,
+      "description": "Rotation about the vertical axis, in degrees."
+    },
+    "universal:rotate-z": {
+      "type": "number",
+      "minimum": -360.0,
+      "maximum": 360.0,
+      "description": "Rotation in the screen plane, in degrees."
+    }
+  }
+}
