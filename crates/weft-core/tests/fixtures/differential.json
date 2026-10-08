@@ -1762,7 +1762,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -2007,7 +2015,22 @@
       "message": "\"type\" at /properties/b/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/a/type names no JSON Schema type.",
+      "path": "#/properties/a/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/b/type names no JSON Schema type.",
+      "path": "#/properties/b/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -2265,7 +2288,15 @@
       "message": "\"$ref\" at /properties/user/$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -3454,7 +3485,15 @@
       "message": "\"properties\" at /properties is not an object."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"properties\" at /properties is not an object.",
+      "path": "#/properties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -3565,6 +3604,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -3763,7 +3816,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -3797,6 +3858,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/properties/user/type names no JSON Schema type.",
+      "path": "#/additionalProperties/properties/user/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -3902,6 +3970,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done/additionalProperties is neither an object nor a boolean.",
+      "path": "#/properties/done/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -4051,6 +4126,27 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/properties/done/type names no JSON Schema type.",
+      "path": "#/additionalProperties/properties/done/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/items is neither an object nor a boolean.",
+      "path": "#/additionalProperties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items is neither an object nor a boolean.",
+      "path": "#/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"message\" in $.error.",
@@ -4082,6 +4178,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -4118,7 +4221,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -4207,6 +4318,55 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/title/properties/email/type names no JSON Schema type.",
+      "path": "#/items/properties/title/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/title/properties/done/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/title/properties/done/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/title/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/properties/title/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/title/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/title/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/items/type names no JSON Schema type.",
+      "path": "#/items/properties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items is neither an object nor a boolean.",
+      "path": "#/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"team\" in $.",
@@ -4292,7 +4452,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -4310,7 +4478,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -4378,7 +4554,36 @@
       "message": "\"type\" at /additionalProperties/items/properties/done/items/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/items/properties/title/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/items/properties/title/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/items/properties/email/properties/title is neither an object nor a boolean.",
+      "path": "#/additionalProperties/items/properties/email/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/items/properties/email/items/type names no JSON Schema type.",
+      "path": "#/additionalProperties/items/properties/email/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/items/properties/done/items/type names no JSON Schema type.",
+      "path": "#/additionalProperties/items/properties/done/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -4403,6 +4608,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos is neither an object nor a boolean.",
+      "path": "#/properties/todos",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -4504,6 +4716,13 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items is neither an object nor a boolean.",
+      "path": "#/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"error\" in $.",
@@ -4572,6 +4791,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/additionalProperties/properties/user/type names no JSON Schema type.",
+      "path": "#/items/additionalProperties/properties/user/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties/items is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -4827,7 +5060,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -4843,7 +5084,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -4942,7 +5191,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -4996,7 +5253,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -5014,7 +5279,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -5071,6 +5344,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/properties/email/items/type names no JSON Schema type.",
+      "path": "#/additionalProperties/properties/email/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items is neither an object nor a boolean.",
+      "path": "#/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -5180,6 +5467,34 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/title/properties/0/type names no JSON Schema type.",
+      "path": "#/properties/title/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/done/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/items/type names no JSON Schema type.",
+      "path": "#/items/properties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -5481,6 +5796,27 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/title/items/type names no JSON Schema type.",
+      "path": "#/properties/title/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/0/type names no JSON Schema type.",
+      "path": "#/items/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"confirmOpen\" in $.",
@@ -5605,7 +5941,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -5637,6 +5981,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -5704,6 +6055,27 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/user is neither an object nor a boolean.",
+      "path": "#/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/todos/items/type names no JSON Schema type.",
+      "path": "#/properties/todos/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"user\" in $.",
@@ -5739,7 +6111,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -5839,6 +6219,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/properties/title/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/properties/title/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/additionalProperties/type names no JSON Schema type.",
+      "path": "#/items/items/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -5992,7 +6386,57 @@
       "message": "The schema at /items/items/items is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy/properties/busy is neither an object nor a boolean.",
+      "path": "#/properties/busy/properties/busy",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/items/type names no JSON Schema type.",
+      "path": "#/items/properties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/properties/user is neither an object nor a boolean.",
+      "path": "#/items/items/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/properties/items is neither an object nor a boolean.",
+      "path": "#/items/items/properties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/additionalProperties/type names no JSON Schema type.",
+      "path": "#/items/items/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/items is neither an object nor a boolean.",
+      "path": "#/items/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -6081,6 +6525,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy/properties/title/additionalProperties is neither an object nor a boolean.",
+      "path": "#/properties/busy/properties/title/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -6182,6 +6640,48 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy/properties/title is neither an object nor a boolean.",
+      "path": "#/properties/busy/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy/properties/todos is neither an object nor a boolean.",
+      "path": "#/properties/busy/properties/todos",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done is neither an object nor a boolean.",
+      "path": "#/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/email/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/email/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/todos/properties/email is neither an object nor a boolean.",
+      "path": "#/items/properties/todos/properties/email",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"draft\" in $.",
@@ -6239,7 +6739,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -6326,6 +6834,41 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/title/properties/0/properties/0/type names no JSON Schema type.",
+      "path": "#/properties/title/properties/0/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/title/properties/user/type names no JSON Schema type.",
+      "path": "#/properties/title/properties/user/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/title/type names no JSON Schema type.",
+      "path": "#/items/properties/title/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/type names no JSON Schema type.",
+      "path": "#/items/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"account\" in $.",
@@ -6383,7 +6926,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -6440,6 +6991,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/todos/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/todos/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/todos/items/type names no JSON Schema type.",
+      "path": "#/items/properties/todos/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/email/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/email/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -6580,6 +7152,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos is neither an object nor a boolean.",
+      "path": "#/properties/todos",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -6742,7 +7328,22 @@
       "message": "\"$ref\" at /properties/title/$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -6764,6 +7365,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -6962,7 +7570,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -7011,6 +7627,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/items/properties/title/items is neither an object nor a boolean.",
+      "path": "#/properties/items/properties/title/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -7117,6 +7747,41 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/user is neither an object nor a boolean.",
+      "path": "#/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/items/properties/todos/properties/todos/type names no JSON Schema type.",
+      "path": "#/additionalProperties/items/properties/todos/properties/todos/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/items/properties/todos/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/items/properties/todos/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/title/properties/items/type names no JSON Schema type.",
+      "path": "#/items/properties/title/properties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -7399,7 +8064,36 @@
       "message": "The schema at /items/properties/busy/items is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/busy/properties/0/type names no JSON Schema type.",
+      "path": "#/items/properties/busy/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/busy/properties/email/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/busy/properties/email/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/busy/items is neither an object nor a boolean.",
+      "path": "#/items/properties/busy/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -7427,6 +8121,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -7463,7 +8164,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -7481,7 +8190,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -7504,6 +8221,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -7564,6 +8288,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/0/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/0/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -7775,6 +8506,13 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"trip\" in $.",
@@ -7974,6 +8712,20 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/email/items/type names no JSON Schema type.",
+      "path": "#/properties/email/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done is neither an object nor a boolean.",
+      "path": "#/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"emailAlerts\" in $.",
@@ -8041,7 +8793,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -8265,7 +9025,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -8288,6 +9056,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos is neither an object nor a boolean.",
+      "path": "#/properties/todos",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -8347,6 +9122,13 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/0/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/0/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"progress\" in $.",
@@ -8394,7 +9176,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -8417,6 +9207,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -8496,6 +9293,20 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/0/properties/busy/type names no JSON Schema type.",
+      "path": "#/items/properties/0/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/properties/email/type names no JSON Schema type.",
+      "path": "#/items/items/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"caption\" in $.",
@@ -8521,7 +9332,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -8539,7 +9358,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -8611,6 +9438,41 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/busy is neither an object nor a boolean.",
+      "path": "#/items/properties/busy",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/done/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/properties/done/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/done/items/properties/user/type names no JSON Schema type.",
+      "path": "#/items/properties/done/items/properties/user/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/done/items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/properties/done/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -8751,7 +9613,15 @@
       "message": "The schema at /properties/email/items/items is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email/items/items is neither an object nor a boolean.",
+      "path": "#/properties/email/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -8806,6 +9676,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/properties/busy/type names no JSON Schema type.",
+      "path": "#/additionalProperties/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/items is neither an object nor a boolean.",
+      "path": "#/additionalProperties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -8885,7 +9776,36 @@
       "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/todos/items/type names no JSON Schema type.",
+      "path": "#/properties/todos/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -8921,7 +9841,22 @@
       "message": "\"type\" at /items/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos/items is neither an object nor a boolean.",
+      "path": "#/properties/todos/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -9120,7 +10055,29 @@
       "message": "\"type\" at /items/additionalProperties/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties is neither an object nor a boolean.",
+      "path": "#/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/email/properties/done/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/email/properties/done/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/additionalProperties/type names no JSON Schema type.",
+      "path": "#/items/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -9138,7 +10095,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -9232,6 +10197,41 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/user/properties/0 is neither an object nor a boolean.",
+      "path": "#/properties/user/properties/0",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/additionalProperties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/additionalProperties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/0 is neither an object nor a boolean.",
+      "path": "#/items/properties/0",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/email/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/email/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items is neither an object nor a boolean.",
+      "path": "#/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"name\" in $.",
@@ -9307,7 +10307,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -9424,6 +10432,69 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email/additionalProperties/additionalProperties is neither an object nor a boolean.",
+      "path": "#/properties/email/additionalProperties/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/email/additionalProperties/items/type names no JSON Schema type.",
+      "path": "#/properties/email/additionalProperties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos/items is neither an object nor a boolean.",
+      "path": "#/properties/todos/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/user is neither an object nor a boolean.",
+      "path": "#/items/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/additionalProperties/items/type names no JSON Schema type.",
+      "path": "#/items/additionalProperties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"labels\" in $.",
@@ -9459,7 +10530,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -9477,7 +10556,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -9587,6 +10674,20 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"email\" in $.",
@@ -9632,7 +10733,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -9692,7 +10801,29 @@
       "message": "The schema at /items/items is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/done/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/done/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items is neither an object nor a boolean.",
+      "path": "#/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -9760,6 +10891,34 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos is neither an object nor a boolean.",
+      "path": "#/properties/todos",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/items is neither an object nor a boolean.",
+      "path": "#/additionalProperties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/title/type names no JSON Schema type.",
+      "path": "#/items/properties/title/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -9907,6 +11066,34 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/busy/properties/0/type names no JSON Schema type.",
+      "path": "#/properties/busy/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy/properties/busy/properties/user is neither an object nor a boolean.",
+      "path": "#/properties/busy/properties/busy/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/email/type names no JSON Schema type.",
+      "path": "#/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"name\" in $.team.",
@@ -9964,7 +11151,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -10022,6 +11217,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/properties/0/properties/done is neither an object nor a boolean.",
+      "path": "#/additionalProperties/properties/0/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/properties/0/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/properties/0/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -10110,6 +11326,34 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/0/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/0/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/0/items is neither an object nor a boolean.",
+      "path": "#/properties/0/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"users\" in $.",
@@ -10137,7 +11381,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -10155,7 +11407,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -10173,7 +11433,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -10206,7 +11474,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -10222,7 +11498,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -10247,6 +11531,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -10445,7 +11736,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -10476,6 +11775,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email/properties/items is neither an object nor a boolean.",
+      "path": "#/properties/email/properties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -10587,6 +11893,34 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/busy/items is neither an object nor a boolean.",
+      "path": "#/items/properties/busy/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/items/properties/todos/type names no JSON Schema type.",
+      "path": "#/items/properties/items/properties/todos/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/items/properties/done/properties/user/type names no JSON Schema type.",
+      "path": "#/items/properties/items/properties/done/properties/user/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"trip\" in $.",
@@ -10692,7 +12026,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -10731,6 +12073,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/0/properties/user is neither an object nor a boolean.",
+      "path": "#/properties/0/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -10799,6 +12148,13 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"title\" in $.",
@@ -10826,7 +12182,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -10844,7 +12208,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -10909,6 +12281,41 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/0/type names no JSON Schema type.",
+      "path": "#/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy is neither an object nor a boolean.",
+      "path": "#/properties/busy",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/properties/email is neither an object nor a boolean.",
+      "path": "#/items/items/properties/email",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/properties/done is neither an object nor a boolean.",
+      "path": "#/items/items/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"progress\" in $.",
@@ -10956,7 +12363,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -11039,6 +12454,34 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/busy/properties/done/type names no JSON Schema type.",
+      "path": "#/items/properties/busy/properties/done/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/additionalProperties/type names no JSON Schema type.",
+      "path": "#/items/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/properties/user/properties/busy/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/properties/user/properties/busy/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/properties/todos/type names no JSON Schema type.",
+      "path": "#/items/items/properties/todos/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"draft\" in $.",
@@ -11096,7 +12539,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -11155,6 +12606,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/items is neither an object nor a boolean.",
+      "path": "#/properties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/busy/type names no JSON Schema type.",
+      "path": "#/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W316",
       "severity": "error",
@@ -11303,6 +12775,13 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"theme\" in $.",
@@ -11390,7 +12869,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -11439,6 +12926,13 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"error\" in $.",
@@ -11471,6 +12965,13 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties is neither an object nor a boolean.",
+      "path": "#/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"users\" in $.",
@@ -11498,7 +12999,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -11569,6 +13078,41 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/properties/title is neither an object nor a boolean.",
+      "path": "#/additionalProperties/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/properties/busy/properties/0/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/properties/busy/properties/0/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/properties/busy/properties/busy/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/properties/busy/properties/busy/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/properties/user is neither an object nor a boolean.",
+      "path": "#/additionalProperties/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"front\" in $.",
@@ -11616,7 +13160,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -11654,6 +13206,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -11862,7 +13421,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -11880,7 +13447,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -11967,6 +13542,27 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/0/properties/busy/items is neither an object nor a boolean.",
+      "path": "#/items/properties/0/properties/busy/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/0/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/0/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/properties/busy/type names no JSON Schema type.",
+      "path": "#/items/items/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"players\" in $.",
@@ -12004,7 +13600,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -12410,6 +14014,34 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/title/properties/email/type names no JSON Schema type.",
+      "path": "#/properties/title/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/done/properties/user/items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/done/properties/user/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/properties/title/type names no JSON Schema type.",
+      "path": "#/properties/done/properties/title/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/done/items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/done/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"error\" in $.",
@@ -12532,6 +14164,62 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/items is neither an object nor a boolean.",
+      "path": "#/additionalProperties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/0/additionalProperties/properties/busy/type names no JSON Schema type.",
+      "path": "#/items/properties/0/additionalProperties/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/0/additionalProperties/items is neither an object nor a boolean.",
+      "path": "#/items/properties/0/additionalProperties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/0/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/0/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/busy/items/properties/user is neither an object nor a boolean.",
+      "path": "#/items/properties/busy/items/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/busy/items/items/type names no JSON Schema type.",
+      "path": "#/items/properties/busy/items/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -12779,6 +14467,41 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email/properties/items/items is neither an object nor a boolean.",
+      "path": "#/properties/email/properties/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/email/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/email/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/busy/type names no JSON Schema type.",
+      "path": "#/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"error\" in $.",
@@ -12851,7 +14574,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -13020,6 +14751,27 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/properties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/properties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"draft\" in $.",
@@ -13114,6 +14866,41 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/email/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/email/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/user is neither an object nor a boolean.",
+      "path": "#/items/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties/items is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -13310,7 +15097,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -13461,6 +15256,76 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/items/properties/0/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/items/properties/0/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/items/properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/items/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos/items/items is neither an object nor a boolean.",
+      "path": "#/properties/todos/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/properties/done/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/properties/done/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties/properties/items/properties/title is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties/properties/items/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/additionalProperties/properties/busy/type names no JSON Schema type.",
+      "path": "#/items/additionalProperties/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/items is neither an object nor a boolean.",
+      "path": "#/items/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"confirmOpen\" in $.",
@@ -13504,6 +15369,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -13598,6 +15470,20 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"team\" in $.",
@@ -13683,7 +15569,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -13711,7 +15605,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -13729,7 +15631,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -13747,7 +15657,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -13913,6 +15831,76 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/todos/properties/title/type names no JSON Schema type.",
+      "path": "#/properties/todos/properties/title/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/todos/properties/done/type names no JSON Schema type.",
+      "path": "#/properties/todos/properties/done/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos/additionalProperties/properties/title/additionalProperties is neither an object nor a boolean.",
+      "path": "#/properties/todos/additionalProperties/properties/title/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/additionalProperties/properties/title/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/additionalProperties/properties/title/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos/additionalProperties/properties/items/properties/todos is neither an object nor a boolean.",
+      "path": "#/properties/todos/additionalProperties/properties/items/properties/todos",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/todos/additionalProperties/properties/items/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/todos/additionalProperties/properties/items/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/todos/items/type names no JSON Schema type.",
+      "path": "#/properties/todos/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/title/items is neither an object nor a boolean.",
+      "path": "#/properties/title/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/items/items/additionalProperties/type names no JSON Schema type.",
+      "path": "#/items/properties/items/items/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -14278,7 +16266,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -14327,6 +16323,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/0 is neither an object nor a boolean.",
+      "path": "#/properties/0",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email/properties/user/additionalProperties/items is neither an object nor a boolean.",
+      "path": "#/properties/email/properties/user/additionalProperties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email/items is neither an object nor a boolean.",
+      "path": "#/properties/email/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -14383,7 +16400,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -14399,7 +16424,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -14440,6 +16473,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -14488,7 +16535,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -14506,7 +16561,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -14524,7 +16587,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -14540,7 +16611,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -14558,7 +16637,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -14574,7 +16661,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -14603,7 +16698,22 @@
       "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done is neither an object nor a boolean.",
+      "path": "#/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -14644,6 +16754,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done is neither an object nor a boolean.",
+      "path": "#/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -14732,7 +16863,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -14795,6 +16934,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/0/properties/busy/type names no JSON Schema type.",
+      "path": "#/properties/0/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/0/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/0/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -14931,7 +17091,50 @@
       "message": "\"type\" at /items/items/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/todos/properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/todos/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/todos/items is neither an object nor a boolean.",
+      "path": "#/items/properties/todos/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/additionalProperties/properties/email/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/additionalProperties/properties/email/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/additionalProperties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/additionalProperties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/type names no JSON Schema type.",
+      "path": "#/items/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -14949,7 +17152,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -15054,6 +17265,55 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/todos/type names no JSON Schema type.",
+      "path": "#/properties/todos/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/type names no JSON Schema type.",
+      "path": "#/properties/done/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/done/items/properties/email is neither an object nor a boolean.",
+      "path": "#/items/properties/done/items/properties/email",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/done/items/properties/done/type names no JSON Schema type.",
+      "path": "#/items/properties/done/items/properties/done/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/done/items/properties/busy is neither an object nor a boolean.",
+      "path": "#/items/properties/done/items/properties/busy",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items is neither an object nor a boolean.",
+      "path": "#/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"theme\" in $.",
@@ -15139,7 +17399,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -15275,6 +17543,34 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"user\" in $.",
@@ -15365,6 +17661,20 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/user/items/properties/todos is neither an object nor a boolean.",
+      "path": "#/items/properties/user/items/properties/todos",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"emailAlerts\" in $.",
@@ -15451,6 +17761,13 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"confirmOpen\" in $.",
@@ -15514,6 +17831,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/done/properties/0/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/done/properties/0/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -15610,7 +17941,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -15649,6 +17988,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/items is neither an object nor a boolean.",
+      "path": "#/items/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -15813,6 +18166,48 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/properties/busy is neither an object nor a boolean.",
+      "path": "#/items/items/properties/busy",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/items/properties/email/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/items/properties/email/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"front\" in $.",
@@ -15912,7 +18307,43 @@
       "message": "\"type\" at /items/items/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/title/type names no JSON Schema type.",
+      "path": "#/properties/title/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/user/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/properties/user/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/user/items/type names no JSON Schema type.",
+      "path": "#/items/properties/user/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/title is neither an object nor a boolean.",
+      "path": "#/items/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/type names no JSON Schema type.",
+      "path": "#/items/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -15935,6 +18366,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -16023,7 +18461,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -16106,6 +18552,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -16214,7 +18674,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -16230,7 +18698,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -16257,6 +18733,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -16342,6 +18825,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/0/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/0/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/0/items/type names no JSON Schema type.",
+      "path": "#/properties/0/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -16448,7 +18945,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -16515,6 +19020,34 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/properties/done is neither an object nor a boolean.",
+      "path": "#/additionalProperties/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/items/additionalProperties/items/type names no JSON Schema type.",
+      "path": "#/additionalProperties/items/additionalProperties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -16679,6 +19212,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/properties/user/properties/title/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/properties/user/properties/title/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/properties/0 is neither an object nor a boolean.",
+      "path": "#/additionalProperties/properties/0",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -16879,6 +19433,27 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/properties/title is neither an object nor a boolean.",
+      "path": "#/additionalProperties/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/user is neither an object nor a boolean.",
+      "path": "#/items/properties/user",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/busy/type names no JSON Schema type.",
+      "path": "#/items/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"email\" in $.",
@@ -17023,7 +19598,64 @@
       "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/user/type names no JSON Schema type.",
+      "path": "#/properties/user/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/title is neither an object nor a boolean.",
+      "path": "#/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/0/properties/busy/type names no JSON Schema type.",
+      "path": "#/items/properties/0/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/0/properties/items/properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/0/properties/items/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/0/properties/items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/items/properties/0/properties/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/0/properties/items/items is neither an object nor a boolean.",
+      "path": "#/items/properties/0/properties/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/properties/title/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/properties/title/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -17222,6 +19854,27 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/additionalProperties/properties/items/type names no JSON Schema type.",
+      "path": "#/properties/done/additionalProperties/properties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done/additionalProperties/items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/properties/done/additionalProperties/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"emailAlerts\" in $.",
@@ -17289,7 +19942,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -17307,7 +19968,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -17470,6 +20139,69 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/items/type names no JSON Schema type.",
+      "path": "#/properties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/title/items is neither an object nor a boolean.",
+      "path": "#/properties/title/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/properties/todos/properties/email/properties/busy is neither an object nor a boolean.",
+      "path": "#/additionalProperties/properties/todos/properties/email/properties/busy",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/properties/todos/properties/email/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/properties/todos/properties/email/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/properties/todos/properties/busy/properties/title is neither an object nor a boolean.",
+      "path": "#/additionalProperties/properties/todos/properties/busy/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/properties/todos/properties/busy/properties/email/type names no JSON Schema type.",
+      "path": "#/additionalProperties/properties/todos/properties/busy/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/properties/todos/properties/busy/items/type names no JSON Schema type.",
+      "path": "#/additionalProperties/properties/todos/properties/busy/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"draft\" in $.",
@@ -17527,7 +20259,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -17563,6 +20303,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/email/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/email/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/email/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/email/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -17617,6 +20371,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -17782,6 +20543,48 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/todos/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/todos/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos/items is neither an object nor a boolean.",
+      "path": "#/properties/todos/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/0/additionalProperties/type names no JSON Schema type.",
+      "path": "#/items/properties/0/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/properties/email is neither an object nor a boolean.",
+      "path": "#/items/properties/email",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -17964,6 +20767,34 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/0 is neither an object nor a boolean.",
+      "path": "#/properties/0",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/user/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/user/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done is neither an object nor a boolean.",
+      "path": "#/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"emailAlerts\" in $.",
@@ -18031,7 +20862,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -18091,6 +20930,34 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/items/properties/done/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/items/properties/done/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/items/properties/email/type names no JSON Schema type.",
+      "path": "#/additionalProperties/items/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/items/additionalProperties is neither an object nor a boolean.",
+      "path": "#/additionalProperties/items/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -18245,7 +21112,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -18289,6 +21164,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email is neither an object nor a boolean.",
+      "path": "#/properties/email",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/properties/done/type names no JSON Schema type.",
+      "path": "#/items/properties/done/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/items/type names no JSON Schema type.",
+      "path": "#/items/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -18424,6 +21320,48 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/0/properties/busy/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/0/properties/busy/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/0/properties/busy/items is neither an object nor a boolean.",
+      "path": "#/properties/0/properties/busy/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/0/additionalProperties is neither an object nor a boolean.",
+      "path": "#/properties/0/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email is neither an object nor a boolean.",
+      "path": "#/properties/email",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/properties/busy/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/properties/busy/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos/properties/title is neither an object nor a boolean.",
+      "path": "#/properties/todos/properties/title",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"confirmOpen\" in $.",
@@ -18475,6 +21413,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/todos is neither an object nor a boolean.",
+      "path": "#/properties/todos",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -18640,6 +21592,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/0/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/0/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done/properties/items is neither an object nor a boolean.",
+      "path": "#/properties/done/properties/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/items/items/properties/0/type names no JSON Schema type.",
+      "path": "#/properties/done/items/items/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -18887,7 +21860,36 @@
       "message": "\"type\" at /properties/email/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/properties/0/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/properties/0/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy/additionalProperties/items/items is neither an object nor a boolean.",
+      "path": "#/properties/busy/additionalProperties/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy/items is neither an object nor a boolean.",
+      "path": "#/properties/busy/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/email/type names no JSON Schema type.",
+      "path": "#/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -18933,7 +21935,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -19071,6 +22081,55 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/done/additionalProperties/additionalProperties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/done/additionalProperties/additionalProperties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/items/type names no JSON Schema type.",
+      "path": "#/properties/done/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/additionalProperties/properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/additionalProperties/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/user/additionalProperties/items/properties/done/type names no JSON Schema type.",
+      "path": "#/properties/user/additionalProperties/items/properties/done/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/user/additionalProperties/items/properties/busy/type names no JSON Schema type.",
+      "path": "#/properties/user/additionalProperties/items/properties/busy/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/user/items is neither an object nor a boolean.",
+      "path": "#/properties/user/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"theme\" in $.",
@@ -19183,6 +22242,20 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/properties/user/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/properties/user/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"confirmOpen\" in $.",
@@ -19220,7 +22293,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -19287,7 +22368,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -19305,7 +22394,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -19420,6 +22517,48 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/email/properties/0/additionalProperties/type names no JSON Schema type.",
+      "path": "#/properties/email/properties/0/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email/properties/title/items/properties/0 is neither an object nor a boolean.",
+      "path": "#/properties/email/properties/title/items/properties/0",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/email/properties/title/items/properties/done/type names no JSON Schema type.",
+      "path": "#/properties/email/properties/title/items/properties/done/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/email/properties/title/items/items is neither an object nor a boolean.",
+      "path": "#/properties/email/properties/title/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/busy/additionalProperties/properties/title/additionalProperties is neither an object nor a boolean.",
+      "path": "#/properties/busy/additionalProperties/properties/title/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/busy/additionalProperties/items/type names no JSON Schema type.",
+      "path": "#/properties/busy/additionalProperties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"draft\" in $.",
@@ -19475,7 +22614,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -19493,7 +22640,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -19549,6 +22704,13 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/additionalProperties/properties/done/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/additionalProperties/properties/done/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -19681,7 +22843,15 @@
       "message": "\"$ref\" at /properties/title/properties/user/items/$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/properties/user/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/properties/user/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -19699,7 +22869,15 @@
       "message": "\"type\" at /type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /type names no JSON Schema type.",
+      "path": "#/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -19804,7 +22982,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -19820,7 +23006,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -19836,7 +23030,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -19919,7 +23121,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -19974,7 +23184,36 @@
       "message": "\"type\" at /additionalProperties/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done/properties/done/properties/0 is neither an object nor a boolean.",
+      "path": "#/properties/done/properties/done/properties/0",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/properties/done/properties/user/type names no JSON Schema type.",
+      "path": "#/properties/done/properties/done/properties/user/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/done/properties/done/properties/busy is neither an object nor a boolean.",
+      "path": "#/properties/done/properties/done/properties/busy",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -19992,7 +23231,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -20070,7 +23317,36 @@
       "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/0/type names no JSON Schema type.",
+      "path": "#/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/items/type names no JSON Schema type.",
+      "path": "#/additionalProperties/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -20088,7 +23364,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -20106,7 +23390,15 @@
       "message": "\"$ref\" at /$ref is not supported; that schema accepts any data."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /$ref is not supported; that schema accepts any data.",
+      "path": "#/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     }
+    ]
    }
   },
   {
@@ -20190,6 +23482,27 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/email/type names no JSON Schema type.",
+      "path": "#/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /items/$ref is not supported; that schema accepts any data.",
+      "path": "#/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -20414,7 +23727,29 @@
       "message": "\"type\" at /properties/done/items/type names no JSON Schema type."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/title/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/title/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/properties/email/type names no JSON Schema type.",
+      "path": "#/properties/done/properties/email/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/done/items/type names no JSON Schema type.",
+      "path": "#/properties/done/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -20502,6 +23837,41 @@
     ],
     "diagnostics": [
      {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/busy/properties/todos/properties/0/type names no JSON Schema type.",
+      "path": "#/properties/busy/properties/todos/properties/0/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/busy/properties/todos/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/busy/properties/todos/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/busy/items/type names no JSON Schema type.",
+      "path": "#/properties/busy/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /properties/user/additionalProperties/properties/todos/type names no JSON Schema type.",
+      "path": "#/properties/user/additionalProperties/properties/todos/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/user/additionalProperties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/user/additionalProperties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"progress\" in $.",
@@ -20547,7 +23917,15 @@
       "message": "The schema at the root of the data schema is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at the root of the data schema is neither an object nor a boolean.",
+      "path": "#",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -20577,6 +23955,20 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/type names no JSON Schema type.",
+      "path": "#/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",
@@ -20683,7 +24075,29 @@
       "message": "The schema at /items is neither an object nor a boolean."
      }
     ],
-    "diagnostics": []
+    "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/0/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/0/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items is neither an object nor a boolean.",
+      "path": "#/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     }
+    ]
    }
   },
   {
@@ -20882,6 +24296,69 @@
     ],
     "diagnostics": [
      {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/0/properties/title/properties/email/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/0/properties/title/properties/email/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/0/properties/items/additionalProperties/additionalProperties is neither an object nor a boolean.",
+      "path": "#/properties/0/properties/items/additionalProperties/additionalProperties",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/0/properties/items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/0/properties/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /properties/items/properties/done is neither an object nor a boolean.",
+      "path": "#/properties/items/properties/done",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/items/properties/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/items/properties/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /additionalProperties/items/properties/title/items is neither an object nor a boolean.",
+      "path": "#/additionalProperties/items/properties/title/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/items/items/type names no JSON Schema type.",
+      "path": "#/additionalProperties/items/items/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /items/additionalProperties/type names no JSON Schema type.",
+      "path": "#/items/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "The schema at /items/items is neither an object nor a boolean.",
+      "path": "#/items/items",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
+     {
       "code": "W315",
       "severity": "error",
       "message": "The data schema does not declare \"users\" in $.",
@@ -20995,6 +24472,48 @@
      }
     ],
     "diagnostics": [
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/items/items/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/items/items/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/email/properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/email/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/properties/todos/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/properties/todos/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W710",
+      "severity": "warning",
+      "message": "\"$ref\" at /additionalProperties/properties/done/items/$ref is not supported; that schema accepts any data.",
+      "path": "#/additionalProperties/properties/done/items/$ref",
+      "expected": "\"type\", \"properties\", \"additionalProperties\" or \"items\""
+     },
+     {
+      "code": "W709",
+      "severity": "error",
+      "message": "\"type\" at /additionalProperties/additionalProperties/type names no JSON Schema type.",
+      "path": "#/additionalProperties/additionalProperties/type",
+      "expected": "a JSON Schema 2020-12 object or boolean (SPEC §10.5)"
+     },
      {
       "code": "W315",
       "severity": "error",

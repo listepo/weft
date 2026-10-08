@@ -215,10 +215,7 @@ describe("plugin data size", () => {
     };
     writeJson(layer, KEY.source, { kind: "button" });
     assert.equal(stored.get(KEY.source), JSON.stringify({ kind: "button" }));
-    assert.throws(
-      () => writeJson(layer, KEY.source, "x".repeat(100_000)),
-      /longer than 100000/,
-    );
+    assert.throws(() => writeJson(layer, KEY.source, "x".repeat(100_000)), /longer than 100000/);
     assert.equal(stored.get(KEY.source), JSON.stringify({ kind: "button" }));
   });
 });
