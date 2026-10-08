@@ -120,6 +120,12 @@ impl Catalog {
         ))
     }
 
+    /// A catalog from a Custom Elements Manifest that extends this one, with its losses.
+    #[napi]
+    pub fn import_cem(&self, manifest: String, options: String) -> Result<String> {
+        js(web::import_cem(&manifest, &options, &self.inner))
+    }
+
     #[napi]
     pub fn check_data(
         &self,

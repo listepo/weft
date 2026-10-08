@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./wasm": "./src/wasm.ts",
-    "./web": "./src/web.ts"
+    "./web": "./src/web.ts",
+    "./cem": "./src/cem.ts"
   },
   "dependencies": {
     "zod": "4.6.5"

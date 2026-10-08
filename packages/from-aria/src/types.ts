@@ -1,23 +1,8 @@
-import type { Catalog, Diagnostic, Document } from "@weft/core";
+import type { Catalog, Diagnostic, Document, Loss, LossKind } from "@weft/core";
 
-// What an import could not carry over from the running UI (SPEC §9, "From a running UI").
-export type LossKind =
-  | "ids"
-  | "bindings"
-  | "actions"
-  | "tokens"
-  | "layout"
-  | "repetition"
-  | "slots"
-  | "hidden"
-  | "props"
-  | "values"
-  | "names"
-  | "kinds"
-  | "text"
-  | "structure";
-
-export type Loss = { kind: LossKind; path: string; note: string };
+// What an import could not carry over from the running UI (SPEC §9, "From a running UI"): the
+// loss shape every importer shares.
+export type { Loss, LossKind } from "@weft/core";
 
 export type ImportOptions = { catalog: Catalog };
 
