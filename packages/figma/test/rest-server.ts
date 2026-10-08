@@ -59,6 +59,13 @@ export function restJson(node: FakeNode, shared: boolean): Json {
     type: node.type,
     ...(node.visible ? {} : { visible: false }),
     absoluteBoundingBox: { x: node.x, y: node.y, width: node.width, height: node.height },
+    ...(node.gridRowAnchorIndex === undefined
+      ? {}
+      : { gridRowAnchorIndex: node.gridRowAnchorIndex }),
+    ...(node.gridColumnAnchorIndex === undefined
+      ? {}
+      : { gridColumnAnchorIndex: node.gridColumnAnchorIndex }),
+    ...(node.layoutPositioning === undefined ? {} : { layoutPositioning: node.layoutPositioning }),
   };
   if (shared && node.shared.size > 0)
     json["sharedPluginData"] = Object.fromEntries(

@@ -219,7 +219,7 @@ const cases: Edit[] = [
         parent: "form",
         index: 2,
         markup:
-          '<stack id="stack-promo" direction="row" gap="{token.space.sm}"><text id="text-terms-apply">Terms apply</text></stack>',
+          '<stack id="stack-promo" direction="row" align="start" gap="{token.space.sm}"><text id="text-terms-apply">Terms apply</text></stack>',
       },
     ],
     losses: ["ids", "values", "values", "ids", "ids", "kinds"],

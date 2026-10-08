@@ -3,7 +3,14 @@
 // of the wrong type takes the default the REST docs give, so a crafted file cannot throw here.
 // Children are wrapped on first visit, which leaves the size limits to the read-back.
 import type { FAlias, FComponentProperties, FEffect, FPaint } from "./api.ts";
-import type { ReadInstance, ReadLayout, ReadNode, ReadOther, VariableLookup } from "./layer.ts";
+import type {
+  GridAnchor,
+  ReadInstance,
+  ReadLayout,
+  ReadNode,
+  ReadOther,
+  VariableLookup,
+} from "./layer.ts";
 
 type Json = Record<string, unknown>;
 
@@ -68,6 +75,31 @@ function cornerRadius(node: Json): number | symbol {
 // The Plugin API counts degrees; the REST API's value is taken as radians (see README).
 const degrees = (radians: number): number => Math.round(((radians * 180) / Math.PI) * 1e9) / 1e9;
 
+/** A finite number the file actually wrote; a missing or wrong field stays absent, not zero. */
+function anchor(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+/**
+ * Grid cell and flow of a node that may be a child of an auto-layout frame. A field of the wrong
+ * type is left out, so a crafted file cannot invent a cell, and a node with no anchors stays in
+ * z-order.
+ */
+function anchorsOf(node: Json): GridAnchor {
+  const row = anchor(own(node, "gridRowAnchorIndex"));
+  const column = anchor(own(node, "gridColumnAnchorIndex"));
+  const positioning = own(node, "layoutPositioning");
+  const out: {
+    gridRowAnchorIndex?: number;
+    gridColumnAnchorIndex?: number;
+    layoutPositioning?: "AUTO" | "ABSOLUTE";
+  } = {};
+  if (row !== undefined) out.gridRowAnchorIndex = row;
+  if (column !== undefined) out.gridColumnAnchorIndex = column;
+  if (positioning === "AUTO" || positioning === "ABSOLUTE") out.layoutPositioning = positioning;
+  return out;
+}
+
 function layout(node: Json): ReadLayout {
   return {
     rotation: degrees(num(node["rotation"], 0)),
@@ -90,6 +122,7 @@ function layout(node: Json): ReadLayout {
     effects: list(node["effects"]).flatMap((e) => effect(e) ?? []),
     cornerRadius: cornerRadius(node),
     boundVariables: undefined,
+    ...anchorsOf(node),
   };
 }
 
@@ -139,7 +172,8 @@ export function restNode(value: unknown, options: RestOptions): ReadNode {
   let children: ReadNode[] | undefined;
   const kids = () => (children ??= list(node["children"]).map((c) => restNode(c, options)));
   const type = str(node["type"], "");
-  if (type === "TEXT") return { ...base, type, characters: str(node["characters"], "") };
+  if (type === "TEXT")
+    return { ...base, ...anchorsOf(node), type, characters: str(node["characters"], "") };
   if (type === "INSTANCE") {
     const instance: ReadInstance = {
       ...base,
@@ -169,6 +203,7 @@ export function restNode(value: unknown, options: RestOptions): ReadNode {
     };
   return {
     ...base,
+    ...anchorsOf(node),
     type: type as ReadOther["type"],
     get children() {
       return Array.isArray(node["children"]) ? kids() : undefined;
