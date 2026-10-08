@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 // A frame of a Figma file → `.weft` screen, read through the Figma REST API (`weft figma pull`):
 //   node figma-pull.ts <figma link | file key> [out.weft] [--node <id>]
-//     [--plugin-id <id>] [--force] [--project weft.json | --no-project]
+//     [--force] [--project weft.json | --no-project]
 // The token is read from the environment only, never from a flag, so it stays out of shell
 // history and process lists, and requests go to api.figma.com only. The project above the working
 // directory (SPEC §10.1) supplies the catalog and tokens, and `import.figma` (SPEC §10.6) the
-// output folder and the plugin id.
+// output folder.
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { loadTokens } from "@weft/catalog";
 import { hasErrors, serialize } from "@weft/core";
-import { parseTarget, PLUGIN_ID, pullScreen, PullError } from "@weft/figma/pull";
+import { parseTarget, pullScreen, PullError } from "@weft/figma/pull";
 // A JSON module, not a path under the repository, so the bundle needs no file beside it.
 import defaultTokens from "../../../packages/catalog/tokens/default.tokens.json" with { type: "json" };
 import {
@@ -27,7 +27,7 @@ import {
 } from "./lib.ts";
 
 const USAGE =
-  "usage: figma-pull <figma link | file key> [out.weft] [--node <id>] [--plugin-id <id>] [--force] [--project weft.json | --no-project]\nThe access token is read from FIGMA_TOKEN.\n";
+  "usage: figma-pull <figma link | file key> [out.weft] [--node <id>] [--force] [--project weft.json | --no-project]\nThe access token is read from FIGMA_TOKEN.\n";
 
 // A screen id becomes the file name only when it is a plain name.
 const SAFE_NAME = /^[A-Za-z0-9_-]{1,100}$/;
@@ -53,7 +53,6 @@ export async function main(
       allowPositionals: true,
       options: {
         node: { type: "string" },
-        "plugin-id": { type: "string" },
         force: { type: "boolean" },
         ...PROJECT_OPTIONS,
       },
@@ -91,7 +90,6 @@ export async function main(
       catalog,
       tokens,
       token,
-      pluginId: parsed.values["plugin-id"] ?? settings?.pluginId ?? PLUGIN_ID,
       fetch: host.fetch,
     });
   } catch (error) {

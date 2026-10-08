@@ -9,12 +9,6 @@ import { NO_VARIABLES, restNode } from "./rest.ts";
 
 export const FIGMA_API = "https://api.figma.com";
 
-/**
- * The plugin id of `plugins/figma/manifest.json`, whose private plugin data holds the Weft source of
- * files built before it moved to shared plugin data (`NAMESPACE`).
- */
-export const PLUGIN_ID = "weft-development";
-
 /** A frame's JSON is far below this; a larger response is refused before it is parsed. */
 export const MAX_RESPONSE_BYTES = 50_000_000;
 
@@ -58,7 +52,6 @@ export type PullOptions = ReadOptions & {
   nodeId: string;
   /** A personal access token or OAuth token with the `file_content:read` scope. */
   token: string;
-  pluginId?: string | undefined;
   fetch?: typeof fetch | undefined;
   /** Only tests point this elsewhere; the CLI always uses `FIGMA_API`. */
   api?: string | undefined;
@@ -93,8 +86,7 @@ async function getNodes(
 ): Promise<Record<string, unknown>> {
   const query = new URLSearchParams({
     ids: ids.join(","),
-    // Shared data holds the Weft source; the plugin's private data, files built before T14.2.
-    plugin_data: `shared,${options.pluginId ?? PLUGIN_ID}`,
+    plugin_data: "shared",
   });
   if (depth !== undefined) query.set("depth", String(depth));
   const url = `${options.api ?? FIGMA_API}/v1/files/${encodeURIComponent(options.fileKey)}/nodes?${query}`;
@@ -162,8 +154,7 @@ async function pullRead(options: PullOptions): Promise<ReadResult> {
       if (document !== undefined) components.set(id, document);
     }
   }
-  const pluginId = options.pluginId ?? PLUGIN_ID;
-  const layer = figmaLayers(NO_VARIABLES)(restNode(root, { pluginId, components }));
+  const layer = figmaLayers(NO_VARIABLES)(restNode(root, { components }));
   return finishRead(await readLayers(layer, options), options);
 }
 
