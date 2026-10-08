@@ -37,5 +37,10 @@ jobs:
           # baselines were taken on; naming itself skips exactly those
           # comparisons and keeps everything else (live-vs-live, a11y) running.
           WEFT_BASELINE_PLATFORM: github-runner
-        run: |
-          moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes
+        run: moon run :test root:typecheck root:lint root:rust-test root:rust-lint
+      # The rest of the gate, on its own: the six runtime legs run in parallel, and
+      # beside the Rust, Chromium and Xcode work on the runner's few cores their
+      # slowest tests passed Vitest's 120 s timeout. The module and the addon they
+      # depend on come from moon's cache of the step above.
+      - name: The merge gate, runtime legs
+        run: moon run root:runtimes
