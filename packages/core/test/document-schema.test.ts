@@ -35,10 +35,12 @@ describe("documentSchema", () => {
   });
 
   test("gives the generator's bytes for the merged catalog of examples/project", () => {
-    const extension = JSON.parse(
-      readFileSync(new URL("../../../examples/project/catalog.json", import.meta.url), "utf8"),
-    ) as object;
-    assert.equal(documentSchema(projectCatalog({ catalog: extension })), pinned("project-shop"));
+    const read = (path: string) =>
+      JSON.parse(
+        readFileSync(new URL(`../../../examples/project/${path}`, import.meta.url), "utf8"),
+      ) as object;
+    const catalog = [read("catalogs/acme-ui.catalog.json"), read("catalog.json")];
+    assert.equal(documentSchema(projectCatalog({ catalog })), pinned("project-shop"));
   });
 
   test("describes only the kinds of the catalog it is given", () => {

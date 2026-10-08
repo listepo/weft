@@ -50,7 +50,7 @@ type Scope = Vec<(String, usize)>;
 pub fn prop_leaf(catalog: &Catalog, kind: &str, prop: &str) -> Option<(Leaf, bool)> {
     match prop {
         "label" | "state" => return Some((Leaf::Text, false)),
-        "hidden" => return Some((Leaf::Bool, false)),
+        "hidden" | "grow" => return Some((Leaf::Bool, false)),
         // A dialog's tilt stays a marker, so the leaf is the one its number takes.
         _ if TILT_PROPS.contains(&prop) => return Some((Leaf::Double, false)),
         _ => {}
@@ -62,6 +62,9 @@ pub fn prop_leaf(catalog: &Catalog, kind: &str, prop: &str) -> Option<(Leaf, boo
         PropType::Boolean => Leaf::Bool,
         PropType::Number if matches!(kind, "slider" | "stepper") => Leaf::Double,
         PropType::Number => Leaf::Int,
+        // A dimension is a number in the theme (`theme.space.lg`), so its marker can carry the
+        // reference until the generator draws the prop; other token types have no such form.
+        PropType::Token if def.token_type.as_deref() == Some("dimension") => Leaf::Double,
         PropType::Token => return None,
     };
     Some((leaf, writable))

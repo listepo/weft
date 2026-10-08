@@ -68,9 +68,50 @@ describe("catalog extension", () => {
       message:
         'The extension of "button" would break existing screens, so it keeps its core definition: role changed from "button" to "link".',
       path: "#/catalog/components/button",
-      expected: "a change that only widens the core definition (SPEC §8)",
+      expected: "a change that only widens the definition it extends (SPEC §8)",
       got: "components.button.role",
     });
+  });
+});
+
+describe("several catalogs", () => {
+  test("record which catalog defined and extended each kind, whatever the list order", () => {
+    for (const name of [
+      "a library and the project catalog",
+      "the project catalog merges last wherever it is listed",
+    ]) {
+      const { project } = run(name);
+      assert.equal(project.catalog.name, "shop", name);
+      const variant = project.catalog.components["acme-button"]?.props?.["variant"];
+      assert.deepEqual(variant?.values, ["default", "danger", "ghost"]);
+      assert.deepEqual(project.kinds["acme-button"], { catalog: "acme-ui", extendedBy: ["shop"] });
+      assert.deepEqual(project.kinds["rating"], { catalog: "shop" });
+      assert.deepEqual(project.kinds["button"], { catalog: "weft-core", extendedBy: ["shop"] });
+      assert.deepEqual(project.kinds["text"], { catalog: "weft-core" });
+    }
+    assert.deepEqual(run("a library and the project catalog").project.catalogs, [
+      { name: "acme-ui", version: "1.0.0", prefix: "acme", source: "lib/acme-ui.json" },
+      { name: "shop", version: "1.1.0", source: "shop.json" },
+    ]);
+  });
+
+  test("a prefix claimed twice names both catalogs", () => {
+    const [d] = run("two libraries with one prefix").diagnostics;
+    assert.equal(d?.path, "#/catalog/1/prefix");
+    assert.match(d?.message ?? "", /"acme-ui".*"acme-two"/);
+  });
+
+  test("a narrowed library kind keeps the library's definition", () => {
+    const { project, diagnostics } = run("the project catalog may not narrow a library kind");
+    assert.match(diagnostics[0]?.message ?? "", /keeps its definition from "acme-ui"/);
+    assert.deepEqual(project.kinds["acme-button"], { catalog: "acme-ui" });
+  });
+
+  test("an unmet requirement points into the catalog that states it", () => {
+    const [missing, old] = run("unmet requirements warn and the catalog still loads").diagnostics;
+    assert.equal(missing?.path, "#/catalog/0/requires/acme-ui");
+    assert.equal(missing?.severity, "warning");
+    assert.equal(old?.message, '"old-ui" requires "weft-core" 1.0.0, but 0.2.0 is loaded.');
   });
 });
 

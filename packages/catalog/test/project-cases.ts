@@ -37,6 +37,43 @@ const extension = (components: Record<string, unknown>) =>
 
 const project = (members: Record<string, unknown>) => text(members);
 
+const badge = {
+  description: "A short status label.",
+  role: "status",
+  content: "text",
+  props: { tone: { description: "Colour.", type: "enum", values: ["info", "warn"] } },
+};
+const library = (name: string, prefix: unknown, components: Record<string, unknown>) => ({
+  weft: "0.1",
+  name,
+  version: "1.0.0",
+  prefix,
+  requires: { "weft-core": "0.2.0" },
+  components,
+});
+const acmeUi = library("acme-ui", "acme", {
+  "acme-badge": badge,
+  "acme-button": {
+    ...badge,
+    role: "button",
+    props: { variant: { description: "Emphasis.", type: "enum", values: ["default", "danger"] } },
+  },
+});
+/** A project catalog over `acme-ui`: a new kind, a core kind and a library kind widened. */
+const shop = (variants: string[]) => ({
+  weft: "0.1",
+  name: "shop",
+  version: "1.1.0",
+  requires: { "weft-core": "0.2.0", "acme-ui": "1.0.0" },
+  components: {
+    rating,
+    button: { events: ["press", "longpress"] },
+    "acme-button": {
+      props: { variant: { description: "Emphasis.", type: "enum", values: variants } },
+    },
+  },
+});
+
 export const sharedFiles: Record<string, string> = {
   "tokens/base.tokens.json": text(base),
   "tokens/brand.tokens.json": text(brand),
@@ -53,6 +90,8 @@ export const sharedFiles: Record<string, string> = {
   }),
   "data-anyof.schema.json": text({ type: "object", properties: { a: { anyOf: [] } } }),
   "data-bad.schema.json": text({ type: "thing" }),
+  "lib/acme-ui.json": text(acmeUi),
+  "shop.json": text(shop(["default", "danger", "ghost"])),
   "catalog.json": extension({
     rating,
     button: {
@@ -247,6 +286,99 @@ export const projectCases: Record<string, ProjectCase> = {
     files: { "c.json": extension({ button: { pattern: "x" } }) },
     codes: ["W706"],
   },
+  "a library and the project catalog": {
+    project: project({ catalog: ["lib/acme-ui.json", "shop.json"] }),
+    codes: [],
+  },
+  "the project catalog merges last wherever it is listed": {
+    project: project({ catalog: ["shop.json", "lib/acme-ui.json"] }),
+    codes: [],
+  },
+  "a list of one catalog": { project: project({ catalog: ["catalog.json"] }), codes: [] },
+  "an empty list of catalogs": { project: project({ catalog: [] }), codes: [] },
+  "too many catalogs": {
+    project: project({ catalog: Array.from({ length: 33 }, () => "catalog.json") }),
+    codes: ["W701"],
+  },
+  "exactly 32 catalogs, all but one claiming a taken name": {
+    project: project({ catalog: Array.from({ length: 32 }, () => "catalog.json") }),
+    codes: Array.from({ length: 31 }, () => "W711"),
+  },
+  "catalog list entries that are not file names": {
+    project: project({ catalog: ["lib/acme-ui.json", 5, "../x.json", "missing.json"] }),
+    codes: ["W701", "W703", "W704"],
+  },
+  "a catalog named after the core": {
+    project: project({ catalog: ["core.json"] }),
+    files: { "core.json": text({ ...shop([]), name: "weft-core", requires: undefined }) },
+    codes: ["W711"],
+  },
+  "two libraries with one prefix": {
+    project: project({ catalog: ["lib/acme-ui.json", "two.json"] }),
+    files: { ...sharedFiles, "two.json": text({ ...acmeUi, name: "acme-two" }) },
+    codes: ["W711"],
+  },
+  "malformed and reserved prefixes": {
+    project: project({ catalog: ["x", "weft", "date", "button", "Acme", "a-b", "", "ok"] }),
+    files: Object.fromEntries(
+      ["x", "weft", "date", "button", "Acme", "a-b", "", "ok"].map((prefix) => [
+        prefix,
+        text(library(`lib-${prefix}`, prefix, {})),
+      ]),
+    ),
+    codes: ["W712", "W712", "W712", "W712", "W712", "W712", "W703"],
+  },
+  "a second catalog without a prefix": {
+    project: project({ catalog: ["catalog.json", "shop.json"] }),
+    codes: ["W712"],
+  },
+  "a library defines only kinds under its prefix": {
+    project: project({ catalog: ["lib.json"] }),
+    files: {
+      "lib.json": text(
+        library("acme-ui", "acme", { "acme-chip": badge, button: { states: ["x"] }, acme: badge }),
+      ),
+    },
+    codes: ["W713", "W713"],
+  },
+  "the project catalog defines no kind under a library prefix": {
+    project: project({ catalog: ["lib/acme-ui.json", "chip.json"] }),
+    files: { ...sharedFiles, "chip.json": extension({ "acme-chip": badge, "acmes-chip": badge }) },
+    codes: ["W713"],
+  },
+  "unmet requirements warn and the catalog still loads": {
+    project: project({ catalog: ["shop.json", "old.json"] }),
+    files: {
+      ...sharedFiles,
+      "old.json": text({
+        ...acmeUi,
+        name: "old-ui",
+        prefix: "old",
+        requires: { "weft-core": "1.0.0" },
+        components: {},
+      }),
+    },
+    codes: ["W714", "W714", "W706"],
+  },
+  "requirements that are not versions": {
+    project: project({ catalog: ["a.json", "b.json", "c.json"] }),
+    files: {
+      "a.json": text({ ...acmeUi, requires: { "weft-core": "0.1" } }),
+      "b.json": text({ ...acmeUi, requires: { "weft-core": 1 } }),
+      "c.json": text({ ...acmeUi, requires: ["weft-core"] }),
+    },
+    codes: ["W706", "W706", "W706"],
+  },
+  "a prefix that is not a string": {
+    project: project({ catalog: ["a.json"] }),
+    files: { "a.json": text({ ...acmeUi, prefix: 7 }) },
+    codes: ["W706"],
+  },
+  "the project catalog may not narrow a library kind": {
+    project: project({ catalog: ["lib/acme-ui.json", "narrow.json"] }),
+    files: { ...sharedFiles, "narrow.json": text(shop(["default"])) },
+    codes: ["W707"],
+  },
   "a data schema": {
     project: project({ data: "data.schema.json" }),
     codes: [],
@@ -342,6 +474,16 @@ export const projectCases: Record<string, ProjectCase> = {
     }),
     content: true,
     codes: [],
+  },
+  "content: a list of catalogs": {
+    project: project({ catalog: [shop(["default", "danger", "ghost"]), acmeUi] }),
+    content: true,
+    codes: [],
+  },
+  "content: a list entry that is not a catalog": {
+    project: project({ catalog: [acmeUi, "shop.json"] }),
+    content: true,
+    codes: ["W706"],
   },
   "content: problems point below the argument": {
     project: project({

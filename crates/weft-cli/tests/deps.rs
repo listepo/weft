@@ -50,7 +50,14 @@ fn the_catalog_depends_only_on_the_core_and_pure_crates() {
     deps.sort();
     assert_eq!(
         deps,
-        ["indexmap", "serde", "serde_json", "thiserror", "weft-core"]
+        [
+            "indexmap",
+            "semver",
+            "serde",
+            "serde_json",
+            "thiserror",
+            "weft-core"
+        ]
     );
 }
 

@@ -8,6 +8,13 @@
     "lg": { "$value": { "value": 24, "unit": "px" } },
     "xl": { "$value": { "value": 32, "unit": "px" } }
   },
+  "size": {
+    "$type": "dimension",
+    "sm": { "$value": { "value": 240, "unit": "px" } },
+    "md": { "$value": { "value": 480, "unit": "px" } },
+    "lg": { "$value": { "value": 720, "unit": "px" } },
+    "xl": { "$value": { "value": 960, "unit": "px" } }
+  },
   "radius": {
     "$type": "dimension",
     "sm": { "$value": { "value": 4, "unit": "px" } },

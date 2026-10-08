@@ -36,9 +36,10 @@ export type ReadLayout = Pick<
   | "effects"
   | "cornerRadius"
   | "boundVariables"
->;
+> &
+  GridAnchor;
 
-type ReadBase = FPluginData & Pick<FScene, "id" | "name" | "visible" | "x" | "y">;
+type ReadBase = FPluginData & Pick<FScene, "id" | "name" | "visible" | "x" | "y"> & GridAnchor;
 
 export type ReadContainer = ReadBase &
   ReadLayout & {
@@ -109,6 +110,13 @@ export function styleKey(layer: ReadLayout, withSpacing: boolean): string {
   return JSON.stringify(key);
 }
 
+/** The cell a grid child occupies, and whether auto-layout flow positions it. */
+export type GridAnchor = {
+  readonly gridRowAnchorIndex?: number | undefined;
+  readonly gridColumnAnchorIndex?: number | undefined;
+  readonly layoutPositioning?: "AUTO" | "ABSOLUTE" | undefined;
+};
+
 const MODE = { HORIZONTAL: "row", VERTICAL: "column", GRID: "grid", NONE: "none" } as const;
 const ALIGN = { MIN: "start", CENTER: "center", MAX: "end", BASELINE: undefined } as const;
 
@@ -163,6 +171,9 @@ export function figmaLayers(variables: VariableLookup): (node: ReadNode) => Laye
           : undefined;
       },
       characters: node.type === "TEXT" ? node.characters : "",
+      gridRowAnchorIndex: node.gridRowAnchorIndex,
+      gridColumnAnchorIndex: node.gridColumnAnchorIndex,
+      layoutPositioning: node.layoutPositioning,
       get layout(): LayerLayout {
         if (container === undefined) return NO_LAYOUT;
         return {

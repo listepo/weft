@@ -15,6 +15,10 @@ description: corpus-leaderboard as html-data
   --weft-space-md: 16px;
   --weft-space-lg: 24px;
   --weft-space-xl: 32px;
+  --weft-size-sm: 240px;
+  --weft-size-md: 480px;
+  --weft-size-lg: 720px;
+  --weft-size-xl: 960px;
   --weft-radius-sm: 4px;
   --weft-radius-md: 8px;
   --weft-radius-pill: 999px;

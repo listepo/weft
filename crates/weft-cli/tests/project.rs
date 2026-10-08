@@ -136,7 +136,7 @@ fn project_problems_point_into_the_project_file_and_fail_the_run() {
     let s = Scratch::new("problems");
     let project = s.write(
         "weft.json",
-        r#"{"tokens": ["tokens/base.tokens.json", "../outside.json"], "catalog": "catalog.json", "extra": 1}"#,
+        r#"{"tokens": ["tokens/base.tokens.json", "../outside.json"], "catalog": ["catalogs/acme-ui.catalog.json", "catalog.json"], "extra": 1}"#,
     );
     let r = run(&[&"validate", &s.path("screens/cart.weft")]);
     assert_eq!(r.code, 1, "{}", r.stdout);
@@ -148,6 +148,72 @@ fn project_problems_point_into_the_project_file_and_fail_the_run() {
              {shown}:#/tokens/1 W703 The file name \"../outside.json\" is absolute, leaves the project directory or is malformed.\n"
         )
     );
+}
+
+#[test]
+fn broken_catalog_lists_give_each_catalog_code() {
+    let library = "catalogs/acme-ui.catalog.json";
+    let shop = read_example("catalog.json");
+    let chip = r#""acme-chip": { "description": "A chip.", "role": "status", "content": "text" },"#;
+    // A case: scratch name, catalog list, one replaced file, expected lines.
+    type Case<'a> = (&'a str, &'a str, Option<(&'a str, String)>, &'a [&'a str]);
+    let cases: [Case; 4] = [
+        (
+            "w711",
+            r#"["catalogs/acme-ui.catalog.json", "catalogs/acme-ui.catalog.json", "catalog.json"]"#,
+            None,
+            &["#/catalog/1/name W711"],
+        ),
+        (
+            "w712",
+            r#"["catalogs/acme-ui.catalog.json", "catalog.json"]"#,
+            Some((
+                library,
+                read_example(library).replace(r#""prefix": "acme""#, r#""prefix": "date""#),
+            )),
+            &["#/catalog/0/prefix W712"],
+        ),
+        (
+            "w713",
+            r#"["catalogs/acme-ui.catalog.json", "catalog.json"]"#,
+            Some((
+                "catalog.json",
+                shop.replacen(
+                    r#""components": {"#,
+                    &format!(r#""components": {{ {chip}"#),
+                    1,
+                ),
+            )),
+            &["#/catalog/1/components/acme-chip W713"],
+        ),
+        (
+            "w714",
+            r#"["catalog.json"]"#,
+            None,
+            &[
+                "#/catalog/0/requires/acme-ui W714",
+                "#/catalog/0/components/acme-button W706",
+                " W401 ",
+            ],
+        ),
+    ];
+    for (name, list, file, expected) in cases {
+        let s = Scratch::new(name);
+        let project = read_example("weft.json")
+            .replace(r#"["catalogs/acme-ui.catalog.json", "catalog.json"]"#, list);
+        s.write("weft.json", &project);
+        if let Some((path, content)) = file {
+            s.write(path, &content);
+        }
+        let r = run(&[&"validate", &s.path("screens/order.weft")]);
+        for code in expected {
+            assert!(r.stdout.contains(code), "{name}: {code}\n{}", r.stdout);
+        }
+    }
+}
+
+fn read_example(name: &str) -> String {
+    std::fs::read_to_string(Path::new(EXAMPLE).join(name)).unwrap()
 }
 
 #[test]
@@ -283,7 +349,7 @@ fn swiftui_project(name: &str) -> Scratch {
         "weft.json",
         r#"{
   "tokens": ["tokens/base.tokens.json", "tokens/swift.tokens.json"],
-  "catalog": "catalog.json",
+  "catalog": ["catalogs/acme-ui.catalog.json", "catalog.json"],
   "export": { "swiftui": { "outDir": "ios" } },
   "import": { "swiftui": { "outDir": "imported" } }
 }"#,
@@ -442,7 +508,7 @@ fn web_project(name: &str) -> Scratch {
         "weft.json",
         r#"{
   "tokens": ["tokens/base.tokens.json"],
-  "catalog": "catalog.json",
+  "catalog": ["catalogs/acme-ui.catalog.json", "catalog.json"],
   "export": {
     "html": { "outDir": "out/html", "source": true },
     "react": { "outDir": "out/react", "source": true },
@@ -530,7 +596,7 @@ fn sample_data_comes_from_the_flag_else_the_project_else_none() {
         "weft.json",
         r#"{
   "tokens": ["tokens/base.tokens.json"],
-  "catalog": "catalog.json",
+  "catalog": ["catalogs/acme-ui.catalog.json", "catalog.json"],
   "export": { "html": { "data": "data/sample.json" }, "swiftui": { "data": "data/sample.json" } }
 }"#,
     );

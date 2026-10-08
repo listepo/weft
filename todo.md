@@ -10,7 +10,6 @@
 - T69.1. Editor skeleton
 - T12.3. Constrained generation: benchmark
 - T16. Layout vocabulary
-- T16.2. Layout vocabulary: spec, catalog, core and corpus
 - T16.3. Layout vocabulary: web generators and the reference renderer
 - T16.8. Layout vocabulary: web importers
 - T16.4. Layout vocabulary: SwiftUI
@@ -18,7 +17,6 @@
 - T16.6. Layout vocabulary: A2UI and json-render
 - T16.7. Layout vocabulary: Figma and Penpot
 - T17. Extension catalogs
-- T17.1. Extension catalogs: spec and loader
 - T17.2. Extension catalogs: tools and docs
 - T17.3. Extension catalogs: distribution and registry
 - T41. Hosted Penpot plugin

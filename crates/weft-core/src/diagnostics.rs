@@ -120,6 +120,7 @@ codes! {
     W315 => Error, "Binding path not declared in the data schema.";
     W316 => Error, "Bound data has a type the attribute does not take.";
     W317 => Error, "Asset path of a `model` is not an allowed path.";
+    W318 => Error, "`grow` on an element whose parent is not a `stack`.";
     W401 => Mode, "Unknown element.";
     W402 => Mode, "Unknown attribute.";
     W403 => Mode, "Newer minor version of the format.";
@@ -145,6 +146,10 @@ codes! {
     W708 => Error, "Project action name breaks the action grammar.";
     W709 => Error, "Data schema is malformed.";
     W710 => Warning, "Data schema keyword is not supported.";
+    W711 => Error, "Two catalogs claim the same name, prefix or kind.";
+    W712 => Error, "Catalog prefix is malformed or reserved, or a second catalog lacks one.";
+    W713 => Error, "Catalog defines or extends a kind it does not own.";
+    W714 => Warning, "Catalog requirement is not loaded at a compatible version.";
 }
 
 impl Code {

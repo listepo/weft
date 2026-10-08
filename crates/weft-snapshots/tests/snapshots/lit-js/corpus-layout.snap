@@ -1,0 +1,72 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-layout as lit-js
+---
+import { LitElement, html, nothing } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _act(actions, event) {
+  if (typeof actions !== "object" || actions === null || !Object.hasOwn(actions, event.action)) return;
+  const fn = actions[event.action];
+  if (typeof fn === "function") fn(event);
+}
+
+function _url(value) {
+  const url = value.replace(/[\t\n\r]/g, "").replace(/^[\u0000- ]+|[\u0000- ]+$/g, "");
+  if (url === "") return undefined;
+  const colon = url.indexOf(":");
+  const delimiter = url.search(/[/?#]/);
+  if (colon < 0 || (delimiter >= 0 && colon > delimiter)) return url;
+  const scheme = /^([A-Za-z][A-Za-z0-9+.-]*):/.exec(url)?.[1]?.toLowerCase();
+  return scheme === "http" || scheme === "https" || scheme === "mailto" ? url : undefined;
+}
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="layout" aria-label="Layout"
+      ><div data-weft-id="toolbar" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" })}
+        ><div data-weft-field=""
+          ><label
+            ><span aria-hidden="true">Search</span
+            ><input data-weft-id="search" aria-label="Search" type="search" .value=${_text(data?.query)} @input=${(_e) => onChange?.("$.query", _e.currentTarget.value)}
+          ></label
+        ></div
+        ><button data-weft-id="filter" type="button" @click=${(_e) => _act(actions, { id: "filter", action: "list.filter" })}>Filter</button
+      ></div
+      ><div data-weft-id="pager" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" })}>${(() => {
+          const _href = _url("");
+          return html`<a data-weft-id="previous" href=${(_href) ?? nothing} role=${(_href === undefined ? "link" : undefined) ?? nothing} tabindex=${(_href === undefined ? 0 : undefined) ?? nothing} @keydown=${_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "previous", action: "list.previous" }); } : undefined} @click=${() => _act(actions, { id: "previous", action: "list.previous" })} style=${styleMap({ display: "inline-block" })}>Previous</a>`;
+        })()}${(() => {
+          const _href = _url("");
+          return html`<a data-weft-id="next" href=${(_href) ?? nothing} role=${(_href === undefined ? "link" : undefined) ?? nothing} tabindex=${(_href === undefined ? 0 : undefined) ?? nothing} @keydown=${_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "next", action: "list.next" }); } : undefined} @click=${() => _act(actions, { id: "next", action: "list.next" })} style=${styleMap({ display: "inline-block" })}>Next</a>`;
+        })()}</div
+      ><div data-weft-id="actions" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" })}
+        ><button data-weft-id="cancel" type="button" @click=${(_e) => _act(actions, { id: "cancel", action: "list.cancel" })}>Cancel</button
+        ><button data-weft-id="save" type="button" data-variant="primary" @click=${(_e) => _act(actions, { id: "save", action: "list.save" })}>Save</button
+      ></div
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

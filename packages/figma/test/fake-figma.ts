@@ -40,6 +40,10 @@ export abstract class FakeBase {
   rotation = 0;
   width = 100;
   height = 100;
+  /** Set only when a test places the layer in a parent grid; absent leaves z-order. */
+  gridRowAnchorIndex?: number;
+  gridColumnAnchorIndex?: number;
+  layoutPositioning?: "AUTO" | "ABSOLUTE";
   parent: Owner | undefined;
   /** Shared plugin data, by namespace; the package uses no private plugin data. */
   readonly shared = new Map<string, Map<string, string>>();
@@ -70,6 +74,10 @@ export abstract class FakeBase {
     to.rotation = this.rotation;
     to.width = this.width;
     to.height = this.height;
+    if (this.gridRowAnchorIndex !== undefined) to.gridRowAnchorIndex = this.gridRowAnchorIndex;
+    if (this.gridColumnAnchorIndex !== undefined)
+      to.gridColumnAnchorIndex = this.gridColumnAnchorIndex;
+    if (this.layoutPositioning !== undefined) to.layoutPositioning = this.layoutPositioning;
     for (const [ns, entries] of this.shared) to.shared.set(ns, new Map(entries));
   }
 }

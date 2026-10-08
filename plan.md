@@ -8,23 +8,10 @@ New bugs, dead code and moves from a read-only Cursor cloud review of `main` at 
 
 | ID | Priority | Kind | Status | Where | Fix |
 | --- | --- | --- | --- | --- | --- |
-| T75 | P1 | bug | done | `packages/catalog/src/node.ts:88-93`; `crates/weft-cli/src/main.rs:487-490`; name check `crates/weft-catalog/src/project.rs:92-98` | The project file reader follows symlinks out of the project directory (a `tokens.json` symlink to a file in `/tmp` was read), against SPEC §10.2. `realpath` after `join` and refuse anything outside the project root (W703/W704). |
-| T76 | P1 | bug | done | `crates/weft-interop/src/a2ui/export.rs:67-75`, `:405-410` | A2UI export treats any `scheme:` URL as `openUrl`, including `javascript:`, `data:` and `file:`, bypassing the SPEC §9 Trust allowlist that `crates/weft-web/src/html.rs:402-429` enforces. Reuse `safe_url` (http, https, mailto). |
-| T77 | P1 | bug | done | `packages/core/test/engines.test.ts:103-108`, `:125-128` | `Bun runs on wasm` hung on the PR #4 runner and blocked CI: `spawnSync` has no timeout. Cap it (e.g. 15 s) and fail or skip when Bun hangs. |
 | T78 | P2 | bug | confirmed (same run) | `crates/weft-swiftui/tests/swift.rs:201-208` | The Swift typecheck tests ran 9+ minutes and were killed when the gate failed. Give nextest a timeout and a Swift module cache, or keep them out of the batch with flaky runtimes. |
-| T79 | P2 | bug | done | `crates/weft-binding/src/boundary.rs:128-133`; `crates/weft-binding/src/api.rs:102-128`, `:416-420`; `packages/core/src/patch.ts:21-26` | `applyPatches`, `serialize` and `canonicalize` throw when `toJson(document)` is `undefined` (cycle or too deep), but SPEC §7 says `applyPatches` never throws. Map `TooDeep` to W200 diagnostics, as `validate` does. |
-| T80 | P2 | bug | done | `crates/weft-binding/src/api.rs:205-206`; `packages/core/src/data.ts:39-47` | `checkData` drops data-schema compile problems (W709/W710). Merge them into the returned diagnostics. |
-| T81 | P2 | bug | done | `crates/weft-cli/src/main.rs:536-538`; `packages/core/src/cli.ts:58` | `weft fmt --write` writes in place, non-atomically. Write a sibling temp file and rename, as T69.1a plans for the editor's save. |
-| T82 | P2 | bug | done | `crates/weft-interop/src/a2ui/export.rs:607-611` | A2UI export copies `image.src` into `url` with no scheme or path filter. Filter it with `safe_url`, or emit a loss. |
-| T83 | P2 | bug | done | `packages/design-tool/src/keys.ts:54-55`, `:101-103` | Figma/Penpot `writeJson` has no 100 kB cap, while `readJson` drops entries over it. Refuse or split oversized writes. |
-| T84 | P2 | bug | done | `plugins/xcode/scripts/xcode-agents.ts:80-81` | `xcode-agents` exits with code 2 on the first unknown `--agents` name. Log it, continue, and exit after the loop. |
-| T85 | P2 | bug | done | `crates/weft-cli/src/main.rs:10` vs `:569-571` | The CLI crate docs still say "only the syntax layer" after T70. Say "syntax and shape layers". |
-| T86 | P2 | bug | done | `packages/catalog/src/node.ts:99-108` | `maxChars` is checked with `statSync`, then the file is read. Enforce the limit on a capped read. |
 | T87 | P2 | bug | suspected | `crates/weft-web/src/from_jsx/mod.rs:37-66` | JSX import runs on a 64 MiB stack thread only off `wasm32`. Use the same budget or iterative lowering on WASM, or document the limit. |
 | T88 | P2 | bug | suspected | `crates/weft-catalog/src/resolver.rs:52-54` vs `:102-103` | The resolver's `tree()` matches context keys case-sensitively; `appearance()` does not. Make `tree()` case-insensitive. |
-| T89 | P2 | dead code | done | `mise.toml:20-23` | `pipx:translate-toolkit` 3.20.0 (and `uv`, only as its backend) is unused: no `po2json`/`pofilter`/`pocount` use anywhere. Drop the pins unless a localization task needs them. |
 | T90 | P2 | dead code | confirmed gap (orphans not listed) | `toolchain.md:18`; about 750 insta snapshots | Nothing checks for unreferenced snapshots. Run `cargo insta test --unreferenced=reject` in CI, or once and delete the orphans. |
-| T91 | P2 | move | done | `safe_url` in `crates/weft-web/src/html.rs:404-429`, JSX `_url` in `jsx/runtime.rs:109-127`, Swift `weftURL` in `helpers.swift:55-60` → `weft-import` or `weft-core` | One shared Trust allowlist, so an exporter cannot skip it again (T76, T82). Generated JSX `_url` and Swift `weftURL` stay language-specific copies of the same rule. |
 | T92 | P2 | move | suspected | `tooling/changed.ts`, `tooling/select.ts` → the org's `scoped-check` | A fourth copy of the affected-test planner. The other copies were not checked from this repo. |
 | T93 | P2 | move | confirmed | `crates/weft-swiftui/src/import/read.rs`, `crates/weft-web/src/jsx/mod.rs` → smaller modules in the same crates | Split the two giant importer files. |
 
@@ -45,19 +32,33 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
-| T16 | todo | P2 | 5 | 15% | |
-| T16.2 | todo | P2 | 3 | 0% | |
+| T16 | todo | P2 | 5 | 30% | |
 | T16.3 | todo | P2 | 3 | 0% | |
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.4 | todo | P2 | 4 | 0% | |
 | T16.5 | todo | P2 | 3 | 0% | |
 | T16.6 | todo | P2 | 2 | 0% | |
 | T16.7 | todo | P2 | 3 | 0% | |
-| T17 | todo | P2 | 4 | 20% | |
-| T17.1 | todo | P2 | 4 | 0% | |
+| T17 | todo | P2 | 4 | 50% | |
 | T17.2 | todo | P2 | 3 | 0% | |
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
+| T94 | in progress | P0 | 2 | 90% | Cursor / grok-4.7 |
+
+### T94. Foreign stack alignment and grid child order
+
+`stackOf` in `packages/design-tool/src/foreign.ts` wrote only `direction`, `columns` and `gap`. `LayerLayout` already has `align` and `wrap`. Figma maps `counterAxisAlignItems` through `ALIGN` (`MIN` → `start`, `CENTER` → `center`, `MAX` → `end`, `BASELINE` → undefined). A foreign horizontal frame with `MIN` alignment became `<stack direction="row">`. SPEC §5.1 says a row without `align` is centered on the cross axis, so an importer must not round-trip a row's center. `wrap` was dropped the same way. Catalog `stack` has the boolean; `grid` has neither `align` nor `wrap`.
+
+**Out of scope.** Padding, fills and fonts (SPEC §9 keeps those as losses; catalog `stack` has no such props). Collapsing vectors into `<image>` (`image` requires `src`). Teaching `crates/weft-slint/src/generate.rs` to emit Slint alignment (SPEC keeps `align` and `wrap` in the source comment). A second Figma simplifier, a new caller of `api.figma.com`, or a copy of Framelink. The REST pull (`packages/figma/src/pull.ts`) and the foreign reader stay the only Figma path.
+
+Execution plan:
+
+1. In `stackOf`, after the direction and columns writes: set `wrap` when `layer.layout.wrap` is true. On a row, set `align` only for `start`, `end` or `stretch`. On a column, set `align` only for `center`, `end` or `stretch`. Leave a row's `center` and a column's `start` unset, and leave `align` unset when it is undefined. Do not set either prop on a grid. Do not emit padding. The painted-loss stays.
+2. Tests in `packages/design-tool/test/foreign-layout.test.ts`: a horizontal frame at `MIN` reads `align="start"` with no `wrap`; a horizontal frame at `CENTER` with wrap reads `wrap` and no `align`; a vertical frame at `MIN` reads neither; a layer that already stores `weft.source` is unchanged, including a row's stored `center` and a column's stored `start`. The sourced-frame snapshots in `packages/figma/test/__snapshots__/layers/` stay as they are. The foreign promo frames in the Figma and Penpot edit tests expect `align="start"`.
+3. Thread `gridRowAnchorIndex`, `gridColumnAnchorIndex` and `layoutPositioning` from the REST node (`rest.ts`) and the plugin node (`layer.ts`) onto `Layer`. When the mode is `grid`, order in-flow children by row anchor, then column anchor, then original index before `convertChildren`. Absolutely positioned children keep their index. Add a `layout` loss only when the order actually changes. Skip when no in-flow child carries an anchor, so z-order remains. A missing or non-numeric anchor stays absent, not zero.
+4. Verify with `mise exec -- pnpm exec vitest run packages/design-tool/test packages/figma/test`.
+
+Progress: steps 1–3 are in the tree. The Vitest command in step 4 exits 0. Remaining: the pull request's CI.
 
 ### T8. Evaluation
 
@@ -443,22 +444,6 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 
 **Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render. T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
 
-### T16.2. Layout vocabulary: spec, catalog, core and corpus
-
-T16 scope items 2, 5 (corpus screens) and 6 (no `weft.json` key), as `docs/layout-design.md` decides. Lands first; every other T16 sub-task builds on it.
-
-Steps:
-
-1. `SPEC.md`: §2.2 `grow` (boolean, literal only, child of a `stack`); §5.1 `justify` (default `start`, declared in the catalog), `padding`, `max-width`, `min-column-width` rows with their meaning; §6.2 `W318` (error in both modes; `<each>` transparent, unknown and extension parents skipped); §8 the catalog version; §9 every target's row lists the new forms as losses until its sub-task lands.
-2. `AGENT-SPEC.md` (one layout line, `W318` and its repair) and `packages/mcp/src/primer.ts`; `bench/src/primers.ts` stays unchanged.
-3. `packages/catalog/src/core.ts` (the props, catalog `version` 0.2.0) and the regenerated `catalog.json`; `packages/catalog/tokens/default.tokens.json` gains `size.sm`/`md`/`lg`/`xl` (240, 480, 720, 960 px); the `stack` and `grid` examples; `docs/catalog-and-tokens.md`.
-4. `crates/weft-core/src/rules.rs`: `grow` in `UNIVERSAL_PROPS` (`bindable: false`) and the `W318` check, with the differential fixtures; `crates/weft-catalog/src/diff.rs` only if the classifier misreads the change (a test asserts it is minor); the T12.1 document schema snapshots retaken.
-5. Corpus: `dashboard` and `glass` as in the design's examples, and a new non-benchmark `corpus/layout` screen; `wizard-step` unchanged. Retake and review the insta snapshots and baselines the new screens change.
-
-Size: about 200 lines of code (`rules.rs`, `core.ts`, tokens), the rest docs, fixtures and snapshots.
-
-Done when: the new props and `grow` validate in strict and lenient mode, `W318` fires for `grow` outside a stack in a test, the coverage test passes with every new prop and `justify` value in the corpus, `bench/test/agent-spec.test.ts` passes, and `moon run root:changed` exits 0.
-
 ### T16.3. Layout vocabulary: web generators and the reference renderer
 
 T16 scope items 3 and 5 for the web, as the design's generate table says. Depends on T16.2.
@@ -547,7 +532,7 @@ Done when: the Figma and Penpot round trips of `dashboard`, `glass` and `layout`
 
 ### T17. Extension catalogs
 
-Parent of T17.1–T17.3, which carry the work (the task was split this way when T17.0 was claimed). T17.0, the design, is done (`done.md`): the creator approved `docs/extension-catalogs-design.md` with its twelve decisions, which T17.1–T17.3 build. This card holds the context, scope and done criteria they share.
+Parent of T17.1–T17.3, which carry the work (the task was split this way when T17.0 was claimed). T17.0, the design, and T17.1, the spec and loader, are done (`done.md`); for T17.0 the creator approved `docs/extension-catalogs-design.md` with its twelve decisions, which T17.1–T17.3 build. This card holds the context, scope and done criteria they share.
 
 A project can extend the core catalog with exactly one file today. Real hosts combine several sources: the core, one or more component libraries, and their own kinds. So a project needs to load several catalogs at once without their kinds colliding. Once catalogs travel between projects, two more questions need answers: how a catalog is published and found, and who keeps the registry. `research.md` §9 lists "Who keeps a registry of extension catalogs" as open; `docs/catalog-and-tokens.md` and `docs/what-is-weft.md` both say there is no registry; `docs/fragments-design.md` defers namespaces and sharing across projects to this task.
 
@@ -577,17 +562,7 @@ A project can extend the core catalog with exactly one file today. Real hosts co
 
 **Decisions** (creator, recorded in `docs/extension-catalogs-design.md`): hyphen prefixes declared by the catalog author (`"prefix": "acme"`), no aliases; libraries define only their own kinds, and the one catalog without a prefix, the project catalog, alone extends core and library kinds, widen-only; `requires` with Cargo's compatibility rule, unmet as the warning `W714`; `catalog` as a file name or an ordered array of at most 32 file and `{ "package" }` entries, libraries merged before the project catalog; new codes `W711`–`W714`; committed files first, npm packages with a `weft.catalog` field later, found by walking up `node_modules`, never over the network; a curated `docs/catalogs.md` and the npm keyword `weft-catalog` instead of a registry service; one design-tool build grouped by catalog; screens stay silent about their catalogs; a repeated `--catalog` replaces the list, and `import-cem` gets `--prefix` with a hint when it is absent.
 
-**Split.** T17.0: design (done). T17.1: spec and loader for several catalogs and prefixes, with fixtures. T17.2: CLI, MCP, `import-cem --prefix`, settings, design tools, AGENT-SPEC and docs. T17.3: package entries and lookup, the publishing guide and the curated list. T17.1 lands first; T17.2 and T17.3 build on it.
-
-### T17.1. Extension catalogs: spec and loader
-
-T17's format and loader, by decisions 1–6 and 11 of `docs/extension-catalogs-design.md`. File entries only; package entries come with T17.3.
-
-- `SPEC.md`: §5 gains the optional `prefix` (one name segment; not `x`, `weft`, a core kind or a core kind's first segment) and `requires` (catalog name → version, Cargo's compatibility rule); §8, the advertisement lists every catalog; §10.2, `catalog` is a file name or an ordered array of at most 32 file names (`W701` beyond); §10.4, the library and project-catalog roles and the three merge steps (core, libraries in order, the project catalog last, widen-only against the definition it extends); §6.2, `W711` (two catalogs claim one name, prefix or kind, naming both), `W712` (bad or reserved prefix, or a second catalog without one), `W713` (a kind outside its owner), `W714` (unmet `requires`, a warning).
-- `crates/weft-catalog/src/project.rs`: several catalogs, `CATALOG_MEMBERS` with `prefix` and `requires`; `Project` keeps the loaded catalogs (`name`, `version`, `prefix`, `source`) and, per kind, the defining catalog and the catalogs that extended it; the merged `Catalog` keeps the project catalog's name and version (else the last library's). Never panics. The diagnostics registry in both engines.
-- Differential fixtures for the catalog loader (regenerate with `WEFT_UPDATE_FIXTURES=1`).
-- `examples/project`: `catalogs/acme-ui.catalog.json`, the `import-cem` output of the `acme-ui.json` fixture with `prefix: "acme"` and `requires` added by hand (T17.2 regenerates it with `--prefix` and must produce the same file); `catalog.json` gains `requires` and widens `acme-button.variant`; `weft.json` lists both; a screen uses kinds of all three catalogs; broken project variants give each new code. The T12 document schema tests cover the merged catalog.
-- Done when T17's first three done criteria hold for the loader (both extensions validate in strict mode; a kind claimed by two catalogs names both; the TypeScript and Rust fixtures agree) and `cargo nextest`, clippy and the TypeScript tests pass.
+**Split.** T17.0: design (done). T17.1: spec and loader for several catalogs and prefixes, with fixtures (done). T17.2: CLI, MCP, `import-cem --prefix`, settings, design tools, AGENT-SPEC and docs. T17.3: package entries and lookup, the publishing guide and the curated list. T17.1 lands first; T17.2 and T17.3 build on it.
 
 ### T17.2. Extension catalogs: tools and docs
 

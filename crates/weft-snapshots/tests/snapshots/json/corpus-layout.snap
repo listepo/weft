@@ -1,0 +1,120 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-layout as json
+---
+{
+  "weft": "0.1",
+  "root": {
+    "kind": "screen",
+    "id": "layout",
+    "props": {
+      "label": "Layout"
+    },
+    "children": [
+      {
+        "kind": "stack",
+        "id": "toolbar",
+        "props": {
+          "direction": "row",
+          "gap": {
+            "token": "space.sm"
+          },
+          "justify": "start"
+        },
+        "children": [
+          {
+            "kind": "field",
+            "id": "search",
+            "props": {
+              "grow": true,
+              "label": "Search",
+              "type": "search",
+              "value": {
+                "bind": "$.query"
+              }
+            }
+          },
+          {
+            "kind": "button",
+            "id": "filter",
+            "on": {
+              "press": "list.filter"
+            },
+            "children": [
+              "Filter"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "pager",
+        "props": {
+          "direction": "row",
+          "gap": {
+            "token": "space.sm"
+          },
+          "justify": "center"
+        },
+        "children": [
+          {
+            "kind": "link",
+            "id": "previous",
+            "on": {
+              "press": "list.previous"
+            },
+            "children": [
+              "Previous"
+            ]
+          },
+          {
+            "kind": "link",
+            "id": "next",
+            "on": {
+              "press": "list.next"
+            },
+            "children": [
+              "Next"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "stack",
+        "id": "actions",
+        "props": {
+          "direction": "row",
+          "gap": {
+            "token": "space.sm"
+          },
+          "justify": "end"
+        },
+        "children": [
+          {
+            "kind": "button",
+            "id": "cancel",
+            "on": {
+              "press": "list.cancel"
+            },
+            "children": [
+              "Cancel"
+            ]
+          },
+          {
+            "kind": "button",
+            "id": "save",
+            "props": {
+              "variant": "primary"
+            },
+            "on": {
+              "press": "list.save"
+            },
+            "children": [
+              "Save"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

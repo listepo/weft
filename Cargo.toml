@@ -28,6 +28,8 @@ serde = { version = "1.0.229", features = ["derive"] }
 # parses numbers exactly as JSON.parse does; unbounded_depth admits documents nested 256 deep.
 serde_json = { version = "1.0.151", features = ["preserve_order", "float_roundtrip", "unbounded_depth"] }
 thiserror = "2.0.21"
+# weft-catalog: Cargo's compatibility rule for a catalog's `requires` (SPEC §5).
+semver = { version = "1.0.28", default-features = false }
 # weft-import: the NFKD step of id slugs, as `String.prototype.normalize("NFKD")` does it.
 unicode-normalization = "0.1.25"
 # weft-web: the WHATWG HTML parser, so imported pages are read as a browser builds them.

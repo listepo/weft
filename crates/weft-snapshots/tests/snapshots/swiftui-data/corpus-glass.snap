@@ -48,15 +48,22 @@ struct GlassEvent: Sendable, Equatable {
 /// The design tokens the screen uses.
 struct GlassTheme: Sendable {
     var material = MaterialTokens()
+    var size = SizeTokens()
     var space = SpaceTokens()
 
     struct MaterialTokens: Sendable {
         var glass: GlassTheme.Surface = GlassTheme.Surface(tint: Color(.sRGB, red: 1, green: 1, blue: 1, opacity: 0.28), blur: 20)
     }
 
+    struct SizeTokens: Sendable {
+        var md: CGFloat = 480
+    }
+
     struct SpaceTokens: Sendable {
+        var lg: CGFloat = 24
         var md: CGFloat = 16
         var sm: CGFloat = 8
+        var xl: CGFloat = 32
     }
 
     /// A material token: apply it with `.modifier(theme.<path>)`.
@@ -118,6 +125,7 @@ struct GlassScreen: View {
             }
             .modifier(theme.material.glass)
             .weftProp("direction", "column")
+            .weftProp("padding", theme.space.lg)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("card")
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: theme.space.sm), count: 2), spacing: theme.space.sm) {
@@ -127,6 +135,8 @@ struct GlassScreen: View {
                     .accessibilityIdentifier("tile-dark")
             }
             .modifier(theme.material.glass)
+            .weftProp("max-width", theme.size.md)
+            .weftProp("padding", theme.space.xl)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("tiles")
         }

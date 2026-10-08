@@ -64,7 +64,7 @@ describe("readProject", () => {
 
   test("treats a member file over maxChars as unreadable", () => {
     const { diagnostics } = readProject(join(example, "weft.json"), { maxChars: 600 });
-    assert.ok(diagnostics.some((d) => d.code === "W704" && d.path === "#/catalog"));
+    assert.ok(diagnostics.some((d) => d.code === "W704" && d.path === "#/catalog/1"));
   });
 
   test("does not follow a symlink out of the project directory", () => {

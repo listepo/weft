@@ -28,7 +28,13 @@ struct RootEvent: Sendable, Equatable {
 
 /// The design tokens the screen uses.
 struct RootTheme: Sendable {
+    var size = SizeTokens()
     var space = SpaceTokens()
+
+    struct SizeTokens: Sendable {
+        var sm: CGFloat = 240
+        var xl: CGFloat = 960
+    }
 
     struct SpaceTokens: Sendable {
         var lg: CGFloat = 24
@@ -50,6 +56,8 @@ struct RootScreen: View {
                 Text("Visitors")
                     .accessibilityIdentifier("card-c")
             }
+            .weftProp("max-width", theme.size.xl)
+            .weftProp("min-column-width", theme.size.sm)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("cards")
         }

@@ -1,7 +1,7 @@
 {
   "$schema": "../../schemas/weft.schema.json",
   "tokens": "tokens/theme.resolver.json",
-  "catalog": "catalog.json",
+  "catalog": ["catalogs/acme-ui.catalog.json", "catalog.json"],
   "actions": ["cart.checkout", "cart.remove", "nav.back"],
   "data": "data.schema.json",
   "validate": { "mode": "strict" },

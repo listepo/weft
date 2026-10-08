@@ -192,6 +192,11 @@ function projectExpect(c: ProjectCase) {
         ([kind, def]) => !Object.hasOwn(core, kind) || !isDeepStrictEqual(core[kind], def),
       ),
     },
+    catalogs: project.catalogs,
+    // Every other kind is defined by the core and extended by nothing.
+    kinds: Object.entries(project.kinds).filter(
+      ([, k]) => k.catalog !== coreCatalog.name || k.extendedBy !== undefined,
+    ),
     tokens: project.tokens === undefined ? null : [...project.tokens],
     actions: project.actions ?? null,
     data: project.data !== undefined,

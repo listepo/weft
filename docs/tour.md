@@ -99,7 +99,7 @@ A misspelled element name gets the same treatment:
 ```console
 $ sed 's/button/buton/g' weft-tour/login.weft > weft-tour/login-buton.weft
 $ weft validate weft-tour/login-buton.weft --catalog packages/catalog/catalog.json --strict; echo "exit $?"
-weft-tour/login-buton.weft:8:5 W401 <buton> is not in catalog weft-core 0.1.0. — did you mean "button"?
+weft-tour/login-buton.weft:8:5 W401 <buton> is not in catalog weft-core 0.2.0. — did you mean "button"?
 exit 1
 ```
 

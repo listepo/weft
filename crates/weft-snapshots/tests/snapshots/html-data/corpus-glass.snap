@@ -15,6 +15,10 @@ description: corpus-glass as html-data
   --weft-space-md: 16px;
   --weft-space-lg: 24px;
   --weft-space-xl: 32px;
+  --weft-size-sm: 240px;
+  --weft-size-md: 480px;
+  --weft-size-lg: 720px;
+  --weft-size-xl: 960px;
   --weft-radius-sm: 4px;
   --weft-radius-md: 8px;
   --weft-radius-pill: 999px;
@@ -267,12 +271,12 @@ a { display: inline-block; }
 </head>
 <body>
 <main data-weft-id="glass" aria-label="Glass">
-  <div data-weft-id="card" class="weft-stack" data-weft-material style="gap: var(--weft-space-md); --_weft-material-tint: var(--weft-material-glass-tint); --_weft-material-solid: var(--weft-material-glass-solid); --_weft-material-blur: var(--weft-material-glass-blur)">
+  <div data-weft-id="card" data-prop-padding="{token.space.lg}" class="weft-stack" data-weft-material style="gap: var(--weft-space-md); --_weft-material-tint: var(--weft-material-glass-tint); --_weft-material-solid: var(--weft-material-glass-solid); --_weft-material-blur: var(--weft-material-glass-blur)">
     <h2 data-weft-id="title">Frosted glass</h2>
     <div data-weft-id="body" data-weft-kind="text">The panel blurs what is behind it.</div>
     <button data-weft-id="close" type="button" data-variant="primary" data-action="press:glass.close">Got it</button>
   </div>
-  <div data-weft-id="tiles" class="weft-grid" data-weft-material style="grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--weft-space-sm); --_weft-material-tint: var(--weft-material-glass-tint); --_weft-material-solid: var(--weft-material-glass-solid); --_weft-material-blur: var(--weft-material-glass-blur)">
+  <div data-weft-id="tiles" data-prop-max-width="{token.size.md}" data-prop-padding="{token.space.xl}" class="weft-grid" data-weft-material style="grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--weft-space-sm); --_weft-material-tint: var(--weft-material-glass-tint); --_weft-material-solid: var(--weft-material-glass-solid); --_weft-material-blur: var(--weft-material-glass-blur)">
     <div data-weft-id="tile-light" data-weft-kind="text">Light</div>
     <div data-weft-id="tile-dark" data-weft-kind="text">Dark</div>
   </div>

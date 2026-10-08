@@ -1,0 +1,11 @@
+<screen id="order" label="Order" weft="0.1">
+  <heading id="title" level="1">Your order</heading>
+  <each id="lines" as="line" in="{$.cart.items}">
+    <acme-card id="line" elevated="true">
+      <text id="line-name" text="{$line.name}"/>
+      <rating id="line-score" label="Customer score" value="{$line.score}" color="{token.color.star}"/>
+    </acme-card>
+  </each>
+  <acme-badge id="count" pill="true">In stock</acme-badge>
+  <acme-button id="checkout" variant="ghost" on-acme-click="cart.checkout">Place order</acme-button>
+</screen>

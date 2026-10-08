@@ -1,10 +1,10 @@
 <screen id="glass" label="Glass" weft="0.1">
-  <stack id="card" direction="column" gap="{token.space.md}" material="{token.material.glass}">
+  <stack id="card" direction="column" gap="{token.space.md}" material="{token.material.glass}" padding="{token.space.lg}">
     <heading id="title" level="2" text="{$.title}"/>
     <text id="body">The panel blurs what is behind it.</text>
     <button id="close" variant="primary" on-press="glass.close">Got it</button>
   </stack>
-  <grid id="tiles" columns="2" gap="{token.space.sm}" material="{token.material.glass}">
+  <grid id="tiles" columns="2" gap="{token.space.sm}" material="{token.material.glass}" max-width="{token.size.md}" padding="{token.space.xl}">
     <text id="tile-light">Light</text>
     <text id="tile-dark">Dark</text>
   </grid>

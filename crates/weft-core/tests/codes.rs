@@ -22,8 +22,8 @@ const IMPORT: [&str; 2] = ["W601", "W602"];
 
 /// Codes of the project file, produced by the weft-catalog loader; its project cases
 /// (packages/catalog/test/project-cases.ts, replayed by crates/weft-catalog) produce each one.
-const PROJECT: [&str; 8] = [
-    "W701", "W702", "W703", "W704", "W705", "W706", "W707", "W708",
+const PROJECT: [&str; 12] = [
+    "W701", "W702", "W703", "W704", "W705", "W706", "W707", "W708", "W711", "W712", "W713", "W714",
 ];
 
 enum Case {
@@ -187,6 +187,7 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W317",
             in_screen("<model id=\"a\" label=\"L\" src=\"../a.glb\" fallback=\"a.png\"/>"),
         ),
+        ("W318", in_screen("<text id=\"a\" grow=\"true\">x</text>")),
         ("W401", in_screen("<mystery id=\"a\"/>")),
         ("W402", in_screen("<stack id=\"a\" shape=\"round\"/>")),
         (
@@ -345,7 +346,7 @@ fn severities_are_errors_except_the_mode_codes_and_the_import_warning() {
             "W401" | "W402" | "W403" => {
                 assert_eq!((lenient, strict), (Severity::Warning, Severity::Error));
             }
-            "W602" | "W702" | "W710" => {
+            "W602" | "W702" | "W710" | "W714" => {
                 assert_eq!((lenient, strict), (Severity::Warning, Severity::Warning));
             }
             other => assert_eq!(

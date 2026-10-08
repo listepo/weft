@@ -15,6 +15,10 @@ description: example-grid as html
   --weft-space-md: 16px;
   --weft-space-lg: 24px;
   --weft-space-xl: 32px;
+  --weft-size-sm: 240px;
+  --weft-size-md: 480px;
+  --weft-size-lg: 720px;
+  --weft-size-xl: 960px;
   --weft-radius-sm: 4px;
   --weft-radius-md: 8px;
   --weft-radius-pill: 999px;
@@ -267,7 +271,7 @@ a { display: inline-block; }
 </head>
 <body>
 <main data-weft-id="root" aria-label="Gallery">
-  <div data-weft-id="cards" class="weft-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--weft-space-lg)">
+  <div data-weft-id="cards" data-prop-max-width="{token.size.xl}" data-prop-min-column-width="{token.size.sm}" class="weft-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--weft-space-lg)">
     <div data-weft-id="card-a" data-weft-kind="text">Revenue</div>
     <div data-weft-id="card-b" data-weft-kind="text">Orders</div>
     <div data-weft-id="card-c" data-weft-kind="text">Visitors</div>

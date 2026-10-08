@@ -104,6 +104,79 @@ fn a_model_asset_cannot_be_bound() {
     );
 }
 
+// ---- `grow`, a universal attribute for a child of a stack (SPEC §2.2) ---------------------
+
+fn strict(markup: &str) -> Vec<&'static str> {
+    let catalog = catalog();
+    let r = parse(
+        &screen(markup),
+        &ParseOptions {
+            catalog: Some(&catalog),
+            mode: Mode::Strict,
+            ..ParseOptions::default()
+        },
+    );
+    codes(&r.diagnostics)
+}
+
+#[test]
+fn a_child_of_a_stack_may_grow_also_through_each() {
+    let ok = [
+        "<stack id=\"a\" direction=\"row\"><text id=\"t\" grow=\"true\">x</text><text id=\"u\">y</text></stack>",
+        "<stack id=\"a\"><each id=\"e\" as=\"x\" in=\"{$.xs}\"><text id=\"t\" grow=\"true\">x</text></each></stack>",
+        "<form id=\"f\"><text id=\"t\" grow=\"false\">x</text></form>",
+    ];
+    for markup in ok {
+        assert!(only(markup).is_empty(), "{markup}");
+        assert!(strict(markup).is_empty(), "{markup}");
+    }
+}
+
+#[test]
+fn grow_outside_a_stack_is_w318_in_both_modes() {
+    let bad = [
+        "<text id=\"t\" grow=\"true\">x</text>",
+        "<form id=\"f\"><button id=\"b\" grow=\"true\">Go</button></form>",
+        "<list id=\"l\"><each id=\"e\" as=\"x\" in=\"{$.xs}\"><item id=\"i\" grow=\"true\">x</item></each></list>",
+        "<dialog id=\"d\" label=\"D\"><slot name=\"actions\"><button id=\"b\" grow=\"true\">OK</button></slot></dialog>",
+    ];
+    for markup in bad {
+        assert_eq!(only(markup), ["W318"], "{markup}");
+        assert_eq!(strict(markup), ["W318"], "{markup}");
+    }
+    let root = markup_codes("<screen id=\"s\" grow=\"true\" weft=\"0.1\"/>");
+    assert_eq!(root, ["W318"]);
+    let r = parse_lenient(&screen("<text id=\"t\" grow=\"true\">x</text>"));
+    assert_eq!(r.diagnostics[0].severity, Severity::Error);
+    assert_eq!(r.diagnostics[0].path, "/screen#root/text#t/@grow");
+}
+
+#[test]
+fn grow_under_an_unknown_or_extension_parent_is_not_judged() {
+    assert_eq!(
+        only("<mystery id=\"m\"><text id=\"t\" grow=\"true\">x</text></mystery>"),
+        ["W401"]
+    );
+    assert!(
+        only(
+            "<x-acme-row id=\"r\" role=\"group\"><text id=\"t\" grow=\"true\">x</text></x-acme-row>"
+        )
+        .is_empty()
+    );
+}
+
+#[test]
+fn grow_is_a_literal_boolean() {
+    assert_eq!(
+        only("<stack id=\"a\"><text id=\"t\" grow=\"{$.g}\">x</text></stack>"),
+        ["W217"]
+    );
+    assert_eq!(
+        only("<stack id=\"a\"><text id=\"t\" grow=\"yes\">x</text></stack>"),
+        ["W204"]
+    );
+}
+
 // ---- modes --------------------------------------------------------------------------------
 
 #[test]

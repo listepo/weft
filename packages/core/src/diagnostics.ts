@@ -77,6 +77,7 @@ export const DIAGNOSTIC_CODES = {
   W315: { severity: "error", summary: "Binding path not declared in the data schema." },
   W316: { severity: "error", summary: "Bound data has a type the attribute does not take." },
   W317: { severity: "error", summary: "Asset path of a `model` is not an allowed path." },
+  W318: { severity: "error", summary: "`grow` on an element whose parent is not a `stack`." },
 
   W401: { severity: "mode", summary: "Unknown element." },
   W402: { severity: "mode", summary: "Unknown attribute." },
@@ -106,6 +107,16 @@ export const DIAGNOSTIC_CODES = {
   W708: { severity: "error", summary: "Project action name breaks the action grammar." },
   W709: { severity: "error", summary: "Data schema is malformed." },
   W710: { severity: "warning", summary: "Data schema keyword is not supported." },
+  W711: { severity: "error", summary: "Two catalogs claim the same name, prefix or kind." },
+  W712: {
+    severity: "error",
+    summary: "Catalog prefix is malformed or reserved, or a second catalog lacks one.",
+  },
+  W713: { severity: "error", summary: "Catalog defines or extends a kind it does not own." },
+  W714: {
+    severity: "warning",
+    summary: "Catalog requirement is not loaded at a compatible version.",
+  },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;
