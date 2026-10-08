@@ -96,8 +96,14 @@ describe(".cursor-plugin/plugin.json", () => {
 describe("skills", () => {
   const skills = readdirSync(join(PLUGIN, "skills"));
 
-  test("are weft-import, weft-export, weft-render and weft-spec", () => {
-    assert.deepEqual(skills.toSorted(), ["weft-export", "weft-import", "weft-render", "weft-spec"]);
+  test("are weft-import, weft-export, weft-render, weft-figma-pull and weft-spec", () => {
+    assert.deepEqual(skills.toSorted(), [
+      "weft-export",
+      "weft-figma-pull",
+      "weft-import",
+      "weft-render",
+      "weft-spec",
+    ]);
   });
 
   describe.each(skills)("%s", (dir) => {
@@ -217,7 +223,7 @@ describe("the plugin folder as Cursor caches it", () => {
         arg.replace("${CURSOR_PLUGIN_ROOT}", copy),
       ),
     ];
-    assert.equal(references.length, 4);
+    assert.equal(references.length, 5);
     for (const reference of references) assert.ok(existsSync(reference), reference);
   });
 

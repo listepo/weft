@@ -12,6 +12,7 @@
     "@weft/core": "workspace:*",
     "@weft/design-md": "workspace:*",
     "@weft/design-plugin": "workspace:*",
+    "@weft/figma": "workspace:*",
     "@weft/from-aria": "workspace:*",
     "@weft/mcp": "workspace:*",
     "@weft/render-react": "workspace:*",

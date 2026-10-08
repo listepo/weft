@@ -42,6 +42,7 @@ export const ENTRIES = {
   export: join(SHARED, "scripts/export.ts"),
   render: join(SHARED, "scripts/render.ts"),
   "design-md": join(SHARED, "scripts/design-md.ts"),
+  "figma-pull": join(SHARED, "scripts/figma-pull.ts"),
   server: join(REPOSITORY, "packages/mcp/src/server.ts"),
 };
 

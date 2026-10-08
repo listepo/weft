@@ -1,12 +1,13 @@
 # The Cursor plugin
 
-The `weft` plugin for Cursor does what the [Claude Code plugin](claude-code-plugin.md) does, with the same scripts and the same [MCP server](mcp.md): three skills you can type, one skill the agent loads on its own, and a rule that is attached whenever a `.weft` file is in context.
+The `weft` plugin for Cursor does what the [Claude Code plugin](claude-code-plugin.md) does, with the same scripts and the same [MCP server](mcp.md): four skills you can type, one skill the agent loads on its own, and a rule that is attached whenever a `.weft` file is in context.
 
 | Skill | What it does |
 | --- | --- |
 | `/weft-import <page.html> [out.weft]` | Turns an HTML file into a Weft screen and prints what the import lost. |
 | `/weft-export <screen.weft> [out.jsx] [--name Component]` | Turns a Weft screen into a React component. |
 | `/weft-render <screen.weft> [out.html] [--data data.json] [--tokens tokens.json]` | Turns a screen into an HTML page and opens it in Cursor's built-in browser. |
+| `/weft-figma-pull <figma link> [out.weft]` | Reads a frame of a Figma file through the Figma REST API back into a Weft screen and prints what was lost. The access token comes from the `FIGMA_TOKEN` environment variable. |
 | `weft-spec` (not typed) | Teaches the agent the format from [AGENT-SPEC.md](../AGENT-SPEC.md), so it writes, patches and repairs valid markup. |
 
 The MCP server gives the agent `weft_primer`, `weft_catalog`, `weft_validate`, `weft_format`, `weft_patch` and `weft_render`. The skills read and write files through small scripts; the server never touches files. The scripts are the ones described in [the Claude Code page](claude-code-plugin.md#what-the-commands-run): they never replace a file unless you pass `--force`, and exit with 0 (done), 1 (the input has errors) or 2 (usage or file problem).
