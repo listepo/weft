@@ -6,7 +6,5 @@
 - T39. Context in the document
 - T13.1. json-render export and import
 - T73. CI workflow for the documented merge gate
-- T67.4. Slint reader for the widgets the generator now emits
-- T67.5. Slint reader recovers bindings and events
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
