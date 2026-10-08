@@ -1,4 +1,4 @@
-# Inherited by every project; the root opts out in its moon.yml. Tests read sibling packages, the corpus, the examples and the compat fixtures,
+# Inherited by every project; the root opts out in its moon.yml. Tests read sibling packages, the corpus, the examples, the compat fixtures and the document schema snapshots,
 # so those are inputs too: a change there must invalidate the cached result.
 tasks:
   test:
@@ -34,3 +34,5 @@ tasks:
       - '/AGENT-SPEC.md'
       - '/vitest.config.ts'
       - '/crates/*/tests/fixtures/**/*'
+      # The document schema snapshots: @weft/core pins the text of documentSchema to them.
+      - '/crates/weft-snapshots/tests/snapshots/document-schema/*'
