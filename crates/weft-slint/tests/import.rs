@@ -365,13 +365,27 @@ fn an_image_is_a_model_only_when_the_comment_says_so() {
 }
 
 #[test]
+fn an_alert_and_a_combobox_follow_the_source_comment() {
+    let (catalog, tokens) = options();
+    let error = std::fs::read_to_string(here("tests/fixtures/error-state.slint")).unwrap();
+    let with_alert = read_slint(&error, &import_options(&catalog, &tokens));
+    assert_kind(&with_alert.document, "alert", "alert");
+    let stripped_error = without_source_comment(&error);
+    let without_alert = read_slint(&stripped_error, &import_options(&catalog, &tokens));
+    assert_kind(&without_alert.document, "stack", "alert");
+
+    let booking = std::fs::read_to_string(here("tests/fixtures/booking.slint")).unwrap();
+    let with_box = read_slint(&booking, &import_options(&catalog, &tokens));
+    assert_kind(&with_box.document, "combobox", "city");
+    let stripped_booking = without_source_comment(&booking);
+    let without_box = read_slint(&stripped_booking, &import_options(&catalog, &tokens));
+    assert_kind(&without_box.document, "select", "city");
+}
+
+#[test]
 fn login_without_the_source_comment_keeps_bindings_and_submit() {
     let (catalog, tokens) = options();
-    let source = std::fs::read_to_string(here("tests/fixtures/login.slint")).unwrap();
-    let source = without_source_comment(&source);
-    assert!(!source.contains("weft:source"), "{source}");
-    let result = read_slint(&source, &import_options(&catalog, &tokens));
-    let markup = serialize(&result.document);
+    let markup = recovered("tests/fixtures/login.slint", &catalog, &tokens);
     for needle in [
         "value=\"{$.email}\"",
         "value=\"{$.password}\"",
@@ -391,6 +405,68 @@ fn login_without_the_source_comment_keeps_bindings_and_submit() {
         !markup.contains("gap="),
         "16px matches more than one dimension token\n{markup}"
     );
+}
+
+#[test]
+fn signup_and_settings_without_the_source_comment_keep_bindings() {
+    let (catalog, tokens) = options();
+    let signup = recovered("tests/fixtures/signup.slint", &catalog, &tokens);
+    for needle in [
+        "value=\"{$.name}\"",
+        "value=\"{$.email}\"",
+        "value=\"{$.password}\"",
+        "value=\"{$.confirm}\"",
+        "checked=\"{$.acceptTerms}\"",
+        "label=\"Full name\"",
+        "label=\"Confirm password\"",
+        "label=\"I accept the terms of service\"",
+        "disabled=\"{!$.acceptTerms}\"",
+        "on-submit=\"auth.signup\"",
+        "on-press=\"nav.signin\"",
+        "level=\"1\"",
+        ">Create your account<",
+        "submit=\"true\"",
+    ] {
+        assert!(signup.contains(needle), "{needle} missing in {signup}");
+    }
+    assert!(
+        !signup.contains("gap="),
+        "16px matches more than one dimension token\n{signup}"
+    );
+
+    let settings = recovered("tests/fixtures/settings.slint", &catalog, &tokens);
+    for needle in [
+        "checked=\"{$.emailAlerts}\"",
+        "checked=\"{$.pushAlerts}\"",
+        "checked=\"{$.darkMode}\"",
+        "value=\"{$.language}\"",
+        "label=\"Email alerts\"",
+        "label=\"Push notifications\"",
+        "label=\"Language\"",
+        "label=\"Dark mode\"",
+        "disabled=\"{!$.dirty}\"",
+        "on-press=\"settings.save\"",
+        "level=\"1\"",
+        "level=\"2\"",
+        ">Settings<",
+        ">Notifications<",
+        "value=\"en\"",
+        "value=\"de\"",
+        "value=\"fr\"",
+        ">English<",
+        ">Deutsch<",
+        ">Français<",
+    ] {
+        assert!(settings.contains(needle), "{needle} missing in {settings}");
+    }
+}
+
+fn recovered(path: &str, catalog: &weft_core::Catalog, tokens: &IndexMap<String, Token>) -> String {
+    let source = std::fs::read_to_string(here(path)).unwrap();
+    let source = without_source_comment(&source);
+    assert!(!source.contains("weft:source"), "{source}");
+    let result = read_slint(&source, &import_options(catalog, tokens));
+    let markup = serialize(&result.document);
     let kept = [
         LossKind::Bindings,
         LossKind::Actions,
@@ -408,6 +484,7 @@ fn login_without_the_source_comment_keeps_bindings_and_submit() {
         result.losses
     );
     assert!(result.diagnostics.is_empty(), "{:?}", result.diagnostics);
+    markup
 }
 
 #[test]

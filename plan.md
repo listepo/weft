@@ -18,8 +18,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T64 | todo | P2 | 2 | 0% | |
 | T65 | todo | P2 | 1 | 0% | |
 | T66 | todo | P2 | 2 | 0% | |
-| T67.4 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
-| T67.5 | in progress | P2 | 4 | 0% | Cursor / grok 4.7 |
+| T67.4 | in progress | P2 | 3 | 100% | Cursor / grok 4.7 |
+| T67.5 | in progress | P2 | 4 | 100% | Cursor / grok 4.7 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 
@@ -197,6 +197,8 @@ Execution plan:
 3. Tests in `crates/weft-slint/tests/import.rs` (`required-features = ["import"]`): strip the source comment from one generated golden that uses `each` and `tabs` (or `list`) and check kinds and ids. Do not edit `read_expr.rs`.
 4. Verify: `cargo nextest run -p weft-slint --features import`.
 
+Progress: the widget match, including `alert` and `combobox` from the source comment, is on this branch together with the binding reader. Without the comment, an `alert` stays a `stack` and a `combobox` stays a `select`. `cargo nextest run -p weft-slint --features import` — 30 tests passed. Committed on this branch, not on `main`.
+
 ### T67.5. Slint reader recovers bindings and events
 
 `read_slint` treats every non-literal expression as a bindings loss and every callback as an actions loss. Invert `root.property` (`user-email` → `$.user.email`), `<=>`, truthiness (`!= ""`, `!= 0`), `enabled` and `visible` into `disabled` and `hidden`, and `root.perform` into the element's event. Also fold a caption `Text` into the control's label, recover a heading level from `font-size` and `font-weight`, read a `ComboBox` model as options, and match a `spacing` in px to one dimension token when the value equals one. Done when `login`, with the source comment removed, round-trips its bindings and events, and the losses that remain are the ones SPEC still lists.
@@ -207,6 +209,8 @@ Execution plan:
 2. New module `crates/weft-slint/src/read_expr.rs`. `read.rs` calls it at expression and callback sites and does not grow a second expression parser. Do not change the element-kind match (T67.4).
 3. Tests in `tests/import.rs`: `login` with the source comment deleted comes back with `$.email` and `auth.submit` (or whatever the screen names), and a spacing that equals a token is that token. `required-features = ["import"]`.
 4. Verify: `cargo nextest run -p weft-slint --features import`.
+
+Progress: `read_expr.rs` reads the generator's expressions back. Without the source comment, `login`, `signup` and `settings` keep their bindings and actions; a `16px` spacing stays unmatched because two dimension tokens share it. `cargo nextest run -p weft-slint --features import` — 30 tests passed. Committed on this branch, not on `main`. The non-test reader is still over the 500-line cap; the expression reader and the widget match are tested only together.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 

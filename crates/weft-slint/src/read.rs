@@ -2,7 +2,7 @@
 //! Parsed, never compiled or run. A brace that would read as a binding is escaped
 //! the way the other importers escape it.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use i_slint_compiler::diagnostics::BuildDiagnostics;
 use i_slint_compiler::literals::unescape_string;
@@ -38,16 +38,16 @@ pub fn read_slint(source: &str, options: &ImportOptions<'_>) -> ImportResult {
     let Some(element) = component.child_node(SyntaxKind::Element) else {
         return missing(diagnostics);
     };
-    // Slint 1.18 has no 3D widget, so a model is an Image unless the source comment names it.
-    let models = comment_markup(source)
+    // A model, an alert and a combobox share a Slint element with image, stack and select.
+    let comment_kinds = comment_markup(source)
         .as_deref()
-        .map(|markup| model_ids(markup, options))
+        .map(|markup| comment_kind_ids(markup, options))
         .unwrap_or_default();
     let mut reader = Reader::new(
         options.catalog,
         options.tokens,
         read_expr::properties(&element),
-        models,
+        comment_kinds,
     );
     if built.has_errors() {
         reader.lose(
@@ -104,8 +104,8 @@ struct Reader<'a> {
     in_list: bool,
     /// A `RadioButton` is a segment only inside the horizontal group.
     segments: bool,
-    /// Ids the source comment calls `model`. An `Image` is a model only for one of these.
-    models: HashSet<String>,
+    /// Ids the source comment calls `model`, `alert` or `combobox`.
+    comment_kinds: HashMap<String, String>,
 }
 
 struct Pending {
@@ -133,7 +133,7 @@ impl<'a> Reader<'a> {
         catalog: &'a Catalog,
         tokens: &'a IndexMap<String, Token>,
         props: read_expr::Props,
-        models: HashSet<String>,
+        comment_kinds: HashMap<String, String>,
     ) -> Self {
         Reader {
             catalog,
@@ -146,7 +146,7 @@ impl<'a> Reader<'a> {
             limited: false,
             in_list: false,
             segments: false,
-            models,
+            comment_kinds,
         }
     }
 
@@ -336,7 +336,7 @@ impl<'a> Reader<'a> {
         if base == "RadioGroup" && is_horizontal(el) {
             return "segmented-control";
         }
-        if base == "Image" && id.is_some_and(|name| self.models.contains(name)) {
+        if base == "Image" && self.comment_kind(id, "model") {
             return "model";
         }
         // The id sits on the column when an empty branch is emitted beside the widget.
@@ -346,7 +346,18 @@ impl<'a> Reader<'a> {
         if base == "VerticalLayout" && splice_anon(el, "StandardTableView").is_some() {
             return "table";
         }
+        // Slint has no alert widget, and select and combobox are both a ComboBox.
+        if base == "VerticalLayout" && self.comment_kind(id, "alert") {
+            return "alert";
+        }
+        if base == "ComboBox" && self.comment_kind(id, "combobox") {
+            return "combobox";
+        }
         fallback
+    }
+
+    fn comment_kind(&self, id: Option<&str>, kind: &str) -> bool {
+        id.is_some_and(|name| self.comment_kinds.get(name).map(String::as_str) == Some(kind))
     }
 
     fn fill(
@@ -1364,7 +1375,8 @@ fn comment_markup(source: &str) -> Option<String> {
     Some(markup.join("\n"))
 }
 
-fn model_ids(markup: &str, options: &ImportOptions<'_>) -> HashSet<String> {
+/// Kinds that share one Slint element: `model` with `image`, `alert` with `stack`, `combobox` with `select`.
+fn comment_kind_ids(markup: &str, options: &ImportOptions<'_>) -> HashMap<String, String> {
     let types = token_types(options.tokens);
     let parsed = parse(
         markup,
@@ -1376,32 +1388,32 @@ fn model_ids(markup: &str, options: &ImportOptions<'_>) -> HashSet<String> {
         },
     );
     let Some(document) = parsed.document else {
-        return HashSet::new();
+        return HashMap::new();
     };
     if has_errors(&parsed.diagnostics) {
-        return HashSet::new();
+        return HashMap::new();
     }
-    let mut ids = HashSet::new();
-    collect_models(&document.root, &mut ids);
+    let mut ids = HashMap::new();
+    collect_comment_kinds(&document.root, &mut ids);
     ids
 }
 
-fn collect_models(node: &Node, ids: &mut HashSet<String>) {
-    if node.kind == "model"
+fn collect_comment_kinds(node: &Node, ids: &mut HashMap<String, String>) {
+    if matches!(node.kind.as_str(), "model" | "alert" | "combobox")
         && let Some(id) = &node.id
     {
-        ids.insert(id.clone());
+        ids.insert(id.clone(), node.kind.clone());
     }
     for list in node.slots.values() {
         for child in list {
             if let Child::Node(child) = child {
-                collect_models(child, ids);
+                collect_comment_kinds(child, ids);
             }
         }
     }
     for child in &node.children {
         if let Child::Node(child) = child {
-            collect_models(child, ids);
+            collect_comment_kinds(child, ids);
         }
     }
 }
