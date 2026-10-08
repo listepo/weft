@@ -127,7 +127,8 @@ describe("runtimes", () => {
       `Bun runs on ${choice}`,
       () => {
         const result = run("bun", ["run"], choice);
-        assert.equal(result.error, undefined, result.error?.message);
+        // A hung Bun is killed by the timeout and surfaces here instead of blocking the run.
+        assert.ifError(result.error);
         assert.equal(result.status, 0, result.stderr);
         assert.deepEqual(JSON.parse(result.stdout), {
           engine: choice,
