@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "prefix": "acme",
   "requires": {
-    "weft-core": "0.1.0"
+    "weft-core": "0.2.0"
   },
   "components": {
     "acme-button": {

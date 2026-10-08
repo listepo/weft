@@ -99,6 +99,7 @@ export const cases: Record<DocumentCode, Case> = {
   W317: {
     markup: screen('<model id="m" label="Chair" src="../chair.glb" fallback="chair.png"/>'),
   },
+  W318: { markup: screen('<text id="t" grow="true">x</text>') },
   W401: { markup: screen('<fancy id="f"/>') },
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
   W403: { markup: screen("", "0.2") },

@@ -24,6 +24,9 @@ description: corpus-glass as json-render
         },
         "material": {
           "token": "material.glass"
+        },
+        "padding": {
+          "token": "space.lg"
         }
       },
       "children": [
@@ -74,6 +77,12 @@ description: corpus-glass as json-render
         },
         "material": {
           "token": "material.glass"
+        },
+        "max-width": {
+          "token": "size.md"
+        },
+        "padding": {
+          "token": "space.xl"
         }
       },
       "children": [

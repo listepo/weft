@@ -58,7 +58,7 @@ With the project, the cart screen is valid. Without it, `<rating>` and the ghost
 $ weft validate examples/project/screens/cart.weft; echo "exit $?"
 exit 0
 $ weft validate examples/project/screens/cart.weft --no-project --catalog packages/catalog/catalog.json --strict; echo "exit $?"
-examples/project/screens/cart.weft:8:11 W401 <rating> is not in catalog weft-core 0.1.0. — use a catalog component, or an extension named x-<vendor>-rating
+examples/project/screens/cart.weft:8:11 W401 <rating> is not in catalog weft-core 0.2.0. — use a catalog component, or an extension named x-<vendor>-rating
 examples/project/screens/cart.weft:10:31 W203 "ghost" is not an allowed value.
 exit 1
 ```
@@ -189,7 +189,7 @@ weft-tour/broken.json:#/tokens/0 W704 The file "tokens/base.tokens.json" cannot 
 weft-tour/broken.json:#/tokens/1 W703 The file name "../outside.json" is absolute, leaves the project directory or is malformed.
 weft-tour/broken.json:#/validate/mode W701 "validate.mode" must be "strict" or "lenient".
 weft-tour/shop/screens/cart.weft:6:46 W306 Token "space.sm" does not exist.
-weft-tour/shop/screens/cart.weft:8:11 W401 <rating> is not in catalog weft-core 0.1.0. — use a catalog component, or an extension named x-<vendor>-rating
+weft-tour/shop/screens/cart.weft:8:11 W401 <rating> is not in catalog weft-core 0.2.0. — use a catalog component, or an extension named x-<vendor>-rating
 weft-tour/shop/screens/cart.weft:8:80 W306 Token "color.star" does not exist.
 weft-tour/shop/screens/cart.weft:10:31 W203 "ghost" is not an allowed value.
 weft-tour/shop/screens/cart.weft:18:38 W306 Token "space.md" does not exist.

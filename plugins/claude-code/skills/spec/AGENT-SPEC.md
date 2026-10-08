@@ -2,7 +2,7 @@
 
 How an AI agent reads, writes, edits and repairs Weft. This is the agent's side of the format: [`SPEC.md`](SPEC.md) is the contract and wins on any conflict; this document says what an agent must do to stay inside it. The MCP primer (`packages/mcp/src/primer.ts`) is a condensed version of it.
 
-The examples are valid in strict mode against the core catalog `weft-core` 0.1 and in canonical form; `bench/test/agent-spec.test.ts` checks them.
+The examples are valid in strict mode against the core catalog `weft-core` 0.2 and in canonical form; `bench/test/agent-spec.test.ts` checks them.
 
 ## 1. What the host gives you
 
@@ -92,6 +92,7 @@ An attribute value is exactly one of:
 - A component whose content is text (`heading`, `text`, `link`, `button`, `radio`, `segment`, `option`, `column`, `menu-item`) or mixed (`item`, `cell`, `alert`) takes its text as content: `<button id="b">Save</button>`.
 - Bound text goes in the `text` attribute: `<text id="t" text="{$.greeting}"/>`. Content or `text`, never both.
 - Any element may be tilted in 3D with the literal numbers `rotate-x`, `rotate-y`, `rotate-z` (degrees, -360 to 360) and `perspective` (px, at least 1): `<stack id="card" rotate-y="30" perspective="800">`. Leave `perspective` out for a flat tilt.
+- Layout says intent, not lengths: `justify="space-between"` pushes a row's children apart (`start`, `center`, `end` also), `grow="true"` on a child of a `stack` (literal, nowhere else) makes it take the free space, and `padding`, `max-width` (on `stack` and `grid`) and `min-column-width` (on `grid`, which then shows fewer than `columns` columns when narrow) take dimension tokens such as `{token.space.lg}` or `{token.size.md}`. Never a margin, a spacer element or a pixel width.
 - `label` is the accessible name. Components marked "label" below need one; on a component that shows its text, leave `label` out.
 
 ### 2.5 Events and actions
@@ -108,11 +109,11 @@ An attribute value is exactly one of:
 - Kinds with a fixed parent stay in it: `radio` in `radio-group`, `segment` in `segmented-control`, `option` in `select` or `combobox`, `item` in `list`, `column` and `row` in `table`, `cell` in `row`, `tab` in `tabs`, `menu-item` in `menu`.
 - `<screen>` is the root only. Nest at most 256 levels.
 
-### 2.7 Components of `weft-core` 0.1
+### 2.7 Components of `weft-core` 0.2
 
 Props are strings unless a type is given; `*` marks a required prop; "label" means the accessible `label` is required; events follow `;`. Every `text` or `mixed` component also takes `text`.
 
-- Layout: `stack` (`direction` column|row, `gap` token, `align` start|center|end|stretch, `wrap` boolean; a `row` without `align` centres its children, so leave `align` out for the default), `grid` (`columns`* integer ≥ 1, `gap` token), `section` (label; slot `header`).
+- Layout: `stack` (`direction` column|row, `gap` token, `align` start|center|end|stretch, `justify` start|center|end|space-between, `wrap` boolean, `padding` token, `max-width` token; a `row` without `align` centres its children, so leave `align` out for the default), `grid` (`columns`* integer ≥ 1, `gap` token, `min-column-width` token, `padding` token, `max-width` token), `section` (label; slot `header`).
 - Text: `heading` (`level`* integer 1–6), `text` (`tone` default|muted|success|warning|danger), `image` (`src`*, label), `model` (`src`* glTF, `usdz`, `fallback`* still image, label*; the three paths are literals), `link` (`href`; press), `alert` (`tone` info|success|warning|danger; mixed).
 - Actions: `button` (`variant` primary|secondary|danger, `disabled` boolean, `submit` boolean literal; states idle|busy; press), `menu` (label) holding `menu-item` (`disabled`; press).
 - Forms: `form` (slot `footer`; states idle|submitting|invalid; submit), `field` (label, `type` text|email|password|number|search|multiline, `value` writable, `placeholder`, `required`, `disabled`, `error`; states valid|invalid; change), `checkbox` and `switch` (label, `checked` writable, `disabled`; change), `radio-group` (label, `value` writable; change) holding `radio` (`value`*, `disabled`), `select` (label, `value` writable, `disabled`; change) holding `option` (`value`*).
@@ -234,6 +235,7 @@ What each code asks of you:
 | W315 | Bind a path the data schema declares; `expected` lists the names at that step and `hint` the nearest one. Inside `<each>`, start from the loop variable. |
 | W316 | Bind data of a type the attribute takes (`expected`), pick another attribute, or negate the binding when the attribute is a boolean condition. |
 | W317 | Give a `model` paths that are relative (no `..`, no scheme) or `https`, with the right extension: `.glb` or `.gltf` for `src`, `.usdz` for `usdz`, an image for `fallback`. |
+| W318 | Move the element with `grow="true"` into a `stack`, or remove `grow`. |
 | W401 | Use a catalog component (see `hint`), or an extension the host knows. |
 | W402 | Use an attribute the component declares, or remove it. |
 | W403 | Write `weft="0.1"`: the reader is older than the version you wrote. |

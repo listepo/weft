@@ -37,6 +37,33 @@
       }
      }
     },
+    "size": {
+     "$type": "dimension",
+     "sm": {
+      "$value": {
+       "value": 240,
+       "unit": "px"
+      }
+     },
+     "md": {
+      "$value": {
+       "value": 480,
+       "unit": "px"
+      }
+     },
+     "lg": {
+      "$value": {
+       "value": 720,
+       "unit": "px"
+      }
+     },
+     "xl": {
+      "$value": {
+       "value": 960,
+       "unit": "px"
+      }
+     }
+    },
     "radius": {
      "$type": "dimension",
      "sm": {
@@ -216,6 +243,46 @@
        "type": "dimension",
        "value": {
         "value": 32,
+        "unit": "px"
+       }
+      }
+     ],
+     [
+      "size.sm",
+      {
+       "type": "dimension",
+       "value": {
+        "value": 240,
+        "unit": "px"
+       }
+      }
+     ],
+     [
+      "size.md",
+      {
+       "type": "dimension",
+       "value": {
+        "value": 480,
+        "unit": "px"
+       }
+      }
+     ],
+     [
+      "size.lg",
+      {
+       "type": "dimension",
+       "value": {
+        "value": 720,
+        "unit": "px"
+       }
+      }
+     ],
+     [
+      "size.xl",
+      {
+       "type": "dimension",
+       "value": {
+        "value": 960,
         "unit": "px"
        }
       }
@@ -16032,8 +16099,8 @@
   "data.schema.json": "{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}}}",
   "data-anyof.schema.json": "{\"type\":\"object\",\"properties\":{\"a\":{\"anyOf\":[]}}}",
   "data-bad.schema.json": "{\"type\":\"thing\"}",
-  "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
-  "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.1.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
+  "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
+  "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
   "catalog.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"props\":{\"variant\":{\"description\":\"Visual emphasis.\",\"type\":\"enum\",\"values\":[\"primary\",\"secondary\",\"danger\",\"ghost\"],\"default\":\"secondary\"}},\"events\":[\"press\",\"longpress\"],\"states\":[\"idle\"]},\"text\":{\"content\":\"mixed\"}}}"
  },
  "projects": [
@@ -16044,7 +16111,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16065,7 +16132,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16094,7 +16161,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16123,7 +16190,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16153,7 +16220,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16189,7 +16256,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16210,7 +16277,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16238,7 +16305,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16289,7 +16356,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16343,7 +16410,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16381,7 +16448,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16410,7 +16477,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16441,7 +16508,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16477,7 +16544,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16504,7 +16571,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16557,7 +16624,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16649,8 +16716,8 @@
     "data.schema.json": "{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}}}",
     "data-anyof.schema.json": "{\"type\":\"object\",\"properties\":{\"a\":{\"anyOf\":[]}}}",
     "data-bad.schema.json": "{\"type\":\"thing\"}",
-    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
-    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.1.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
+    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
+    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
     "catalog.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"props\":{\"variant\":{\"description\":\"Visual emphasis.\",\"type\":\"enum\",\"values\":[\"primary\",\"secondary\",\"danger\",\"ghost\"],\"default\":\"secondary\"}},\"events\":[\"press\",\"longpress\"],\"states\":[\"idle\"]},\"text\":{\"content\":\"mixed\"}}}",
     "./tokens/base.tokens.json": "{\"color\":{\"$type\":\"color\",\"brand\":{\"$value\":\"#000000\"},\"text\":{\"$value\":\"{color.brand}\"}},\"space\":{\"$type\":\"dimension\",\"s\":{\"$value\":{\"value\":4,\"unit\":\"px\"}}}}"
    },
@@ -16658,7 +16725,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16708,7 +16775,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16770,7 +16837,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16824,7 +16891,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16877,7 +16944,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16908,7 +16975,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -16956,7 +17023,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -17121,7 +17188,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -17153,7 +17220,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -17185,7 +17252,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -18273,7 +18340,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -18294,7 +18361,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -18847,7 +18914,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -18884,10 +18951,10 @@
     "data.schema.json": "{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}}}",
     "data-anyof.schema.json": "{\"type\":\"object\",\"properties\":{\"a\":{\"anyOf\":[]}}}",
     "data-bad.schema.json": "{\"type\":\"thing\"}",
-    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
-    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.1.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
+    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
+    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
     "catalog.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"props\":{\"variant\":{\"description\":\"Visual emphasis.\",\"type\":\"enum\",\"values\":[\"primary\",\"secondary\",\"danger\",\"ghost\"],\"default\":\"secondary\"}},\"events\":[\"press\",\"longpress\"],\"states\":[\"idle\"]},\"text\":{\"content\":\"mixed\"}}}",
-    "two.json": "{\"weft\":\"0.1\",\"name\":\"acme-two\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}"
+    "two.json": "{\"weft\":\"0.1\",\"name\":\"acme-two\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}"
    },
    "codes": [
     "W711"
@@ -18977,14 +19044,14 @@
    "name": "malformed and reserved prefixes",
    "project": "{\"catalog\":[\"x\",\"weft\",\"date\",\"button\",\"Acme\",\"a-b\",\"\",\"ok\"]}",
    "files": {
-    "x": "{\"weft\":\"0.1\",\"name\":\"lib-x\",\"version\":\"1.0.0\",\"prefix\":\"x\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{}}",
-    "weft": "{\"weft\":\"0.1\",\"name\":\"lib-weft\",\"version\":\"1.0.0\",\"prefix\":\"weft\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{}}",
-    "date": "{\"weft\":\"0.1\",\"name\":\"lib-date\",\"version\":\"1.0.0\",\"prefix\":\"date\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{}}",
-    "button": "{\"weft\":\"0.1\",\"name\":\"lib-button\",\"version\":\"1.0.0\",\"prefix\":\"button\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{}}",
-    "Acme": "{\"weft\":\"0.1\",\"name\":\"lib-Acme\",\"version\":\"1.0.0\",\"prefix\":\"Acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{}}",
-    "a-b": "{\"weft\":\"0.1\",\"name\":\"lib-a-b\",\"version\":\"1.0.0\",\"prefix\":\"a-b\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{}}",
-    "": "{\"weft\":\"0.1\",\"name\":\"lib-\",\"version\":\"1.0.0\",\"prefix\":\"\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{}}",
-    "ok": "{\"weft\":\"0.1\",\"name\":\"lib-ok\",\"version\":\"1.0.0\",\"prefix\":\"ok\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{}}"
+    "x": "{\"weft\":\"0.1\",\"name\":\"lib-x\",\"version\":\"1.0.0\",\"prefix\":\"x\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{}}",
+    "weft": "{\"weft\":\"0.1\",\"name\":\"lib-weft\",\"version\":\"1.0.0\",\"prefix\":\"weft\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{}}",
+    "date": "{\"weft\":\"0.1\",\"name\":\"lib-date\",\"version\":\"1.0.0\",\"prefix\":\"date\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{}}",
+    "button": "{\"weft\":\"0.1\",\"name\":\"lib-button\",\"version\":\"1.0.0\",\"prefix\":\"button\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{}}",
+    "Acme": "{\"weft\":\"0.1\",\"name\":\"lib-Acme\",\"version\":\"1.0.0\",\"prefix\":\"Acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{}}",
+    "a-b": "{\"weft\":\"0.1\",\"name\":\"lib-a-b\",\"version\":\"1.0.0\",\"prefix\":\"a-b\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{}}",
+    "": "{\"weft\":\"0.1\",\"name\":\"lib-\",\"version\":\"1.0.0\",\"prefix\":\"\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{}}",
+    "ok": "{\"weft\":\"0.1\",\"name\":\"lib-ok\",\"version\":\"1.0.0\",\"prefix\":\"ok\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{}}"
    },
    "codes": [
     "W712",
@@ -19225,7 +19292,7 @@
    "name": "a library defines only kinds under its prefix",
    "project": "{\"catalog\":[\"lib.json\"]}",
    "files": {
-    "lib.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-chip\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"button\":{\"states\":[\"x\"]},\"acme\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}}}}"
+    "lib.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-chip\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"button\":{\"states\":[\"x\"]},\"acme\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}}}}"
    },
    "codes": [
     "W713",
@@ -19312,8 +19379,8 @@
     "data.schema.json": "{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}}}",
     "data-anyof.schema.json": "{\"type\":\"object\",\"properties\":{\"a\":{\"anyOf\":[]}}}",
     "data-bad.schema.json": "{\"type\":\"thing\"}",
-    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
-    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.1.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
+    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
+    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
     "catalog.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"props\":{\"variant\":{\"description\":\"Visual emphasis.\",\"type\":\"enum\",\"values\":[\"primary\",\"secondary\",\"danger\",\"ghost\"],\"default\":\"secondary\"}},\"events\":[\"press\",\"longpress\"],\"states\":[\"idle\"]},\"text\":{\"content\":\"mixed\"}}}",
     "chip.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"acme-chip\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acmes-chip\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}}}}"
    },
@@ -19446,8 +19513,8 @@
     "data.schema.json": "{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}}}",
     "data-anyof.schema.json": "{\"type\":\"object\",\"properties\":{\"a\":{\"anyOf\":[]}}}",
     "data-bad.schema.json": "{\"type\":\"thing\"}",
-    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
-    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.1.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
+    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
+    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
     "catalog.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"props\":{\"variant\":{\"description\":\"Visual emphasis.\",\"type\":\"enum\",\"values\":[\"primary\",\"secondary\",\"danger\",\"ghost\"],\"default\":\"secondary\"}},\"events\":[\"press\",\"longpress\"],\"states\":[\"idle\"]},\"text\":{\"content\":\"mixed\"}}}",
     "old.json": "{\"weft\":\"0.1\",\"name\":\"old-ui\",\"version\":\"1.0.0\",\"prefix\":\"old\",\"requires\":{\"weft-core\":\"1.0.0\"},\"components\":{}}"
    },
@@ -19567,10 +19634,10 @@
      {
       "code": "W714",
       "severity": "warning",
-      "message": "\"old-ui\" requires \"weft-core\" 1.0.0, but 0.1.0 is loaded.",
+      "message": "\"old-ui\" requires \"weft-core\" 1.0.0, but 0.2.0 is loaded.",
       "path": "#/catalog/1/requires/weft-core",
       "expected": "\"weft-core\" loaded at a version compatible with 1.0.0",
-      "got": "0.1.0"
+      "got": "0.2.0"
      },
      {
       "code": "W706",
@@ -19599,7 +19666,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -19639,7 +19706,7 @@
    "name": "a prefix that is not a string",
    "project": "{\"catalog\":[\"a.json\"]}",
    "files": {
-    "a.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":7,\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}"
+    "a.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":7,\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}"
    },
    "codes": [
     "W706"
@@ -19647,7 +19714,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -19683,10 +19750,10 @@
     "data.schema.json": "{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}}}",
     "data-anyof.schema.json": "{\"type\":\"object\",\"properties\":{\"a\":{\"anyOf\":[]}}}",
     "data-bad.schema.json": "{\"type\":\"thing\"}",
-    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
-    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.1.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
+    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
+    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
     "catalog.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"props\":{\"variant\":{\"description\":\"Visual emphasis.\",\"type\":\"enum\",\"values\":[\"primary\",\"secondary\",\"danger\",\"ghost\"],\"default\":\"secondary\"}},\"events\":[\"press\",\"longpress\"],\"states\":[\"idle\"]},\"text\":{\"content\":\"mixed\"}}}",
-    "narrow.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.1.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\"]}}}}}"
+    "narrow.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\"]}}}}}"
    },
    "codes": [
     "W707"
@@ -19858,7 +19925,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -19879,7 +19946,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -19908,7 +19975,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -19937,7 +20004,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20134,7 +20201,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20203,7 +20270,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20308,7 +20375,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20378,7 +20445,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20409,7 +20476,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20452,7 +20519,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20487,7 +20554,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20540,7 +20607,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -20734,7 +20801,7 @@
   },
   {
    "name": "content: a list of catalogs",
-   "project": "{\"catalog\":[{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.1.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}},{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}]}",
+   "project": "{\"catalog\":[{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}},{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}]}",
    "content": true,
    "codes": [],
    "expect": {
@@ -20892,7 +20959,7 @@
   },
   {
    "name": "content: a list entry that is not a catalog",
-   "project": "{\"catalog\":[{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.1.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}},\"shop.json\"]}",
+   "project": "{\"catalog\":[{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}},\"shop.json\"]}",
    "content": true,
    "codes": [
     "W706"
@@ -20990,7 +21057,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -21254,7 +21321,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -21296,7 +21363,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -21643,7 +21710,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -21699,7 +21766,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -21742,7 +21809,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -21777,7 +21844,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -21836,7 +21903,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22035,7 +22102,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22087,7 +22154,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22251,7 +22318,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22286,7 +22353,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22331,7 +22398,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22387,7 +22454,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22445,7 +22512,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22506,7 +22573,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22564,7 +22631,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22594,7 +22661,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22637,7 +22704,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22867,7 +22934,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22903,7 +22970,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22931,7 +22998,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -22974,7 +23041,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23010,7 +23077,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23061,7 +23128,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23120,7 +23187,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23171,7 +23238,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23222,7 +23289,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23264,7 +23331,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23307,7 +23374,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23382,7 +23449,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23425,7 +23492,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23460,7 +23527,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23502,7 +23569,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23643,7 +23710,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23670,7 +23737,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23731,7 +23798,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23903,7 +23970,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23953,7 +24020,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -23987,7 +24054,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24029,7 +24096,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24192,7 +24259,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24254,7 +24321,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24313,7 +24380,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24348,7 +24415,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24397,7 +24464,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24447,7 +24514,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24506,7 +24573,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24534,7 +24601,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24591,7 +24658,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24641,7 +24708,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24660,7 +24727,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24703,7 +24770,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24738,7 +24805,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24781,7 +24848,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24838,7 +24905,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24896,7 +24963,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24931,7 +24998,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -24982,7 +25049,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25038,7 +25105,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25104,7 +25171,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25167,7 +25234,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25210,7 +25277,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25263,7 +25330,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25290,7 +25357,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25318,7 +25385,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25381,7 +25448,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25439,7 +25506,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25482,7 +25549,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25532,7 +25599,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25568,7 +25635,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25834,7 +25901,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25876,7 +25943,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25911,7 +25978,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25953,7 +26020,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -25995,7 +26062,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26158,7 +26225,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26404,7 +26471,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26423,7 +26490,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26483,7 +26550,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26510,7 +26577,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26577,7 +26644,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26637,7 +26704,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26687,7 +26754,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26723,7 +26790,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26897,7 +26964,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26941,7 +27008,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -26992,7 +27059,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27035,7 +27102,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27095,7 +27162,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27137,7 +27204,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27179,7 +27246,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27232,7 +27299,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27288,7 +27355,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27338,7 +27405,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27373,7 +27440,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27392,7 +27459,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27474,7 +27541,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27747,7 +27814,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27784,7 +27851,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -27860,7 +27927,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28070,7 +28137,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28098,7 +28165,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28133,7 +28200,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28171,7 +28238,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28205,7 +28272,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28389,7 +28456,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28534,7 +28601,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28578,7 +28645,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28613,7 +28680,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28656,7 +28723,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28724,7 +28791,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -28971,7 +29038,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29014,7 +29081,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29050,7 +29117,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29089,7 +29156,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29295,7 +29362,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29355,7 +29422,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29377,7 +29444,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29602,7 +29669,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29871,7 +29938,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29906,7 +29973,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -29967,7 +30034,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30271,7 +30338,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30298,7 +30365,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30343,7 +30410,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30388,7 +30455,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30419,7 +30486,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30482,7 +30549,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30840,7 +30907,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30897,7 +30964,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30932,7 +30999,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -30977,7 +31044,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31185,7 +31252,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31221,7 +31288,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31249,7 +31316,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31278,7 +31345,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31320,7 +31387,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31364,7 +31431,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31630,7 +31697,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31664,7 +31731,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31692,7 +31759,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31752,7 +31819,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -31829,7 +31896,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -32024,7 +32091,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -32082,7 +32149,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -32284,7 +32351,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -32327,7 +32394,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -32398,7 +32465,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -32434,7 +32501,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -32603,7 +32670,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -32639,7 +32706,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -33392,7 +33459,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -33537,7 +33604,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -33614,7 +33681,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -33664,7 +33731,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -33878,7 +33945,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -33939,7 +34006,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -33981,7 +34048,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34261,7 +34328,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34304,7 +34371,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34347,7 +34414,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34527,7 +34594,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34584,7 +34651,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34634,7 +34701,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34669,7 +34736,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34703,7 +34770,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34747,7 +34814,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -34960,7 +35027,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35027,7 +35094,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35071,7 +35138,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35129,7 +35196,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35304,7 +35371,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35354,7 +35421,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35382,7 +35449,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35419,7 +35486,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35454,7 +35521,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35488,7 +35555,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35667,7 +35734,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35713,7 +35780,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35764,7 +35831,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35830,7 +35897,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -35879,7 +35946,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36042,7 +36109,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36107,7 +36174,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36166,7 +36233,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36449,7 +36516,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36491,7 +36558,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36659,7 +36726,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36686,7 +36753,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36925,7 +36992,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36952,7 +37019,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -36987,7 +37054,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37037,7 +37104,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37056,7 +37123,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37105,7 +37172,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37140,7 +37207,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37176,7 +37243,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37233,7 +37300,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37414,7 +37481,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37482,7 +37549,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37547,7 +37614,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37575,7 +37642,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37627,7 +37694,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37654,7 +37721,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37864,7 +37931,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -37899,7 +37966,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -38085,7 +38152,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -38349,7 +38416,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -38431,7 +38498,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -38475,7 +38542,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -38517,7 +38584,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -38721,7 +38788,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -38763,7 +38830,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -38984,7 +39051,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39019,7 +39086,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39038,7 +39105,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39088,7 +39155,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39132,7 +39199,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39313,7 +39380,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39372,7 +39439,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39430,7 +39497,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39674,7 +39741,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39744,7 +39811,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39797,7 +39864,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39848,7 +39915,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39883,7 +39950,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -39925,7 +39992,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40133,7 +40200,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40182,7 +40249,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40217,7 +40284,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40309,7 +40376,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40337,7 +40404,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40364,7 +40431,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40392,7 +40459,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40426,7 +40493,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -40884,7 +40951,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41039,7 +41106,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41113,7 +41180,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41141,7 +41208,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41209,7 +41276,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41369,7 +41436,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41411,7 +41478,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41445,7 +41512,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41495,7 +41562,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41550,7 +41617,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41578,7 +41645,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41757,7 +41824,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -41784,7 +41851,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -42425,7 +42492,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -42474,7 +42541,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -42510,7 +42577,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -42552,7 +42619,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -42618,7 +42685,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -42661,7 +42728,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],
@@ -42712,7 +42779,7 @@
    "expect": {
     "catalog": {
      "name": "weft-core",
-     "version": "0.1.0",
+     "version": "0.2.0",
      "changed": []
     },
     "catalogs": [],

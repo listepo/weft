@@ -20,6 +20,10 @@ description: example-stack as json
           "gap": {
             "token": "space.md"
           },
+          "justify": "space-between",
+          "padding": {
+            "token": "space.sm"
+          },
           "wrap": false
         },
         "children": [

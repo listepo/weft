@@ -26,7 +26,7 @@ function _url(value) {
 export default function WeftScreen({ data, actions, onChange }) {
   return (
     <main data-weft-id="dashboard" data-state="ready" aria-label="Team dashboard">
-      <div data-weft-id="header" style={{ gap: "var(--weft-space-xl)", display: "flex", flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
+      <div data-weft-id="header" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
         <h1 data-weft-id="title">
           {!(_text(data?.team?.name).trim() === "") ? _squash(_text(data?.team?.name)) : ""}
         </h1>
@@ -75,7 +75,7 @@ export default function WeftScreen({ data, actions, onChange }) {
           })()}
         </div>
       </div>
-      <div data-weft-id="footer" style={{ gap: "var(--weft-space-xs)", display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+      <div data-weft-id="footer" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "flex-end", flexWrap: "wrap" }}>
         <div data-weft-id="owner" data-tone="default">Owned by the platform team</div>
         <div data-weft-id="footer-links" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "flex-start" }}>
           {(() => {

@@ -4,3 +4,5 @@ description: example-grid as a2ui-losses
 ---
 Layout /screen#root/grid#cards: columns: this layout has no A2UI form
 Tokens /screen#root/grid#cards: gap: design tokens have no A2UI form
+Tokens /screen#root/grid#cards: max-width: design tokens have no A2UI form
+Tokens /screen#root/grid#cards: min-column-width: design tokens have no A2UI form

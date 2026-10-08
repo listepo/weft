@@ -4,11 +4,11 @@ description: corpus-dashboard as slint
 ---
 // weft:source slint
 // <screen id="dashboard" label="Team dashboard" state="ready" weft="0.1">
-//   <stack id="header" direction="row" gap="{token.space.xl}" wrap="true">
+//   <stack id="header" direction="row" gap="{token.space.md}" justify="space-between" wrap="true">
 //     <heading id="title" level="1" text="{$.team.name}"/>
 //     <text id="updated" text="{$.updatedAt}" tone="muted"/>
 //   </stack>
-//   <grid id="stats" columns="3" gap="{token.space.lg}">
+//   <grid id="stats" columns="3" gap="{token.space.lg}" min-column-width="{token.size.sm}">
 //     <section id="velocity" label="Velocity">
 //       <text id="velocity-value" text="{$.stats.velocity}" tone="success"/>
 //       <slot name="header">
@@ -28,7 +28,7 @@ description: corpus-dashboard as slint
 //       </slot>
 //     </section>
 //   </grid>
-//   <stack id="notices" direction="column" gap="{token.space.sm}">
+//   <stack id="notices" direction="column" gap="{token.space.sm}" max-width="{token.size.lg}">
 //     <alert id="release" tone="info">Release 2.4 ships on Friday.</alert>
 //     <alert id="backup" text="{$.backupStatus}" tone="success"/>
 //     <alert id="quota" tone="warning">
@@ -36,7 +36,7 @@ description: corpus-dashboard as slint
 //       <link id="quota-link" href="https://example.com/storage">Manage storage</link>
 //     </alert>
 //   </stack>
-//   <stack id="footer" align="end" gap="{token.space.xs}">
+//   <stack id="footer" align="end" direction="row" gap="{token.space.md}" justify="space-between" wrap="true">
 //     <text id="owner" tone="default">Owned by the platform team</text>
 //     <stack id="footer-links" align="start" direction="row" gap="{token.space.md}">
 //       <link id="docs" href="/docs">Docs</link>
@@ -61,7 +61,7 @@ export component DashboardScreen inherits Window {
     dashboard := VerticalBox {
         alignment: LayoutAlignment.start;
         header := HorizontalLayout {
-            spacing: 32px;
+            spacing: 16px;
             title := Text {
                 text: root.team-name;
                 font-size: 32px;
@@ -136,8 +136,8 @@ export component DashboardScreen inherits Window {
                 }
             }
         }
-        footer := VerticalLayout {
-            spacing: 4px;
+        footer := HorizontalLayout {
+            spacing: 16px;
             owner := Text {
                 text: "Owned by the platform team";
             }

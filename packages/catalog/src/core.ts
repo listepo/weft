@@ -1,4 +1,4 @@
-// The `weft-core` 0.1 catalog of SPEC §5.1 as data. `catalog.json` is generated from this object.
+// The `weft-core` 0.2 catalog of SPEC §5.1 as data. `catalog.json` is generated from this object.
 import type { Catalog, ComponentDef, PropDef, SlotDef } from "@weft/core";
 
 const str = (description: string, extra: Partial<PropDef> = {}): PropDef => ({
@@ -33,6 +33,13 @@ const material = (description: string): PropDef => ({
   type: "token",
   tokenType: "material",
 });
+
+const paddingProp = (what: string): PropDef =>
+  dimension(`Inner spacing on all four sides of the ${what}, as a dimension token.`);
+const maxWidthProp = (what: string): PropDef =>
+  dimension(
+    `Widest the ${what} may be, as a dimension token; it fills its parent up to that width.`,
+  );
 
 const checkedProp = bool("Whether the control is on; bind it to a boolean to read and write it.", {
   writable: true,
@@ -80,7 +87,14 @@ const components: Record<string, ComponentDef> = {
         "end",
         "stretch",
       ]),
+      justify: oneOf(
+        "How free space along the main direction is shared: after, around or before the children, or between them.",
+        ["start", "center", "end", "space-between"],
+        { default: "start" },
+      ),
       wrap: bool("Set to true to let children wrap onto further lines when they do not fit."),
+      padding: paddingProp("stack"),
+      "max-width": maxWidthProp("stack"),
       material: material(
         "Frosted-glass surface behind the stack, as a material token: a background blur and a tint.",
       ),
@@ -98,6 +112,11 @@ const components: Record<string, ComponentDef> = {
         min: 1,
       }),
       gap: dimension("Space between grid cells, as a dimension token."),
+      "min-column-width": dimension(
+        "Narrowest a column may be, as a dimension token; below it the grid shows fewer columns, down to one.",
+      ),
+      padding: paddingProp("grid"),
+      "max-width": maxWidthProp("grid"),
       material: material(
         "Frosted-glass surface behind the grid, as a material token: a background blur and a tint.",
       ),
@@ -539,6 +558,6 @@ for (const def of Object.values(components)) {
 export const coreCatalog: Catalog = {
   weft: "0.1",
   name: "weft-core",
-  version: "0.1.0",
+  version: "0.2.0",
   components,
 };

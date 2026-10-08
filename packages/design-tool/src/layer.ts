@@ -18,8 +18,11 @@ export type LayerLayout = {
   mode: Mode | "none";
   /** The tool's own name for the layout, for loss notes. */
   label: string;
-  /** Undefined when the tool's alignment has no Weft value (`alignLabel` names it). */
-  align: Align | undefined;
+  /**
+   * Undefined when the tool's alignment has no Weft value (`alignLabel` names it).
+   * `stretch` is a Weft value; a tool that draws it as `start` reports `start` instead.
+   */
+  align: Align | "stretch" | undefined;
   alignLabel: string;
   wrap: boolean;
   columns: number;
@@ -39,6 +42,14 @@ export interface Layer extends PluginData {
   /** A text layer's text; `""` for every other layer. */
   readonly characters: string;
   readonly layout: LayerLayout;
+  /**
+   * The 0-based cell this layer occupies when it is a child of a grid. Absent when the tool
+   * does not report anchors; the reader then keeps the children in z-order.
+   */
+  readonly gridRowAnchorIndex?: number | undefined;
+  readonly gridColumnAnchorIndex?: number | undefined;
+  /** `ABSOLUTE` is out of flow and keeps its place when grid children are ordered. */
+  readonly layoutPositioning?: "AUTO" | "ABSOLUTE" | undefined;
   /** Whether a fill is an image. */
   readonly image: boolean;
   /** Whether the layer has fills or strokes. */

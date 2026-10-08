@@ -1,7 +1,7 @@
 {
   "weft": "0.1",
   "name": "weft-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "components": {
     "screen": {
       "description": "The root of every document: one full screen of UI, carrying the format version.",
@@ -39,9 +39,25 @@
           "type": "enum",
           "values": ["start", "center", "end", "stretch"]
         },
+        "justify": {
+          "description": "How free space along the main direction is shared: after, around or before the children, or between them.",
+          "type": "enum",
+          "values": ["start", "center", "end", "space-between"],
+          "default": "start"
+        },
         "wrap": {
           "description": "Set to true to let children wrap onto further lines when they do not fit.",
           "type": "boolean"
+        },
+        "padding": {
+          "description": "Inner spacing on all four sides of the stack, as a dimension token.",
+          "type": "token",
+          "tokenType": "dimension"
+        },
+        "max-width": {
+          "description": "Widest the stack may be, as a dimension token; it fills its parent up to that width.",
+          "type": "token",
+          "tokenType": "dimension"
         },
         "material": {
           "description": "Frosted-glass surface behind the stack, as a material token: a background blur and a tint.",
@@ -64,6 +80,21 @@
         },
         "gap": {
           "description": "Space between grid cells, as a dimension token.",
+          "type": "token",
+          "tokenType": "dimension"
+        },
+        "min-column-width": {
+          "description": "Narrowest a column may be, as a dimension token; below it the grid shows fewer columns, down to one.",
+          "type": "token",
+          "tokenType": "dimension"
+        },
+        "padding": {
+          "description": "Inner spacing on all four sides of the grid, as a dimension token.",
+          "type": "token",
+          "tokenType": "dimension"
+        },
+        "max-width": {
+          "description": "Widest the grid may be, as a dimension token; it fills its parent up to that width.",
           "type": "token",
           "tokenType": "dimension"
         },

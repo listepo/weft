@@ -5,7 +5,7 @@ FRAME "screen#glass" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
   | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
   FRAME "stack#card" layoutMode="VERTICAL" itemSpacing=16 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" fills=[{"type":"SOLID","color":"#ffffff","opacity":0.28}] effects=[{"type":"BACKGROUND_BLUR","radius":20,"visible":true}] bound={"itemSpacing":"var(space/md)"}
     | weft.origin = layer(stack#card)
-    | weft.source = {"kind":"stack","id":"card","props":{"direction":"column","gap":{"token":"space.md"},"material":{"token":"material.glass"}}}
+    | weft.source = {"kind":"stack","id":"card","props":{"direction":"column","gap":{"token":"space.md"},"material":{"token":"material.glass"},"padding":{"token":"space.lg"}}}
     | weft.style = [[[1,1,1,0.28,""]],[],0,[0,0,0,0],null,[["BACKGROUND_BLUR",20,true]]]
     INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
       | weft.origin = layer(heading#title)
@@ -21,7 +21,7 @@ FRAME "screen#glass" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
       TEXT "text" chars="Got it" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
   FRAME "grid#tiles" layoutMode="GRID" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" gridColumnCount=2 gridRowGap=8 gridColumnGap=8 fills=[{"type":"SOLID","color":"#ffffff","opacity":0.28}] effects=[{"type":"BACKGROUND_BLUR","radius":20,"visible":true}] bound={"gridRowGap":"var(space/sm)","gridColumnGap":"var(space/sm)"}
     | weft.origin = layer(grid#tiles)
-    | weft.source = {"kind":"grid","id":"tiles","props":{"columns":2,"gap":{"token":"space.sm"},"material":{"token":"material.glass"}}}
+    | weft.source = {"kind":"grid","id":"tiles","props":{"columns":2,"gap":{"token":"space.sm"},"material":{"token":"material.glass"},"max-width":{"token":"size.md"},"padding":{"token":"space.xl"}}}
     | weft.style = [[[1,1,1,0.28,""]],[],0,[0,0,0,0],null,[["BACKGROUND_BLUR",20,true]]]
     INSTANCE "text#tile-light" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
       | weft.origin = layer(text#tile-light)

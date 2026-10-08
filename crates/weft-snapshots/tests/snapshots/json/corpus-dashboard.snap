@@ -18,8 +18,9 @@ description: corpus-dashboard as json
         "props": {
           "direction": "row",
           "gap": {
-            "token": "space.xl"
+            "token": "space.md"
           },
+          "justify": "space-between",
           "wrap": true
         },
         "children": [
@@ -52,6 +53,9 @@ description: corpus-dashboard as json
           "columns": 3,
           "gap": {
             "token": "space.lg"
+          },
+          "min-column-width": {
+            "token": "size.sm"
           }
         },
         "children": [
@@ -163,6 +167,9 @@ description: corpus-dashboard as json
           "direction": "column",
           "gap": {
             "token": "space.sm"
+          },
+          "max-width": {
+            "token": "size.lg"
           }
         },
         "children": [
@@ -219,9 +226,12 @@ description: corpus-dashboard as json
         "id": "footer",
         "props": {
           "align": "end",
+          "direction": "row",
           "gap": {
-            "token": "space.xs"
-          }
+            "token": "space.md"
+          },
+          "justify": "space-between",
+          "wrap": true
         },
         "children": [
           {

@@ -48,7 +48,7 @@ const library = (name: string, prefix: unknown, components: Record<string, unkno
   name,
   version: "1.0.0",
   prefix,
-  requires: { "weft-core": "0.1.0" },
+  requires: { "weft-core": "0.2.0" },
   components,
 });
 const acmeUi = library("acme-ui", "acme", {
@@ -64,7 +64,7 @@ const shop = (variants: string[]) => ({
   weft: "0.1",
   name: "shop",
   version: "1.1.0",
-  requires: { "weft-core": "0.1.0", "acme-ui": "1.0.0" },
+  requires: { "weft-core": "0.2.0", "acme-ui": "1.0.0" },
   components: {
     rating,
     button: { events: ["press", "longpress"] },

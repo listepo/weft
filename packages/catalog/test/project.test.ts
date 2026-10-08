@@ -111,7 +111,7 @@ describe("several catalogs", () => {
     const [missing, old] = run("unmet requirements warn and the catalog still loads").diagnostics;
     assert.equal(missing?.path, "#/catalog/0/requires/acme-ui");
     assert.equal(missing?.severity, "warning");
-    assert.equal(old?.message, '"old-ui" requires "weft-core" 1.0.0, but 0.1.0 is loaded.');
+    assert.equal(old?.message, '"old-ui" requires "weft-core" 1.0.0, but 0.2.0 is loaded.');
   });
 });
 

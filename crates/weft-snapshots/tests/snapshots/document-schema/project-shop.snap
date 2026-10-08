@@ -182,6 +182,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -260,6 +263,9 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "The `disabled` attribute."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
             },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
@@ -417,6 +423,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "The `elevated` attribute."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -508,6 +517,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -632,6 +644,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -726,6 +741,9 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Set to true to make the button non-interactive."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
             },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
@@ -828,6 +846,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -918,6 +939,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "Set to true to make the checkbox non-interactive."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -982,6 +1006,9 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Set to true to make the colour picker non-interactive."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
             },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
@@ -1048,6 +1075,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -1140,6 +1170,9 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Set to true to make the combobox non-interactive."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
             },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
@@ -1240,6 +1273,9 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Set to true to make the picker non-interactive."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
             },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
@@ -1343,6 +1379,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -2986,6 +3025,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "An error message to show for this field; set it when the value is invalid."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3105,6 +3147,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3226,6 +3271,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "Space between grid cells, as a dimension token."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3242,6 +3290,39 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Frosted-glass surface behind the grid, as a material token: a background blur and a tint."
+            },
+            "max-width": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Widest the grid may be, as a dimension token; it fills its parent up to that width."
+            },
+            "min-column-width": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Narrowest a column may be, as a dimension token; below it the grid shows fewer columns, down to one."
+            },
+            "padding": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Inner spacing on all four sides of the grid, as a dimension token."
             },
             "perspective": {
               "$ref": "#/$defs/universal:perspective"
@@ -3295,6 +3376,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3370,6 +3454,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3427,6 +3514,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3504,6 +3594,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3582,6 +3675,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3685,6 +3781,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3753,6 +3852,9 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Set to true to make the command non-interactive."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
             },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
@@ -3825,6 +3927,9 @@ description: the document JSON Schema of project-shop
               "type": "string",
               "description": "A still image (.png, .jpg, .jpeg, .webp) shown while the model loads, where it cannot be shown, and in design tools; same path rules as src."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3880,6 +3985,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -3964,6 +4072,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "Set to true to make this choice non-interactive."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4037,6 +4148,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4126,6 +4240,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "Colour of the filled stars, as a color token."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4185,6 +4302,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4252,6 +4372,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4321,6 +4444,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4410,6 +4536,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "Set to true to make this segment non-interactive."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4483,6 +4612,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4572,6 +4704,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "Set to true to make the select non-interactive."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -4660,6 +4795,9 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Set to true to make the slider non-interactive."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
             },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
@@ -4800,8 +4938,27 @@ description: the document JSON Schema of project-shop
               ],
               "description": "Space between children, as a dimension token."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
+            },
+            "justify": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "start",
+                    "center",
+                    "end",
+                    "space-between"
+                  ]
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "How free space along the main direction is shared: after, around or before the children, or between them."
             },
             "label": {
               "$ref": "#/$defs/universal:label"
@@ -4816,6 +4973,28 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Frosted-glass surface behind the stack, as a material token: a background blur and a tint."
+            },
+            "max-width": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Widest the stack may be, as a dimension token; it fills its parent up to that width."
+            },
+            "padding": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Token"
+                },
+                {
+                  "$ref": "#/$defs/Binding"
+                }
+              ],
+              "description": "Inner spacing on all four sides of the stack, as a dimension token."
             },
             "perspective": {
               "$ref": "#/$defs/universal:perspective"
@@ -4886,6 +5065,9 @@ description: the document JSON Schema of project-shop
                 }
               ],
               "description": "Set to true to make the stepper non-interactive."
+            },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
             },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
@@ -5007,6 +5189,9 @@ description: the document JSON Schema of project-shop
               ],
               "description": "Set to true to make the switch non-interactive."
             },
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -5061,6 +5246,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -5119,6 +5307,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -5221,6 +5412,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -5288,6 +5482,9 @@ description: the document JSON Schema of project-shop
         "props": {
           "type": "object",
           "properties": {
+            "grow": {
+              "$ref": "#/$defs/universal:grow"
+            },
             "hidden": {
               "$ref": "#/$defs/universal:hidden"
             },
@@ -5350,6 +5547,10 @@ description: the document JSON Schema of project-shop
       ],
       "additionalProperties": false,
       "description": "A run of plain text such as a paragraph, caption or message."
+    },
+    "universal:grow": {
+      "type": "boolean",
+      "description": "Takes a share of the parent stack's free space."
     },
     "universal:hidden": {
       "anyOf": [

@@ -15,6 +15,10 @@ description: example-stack as html
   --weft-space-md: 16px;
   --weft-space-lg: 24px;
   --weft-space-xl: 32px;
+  --weft-size-sm: 240px;
+  --weft-size-md: 480px;
+  --weft-size-lg: 720px;
+  --weft-size-xl: 960px;
   --weft-radius-sm: 4px;
   --weft-radius-md: 8px;
   --weft-radius-pill: 999px;
@@ -267,7 +271,7 @@ a { display: inline-block; }
 </head>
 <body>
 <main data-weft-id="root" aria-label="Actions">
-  <div data-weft-id="actions" class="weft-row" data-align="end" style="gap: var(--weft-space-md)">
+  <div data-weft-id="actions" data-prop-justify="space-between" data-prop-padding="{token.space.sm}" class="weft-row" data-align="end" style="gap: var(--weft-space-md)">
     <button data-weft-id="save" type="button" data-variant="primary" data-action="press:doc.save">Save</button><button data-weft-id="discard" type="button" data-action="press:doc.discard">Discard</button>
   </div>
 </main>

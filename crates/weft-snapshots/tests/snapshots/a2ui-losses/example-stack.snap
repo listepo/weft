@@ -3,4 +3,6 @@ source: crates/weft-snapshots/tests/interop.rs
 description: example-stack as a2ui-losses
 ---
 Tokens /screen#root/stack#actions: gap: design tokens have no A2UI form
+Props /screen#root/stack#actions: justify: this prop has no A2UI property
+Tokens /screen#root/stack#actions: padding: design tokens have no A2UI form
 Layout /screen#root/stack#actions: wrap: this layout has no A2UI form
