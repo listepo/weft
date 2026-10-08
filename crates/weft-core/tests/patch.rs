@@ -1106,3 +1106,13 @@ fn patches_that_nest_deeper_and_deeper_are_refused_without_overflowing_the_stack
         panic!("the depth limit never applied");
     });
 }
+
+#[test]
+fn a_growing_element_moved_out_of_its_stack_fails_the_list_with_w318() {
+    let grow = json!({"op": "set", "id": "t1", "prop": "grow", "value": true});
+    assert!(outcome(&json!([grow])).is_ok());
+    assert_eq!(
+        rejected(&json!([grow, {"op": "move", "id": "t1", "parent": "f"}])),
+        ["W318"]
+    );
+}

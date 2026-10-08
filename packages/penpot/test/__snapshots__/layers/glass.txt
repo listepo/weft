@@ -5,7 +5,7 @@ board "screen#glass" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
   | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
   board "stack#card" backgroundBlur={"value":20,"hidden":false} tokens={"rowGap":"space.md","columnGap":"space.md"} fillList=[{"fillColor":"#ffffff","fillOpacity":0.28}] flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#card>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#card)
-    | weft/weft.source = {"kind":"stack","id":"card","props":{"direction":"column","gap":{"token":"space.md"},"material":{"token":"material.glass"}}}
+    | weft/weft.source = {"kind":"stack","id":"card","props":{"direction":"column","gap":{"token":"space.md"},"material":{"token":"material.glass"},"padding":{"token":"space.lg"}}}
     | weft/weft.style = [[["#ffffff",0.28]],[],0,[0,0,0,0],null,[20,false]]
     board "heading#title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#title>","dir":"column"}
       | weft/weft.kind = heading
@@ -24,7 +24,7 @@ board "screen#glass" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
       text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Got it"
   board "grid#tiles" backgroundBlur={"value":20,"hidden":false} tokens={"rowGap":"space.sm","columnGap":"space.sm"} fillList=[{"fillColor":"#ffffff","fillOpacity":0.28}] grid={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<grid#tiles>","columns":[{"type":"flex","value":1},{"type":"flex","value":1}],"rows":[{"type":"auto","value":null}]}
     | weft/weft.origin = shape(grid#tiles)
-    | weft/weft.source = {"kind":"grid","id":"tiles","props":{"columns":2,"gap":{"token":"space.sm"},"material":{"token":"material.glass"}}}
+    | weft/weft.source = {"kind":"grid","id":"tiles","props":{"columns":2,"gap":{"token":"space.sm"},"material":{"token":"material.glass"},"max-width":{"token":"size.md"},"padding":{"token":"space.xl"}}}
     | weft/weft.style = [[["#ffffff",0.28]],[],0,[0,0,0,0],null,[20,false]]
     board "text#tile-light" layoutCell={"row":1,"column":1} inCopy=true head=true componentOf="<tone=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<text#tile-light>","dir":"column"}
       | weft/weft.kind = text

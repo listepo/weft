@@ -560,6 +560,17 @@ impl<'a> Validator<'a> {
         }
     }
 
+    /// Whether `grow` has a stack to grow in (SPEC §2.2). `<each>` is transparent, and an unknown
+    /// or extension parent is opaque (SPEC §8): it may be a newer container that grows children.
+    fn grows_in_stack(&self, owner: Option<&Owner>) -> bool {
+        owner.is_some_and(|o| {
+            !o.slot
+                && o.kind
+                    .as_ref()
+                    .is_some_and(|k| k == "stack" || !self.catalog.components.contains_key(k))
+        })
+    }
+
     fn visit_list(
         &mut self,
         list: &[Child],
@@ -910,6 +921,21 @@ impl<'a> Validator<'a> {
             } else {
                 self.check_value(value, None, &[], &attr_at, scope);
             }
+        }
+
+        if category != Category::Each
+            && props.get("grow") == Some(&Value::Bool(true))
+            && !self.grows_in_stack(owner)
+        {
+            self.report(
+                diag(
+                    Code::W318,
+                    &node_at(node, path, Some("grow")),
+                    format!("<{kind}> grows, but its parent is not a <stack>."),
+                    "a parent <stack>",
+                )
+                .hint("move the element into a <stack>, or remove grow"),
+            );
         }
 
         let mut inner_scope = scope.to_vec();

@@ -18,6 +18,12 @@ description: example-grid as json
           "columns": 3,
           "gap": {
             "token": "space.lg"
+          },
+          "max-width": {
+            "token": "size.xl"
+          },
+          "min-column-width": {
+            "token": "size.sm"
           }
         },
         "children": [

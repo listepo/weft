@@ -2382,6 +2382,130 @@
   "sems": [
    {
     "role": "main",
+    "name": "Layout",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "searchbox",
+      "name": "Search",
+      "states": {},
+      "props": {},
+      "children": [
+       {
+        "role": "text",
+        "name": "invoices",
+        "states": {},
+        "props": {},
+        "children": []
+       }
+      ]
+     },
+     {
+      "role": "button",
+      "name": "Filter",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "link",
+      "name": "Previous",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "link",
+      "name": "Next",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "button",
+      "name": "Cancel",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "button",
+      "name": "Save",
+      "states": {},
+      "props": {},
+      "children": []
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.1",
+    "root": {
+     "kind": "screen",
+     "id": "screen-layout",
+     "props": {
+      "label": "Layout"
+     },
+     "children": [
+      {
+       "kind": "field",
+       "id": "field-search",
+       "props": {
+        "label": "Search",
+        "type": "search",
+        "value": "invoices"
+       }
+      },
+      {
+       "kind": "button",
+       "id": "button-filter",
+       "children": [
+        "Filter"
+       ]
+      },
+      {
+       "kind": "link",
+       "id": "link-previous",
+       "children": [
+        "Previous"
+       ]
+      },
+      {
+       "kind": "link",
+       "id": "link-next",
+       "children": [
+        "Next"
+       ]
+      },
+      {
+       "kind": "button",
+       "id": "button-cancel",
+       "children": [
+        "Cancel"
+       ]
+      },
+      {
+       "kind": "button",
+       "id": "button-save",
+       "children": [
+        "Save"
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-layout"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
     "name": "Leaderboard",
     "states": {},
     "props": {},

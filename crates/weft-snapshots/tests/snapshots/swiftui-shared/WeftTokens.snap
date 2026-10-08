@@ -13,6 +13,7 @@ struct WeftTokens: Sendable {
     var font = FontTokens()
     var material = MaterialTokens()
     var radius = RadiusTokens()
+    var size = SizeTokens()
     var space = SpaceTokens()
 
     struct ColorTokens: Sendable {
@@ -51,6 +52,13 @@ struct WeftTokens: Sendable {
         var md: CGFloat = 8
         var pill: CGFloat = 999
         var sm: CGFloat = 4
+    }
+
+    struct SizeTokens: Sendable {
+        var lg: CGFloat = 720
+        var md: CGFloat = 480
+        var sm: CGFloat = 240
+        var xl: CGFloat = 960
     }
 
     struct SpaceTokens: Sendable {

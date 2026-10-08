@@ -1,0 +1,42 @@
+FRAME "screen#layout" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.1"}
+  | weft.origin = layer(screen#layout)
+  | weft.source = {"kind":"screen","id":"layout","props":{"label":"Layout"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  FRAME "stack#toolbar" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+    | weft.origin = layer(stack#toolbar)
+    | weft.source = {"kind":"stack","id":"toolbar","props":{"direction":"row","gap":{"token":"space.sm"},"justify":"start"}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "field#search" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=search, state=(unset)>"
+      | weft.origin = layer(field#search)
+      | weft.source = {"kind":"field","id":"search","props":{"grow":true,"label":"Search","type":"search","value":{"bind":"$.query"}},"shown":{"text":"","label":"Search"}}
+      TEXT "label" chars="Search"
+      FRAME "box" width=240 height=36 layoutMode="HORIZONTAL" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=4 bound={"topLeftRadius":"var(radius/sm)","topRightRadius":"var(radius/sm)","bottomLeftRadius":"var(radius/sm)","bottomRightRadius":"var(radius/sm)"}
+    INSTANCE "button#filter" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=secondary, state=(unset)>"
+      | weft.origin = layer(button#filter)
+      | weft.source = {"kind":"button","id":"filter","on":{"press":"list.filter"},"children":["Filter"],"shown":{"text":"Filter"}}
+      TEXT "text" chars="Filter" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+  FRAME "stack#pager" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+    | weft.origin = layer(stack#pager)
+    | weft.source = {"kind":"stack","id":"pager","props":{"direction":"row","gap":{"token":"space.sm"},"justify":"center"}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "link#previous" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+      | weft.origin = layer(link#previous)
+      | weft.source = {"kind":"link","id":"previous","on":{"press":"list.previous"},"children":["Previous"],"shown":{"text":"Previous"}}
+      TEXT "text" chars="Previous" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
+    INSTANCE "link#next" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
+      | weft.origin = layer(link#next)
+      | weft.source = {"kind":"link","id":"next","on":{"press":"list.next"},"children":["Next"],"shown":{"text":"Next"}}
+      TEXT "text" chars="Next" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
+  FRAME "stack#actions" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
+    | weft.origin = layer(stack#actions)
+    | weft.source = {"kind":"stack","id":"actions","props":{"direction":"row","gap":{"token":"space.sm"},"justify":"end"}}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    INSTANCE "button#cancel" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}] strokes=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=secondary, state=(unset)>"
+      | weft.origin = layer(button#cancel)
+      | weft.source = {"kind":"button","id":"cancel","on":{"press":"list.cancel"},"children":["Cancel"],"shown":{"text":"Cancel"}}
+      TEXT "text" chars="Cancel" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
+    INSTANCE "button#save" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
+      | weft.origin = layer(button#save)
+      | weft.source = {"kind":"button","id":"save","props":{"variant":"primary"},"on":{"press":"list.save"},"children":["Save"],"shown":{"text":"Save"}}
+      TEXT "text" chars="Save" size=14 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]

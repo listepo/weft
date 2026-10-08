@@ -14,6 +14,7 @@ export const primer = (
 - Inside <each in="{$.items}" as="item"> the loop variable is bound as {$item.field}; ids inside it are templates.
 - Events are on-<event>="action.name", for example on-press="auth.submit". Actions take no arguments and no code.
 - Named slots: <slot name="footer"> as a direct child of a component that declares that slot. Text is content of text-bearing components.
+- Layout says intent, never lengths: justify="space-between" on a stack, grow="true" on a child of a stack (literal, nowhere else) to take the free space, and padding, max-width and min-column-width as dimension tokens such as {token.size.md}.
 - Comments are allowed and dropped by weft_format.
 
 Tools:

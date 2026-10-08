@@ -77,14 +77,18 @@ struct DashboardEvent: Sendable, Equatable {
 
 /// The design tokens the screen uses.
 struct DashboardTheme: Sendable {
+    var size = SizeTokens()
     var space = SpaceTokens()
+
+    struct SizeTokens: Sendable {
+        var lg: CGFloat = 720
+        var sm: CGFloat = 240
+    }
 
     struct SpaceTokens: Sendable {
         var lg: CGFloat = 24
         var md: CGFloat = 16
         var sm: CGFloat = 8
-        var xl: CGFloat = 32
-        var xs: CGFloat = 4
     }
 }
 
@@ -96,7 +100,7 @@ struct DashboardScreen: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            HStack(spacing: theme.space.xl) {
+            HStack(spacing: theme.space.md) {
                 Text(model.team.name)
                     .font(.largeTitle)
                     .accessibilityHeading(.h1)
@@ -106,6 +110,7 @@ struct DashboardScreen: View {
                     .foregroundStyle(.secondary)
                     .accessibilityIdentifier("updated")
             }
+            .weftProp("justify", "space-between")
             .weftProp("wrap", true)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("header")
@@ -153,6 +158,7 @@ struct DashboardScreen: View {
                 .accessibilityLabel("Incidents")
                 .accessibilityIdentifier("incidents")
             }
+            .weftProp("min-column-width", theme.size.sm)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("stats")
             VStack(spacing: theme.space.sm) {
@@ -186,9 +192,10 @@ struct DashboardScreen: View {
                 .accessibilityIdentifier("quota")
             }
             .weftProp("direction", "column")
+            .weftProp("max-width", theme.size.lg)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("notices")
-            VStack(alignment: .trailing, spacing: theme.space.xs) {
+            HStack(alignment: .bottom, spacing: theme.space.md) {
                 Text("Owned by the platform team")
                     .foregroundStyle(.primary)
                     .accessibilityIdentifier("owner")
@@ -215,6 +222,8 @@ struct DashboardScreen: View {
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("footer-links")
             }
+            .weftProp("justify", "space-between")
+            .weftProp("wrap", true)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("footer")
         }

@@ -3,9 +3,9 @@ FRAME "screen#dashboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAx
   | weft.origin = layer(screen#dashboard)
   | weft.source = {"kind":"screen","id":"dashboard","props":{"label":"Team dashboard","state":"ready"}}
   | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
-  FRAME "stack#header" layoutMode="HORIZONTAL" layoutWrap="WRAP" itemSpacing=32 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xl)"}
+  FRAME "stack#header" layoutMode="HORIZONTAL" layoutWrap="WRAP" itemSpacing=16 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
     | weft.origin = layer(stack#header)
-    | weft.source = {"kind":"stack","id":"header","props":{"direction":"row","gap":{"token":"space.xl"},"wrap":true}}
+    | weft.source = {"kind":"stack","id":"header","props":{"direction":"row","gap":{"token":"space.md"},"justify":"space-between","wrap":true}}
     | weft.style = [[],[],0,[0,0,0,0],null]
     INSTANCE "heading#title" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<heading>"
       | weft.origin = layer(heading#title)
@@ -17,7 +17,7 @@ FRAME "screen#dashboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAx
       TEXT "text" chars="{$.updatedAt}" size=14 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
   FRAME "grid#stats" layoutMode="GRID" itemSpacing=24 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" gridColumnCount=3 gridRowGap=24 gridColumnGap=24 bound={"gridRowGap":"var(space/lg)","gridColumnGap":"var(space/lg)"}
     | weft.origin = layer(grid#stats)
-    | weft.source = {"kind":"grid","id":"stats","props":{"columns":3,"gap":{"token":"space.lg"}}}
+    | weft.source = {"kind":"grid","id":"stats","props":{"columns":3,"gap":{"token":"space.lg"},"min-column-width":{"token":"size.sm"}}}
     | weft.style = [[],[],0,[0,0,0,0],null]
     FRAME "section#velocity" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
       | weft.origin = layer(section#velocity)
@@ -63,7 +63,7 @@ FRAME "screen#dashboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAx
           TEXT "text" chars="Incidents" font={"family":"Inter","style":"Bold"} size=24 fills=[{"type":"SOLID","color":"#1a1c21","boundVariables":{"color":"var(color/ink)"}}]
   FRAME "stack#notices" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
     | weft.origin = layer(stack#notices)
-    | weft.source = {"kind":"stack","id":"notices","props":{"direction":"column","gap":{"token":"space.sm"}}}
+    | weft.source = {"kind":"stack","id":"notices","props":{"direction":"column","gap":{"token":"space.sm"},"max-width":{"token":"size.lg"}}}
     | weft.style = [[],[],0,[0,0,0,0],null]
     FRAME "alert#release" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
       | weft.origin = layer(alert#release)
@@ -87,9 +87,9 @@ FRAME "screen#dashboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAx
         | weft.origin = layer(link#quota-link)
         | weft.source = {"kind":"link","id":"quota-link","props":{"href":"https://example.com/storage"},"children":["Manage storage"],"shown":{"text":"Manage storage"}}
         TEXT "text" chars="Manage storage" size=14 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}]
-  FRAME "stack#footer" layoutMode="VERTICAL" itemSpacing=4 counterAxisAlignItems="MAX" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
+  FRAME "stack#footer" layoutMode="HORIZONTAL" layoutWrap="WRAP" itemSpacing=16 counterAxisAlignItems="MAX" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
     | weft.origin = layer(stack#footer)
-    | weft.source = {"kind":"stack","id":"footer","props":{"align":"end","gap":{"token":"space.xs"}}}
+    | weft.source = {"kind":"stack","id":"footer","props":{"align":"end","direction":"row","gap":{"token":"space.md"},"justify":"space-between","wrap":true}}
     | weft.style = [[],[],0,[0,0,0,0],null]
     INSTANCE "text#owner" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=default>"
       | weft.origin = layer(text#owner)

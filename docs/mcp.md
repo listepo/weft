@@ -27,7 +27,7 @@ You can call the tools yourself with `docs/examples/mcp-call.mjs`, a 40-line cli
 $ mkdir -p weft-tour
 $ cp corpus/login/screen.weft weft-tour/login.weft
 $ node docs/examples/mcp-call.mjs weft_catalog | head -n 6
-catalog weft-core 0.1.0 (weft 0.1); kind | role | content | description
+catalog weft-core 0.2.0 (weft 0.1); kind | role | content | description
 screen | main | nodes | The root of every document: one full screen of UI, carrying the format version.
 stack | none | nodes | Lays its children out in one line, as a column or a row; use it for most vertical or horizontal grouping.
 grid | none | nodes | Lays its children out in a fixed number of equal columns; use it for card galleries and dashboards.

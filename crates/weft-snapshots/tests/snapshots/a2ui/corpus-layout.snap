@@ -1,0 +1,146 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-layout as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "layout",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "layout",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "toolbar",
+            "pager",
+            "actions"
+          ],
+          "accessibility": {
+            "label": "Layout"
+          }
+        },
+        {
+          "id": "toolbar",
+          "component": "Row",
+          "children": [
+            "search",
+            "filter"
+          ]
+        },
+        {
+          "id": "search",
+          "component": "TextField",
+          "label": "Search",
+          "variant": "shortText",
+          "value": {
+            "path": "/query"
+          }
+        },
+        {
+          "id": "filter",
+          "component": "Button",
+          "child": "filter-label",
+          "variant": "default",
+          "action": {
+            "event": {
+              "name": "list.filter"
+            }
+          }
+        },
+        {
+          "id": "filter-label",
+          "component": "Text",
+          "text": "Filter"
+        },
+        {
+          "id": "pager",
+          "component": "Row",
+          "children": [
+            "previous",
+            "next"
+          ]
+        },
+        {
+          "id": "previous",
+          "component": "Button",
+          "child": "previous-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "list.previous"
+            }
+          }
+        },
+        {
+          "id": "previous-label",
+          "component": "Text",
+          "text": "Previous"
+        },
+        {
+          "id": "next",
+          "component": "Button",
+          "child": "next-label",
+          "variant": "borderless",
+          "action": {
+            "event": {
+              "name": "list.next"
+            }
+          }
+        },
+        {
+          "id": "next-label",
+          "component": "Text",
+          "text": "Next"
+        },
+        {
+          "id": "actions",
+          "component": "Row",
+          "children": [
+            "cancel",
+            "save"
+          ]
+        },
+        {
+          "id": "cancel",
+          "component": "Button",
+          "child": "cancel-label",
+          "variant": "default",
+          "action": {
+            "event": {
+              "name": "list.cancel"
+            }
+          }
+        },
+        {
+          "id": "cancel-label",
+          "component": "Text",
+          "text": "Cancel"
+        },
+        {
+          "id": "save",
+          "component": "Button",
+          "child": "save-label",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "list.save"
+            }
+          }
+        },
+        {
+          "id": "save-label",
+          "component": "Text",
+          "text": "Save"
+        }
+      ]
+    }
+  }
+]

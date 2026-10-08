@@ -219,7 +219,7 @@ description: corpus-dashboard as a2ui
         },
         {
           "id": "footer",
-          "component": "Column",
+          "component": "Row",
           "children": [
             "owner",
             "footer-links"

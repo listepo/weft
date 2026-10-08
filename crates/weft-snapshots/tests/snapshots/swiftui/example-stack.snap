@@ -35,6 +35,7 @@ struct RootTheme: Sendable {
 
     struct SpaceTokens: Sendable {
         var md: CGFloat = 16
+        var sm: CGFloat = 8
     }
 }
 
@@ -60,6 +61,8 @@ struct RootScreen: View {
                 }
                 .accessibilityIdentifier("discard")
             }
+            .weftProp("justify", "space-between")
+            .weftProp("padding", theme.space.sm)
             .weftProp("wrap", false)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("actions")

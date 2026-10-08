@@ -1,0 +1,48 @@
+board "screen#layout" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#layout>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.1"}
+  | weft/weft.origin = shape(screen#layout)
+  | weft/weft.source = {"kind":"screen","id":"layout","props":{"label":"Layout"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "stack#toolbar" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#toolbar>","dir":"row","wrap":"nowrap"}
+    | weft/weft.origin = shape(stack#toolbar)
+    | weft/weft.source = {"kind":"stack","id":"toolbar","props":{"direction":"row","gap":{"token":"space.sm"},"justify":"start"}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    board "field#search" inCopy=true head=true componentOf="<type=search, state=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#search>","dir":"column"}
+      | weft/weft.kind = field
+      | weft/weft.origin = shape(field#search)
+      | weft/weft.source = {"kind":"field","id":"search","props":{"grow":true,"label":"Search","type":"search","value":{"bind":"$.query"}},"shown":{"text":"","label":"Search"}}
+      text "label" inCopy=true fontSize="12" growType="auto-width" text="Search"
+      board "box" width=240 height=36 borderRadius=4 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<box>","dir":"row"}
+    board "button#filter" borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.white","strokeColor":"color.ink"} inCopy=true head=true componentOf="<variant=secondary, state=(unset)>" fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#filter>","dir":"row"}
+      | weft/weft.kind = button
+      | weft/weft.origin = shape(button#filter)
+      | weft/weft.source = {"kind":"button","id":"filter","on":{"press":"list.filter"},"children":["Filter"],"shown":{"text":"Filter"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Filter"
+  board "stack#pager" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#pager>","dir":"row","wrap":"nowrap"}
+    | weft/weft.origin = shape(stack#pager)
+    | weft/weft.source = {"kind":"stack","id":"pager","props":{"direction":"row","gap":{"token":"space.sm"},"justify":"center"}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    board "link#previous" inCopy=true head=true componentOf="<link>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<link#previous>","dir":"column"}
+      | weft/weft.kind = link
+      | weft/weft.origin = shape(link#previous)
+      | weft/weft.source = {"kind":"link","id":"previous","on":{"press":"list.previous"},"children":["Previous"],"shown":{"text":"Previous"}}
+      text "text" tokens={"fill":"color.action.primary"} inCopy=true fillList=[{"fillColor":"#2663eb","fillOpacity":1}] growType="auto-width" text="Previous"
+    board "link#next" inCopy=true head=true componentOf="<link>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<link#next>","dir":"column"}
+      | weft/weft.kind = link
+      | weft/weft.origin = shape(link#next)
+      | weft/weft.source = {"kind":"link","id":"next","on":{"press":"list.next"},"children":["Next"],"shown":{"text":"Next"}}
+      text "text" tokens={"fill":"color.action.primary"} inCopy=true fillList=[{"fillColor":"#2663eb","fillOpacity":1}] growType="auto-width" text="Next"
+  board "stack#actions" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#actions>","dir":"row","wrap":"nowrap"}
+    | weft/weft.origin = shape(stack#actions)
+    | weft/weft.source = {"kind":"stack","id":"actions","props":{"direction":"row","gap":{"token":"space.sm"},"justify":"end"}}
+    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    board "button#cancel" borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.white","strokeColor":"color.ink"} inCopy=true head=true componentOf="<variant=secondary, state=(unset)>" fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#cancel>","dir":"row"}
+      | weft/weft.kind = button
+      | weft/weft.origin = shape(button#cancel)
+      | weft/weft.source = {"kind":"button","id":"cancel","on":{"press":"list.cancel"},"children":["Cancel"],"shown":{"text":"Cancel"}}
+      text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Cancel"
+    board "button#save" borderRadius=8 tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.action.primary"} inCopy=true head=true componentOf="<variant=primary, state=(unset)>" fillList=[{"fillColor":"#2663eb","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#save>","dir":"row"}
+      | weft/weft.kind = button
+      | weft/weft.origin = shape(button#save)
+      | weft/weft.source = {"kind":"button","id":"save","props":{"variant":"primary"},"on":{"press":"list.save"},"children":["Save"],"shown":{"text":"Save"}}
+      text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Save"
