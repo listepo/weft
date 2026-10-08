@@ -112,7 +112,7 @@ Not yet measured: how well real models generate and edit Weft compared with the 
 | Mapping to code and back | Partly: React renderer and JSX generator; SwiftUI generator and importer (T34); importers from DOM and snapshots with a documented loss table | SPEC §9, `roadmap.md` |
 | Streaming and incremental generation | Open. Flat id lists in A2UI and json-render exist for progressive rendering; nested markup has to show it can do the same | `roadmap.md` |
 | Host capabilities | Answered for MCP hosts: `weft_capabilities` reports the format version, catalogs, token paths and action names the host checks (T10); other hosts are not covered | SPEC §8, `packages/mcp` |
-| Layout without becoming CSS | Open: only `stack` and `grid` | `roadmap.md` |
+| Layout without becoming CSS | Decided (T16.1), built in T16.2–T16.8: `justify` on `stack`, a universal `grow`, `padding` and `max-width` on `stack` and `grid`, `min-column-width` on `grid`, `size.*` tokens; no breakpoints | `docs/layout-design.md`, §21 |
 | Who keeps a registry of extension catalogs | Decided (T17.0), built in T17.1–T17.3: no service; a curated list in the docs kept by the creator, an npm keyword, author-declared kind prefixes | `docs/extension-catalogs-design.md`, §22 |
 | Figma as a source | Open | `roadmap.md` |
 
@@ -300,6 +300,67 @@ Checked on 2026-10-08. What each provider's structured-output mode accepts (recu
 | `integer: true` maps to `"type": "integer"` | "integer" "matches any number with a zero fractional part" (Validation §6.1.1), which is the validator's own test (`fract() == 0`, `W224`), so `2.0` passes both | https://json-schema.org/draft/2020-12/json-schema-validation (2026-10-08) |
 | Grammars as `pattern`, but not the look-around ones | Patterns "SHOULD be valid according to the regular expression dialect described in" ECMA-262 and built with the `u` flag (Core §6.4). The id, binding, token and action grammars need only classes, groups and repetition; "no reference inside a literal" (`W213`) needs look-ahead and "characters XML can carry" (`W221`) needs ranges beyond the BMP, so both stay in the validator | https://json-schema.org/draft/2020-12/json-schema-core (2026-10-08); SPEC §3.1 |
 | The catalog only, no `x-` extensions | Creator's decision for T12.1: project token, action and data-path enums are left for later (revisited after T12.3 measures), and a constrained writer has no use for extensions, which strict mode would still allow | decision (T12 open questions 1 and 2) |
+
+## 21. Layout (T16)
+
+Checked on 2026-10-08. The question is how much layout Weft can say so that every target draws it alike and reads it back. Apple pages were read as their documentation JSON (`developer.apple.com/tutorials/data/documentation/swiftui/...`); the Figma and Penpot rows are the type declarations of the pinned packages, which are the vendors' own API definitions; the Slint rows are the source of the pinned crates; the A2UI rows are the copy of its catalog the snapshot tests already use. The proposal built on these facts is `docs/layout-design.md`.
+
+**Main-axis distribution** (how the free space along a row or column is shared):
+
+| System | Values | Source (checked) |
+| --- | --- | --- |
+| CSS Flexbox | `justify-content`: `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, initial `flex-start`; further values come from CSS Box Alignment. `gap` is a minimum between items, so free space is shared on top of it | https://www.w3.org/TR/css-flexbox-1/ (Candidate Recommendation Draft of 2025-10-14; checked 2026-10-08) |
+| A2UI v0.9 | `Row` and `Column` take `justify`: `start`, `center`, `end`, `spaceBetween`, `spaceAround`, `spaceEvenly`, `stretch`, default `start`; "Use 'spaceBetween' to push items to the edges" | `specification/v0_9/catalogs/basic/catalog.json` of `a2ui-project/a2ui` at commit `4787774e92` (copy in `crates/weft-snapshots/tests/a2ui-schemas/basic_catalog.json`; checked 2026-10-08) |
+| Figma auto layout | `primaryAxisAlignItems`: `MIN`, `MAX`, `CENTER`, `SPACE_BETWEEN`, `SPACE_EVENLY`, `SPACE_AROUND` | `@figma/plugin-typings` 1.140.0, `plugin-api.d.ts` |
+| Penpot flex layout | `justifyContent`: `start`, `center`, `end`, `space-between`, `space-around`, `space-evenly`, `stretch` | `@penpot/plugin-types` 1.5.0, `index.d.ts`; https://help.penpot.app/user-guide/designing/flexible-layouts/ (checked 2026-10-08) |
+| Slint | `HorizontalLayout`/`VerticalLayout` `alignment` of type `LayoutAlignment`: `stretch`, `center`, `start`, `end`, `space-between`, `space-around`, `space-evenly`; "Matches the CSS flex box". The property declares no default, and `stretch` is the enum's first value | `i-slint-compiler` 1.18.1 `builtin_elements.rs`, `i-slint-common` 1.18.1 `enums.rs` |
+| Jetpack Compose | `Arrangement.Start`, `End`, `Center`, `SpaceBetween`, `SpaceAround`, `SpaceEvenly`, `spacedBy(space)`; `SpaceAround` puts half the inner space before the first and after the last child | `compose/foundation/foundation-layout/.../Arrangement.kt` of `androidx/androidx`, branch `androidx-main` (checked 2026-10-08) |
+| SwiftUI | No distribution parameter on `HStack`/`VStack`. `Spacer` is "a flexible space that expands along the major axis of its containing stack layout"; a spacer also makes the stack take "as much space as the parent view allows". So `start`, `center`, `end`, `space-between` and `space-evenly` are spacers placed around or between the children; `space-around` (half spaces at the ends) has no spacer form | https://developer.apple.com/documentation/swiftui/spacer (iOS 13.0; checked 2026-10-08) |
+
+**Child sizing** (which child takes the free space):
+
+| System | Form | Source (checked) |
+| --- | --- | --- |
+| CSS Flexbox | `flex: <number>` is "equivalent to `flex: <number> 1 0`"; `flex: none` is `0 0 auto`; the initial `flex` is `0 1 auto`, so an item hugs its content and may shrink. Flex items have an automatic minimum size (their content), so a growing item needs `min-width: 0` to shrink below its content | https://www.w3.org/TR/css-flexbox-1/ §4.5, §7.1 (2025-10-14; checked 2026-10-08) |
+| A2UI v0.9 | `weight`: "The relative weight of this component within a Row or Column. This is similar to the CSS 'flex-grow' property", only on a direct child of a `Row` or `Column` | `basic_catalog.json` at `4787774e92`, `$defs/CatalogComponentCommon` |
+| Figma | `layoutSizingHorizontal`/`layoutSizingVertical`: `FIXED`, `HUG`, `FILL`; `HUG` only on auto-layout frames and text, `FILL` only on auto-layout children; a shorthand for `layoutGrow`, `layoutAlign` and the sizing modes. `layoutGrow` is 0 or 1: Figma has no ratios | `@figma/plugin-typings` 1.140.0; https://developers.figma.com/docs/plugins/api/properties/nodes-layoutsizinghorizontal/ (checked 2026-10-08) |
+| Penpot | A child's `horizontalSizing`/`verticalSizing`: `fix`, `fill`, `auto`; no ratios | `@penpot/plugin-types` 1.5.0 (`LayoutChildProperties`) |
+| Slint | `horizontal-stretch`/`vertical-stretch`, a float, default 0; "the elements won't be stretched unless all elements are 0"; built-in widgets use 0 or 1 | https://docs.slint.dev/latest/docs/slint/reference/layouts/overview/ (the page labels itself the documentation of the next version; checked 2026-10-08) |
+| Jetpack Compose | `Modifier.weight(weight, fill = true)` in `RowScope`/`ColumnScope`: the parent divides "the horizontal space remaining after measuring unweighted child elements" by weight | `Row.kt` of `androidx/androidx`, branch `androidx-main` (checked 2026-10-08) |
+| SwiftUI | `frame(maxWidth: .infinity)` makes a view flexible, so the stack gives it the free space; `layoutPriority(_:)` decides which child shrinks last and stretches first ("Views typically have a default priority of 0"). Neither gives ratios | https://developer.apple.com/documentation/swiftui/view/frame(minwidth:idealwidth:maxwidth:minheight:idealheight:maxheight:alignment:), https://developer.apple.com/documentation/swiftui/view/layoutpriority(_:) (iOS 13.0; checked 2026-10-08) |
+
+**Padding and maximum size:**
+
+| System | Form | Source (checked) |
+| --- | --- | --- |
+| CSS | `max-width` and `max-height` "specify the maximum width" and height of a box, initial value `none`; `min-width` has the initial value `auto` | https://www.w3.org/TR/css-sizing-3/ (Working Draft of 2026-09-04; checked 2026-10-08) |
+| Figma | `paddingLeft`/`Right`/`Top`/`Bottom` and `minWidth`/`maxWidth`/`minHeight`/`maxHeight` on auto-layout frames and their direct children; all of them, `itemSpacing` and the grid gaps can be bound to variables (`VariableBindableNodeField`) | `@figma/plugin-typings` 1.140.0 |
+| Penpot | Container `leftPadding` … `bottomPadding` (and `horizontalPadding`/`verticalPadding`); child `minWidth`/`maxWidth`/`minHeight`/`maxHeight`, `null` for none | `@penpot/plugin-types` 1.5.0 |
+| Slint | Layouts take `padding` and `padding-left` … `padding-bottom`; every element takes `min-width`, `max-width`, `preferred-width` (and heights) | `i-slint-compiler` 1.18.1 `builtin_elements.rs`; https://docs.slint.dev/latest/docs/slint/reference/layouts/overview/ (checked 2026-10-08) |
+| SwiftUI | `padding(_:_:)` adds "an equal padding amount to specific edges"; `frame(maxWidth:)` caps a size, and a frame with only a maximum adopts the child's size within it | https://developer.apple.com/documentation/swiftui/view/padding(_:_:) (iOS 13.0; checked 2026-10-08) |
+| A2UI v0.9 | No padding, width or size property on any component of the basic catalog | `basic_catalog.json` and `common_types.json` at `4787774e92` (searched for `padding`, `width`, `margin`; checked 2026-10-08) |
+
+**Reflow** (a layout that changes with the space it gets):
+
+| System | Form | Source (checked) |
+| --- | --- | --- |
+| CSS Grid | `repeat(auto-fill, minmax(25ch, 1fr))` makes "as many 25-character columns as will fit"; `auto-fit` does the same and collapses empty tracks; `minmax()` is allowed inside the repetition, with a fixed minimum | https://www.w3.org/TR/css-grid-1/ §7.2.3 (Candidate Recommendation Draft of 2025-03-26; checked 2026-10-08) |
+| CSS container queries | `@container (width > 40em) { … }` applies rules by the size of a container (`container-type: inline-size`); the at-rule is standard-track and shipped in Chrome 105, Firefox 110 and Safari 16 | https://www.w3.org/TR/css-contain-3/ (Working Draft of 2022-08-18), https://github.com/mdn/browser-compat-data/blob/main/css/at-rules/container.json (checked 2026-10-08) |
+| SwiftUI | `GridItem.Size.adaptive(minimum:maximum:)` places "as many items of the minimum size as possible" in the space of one flexible item (iOS 14); `Grid` (iOS 16) has fixed rows; `ViewThatFits` (iOS 16) shows "the first child view that fits"; the `Layout` protocol (iOS 16) lets an app define its own container | https://developer.apple.com/documentation/swiftui/griditem/size-swift.enum/adaptive(minimum:maximum:), https://developer.apple.com/documentation/swiftui/grid, https://developer.apple.com/documentation/swiftui/viewthatfits, https://developer.apple.com/documentation/swiftui/layout (checked 2026-10-08) |
+| Figma | `layoutMode: 'GRID'` with `gridColumnCount` and tracks of type `FLEX`, `FIXED` or `HUG`; no automatic repetition | `@figma/plugin-typings` 1.140.0 (`GridLayoutMixin`, `GridTrackSize`) |
+| Penpot | Grid tracks of type `flex`, `fixed`, `percent` or `auto`; the user guide names no breakpoint or automatic repetition | `@penpot/plugin-types` 1.5.0; https://help.penpot.app/user-guide/designing/flexible-layouts/ (its grid part; checked 2026-10-08) |
+| Slint | `GridLayout` places children by `row` and `col`, with no automatic repetition. 1.18.1 also has a `FlexboxLayout` with `flex-wrap` and `flex-direction` | `i-slint-compiler` 1.18.1 `builtin_elements.rs` |
+| A2UI v0.9 | No grid: "To create a grid layout, nest Columns within this Row" | `basic_catalog.json` at `4787774e92` |
+
+**Conclusions for Weft** (decisions proposed in `docs/layout-design.md`, not approved):
+
+| Finding | Consequence |
+| --- | --- |
+| `start`, `center`, `end` and `space-between` exist in every target, `space-between` through spacers in SwiftUI | They are the proposed `justify` values. `space-around` has no SwiftUI form; `space-evenly` has one (spacers at both ends too) but no corpus screen needs it |
+| Figma, Penpot and SwiftUI have no ratios for growing children | Child growth is a yes/no `grow`, not a weight |
+| Every target but A2UI has padding and a maximum size, and Figma and Penpot can bind both to variables | `padding` and `max-width` take dimension tokens and survive the design-tool round trip |
+| Only CSS and SwiftUI reflow a grid by a minimum column width; no design tool and no Slint layout does | Grid reflow is one token (`min-column-width`); targets without it draw `columns` and keep the prop |
+| Container queries and breakpoints are viewport or container rules with no form in SwiftUI, Slint, Figma or Penpot | No breakpoints |
 
 ## 22. Extension catalogs (T17)
 
