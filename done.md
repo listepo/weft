@@ -4,7 +4,7 @@
 
 A literal `href` or `src` now passes through the Trust allowlist on the way to json-render and back. `http`, `https`, `mailto` and a relative URL are kept (surrounding space and line breaks stripped, as `safe_url` does). `javascript:`, `data:` and any other scheme are a `props` loss and are left out, the same way A2UI drops an unsafe image `src`. A binding of either prop is still an expression. SPEC §9's json-render rows say so.
 Model: Cursor / grok-4.7 · Status: done · Priority: P1 · Complexity: 2 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-interop/src/json_render/{export,import}.rs`, `crates/weft-snapshots/tests/interop.rs`
-Check: `cargo clippy -p weft-interop --all-targets -- -D warnings`; `cargo test -p weft-snapshots --test interop` — 12 passed.
+Check: `cargo clippy -p weft-interop --all-targets -- -D warnings`; `cargo test -p weft-snapshots --test interop` — 15 passed.
 
 ### T16.6. Layout vocabulary: A2UI and json-render
 
