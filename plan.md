@@ -25,7 +25,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T28 | in progress | P2 | 3 | 90% | Cursor / grok-4.7 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
-| T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
@@ -208,12 +207,6 @@ Scope extension (creator): everything that can be configured is configurable thr
 14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
 
 Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). Left: the fragments proposal in `docs/fragments-design.md` waits for the creator; once approved, fragments are built (format, both parsers, patches, fixtures) and the example project gains a shared fragment, which the done criteria ask for.
-
-### T32. Claude Code plugin from GitHub
-
-The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
-
-Progress: the bundle carries the WebAssembly core (T22 merged): `plugins/claude-code/build.ts` bundles the scripts and the MCP server with Vite 8 into the committed `dist/` and copies `weft_bg.wasm` to `dist/wasm/`, where `@weft/core` reads it relative to the shared chunk; `claude-code:build` depends on `root:wasm`. The plugin folder alone runs (tests copy only it to a temp folder and run every script and the server there; `claude --plugin-dir <copy> mcp list` shows `weft` connected; `claude plugin validate --strict` passes). The Desktop `node` requirement (24.2 or later on the PATH) is in the plugin README. `root:wasm` remaps build paths, so the `.wasm` is byte-reproducible and the up-to-date test compares it byte for byte. Remaining: `repository` in `plugin.json` once a remote exists, and the done criterion itself, `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` on a clean machine.
 
 ### T39. Context in the document
 

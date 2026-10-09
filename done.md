@@ -1,5 +1,15 @@
 # Done
 
+### T32. Claude Code plugin from GitHub
+
+The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
+
+Progress: the bundle carries the WebAssembly core (T22 merged): `plugins/claude-code/build.ts` bundles the scripts and the MCP server with Vite 8 into the committed `dist/` and copies `weft_bg.wasm` to `dist/wasm/`, where `@weft/core` reads it relative to the shared chunk; `claude-code:build` depends on `root:wasm`. The plugin folder alone runs (tests copy only it to a temp folder and run every script and the server there; `claude --plugin-dir <copy> mcp list` shows `weft` connected; `claude plugin validate --strict` passes). The Desktop `node` requirement (24.2 or later on the PATH) is in the plugin README. `root:wasm` remaps build paths, so the `.wasm` is byte-reproducible and the up-to-date test compares it byte for byte. Remaining: `repository` in `plugin.json` once a remote exists, and the done criterion itself, `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` on a clean machine.
+
+Result: `plugin.json` gains `repository` and `homepage` (https://github.com/listepo/weft). With an empty `CLAUDE_CONFIG_DIR`, `claude plugin marketplace add listepo/weft` and `claude plugin install weft@weft` (Claude Code 2.1.267) install the plugin from GitHub; `claude mcp list` shows `plugin:weft:weft` connected from the plugin cache, and `dist/export.js` run from the cache converts a corpus screen.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 2 · Files: `plugins/claude-code/.claude-plugin/plugin.json`, `plugins/claude-code/README.md`
+Check: the install above; `claude plugin validate --strict plugins/claude-code`; `plugins/claude-code` tests.
+
 ### T95. json-render export: only trusted URLs
 
 A literal `href` or `src` now passes through the Trust allowlist on the way to json-render and back. `http`, `https`, `mailto` and a relative URL are kept (surrounding space and line breaks stripped, as `safe_url` does). `javascript:`, `data:` and any other scheme are a `props` loss and are left out, the same way A2UI drops an unsafe image `src`. A binding of either prop is still an expression. SPEC §9's json-render rows say so.
