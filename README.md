@@ -19,7 +19,7 @@ Status: prototype. The format is specified in [SPEC.md](SPEC.md); the reasoning 
 
 ## Quality test
 
-A benchmark checks how reliably models read and write Weft next to semantic HTML, React JSX and A2UI JSON: 12 reference screens in all four formats, 36 edit tasks and 24 questions, each run three times, with one repair cycle that feeds the validator's diagnostics back. It reports validity, task success and output size per model and format.
+A benchmark checks how reliably models read and write Weft next to semantic HTML, React JSX and A2UI JSON: 12 reference screens in all four formats, 36 edit tasks and 24 questions, each run three times, with one repair cycle that feeds the validator's diagnostics back and an optional readback turn that states changed bindings in plain words. It reports validity, task success and output size per model and format.
 
 The current run (T8) uses Bonsai 27B served locally by LM Studio, after a first round on Claude Sonnet 5.5, Opus 5.5 and Haiku 4.5. The method, how to run it and the history of every measurement are in [test.md](test.md).
 

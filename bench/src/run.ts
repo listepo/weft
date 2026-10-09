@@ -33,11 +33,12 @@ function usage(): never {
       "usage: node bench/src/run.ts tokens",
       "       node bench/src/run.ts edit|read [--provider anthropic|openai] [--base-url <url>] [--model a,b]",
       "                                       [--screens a,b] [--formats weft,html,jsx,a2ui] [--samples 3]",
-      "                                       [--concurrency 4] [--batch]",
+      "                                       [--concurrency 4] [--batch] [--readback]",
       "       node bench/src/run.ts rescore <results.json>",
       "",
       "--provider openai talks to any OpenAI-compatible server; --base-url defaults to LM Studio",
       `(${LMSTUDIO_URL}) and --model is required. --batch uses the Anthropic Message Batches API.`,
+      "--readback sends one plain-language binding diff after a valid edit, for every format.",
     ].join("\n"),
   );
   process.exit(2);
@@ -84,6 +85,7 @@ interface TaskOptions {
   samples?: string;
   concurrency?: string;
   batch?: boolean;
+  readback?: boolean;
 }
 
 const positiveInt = (v: string | undefined, fallback: number): number => {
@@ -155,10 +157,15 @@ async function tasksCommand(mode: "edit" | "read", values: TaskOptions): Promise
   const jobs = planJobs(tasks, formats, models, samples);
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   let done = 0;
-  const { results, error } = await runJobs(jobs, providerFor, concurrency, (r) =>
-    console.error(
-      `[${++done}/${jobs.length}] ${r.model} ${r.id} ${r.format} #${r.sample}: ${r.success ? "ok" : "FAIL"}`,
-    ),
+  const { results, error } = await runJobs(
+    jobs,
+    providerFor,
+    concurrency,
+    (r) =>
+      console.error(
+        `[${++done}/${jobs.length}] ${r.model} ${r.id} ${r.format} #${r.sample}: ${r.success ? "ok" : "FAIL"}`,
+      ),
+    { readback: values.readback === true },
   );
   if (error !== undefined) {
     console.log(
@@ -193,6 +200,7 @@ const { positionals, values } = parseArgs({
     samples: { type: "string" },
     concurrency: { type: "string" },
     batch: { type: "boolean" },
+    readback: { type: "boolean" },
   },
 });
 const command = positionals[0];

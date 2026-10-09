@@ -21,8 +21,8 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
-| T8 | in progress | P1 | 3 | 55% | Claude Code / claude-opus-5-5 |
-| T28 | in progress | P2 | 3 | 75% | Claude Code / claude-opus-5-5 |
+| T8 | in progress | P1 | 3 | 70% | Cursor / grok-4.7 |
+| T28 | in progress | P2 | 3 | 90% | Cursor / grok-4.7 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
@@ -88,7 +88,7 @@ Progress: steps 1–3 are in the tree. The Vitest command in step 4 exits 0. Rem
 
 ### T8. Evaluation
 
-Paused until T20–T25 land: the final runs use the Rust core and the stricter benchmark.
+T20–T25 have landed, so the final runs are the ones on the Rust core and the stricter benchmark. The harness steps below are in the tree. The full edit and read runs are not: this environment has no `ANTHROPIC_API_KEY` and no LM Studio server, and the runs already in `test.md` are the earlier one-sample measurements.
 
 Full benchmark run on two or three models against the baselines, and a report with a continue/stop recommendation. Done when first-try validity is at least 95%, validity after one repair cycle is at least 99%, and raw results are in the repository.
 
@@ -103,6 +103,8 @@ Execution plan:
 7. `bench/EVALUATION.md`: results against the done criteria (Weft first-try validity at least 95%, after one repair at least 99%), comparison with the baselines, failure analysis, continue/stop recommendation.
 8. Verify with `pnpm run ci`.
 
+Progress: steps 1–5 are done (repair cycle, summaries, `DEFAULT_MODELS`, results committed under `bench/results/`, trial row in `test.md`). `bench/EVALUATION.md` records those runs against the numeric bar and does not close the task. Remaining: step 6, the three-sample edit and read runs on the current harness, then a history row and a revision of the report. Step 8 waits on that.
+
 ### T28. Binding readback against inverted conditions
 
 In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in while `$.busy` is true. It changed `{!$.email}` to `{!$.busy}` and kept the `!`. The markup is valid, but the condition is inverted. The HTML and JSX baselines got it right. Validation cannot see intent. The model can, if the core tells it in plain words what a binding means. Depends on T20.
@@ -114,14 +116,14 @@ In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in
 
 Done when the tests for `explain` pass, the CLI prints readbacks, and the rerun is in the `test.md` history.
 
-Execution plan (steps 1–3; step 4 waits for the creator's go-ahead on the method change and a local LM Studio model):
+Execution plan (steps 1–3 are done; step 4 is the benchmark turn, now in the harness, and the live rerun still needs a local LM Studio model):
 
 - Core, new module `crates/weft-core/src/explain.rs` with exports in `lib.rs` only, so no other core module changes. `explain(document, catalog)` returns one `Readback { path, target, name, sentence }` per bound or token prop, event and `<each>`; `explain_changes(before, after, catalog)` returns `Change { target, name, kind, before, after }` for every prop (literals included), event and loop that was added, removed or changed, matching elements by id. Elements are named `kind#id`, or by their SPEC §6.1 diagnostic path when they have no valid id (reusing `path_segment`), so slots appear as `slot[name]`. Sentences never hide a negation: a negated binding reads `true while $.busy is falsy (NOT $.busy)`, a plain binding on a boolean prop `true while $.busy is truthy`, other bindings `reads $.x` with `; user input writes $.x` on writable props, tokens `design token space.md`, events `runs action auth.submit`, loops `repeats its children once per item of $.todos, as $todo`. Pure, no I/O; unit tests named as claims in the module.
 - CLI: `weft explain <file> [--against <old-file>] [--catalog <file>]` in `crates/weft-cli`, one line per readback or change on stdout; diagnostics with errors in either file print as in `validate` and exit 1; usage and I/O failures exit 2. End-to-end cases in `crates/weft-cli/tests/cli.rs`, including the `login.e2` inversion.
 - `AGENT-SPEC.md` §4: read back the changed bindings before answering (`weft explain --against` when a tool is available, otherwise read `!` as NOT) and compare each with the instruction; one checklist line. `bench/test/agent-spec.test.ts` must stay green.
 - Verify: `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all --check`, `cargo nextest run --workspace`, the binary on a corpus screen, `moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
 
-Progress: steps 1–3 are done. `explain` and `explain_changes` live in `crates/weft-core/src/explain.rs` with unit tests, `weft explain` in `crates/weft-cli` with end-to-end tests, and `AGENT-SPEC.md` §4.1 holds the readback loop. Remaining: step 4 (the optional readback turn in the benchmark, recorded in `test.md`, and the `login` rerun on Bonsai with 3 samples), which waits for the creator's go-ahead on the method change and a local LM Studio model.
+Progress: steps 1–3 are done. `explain` and `explain_changes` live in `crates/weft-core/src/explain.rs` with unit tests, `weft explain` in `crates/weft-cli` with end-to-end tests, and `AGENT-SPEC.md` §4.1 holds the readback loop. Step 4's harness is in: `bench/src/readback.ts` diffs the neutral tree, `run.ts edit --readback` sends one follow-up after a valid edit for every format, and `test.md` records the method. A mocked login.e2 inversion is covered in `bench/test/checkers.test.ts`. Remaining: the `login` rerun on Bonsai with 3 samples and its row in the `test.md` history. No LM Studio server is reachable here, so that run is not invented.
 
 ### T14. Figma round trip and plugin
 
