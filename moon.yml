@@ -50,9 +50,14 @@ tasks:
     # (cargo registry sources, the toolchain and this workspace appear in its panic messages), so
     # the same sources build to the same bytes on any machine. A script, not a command, for the
     # shell variables; the remap is passed to rustc by this task only, not by a global cargo config.
+    # Where the toolchain has the rust-src component, rustc points the standard library's panic
+    # locations at the local copy instead of the `/rustc/<commit>` path the library was built
+    # with, so the bytes depended on whether rust-src was installed (CI has none) and on which
+    # crates were last compiled before or after it was. The sysroot remap, after the rustup one
+    # because the last matching prefix wins, maps the local copy back to that path.
     # Two modules: the core alone (`@weft/core`), and the core with the web importers and
     # generators (`@weft/core/web`), so core-only pages do not download the HTML and JSX parsers.
-    script: 'export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(pwd -P)=/weft" && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm-web --out-name weft -- --features web'
+    script: 'export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(rustc --print sysroot)/lib/rustlib/src/rust=/rustc/$(rustc -vV | sed -n "s/^commit-hash: //p") --remap-path-prefix=$(pwd -P)=/weft" &&wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm --out-name weft && wasm-pack build crates/weft-wasm --release --target web --no-pack --out-dir ../../packages/core/wasm-web --out-name weft -- --features web'
     inputs: ["@group(rust-shared)", "@group(wasm-crate)"]
     outputs: ["/packages/core/wasm/**/*", "/packages/core/wasm-web/**/*"]
   # The native addon of the same Rust core (crates/weft-node) for Node and Bun, built for the host
