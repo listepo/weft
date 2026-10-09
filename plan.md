@@ -43,6 +43,41 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
 | T94 | in progress | P0 | 2 | 90% | Cursor / grok-4.7 |
+| T95 | todo | P1 | 2 | 0% | |
+| T96 | todo | P2 | 3 | 0% | |
+| T97 | todo | P2 | 2 | 0% | |
+| T98 | todo | P2 | 2 | 0% | |
+| T99 | todo | P3 | 1 | 0% | |
+
+### T95. json-render export: only trusted URLs
+
+Found while merging #18. T76/T82 restricted A2UI `openUrl`, `href` and `src` to `http`, `https` and `mailto` through `weft_import::safe_url`, and A2UI export drops anything else as a loss. The json-render exporter (`crates/weft-interop/src/json_render/export.rs`) still copies `link.href` and `image.src` verbatim, `javascript:` included, so an untrusted document can carry a script URL into a json-render tree.
+
+Done when: json-render export passes every `href` and `src` through `safe_url`, drops a rejected value with a loss diagnostic like A2UI's, and has tests for `javascript:`, `data:` and a relative URL; the import side is checked the same way; SPEC §9's json-render row says so.
+
+### T96. Too-deep documents: report, do not hide
+
+Found while merging #18. After T79, `serialize`, `stringify` and `canonicalize` (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`) return the output of an empty placeholder document (`to_document(Null)`) for a cyclic or too-deep input instead of failing. Only `applyPatches` reports W200. A caller gets a valid-looking empty screen and no signal.
+
+Done when: these entry points return W200 (or the binding's error type) for a too-deep or cyclic input, in Rust and TypeScript alike, with differential fixtures; no entry point turns such input into an empty document silently.
+
+### T97. Design-tool plugin data over 100 kB
+
+Found while merging #18. T83 made `writeJson` (`packages/design-tool/src/keys.ts`) throw once an entry passes 100 kB. It is called partway through `packages/design-tool/src/build.ts`, so one node with a very large source aborts the whole Figma or Penpot build. The message says "bytes" but the check counts string length (UTF-16 code units), not UTF-8 bytes.
+
+Done when: the cap is measured in UTF-8 bytes as Figma documents it; an oversized entry is reported as a build diagnostic and the rest of the build completes (the layer is drawn, its source is not stored, and pull reads it as foreign); tests cover a multi-byte source near the cap.
+
+### T98. `fmt --write` keeps symlinks and permissions
+
+Found while merging #18. T81's atomic write (temp file, then rename) in the Rust CLI (`crates/weft-cli/src/main.rs`) and the TypeScript CLI replaces the target path. Formatting a symlinked file turns the link into a regular file, and the file's permissions are not kept.
+
+Done when: both CLIs resolve a symlink and write to its target, copy the original file's permissions onto the temp file before the rename, and have tests for a symlinked file and a read-only-group file.
+
+### T99. Node capped read handles a short read
+
+Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` makes a single `readSync` call into a buffer of `maxChars*4+1` bytes allocated up front. A short read is unlikely on a regular file but is not handled, and the buffer is sized for the worst case.
+
+Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
 
 ### T94. Foreign stack alignment and grid child order
 

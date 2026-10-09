@@ -19,3 +19,8 @@
 - T17.2. Extension catalogs: tools and docs
 - T17.3. Extension catalogs: distribution and registry
 - T41. Hosted Penpot plugin
+- T95. json-render export: only trusted URLs
+- T96. Too-deep documents: report, do not hide
+- T97. Design-tool plugin data over 100 kB
+- T98. `fmt --write` keeps symlinks and permissions
+- T99. Node capped read handles a short read
