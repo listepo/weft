@@ -7,7 +7,7 @@ tasks:
     # The web screenshots and the iOS Simulator share a runner's cores. One Vitest
     # process runs both projects at once, and a shot then never gets two stable
     # frames. Two invocations run one project after the other.
-    command: "vitest run --config vitest.config.ts --project web && vitest run --config vitest.config.ts --project swiftui"
+    script: "vitest run --config vitest.config.ts --project web && vitest run --config vitest.config.ts --project swiftui"
     deps: ["root:wasm", "root:cli"]
     # The CLI's sources decide what the static page and the importers produce.
     inputs: ["/crates/**/*", "/Cargo.toml", "/Cargo.lock"]
