@@ -126,6 +126,8 @@ describe.each(NAMES)("the committed bundle of the %s plugin", (name) => {
     for (const file of filesIn(dist)) {
       const text = readFileSync(join(dist, file)).toString("latin1");
       assert.equal(/\/(Users|home)\/[\w.-]+/.test(text), false, file);
+      // A local rust-src copy named here means the build depended on whether one was installed.
+      assert.equal(text.includes("/lib/rustlib/src/rust/"), false, file);
     }
   });
 
