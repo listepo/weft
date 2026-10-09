@@ -1,5 +1,29 @@
 # Done
 
+### T28. Binding readback against inverted conditions
+
+In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in while `$.busy` is true. It changed `{!$.email}` to `{!$.busy}` and kept the `!`. The markup is valid, but the condition is inverted. The HTML and JSX baselines got it right. Validation cannot see intent. The model can, if the core tells it in plain words what a binding means. Depends on T20.
+
+1. `weft-core`: `explain(document)` reads every binding as a sentence, e.g. `button#submit disabled: while $.busy is false`. `explain_changes(before, after)` lists only the props, events and bindings that changed.
+2. CLI: `weft explain <file> [--against <old-file>]`.
+3. `AGENT-SPEC.md` repair loop: before answering, read back the changed bindings and compare them with the instruction.
+4. Benchmark: an optional readback turn after a valid edit, the same for every format. This is a method change, recorded in `test.md`. Rerun `login` on Bonsai with 3 samples.
+
+Done when the tests for `explain` pass, the CLI prints readbacks, and the rerun is in the `test.md` history.
+
+Execution plan (steps 1–3 are done; step 4 is the benchmark turn, now in the harness, and the live rerun still needs a local LM Studio model):
+
+- Core, new module `crates/weft-core/src/explain.rs` with exports in `lib.rs` only, so no other core module changes. `explain(document, catalog)` returns one `Readback { path, target, name, sentence }` per bound or token prop, event and `<each>`; `explain_changes(before, after, catalog)` returns `Change { target, name, kind, before, after }` for every prop (literals included), event and loop that was added, removed or changed, matching elements by id. Elements are named `kind#id`, or by their SPEC §6.1 diagnostic path when they have no valid id (reusing `path_segment`), so slots appear as `slot[name]`. Sentences never hide a negation: a negated binding reads `true while $.busy is falsy (NOT $.busy)`, a plain binding on a boolean prop `true while $.busy is truthy`, other bindings `reads $.x` with `; user input writes $.x` on writable props, tokens `design token space.md`, events `runs action auth.submit`, loops `repeats its children once per item of $.todos, as $todo`. Pure, no I/O; unit tests named as claims in the module.
+- CLI: `weft explain <file> [--against <old-file>] [--catalog <file>]` in `crates/weft-cli`, one line per readback or change on stdout; diagnostics with errors in either file print as in `validate` and exit 1; usage and I/O failures exit 2. End-to-end cases in `crates/weft-cli/tests/cli.rs`, including the `login.e2` inversion.
+- `AGENT-SPEC.md` §4: read back the changed bindings before answering (`weft explain --against` when a tool is available, otherwise read `!` as NOT) and compare each with the instruction; one checklist line. `bench/test/agent-spec.test.ts` must stay green.
+- Verify: `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all --check`, `cargo nextest run --workspace`, the binary on a corpus screen, `moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Progress: steps 1–3 are done. `explain` and `explain_changes` live in `crates/weft-core/src/explain.rs` with unit tests, `weft explain` in `crates/weft-cli` with end-to-end tests, and `AGENT-SPEC.md` §4.1 holds the readback loop. Step 4's harness is in: `bench/src/readback.ts` diffs the neutral tree, `run.ts edit --readback` sends one follow-up after a valid edit for every format, and `test.md` records the method. A mocked login.e2 inversion is covered in `bench/test/checkers.test.ts`.
+
+Result: the `login` rerun on LM Studio / prism-ml/bonsai-27b with `--readback` and 3 samples is `bench/results/edit-2026-10-09T09-08-11-689Z` and has its row in the `test.md` history. Weft: 88.9% first-try valid, 100% after repair, 88.9% success after repair, 100% success after readback. `login.e2` sample 1 repeated the inversion (`{!$.busy}`), valid markup, so the repair cycle did not fire; the readback turn corrected it. The baselines' success after readback equals their success after repair (HTML 88.9%, JSX 55.6%, A2UI 100%).
+Model: Cursor / grok-4.7 (harness), Claude Code / claude-opus-5-5 (rerun) · Status: done · Priority: P2 · Complexity: 3 · Files: `crates/weft-core/src/explain.rs`, `crates/weft-cli`, `AGENT-SPEC.md`, `bench/src/{readback,run,run-tasks}.ts`, `bench/test/checkers.test.ts`, `test.md`, `bench/results/edit-2026-10-09T09-08-11-689Z.*`
+Check: `node bench/src/run.ts edit --provider openai --model prism-ml/bonsai-27b --screens login --samples 3 --readback --concurrency 1`.
+
 ### T95. json-render export: only trusted URLs
 
 A literal `href` or `src` now passes through the Trust allowlist on the way to json-render and back. `http`, `https`, `mailto` and a relative URL are kept (surrounding space and line breaks stripped, as `safe_url` does). `javascript:`, `data:` and any other scheme are a `props` loss and are left out, the same way A2UI drops an unsafe image `src`. A binding of either prop is still an expression. SPEC §9's json-render rows say so.
