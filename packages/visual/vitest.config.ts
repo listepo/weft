@@ -50,9 +50,9 @@ const web: TestProjectInlineConfiguration = hasChromium
 
 export default defineConfig({
   test: {
-    // Two 60s shots (commands.ts) plus the page setup. 120s was the shot budget alone once
-    // Playwright spent its default 30s waiting for a frame that the simulator had stalled.
-    testTimeout: 180_000,
+    // Two 60s shots (commands.ts). The projects run one after the other (moon.yml), so
+    // this only has to cover a slow shot, not a simulator build beside it.
+    testTimeout: 150_000,
     hookTimeout: 300_000,
     projects: [
       web,
