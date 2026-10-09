@@ -26777,6 +26777,150 @@
    }
   },
   {
+   "name": "W227 lenient",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><context><entry id=\"n\" by=\"agent\" kind=\"todo\" name=\"m\">x</entry></context></screen>",
+   "mode": "lenient",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W227",
+      "severity": "error",
+      "message": "A `todo` entry has no `status`.",
+      "path": "/screen#s/context/entry#n",
+      "line": 1,
+      "column": 36,
+      "expected": "status=\"open\" or status=\"resolved\"",
+      "hint": "add status=\"open\""
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"context\": [\n    {\n      \"id\": \"n\",\n      \"kind\": \"todo\",\n      \"by\": \"agent\",\n      \"name\": \"m\",\n      \"text\": \"x\"\n    }\n  ],\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <context>\n    <entry id=\"n\" by=\"agent\" kind=\"todo\" name=\"m\">x</entry>\n  </context>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W227 strict",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><context><entry id=\"n\" by=\"agent\" kind=\"todo\" name=\"m\">x</entry></context></screen>",
+   "mode": "strict",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W227",
+      "severity": "error",
+      "message": "A `todo` entry has no `status`.",
+      "path": "/screen#s/context/entry#n",
+      "line": 1,
+      "column": 36,
+      "expected": "status=\"open\" or status=\"resolved\"",
+      "hint": "add status=\"open\""
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"context\": [\n    {\n      \"id\": \"n\",\n      \"kind\": \"todo\",\n      \"by\": \"agent\",\n      \"name\": \"m\",\n      \"text\": \"x\"\n    }\n  ],\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <context>\n    <entry id=\"n\" by=\"agent\" kind=\"todo\" name=\"m\">x</entry>\n  </context>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W228 lenient",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><context><entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</entry></context></screen>",
+   "mode": "lenient",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W228",
+      "severity": "warning",
+      "message": "The entry text has 501 characters.",
+      "path": "/screen#s/context/entry#n",
+      "line": 1,
+      "column": 36,
+      "expected": "at most 500 characters",
+      "hint": "shorten the note, or split it into several entries"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"context\": [\n    {\n      \"id\": \"n\",\n      \"kind\": \"intent\",\n      \"by\": \"agent\",\n      \"name\": \"m\",\n      \"text\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\n    }\n  ],\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <context>\n    <entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</entry>\n  </context>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W228 strict",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><context><entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</entry></context></screen>",
+   "mode": "strict",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W228",
+      "severity": "error",
+      "message": "The entry text has 501 characters.",
+      "path": "/screen#s/context/entry#n",
+      "line": 1,
+      "column": 36,
+      "expected": "at most 500 characters",
+      "hint": "shorten the note, or split it into several entries"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"context\": [\n    {\n      \"id\": \"n\",\n      \"kind\": \"intent\",\n      \"by\": \"agent\",\n      \"name\": \"m\",\n      \"text\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\n    }\n  ],\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <context>\n    <entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</entry>\n  </context>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W229 lenient",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><context><entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\"> </entry></context></screen>",
+   "mode": "lenient",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W229",
+      "severity": "error",
+      "message": "The entry has no text.",
+      "path": "/screen#s/context/entry#n",
+      "line": 1,
+      "column": 36,
+      "expected": "1 to 500 characters of text",
+      "hint": "write the note, or remove the entry"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"context\": [\n    {\n      \"id\": \"n\",\n      \"kind\": \"intent\",\n      \"by\": \"agent\",\n      \"name\": \"m\",\n      \"text\": \"\"\n    }\n  ],\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <context>\n    <entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\"/>\n  </context>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W229 strict",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><context><entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\"> </entry></context></screen>",
+   "mode": "strict",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W229",
+      "severity": "error",
+      "message": "The entry has no text.",
+      "path": "/screen#s/context/entry#n",
+      "line": 1,
+      "column": 36,
+      "expected": "1 to 500 characters of text",
+      "hint": "write the note, or remove the entry"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"context\": [\n    {\n      \"id\": \"n\",\n      \"kind\": \"intent\",\n      \"by\": \"agent\",\n      \"name\": \"m\",\n      \"text\": \"\"\n    }\n  ],\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <context>\n    <entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\"/>\n  </context>\n</screen>\n"
+   }
+  },
+  {
    "name": "W301 lenient",
    "markup": "<screen id=\"s\" weft=\"0.1\"><text id=\"t\">a</text><text id=\"t\">b</text></screen>",
    "mode": "lenient",

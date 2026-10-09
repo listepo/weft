@@ -61,6 +61,12 @@ export const DIAGNOSTIC_CODES = {
     summary: "Kind, attribute, event or slot name is invalid or reserved.",
   },
   W224: { severity: "error", summary: "Number outside the declared range or not whole." },
+  W227: {
+    severity: "error",
+    summary: "Context entry status missing or not allowed for its kind.",
+  },
+  W228: { severity: "mode", summary: "Context over a limit." },
+  W229: { severity: "error", summary: "Context entry text or author name not allowed." },
 
   W301: { severity: "error", summary: "Duplicate id." },
   W302: { severity: "error", summary: "Child kind not allowed here." },

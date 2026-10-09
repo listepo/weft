@@ -4,6 +4,7 @@
 
 mod canonical;
 mod context;
+mod context_check;
 pub mod controls;
 mod data;
 mod diagnostics;

@@ -1,13 +1,16 @@
 //! The context block of SPEC §2.3: lifted out of the tree, written first, kept in canonical JSON
-//! in written order.
+//! in written order, and checked entry by entry.
 
 #![allow(clippy::unwrap_used, clippy::panic)]
 
 mod common;
 
-use common::{catalog, codes, document, json_codes, markup_codes};
+use common::{catalog, codes, document, json_codes, markup_codes, parse_strict};
 use serde_json::{Value as Json, json};
-use weft_core::{ParseOptions, ValidateOptions, parse, parse_json, serialize, stringify, validate};
+use weft_core::{
+    Code, ParseOptions, Severity, ValidateOptions, parse, parse_json, serialize, stringify,
+    validate,
+};
 
 const LOGIN: &str = r#"<screen id="login" label="Sign in" weft="0.2">
   <context>
@@ -120,7 +123,102 @@ fn misplaced_or_malformed_entries_are_w121() {
 }
 
 #[test]
-fn json_entries_have_a_shape() {
+fn entry_values_are_checked() {
+    let expect = [
+        (entry("kind=\"note\"", "x"), vec!["W203"]),
+        (
+            "<entry id=\"n\" by=\"bot\" kind=\"intent\" name=\"m\">x</entry>".to_owned(),
+            vec!["W203"],
+        ),
+        (entry("kind=\"todo\" status=\"done\"", "x"), vec!["W203"]),
+        (entry("kind=\"todo\"", "x"), vec!["W227"]),
+        (entry("kind=\"intent\" status=\"open\"", "x"), vec!["W227"]),
+        (entry("kind=\"intent\"", " "), vec!["W229"]),
+        (
+            "<entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"\">x</entry>".to_owned(),
+            vec!["W229"],
+        ),
+        (entry("kind=\"intent\" for=\"root\"", "x"), vec!["W309"]),
+        (entry("kind=\"intent\" for=\"nope\"", "x"), vec!["W309"]),
+        (entry("kind=\"intent\" for=\"n\"", "x"), vec!["W309"]),
+        (
+            entry(
+                "kind=\"intent\" for=\"t\"",
+                "{$.x} & {token.y}".replace('&', "&amp;").as_str(),
+            ),
+            vec![],
+        ),
+        (
+            "<entry by=\"agent\" kind=\"intent\" name=\"m\">x</entry>".to_owned(),
+            vec!["W202"],
+        ),
+        (
+            "<entry id=\"t\" by=\"agent\" kind=\"intent\" name=\"m\">x</entry>".to_owned(),
+            vec!["W301"],
+        ),
+        (
+            "<entry id=\"1\" by=\"agent\" kind=\"intent\" name=\"m\">x</entry>".to_owned(),
+            vec!["W212"],
+        ),
+    ];
+    for (entries, want) in expect {
+        let markup = with_context(&entries);
+        assert_eq!(markup_codes(&markup), want, "{markup}");
+    }
+}
+
+#[test]
+fn paths_name_the_block_and_the_entry() {
+    let markup = with_context(&format!(
+        "{}<entry by=\"agent\" kind=\"todo\" name=\"m\">x</entry>",
+        entry("kind=\"question\"", "x")
+    ));
+    let result = common::parse_lenient(&markup);
+    let paths: Vec<(&str, &str)> = result
+        .diagnostics
+        .iter()
+        .map(|d| (d.code.as_str(), d.path.as_str()))
+        .collect();
+    assert_eq!(
+        paths,
+        [
+            ("W227", "/screen#root/context/entry#n"),
+            ("W202", "/screen#root/context/entry[1]"),
+            ("W227", "/screen#root/context/entry[1]"),
+        ]
+    );
+    assert!(result.diagnostics.iter().all(|d| d.line == Some(1)));
+}
+
+#[test]
+fn limits_are_a_mode_code() {
+    let long = with_context(&entry("kind=\"intent\"", &"x".repeat(501)));
+    let lenient = common::parse_lenient(&long);
+    assert_eq!(codes(&lenient.diagnostics), ["W228"]);
+    assert_eq!(lenient.diagnostics[0].severity, Severity::Warning);
+    assert!(lenient.document.is_some());
+    let strict = parse_strict(&long);
+    assert_eq!(strict.diagnostics[0].severity, Severity::Error);
+
+    let many: String = (0..101)
+        .map(|i| format!("<entry id=\"e{i}\" by=\"agent\" kind=\"intent\" name=\"m\">x</entry>"))
+        .collect();
+    assert_eq!(markup_codes(&with_context(&many)), ["W228"]);
+    let full: String = (0..33)
+        .map(|i| {
+            format!(
+                "<entry id=\"e{i}\" by=\"agent\" kind=\"intent\" name=\"m\">{}</entry>",
+                "x".repeat(500)
+            )
+        })
+        .collect();
+    let d = &common::parse_lenient(&with_context(&full)).diagnostics;
+    assert_eq!(codes(d), ["W228"]);
+    assert_eq!(d[0].path, "/screen#root/context");
+}
+
+#[test]
+fn json_entries_have_a_shape_and_the_same_checks() {
     let doc = |context: Json| json!({"weft": "0.2", "context": context, "root": {"kind": "screen", "id": "s"}});
     assert_eq!(json_codes(&doc(json!({}))), ["W200"]);
     assert_eq!(
@@ -134,6 +232,18 @@ fn json_entries_have_a_shape() {
             json!([{"id": "a", "kind": "intent", "by": "agent", "name": "m", "text": "x", "extra": 1}])
         )),
         ["W200"]
+    );
+    assert_eq!(
+        json_codes(&doc(
+            json!([{"kind": "intent", "by": "agent", "name": "m", "text": "x"}])
+        )),
+        ["W202"]
+    );
+    assert_eq!(
+        json_codes(&doc(
+            json!([{"id": "a", "kind": "intent", "by": "agent", "name": "m", "text": "x\u{1}"}])
+        )),
+        ["W221"]
     );
     assert!(json_codes(&doc(json!([]))).is_empty());
     let reserved = json!({"weft": "0.2", "root": {"kind": "screen", "id": "s", "children": [{"kind": "entry", "id": "e"}]}});
@@ -158,4 +268,5 @@ fn without_a_catalog_the_block_is_still_read() {
     assert_eq!(r.document.unwrap().context.len(), 4);
     let options = ValidateOptions::default();
     assert!(validate(&parse_json(&stringify(&document(LOGIN))).unwrap(), &options).is_empty());
+    assert_eq!(Code::W228.as_str(), "W228");
 }

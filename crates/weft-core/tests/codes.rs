@@ -142,6 +142,25 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W224",
             in_screen("<heading id=\"a\" level=\"9\">T</heading>"),
         ),
+        (
+            "W227",
+            in_screen(
+                "<context><entry id=\"e\" by=\"agent\" kind=\"question\" name=\"m\">Why?</entry></context>",
+            ),
+        ),
+        (
+            "W228",
+            in_screen(&format!(
+                "<context><entry id=\"e\" by=\"agent\" kind=\"intent\" name=\"m\">{}</entry></context>",
+                "x".repeat(501)
+            )),
+        ),
+        (
+            "W229",
+            in_screen(
+                "<context><entry id=\"e\" by=\"agent\" kind=\"intent\" name=\"-m\">x</entry></context>",
+            ),
+        ),
         ("W301", in_screen("<stack id=\"a\"/><stack id=\"a\"/>")),
         (
             "W302",
@@ -348,7 +367,7 @@ fn severities_are_errors_except_the_mode_codes_and_the_import_warning() {
     for code in Code::ALL {
         let (lenient, strict) = (code.severity(Mode::Lenient), code.severity(Mode::Strict));
         match code.as_str() {
-            "W401" | "W402" | "W403" => {
+            "W228" | "W401" | "W402" | "W403" => {
                 assert_eq!((lenient, strict), (Severity::Warning, Severity::Error));
             }
             "W602" | "W702" | "W710" | "W714" => {

@@ -4,6 +4,7 @@
 use indexmap::IndexMap;
 use serde_json::Value as Json;
 
+use crate::context_check::check_entries;
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, did_you_mean, one_of, quote};
 use crate::json::{JSON_DEPTH_LIMIT, js_number, js_round};
 use crate::model::{
@@ -76,6 +77,10 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
     let version_at = node_at(root, &root_path, Some("weft"));
     v.check_version(&document.weft, &version_at);
     v.visit_node(root, &root_path, None, &[]);
+    let root_id = root.id.as_deref();
+    for d in check_entries(&document.context, &root_path, root_id, &mut v.ids) {
+        v.report(d);
+    }
 
     for (value, target, at) in std::mem::take(&mut v.references) {
         if v.ids.get(&value).map(|(kind, _)| kind.as_str()) != Some(target.as_str()) {

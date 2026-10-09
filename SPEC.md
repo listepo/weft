@@ -123,13 +123,13 @@ A screen MAY carry a `<context>` block: notes that people and agents left for wh
 
 | Field | Required | Value |
 | --- | --- | --- |
-| `id` | yes | The id grammar of §2.2, document-unique across elements and entries |
-| `kind` | yes | `intent`, `decision`, `constraint`, `question`, `todo` or `source`. |
-| `by` | yes | `human` or `agent`. |
-| `name` | yes | Who wrote it: a person's name or handle, or an agent's model id. 1–64 characters: letters and digits of any script, space, `.`, `_`, `@`, `/`, `+`, `-`, starting with a letter or digit. |
-| `for` | no | The id of the element the entry is about: any element but the root, including `<each>`, extension elements and template ids inside `<each>`. Absent means the screen. |
-| `status` | on `question` and `todo` only | `open` or `resolved`: required on those two kinds and not allowed on the others. |
-| text | yes | 1–500 characters after normalization. |
+| `id` | yes | The id grammar of §2.2, document-unique across elements and entries (`W202`, `W212`, `W301`). |
+| `kind` | yes | `intent`, `decision`, `constraint`, `question`, `todo` or `source` (`W203`). |
+| `by` | yes | `human` or `agent` (`W203`). |
+| `name` | yes | Who wrote it: a person's name or handle, or an agent's model id. 1–64 characters: letters and digits of any script, space, `.`, `_`, `@`, `/`, `+`, `-`, starting with a letter or digit (`W229`). |
+| `for` | no | The id of the element the entry is about: any element but the root, including `<each>`, extension elements and template ids inside `<each>`. Absent means the screen (`W309`). |
+| `status` | on `question` and `todo` only | `open` or `resolved`: required on those two kinds and not allowed on the others (`W227`, `W203`). |
+| text | yes | 1–500 characters after normalization (`W229` when empty, `W228` when longer). |
 
 | Kind | Meaning |
 | --- | --- |
@@ -140,7 +140,7 @@ A screen MAY carry a `<context>` block: notes that people and agents left for wh
 | `todo` | Work left to do. Open until done. |
 | `source` | Where content or design came from: a guide, a ticket, research, a design file. A URL in the text is text; no tool fetches it. |
 
-Limits, because context is the one part of a document written as free prose for models to read: at most 100 entries, 500 characters per text and 16,000 characters of text in all. Characters are UTF-16 code units, as diagnostic columns are. `by` and `name` are claims nobody verifies; an entry has no date.
+Limits, because context is the one part of a document written as free prose for models to read: at most 100 entries, 500 characters per text and 16,000 characters of text in all (`W228`, a `mode` code: an error for writers, a warning for readers, since a reader that never shows context has no reason to refuse a screen whose notes are too long). Characters are UTF-16 code units, as diagnostic columns are. `by` and `name` are claims nobody verifies; an entry has no date.
 
 ## 3. Canonical JSON
 
@@ -182,7 +182,7 @@ Canonical form rules, so that equal documents are byte-equal:
 
 - Object keys in the order shown above; `props`, `on` and `slots` keys sorted lexicographically by UTF-16 code unit.
 - Empty `props`, `on`, `slots`, `children` and empty slot lists are omitted, and so are an empty `context` and the absent members of an entry.
-- `context` keeps the order the entries were written in; it is not sorted. Entry text is whitespace-normalized like text children. The JSON shape check reads every entry member as a string, so a wrong value is never `W200`.
+- `context` keeps the order the entries were written in; it is not sorted. Entry text is whitespace-normalized like text children. The JSON shape check reads every entry member as a string, so a wrong value is a validation diagnostic (`W203`, `W227`) rather than `W200`.
 - Text children are whitespace-normalized as in §2, and adjacent text children are joined with one space. `-0` is written `0`.
 - Props whose value equals the catalog default are kept as written (no default elision).
 - The `weft` attribute of the root element is `Document.weft` and never appears in the root's `props`.
@@ -444,8 +444,8 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W121 | `<entry>` misplaced or malformed (§2.3): outside `<context>`, an element inside it, an attribute it does not take, or `kind`, `by` or `name` missing. |
 | W200 | Document does not have the JSON shape of §3 (or nests too deep, or the root's `props` holds `weft`). |
 | W201 | Root element is not the catalog's `root` kind (`screen`). |
-| W202 | Element without `id`. |
-| W203 | Value not one of the enum values or declared states. |
+| W202 | Element or context entry without `id`. |
+| W203 | Value not one of the enum values or declared states, or an entry's `kind`, `by` or `status` not one of its values (§2.3). |
 | W204 | Value of the wrong type. |
 | W205 | Required prop, `label` or the root's `weft` missing. |
 | W206 | Event not declared by the component. |
@@ -467,7 +467,10 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W222 | `<each>` without a binding `in` or a valid `as`. |
 | W223 | Kind, prop, event or slot name invalid or reserved (`slot`, `context` or `entry` as a kind, `id` or `on-*` in `props`). |
 | W224 | Number below `min`, above `max`, or not whole where the prop is `integer`. |
-| W301 | Duplicate id. |
+| W227 | `status` missing on a context entry of kind `question` or `todo`, or given on another kind (§2.3). |
+| W228 | Context over a limit: more than 100 entries, an entry text over 500 characters, or more than 16,000 characters of entry text in the document (mode, §2.3). |
+| W229 | Context entry text empty, or `name` empty, over 64 characters or holding a character outside its set (§2.3). |
+| W301 | Duplicate id, among elements and context entries alike. |
 | W302 | Child kind not in the parent's (or slot's) `allowedChildren`. |
 | W303 | Parent kind not in the child's `allowedParents`. |
 | W304 | Content breaks the content model: text where only elements go, elements where only text goes, anything in `none`. |
@@ -475,7 +478,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W306 | Token not in the supplied token set. |
 | W307 | Token `$type` differs from the prop's `tokenType`. |
 | W308 | Action not in the supplied action list. |
-| W309 | Id reference points at no suitable element (a `references` prop that names none of its kind). |
+| W309 | Id reference points at no suitable element (a `references` prop that names none of its kind, or an entry's `for` that names no element or names the root). |
 | W310 | Text given twice: a `text` or `mixed` component has both content and the `text` prop. |
 | W311 | Loop variable shadows an enclosing one. |
 | W312 | The `root` kind (`screen`) below the root. |

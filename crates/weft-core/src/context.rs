@@ -1,5 +1,6 @@
 //! The context block of SPEC §2.3: notes that people and agents leave about the screen and its
-//! elements. Read from markup and written back here; never rendered and never followed.
+//! elements. Read from markup and written back here, checked in `context_check`; never rendered
+//! and never followed.
 
 use std::collections::HashMap;
 
@@ -11,6 +12,13 @@ use crate::source::{NodeSource, Source, path_segment};
 use crate::syntax::{RawChild, RawElement, SyntaxResult};
 
 const ATTRIBUTES: [&str; 6] = ["id", "kind", "by", "name", "for", "status"];
+
+pub fn entry_path(root_path: &str, entry: &Entry, index: usize) -> String {
+    format!(
+        "{root_path}/{CONTEXT}/{}",
+        path_segment(ENTRY, entry.id.as_deref(), Some(index))
+    )
+}
 
 pub fn misplaced_context(pos: Position, path: &str, message: impl Into<String>) -> Diagnostic {
     Diagnostic::new(

@@ -1,5 +1,11 @@
 # Done
 
+### T39.2. Context: entry validation
+
+`validate.rs` checks every entry once the block is read: ids shared with elements (`W202`, `W212`, `W301`), `kind`, `by` and `status` values (`W203`), `status` against the kind (`W227`), `for` naming an element other than the root (`W309`), the author name and empty text (`W229`), characters markup cannot carry (`W221`), and the limits (`W228`, a `mode` code). SPEC §2.3, §3 and §6.2 and AGENT-SPEC name the codes; `cases.ts` and `codes.rs` produce each one; fixtures regenerated.
+
+Built: `context_check.rs` holds the checks, run by `validate.rs` after the element tree so entry ids join the same id map as elements; paths name `context/entry#id` (or `entry[i]` without an id). The author name follows the SPEC character set, checked per Unicode letter and digit. The limits count UTF-16 code units, as diagnostic columns do.
+
 ### T39.1. Context: spec, model, markup and JSON
 
 The `<context>` block and its entries in the format and the Rust core, without value checks (T39.2), patches or targets.

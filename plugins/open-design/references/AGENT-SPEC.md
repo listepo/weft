@@ -249,7 +249,10 @@ What each code asks of you:
 | W222 | Give `<each>` `in="{$.items}"` and `as="item"`. |
 | W223 | Rename the kind, prop, event or slot to a valid name; ids go in `id`, events in `on-*`. |
 | W224 | Use a number within the range (and whole, if required); `hint` names the nearest one. |
-| W301 | Give one of the two elements another id. |
+| W227 | Give a `question` or `todo` entry `status="open"` (or `"resolved"`); remove `status` from any other kind. |
+| W228 | Shorten the entry to 500 characters, or remove resolved and outdated entries (at most 100, 16,000 characters in all). |
+| W229 | Write the entry's text; give `name` 1–64 letters, digits, spaces or `._@/+-`, starting with a letter or digit. |
+| W301 | Give one of the two elements (or entries) another id; elements and entries share ids. |
 | W302 | Use a kind the parent (or slot) accepts, or move the element. |
 | W303 | Put the element inside its required parent. |
 | W304 | Respect the content model: wrap loose text in `<text id="…">`, move elements out of text-only components. |
@@ -257,7 +260,7 @@ What each code asks of you:
 | W306 | Use a token from the host's token set. |
 | W307 | Use a token of the type the prop expects. |
 | W308 | Use an action the host provides. |
-| W309 | Point the reference at an existing element of the right kind (`tabs.selected` at a `tab` id). |
+| W309 | Point the reference at an existing element of the right kind (`tabs.selected` at a `tab` id). For an entry's `for`, name an existing element other than the root, or remove `for` to make the note about the screen. |
 | W310 | Keep the text in content or in `text`, not both. |
 | W311 | Give the inner `<each>` another `as` name. |
 | W312 | Use `section` or `stack` below the root. |

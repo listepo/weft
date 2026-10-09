@@ -41,7 +41,7 @@ export const NodeSchema: z.ZodType<Node> = z.lazy(() =>
 export const ChildSchema: z.ZodType<Child> = z.lazy(() => z.union([NodeSchema, z.string()]));
 
 // A context entry (SPEC §2.3). Every member is a string here, so that validation, not the shape
-// check, names a wrong kind, author or status.
+// check, names a wrong kind, author or status (W203, W227).
 export const EntrySchema = z.strictObject({
   id: z.string().optional(),
   kind: z.string(),

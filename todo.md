@@ -4,7 +4,6 @@
 - T31. Project file and shared resources
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
-- T39.2. Context: entry validation
 - T39.3. Context: patch operations
 - T39.4. Context: explain, MCP and CLI
 - T39.5. Context: code targets
