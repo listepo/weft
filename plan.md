@@ -36,7 +36,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.4 | todo | P2 | 4 | 0% | |
 | T16.5 | todo | P2 | 3 | 0% | |
-| T16.6 | todo | P2 | 2 | 0% | |
+| T16.6 | in progress | P2 | 2 | 0% | Cursor / grok-4.7 |
 | T16.7 | todo | P2 | 3 | 0% | |
 | T17 | todo | P2 | 4 | 50% | |
 | T17.2 | todo | P2 | 3 | 0% | |
@@ -510,6 +510,8 @@ Steps:
 Size: about 100 lines of code.
 
 Done when: the A2UI and json-render round trips of `layout` keep every mapped form, a test covers each listed loss, and `moon run root:changed` exits 0.
+
+Progress: claimed. Export, import and the §9 rows are not in the tree yet.
 
 ### T16.7. Layout vocabulary: Figma and Penpot
 
