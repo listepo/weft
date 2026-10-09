@@ -455,6 +455,8 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W802 | `<use>` gives an attribute, `on-*` or slot that its fragment does not declare (§10.7). |
 | W803 | Malformed `<param>` or `<fragment>`: a bad declaration, a duplicate or misplaced `<param>`, a fragment without a body (§10.7). |
 | W804 | `<outlet>` names no slot parameter, places one twice, has other attributes or content, or stands outside a fragment (§10.7). |
+| W805 | Fragments use each other in a cycle; the use that closes it expands to nothing (§10.7). |
+| W806 | Expanding the fragments gives more than 10,000 elements or nests deeper than 256 levels (§10.7). |
 | W807 | Parameter read where its type cannot go: an action or slot parameter in a prop, a value parameter in `on-*`, a read with more after the name (§10.7). |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
@@ -826,6 +828,7 @@ In canonical JSON a fragment file is a `Document` whose root has the kind `fragm
 - Ids inside a fragment body are local. They are unique within the fragment (`W301` there) and may repeat the ids of any screen.
 - The id of a `<use>` is a screen id like any other.
 - An expanded element is addressed by its *instance path*: the id of the `<use>` and the local id, joined by `/`, as in `header/title`. Nested uses join further: `header/crumbs/home`. `/` is outside the id grammar, so an instance path never collides with a document id. Inside `<each>` the index suffix of §4.3 follows the whole instance path: `card/price[2]`.
+- Renderers write the instance path to `data-weft-id`.
 
 **Meaning: expansion.** A use means its fragment's body, placed where the `<use>` stands, with:
 
@@ -836,6 +839,8 @@ In canonical JSON a fragment file is a `Document` whose root has the kind `fragm
 Evaluation is scoped, not textual. The loop variables of the body never capture names from the use site, and the reverse. An implementation that expands by rewriting renames the body's loop variables that would clash.
 
 `<use>` is transparent for structure, as `<each>` is. The top-level elements of the body are checked against the parent's (or slot's) `allowedChildren` and against their own `allowedParents` where the `<use>` stands. `<use>` itself adds no node to the accessibility tree.
+
+A fragment file is as untrusted as a screen, so expansion is bounded. A fragment may use other fragments, but a cycle (`a` uses `b`, which uses `a`) is `W805`, and nothing in it expands. A screen whose expansion holds more than 10,000 elements, or nests deeper than the 256 levels of §2 (a `<use>` counts as a level), is `W806`, and its expansion keeps only the root. Both are reported at the outermost `<use>` that leads to them.
 
 **Validation.** A fragment is checked once on its own, and each use is checked against the fragment's parameters. Expanded content is not checked again element by element.
 
@@ -871,3 +876,5 @@ A reader without fragments (no project) reads `<use>` as content it does not kno
 - `insert` and `move` with `"parent": "header", "slot": "actions"` fill a slot parameter. The slot must be one the fragment declares (`W504`).
 - `remove` and `move` of a `<use>` take the whole instance.
 - An id inside a fragment body (`title`, or the instance path `header/title`) is not a screen id. It is `W502`, and the hint names the fragment to edit. A fragment file is edited with the same patches as a screen, with `<fragment>` as its root.
+
+**Tools.** Renderers and generators expand uses before they draw (as above) and write instance paths to `data-weft-id`; the Slint generator, whose element names cannot hold `/`, names an element by its instance path with `--` for `/`. The accessibility tree of the reference renderer equals that of the expanded document. Importers never produce `<use>`, because they cannot tell a fragment from a copy. The core exports `expand(document, catalog)`, which returns the expanded document and its `W805`/`W806` diagnostics.

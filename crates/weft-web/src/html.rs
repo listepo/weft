@@ -88,9 +88,11 @@ pub fn to_html_with_data(
         ));
         out.push('\n');
     }
-    // The source comment above keeps the screen as written, not as filled in.
-    let filled = data.map(|data| fill(document, options.catalog, data));
-    let document = filled.as_ref().unwrap_or(document);
+    // The source comment above keeps the screen as written: its uses not expanded (SPEC §10.7),
+    // and not filled in. Validation above reported any cycle or excess, so the expansion is whole.
+    let expanded = weft_core::expand(document, options.catalog).document;
+    let filled = data.map(|data| fill(&expanded, options.catalog, data));
+    let document = filled.as_ref().unwrap_or(&expanded);
     let title = match document.root.props.get("label") {
         Some(Value::String(s)) if !s.is_empty() => s.clone(),
         _ => document.root.id.clone().unwrap_or_else(|| "Weft".into()),

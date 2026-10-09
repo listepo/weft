@@ -21,6 +21,12 @@ pub fn clash_key(name: &str) -> String {
     name.replace('_', "-")
 }
 
+/// The element name of an id. An expanded fragment's instance path (`header/title`, SPEC §10.7)
+/// takes `--` for `/`, which Slint allows in a name; a clash with a screen id is reported as any.
+pub fn element_name(id: &str) -> String {
+    id.replace('/', "--")
+}
+
 /// A Weft id or data path segment as a Slint identifier, when Slint takes it as one.
 pub fn identifier(name: &str) -> Option<&str> {
     let mut chars = name.chars();

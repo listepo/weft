@@ -6,6 +6,7 @@ mod canonical;
 pub mod controls;
 mod data;
 mod diagnostics;
+mod expand;
 mod explain;
 pub mod fragment;
 mod json;
@@ -29,6 +30,7 @@ pub use data::{
 pub use diagnostics::{
     Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors, one_of,
 };
+pub use expand::{EXPANDED_LIMIT, Expanded, expand};
 pub use explain::{Change, ChangeKind, Readback, explain, explain_changes};
 pub use json::{
     JSON_DEPTH_LIMIT, JsonError, js_number, js_round, order_keys, parse_json, to_compact,

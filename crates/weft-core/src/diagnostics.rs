@@ -154,6 +154,8 @@ codes! {
     W802 => Error, "Attribute, action or slot the fragment does not declare.";
     W803 => Error, "Malformed `<param>` or `<fragment>`.";
     W804 => Error, "`<outlet>` names no slot parameter, or one twice.";
+    W805 => Error, "Fragments use each other in a cycle.";
+    W806 => Error, "Expanding the fragments exceeds the element or depth limit.";
     W807 => Error, "Parameter read where its type cannot go.";
 }
 

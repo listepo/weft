@@ -110,5 +110,11 @@ export const cases: Record<DocumentCode, Case> = {
   W802: { markup: screen('<use id="u" fragment="page-header" title="T" subtitle="S"/>') },
   W803: { markup: fragment('<param name="title" type="text"/><stack id="a"/>') },
   W804: { markup: fragment('<stack id="a"><outlet name="nope"/></stack>') },
+  W805: { markup: screen('<use id="u" fragment="loop"/>') },
+  W806: {
+    markup: screen(
+      Array.from({ length: 100 }, (_, i) => `<use id="u${i}" fragment="wide"/>`).join(""),
+    ),
+  },
   W807: { markup: fragment('<param name="back" type="action"/><text id="a" text="{$back}"/>') },
 };

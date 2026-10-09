@@ -389,6 +389,27 @@
     }
    },
    "fragments": {
+    "loop": {
+     "weft": "0.2",
+     "root": {
+      "kind": "fragment",
+      "children": [
+       {
+        "kind": "stack",
+        "id": "again",
+        "children": [
+         {
+          "kind": "use",
+          "id": "inner",
+          "props": {
+           "fragment": "loop"
+          }
+         }
+        ]
+       }
+      ]
+     }
+    },
     "page-header": {
      "weft": "0.2",
      "root": {
@@ -473,6 +494,720 @@
           "props": {
            "name": "actions"
           }
+         }
+        ]
+       }
+      ]
+     }
+    },
+    "wide": {
+     "weft": "0.2",
+     "root": {
+      "kind": "fragment",
+      "children": [
+       {
+        "kind": "stack",
+        "id": "rows",
+        "children": [
+         {
+          "kind": "text",
+          "id": "t0",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t1",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t2",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t3",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t4",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t5",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t6",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t7",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t8",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t9",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t10",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t11",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t12",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t13",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t14",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t15",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t16",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t17",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t18",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t19",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t20",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t21",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t22",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t23",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t24",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t25",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t26",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t27",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t28",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t29",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t30",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t31",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t32",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t33",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t34",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t35",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t36",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t37",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t38",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t39",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t40",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t41",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t42",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t43",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t44",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t45",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t46",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t47",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t48",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t49",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t50",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t51",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t52",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t53",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t54",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t55",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t56",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t57",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t58",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t59",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t60",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t61",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t62",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t63",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t64",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t65",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t66",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t67",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t68",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t69",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t70",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t71",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t72",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t73",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t74",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t75",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t76",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t77",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t78",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t79",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t80",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t81",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t82",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t83",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t84",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t85",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t86",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t87",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t88",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t89",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t90",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t91",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t92",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t93",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t94",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t95",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t96",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t97",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t98",
+          "children": [
+           "x"
+          ]
+         },
+         {
+          "kind": "text",
+          "id": "t99",
+          "children": [
+           "x"
+          ]
          }
         ]
        }
@@ -27784,7 +28519,7 @@
       "path": "/screen#s/use#u/@fragment",
       "line": 1,
       "column": 39,
-      "expected": "one of: \"page-header\"",
+      "expected": "one of: \"loop\", \"page-header\", \"wide\"",
       "got": "page-headr",
       "hint": "did you mean \"page-header\"?"
      }
@@ -27809,7 +28544,7 @@
       "path": "/screen#s/use#u/@fragment",
       "line": 1,
       "column": 39,
-      "expected": "one of: \"page-header\"",
+      "expected": "one of: \"loop\", \"page-header\", \"wide\"",
       "got": "page-headr",
       "hint": "did you mean \"page-header\"?"
      }
@@ -27958,6 +28693,98 @@
     ],
     "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"a\",\n        \"children\": [\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"nope\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
     "markup": "<fragment weft=\"0.2\">\n  <stack id=\"a\">\n    <outlet name=\"nope\"/>\n  </stack>\n</fragment>\n"
+   }
+  },
+  {
+   "name": "W805 lenient",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><use id=\"u\" fragment=\"loop\"/></screen>",
+   "mode": "lenient",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W805",
+      "severity": "error",
+      "message": "Fragments use each other in a cycle: loop → loop.",
+      "path": "/screen#s/use#u",
+      "line": 1,
+      "column": 27,
+      "expected": "fragments that do not use themselves"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"u\",\n        \"props\": {\n          \"fragment\": \"loop\"\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <use id=\"u\" fragment=\"loop\"/>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W805 strict",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><use id=\"u\" fragment=\"loop\"/></screen>",
+   "mode": "strict",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W805",
+      "severity": "error",
+      "message": "Fragments use each other in a cycle: loop → loop.",
+      "path": "/screen#s/use#u",
+      "line": 1,
+      "column": 27,
+      "expected": "fragments that do not use themselves"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"u\",\n        \"props\": {\n          \"fragment\": \"loop\"\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <use id=\"u\" fragment=\"loop\"/>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W806 lenient",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><use id=\"u0\" fragment=\"wide\"/><use id=\"u1\" fragment=\"wide\"/><use id=\"u2\" fragment=\"wide\"/><use id=\"u3\" fragment=\"wide\"/><use id=\"u4\" fragment=\"wide\"/><use id=\"u5\" fragment=\"wide\"/><use id=\"u6\" fragment=\"wide\"/><use id=\"u7\" fragment=\"wide\"/><use id=\"u8\" fragment=\"wide\"/><use id=\"u9\" fragment=\"wide\"/><use id=\"u10\" fragment=\"wide\"/><use id=\"u11\" fragment=\"wide\"/><use id=\"u12\" fragment=\"wide\"/><use id=\"u13\" fragment=\"wide\"/><use id=\"u14\" fragment=\"wide\"/><use id=\"u15\" fragment=\"wide\"/><use id=\"u16\" fragment=\"wide\"/><use id=\"u17\" fragment=\"wide\"/><use id=\"u18\" fragment=\"wide\"/><use id=\"u19\" fragment=\"wide\"/><use id=\"u20\" fragment=\"wide\"/><use id=\"u21\" fragment=\"wide\"/><use id=\"u22\" fragment=\"wide\"/><use id=\"u23\" fragment=\"wide\"/><use id=\"u24\" fragment=\"wide\"/><use id=\"u25\" fragment=\"wide\"/><use id=\"u26\" fragment=\"wide\"/><use id=\"u27\" fragment=\"wide\"/><use id=\"u28\" fragment=\"wide\"/><use id=\"u29\" fragment=\"wide\"/><use id=\"u30\" fragment=\"wide\"/><use id=\"u31\" fragment=\"wide\"/><use id=\"u32\" fragment=\"wide\"/><use id=\"u33\" fragment=\"wide\"/><use id=\"u34\" fragment=\"wide\"/><use id=\"u35\" fragment=\"wide\"/><use id=\"u36\" fragment=\"wide\"/><use id=\"u37\" fragment=\"wide\"/><use id=\"u38\" fragment=\"wide\"/><use id=\"u39\" fragment=\"wide\"/><use id=\"u40\" fragment=\"wide\"/><use id=\"u41\" fragment=\"wide\"/><use id=\"u42\" fragment=\"wide\"/><use id=\"u43\" fragment=\"wide\"/><use id=\"u44\" fragment=\"wide\"/><use id=\"u45\" fragment=\"wide\"/><use id=\"u46\" fragment=\"wide\"/><use id=\"u47\" fragment=\"wide\"/><use id=\"u48\" fragment=\"wide\"/><use id=\"u49\" fragment=\"wide\"/><use id=\"u50\" fragment=\"wide\"/><use id=\"u51\" fragment=\"wide\"/><use id=\"u52\" fragment=\"wide\"/><use id=\"u53\" fragment=\"wide\"/><use id=\"u54\" fragment=\"wide\"/><use id=\"u55\" fragment=\"wide\"/><use id=\"u56\" fragment=\"wide\"/><use id=\"u57\" fragment=\"wide\"/><use id=\"u58\" fragment=\"wide\"/><use id=\"u59\" fragment=\"wide\"/><use id=\"u60\" fragment=\"wide\"/><use id=\"u61\" fragment=\"wide\"/><use id=\"u62\" fragment=\"wide\"/><use id=\"u63\" fragment=\"wide\"/><use id=\"u64\" fragment=\"wide\"/><use id=\"u65\" fragment=\"wide\"/><use id=\"u66\" fragment=\"wide\"/><use id=\"u67\" fragment=\"wide\"/><use id=\"u68\" fragment=\"wide\"/><use id=\"u69\" fragment=\"wide\"/><use id=\"u70\" fragment=\"wide\"/><use id=\"u71\" fragment=\"wide\"/><use id=\"u72\" fragment=\"wide\"/><use id=\"u73\" fragment=\"wide\"/><use id=\"u74\" fragment=\"wide\"/><use id=\"u75\" fragment=\"wide\"/><use id=\"u76\" fragment=\"wide\"/><use id=\"u77\" fragment=\"wide\"/><use id=\"u78\" fragment=\"wide\"/><use id=\"u79\" fragment=\"wide\"/><use id=\"u80\" fragment=\"wide\"/><use id=\"u81\" fragment=\"wide\"/><use id=\"u82\" fragment=\"wide\"/><use id=\"u83\" fragment=\"wide\"/><use id=\"u84\" fragment=\"wide\"/><use id=\"u85\" fragment=\"wide\"/><use id=\"u86\" fragment=\"wide\"/><use id=\"u87\" fragment=\"wide\"/><use id=\"u88\" fragment=\"wide\"/><use id=\"u89\" fragment=\"wide\"/><use id=\"u90\" fragment=\"wide\"/><use id=\"u91\" fragment=\"wide\"/><use id=\"u92\" fragment=\"wide\"/><use id=\"u93\" fragment=\"wide\"/><use id=\"u94\" fragment=\"wide\"/><use id=\"u95\" fragment=\"wide\"/><use id=\"u96\" fragment=\"wide\"/><use id=\"u97\" fragment=\"wide\"/><use id=\"u98\" fragment=\"wide\"/><use id=\"u99\" fragment=\"wide\"/></screen>",
+   "mode": "lenient",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W806",
+      "severity": "error",
+      "message": "Expanding the fragments gives more than 10000 elements or more than 256 levels.",
+      "path": "/screen#s/use#u99",
+      "line": 1,
+      "column": 3086,
+      "expected": "fewer or smaller uses"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"u0\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u1\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u2\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u3\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u4\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u5\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u6\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u7\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u8\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u9\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u10\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u11\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u12\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u13\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u14\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u15\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u16\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u17\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u18\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u19\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u20\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u21\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u22\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u23\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u24\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u25\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u26\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u27\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u28\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u29\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u30\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u31\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u32\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u33\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u34\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u35\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u36\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u37\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u38\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u39\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u40\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u41\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u42\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u43\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u44\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u45\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u46\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u47\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u48\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u49\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u50\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u51\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u52\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u53\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u54\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u55\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u56\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u57\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u58\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u59\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u60\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u61\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u62\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u63\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u64\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u65\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u66\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u67\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u68\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u69\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u70\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u71\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u72\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u73\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u74\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u75\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u76\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u77\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u78\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u79\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u80\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u81\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u82\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u83\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u84\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u85\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u86\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u87\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u88\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u89\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u90\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u91\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u92\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u93\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u94\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u95\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u96\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u97\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u98\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u99\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <use id=\"u0\" fragment=\"wide\"/>\n  <use id=\"u1\" fragment=\"wide\"/>\n  <use id=\"u2\" fragment=\"wide\"/>\n  <use id=\"u3\" fragment=\"wide\"/>\n  <use id=\"u4\" fragment=\"wide\"/>\n  <use id=\"u5\" fragment=\"wide\"/>\n  <use id=\"u6\" fragment=\"wide\"/>\n  <use id=\"u7\" fragment=\"wide\"/>\n  <use id=\"u8\" fragment=\"wide\"/>\n  <use id=\"u9\" fragment=\"wide\"/>\n  <use id=\"u10\" fragment=\"wide\"/>\n  <use id=\"u11\" fragment=\"wide\"/>\n  <use id=\"u12\" fragment=\"wide\"/>\n  <use id=\"u13\" fragment=\"wide\"/>\n  <use id=\"u14\" fragment=\"wide\"/>\n  <use id=\"u15\" fragment=\"wide\"/>\n  <use id=\"u16\" fragment=\"wide\"/>\n  <use id=\"u17\" fragment=\"wide\"/>\n  <use id=\"u18\" fragment=\"wide\"/>\n  <use id=\"u19\" fragment=\"wide\"/>\n  <use id=\"u20\" fragment=\"wide\"/>\n  <use id=\"u21\" fragment=\"wide\"/>\n  <use id=\"u22\" fragment=\"wide\"/>\n  <use id=\"u23\" fragment=\"wide\"/>\n  <use id=\"u24\" fragment=\"wide\"/>\n  <use id=\"u25\" fragment=\"wide\"/>\n  <use id=\"u26\" fragment=\"wide\"/>\n  <use id=\"u27\" fragment=\"wide\"/>\n  <use id=\"u28\" fragment=\"wide\"/>\n  <use id=\"u29\" fragment=\"wide\"/>\n  <use id=\"u30\" fragment=\"wide\"/>\n  <use id=\"u31\" fragment=\"wide\"/>\n  <use id=\"u32\" fragment=\"wide\"/>\n  <use id=\"u33\" fragment=\"wide\"/>\n  <use id=\"u34\" fragment=\"wide\"/>\n  <use id=\"u35\" fragment=\"wide\"/>\n  <use id=\"u36\" fragment=\"wide\"/>\n  <use id=\"u37\" fragment=\"wide\"/>\n  <use id=\"u38\" fragment=\"wide\"/>\n  <use id=\"u39\" fragment=\"wide\"/>\n  <use id=\"u40\" fragment=\"wide\"/>\n  <use id=\"u41\" fragment=\"wide\"/>\n  <use id=\"u42\" fragment=\"wide\"/>\n  <use id=\"u43\" fragment=\"wide\"/>\n  <use id=\"u44\" fragment=\"wide\"/>\n  <use id=\"u45\" fragment=\"wide\"/>\n  <use id=\"u46\" fragment=\"wide\"/>\n  <use id=\"u47\" fragment=\"wide\"/>\n  <use id=\"u48\" fragment=\"wide\"/>\n  <use id=\"u49\" fragment=\"wide\"/>\n  <use id=\"u50\" fragment=\"wide\"/>\n  <use id=\"u51\" fragment=\"wide\"/>\n  <use id=\"u52\" fragment=\"wide\"/>\n  <use id=\"u53\" fragment=\"wide\"/>\n  <use id=\"u54\" fragment=\"wide\"/>\n  <use id=\"u55\" fragment=\"wide\"/>\n  <use id=\"u56\" fragment=\"wide\"/>\n  <use id=\"u57\" fragment=\"wide\"/>\n  <use id=\"u58\" fragment=\"wide\"/>\n  <use id=\"u59\" fragment=\"wide\"/>\n  <use id=\"u60\" fragment=\"wide\"/>\n  <use id=\"u61\" fragment=\"wide\"/>\n  <use id=\"u62\" fragment=\"wide\"/>\n  <use id=\"u63\" fragment=\"wide\"/>\n  <use id=\"u64\" fragment=\"wide\"/>\n  <use id=\"u65\" fragment=\"wide\"/>\n  <use id=\"u66\" fragment=\"wide\"/>\n  <use id=\"u67\" fragment=\"wide\"/>\n  <use id=\"u68\" fragment=\"wide\"/>\n  <use id=\"u69\" fragment=\"wide\"/>\n  <use id=\"u70\" fragment=\"wide\"/>\n  <use id=\"u71\" fragment=\"wide\"/>\n  <use id=\"u72\" fragment=\"wide\"/>\n  <use id=\"u73\" fragment=\"wide\"/>\n  <use id=\"u74\" fragment=\"wide\"/>\n  <use id=\"u75\" fragment=\"wide\"/>\n  <use id=\"u76\" fragment=\"wide\"/>\n  <use id=\"u77\" fragment=\"wide\"/>\n  <use id=\"u78\" fragment=\"wide\"/>\n  <use id=\"u79\" fragment=\"wide\"/>\n  <use id=\"u80\" fragment=\"wide\"/>\n  <use id=\"u81\" fragment=\"wide\"/>\n  <use id=\"u82\" fragment=\"wide\"/>\n  <use id=\"u83\" fragment=\"wide\"/>\n  <use id=\"u84\" fragment=\"wide\"/>\n  <use id=\"u85\" fragment=\"wide\"/>\n  <use id=\"u86\" fragment=\"wide\"/>\n  <use id=\"u87\" fragment=\"wide\"/>\n  <use id=\"u88\" fragment=\"wide\"/>\n  <use id=\"u89\" fragment=\"wide\"/>\n  <use id=\"u90\" fragment=\"wide\"/>\n  <use id=\"u91\" fragment=\"wide\"/>\n  <use id=\"u92\" fragment=\"wide\"/>\n  <use id=\"u93\" fragment=\"wide\"/>\n  <use id=\"u94\" fragment=\"wide\"/>\n  <use id=\"u95\" fragment=\"wide\"/>\n  <use id=\"u96\" fragment=\"wide\"/>\n  <use id=\"u97\" fragment=\"wide\"/>\n  <use id=\"u98\" fragment=\"wide\"/>\n  <use id=\"u99\" fragment=\"wide\"/>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W806 strict",
+   "markup": "<screen id=\"s\" weft=\"0.1\"><use id=\"u0\" fragment=\"wide\"/><use id=\"u1\" fragment=\"wide\"/><use id=\"u2\" fragment=\"wide\"/><use id=\"u3\" fragment=\"wide\"/><use id=\"u4\" fragment=\"wide\"/><use id=\"u5\" fragment=\"wide\"/><use id=\"u6\" fragment=\"wide\"/><use id=\"u7\" fragment=\"wide\"/><use id=\"u8\" fragment=\"wide\"/><use id=\"u9\" fragment=\"wide\"/><use id=\"u10\" fragment=\"wide\"/><use id=\"u11\" fragment=\"wide\"/><use id=\"u12\" fragment=\"wide\"/><use id=\"u13\" fragment=\"wide\"/><use id=\"u14\" fragment=\"wide\"/><use id=\"u15\" fragment=\"wide\"/><use id=\"u16\" fragment=\"wide\"/><use id=\"u17\" fragment=\"wide\"/><use id=\"u18\" fragment=\"wide\"/><use id=\"u19\" fragment=\"wide\"/><use id=\"u20\" fragment=\"wide\"/><use id=\"u21\" fragment=\"wide\"/><use id=\"u22\" fragment=\"wide\"/><use id=\"u23\" fragment=\"wide\"/><use id=\"u24\" fragment=\"wide\"/><use id=\"u25\" fragment=\"wide\"/><use id=\"u26\" fragment=\"wide\"/><use id=\"u27\" fragment=\"wide\"/><use id=\"u28\" fragment=\"wide\"/><use id=\"u29\" fragment=\"wide\"/><use id=\"u30\" fragment=\"wide\"/><use id=\"u31\" fragment=\"wide\"/><use id=\"u32\" fragment=\"wide\"/><use id=\"u33\" fragment=\"wide\"/><use id=\"u34\" fragment=\"wide\"/><use id=\"u35\" fragment=\"wide\"/><use id=\"u36\" fragment=\"wide\"/><use id=\"u37\" fragment=\"wide\"/><use id=\"u38\" fragment=\"wide\"/><use id=\"u39\" fragment=\"wide\"/><use id=\"u40\" fragment=\"wide\"/><use id=\"u41\" fragment=\"wide\"/><use id=\"u42\" fragment=\"wide\"/><use id=\"u43\" fragment=\"wide\"/><use id=\"u44\" fragment=\"wide\"/><use id=\"u45\" fragment=\"wide\"/><use id=\"u46\" fragment=\"wide\"/><use id=\"u47\" fragment=\"wide\"/><use id=\"u48\" fragment=\"wide\"/><use id=\"u49\" fragment=\"wide\"/><use id=\"u50\" fragment=\"wide\"/><use id=\"u51\" fragment=\"wide\"/><use id=\"u52\" fragment=\"wide\"/><use id=\"u53\" fragment=\"wide\"/><use id=\"u54\" fragment=\"wide\"/><use id=\"u55\" fragment=\"wide\"/><use id=\"u56\" fragment=\"wide\"/><use id=\"u57\" fragment=\"wide\"/><use id=\"u58\" fragment=\"wide\"/><use id=\"u59\" fragment=\"wide\"/><use id=\"u60\" fragment=\"wide\"/><use id=\"u61\" fragment=\"wide\"/><use id=\"u62\" fragment=\"wide\"/><use id=\"u63\" fragment=\"wide\"/><use id=\"u64\" fragment=\"wide\"/><use id=\"u65\" fragment=\"wide\"/><use id=\"u66\" fragment=\"wide\"/><use id=\"u67\" fragment=\"wide\"/><use id=\"u68\" fragment=\"wide\"/><use id=\"u69\" fragment=\"wide\"/><use id=\"u70\" fragment=\"wide\"/><use id=\"u71\" fragment=\"wide\"/><use id=\"u72\" fragment=\"wide\"/><use id=\"u73\" fragment=\"wide\"/><use id=\"u74\" fragment=\"wide\"/><use id=\"u75\" fragment=\"wide\"/><use id=\"u76\" fragment=\"wide\"/><use id=\"u77\" fragment=\"wide\"/><use id=\"u78\" fragment=\"wide\"/><use id=\"u79\" fragment=\"wide\"/><use id=\"u80\" fragment=\"wide\"/><use id=\"u81\" fragment=\"wide\"/><use id=\"u82\" fragment=\"wide\"/><use id=\"u83\" fragment=\"wide\"/><use id=\"u84\" fragment=\"wide\"/><use id=\"u85\" fragment=\"wide\"/><use id=\"u86\" fragment=\"wide\"/><use id=\"u87\" fragment=\"wide\"/><use id=\"u88\" fragment=\"wide\"/><use id=\"u89\" fragment=\"wide\"/><use id=\"u90\" fragment=\"wide\"/><use id=\"u91\" fragment=\"wide\"/><use id=\"u92\" fragment=\"wide\"/><use id=\"u93\" fragment=\"wide\"/><use id=\"u94\" fragment=\"wide\"/><use id=\"u95\" fragment=\"wide\"/><use id=\"u96\" fragment=\"wide\"/><use id=\"u97\" fragment=\"wide\"/><use id=\"u98\" fragment=\"wide\"/><use id=\"u99\" fragment=\"wide\"/></screen>",
+   "mode": "strict",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W806",
+      "severity": "error",
+      "message": "Expanding the fragments gives more than 10000 elements or more than 256 levels.",
+      "path": "/screen#s/use#u99",
+      "line": 1,
+      "column": 3086,
+      "expected": "fewer or smaller uses"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.1\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"u0\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u1\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u2\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u3\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u4\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u5\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u6\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u7\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u8\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u9\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u10\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u11\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u12\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u13\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u14\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u15\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u16\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u17\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u18\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u19\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u20\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u21\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u22\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u23\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u24\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u25\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u26\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u27\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u28\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u29\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u30\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u31\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u32\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u33\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u34\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u35\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u36\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u37\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u38\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u39\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u40\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u41\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u42\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u43\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u44\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u45\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u46\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u47\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u48\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u49\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u50\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u51\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u52\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u53\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u54\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u55\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u56\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u57\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u58\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u59\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u60\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u61\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u62\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u63\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u64\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u65\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u66\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u67\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u68\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u69\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u70\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u71\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u72\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u73\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u74\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u75\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u76\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u77\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u78\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u79\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u80\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u81\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u82\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u83\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u84\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u85\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u86\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u87\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u88\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u89\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u90\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u91\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u92\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u93\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u94\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u95\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u96\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u97\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u98\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"u99\",\n        \"props\": {\n          \"fragment\": \"wide\"\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.1\">\n  <use id=\"u0\" fragment=\"wide\"/>\n  <use id=\"u1\" fragment=\"wide\"/>\n  <use id=\"u2\" fragment=\"wide\"/>\n  <use id=\"u3\" fragment=\"wide\"/>\n  <use id=\"u4\" fragment=\"wide\"/>\n  <use id=\"u5\" fragment=\"wide\"/>\n  <use id=\"u6\" fragment=\"wide\"/>\n  <use id=\"u7\" fragment=\"wide\"/>\n  <use id=\"u8\" fragment=\"wide\"/>\n  <use id=\"u9\" fragment=\"wide\"/>\n  <use id=\"u10\" fragment=\"wide\"/>\n  <use id=\"u11\" fragment=\"wide\"/>\n  <use id=\"u12\" fragment=\"wide\"/>\n  <use id=\"u13\" fragment=\"wide\"/>\n  <use id=\"u14\" fragment=\"wide\"/>\n  <use id=\"u15\" fragment=\"wide\"/>\n  <use id=\"u16\" fragment=\"wide\"/>\n  <use id=\"u17\" fragment=\"wide\"/>\n  <use id=\"u18\" fragment=\"wide\"/>\n  <use id=\"u19\" fragment=\"wide\"/>\n  <use id=\"u20\" fragment=\"wide\"/>\n  <use id=\"u21\" fragment=\"wide\"/>\n  <use id=\"u22\" fragment=\"wide\"/>\n  <use id=\"u23\" fragment=\"wide\"/>\n  <use id=\"u24\" fragment=\"wide\"/>\n  <use id=\"u25\" fragment=\"wide\"/>\n  <use id=\"u26\" fragment=\"wide\"/>\n  <use id=\"u27\" fragment=\"wide\"/>\n  <use id=\"u28\" fragment=\"wide\"/>\n  <use id=\"u29\" fragment=\"wide\"/>\n  <use id=\"u30\" fragment=\"wide\"/>\n  <use id=\"u31\" fragment=\"wide\"/>\n  <use id=\"u32\" fragment=\"wide\"/>\n  <use id=\"u33\" fragment=\"wide\"/>\n  <use id=\"u34\" fragment=\"wide\"/>\n  <use id=\"u35\" fragment=\"wide\"/>\n  <use id=\"u36\" fragment=\"wide\"/>\n  <use id=\"u37\" fragment=\"wide\"/>\n  <use id=\"u38\" fragment=\"wide\"/>\n  <use id=\"u39\" fragment=\"wide\"/>\n  <use id=\"u40\" fragment=\"wide\"/>\n  <use id=\"u41\" fragment=\"wide\"/>\n  <use id=\"u42\" fragment=\"wide\"/>\n  <use id=\"u43\" fragment=\"wide\"/>\n  <use id=\"u44\" fragment=\"wide\"/>\n  <use id=\"u45\" fragment=\"wide\"/>\n  <use id=\"u46\" fragment=\"wide\"/>\n  <use id=\"u47\" fragment=\"wide\"/>\n  <use id=\"u48\" fragment=\"wide\"/>\n  <use id=\"u49\" fragment=\"wide\"/>\n  <use id=\"u50\" fragment=\"wide\"/>\n  <use id=\"u51\" fragment=\"wide\"/>\n  <use id=\"u52\" fragment=\"wide\"/>\n  <use id=\"u53\" fragment=\"wide\"/>\n  <use id=\"u54\" fragment=\"wide\"/>\n  <use id=\"u55\" fragment=\"wide\"/>\n  <use id=\"u56\" fragment=\"wide\"/>\n  <use id=\"u57\" fragment=\"wide\"/>\n  <use id=\"u58\" fragment=\"wide\"/>\n  <use id=\"u59\" fragment=\"wide\"/>\n  <use id=\"u60\" fragment=\"wide\"/>\n  <use id=\"u61\" fragment=\"wide\"/>\n  <use id=\"u62\" fragment=\"wide\"/>\n  <use id=\"u63\" fragment=\"wide\"/>\n  <use id=\"u64\" fragment=\"wide\"/>\n  <use id=\"u65\" fragment=\"wide\"/>\n  <use id=\"u66\" fragment=\"wide\"/>\n  <use id=\"u67\" fragment=\"wide\"/>\n  <use id=\"u68\" fragment=\"wide\"/>\n  <use id=\"u69\" fragment=\"wide\"/>\n  <use id=\"u70\" fragment=\"wide\"/>\n  <use id=\"u71\" fragment=\"wide\"/>\n  <use id=\"u72\" fragment=\"wide\"/>\n  <use id=\"u73\" fragment=\"wide\"/>\n  <use id=\"u74\" fragment=\"wide\"/>\n  <use id=\"u75\" fragment=\"wide\"/>\n  <use id=\"u76\" fragment=\"wide\"/>\n  <use id=\"u77\" fragment=\"wide\"/>\n  <use id=\"u78\" fragment=\"wide\"/>\n  <use id=\"u79\" fragment=\"wide\"/>\n  <use id=\"u80\" fragment=\"wide\"/>\n  <use id=\"u81\" fragment=\"wide\"/>\n  <use id=\"u82\" fragment=\"wide\"/>\n  <use id=\"u83\" fragment=\"wide\"/>\n  <use id=\"u84\" fragment=\"wide\"/>\n  <use id=\"u85\" fragment=\"wide\"/>\n  <use id=\"u86\" fragment=\"wide\"/>\n  <use id=\"u87\" fragment=\"wide\"/>\n  <use id=\"u88\" fragment=\"wide\"/>\n  <use id=\"u89\" fragment=\"wide\"/>\n  <use id=\"u90\" fragment=\"wide\"/>\n  <use id=\"u91\" fragment=\"wide\"/>\n  <use id=\"u92\" fragment=\"wide\"/>\n  <use id=\"u93\" fragment=\"wide\"/>\n  <use id=\"u94\" fragment=\"wide\"/>\n  <use id=\"u95\" fragment=\"wide\"/>\n  <use id=\"u96\" fragment=\"wide\"/>\n  <use id=\"u97\" fragment=\"wide\"/>\n  <use id=\"u98\" fragment=\"wide\"/>\n  <use id=\"u99\" fragment=\"wide\"/>\n</screen>\n"
    }
   },
   {

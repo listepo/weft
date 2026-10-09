@@ -108,6 +108,12 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
             v.report(d);
         }
     }
+    if !catalog.fragments.is_empty() {
+        // Each use was checked against its fragment above; only the bounds of the whole
+        // expansion remain (SPEC §10.7).
+        v.out
+            .extend(crate::expand::expand(document, catalog).diagnostics);
+    }
     v.out
 }
 

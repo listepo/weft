@@ -138,6 +138,26 @@ pub fn canonicalize_document(document: Option<&str>) -> Result<String> {
     }
 }
 
+/// `expand`: `{document, diagnostics}`, the document with each use of a known fragment expanded
+/// (SPEC §10.7); a document past the depth limit is reported as `validate` reports it.
+pub fn expand_document(document: Option<&str>, catalog: &Catalog) -> Result<String> {
+    let document = match read_document(document) {
+        Ok(d) => d,
+        Err(BindingError::TooDeep) => {
+            return write(&Patched {
+                document: Some(&too_deep_document()),
+                diagnostics: &too_deep_diagnostics(),
+            });
+        }
+        Err(e) => return Err(e),
+    };
+    let expanded = weft_core::expand(&document, catalog);
+    write(&Patched {
+        document: Some(&expanded.document),
+        diagnostics: &expanded.diagnostics,
+    })
+}
+
 #[derive(Serialize)]
 struct Patched<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]

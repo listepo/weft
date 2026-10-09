@@ -254,6 +254,15 @@ fn cases() -> Vec<(&'static str, Case)> {
             r#"<param name="title" type="text"/><stack id="a"/>"#,
         ),
         fragment("W804", r#"<stack id="a"><outlet name="nope"/></stack>"#),
+        ("W805", in_screen(r#"<use id="u" fragment="loop"/>"#)),
+        (
+            "W806",
+            in_screen(
+                &(0..100)
+                    .map(|i| format!(r#"<use id="u{i}" fragment="wide"/>"#))
+                    .collect::<String>(),
+            ),
+        ),
         fragment(
             "W807",
             r#"<param name="back" type="action"/><text id="a" text="{$back}"/>"#,

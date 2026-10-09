@@ -24,8 +24,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T8 | in progress | P1 | 3 | 70% | Cursor / grok-4.7 |
 | T28 | in progress | P2 | 3 | 90% | Cursor / grok-4.7 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
-| T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
-| T31.3 | todo | P1 | 4 | 0% | |
+| T31 | in progress | P1 | 5 | 85% | Claude Code / claude-opus-5-5 |
 | T31.4 | todo | P1 | 3 | 0% | |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
@@ -209,7 +208,7 @@ Scope extension (creator): everything that can be configured is configurable thr
 13. `AGENTS.md`: every new tool option gets a `weft.json` key in the same change.
 14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
 
-Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). The creator approved `docs/fragments-design.md` with its recommendations (a name → file map, braced `on-*` action parameters, named slots only, 10,000 expanded elements, format 0.2). Part B is built in four subtasks; T31.1 (fragment files) and T31.2 (uses and patches) are done, and T31 closes with T31.4.
+Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). The creator approved `docs/fragments-design.md` with its recommendations (a name → file map, braced `on-*` action parameters, named slots only, 10,000 expanded elements, format 0.2). Part B is built in four subtasks; T31.1 (fragment files), T31.2 (uses and patches) and T31.3 (expansion and renderers) are done, and T31 closes with T31.4.
 
 Part B build plan (fragments):
 
@@ -218,10 +217,6 @@ Part B build plan (fragments):
 - Format version: T31.1 moves `weft` to 0.2 with the same edits T39 makes for context, which shares that 0.2 (`docs/context-design.md`, version bundling); whichever lands second keeps one bump.
 
 Each subtask gets one pull request, verified with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
-
-### T31.3. Fragments: expansion and renderers
-
-`expand` in the core (SPEC §10.7): parameter reads replaced by use values, outlets by slot content, ids by instance paths (`header/title`), body loop variables renamed when they would capture a use-site name, cycles (`W805`) and the 10,000-element and depth limits (`W806`) guarded, also reported by validation. Exported through `weft-binding`, `weft-wasm` and `weft-node` and `@weft/core`; the reference renderer (`@weft/render-react`), the static HTML page and the code generators render the expansion. Done when a screen with nested uses renders the same accessibility tree as its hand-expanded copy, and hostile fragments (cycles, exponential fan-out) are diagnostics.
 
 ### T31.4. Fragments: project, tools and example
 

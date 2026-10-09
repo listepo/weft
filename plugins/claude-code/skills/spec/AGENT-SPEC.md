@@ -303,6 +303,8 @@ What each code asks of you:
 | W802 | Give the `<use>` only the attributes, `on-*` actions and slots its fragment declares as parameters; `expected` lists them. |
 | W803 | Fix the `<param>`: a name of lowercase letters and digits, a known `type`, only the attributes its type takes, a `default` of that type, every `<param>` before the body, each name once; and give the fragment a body. |
 | W804 | Give `<outlet>` only `name`, naming a slot parameter of the fragment, once; outside a fragment use a `<slot>` of a `<use>`. |
+| W805 | Break the cycle: a fragment may not use itself, directly or through other fragments; write the repeated part out once. |
+| W806 | Use fewer or smaller fragments: a screen expands to at most 10,000 elements and 256 levels. |
 | W807 | Read a value parameter whole (`{$title}`, not `{$title.x}`) in a prop, an action parameter in `on-*`, and a slot parameter with `<outlet>`. |
 
 ### 4.1 Reading back an edit

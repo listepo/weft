@@ -180,6 +180,20 @@ export const catalog: Catalog = CatalogSchema.parse({
   },
   // The page header of SPEC §10.7, so that its examples check against a fragment.
   fragments: {
+    // Uses itself, so that a screen using it has a cycle (W805).
+    loop: {
+      weft: "0.2",
+      root: {
+        kind: "fragment",
+        children: [
+          {
+            kind: "stack",
+            id: "again",
+            children: [{ kind: "use", id: "inner", props: { fragment: "loop" } }],
+          },
+        ],
+      },
+    },
     "page-header": {
       weft: "0.2",
       root: {
@@ -211,6 +225,24 @@ export const catalog: Catalog = CatalogSchema.parse({
               },
               { kind: "outlet", props: { name: "actions" } },
             ],
+          },
+        ],
+      },
+    },
+    // A hundred and one elements, so that a screen of a hundred uses passes the limit (W806).
+    wide: {
+      weft: "0.2",
+      root: {
+        kind: "fragment",
+        children: [
+          {
+            kind: "stack",
+            id: "rows",
+            children: Array.from({ length: 100 }, (_, i) => ({
+              kind: "text",
+              id: `t${i}`,
+              children: ["x"],
+            })),
           },
         ],
       },
