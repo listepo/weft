@@ -8,7 +8,9 @@ pub const MARKER: &str = "weft:source";
 
 /// The comment text after the marker line: `\` escapes the next character, so the payload never
 /// contains a sequence that would end or nest an HTML or JavaScript comment (`-->`, `--!>`, `<!--`,
-/// `*/`).
+/// `*/`). Every `@` is followed by a `\` too: context is untrusted text, and `@license` or
+/// `@preserve` would make a minifier keep the comment, with the screen's notes, in a production
+/// bundle.
 pub fn escape(markup: &str) -> String {
     let mut out = String::with_capacity(markup.len() + 8);
     let mut chars = markup.chars().peekable();
@@ -18,6 +20,7 @@ pub fn escape(markup: &str) -> String {
             '-' if chars.peek() == Some(&'-') => out.push_str("-\\"),
             '*' if chars.peek() == Some(&'/') => out.push_str("*\\"),
             '<' if chars.peek() == Some(&'!') => out.push_str("<\\"),
+            '@' => out.push_str("@\\"),
             _ => out.push(c),
         }
     }
@@ -75,9 +78,9 @@ mod tests {
 
     #[test]
     fn payloads_cannot_close_or_nest_comments() {
-        let markup = r#"<text id="t">a --> b --!> c <!-- d */ e \ f -- g</text>"#;
+        let markup = r#"<text id="t">a --> b --!> c <!-- d */ e \ f -- g @license @\ @@ @</text>"#;
         let escaped = escape(markup);
-        for bad in ["-->", "--!>", "<!--", "*/", "--"] {
+        for bad in ["-->", "--!>", "<!--", "*/", "--", "@license"] {
             assert!(!escaped.contains(bad), "{bad} in {escaped}");
         }
         assert_eq!(unescape(&escaped), markup);

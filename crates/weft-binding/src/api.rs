@@ -193,6 +193,8 @@ pub fn apply(
             mode: o.mode,
             tokens: o.tokens.as_ref(),
             actions: o.actions.as_deref(),
+            author: o.author.as_ref(),
+            read_only_context: o.read_only_context,
         },
     );
     write(&Patched {

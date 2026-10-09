@@ -4,6 +4,7 @@
 use indexmap::IndexMap;
 use serde_json::Value as Json;
 
+use crate::context_check::check_entries;
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, did_you_mean, one_of, quote};
 use crate::fragment::{FRAGMENT, OUTLET, PARAM, ParamKind, USE};
 use crate::json::{JSON_DEPTH_LIMIT, js_number, js_round};
@@ -12,9 +13,9 @@ use crate::model::{
     WEFT_VERSION,
 };
 use crate::rules::{
-    ARIA_ROLES, EACH, MAX_DEPTH, MODEL_ASSETS, SLOT, asset_problem, embedded_reference,
-    has_non_xml_char, is_action, is_binding, is_extension_name, is_id, is_loop_variable, is_name,
-    is_token, universal_prop, version,
+    ARIA_ROLES, CONTEXT, EACH, ENTRY, MAX_DEPTH, MODEL_ASSETS, SLOT, asset_problem,
+    embedded_reference, has_non_xml_char, is_action, is_binding, is_extension_name, is_id,
+    is_loop_variable, is_name, is_token, universal_prop, version,
 };
 use crate::shape::{document_issues, to_document};
 use crate::source::{NodeSource, path_segment};
@@ -87,6 +88,10 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
         v.visit_fragment(root, &root_path);
     } else {
         v.visit_node(root, &root_path, None, &[]);
+    }
+    let root_id = root.id.as_deref();
+    for d in check_entries(&document.context, &root_path, root_id, &mut v.ids) {
+        v.report(d);
     }
 
     for (value, target, at) in std::mem::take(&mut v.references) {
@@ -769,10 +774,15 @@ impl<'a> Validator<'a> {
         if category == Category::Use && component.is_none() {
             self.unknown_fragment(node, path);
         } else if category == Category::Unknown {
-            if kind == SLOT || !is_name(kind) {
+            if [SLOT, CONTEXT, ENTRY].contains(&kind) || !is_name(kind) {
                 let (message, hint) = if kind == SLOT {
                     (
                         "`slot` is structural; named slots live in `slots`.".to_owned(),
+                        None,
+                    )
+                } else if kind == CONTEXT || kind == ENTRY {
+                    (
+                        format!("`{kind}` is structural; context lives in `Document.context`."),
                         None,
                     )
                 } else {

@@ -97,11 +97,20 @@ export type LimitName =
  * them). A key that is absent takes the tool's default; an explicit tool argument overrides both.
  * File names are relative to the project file.
  */
-type JsxExportSettings = { outDir?: string; typescript?: boolean; source?: boolean };
+type ExportContext = "keep" | "strip";
+type JsxExportSettings = {
+  outDir?: string;
+  typescript?: boolean;
+  source?: boolean;
+  context?: ExportContext;
+};
+/** An importer that reads a generated file's source comment back, context included. */
+type SourceImportSettings = { outDir?: string; context?: "keep" | "drop" };
 
 export type Settings = {
   validate?: { mode?: Mode };
   format?: { write?: boolean };
+  explain?: { context?: boolean };
   render?: {
     data?: string;
     tokens?: string[] | string;
@@ -109,22 +118,24 @@ export type Settings = {
     appearance?: "light" | "dark";
   };
   export?: {
-    html?: { outDir?: string; source?: boolean };
+    html?: { outDir?: string; source?: boolean; context?: ExportContext };
     react?: JsxExportSettings;
     solid?: JsxExportSettings;
     swiftui?: { outDir?: string };
     css?: { outDir?: string };
     a2ui?: { outDir?: string };
+    slint?: { outDir?: string; context?: ExportContext };
   };
   import?: {
-    html?: { outDir?: string };
-    react?: { outDir?: string };
-    solid?: { outDir?: string };
+    html?: SourceImportSettings;
+    react?: SourceImportSettings;
+    solid?: SourceImportSettings;
+    slint?: SourceImportSettings;
     swiftui?: { outDir?: string };
     a2ui?: { outDir?: string };
     figma?: { outDir?: string };
   };
-  mcp?: { limits?: Partial<Record<LimitName, number>> };
+  mcp?: { limits?: Partial<Record<LimitName, number>>; context?: "read-write" | "read-only" };
   plugins?: Record<string, Record<string, unknown>>;
 };
 

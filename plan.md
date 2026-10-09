@@ -23,7 +23,9 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
-| T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
+| T39 | in progress | P1 | 4 | 80% | Claude Code / claude-opus-5-5 |
+| T39.7 | todo | P2 | 3 | 0% | |
+| T39.9 | todo | P2 | 3 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
@@ -147,13 +149,17 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
 
-Execution plan, design stage (one file, no code, `SPEC.md` or `AGENT-SPEC.md` changes):
+The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.9, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.9.
 
-1. Read `SPEC.md`, `AGENT-SPEC.md`, `docs/figma-style-overrides-design.md`, the parser, model, canonical form and patches in `crates/weft-core`, plugin data in `packages/figma`, `packages/to-jsx` and the benchmark primers in `bench/`.
-2. Write `docs/context-design.md` in the shape of the style-overrides proposal: markup syntax with at least two alternatives and a recommendation, the entry model, canonical JSON and ordering, validation rules, new diagnostic codes and limits, patch operations, the effect on every target (renderers, code generators and importers, Figma, MCP, `weft explain`), the security rule and its `AGENT-SPEC.md` wording, the `weft.json` option (T31), versioning and migration, and open questions with recommendations. Worked examples use the corpus login screen in markup and canonical JSON.
-3. Verify with `mise exec -- moon run root:lint`, commit, and leave T39 in progress until the creator approves the design.
+### T39.7. Context: Figma and Penpot
 
-Progress: the design proposal is in `docs/context-design.md` and awaits the creator's approval. It recommends one `<context>` block under `<screen>` with entries attached to elements by `for`, new codes `W120`, `W121`, `W227`–`W229` and `W510`–`W512`, the patch operations `add-context`, `set-context`, `resolve-context` and `remove-context`, and `weft` 0.2. Eleven open questions close the document. The build (SPEC, AGENT-SPEC, the Rust core and the targets together) starts after approval.
+The canonical entries in plugin data (`weft.context`) on the root frame, read back with entries about removed layers dropped as a `context` loss (SPEC §9 loss row), and `import.figma.context`; the plugin panel lists the selected layer's entries read-only.
+
+### T39.9. Context: SwiftUI
+
+SwiftUI has no source comment, so it carries context as `// weft:context <entry JSON>` lines above the view struct, read back by `weft import-swiftui`, with readable `//` comments above each named view that the importer ignores. `export.swiftui.context` and `import.swiftui.context` (SPEC §10.6, `settings.rs`, the schema) and the CLI `--context`, as T39.6 gave the web and Slint targets; a round-trip test.
+
+Open question for the creator before this is claimed: `import_swiftui` reads code by convention, with no regeneration check like the web and Slint importers have. A `// weft:context` line therefore cannot be told apart from one forged in foreign Swift, and the design reads context only from code recognized as Weft-generated. Options: add a `weft:source` comment with that check to SwiftUI first, or accept the lines on a lenient read and validate them.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 

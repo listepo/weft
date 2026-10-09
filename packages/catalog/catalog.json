@@ -10,7 +10,7 @@
       "root": true,
       "props": {
         "weft": {
-          "description": "The Weft format version of the document, always the literal \"0.1\".",
+          "description": "The Weft format version of the document: \"0.2\", or \"0.1\" for a document written before 0.2.",
           "type": "string",
           "required": true,
           "bindable": false

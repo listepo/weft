@@ -39,7 +39,9 @@ const JOINED: [&str; 4] = ["states", "events", "allowedChildren", "allowedParent
 /// Merged by name rather than replaced by an extension entry.
 const MERGED: [&str; 2] = ["props", "slots"];
 /// Element names with a fixed meaning in markup (SPEC §10.4), which no component may take.
-const STRUCTURAL: [&str; 6] = ["each", "slot", "use", "fragment", "param", "outlet"];
+const STRUCTURAL: [&str; 8] = [
+    "context", "each", "entry", "slot", "use", "fragment", "param", "outlet",
+];
 const CATALOG_MEMBERS: [&str; 6] = [
     "weft",
     "name",

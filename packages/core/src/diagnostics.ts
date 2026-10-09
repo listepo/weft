@@ -30,6 +30,8 @@ export const DIAGNOSTIC_CODES = {
   W117: { severity: "error", summary: "Nesting deeper than the limit." },
   W118: { severity: "error", summary: "Misplaced or malformed `<slot>`." },
   W119: { severity: "error", summary: "Slot name used twice under one parent." },
+  W120: { severity: "error", summary: "Misplaced or malformed `<context>`." },
+  W121: { severity: "error", summary: "Misplaced or malformed `<entry>`." },
 
   W200: { severity: "error", summary: "Document does not have the canonical JSON shape." },
   W201: { severity: "error", summary: "Root element is not `screen`." },
@@ -59,6 +61,12 @@ export const DIAGNOSTIC_CODES = {
     summary: "Kind, attribute, event or slot name is invalid or reserved.",
   },
   W224: { severity: "error", summary: "Number outside the declared range or not whole." },
+  W227: {
+    severity: "error",
+    summary: "Context entry status missing or not allowed for its kind.",
+  },
+  W228: { severity: "mode", summary: "Context over a limit." },
+  W229: { severity: "error", summary: "Context entry text or author name not allowed." },
 
   W301: { severity: "error", summary: "Duplicate id." },
   W302: { severity: "error", summary: "Child kind not allowed here." },
@@ -93,6 +101,9 @@ export const DIAGNOSTIC_CODES = {
   W507: { severity: "error", summary: "The root element cannot be removed or moved." },
   W508: { severity: "error", summary: "Inserted markup is not a list of elements." },
   W509: { severity: "error", summary: "Inserted markup reuses an id of the document." },
+  W510: { severity: "error", summary: "An added context entry reuses an id of the document." },
+  W511: { severity: "error", summary: "A context patch names no context entry." },
+  W512: { severity: "error", summary: "The host does not allow this context patch." },
 
   W601: { severity: "error", summary: "Imported input cannot be read." },
   W602: { severity: "warning", summary: "Imported input exceeds an import limit." },

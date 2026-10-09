@@ -191,3 +191,57 @@ fn a_bound_field_error_comes_back_as_the_fields_error() {
         );
     }
 }
+
+const NOTED: &str = r#"<screen id="s" label="Notes" weft="0.2">
+  <context>
+    <entry id="why" by="human" kind="intent" name="Ivan">Sign in quickly. @preserve */ end</entry>
+    <entry id="go-why" by="agent" for="go" kind="question" name="m" status="open">Primary?</entry>
+  </context>
+  <button id="go" on-press="auth.go">Go</button>
+</screen>
+"#;
+
+#[test]
+fn context_notes_are_readable_comments_that_importers_ignore() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    let parsed = parse(
+        NOTED,
+        &ParseOptions {
+            catalog: Some(&catalog),
+            ..Default::default()
+        },
+    );
+    assert!(parsed.diagnostics.is_empty(), "{:?}", parsed.diagnostics);
+    let document = parsed.document.unwrap();
+    let screen_note = "{/* intent (human Ivan): Sign in quickly. @\\preserve *\\/ end */}";
+    let button_note = "{/* question open (agent m): Primary? */}";
+    for (framework, typescript) in FLAVOURS {
+        let what = format!("{framework:?} ts={typescript}");
+        let code = generate(&document, framework, typescript, false);
+        let at = |needle: &str| {
+            code.find(needle)
+                .unwrap_or_else(|| panic!("{what}: {needle}\n{code}"))
+        };
+        assert!(at("<main") < at(screen_note), "{what}");
+        assert!(at(screen_note) < at(button_note), "{what}");
+        assert!(at(button_note) < at("<button"), "{what}");
+        assert!(!code.contains("@preserve"), "{what}");
+
+        let back = import_jsx(&code, typescript, &options);
+        assert!(back.losses.is_empty(), "{what}: {:?}", back.losses);
+        let mut bare = document.clone();
+        bare.context.clear();
+        assert_eq!(serialize(&back.document), serialize(&bare), "{what}");
+
+        let code = generate(&document, framework, typescript, true);
+        let back = import_jsx(&code, typescript, &options);
+        assert_eq!(serialize(&back.document), NOTED, "{what}");
+    }
+    let lit = generate(&document, Framework::Lit, false, false);
+    assert!(!lit.contains("Primary?"), "{lit}");
+}

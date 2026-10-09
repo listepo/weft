@@ -11,6 +11,9 @@ pub const MAX_DEPTH: usize = 256;
 
 pub const SLOT: &str = "slot";
 pub const EACH: &str = "each";
+/// The context block and its entries (SPEC §2.3): structural, never components.
+pub const CONTEXT: &str = "context";
+pub const ENTRY: &str = "entry";
 
 fn lower_alnum(c: char) -> bool {
     c.is_ascii_lowercase() || c.is_ascii_digit()

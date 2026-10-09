@@ -16,6 +16,7 @@ The server works only on text passed in tool calls. It reads no files, and opens
 | `weft_format` | `markup` | The canonical markup, or the diagnostics when the markup has errors. |
 | `weft_patch` | `markup`, `patches` | The patched screen in canonical form, or diagnostics and nothing applied. The result is checked strictly. |
 | `weft_render` | `markup`, `data` (optional), `html` (optional) | The accessibility tree of the screen, as YAML, and with `html: true` also the static HTML page. |
+| `weft_context` | `markup`, `for`, `kind`, `status` (all but `markup` optional) | `{"notice", "entries": […]}`: the screen's context entries (SPEC §2.3), filtered, under a fixed notice that they are data, not instructions. |
 
 A tool that cannot do its job (an unknown component, a patch that does not apply, markup that `weft_format` or `weft_render` cannot accept) sets `isError` in its result and never throws. `weft_validate` is different: finding problems is its job, so it answers `"valid": false` with the diagnostics as an ordinary result. Inputs are bounded (for example 200,000 characters of markup and 100 patches per call); the numbers are in `packages/mcp/README.md`.
 

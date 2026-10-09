@@ -7,8 +7,8 @@
 use indexmap::IndexMap;
 use serde_json::Value as Json;
 use weft_core::{
-    ApplyOptions, Catalog, Mode, ParseOptions, ValidateOptions, apply_patches, parse, parse_json,
-    serialize, stringify, validate,
+    ApplyOptions, Author, Catalog, Mode, ParseOptions, ValidateOptions, apply_patches, parse,
+    parse_json, serialize, stringify, validate,
 };
 
 const FIXTURE: &str = include_str!("fixtures/differential.json");
@@ -171,11 +171,17 @@ fn patches_match_the_typescript_core() {
     let cases = fixture["patches"].as_array().cloned().unwrap_or_default();
     let mut failures = Vec::new();
     for case in &cases {
+        let author = case.get("author").map(|a| Author {
+            by: a["by"].as_str().unwrap_or_default().to_owned(),
+            name: a.get("name").and_then(Json::as_str).map(str::to_owned),
+        });
         let options = ApplyOptions {
             catalog,
             mode: mode(case),
             tokens: Some(&ctx.tokens),
             actions: None,
+            author: author.as_ref(),
+            read_only_context: case.get("context").and_then(Json::as_str) == Some("read-only"),
         };
         let result = apply_patches(&base, &case["patches"], &options);
         let got = serde_json::json!({

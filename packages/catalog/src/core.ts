@@ -64,10 +64,13 @@ const components: Record<string, ComponentDef> = {
     content: "nodes",
     root: true,
     props: {
-      weft: str('The Weft format version of the document, always the literal "0.1".', {
-        required: true,
-        bindable: false,
-      }),
+      weft: str(
+        'The Weft format version of the document: "0.2", or "0.1" for a document written before 0.2.',
+        {
+          required: true,
+          bindable: false,
+        },
+      ),
     },
     states: ["ready", "loading", "error"],
   },

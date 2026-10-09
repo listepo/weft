@@ -19,6 +19,7 @@ fn node(kind: &str, id: &str) -> Node {
 fn doc(root: Node) -> Document {
     Document {
         weft: "0.1".into(),
+        context: Vec::new(),
         root,
     }
 }
@@ -249,6 +250,7 @@ fn attributes_are_id_then_sorted_props_with_the_version_then_sorted_events() {
 fn a_document_without_a_version_writes_no_version_attribute() {
     let d = Document {
         weft: String::new(),
+        context: Vec::new(),
         root: node("screen", "s"),
     };
     assert_eq!(serialize(&d), "<screen id=\"s\"/>\n");

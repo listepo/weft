@@ -14,7 +14,7 @@ import {
   type Node,
 } from "../src/index.ts";
 import { catalog, tokens } from "./catalog.ts";
-import { BASE, failures } from "./patch-cases.ts";
+import { AGENT, BASE, ENTRY, failures, type HostOptions } from "./patch-cases.ts";
 
 const options = { catalog, tokens };
 
@@ -32,8 +32,13 @@ function ok(patches: unknown, from: Document = base): Document {
   assert.equal(hasErrors(result.diagnostics), false);
   return result.document;
 }
-function rejected(patches: unknown, code: string, from: Document = base): Diagnostic {
-  const result = applyPatches(from, patches, options);
+function rejected(
+  patches: unknown,
+  code: string,
+  from: Document = base,
+  host: HostOptions = {},
+): Diagnostic {
+  const result = applyPatches(from, patches, { ...options, ...host });
   assert.equal(result.document, undefined, "nothing may be applied");
   const hit = result.diagnostics.find((d) => d.code === code);
   assert.ok(hit, `${code} expected, got ${JSON.stringify(result.diagnostics, null, 2)}`);
@@ -57,7 +62,9 @@ function child(node: Node, ...path: number[]): Node {
 test("every patch code has a failing case", () => {
   const registered = Object.keys(DIAGNOSTIC_CODES).filter((code) => code.startsWith("W5"));
   assert.deepEqual(Object.keys(failures).toSorted(), registered.toSorted());
-  for (const [code, [patches, from]] of Object.entries(failures)) rejected(patches, code, from);
+  for (const [code, [patches, from, host]] of Object.entries(failures)) {
+    rejected(patches, code, from, host);
+  }
 });
 
 test("set: literal, binding, token and removal", () => {
@@ -296,7 +303,7 @@ test("remove: deletes the element and its subtree, in any slot", () => {
     { op: "remove", id: "e" },
   ]);
   const s = text(out);
-  assert.doesNotMatch(s, /reset|"i2"|"i3"|<slot name="footer">/);
+  assert.doesNotMatch(s, /"reset"|nav\.reset|"i2"|"i3"|<slot name="footer">/);
   assert.match(s, /<item id="i1">One<\/item>/);
 });
 
@@ -574,4 +581,19 @@ test("property: random patch sequences never throw and give a valid document or 
   );
   // Guards against a generator that only ever produces one of the two outcomes.
   assert.ok(accepted > 100 && refused > 100, `${accepted} accepted, ${refused} refused`);
+});
+
+test("context patches cross the boundary with the host's options", () => {
+  const added = ok([
+    { op: "add-context", entry: ENTRY },
+    { op: "resolve-context", id: "reset-where" },
+  ]);
+  assert.match(text(added), /<entry id="n" by="agent" for="go" kind="decision" name="m">/);
+  assert.match(text(added), /status="resolved"/);
+  const forged = { op: "add-context", entry: { ...ENTRY, name: "someone" } };
+  assert.equal(rejected([forged], "W512", base, { author: AGENT }).path, "#/patches/0/entry/name");
+  const resolve = { op: "resolve-context", id: "reset-where" };
+  assert.equal(rejected([resolve], "W512", base, { context: "read-only" }).path, "#/patches/0/op");
+  const dangling = rejected([{ op: "remove", id: "email" }], "W309");
+  assert.equal(dangling.hint, "remove-context reset-where, or set-context its for");
 });

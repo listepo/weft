@@ -40,7 +40,24 @@ export const NodeSchema: z.ZodType<Node> = z.lazy(() =>
 );
 export const ChildSchema: z.ZodType<Child> = z.lazy(() => z.union([NodeSchema, z.string()]));
 
-export const DocumentSchema = z.strictObject({ weft: z.string(), root: NodeSchema });
+// A context entry (SPEC §2.3). Every member is a string here, so that validation, not the shape
+// check, names a wrong kind, author or status (W203, W227).
+export const EntrySchema = z.strictObject({
+  id: z.string().optional(),
+  kind: z.string(),
+  by: z.string(),
+  name: z.string(),
+  for: z.string().optional(),
+  status: z.string().optional(),
+  text: z.string(),
+});
+export type Entry = z.infer<typeof EntrySchema>;
+
+export const DocumentSchema = z.strictObject({
+  weft: z.string(),
+  context: z.array(EntrySchema).optional(),
+  root: NodeSchema,
+});
 export type Document = z.infer<typeof DocumentSchema>;
 
 export const ContentModelSchema = z.enum(["none", "text", "nodes", "mixed"]);
@@ -131,5 +148,14 @@ export const PatchSchema = z.discriminatedUnion("op", [
     slot: z.string().optional(),
     index: z.number().int().nonnegative().optional(),
   }),
+  z.strictObject({ op: z.literal("add-context"), entry: EntrySchema }),
+  z.strictObject({
+    op: z.literal("set-context"),
+    id: z.string(),
+    field: z.enum(["text", "kind", "for"]),
+    value: z.string().nullable(),
+  }),
+  z.strictObject({ op: z.literal("resolve-context"), id: z.string() }),
+  z.strictObject({ op: z.literal("remove-context"), id: z.string() }),
 ]);
 export type Patch = z.infer<typeof PatchSchema>;

@@ -78,6 +78,8 @@ codes! {
     W117 => Error, "Nesting deeper than the limit.";
     W118 => Error, "Misplaced or malformed `<slot>`.";
     W119 => Error, "Slot name used twice under one parent.";
+    W120 => Error, "Misplaced or malformed `<context>`.";
+    W121 => Error, "Misplaced or malformed `<entry>`.";
     W200 => Error, "Document does not have the canonical JSON shape.";
     W201 => Error, "Root element is not `screen`.";
     W202 => Error, "Element without `id`.";
@@ -103,6 +105,9 @@ codes! {
     W222 => Error, "Malformed `<each>`.";
     W223 => Error, "Kind, attribute, event or slot name is invalid or reserved.";
     W224 => Error, "Number outside the declared range or not whole.";
+    W227 => Error, "Context entry status missing or not allowed for its kind.";
+    W228 => Mode, "Context over a limit.";
+    W229 => Error, "Context entry text or author name not allowed.";
     W301 => Error, "Duplicate id.";
     W302 => Error, "Child kind not allowed here.";
     W303 => Error, "Parent kind not allowed for this component.";
@@ -134,6 +139,9 @@ codes! {
     W507 => Error, "The root element cannot be removed or moved.";
     W508 => Error, "Inserted markup is not a list of elements.";
     W509 => Error, "Inserted markup reuses an id of the document.";
+    W510 => Error, "An added context entry reuses an id of the document.";
+    W511 => Error, "A context patch names no context entry.";
+    W512 => Error, "The host does not allow this context patch.";
     W601 => Error, "Imported input cannot be read.";
     W602 => Warning, "Imported input exceeds an import limit.";
     W701 => Error, "Project file or one of its members has the wrong shape.";

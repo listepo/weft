@@ -48,6 +48,8 @@ export const cases: Record<DocumentCode, Case> = {
       '<form id="f"><slot name="footer"><text id="a">a</text></slot><slot name="footer"><text id="b">b</text></slot></form>',
     ),
   },
+  W120: { markup: screen('<form id="f"><context/></form>') },
+  W121: { markup: screen('<context><entry id="n" by="agent" name="m">x</entry></context>') },
   W200: { json: { weft: "0.1", root: { kind: "screen", id: "s", children: [{ id: 1 }] } } },
   W201: { markup: '<form id="f" weft="0.1"/>' },
   W202: { markup: screen("<text>x</text>") },
@@ -77,6 +79,17 @@ export const cases: Record<DocumentCode, Case> = {
   },
   W223: { json: doc({ kind: "text", id: "t", props: { "on-press": "a.b" } }) },
   W224: { markup: screen('<heading id="h" level="7">x</heading>') },
+  W227: {
+    markup: screen('<context><entry id="n" by="agent" kind="todo" name="m">x</entry></context>'),
+  },
+  W228: {
+    markup: screen(
+      `<context><entry id="n" by="agent" kind="intent" name="m">${"x".repeat(501)}</entry></context>`,
+    ),
+  },
+  W229: {
+    markup: screen('<context><entry id="n" by="agent" kind="intent" name="m"> </entry></context>'),
+  },
   W301: { markup: screen('<text id="t">a</text><text id="t">b</text>') },
   W302: { markup: screen('<list id="l"><text id="t">x</text></list>') },
   W303: { markup: screen('<item id="i">x</item>') },

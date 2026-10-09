@@ -116,7 +116,29 @@ impl Serialize for Node {
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Document {
     pub weft: String,
+    /// The `<context>` block (SPEC §2.3), in written order.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub context: Vec<Entry>,
     pub root: Node,
+}
+
+/// A context entry (SPEC §2.3): a note about the screen, or with `for` about one element. Values
+/// stay strings so that validation, not the reader, says what is wrong with them.
+#[derive(Clone, Debug, Default, PartialEq, Serialize)]
+pub struct Entry {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    pub kind: String,
+    pub by: String,
+    pub name: String,
+    #[serde(rename = "for", skip_serializing_if = "Option::is_none")]
+    pub target: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
+    pub text: String,
+    /// Markup positions; never serialized and ignored by equality.
+    #[serde(skip)]
+    pub source: Source,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

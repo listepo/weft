@@ -43,4 +43,6 @@ export type ServerSettings = {
   limits: Limits;
   /** The default of `weft_validate`'s `strict`. Writers' tools always check strictly. */
   mode: Mode;
+  /** Whether `weft_patch` may change context (`mcp.context`); `weft_context` reads either way. */
+  context: "read-write" | "read-only";
 };

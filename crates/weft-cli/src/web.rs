@@ -17,7 +17,8 @@ use weft_web::{
 };
 
 use crate::convert::{
-    catalog, emit, finish_import, out_dir, project, sample_data, strict_document, switch, tokens,
+    catalog, emit, finish_import, keeps_context, out_dir, project, sample_data, strict_document,
+    switch, tokens,
 };
 use crate::swiftui::TokensArgs;
 use crate::{DIAGNOSTICS, ProjectArgs, print, read};
@@ -74,7 +75,7 @@ pub fn export_css_base(
     Ok(0)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Target {
     Html,
     React,
@@ -106,6 +107,8 @@ pub struct ExportArgs {
     pub javascript: bool,
     pub source: bool,
     pub no_source: bool,
+    /// `--context`: `Some(true)` keeps, `Some(false)` strips.
+    pub context: Option<bool>,
     /// Sample data for the static page; the component targets take data at run time.
     pub data: Option<PathBuf>,
 }
@@ -115,9 +118,20 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(&args.file, args.project)?;
     let project = project.as_ref();
     let catalog = catalog(args.catalog.as_deref(), project)?;
-    let Some(document) = strict_document(&args.file, &catalog)? else {
+    let Some(mut document) = strict_document(&args.file, &catalog)? else {
         return Ok(DIAGNOSTICS);
     };
+    // A static page is deployed as is, and its source comment is readable by anyone who opens it.
+    let keep = keeps_context(
+        args.context,
+        project,
+        "export",
+        target,
+        args.target != Target::Html,
+    );
+    if !keep {
+        document.context.clear();
+    }
     let source = switch(
         args.source,
         args.no_source,
@@ -193,6 +207,8 @@ pub struct ImportArgs {
     pub tokens: Option<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
+    /// `--context`: `Some(true)` keeps, `Some(false)` drops.
+    pub context: Option<bool>,
 }
 
 /// TypeScript by extension: `.tsx`, `.ts`, `.mts` and `.cts` hold types the JSX grammar refuses.
@@ -215,7 +231,7 @@ pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
         catalog: &catalog,
         tokens: &tokens.tokens,
     };
-    let result = match args.target {
+    let mut result = match args.target {
         Target::Html => import_html(&text, &options),
         Target::React | Target::Solid => import_jsx(&text, is_typescript(&args.file), &options),
         // No Lit importer is wired to a command.
@@ -228,5 +244,8 @@ pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
         "import",
         args.target.name(),
     );
+    if !keeps_context(args.context, project, "import", args.target.name(), true) {
+        result.document.context.clear();
+    }
     finish_import(&args.file, &result, dir, args.force, out)
 }

@@ -16246,7 +16246,7 @@
       "severity": "warning",
       "message": "Unknown member \"token\" in the project file.",
       "path": "#/token",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "token",
       "hint": "did you mean \"tokens\"?"
      },
@@ -16305,7 +16305,7 @@
       "severity": "warning",
       "message": "Unknown member \"__proto__\" in the project file.",
       "path": "#/__proto__",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "__proto__"
      }
     ]
@@ -20528,7 +20528,7 @@
       "severity": "warning",
       "message": "Unknown key \"outdir\" in \"export.react\".",
       "path": "#/export/react/outdir",
-      "expected": "one of: \"outDir\", \"typescript\", \"source\"",
+      "expected": "one of: \"outDir\", \"typescript\", \"source\", \"context\"",
       "got": "outdir",
       "hint": "did you mean \"outDir\"?"
      },
@@ -20545,7 +20545,7 @@
       "severity": "warning",
       "message": "Unknown key \"limit\" in \"mcp\".",
       "path": "#/mcp/limit",
-      "expected": "one of: \"limits\"",
+      "expected": "one of: \"limits\", \"context\"",
       "got": "limit",
       "hint": "did you mean \"limits\"?"
      }
@@ -21653,7 +21653,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/project/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21711,7 +21711,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21815,7 +21815,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21929,7 +21929,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -21981,7 +21981,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22026,7 +22026,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22063,7 +22063,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22132,7 +22132,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -22164,7 +22164,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22268,7 +22268,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22343,7 +22343,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22468,7 +22468,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22537,7 +22537,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22597,7 +22597,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22862,7 +22862,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22899,7 +22899,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22946,7 +22946,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -22991,7 +22991,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23057,7 +23057,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23272,7 +23272,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23324,7 +23324,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23383,7 +23383,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23612,7 +23612,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23739,7 +23739,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23784,7 +23784,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23893,7 +23893,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -23985,7 +23985,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24203,7 +24203,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24342,7 +24342,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24423,7 +24423,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24504,7 +24504,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24564,7 +24564,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24616,7 +24616,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24660,7 +24660,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24850,7 +24850,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -24901,7 +24901,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25019,7 +25019,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25189,7 +25189,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25239,7 +25239,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25298,7 +25298,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25696,7 +25696,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25742,7 +25742,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -25867,7 +25867,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26051,7 +26051,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26103,7 +26103,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26147,7 +26147,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26230,7 +26230,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26324,7 +26324,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26440,7 +26440,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26477,7 +26477,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26522,7 +26522,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26569,7 +26569,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26646,7 +26646,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26684,7 +26684,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26785,7 +26785,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26874,7 +26874,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26942,7 +26942,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -26994,7 +26994,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27039,7 +27039,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27418,7 +27418,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27475,7 +27475,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27523,7 +27523,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27583,7 +27583,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27634,7 +27634,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27724,7 +27724,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27782,7 +27782,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27833,7 +27833,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27897,7 +27897,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -27972,7 +27972,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28041,7 +28041,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28079,7 +28079,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28283,7 +28283,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28351,7 +28351,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -28380,7 +28380,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28418,7 +28418,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28752,7 +28752,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28795,7 +28795,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28839,7 +28839,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28890,7 +28890,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -28936,7 +28936,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29313,7 +29313,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -29873,7 +29873,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30079,7 +30079,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30523,7 +30523,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -30835,7 +30835,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -30932,7 +30932,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31002,7 +31002,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31111,7 +31111,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31169,7 +31169,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31208,7 +31208,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31252,7 +31252,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31587,7 +31587,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -31681,7 +31681,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31724,7 +31724,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31769,7 +31769,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31808,7 +31808,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -31936,7 +31936,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32073,7 +32073,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32156,7 +32156,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32217,7 +32217,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32276,7 +32276,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32352,7 +32352,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32402,7 +32402,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32523,7 +32523,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -32552,7 +32552,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32589,7 +32589,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32625,7 +32625,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32662,7 +32662,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32863,7 +32863,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32909,7 +32909,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -32977,7 +32977,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -33106,7 +33106,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -33240,7 +33240,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -33324,7 +33324,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -33457,7 +33457,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -33534,7 +33534,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -33807,7 +33807,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -33853,7 +33853,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34036,7 +34036,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34087,7 +34087,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34131,7 +34131,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34228,7 +34228,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34281,7 +34281,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34332,7 +34332,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34433,7 +34433,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34480,7 +34480,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34534,7 +34534,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34644,7 +34644,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34705,7 +34705,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34756,7 +34756,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34837,7 +34837,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -34888,7 +34888,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -34955,7 +34955,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35052,7 +35052,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35099,7 +35099,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35143,7 +35143,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35197,7 +35197,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35264,7 +35264,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35413,7 +35413,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35471,7 +35471,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35540,7 +35540,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35603,7 +35603,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35648,7 +35648,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35722,7 +35722,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -35897,7 +35897,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36110,7 +36110,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -36139,7 +36139,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36219,7 +36219,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36276,7 +36276,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36313,7 +36313,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36350,7 +36350,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36410,7 +36410,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36665,7 +36665,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36763,7 +36763,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36849,7 +36849,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -36949,7 +36949,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37000,7 +37000,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37036,7 +37036,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37215,7 +37215,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37281,7 +37281,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37342,7 +37342,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37431,7 +37431,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37476,7 +37476,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37579,7 +37579,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37647,7 +37647,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37862,7 +37862,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37921,7 +37921,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -37978,7 +37978,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38023,7 +38023,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38068,7 +38068,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38171,7 +38171,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38327,7 +38327,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38654,7 +38654,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38722,7 +38722,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38782,7 +38782,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38826,7 +38826,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -38862,7 +38862,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -39158,7 +39158,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -39208,7 +39208,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -39513,7 +39513,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -39621,7 +39621,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -39666,7 +39666,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -39716,7 +39716,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -39767,7 +39767,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -39842,7 +39842,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -39871,7 +39871,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40051,7 +40051,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40123,7 +40123,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40204,7 +40204,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40253,7 +40253,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40305,7 +40305,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      }
     ]
@@ -40337,7 +40337,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40374,7 +40374,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40536,7 +40536,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40757,7 +40757,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40816,7 +40816,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40867,7 +40867,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40926,7 +40926,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -40970,7 +40970,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -41015,7 +41015,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -41074,7 +41074,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -41117,7 +41117,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -41305,7 +41305,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {
@@ -41341,7 +41341,7 @@
       "severity": "warning",
       "message": "Unknown member \"extra\" in the project file.",
       "path": "#/extra",
-      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
+      "expected": "one of: \"$schema\", \"tokens\", \"catalog\", \"actions\", \"data\", \"fragments\", \"validate\", \"format\", \"explain\", \"render\", \"export\", \"import\", \"mcp\", \"plugins\"",
       "got": "extra"
      },
      {

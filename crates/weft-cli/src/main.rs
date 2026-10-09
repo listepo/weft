@@ -27,8 +27,8 @@ use clap::{Args, Parser, Subcommand};
 use weft_catalog::{PROJECT_FILE, Project, ProjectOptions, load_project_text, token_types};
 use weft_core::{
     Catalog, DataCheckOptions, Diagnostic, Document, Mode, ParseOptions, ValidateOptions,
-    check_data, check_data_json, explain, explain_changes, has_errors, parse, parse_json,
-    serialize, validate,
+    check_data, check_data_json, explain, explain_changes, explain_with_context, has_errors, parse,
+    parse_json, serialize, validate,
 };
 
 #[derive(Parser)]
@@ -73,6 +73,10 @@ struct WebExport {
     /// Leave the source comment out, whatever the project says.
     #[arg(long)]
     no_source: bool,
+    /// Whether the source comment carries the screen's context (default: the project's
+    /// `export.<target>.context`, else `strip` for HTML and `keep` for the others).
+    #[arg(long, value_enum)]
+    context: Option<convert::ExportContext>,
     /// Overwrite the output file when it already exists.
     #[arg(long)]
     force: bool,
@@ -117,6 +121,10 @@ struct WebImport {
     /// `import.<target>.outDir`, else print).
     #[arg(long)]
     out_dir: Option<PathBuf>,
+    /// Whether context read back from a generated file enters the document (default: the
+    /// project's `import.<target>.context`, else `keep`).
+    #[arg(long, value_enum)]
+    context: Option<convert::ImportContext>,
     /// Overwrite the output file when it already exists.
     #[arg(long)]
     force: bool,
@@ -164,6 +172,10 @@ enum Command {
         /// props read as plain reads.
         #[arg(long)]
         catalog: Option<PathBuf>,
+        /// Also list each element's context entries after its readbacks (default: the project's
+        /// `explain.context`, else off). `--against` always lists context changes.
+        #[arg(long)]
+        context: bool,
         #[command(flatten)]
         project: ProjectArgs,
     },
@@ -249,6 +261,10 @@ enum Command {
         /// `export.slint.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Whether the source comment carries the screen's context (default: the project's
+        /// `export.slint.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ExportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -265,6 +281,10 @@ enum Command {
         /// `import.slint.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Whether context read back from the source comment enters the document (default: the
+        /// project's `import.slint.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ImportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -699,10 +719,15 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             file,
             against,
             catalog,
+            context,
             project,
         } => {
             // Project problems go to stderr: stdout carries the read-back.
             let (project, _) = project_for(&file, project, Mode::Lenient, &mut std::io::stderr())?;
+            let context = context
+                || setting(project.as_ref(), &["explain", "context"])
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(false);
             let explicit = catalog.as_deref().map(load_catalog).transpose()?;
             let catalog = explicit.or_else(|| project.map(|p| p.catalog));
             if catalog.is_none() {
@@ -715,7 +740,12 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 return Ok(DIAGNOSTICS);
             };
             let Some(against) = against else {
-                for readback in explain(&document, catalog) {
+                let readbacks = if context {
+                    explain_with_context(&document, catalog)
+                } else {
+                    explain(&document, catalog)
+                };
+                for readback in readbacks {
                     writeln!(out, "{readback}")?;
                 }
                 return Ok(0);
@@ -725,7 +755,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             };
             let changes = explain_changes(&before, &document, catalog);
             if changes.is_empty() {
-                eprintln!("weft: no prop, event or loop changed");
+                eprintln!("weft: no prop, event, loop or context entry changed");
             }
             for change in changes {
                 writeln!(out, "{change}")?;
@@ -828,6 +858,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             name,
             project,
             out_dir,
+            context,
             force,
         } => slint::export(
             slint::ExportArgs {
@@ -837,6 +868,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 name,
                 project,
                 out_dir,
+                context: context.map(|c| c == convert::ExportContext::Keep),
                 force,
             },
             out,
@@ -846,6 +878,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             catalog,
             project,
             out_dir,
+            context,
             force,
         } => slint::import(
             slint::ImportArgs {
@@ -853,6 +886,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 catalog,
                 project,
                 out_dir,
+                context: context.map(|c| c == convert::ImportContext::Keep),
                 force,
             },
             out,
@@ -953,6 +987,7 @@ fn web_export(
             javascript,
             source: common.source,
             no_source: common.no_source,
+            context: common.context.map(|c| c == convert::ExportContext::Keep),
             data,
         },
         out,
@@ -968,6 +1003,7 @@ fn web_import(target: web::Target, args: WebImport, out: &mut dyn Write) -> Resu
             tokens: args.tokens,
             project: args.project,
             out_dir: args.out_dir,
+            context: args.context.map(|c| c == convert::ImportContext::Keep),
             force: args.force,
         },
         out,

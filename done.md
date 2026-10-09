@@ -1,5 +1,54 @@
 # Done
 
+### T39.8. Context: readable comments in React and SolidJS
+
+For developers, each element that entries name gets a readable comment above it in generated React and SolidJS code, for example `{/* decision (agent claude-opus-5-5): Disabled until … */}`, escaped like the source comment (`*/`, `@`), and only when the context is kept. The comments are derived: importers ignore them, and regenerating gives them back, so the source check still passes.
+
+Built: `notes` in `crates/weft-web/src/jsx/mod.rs` reads the document's context, and `kids` puts each element's notes before it. Entries about the screen, and about the root, come first inside the root element. A line reads `{/* question open (agent m): Primary? */}`, escaped with `provenance::escape`, and is cut at 500 characters for input that was not validated. Lit gets no notes: its templates are strings that reach the DOM. Importing by convention skips the empty expression containers, so a component without its source comment still reads back with no losses, and without its context.
+
+### T39.6. Context: web and Slint source comments
+
+The generated code that Weft reads back keeps the screen's context in its source comment, and a static page leaves it out by default. The `export.<target>.context` (`keep`, `strip`) and `import.<target>.context` (`keep`, `drop`) keys of `weft.json` cover React, SolidJS, HTML and Slint (SPEC §10.6, `settings.rs`, the schema), and the CLI's `--context` overrides them. Round-trip tests on a context-bearing screen outside the benchmark list.
+
+Built: the context already travelled in the canonical markup of the `weft:source` comment, so the work is the policy around it. `crates/weft-cli/src/convert.rs` resolves `--context`, then the key, then the default (`strip` for `html`, `keep` otherwise), and clears `document.context` before generating or after importing. `crates/weft-web/src/provenance.rs` now writes every `@` as `@\`, so a note cannot carry `@license` or `@preserve` into a minified bundle. Older comments still read back unchanged, because unescaping a plain `@` is a no-op. The plugins' export script honours `export.react.context`. The claimed card was split. Readable per-element comments are T39.8. SwiftUI, which has no source comment yet, is T39.9. Escaping U+2028 and U+2029 was not needed: block comments and HTML comments may hold them, and a Slint line comment ends only at `\n`.
+
+### T39.5. Context: explain
+
+`weft explain --context` lists each element's entries after its readbacks, and the entries about the screen after the root's; `weft explain --against` always lists context changes (added, changed, removed entries), so a reviewer sees every note an edit touched. The option is also the `explain.context` key of `weft.json` (SPEC §10.6, `settings.rs`, the schema).
+
+Built: `explain_with_context` in `crates/weft-core/src/explain.rs` (`explain` itself leaves entries out, so its callers do not change); `explain_changes` compares entries by id like props, so moving an entry to another element is one change. An entry whose `for` names no element (a lenient read) still reads back, against the screen, and text over the 500-character limit is cut and says so. The CLI takes `--context`, else `explain.context`. `docs/cli.md` and `docs/projects.md` describe both; `docs/projects.md` also gained the `mcp.context` row T39.4 missed.
+
+### T39.4. Context: MCP
+
+The MCP tool `weft_context` returns a screen's entries under its fixed notice; `weft_patch` takes the four context operations and stamps `author: { by: "agent" }`, so the agent channel cannot write a `human` entry (`W512`); the `mcp.context` setting (`read-write`, `read-only`) of `weft.json` (SPEC §10.6, `settings.rs`, the schema) reaches the server through `weft-mcp --project` and `createServer`.
+
+Built: `packages/mcp/src/tools/context.ts` reads the markup leniently, filters by `for` (`""` for entries about the screen), `kind` and `status`, and cuts the result at the format's limits (100 entries, 500 characters each, 16,000 in all) with an `omitted` count, since a lenient read only warns about an oversized block. `weft_patch`'s description lists the context forms, or says the context is read-only. The primer, `docs/mcp.md`, the package README and the plugins' tool lists name the new tool. The explain and CLI parts of the old T39.4 card moved to T39.5 (explain) and T39.6 (the export and import keys and `--context`), which also renumbered code targets to T39.6 and Figma and Penpot to T39.7.
+
+### T39.3. Context: patch operations
+
+`add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.
+
+Built: `context_patch.rs` applies the four operations on the working copy, so a later patch sees an earlier one and a failure leaves no trace. With `author` set, an added entry must carry its `by`, and its `name` when the host sets one (`W512`); `context: "read-only"` refuses every context operation with `W512`. `set-context` takes `field` and `value`; `value: null` clears `for` only, and a kind change to `question` or `todo` adds `status="open"` while other kinds drop it. A dangling `for` after an element patch is the validator's `W309`, with a hint naming the entry to remove or retarget. The patch base of the shared cases gained a context block, and the differential fuzz draws context operations.
+
+### T39.2. Context: entry validation
+
+`validate.rs` checks every entry once the block is read: ids shared with elements (`W202`, `W212`, `W301`), `kind`, `by` and `status` values (`W203`), `status` against the kind (`W227`), `for` naming an element other than the root (`W309`), the author name and empty text (`W229`), characters markup cannot carry (`W221`), and the limits (`W228`, a `mode` code). SPEC §2.3, §3 and §6.2 and AGENT-SPEC name the codes; `cases.ts` and `codes.rs` produce each one; fixtures regenerated.
+
+Built: `context_check.rs` holds the checks, run by `validate.rs` after the element tree so entry ids join the same id map as elements; paths name `context/entry#id` (or `entry[i]` without an id). The author name follows the SPEC character set, checked per Unicode letter and digit. The limits count UTF-16 code units, as diagnostic columns do.
+
+### T39.1. Context: spec, model, markup and JSON
+
+The `<context>` block and its entries in the format and the Rust core, without value checks (T39.2), patches or targets.
+
+1. `SPEC.md`: §2.3 Context (syntax), §3 `Document.context` and `Entry` with ordering and canonical markup, §3.1 (the generated schema admits no context, like extensions), §6 paths (`context`, `entry#id`) and codes `W120`, `W121` and the reserved kinds in `W223`, §8 version 0.2 and the 0.1-reader note. `AGENT-SPEC.md` §2.9 Context in the approved wording, the new codes, the §5 and §6 lines; the MCP primer gets the first two bullets.
+2. `crates/weft-core`: `Entry` and `Document.context` in `model.rs`; `parse.rs` lifts `<context>` from the root; `serialize.rs` writes it first; `canonical.rs` normalizes entry text and drops an empty block; `shape.rs` reads the JSON shape; `validate.rs` reserves `context` and `entry` as kinds; `diagnostics.rs` registers the codes; `WEFT_VERSION` 0.2. `crates/weft-catalog` reserves `context` and `entry`.
+3. `packages/core`: `EntrySchema`, `Document.context`, the codes; differential cases in `cases.ts`, fixtures regenerated with `WEFT_UPDATE_FIXTURES=1`.
+4. Tests: markup ↔ JSON round trip of the design's login example byte for byte, every new code, fmt of a document without context unchanged.
+
+Built: the block is lifted from under the root wherever it stands and written first; canonical JSON keeps entries in written order; the JSON shape reads every member as a string, so a wrong value is left to validation rather than `W200`. Splitting the value checks into T39.2 kept this task under 500 lines of code. The format, `WEFT_VERSION` and the core catalog's `weft` moved to 0.2; the corpus keeps `weft="0.1"`, so the generated document schema admits both versions and round-trip tests that compare an import with a corpus screen stamp the current version first; the compat fixtures moved to 0.3.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 4
+Check: `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint` green except the SwiftUI screenshot baselines in `packages/visual` and the Swift typecheck tests, which time out or differ under the machine's load (see the PR).
+
 ### T31. Project file and shared resources
 
 Several `.weft` screens share one set of resources through a project file, `weft.json`, which tools find by walking up from the screen, like `tsconfig.json`. Screens themselves do not name what they use. Approved scope:

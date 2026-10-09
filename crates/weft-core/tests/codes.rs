@@ -37,6 +37,8 @@ enum Case {
     Json(Json),
     /// Patches applied to the fixture's patch base.
     Patch(Json),
+    /// Patches applied with the context read-only (SPEC §7).
+    ReadOnly(Json),
     /// A data schema, compiled, then markup checked against it (SPEC §10.5).
     Data(Json, String),
 }
@@ -72,6 +74,11 @@ fn cases() -> Vec<(&'static str, Case)> {
         ("W117", Case::Syntax("<a>".repeat(MAX_DEPTH + 1))),
         syntax("W118", "<a><slot/></a>"),
         syntax("W119", "<a><slot name=\"s\"/><slot name=\"s\"/></a>"),
+        syntax("W120", "<a><b><context/></b></a>"),
+        syntax(
+            "W121",
+            "<a><context><entry id=\"e\" by=\"agent\" name=\"m\">x</entry></context></a>",
+        ),
         ("W200", Case::Json(json!({"weft": "0.1"}))),
         (
             "W201",
@@ -136,6 +143,25 @@ fn cases() -> Vec<(&'static str, Case)> {
         (
             "W224",
             in_screen("<heading id=\"a\" level=\"9\">T</heading>"),
+        ),
+        (
+            "W227",
+            in_screen(
+                "<context><entry id=\"e\" by=\"agent\" kind=\"question\" name=\"m\">Why?</entry></context>",
+            ),
+        ),
+        (
+            "W228",
+            in_screen(&format!(
+                "<context><entry id=\"e\" by=\"agent\" kind=\"intent\" name=\"m\">{}</entry></context>",
+                "x".repeat(501)
+            )),
+        ),
+        (
+            "W229",
+            in_screen(
+                "<context><entry id=\"e\" by=\"agent\" kind=\"intent\" name=\"-m\">x</entry></context>",
+            ),
         ),
         ("W301", in_screen("<stack id=\"a\"/><stack id=\"a\"/>")),
         (
@@ -244,6 +270,18 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W509",
             json!([{"op": "insert", "parent": "main", "markup": "<stack id=\"go\"/>"}]),
         ),
+        patch(
+            "W510",
+            json!([{"op": "add-context", "entry": {"id": "why", "kind": "todo", "by": "agent", "name": "m", "status": "open", "text": "x"}}]),
+        ),
+        patch(
+            "W511",
+            json!([{"op": "resolve-context", "id": "reset-were"}]),
+        ),
+        (
+            "W512",
+            Case::ReadOnly(json!([{"op": "remove-context", "id": "why"}])),
+        ),
         ("W801", in_screen(r#"<use id="u" fragment="page-headr"/>"#)),
         (
             "W802",
@@ -312,7 +350,7 @@ fn run(case: &Case) -> Vec<&'static str> {
             };
             codes(&validate(input, &options))
         }
-        Case::Patch(patches) => {
+        Case::Patch(patches) | Case::ReadOnly(patches) => {
             let fixture = parse_json(FIXTURE).unwrap();
             let base = parse(
                 fixture["patchBase"].as_str().unwrap(),
@@ -323,7 +361,11 @@ fn run(case: &Case) -> Vec<&'static str> {
             )
             .document
             .unwrap();
-            codes(&apply_patches(&base, patches, &ApplyOptions::new(&catalog)).diagnostics)
+            let options = ApplyOptions {
+                read_only_context: matches!(case, Case::ReadOnly(_)),
+                ..ApplyOptions::new(&catalog)
+            };
+            codes(&apply_patches(&base, patches, &options).diagnostics)
         }
     }
 }
@@ -371,7 +413,7 @@ fn severities_are_errors_except_the_mode_codes_and_the_import_warning() {
     for code in Code::ALL {
         let (lenient, strict) = (code.severity(Mode::Lenient), code.severity(Mode::Strict));
         match code.as_str() {
-            "W401" | "W402" | "W403" | "W801" => {
+            "W228" | "W401" | "W402" | "W403" | "W801" => {
                 assert_eq!((lenient, strict), (Severity::Warning, Severity::Error));
             }
             "W602" | "W702" | "W710" | "W714" => {

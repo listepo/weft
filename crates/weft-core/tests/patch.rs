@@ -255,7 +255,9 @@ fn the_expected_form_of_a_malformed_patch_names_the_operation() {
     let r = apply(&json!([{"op": "explode"}]));
     assert_eq!(
         r.diagnostics[0].expected.as_deref(),
-        Some("one of: \"set\", \"insert\", \"remove\", \"move\"")
+        Some(
+            "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
+        )
     );
 }
 

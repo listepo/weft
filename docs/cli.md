@@ -74,7 +74,7 @@ compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.2.
 exit 1
 ```
 
-**Projects.** Every command first looks for a `weft.json` in the file's folder or above it and, when it finds one, checks against the project's catalog, tokens, actions and data schema, so token names, action names and bindings are checked too. `--project <file>` names another project file, `--no-project` ignores it, and `--catalog` replaces only the project's catalog. The project's `validate.mode` sets the default of `--strict` (`--lenient` overrides it), and its `format.write` the default of `fmt --write` (`--print` overrides it). Project problems are printed first, as `weft.json:#/pointer code message`. See [Projects](projects.md).
+**Projects.** Every command first looks for a `weft.json` in the file's folder or above it and, when it finds one, checks against the project's catalog, tokens, actions and data schema, so token names, action names and bindings are checked too. `--project <file>` names another project file, `--no-project` ignores it, and `--catalog` replaces only the project's catalog. The project's `validate.mode` sets the default of `--strict` (`--lenient` overrides it), and its `format.write` the default of `fmt --write` (`--print` overrides it). Its `explain.context` turns on `explain --context`. Project problems are printed first, as `weft.json:#/pointer code message`. See [Projects](projects.md).
 
 **Output.** One line per diagnostic: `file:line:column code message`, then ` — hint` when there is one. [SPEC §6.2](../SPEC.md#62-codes) lists the codes; a code never changes meaning.
 
@@ -155,6 +155,8 @@ button#submit disabled changed: was true while $.email is falsy (NOT $.email); n
 
 Sentences never hide a negation: a negated binding always contains `NOT`. If neither file changed anything, you get a message on stderr and no output. If either file has errors, `explain` prints the diagnostics as `validate` does and exits 1. It reads markup only, not `.json` files.
 
+`--context` (or `"explain": { "context": true }` in `weft.json`) also lists the screen's context entries (SPEC section 2.3): each after the readbacks of the element its `for` names, the ones about the screen after the root's, and one whose `for` names no element against the screen. A line reads `button#go context why: decision by agent m: <text>`; `by` and the name are what the entry claims, not checked facts. Text over 500 characters is cut and says so. `--against` always lists context changes, so an edit cannot add, change or remove a note unseen.
+
 ## `weft swiftui`, `weft swiftui-tokens` and `weft import-swiftui`
 
 `weft swiftui` prints a SwiftUI file for a screen. It contains an `@Observable` model, an action enum, and the view. In a project the view reads the tokens from `WeftTokens`, which `weft swiftui-tokens` writes once for the whole token set; without a project, or with `--no-shared-tokens`, the file carries a theme with the screen's tokens instead and builds on its own. `weft import-swiftui` reads Swift source back into markup. What the generator printed comes back unchanged:
@@ -223,6 +225,8 @@ weft-tour/Hello.jsx:/screen#screen-hello/button#button-toggle loss actions: onCl
 ```
 
 The source is parsed, never run. `import-react` and `import-solid` read `.tsx` (and `.ts`) files as TypeScript. `--source`/`--no-source`, `--typescript`/`--javascript` and `--out-dir` override the project's `export.<target>` and `import.<target>` settings ([Projects](projects.md)); `--catalog` and `--tokens` replace the project's catalog and tokens. The parsers and the mapping are described in `crates/weft-web/README.md` and SPEC §9.
+
+The source comment carries the screen's `<context>` block (SPEC §2.3), so an import gives the notes back too. `--context strip` leaves them out of the output, and `--context drop` leaves them out of an import. The default is `strip` for `weft html`, since a deployed page shows its comments to anyone who reads its source, and `keep` for everything else. React and SolidJS components also show each note as a readable `{/* … */}` comment above the element it is about; importers ignore these. `weft slint` and `weft import-slint` take the same flag. The project's `export.<target>.context` and `import.<target>.context` set the defaults. Inside the comment, `@` is always followed by `\`, so a note cannot carry `@license` or `@preserve` into a minified bundle.
 
 A component reads its tokens as `var(--weft-…)`. `weft css-tokens` writes them once for the app as `weft-tokens.css`, from the project found in the working directory (or `--project`, `--tokens`). It prints unless `--out-dir` or the project's `export.css.outDir` names a folder. When the project's tokens are a resolver with light and dark themes ([Projects](projects.md#light-and-dark-a-resolver)), the stylesheet and the page from `weft html` follow the system appearance: the light values on `:root`, the ones that differ in the dark under `@media (prefers-color-scheme: dark)`. A typography token is the `font` shorthand plus `--weft-<path>-letter-spacing`.
 

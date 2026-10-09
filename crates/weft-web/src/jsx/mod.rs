@@ -105,6 +105,10 @@ pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, JsxEr
         }
     }
     let mut g = Gen::new(options.catalog, options.framework, options.typescript);
+    // Lit's templates are strings, where a comment would reach the DOM.
+    if options.framework != Framework::Lit {
+        g.notes = notes(document);
+    }
     let scope = Rc::new(Scope::default());
     let expanded = expanded(document, options.catalog);
     let root = expanded
@@ -122,8 +126,14 @@ pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, JsxEr
     });
     let mut body = "null".to_owned();
     if let Some((n, hidden)) = first
-        && let Some(c) = g.render(&n, &Ctx::default())
+        && let Some(mut c) = g.render(&n, &Ctx::default())
     {
+        if let C::J(j) = &mut c {
+            let mut kids = g.comments("");
+            kids.extend(g.comments(n.doc_id));
+            kids.append(&mut j.kids);
+            j.kids = kids;
+        }
         body = g.root_body(c, hidden);
     }
     let module = g.module(name, &body);
@@ -135,6 +145,33 @@ pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, JsxEr
         Some(comment) => Ok(format!("{comment}\n{module}")),
         None => Ok(module),
     }
+}
+
+/// Text a readable note keeps: the format's limit (SPEC §2.3), for input that was not validated.
+const MAX_NOTE: usize = 500;
+
+/// Readable notes for developers, one line per context entry (SPEC §2.3), keyed by the id its
+/// `for` names and by `""` for the entries about the screen. They are derived from the context the
+/// source comment carries, so importers ignore them, and they are escaped like that comment: entry
+/// text is untrusted and must not end the comment or carry a minifier's keep marker.
+fn notes(document: &Json) -> HashMap<String, Vec<String>> {
+    let mut out: HashMap<String, Vec<String>> = HashMap::new();
+    let entries = document.get("context").and_then(Json::as_array);
+    for entry in entries.into_iter().flatten() {
+        let field = |name: &str| entry.get(name).and_then(Json::as_str);
+        let (Some(kind), Some(by), Some(name), Some(text)) =
+            (field("kind"), field("by"), field("name"), field("text"))
+        else {
+            continue;
+        };
+        let status = field("status").map(|s| format!(" {s}")).unwrap_or_default();
+        let text: String = text.chars().take(MAX_NOTE).collect();
+        let line = format!("{kind}{status} ({by} {name}): {text}");
+        out.entry(field("for").unwrap_or_default().to_owned())
+            .or_default()
+            .push(crate::provenance::escape(&line));
+    }
+    out
 }
 
 /// With fragments, the document with each use expanded (SPEC §10.7). Only a document of the right
@@ -464,6 +501,8 @@ pub(crate) struct Gen<'a> {
     solid_web: BTreeSet<&'static str>,
     /// What the Lit module imports beyond `LitElement` and `html`, set when printing.
     lit_uses: lit::Uses,
+    /// Readable context notes by element id (`notes`).
+    notes: HashMap<String, Vec<String>>,
 }
 
 impl<'a> Gen<'a> {
@@ -477,7 +516,18 @@ impl<'a> Gen<'a> {
             solid: BTreeSet::new(),
             solid_web: BTreeSet::new(),
             lit_uses: lit::Uses::default(),
+            notes: HashMap::new(),
         }
+    }
+
+    /// `{/* … */}` children for the notes about `id`.
+    fn comments(&self, id: &str) -> Vec<C<'a>> {
+        self.notes
+            .get(id)
+            .into_iter()
+            .flatten()
+            .map(|line| C::Code(Code::lit(format!("/* {line} */"))))
+            .collect()
     }
 
     fn solid(&self) -> bool {
@@ -1080,6 +1130,9 @@ impl<'a> Gen<'a> {
                     out.extend(c);
                 }
                 Piece::Node(n, hidden) => {
+                    if map.is_none() && !n.doc_id.is_empty() {
+                        out.extend(self.comments(n.doc_id));
+                    }
                     let c = match map.as_deref_mut() {
                         Some(f) => f(self, Leaf::Node(n)),
                         None => self.render(n, ctx),

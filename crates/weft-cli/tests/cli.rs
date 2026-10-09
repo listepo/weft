@@ -230,7 +230,8 @@ fn explain_against_an_identical_version_prints_nothing_and_says_so() {
     assert_eq!(r.code, 0);
     assert_eq!(r.stdout, "");
     assert!(
-        r.stderr.contains("no prop, event or loop changed"),
+        r.stderr
+            .contains("no prop, event, loop or context entry changed"),
         "{}",
         r.stderr
     );

@@ -3,6 +3,9 @@
 //! WebAssembly and native Node addons.
 
 mod canonical;
+mod context;
+mod context_check;
+mod context_patch;
 pub mod controls;
 mod data;
 mod diagnostics;
@@ -23,6 +26,7 @@ mod validate;
 mod values;
 
 pub use canonical::{canonicalize, stringify};
+pub use context_patch::Author;
 pub use data::{
     DataCheckOptions, DataSchema, DataSchemaProblem, Shape, check_data, check_data_json,
     compile_data_schema, data_schema_diagnostics,
@@ -31,13 +35,13 @@ pub use diagnostics::{
     Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors, one_of,
 };
 pub use expand::{EXPANDED_LIMIT, Expanded, expand};
-pub use explain::{Change, ChangeKind, Readback, explain, explain_changes};
+pub use explain::{Change, ChangeKind, Readback, explain, explain_changes, explain_with_context};
 pub use json::{
     JSON_DEPTH_LIMIT, JsonError, js_number, js_round, order_keys, parse_json, to_compact,
 };
 pub use model::{
-    Catalog, Child, ComponentDef, Content, Document, Fragment, Map, Node, PropDef, PropDefault,
-    PropType, SlotDef, Value, WEFT_VERSION,
+    Catalog, Child, ComponentDef, Content, Document, Entry, Fragment, Map, Node, PropDef,
+    PropDefault, PropType, SlotDef, Value, WEFT_VERSION,
 };
 pub use parse::{ParseOptions, ParseResult, parse, parse_partial};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};

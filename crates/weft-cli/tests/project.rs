@@ -325,6 +325,26 @@ fn explain_reads_the_catalog_of_the_project() {
 }
 
 #[test]
+fn explain_lists_context_with_the_flag_or_the_project_setting() {
+    let s = Scratch::new("explain-context");
+    let screen = s.write(
+        "screens/noted.weft",
+        "<screen id=\"s\" weft=\"0.2\">\n  <context>\n    \
+         <entry id=\"why\" by=\"human\" for=\"b\" kind=\"intent\" name=\"Ivan\">The one action.</entry>\n  \
+         </context>\n  <button id=\"b\">Go</button>\n</screen>\n",
+    );
+    let line = "button#b context why: intent by human Ivan: The one action.\n";
+    let plain = run(&[&"explain", &screen]);
+    assert_eq!(plain.code, 0, "{}{}", plain.stdout, plain.stderr);
+    assert_eq!(plain.stdout, "");
+    let flag = run(&[&"explain", &screen, &"--context"]);
+    assert_eq!(flag.stdout, line, "{}", flag.stderr);
+    with_settings(&s, serde_json::json!({ "explain": { "context": true } }));
+    let setting = run(&[&"explain", &screen]);
+    assert_eq!(setting.stdout, line, "{}", setting.stderr);
+}
+
+#[test]
 fn bad_settings_are_reported_and_the_defaults_apply() {
     let s = Scratch::new("settings");
     let project = with_settings(
@@ -563,6 +583,90 @@ fn web_targets_write_where_the_project_says_and_read_back_exactly() {
         let back = std::fs::read_to_string(s.path(&format!("back/{target}/plain.weft"))).unwrap();
         assert_eq!(back, PLAIN, "{target}");
     }
+}
+
+/// `PLAIN` with a note whose text tries to end a comment and to carry a minifier keep marker.
+const NOTED: &str = r#"<screen id="plain" label="Plain" weft="0.2">
+  <context>
+    <entry id="why" by="human" kind="intent" name="Ivan">Back returns home. @license */ --&gt; end</entry>
+  </context>
+  <stack id="row" direction="row" gap="{token.space.sm}">
+    <button id="back" on-press="nav.back">Back</button>
+  </stack>
+</screen>
+"#;
+
+fn read_back(s: &Scratch, file: &str) -> String {
+    std::fs::read_to_string(s.path(file)).unwrap()
+}
+
+#[test]
+fn context_travels_in_the_source_comment_unless_stripped_or_dropped() {
+    let s = web_project("web-context");
+    let screen = s.write("screens/plain.weft", NOTED);
+    for (target, file) in [
+        ("react", "out/react/plain.jsx"),
+        ("solid", "out/solid/plain.tsx"),
+    ] {
+        let r = run(&[&target, &screen]);
+        assert_eq!(r.code, 0, "{}", r.stderr);
+        let code = read_back(&s, file);
+        assert!(
+            code.contains("Back returns home.") && !code.contains("@license"),
+            "{code}"
+        );
+        let import = format!("import-{target}");
+        let r = run(&[&import, &s.path(file)]);
+        assert_eq!(r.code, 0, "{}", r.stderr);
+        assert_eq!(read_back(&s, &format!("back/{target}/plain.weft")), NOTED);
+        let r = run(&[&import, &s.path(file), &"--context", &"drop", &"--force"]);
+        assert_eq!(r.code, 0, "{}", r.stderr);
+        assert_eq!(read_back(&s, &format!("back/{target}/plain.weft")), PLAIN);
+    }
+
+    // A static page is deployed as is: its source comment leaves the notes out unless asked.
+    let r = run(&[&"html", &screen]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    let page = read_back(&s, "out/html/plain.html");
+    assert!(
+        page.contains("weft:source") && !page.contains("Back returns home"),
+        "{page}"
+    );
+    let r = run(&[&"html", &screen, &"--context", &"keep", &"--force"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    let r = run(&[&"import-html", &s.path("out/html/plain.html")]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert_eq!(read_back(&s, "back/html/plain.weft"), NOTED);
+
+    with_settings(
+        &s,
+        serde_json::json!({
+            "export": { "react": { "outDir": "out/react", "source": true, "context": "strip" } },
+            "import": { "html": { "outDir": "back/html", "context": "drop" } }
+        }),
+    );
+    let r = run(&[&"react", &screen, &"--force"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(!read_back(&s, "out/react/plain.jsx").contains("Back returns home"));
+    let r = run(&[&"import-html", &s.path("out/html/plain.html"), &"--force"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert_eq!(read_back(&s, "back/html/plain.weft"), PLAIN);
+}
+
+#[test]
+fn slint_keeps_context_in_its_source_comment() {
+    let s = Scratch::new("slint-context");
+    let screen = s.write("screens/plain.weft", NOTED);
+    let r = run(&[&"slint", &screen]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.contains("Back returns home."), "{}", r.stdout);
+    let slint = s.write("plain.slint", &r.stdout);
+    let r = run(&[&"import-slint", &slint]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, NOTED), "{}", r.stderr);
+    let r = run(&[&"import-slint", &slint, &"--context", &"drop"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
+    let r = run(&[&"slint", &screen, &"--context", &"strip"]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
 }
 
 #[test]
