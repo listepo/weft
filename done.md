@@ -1,5 +1,11 @@
 # Done
 
+### T39.8. Context: readable comments in React and SolidJS
+
+For developers, each element that entries name gets a readable comment above it in generated React and SolidJS code, for example `{/* decision (agent claude-opus-5-5): Disabled until … */}`, escaped like the source comment (`*/`, `@`), and only when the context is kept. The comments are derived: importers ignore them, and regenerating gives them back, so the source check still passes.
+
+Built: `notes` in `crates/weft-web/src/jsx/mod.rs` reads the document's context, and `kids` puts each element's notes before it. Entries about the screen, and about the root, come first inside the root element. A line reads `{/* question open (agent m): Primary? */}`, escaped with `provenance::escape`, and is cut at 500 characters for input that was not validated. Lit gets no notes: its templates are strings that reach the DOM. Importing by convention skips the empty expression containers, so a component without its source comment still reads back with no losses, and without its context.
+
 ### T39.6. Context: web and Slint source comments
 
 The generated code that Weft reads back keeps the screen's context in its source comment, and a static page leaves it out by default. The `export.<target>.context` (`keep`, `strip`) and `import.<target>.context` (`keep`, `drop`) keys of `weft.json` cover React, SolidJS, HTML and Slint (SPEC §10.6, `settings.rs`, the schema), and the CLI's `--context` overrides them. Round-trip tests on a context-bearing screen outside the benchmark list.

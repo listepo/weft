@@ -5,7 +5,6 @@
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
 - T39.7. Context: Figma and Penpot
-- T39.8. Context: readable comments in React and SolidJS
 - T39.9. Context: SwiftUI
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
