@@ -254,7 +254,7 @@ What each code asks of you:
 | W701 | The project file, or the member at `path`, has the wrong shape; fix `weft.json` (or the `project` argument), not the screen. |
 | W702 | A warning: correct the name using the hint, or remove the key. Members are `tokens`, `catalog`, `actions`, `data`, `$schema` and the tool sections of SPEC §10.6. |
 | W703 | Name the file relative to the project file, inside its directory, with `/`. |
-| W704 | Point at a file that exists and holds JSON. |
+| W704 | Point at a file that exists, holds JSON, and stays inside the project directory after following symbolic links. |
 | W705 | Fix the token file named in the message: give the token a `$type`, point the alias at an existing token, break the cycle. |
 | W706 | Make the catalog extension, or the entry at `path`, a valid catalog definition; new kinds need `description`, `role` and `content` and no `x-` prefix. |
 | W707 | An extension may only add: keep the core's role, type and content model, and add props and slots as optional. |

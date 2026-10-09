@@ -1,8 +1,8 @@
 //! What every Weft importer shares (SPEC §9, "From a running UI" and "From source code"): the loss
-//! table, the import limits, generated ids, literal text, stand-ins for required props, and the
-//! role tree (`Sem`) that HTML, accessibility snapshots and other sources are reduced to before the
-//! catalog is consulted. Kept apart from any parser so that importers of other platforms reuse it
-//! without pulling in a web parser.
+//! table, the import limits, generated ids, literal text, stand-ins for required props, the
+//! Trust URL allowlist, and the role tree (`Sem`) that HTML, accessibility snapshots and other
+//! sources are reduced to before the catalog is consulted. Kept apart from any parser so that
+//! importers of other platforms reuse it without pulling in a web parser.
 
 mod build;
 mod cem;
@@ -13,6 +13,7 @@ mod loss;
 mod props;
 mod sem;
 mod text;
+mod url;
 
 pub use build::{BuildOptions, Built, build_document};
 pub use cem::{CemImport, CemOptions, MAX_KINDS, MAX_MANIFEST_LENGTH, MAX_MEMBERS, import_cem};
@@ -27,3 +28,4 @@ pub use sem::{Note, Sem};
 pub use text::{
     clean, is_js_space, js_length, js_number_from, js_prefix, js_trim, literal, slug, squash,
 };
+pub use url::{safe_absolute_url, safe_url};

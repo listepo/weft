@@ -7,7 +7,7 @@ use std::collections::HashSet;
 
 use serde_json::{Map, Value as Json, json};
 use weft_core::{Child, Document, Node, Value};
-use weft_import::{Loss, LossKind, Losses};
+use weft_import::{Loss, LossKind, Losses, safe_absolute_url, safe_url};
 
 use crate::ids::{collect_ids, fresh_id};
 use crate::number;
@@ -62,16 +62,6 @@ pub fn to_a2ui(doc: &Document) -> Exported {
         messages,
         losses: ex.losses.0,
     }
-}
-
-/// Whether `url` has a scheme, as the `uri` format of `openUrl` requires.
-fn absolute(url: &str) -> bool {
-    url.split_once(':').is_some_and(|(scheme, _)| {
-        scheme.starts_with(|c: char| c.is_ascii_alphabetic())
-            && scheme
-                .chars()
-                .all(|c| c.is_ascii_alphanumeric() || "+.-".contains(c))
-    })
 }
 
 /// An A2UI `Button` always has an action; this one does nothing but name the press.
@@ -404,15 +394,20 @@ impl Ex {
         }
         if !button && action.is_none() {
             match p.shift_remove("href") {
-                Some(Value::String(url)) if absolute(&url) => {
+                Some(Value::String(url)) if safe_absolute_url(&url).is_some() => {
                     action = Some(
                         json!({ "functionCall": { "call": "openUrl", "args": { "url": url }, "returnType": "void" } }),
                     );
                 }
-                Some(Value::String(_)) => self.lose(
+                Some(Value::String(url)) if safe_url(&url).is_some() => self.lose(
                     LossKind::Props,
                     path,
                     "openUrl takes an absolute URI; a relative href is left out",
+                ),
+                Some(Value::String(_)) => self.lose(
+                    LossKind::Props,
+                    path,
+                    "openUrl takes http, https or mailto; this href is left out",
                 ),
                 Some(_) => self.lose(
                     LossKind::Bindings,
@@ -605,9 +600,21 @@ impl Ex {
                 Built("Text", f, Vec::new())
             }
             "image" => {
-                let url = self
-                    .take(p, "src", path, false)
-                    .unwrap_or_else(|| json!(""));
+                let url = match self.take(p, "src", path, false) {
+                    Some(Json::String(s)) => match safe_url(&s) {
+                        Some(u) => json!(u),
+                        None => {
+                            self.lose(
+                                LossKind::Props,
+                                path,
+                                "image src is not http, https, mailto or relative; it is left out",
+                            );
+                            json!("")
+                        }
+                    },
+                    Some(v) => v,
+                    None => json!(""),
+                };
                 let mut f = json!({ "url": url });
                 if let Some(l) = parts.label.take() {
                     f["description"] = l;
@@ -803,5 +810,65 @@ impl Ex {
                 return Err(ids);
             }
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use weft_core::{ParseOptions, parse};
+
+    fn doc(markup: &str) -> Document {
+        parse(markup, &ParseOptions::default())
+            .document
+            .expect("markup parses")
+    }
+
+    fn messages_text(doc: &Document) -> String {
+        serde_json::to_string(&to_a2ui(doc).messages).expect("messages serialize")
+    }
+
+    #[test]
+    fn javascript_href_is_not_open_url() {
+        let exported = to_a2ui(&doc(
+            r#"<screen id="s" weft="0.1"><link id="l" href="javascript:alert(1)">Go</link></screen>"#,
+        ));
+        let text = serde_json::to_string(&exported.messages).expect("messages serialize");
+        assert!(!text.contains("javascript:"), "{text}");
+        assert!(!text.contains("openUrl"), "{text}");
+        assert!(
+            exported
+                .losses
+                .iter()
+                .any(|l| l.kind == LossKind::Props && l.note.contains("http")),
+            "{:?}",
+            exported.losses
+        );
+    }
+
+    #[test]
+    fn https_href_is_open_url() {
+        let text = messages_text(&doc(
+            r#"<screen id="s" weft="0.1"><link id="l" href="https://example.com">Go</link></screen>"#,
+        ));
+        assert!(text.contains("openUrl"), "{text}");
+        assert!(text.contains("https://example.com"), "{text}");
+    }
+
+    #[test]
+    fn javascript_image_src_is_dropped() {
+        let exported = to_a2ui(&doc(
+            r#"<screen id="s" weft="0.1"><image id="i" src="javascript:alert(1)" label="pic"/></screen>"#,
+        ));
+        let text = serde_json::to_string(&exported.messages).expect("messages serialize");
+        assert!(!text.contains("javascript:"), "{text}");
+        assert!(
+            exported
+                .losses
+                .iter()
+                .any(|l| l.kind == LossKind::Props && l.note.contains("image src")),
+            "{:?}",
+            exported.losses
+        );
     }
 }

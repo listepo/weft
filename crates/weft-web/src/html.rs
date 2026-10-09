@@ -24,6 +24,8 @@ use weft_core::{
     serialize, validate_document,
 };
 
+use weft_import::safe_url;
+
 use crate::fill::fill;
 use crate::provenance;
 use crate::tilt;
@@ -397,36 +399,6 @@ pub(crate) fn escape_attr(s: &str) -> String {
         }
     }
     out
-}
-
-/// SPEC §9 trust rule: http, https, mailto or relative; anything else is dropped. Tabs, newlines
-/// and surrounding control characters are removed first, as a URL parser would.
-pub(crate) fn safe_url(value: &str) -> Option<String> {
-    let url: String = value
-        .chars()
-        .filter(|c| !matches!(c, '\t' | '\n' | '\r'))
-        .collect();
-    let url = url.trim_matches(|c: char| c <= ' ');
-    if url.is_empty() {
-        return None;
-    }
-    let colon = url.find(':');
-    let delimiter = url.find(['/', '?', '#']);
-    let has_scheme = matches!((colon, delimiter), (Some(c), Some(d)) if c < d)
-        || matches!((colon, delimiter), (Some(_), None));
-    if !has_scheme {
-        return Some(url.to_owned());
-    }
-    let scheme = &url[..colon.unwrap_or_default()];
-    let valid = scheme
-        .chars()
-        .next()
-        .is_some_and(|c| c.is_ascii_alphabetic())
-        && scheme
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '.' | '-'));
-    let scheme = scheme.to_ascii_lowercase();
-    (valid && matches!(scheme.as_str(), "http" | "https" | "mailto")).then(|| url.to_owned())
 }
 
 /// A path of a `model` the page may use: one that follows the rule of SPEC §5.1 and the URL rule
@@ -1548,16 +1520,6 @@ mod tests {
     #[test]
     fn the_base_stylesheet_cannot_close_the_style_element() {
         assert!(!BASE_CSS.contains('<'));
-    }
-
-    #[test]
-    fn only_safe_urls_survive() {
-        assert_eq!(safe_url("https://a.b/c").as_deref(), Some("https://a.b/c"));
-        assert_eq!(safe_url("/x?y:z").as_deref(), Some("/x?y:z"));
-        assert_eq!(safe_url("MAILTO:a@b").as_deref(), Some("MAILTO:a@b"));
-        assert_eq!(safe_url("java\nscript:alert(1)"), None);
-        assert_eq!(safe_url(" data:text/html,x"), None);
-        assert_eq!(safe_url(""), None);
     }
 
     #[test]

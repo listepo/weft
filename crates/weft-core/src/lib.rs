@@ -23,7 +23,7 @@ mod values;
 pub use canonical::{canonicalize, stringify};
 pub use data::{
     DataCheckOptions, DataSchema, DataSchemaProblem, Shape, check_data, check_data_json,
-    compile_data_schema,
+    compile_data_schema, data_schema_diagnostics,
 };
 pub use diagnostics::{
     Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors, one_of,

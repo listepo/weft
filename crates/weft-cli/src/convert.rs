@@ -86,7 +86,7 @@ fn resolver(file: &Path) -> Result<TokenSet> {
         .file_name()
         .and_then(|n| n.to_str())
         .with_context(|| format!("{} has no file name", file.display()))?;
-    let read_member = |member: &str| std::fs::read_to_string(dir.join(member)).ok();
+    let read_member = |member: &str| crate::read_project_member(dir, member);
     let loaded = load_project(
         &serde_json::json!({ "tokens": name }),
         &ProjectOptions {

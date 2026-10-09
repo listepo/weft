@@ -1,7 +1,7 @@
 // The file side of SPEC §10 for Node tools: finding the project above a screen and reading the
 // files it names. Kept apart from the pure loader so that browser and MCP code never pull in fs.
-import { readFileSync, statSync } from "node:fs";
-import { basename, dirname, join, resolve } from "node:path";
+import { closeSync, openSync, readFileSync, readSync, realpathSync, statSync } from "node:fs";
+import { basename, dirname, join, resolve, sep } from "node:path";
 import type { Diagnostic, Mode } from "@weft/core";
 import { loadProjectText, PROJECT_FILE, type Project, type ProjectResult } from "./project.ts";
 
@@ -86,24 +86,45 @@ export function readResolver(
 }
 
 function reader(projectFile: string, maxChars: number | undefined) {
-  // The loader has already refused names that leave the directory.
+  const root = dirname(resolve(projectFile));
   return (name: string): string | undefined => {
     try {
-      return readBounded(projectPath(projectFile, name), maxChars);
+      return readBounded(confinedPath(root, name), maxChars);
     } catch {
       return undefined;
     }
   };
 }
 
+/** SPEC §10.2: the resolved path (symbolic links followed) must stay inside the project directory. */
+function confinedPath(root: string, name: string): string {
+  const rootReal = realpathSync(root);
+  const resolved = realpathSync(join(rootReal, name));
+  const prefix = rootReal.endsWith(sep) ? rootReal : rootReal + sep;
+  if (resolved !== rootReal && !resolved.startsWith(prefix)) {
+    throw new Error(`${name} resolves outside the project directory`);
+  }
+  return resolved;
+}
+
 function readBounded(file: string, maxChars: number | undefined): string {
-  // A UTF-8 character is at most 4 bytes, so a larger file is refused before it is read.
-  if (maxChars !== undefined && statSync(file).size > maxChars * 4) {
-    throw new Error(`${file} is longer than ${maxChars} characters`);
+  if (maxChars === undefined) return readFileSync(file, "utf8");
+  // Read at most one extra byte past the UTF-8 ceiling so a replacement between stat and read
+  // cannot load an oversized file (SPEC §10.2 untrusted input).
+  const maxBytes = maxChars * 4;
+  const fd = openSync(file, "r");
+  try {
+    const buf = Buffer.alloc(maxBytes + 1);
+    const n = readSync(fd, buf, 0, maxBytes + 1, 0);
+    if (n > maxBytes) {
+      throw new Error(`${file} is longer than ${maxChars} characters`);
+    }
+    const text = buf.toString("utf8", 0, n);
+    if (text.length > maxChars) {
+      throw new Error(`${file} is longer than ${maxChars} characters`);
+    }
+    return text;
+  } finally {
+    closeSync(fd);
   }
-  const text = readFileSync(file, "utf8");
-  if (maxChars !== undefined && text.length > maxChars) {
-    throw new Error(`${file} is longer than ${maxChars} characters`);
-  }
-  return text;
 }

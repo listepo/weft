@@ -33,6 +33,20 @@ describe("Xcode agents", () => {
     expect(run(process.execPath, [script, "--agents", "nobody", "--root", root]).status).toBe(2);
   });
 
+  test("unknown agents are reported and the others still run", () => {
+    const result = run(process.execPath, [
+      script,
+      "--dry-run",
+      "--agents",
+      "nobody,claude",
+      "--root",
+      root,
+    ]);
+    expect(result.status).toBe(2);
+    expect(result.output).toContain('unknown agent "nobody"');
+    expect(result.output).toContain("CLAUDE_CONFIG_DIR=");
+  });
+
   test.skipIf(!installed("claude"))(
     "registers the server and the guide with the Claude agent",
     () => {
