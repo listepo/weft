@@ -24,6 +24,33 @@ Result: the `login` rerun on LM Studio / prism-ml/bonsai-27b with `--readback` a
 Model: Cursor / grok-4.7 (harness), Claude Code / claude-opus-5-5 (rerun) · Status: done · Priority: P2 · Complexity: 3 · Files: `crates/weft-core/src/explain.rs`, `crates/weft-cli`, `AGENT-SPEC.md`, `bench/src/{readback,run,run-tasks}.ts`, `bench/test/checkers.test.ts`, `test.md`, `bench/results/edit-2026-10-09T09-08-11-689Z.*`
 Check: `node bench/src/run.ts edit --provider openai --model prism-ml/bonsai-27b --screens login --samples 3 --readback --concurrency 1`.
 
+### T94. Foreign stack alignment and grid child order
+
+`stackOf` in `packages/design-tool/src/foreign.ts` wrote only `direction`, `columns` and `gap`. `LayerLayout` already has `align` and `wrap`. Figma maps `counterAxisAlignItems` through `ALIGN` (`MIN` → `start`, `CENTER` → `center`, `MAX` → `end`, `BASELINE` → undefined). A foreign horizontal frame with `MIN` alignment became `<stack direction="row">`. SPEC §5.1 says a row without `align` is centered on the cross axis, so an importer must not round-trip a row's center. `wrap` was dropped the same way. Catalog `stack` has the boolean; `grid` has neither `align` nor `wrap`.
+
+**Out of scope.** Padding, fills and fonts (SPEC §9 keeps those as losses; catalog `stack` has no such props). Collapsing vectors into `<image>` (`image` requires `src`). Teaching `crates/weft-slint/src/generate.rs` to emit Slint alignment (SPEC keeps `align` and `wrap` in the source comment). A second Figma simplifier, a new caller of `api.figma.com`, or a copy of Framelink. The REST pull (`packages/figma/src/pull.ts`) and the foreign reader stay the only Figma path.
+
+Execution plan:
+
+1. In `stackOf`, after the direction and columns writes: set `wrap` when `layer.layout.wrap` is true. On a row, set `align` only for `start`, `end` or `stretch`. On a column, set `align` only for `center`, `end` or `stretch`. Leave a row's `center` and a column's `start` unset, and leave `align` unset when it is undefined. Do not set either prop on a grid. Do not emit padding. The painted-loss stays.
+2. Tests in `packages/design-tool/test/foreign-layout.test.ts`: a horizontal frame at `MIN` reads `align="start"` with no `wrap`; a horizontal frame at `CENTER` with wrap reads `wrap` and no `align`; a vertical frame at `MIN` reads neither; a layer that already stores `weft.source` is unchanged, including a row's stored `center` and a column's stored `start`. The sourced-frame snapshots in `packages/figma/test/__snapshots__/layers/` stay as they are. The foreign promo frames in the Figma and Penpot edit tests expect `align="start"`.
+3. Thread `gridRowAnchorIndex`, `gridColumnAnchorIndex` and `layoutPositioning` from the REST node (`rest.ts`) and the plugin node (`layer.ts`) onto `Layer`. When the mode is `grid`, order in-flow children by row anchor, then column anchor, then original index before `convertChildren`. Absolutely positioned children keep their index. Add a `layout` loss only when the order actually changes. Skip when no in-flow child carries an anchor, so z-order remains. A missing or non-numeric anchor stays absent, not zero.
+4. Verify with `mise exec -- pnpm exec vitest run packages/design-tool/test packages/figma/test`.
+
+Result: `stackOf` writes `align` and `wrap` as the plan says, and grid children with anchors are ordered by cell, with a `layout` loss only when the order differs from z-order. Merged in PR #21 (`118fa3b`); the PR predates the CI workflow (T73), so it ran no checks, and later CI runs on `main` cover the change.
+Model: Cursor / grok-4.7 · Status: done · Priority: P0 · Complexity: 2 · Files: `packages/design-tool/src/{foreign,layer}.ts`, `packages/figma/src/{layer,rest}.ts`, `packages/figma/README.md`, `vitest.config.ts`, tests
+Check: `mise exec -- pnpm exec vitest run packages/design-tool/test packages/figma/test` exits 0.
+
+### T32. Claude Code plugin from GitHub
+
+The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
+
+Progress: the bundle carries the WebAssembly core (T22 merged): `plugins/claude-code/build.ts` bundles the scripts and the MCP server with Vite 8 into the committed `dist/` and copies `weft_bg.wasm` to `dist/wasm/`, where `@weft/core` reads it relative to the shared chunk; `claude-code:build` depends on `root:wasm`. The plugin folder alone runs (tests copy only it to a temp folder and run every script and the server there; `claude --plugin-dir <copy> mcp list` shows `weft` connected; `claude plugin validate --strict` passes). The Desktop `node` requirement (24.2 or later on the PATH) is in the plugin README. `root:wasm` remaps build paths, so the `.wasm` is byte-reproducible and the up-to-date test compares it byte for byte. Remaining: `repository` in `plugin.json` once a remote exists, and the done criterion itself, `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` on a clean machine.
+
+Result: `plugin.json` gains `repository` and `homepage` (https://github.com/listepo/weft). With an empty `CLAUDE_CONFIG_DIR`, `claude plugin marketplace add listepo/weft` and `claude plugin install weft@weft` (Claude Code 2.1.267) install the plugin from GitHub; `claude mcp list` shows `plugin:weft:weft` connected from the plugin cache, and `dist/export.js` run from the cache converts a corpus screen.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 2 · Files: `plugins/claude-code/.claude-plugin/plugin.json`, `plugins/claude-code/README.md`
+Check: the install above; `claude plugin validate --strict plugins/claude-code`; `plugins/claude-code` tests.
+
 ### T95. json-render export: only trusted URLs
 
 A literal `href` or `src` now passes through the Trust allowlist on the way to json-render and back. `http`, `https`, `mailto` and a relative URL are kept (surrounding space and line breaks stripped, as `safe_url` does). `javascript:`, `data:` and any other scheme are a `props` loss and are left out, the same way A2UI drops an unsafe image `src`. A binding of either prop is still an expression. SPEC §9's json-render rows say so.
