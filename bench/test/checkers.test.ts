@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import { test } from "vitest";
 import { SCREENS, loadTasks, readScreen, type EditTask, type QuestionTask } from "../src/corpus.ts";
-import { FORMATS, type Format } from "../src/neutral.ts";
+import { parsers } from "../src/formats.ts";
+import { FORMATS, type Format, type NNode } from "../src/neutral.ts";
 import { mockProvider } from "../src/provider.ts";
+import { bindingChanges } from "../src/readback.ts";
 import {
   checkAnswer,
   checkEdit,
   editPrompt,
   planJobs,
   readPrompt,
+  renderSummary,
   rescore,
   runJobs,
   runTask,
@@ -323,6 +326,78 @@ test("an invalid edit reply gets one repair prompt with the validator's diagnost
   );
   assert.equal(calls, 1);
   assert.equal(once.repaired, false);
+});
+
+const INVERSION =
+  'button "Sign in" disabled changed: was true while $.email is falsy (NOT $.email); now true while $.busy is falsy (NOT $.busy)';
+
+function invert(format: Format, src: string): string {
+  if (format === "weft") return src.replace("{!$.email}", "{!$.busy}");
+  if (format === "html") return src.replace("disabled:!$.email", "disabled:!$.busy");
+  if (format === "jsx") return src.replace("disabled={!data.email}", "disabled={!data.busy}");
+  return a2ui(src, (byId) => {
+    const checks = need(byId, "submit").checks as {
+      condition: { args: { value: { path: string } } };
+    }[];
+    const value = checks[0]?.condition.args.value;
+    assert.ok(value, "submit check");
+    value.path = "/busy";
+  });
+}
+
+test("an inverted disabled binding reads back as falsy in every format", () => {
+  for (const format of FORMATS) {
+    const src = readScreen("login", format);
+    const before = parsers[format](src).tree as NNode;
+    const after = parsers[format](invert(format, src)).tree as NNode;
+    assert.ok(before && after, format);
+    assert.deepEqual(bindingChanges(before, before), [], format);
+    assert.ok(bindingChanges(before, after).includes(INVERSION), format);
+  }
+});
+
+test("a valid inverted edit gets one readback prompt and can correct the negation", async () => {
+  const t = task("login.e2");
+  const solve = (p: string) =>
+    wrap("weft", solutions["login.e2"]!.weft!(p.match(/```xml\n([\s\S]*?)```/)![1]!.trim()));
+  const prompts: string[] = [];
+  const r = await runTask(
+    t,
+    "weft",
+    mockProvider((p) => {
+      prompts.push(p);
+      if (p.includes("Readback of what")) return solve(p);
+      return wrap("weft", invert("weft", p.match(/```xml\n([\s\S]*?)```/)![1]!.trim()));
+    }),
+    "m",
+    0,
+    { readback: true },
+  );
+  assert.equal(prompts.length, 2);
+  assert.match(prompts[1]!, /NOT \$\.busy/);
+  assert.match(prompts[1]!, /falsy/);
+  assert.doesNotMatch(prompts[1]!, /"has":/);
+  assert.deepEqual(
+    [r.valid, r.success, r.repaired, r.readback, r.successAfterReadback, r.validAfterReadback],
+    [true, false, false, true, true, true],
+  );
+  const rendered = renderSummary("edit", summarize([r]));
+  assert.match(rendered, /Success after readback/);
+  assert.match(rendered, /\| 100\.0% \| 100\.0% \| 0\.0% \| 0\.0% \| 100\.0% \| 100\.0% \|/);
+
+  let calls = 0;
+  const quiet = await runTask(
+    t,
+    "weft",
+    mockProvider((p) => {
+      calls++;
+      return wrap("weft", invert("weft", p.match(/```xml\n([\s\S]*?)```/)![1]!.trim()));
+    }),
+    "m",
+  );
+  assert.equal(calls, 1);
+  assert.equal(quiet.readback, undefined);
+  assert.equal(renderSummary("edit", summarize([quiet])).includes("readback"), false);
 });
 
 test("tasks cover every screen", () => {

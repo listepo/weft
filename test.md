@@ -1,5 +1,7 @@
 # Quality test
 
+Translations: [Russian](docs/ru/test.md), [Ukrainian](docs/uk/test.md).
+
 The quality test measures how reliably language models read and write Weft, compared with three formats a model could be asked to use instead: semantic HTML, a React JSX component and A2UI JSON. It is the evidence behind the continue/stop decision of T8 and the regression check for every later change to the format, the primer or the core. The harness lives in `bench/`.
 
 ## What is measured
@@ -18,6 +20,7 @@ The quality test measures how reliably language models read and write Weft, comp
 - *Valid*: the edit reply parses in its format with no errors (Weft: the core validator in strict mode; HTML, JSX, A2UI: their parsers in `bench/src/adapters/`).
 - *Success*: the reply is valid, the requested change is there (assertions in the task, checked on a neutral tree shared by all formats, including order and bindings), and nothing else was lost.
 - *Repair*: when an edit reply is invalid, the model gets one more prompt with its reply and the validator's diagnostics, and nothing else. The same rule applies to every format. *Valid after repair* and *success after repair* count the second reply.
+- *Readback* (optional, `node bench/src/run.ts edit --readback`): after an edit reply is valid, on the first try or after the repair, the model gets one more prompt. That prompt lists the bindings, flags, events and loops that changed, in plain words, and nothing else. A negated binding reads `true while $.busy is falsy (NOT $.busy)`; `!` is NOT. The sentences come from the neutral tree, so every format gets the same wording. *Valid after readback* and *success after readback* count that reply. Runs without the flag do not send it, and their table has no readback columns, so the rows below stay comparable.
 - *Answer*: the last `ANSWER:` line, compared case- and whitespace-insensitively. An action named in the format's own spelling (`press:nav.reset` in HTML, `actions.nav.reset()` in JSX) counts as the action.
 - *Output tokens*: the visible size of the first reply as reported by the provider; reasoning tokens are excluded.
 
@@ -45,13 +48,13 @@ node bench/src/run.ts tokens
 node bench/src/run.ts rescore bench/results/<run>.json
 ```
 
-Options: `--screens a,b`, `--formats weft,html,jsx,a2ui`, `--samples N` (default 3), `--concurrency N` (default 4), `--base-url` for another OpenAI-compatible server. Each run writes `bench/results/<mode>-<time>.json` (every reply verbatim with its verdict) and a summary `.md`. A run that fails half-way still saves what it finished.
+Options: `--screens a,b`, `--formats weft,html,jsx,a2ui`, `--samples N` (default 3), `--concurrency N` (default 4), `--base-url` for another OpenAI-compatible server, `--readback` for the binding readback turn on an edit run. Each run writes `bench/results/<mode>-<time>.json` (every reply verbatim with its verdict) and a summary `.md`. A run that fails half-way still saves what it finished.
 
 ## Limitations
 
 - The corpus is small (12 screens, 60 tasks) and written by the format's authors.
 - Edit success is judged by the task's assertions; a change the assertions do not cover is not checked.
-- One prompt shape; no system prompt, no tool calling, no few-shot examples.
+- One prompt shape; no system prompt, no tool calling, no few-shot examples. The readback turn is a second user message, and only when `--readback` is set.
 - Runs before the history row of 2026-10-04 have one sample, no saved replies and no action-spelling rule.
 
 ## History

@@ -4,6 +4,7 @@ import { FENCE_LANG, extractDocument, parsers } from "./formats.ts";
 import { evaluate, missingContent, norm, type Format } from "./neutral.ts";
 import { PRIMERS } from "./primers.ts";
 import type { Provider } from "./provider.ts";
+import { bindingChanges } from "./readback.ts";
 import { readFileSync } from "node:fs";
 import pLimit from "p-limit";
 
@@ -29,6 +30,16 @@ export interface TaskResult {
   reply: string;
   /** The reply to the repair prompt, when one was sent. */
   repairReply?: string;
+  /**
+   * A readback prompt was sent after a valid edit. Absent when the run did not ask for one,
+   * so earlier results stay comparable.
+   */
+  readback?: boolean;
+  /** The reply to the readback prompt, when one was sent. */
+  readbackReply?: string;
+  /** Set only for a run that asked for a readback. Equals the post-repair verdict when none was sent. */
+  successAfterReadback?: boolean;
+  validAfterReadback?: boolean;
   errors: string[];
   failed: string[];
 }
@@ -72,6 +83,28 @@ export function repairPrompt(
     `Your previous reply:\n\`\`\`${FENCE_LANG[format]}\n${extractDocument(reply)}\n\`\`\``,
     `It is not a valid document:\n${diagnostics.map((e) => `- ${e}`).join("\n")}`,
     "Fix these problems and apply the requested change. Reply with the complete corrected document in a single code block and nothing else.",
+  ].join("\n\n");
+}
+
+/**
+ * Sent only after a valid edit, and only when the run asked for it. The lines are the binding
+ * diff and nothing else: the hidden assertions stay hidden, the same way the repair prompt
+ * carries only the validator's diagnostics. The same wording is used for every format.
+ */
+export function readbackPrompt(
+  task: EditTask,
+  format: Format,
+  reply: string,
+  lines: string[],
+): string {
+  const body = lines.length
+    ? lines.map((line) => `- ${line}`).join("\n")
+    : "- No binding, event or loop changed.";
+  return [
+    editPrompt(task, format),
+    `Your previous reply:\n\`\`\`${FENCE_LANG[format]}\n${extractDocument(reply)}\n\`\`\``,
+    `Readback of what that reply changed. A leading ! is NOT. Falsy means false, 0, an empty string, null or missing.\n${body}`,
+    "Compare each line with the requested change. If a line says the opposite of the instruction, fix it. If every line matches, keep the document as it is. Reply with the complete document in a single code block and nothing else.",
   ].join("\n\n");
 }
 
@@ -124,6 +157,7 @@ export function scoreTask(
   reply: string,
   outputTokens: number,
   repairReply?: string,
+  readbackReply?: string,
 ): TaskResult {
   const base = { id: task.id, screen: task.screen, format, model, type: task.type, sample };
   if (task.type === "question") {
@@ -143,15 +177,31 @@ export function scoreTask(
   }
   const first = checkEdit(task, format, reply);
   const common = { ...base, ...first, outputTokens, reply };
-  if (first.valid)
-    return {
-      ...common,
-      repaired: false,
-      successAfterRepair: first.success,
-      validAfterRepair: true,
-    };
-  if (repairReply === undefined)
-    return { ...common, repaired: false, successAfterRepair: false, validAfterRepair: false };
+  const scored: TaskResult = first.valid
+    ? { ...common, repaired: false, successAfterRepair: first.success, validAfterRepair: true }
+    : repairReply === undefined
+      ? { ...common, repaired: false, successAfterRepair: false, validAfterRepair: false }
+      : scoreRepair(common, first, task, format, repairReply);
+  if (readbackReply === undefined) return scored;
+  const third = checkEdit(task, format, readbackReply);
+  return {
+    ...scored,
+    readback: true,
+    readbackReply,
+    successAfterReadback: third.success,
+    validAfterReadback: third.valid,
+    failed: [...scored.failed, ...third.failed.map((f) => `after readback: ${f}`)],
+    errors: [...scored.errors, ...third.errors.map((e) => `after readback: ${e}`)],
+  };
+}
+
+function scoreRepair(
+  common: Omit<TaskResult, "repaired" | "repairReply" | "successAfterRepair" | "validAfterRepair">,
+  first: Pick<TaskResult, "failed" | "errors">,
+  task: EditTask,
+  format: Format,
+  repairReply: string,
+): TaskResult {
   const second = checkEdit(task, format, repairReply);
   return {
     ...common,
@@ -164,26 +214,69 @@ export function scoreTask(
   };
 }
 
+export interface RunOptions {
+  /** After a valid edit, send one readback of the changed bindings. Off unless the run asks. */
+  readback?: boolean;
+}
+
 export async function runTask(
   task: Task,
   format: Format,
   provider: Provider,
   model: string,
   sample = 0,
+  options: RunOptions = {},
 ): Promise<TaskResult> {
   const prompt = task.type === "edit" ? editPrompt(task, format) : readPrompt(task, format);
   const completion = await provider.complete(prompt);
   const outputTokens = completion.outputTokens ?? countProxy(completion.text);
-  if (task.type === "edit") {
-    const first = checkEdit(task, format, completion.text);
-    if (!first.valid) {
-      const retry = await provider.complete(
-        repairPrompt(task, format, completion.text, first.errors),
-      );
-      return scoreTask(task, format, model, sample, completion.text, outputTokens, retry.text);
-    }
+  if (task.type !== "edit")
+    return scoreTask(task, format, model, sample, completion.text, outputTokens);
+  const first = checkEdit(task, format, completion.text);
+  let repairReply: string | undefined;
+  let current = completion.text;
+  if (!first.valid) {
+    const retry = await provider.complete(
+      repairPrompt(task, format, completion.text, first.errors),
+    );
+    repairReply = retry.text;
+    current = retry.text;
   }
-  return scoreTask(task, format, model, sample, completion.text, outputTokens);
+  const scored = scoreTask(
+    task,
+    format,
+    model,
+    sample,
+    completion.text,
+    outputTokens,
+    repairReply,
+    await readbackOf(task, format, provider, current, options),
+  );
+  // A run that asked for the turn records the columns even when a reply stayed invalid.
+  if (!options.readback || scored.successAfterReadback !== undefined) return scored;
+  return {
+    ...scored,
+    readback: false,
+    successAfterReadback: scored.successAfterRepair,
+    validAfterReadback: scored.validAfterRepair,
+  };
+}
+
+/** One follow-up when the latest reply is valid. An invalid reply has nothing reliable to read back. */
+async function readbackOf(
+  task: EditTask,
+  format: Format,
+  provider: Provider,
+  reply: string,
+  options: RunOptions,
+): Promise<string | undefined> {
+  if (!options.readback) return undefined;
+  const edited = parsers[format](extractDocument(reply));
+  if (!edited.tree || edited.errors.length > 0) return undefined;
+  const original = parsers[format](readScreen(task.screen, format));
+  const lines = original.tree ? bindingChanges(original.tree, edited.tree) : [];
+  const follow = await provider.complete(readbackPrompt(task, format, reply, lines));
+  return follow.text;
 }
 
 export interface Job {
@@ -216,6 +309,7 @@ export async function runJobs(
   providerFor: (model: string) => Provider,
   concurrency: number,
   onResult: (r: TaskResult) => void = () => {},
+  options: RunOptions = {},
 ): Promise<{ results: TaskResult[]; error?: unknown }> {
   const limit = pLimit(concurrency);
   const out: (TaskResult | undefined)[] = Array.from({ length: jobs.length });
@@ -225,7 +319,14 @@ export async function runJobs(
       limit(async () => {
         if (error !== undefined) return;
         try {
-          const r = await runTask(j.task, j.format, providerFor(j.model), j.model, j.sample);
+          const r = await runTask(
+            j.task,
+            j.format,
+            providerFor(j.model),
+            j.model,
+            j.sample,
+            options,
+          );
           out[i] = r;
           onResult(r);
         } catch (e) {
@@ -254,6 +355,7 @@ export function rescore(results: TaskResult[], tasks: Task[]): TaskResult[] {
       r.reply,
       r.outputTokens,
       r.repairReply,
+      r.readbackReply,
     );
   });
 }
@@ -274,6 +376,9 @@ export interface Summary {
   successAfterRepair: Stat;
   valid: Stat;
   validAfterRepair: Stat;
+  /** Present when this group asked for a readback turn. */
+  successAfterReadback?: Stat;
+  validAfterReadback?: Stat;
   meanOutputTokens: number;
 }
 
@@ -304,26 +409,43 @@ export function summarize(results: TaskResult[]): Summary[] {
       successAfterRepair: stat((r) => r.successAfterRepair),
       valid: stat((r) => r.valid),
       validAfterRepair: stat((r) => r.validAfterRepair),
+      ...(g.some((r) => r.successAfterReadback !== undefined)
+        ? {
+            successAfterReadback: stat((r) => r.successAfterReadback ?? r.successAfterRepair),
+            validAfterReadback: stat((r) => r.validAfterReadback ?? r.validAfterRepair),
+          }
+        : {}),
       meanOutputTokens: g.reduce((s, r) => s + r.outputTokens, 0) / g.length,
     };
   });
 }
 
 export function renderSummary(mode: string, summaries: Summary[]): string {
+  const readback = summaries.some((s) => s.successAfterReadback !== undefined);
+  const head = readback
+    ? "| Model | Format | Tasks | Samples | Valid | Valid after repair | Success | Success after repair | Valid after readback | Success after readback | Mean output tokens |"
+    : "| Model | Format | Tasks | Samples | Valid | Valid after repair | Success | Success after repair | Mean output tokens |";
+  const rule = readback
+    ? "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |"
+    : "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |";
   const lines = [
     `## ${mode}`,
     "",
     "Rates are means over all samples; the range is the lowest and highest single-sample rate.",
     "",
-    "| Model | Format | Tasks | Samples | Valid | Valid after repair | Success | Success after repair | Mean output tokens |",
-    "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    head,
+    rule,
   ];
   const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
   const cell = (s: Stat) =>
     s.min === s.max ? pct(s.mean) : `${pct(s.mean)} (${pct(s.min)}–${pct(s.max)})`;
-  for (const s of summaries)
+  for (const s of summaries) {
+    const tail = readback
+      ? ` ${cell(s.validAfterReadback ?? s.validAfterRepair)} | ${cell(s.successAfterReadback ?? s.successAfterRepair)} |`
+      : "";
     lines.push(
-      `| ${s.model} | ${s.format} | ${s.tasks} | ${s.samples} | ${cell(s.valid)} | ${cell(s.validAfterRepair)} | ${cell(s.success)} | ${cell(s.successAfterRepair)} | ${s.meanOutputTokens.toFixed(0)} |`,
+      `| ${s.model} | ${s.format} | ${s.tasks} | ${s.samples} | ${cell(s.valid)} | ${cell(s.validAfterRepair)} | ${cell(s.success)} | ${cell(s.successAfterRepair)} |${tail} ${s.meanOutputTokens.toFixed(0)} |`,
     );
+  }
   return lines.join("\n") + "\n";
 }
