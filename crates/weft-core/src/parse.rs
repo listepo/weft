@@ -141,7 +141,7 @@ pub fn parse_fragment(markup: &str, catalog: &Catalog) -> (Option<Node>, Vec<Dia
     (wrapper, diagnostics)
 }
 
-/// `typing` is the `type` attribute of a `<param>`.
+/// `typing` is the `fragment` attribute of a `<use>`, or the `type` of a `<param>`.
 fn prop_type(
     catalog: Option<&Catalog>,
     kind: &str,
@@ -152,6 +152,11 @@ fn prop_type(
     match kind {
         EACH => None,
         fragment::PARAM => fragment::param_attr_type(name, typing),
+        // A use takes no universal attributes (SPEC §10.7), only its fragment's parameters.
+        fragment::USE => {
+            let fragment = catalog?.fragments.get(typing?)?;
+            fragment.signature.prop(name).map(|d| d.kind)
+        }
         _ => catalog?
             .components
             .get(kind)?
@@ -182,10 +187,15 @@ impl Builder<'_> {
         let mut props = Vec::new();
         let mut on = Vec::new();
         let mut attrs: HashMap<String, Position> = HashMap::new();
+        let typing = match kind.as_str() {
+            fragment::USE => "fragment",
+            fragment::PARAM => "type",
+            _ => "",
+        };
         let typing = raw
             .attrs
             .iter()
-            .find(|a| kind == fragment::PARAM && a.name == "type")
+            .find(|a| a.name == typing)
             .map(|a| a.value.as_str());
         for attr in &raw.attrs {
             attrs.insert(attr.name.clone(), attr.pos);
@@ -450,6 +460,7 @@ mod tests {
             name: "t".into(),
             version: "1".into(),
             components: Default::default(),
+            fragments: Default::default(),
         };
         let (wrapper, diagnostics) = parse_fragment("<a b='1'/>", &catalog);
         assert!(wrapper.is_none());

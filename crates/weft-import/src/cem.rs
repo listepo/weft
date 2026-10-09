@@ -56,6 +56,7 @@ pub fn import_cem(text: &str, options: &CemOptions<'_>) -> CemImport {
             name: options.name.to_owned(),
             version: options.version.to_owned(),
             components,
+            fragments: Default::default(),
         },
         losses: run.losses.0,
         diagnostics: run.diagnostics,

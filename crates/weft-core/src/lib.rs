@@ -34,8 +34,8 @@ pub use json::{
     JSON_DEPTH_LIMIT, JsonError, js_number, js_round, order_keys, parse_json, to_compact,
 };
 pub use model::{
-    Catalog, Child, ComponentDef, Content, Document, Map, Node, PropDef, PropDefault, PropType,
-    SlotDef, Value, WEFT_VERSION,
+    Catalog, Child, ComponentDef, Content, Document, Fragment, Map, Node, PropDef, PropDefault,
+    PropType, SlotDef, Value, WEFT_VERSION,
 };
 pub use parse::{ParseOptions, ParseResult, parse, parse_partial};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};

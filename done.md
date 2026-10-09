@@ -1,5 +1,11 @@
 # Done
 
+### T31.2. Fragments: uses and patches
+
+`<use id fragment …>` places a fragment (SPEC §10.7). The project's merged catalog carries the fragments (`Catalog.fragments`, name → fragment document, in the Rust and TypeScript models), and each fragment's parameters form a component definition of its own: value parameters as props, action parameters as events, slot parameters as slots. So the parser types `<use>` literals and the validator checks use sites with the code that checks components: `W801` (no such fragment, mode severity, nearest-name hint), `W802` (an undeclared attribute, action or slot), `W205`, value types and ranges, and the body's top-level elements against where the use stands (`W302`, `W303`, `W318`). Patches set parameters on the `<use>`, fill its slot parameters (`W504` for an undeclared one), and an id inside a fragment body is `W502` with a hint naming the fragment. `AGENT-SPEC.md` shows a use; the differential catalog has a fragment.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 4 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-core/src/{model.rs,fragment.rs,validate.rs,validate/uses.rs,parse.rs,patch.rs}`, `packages/core/src/model.ts`, `crates/weft-core/tests/fragments.rs`
+Check: `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
 ### T31.1. Fragments: fragment files
 
 A fragment file (SPEC §10.7) is a document whose root is `<fragment label weft>`: leading `<param>` declarations (`string`, `number`, `boolean`, `enum`, `token`, `action`, `slot`, with the vocabulary of a catalog prop), then a body as it could stand in a screen, with `<outlet name>` for slot parameters. The parser types `<param>` literals (`min`, `max`, `required`, `integer`, and `default` by the parameter's type); the validator checks a fragment on its own: declarations (`W803`), outlets (`W804`), and every parameter read as a value of its declared type (`W204`, `W203`, `W307`, `W218`, `W807` for an action or slot parameter in a prop or a read past the name), with `on-press="{$back}"` forwarding an action parameter and `W305` for an unknown one. `use`, `fragment`, `param` and `outlet` are reserved kind names in catalogs (`W706`). The format moves to `weft` 0.2. `AGENT-SPEC.md` gains a fragments section and repair rows.

@@ -178,6 +178,44 @@ export const catalog: Catalog = CatalogSchema.parse({
       events: ["close"],
     },
   },
+  // The page header of SPEC §10.7, so that its examples check against a fragment.
+  fragments: {
+    "page-header": {
+      weft: "0.2",
+      root: {
+        kind: "fragment",
+        props: { label: "Page header" },
+        children: [
+          { kind: "param", props: { name: "title", required: true, type: "string" } },
+          {
+            kind: "param",
+            props: { default: "muted", name: "tone", type: "enum", values: "default muted" },
+          },
+          { kind: "param", props: { name: "back", type: "action" } },
+          {
+            kind: "param",
+            props: { "allowed-children": "button link", name: "actions", type: "slot" },
+          },
+          {
+            kind: "stack",
+            id: "bar",
+            props: { direction: "row" },
+            children: [
+              { kind: "button", id: "back", on: { press: "{$back}" }, children: ["Back"] },
+              { kind: "heading", id: "title", props: { level: 1, text: { bind: "$title" } } },
+              {
+                kind: "text",
+                id: "note",
+                props: { tone: { bind: "$tone" } },
+                children: ["Signed in"],
+              },
+              { kind: "outlet", props: { name: "actions" } },
+            ],
+          },
+        ],
+      },
+    },
+  },
 });
 
 export const tokens: ReadonlyMap<string, string> = new Map([

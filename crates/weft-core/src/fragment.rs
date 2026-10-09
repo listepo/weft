@@ -2,7 +2,9 @@
 //! parser types their literals and the validator checks fragments and their reads alike.
 
 use crate::diagnostics::{Code, one_of};
-use crate::model::{Map, Node, PropDef, PropDefault, PropType, SlotDef, Value};
+use crate::model::{
+    ComponentDef, Content, Map, Node, PropDef, PropDefault, PropType, SlotDef, Value,
+};
 use crate::rules::is_name;
 
 pub const FRAGMENT: &str = "fragment";
@@ -302,4 +304,44 @@ pub fn mismatch(name: &str, param: &PropDef, def: &PropDef) -> Option<(Code, Str
         .filter(|_| def.kind == PropType::Token)?;
     let message = format!("Parameter \"{name}\" is not a token of type {wanted}.");
     (param.token_type.as_ref() != Some(wanted)).then(|| (Code::W307, message, wanted.clone()))
+}
+
+pub const USE: &str = "use";
+
+/// The definition a `<use>` of this fragment answers to: its value parameters as props, its
+/// action parameters as events and its slot parameters as slots.
+pub fn signature(root: &Node) -> ComponentDef {
+    let mut fragment = PropDef::new("The name of the fragment to place.", PropType::String);
+    fragment.required = Some(true);
+    fragment.bindable = Some(false);
+    let mut props = Map::from_iter([(FRAGMENT.to_owned(), fragment)]);
+    let (mut slots, mut events) = (Map::new(), Vec::new());
+    for (name, kind) in params(root) {
+        match kind {
+            ParamKind::Value(def) => {
+                props.insert(name, def);
+            }
+            ParamKind::Action => events.push(name),
+            ParamKind::Slot(def) => {
+                slots.insert(name, def);
+            }
+        }
+    }
+    let description = match root.props.get("label") {
+        Some(Value::String(label)) => label.clone(),
+        _ => String::new(),
+    };
+    ComponentDef {
+        description,
+        role: "group".to_owned(),
+        content: Content::None,
+        allowed_children: None,
+        allowed_parents: None,
+        requires_label: None,
+        root: None,
+        props: Some(props),
+        slots: (!slots.is_empty()).then_some(slots),
+        states: None,
+        events: (!events.is_empty()).then_some(events),
+    }
 }

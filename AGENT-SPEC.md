@@ -132,7 +132,7 @@ When nothing in the catalog fits, an extension element `x-<vendor>-<name>` with 
 
 ### 2.9 Fragments
 
-A project can share a block between screens, such as a page header, as a *fragment* in its own file (SPEC §10.7).
+A project can share a block between screens, such as a page header, as a *fragment* in its own file (SPEC §10.7). Place it with `<use>`; never copy its body into the screen.
 
 ```xml
 <fragment label="Page header" weft="0.2">
@@ -147,8 +147,20 @@ A project can share a block between screens, such as a page header, as a *fragme
 </fragment>
 ```
 
-- The `<param>` elements come first, then the body. Read a value parameter whole, `{$title}`, where its type fits; an action parameter as `on-press="{$back}"`; a slot parameter with `<outlet name="actions"/>`.
-- Ids inside a fragment belong to it and may repeat the ids of a screen.
+```xml
+<screen id="cart" label="Cart" weft="0.2">
+  <use id="header" fragment="page-header" title="Your cart" on-back="nav.back">
+    <slot name="actions">
+      <button id="clear" on-press="cart.clear">Clear</button>
+    </slot>
+  </use>
+</screen>
+```
+
+- `<use>` takes an `id`, `fragment` (the name), one attribute per value parameter with a value of its type (a literal, binding or token), `on-<name>` per action parameter, and `<slot name="…">` per slot parameter. It takes no `label`, `hidden` or other universal attribute and no default content.
+- What a use places must be allowed where the `<use>` stands, as if the body were written there.
+- Ids inside a fragment belong to it. A rendered element is addressed as `header/title`. A patch sets a parameter on the `<use>` (`"prop": "title"`, `"prop": "on-back"`) or fills its slot; it never names an id inside the fragment (`W502`): edit the fragment instead.
+- In a fragment the `<param>` elements come first, then the body. Read a value parameter whole, `{$title}`, where its type fits; an action parameter as `on-press="{$back}"`; a slot parameter with `<outlet name="actions"/>`.
 
 ## 3. Editing a screen
 
@@ -287,8 +299,10 @@ What each code asks of you:
 | W712 | Give a shared catalog its own `prefix`: one lowercase segment, not `x`, `weft` or a core kind's first segment. Only the project's own catalog has none. |
 | W713 | A library defines only kinds named `<prefix>-…`; extend core and library kinds in the project's own catalog, and name its new kinds outside the libraries' prefixes. |
 | W714 | A warning: add the required catalog to `catalog`, or load a version compatible with the one `requires` names. |
+| W801 | Use a fragment the project has (`hint` names the nearest), or write the elements without `<use>`. |
+| W802 | Give the `<use>` only the attributes, `on-*` actions and slots its fragment declares as parameters; `expected` lists them. |
 | W803 | Fix the `<param>`: a name of lowercase letters and digits, a known `type`, only the attributes its type takes, a `default` of that type, every `<param>` before the body, each name once; and give the fragment a body. |
-| W804 | Give `<outlet>` only `name`, naming a slot parameter of the fragment, once; use `<outlet>` only in a fragment. |
+| W804 | Give `<outlet>` only `name`, naming a slot parameter of the fragment, once; outside a fragment use a `<slot>` of a `<use>`. |
 | W807 | Read a value parameter whole (`{$title}`, not `{$title.x}`) in a prop, an action parameter in `on-*`, and a slot parameter with `<outlet>`. |
 
 ### 4.1 Reading back an edit

@@ -117,6 +117,8 @@ export const DIAGNOSTIC_CODES = {
     severity: "warning",
     summary: "Catalog requirement is not loaded at a compatible version.",
   },
+  W801: { severity: "mode", summary: "`<use>` names no fragment of the project." },
+  W802: { severity: "error", summary: "Attribute, action or slot the fragment does not declare." },
   W803: { severity: "error", summary: "Malformed `<param>` or `<fragment>`." },
   W804: { severity: "error", summary: "`<outlet>` names no slot parameter, or one twice." },
   W807: { severity: "error", summary: "Parameter read where its type cannot go." },

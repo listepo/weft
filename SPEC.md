@@ -153,7 +153,7 @@ Helper entries (`Id`, `Binding`, `NegatableBinding`, `Token`, `Action`, `Node`) 
 
 The schema leaves out what it cannot express, and the validator still checks it: unique ids (`W301`), loop variables in scope and not shadowed (`W305`, `W311`), `references` (`W309`), text given both as content and as `text` (`W310`), a submit button outside a `form` (`W313`), the asset paths of a `model` (`W317`), a reference inside a literal (`W213`) and characters XML cannot carry (`W221`), whose patterns would need look-around or ranges beyond the Basic Multilingual Plane that structured-output modes do not reliably support. It describes the catalog only, so the project's tokens, actions and data schema (`W306`–`W308`, `W315`, `W316`) are not narrowed into it.
 
-It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with two exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for, and it admits no `state` on a kind that declares no states, where validation lets a bound one through. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
+It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with three exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for; it admits no `state` on a kind that declares no states, where validation lets a bound one through; and it admits no `<use>` (§10.7), whose parameters belong to the project's fragments rather than to the catalog. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
 
 `weft schema` prints the schema of the project's catalog (or of `--catalog`) indented, or writes it as `document.schema.json` (§10.6); `documentSchema` of `@weft/core/document-schema` and the MCP tool `weft_schema` return the same schema as compact JSON text, byte for byte what the generator writes. The schema of §3 that `documentJsonSchema()` of `@weft/core` returns is a different one: it knows no catalog and admits any kind and any prop.
 
@@ -209,6 +209,7 @@ type Catalog = {
   prefix?: string;                         // owns the kinds named `<prefix>-…`; absent = a project catalog
   requires?: Record<string, string>;       // catalog name → the version it was written against
   components: Record<string, ComponentDef>;
+  fragments?: Record<string, Document>;    // a project's fragments by name (§10.7); never in a catalog file
 };
 
 type ComponentDef = {
@@ -450,6 +451,8 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W712 | Catalog prefix is malformed or reserved, or a second catalog has no prefix; the catalog is ignored (§5, §10.4). |
 | W713 | Catalog defines or extends a kind it does not own: a library's kind outside its prefix, or a project catalog's new kind under a library's prefix (§10.4). |
 | W714 | Catalog requirement names a catalog that is not loaded, or is loaded at an incompatible version (§5, §10.4). |
+| W801 | `<use>` names no fragment of the project (mode, §10.7). |
+| W802 | `<use>` gives an attribute, `on-*` or slot that its fragment does not declare (§10.7). |
 | W803 | Malformed `<param>` or `<fragment>`: a bad declaration, a duplicate or misplaced `<param>`, a fragment without a body (§10.7). |
 | W804 | `<outlet>` names no slot parameter, places one twice, has other attributes or content, or stands outside a fragment (§10.7). |
 | W807 | Parameter read where its type cannot go: an action or slot parameter in a prop, a value parameter in `on-*`, a read with more after the name (§10.7). |
@@ -493,7 +496,7 @@ type Patch =
 ## 8. Versioning and extensibility
 
 - `weft` on `<screen>` is `major.minor`. A minor version only adds; a reader of `0.x` MUST accept any `0.y` document under the rules below. A major version may break.
-- The format is `weft` 0.2 since fragments (§10.7), a minor addition: a 0.1 document is a valid 0.2 document and needs no migration, and writers write `weft="0.2"`. There is no per-feature gate: a 0.2 reader accepts a fragment file marked 0.1. A 0.1 reader warns about the version (`W403`) and reads `<fragment>`, `<param>` and `<outlet>` as unknown elements, which it keeps.
+- The format is `weft` 0.2 since fragments (§10.7), a minor addition: a 0.1 document is a valid 0.2 document and needs no migration, and writers write `weft="0.2"`. There is no per-feature gate: a 0.2 reader accepts a fragment file or a `<use>` marked 0.1. A 0.1 reader warns about the version (`W403`) and reads `<fragment>`, `<param>`, `<outlet>` and `<use>` as unknown elements, which it keeps.
 - **Extensions** are elements or attributes whose name starts with `x-<vendor>-`. An extension element MUST carry `role` (its ARIA fallback) and follows `content: "mixed"`; it may have any attributes, slots and events, and its literals stay strings. A reader that does not know it renders its children inside a container with that role. Extension attributes are allowed on every element in both modes.
 - **Unknown, non-extension** elements or attributes come from a newer minor version or another catalog. In *lenient* mode (default for readers) they produce a `W4xx` warning; an unknown element is treated as an extension with role `group`, an unknown attribute is kept in the model and ignored. In *strict* mode (default for writers and CI) they are errors. A newer minor `weft` version is reported the same way. Unknown and extension elements are opaque: parent/child rules skip them, but the parent's content model still applies. Undeclared events, slots, states and enum values of a known component are schema errors, not compatibility warnings.
 - A reader MUST NOT drop unknown content when it round-trips a document.
@@ -763,7 +766,9 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 
 ### 10.7 Fragments
 
-A fragment is a block that several screens of a project share, such as a page header, a footer or a product card. It is kept once, in its own file. A fragment adds elements to the format, not a new model, and it is an addition of format 0.2 (§8).
+A fragment is a block that several screens of a project share, such as a page header, a footer or a product card. It is kept once, in its own file, and screens place it by reference.
+
+The project's merged catalog (§10.4) carries the fragments in a `fragments` member, which maps each name to its fragment document in canonical JSON. So every tool that is given the project's catalog knows the fragments. Without a project there are no fragments. A fragment adds elements to the format, not a new model, and it is an addition of format 0.2 (§8).
 
 **A fragment file.**
 
@@ -790,11 +795,63 @@ A fragment is a block that several screens of a project share, such as a page he
 
 In canonical JSON a fragment file is a `Document` whose root has the kind `fragment`. `param` and `outlet` are nodes without an id, and their attributes sit in `props`, typed as above. A parameter read is an ordinary binding value, `{ "bind": "$title" }`. An action parameter in `on` is the string `"{$back}"`. The rules of §3 apply unchanged, and the `<param>` elements keep their document order before the body.
 
-**Ids.** Ids inside a fragment body are local. They are unique within the fragment (`W301` there) and may repeat the ids of any screen.
+**A use.**
 
-**Validation.** A fragment is checked once on its own.
+```xml
+<screen id="cart" label="Cart" weft="0.2">
+  <use id="header" fragment="page-header" title="Your cart" on-back="nav.back">
+    <slot name="actions">
+      <button id="clear" on-press="cart.clear">Clear</button>
+    </slot>
+  </use>
+</screen>
+```
 
-A fragment is checked as a screen body, with the project's catalog, tokens, actions and data schema. Each parameter read counts as a value of the parameter's type. A `string` prop takes `string` and `enum` parameters, a `number` prop takes `number` parameters, a `boolean` prop takes `boolean` parameters, an `enum` prop takes an `enum` parameter whose values it allows (`W203`), and a `token` prop takes a `token` parameter with the same `token-type` (`W307`). Any other pairing is `W204`. A literal-only prop takes no read (`W217`), and a negated read needs a boolean parameter in a boolean prop (`W218`). Reads of `$.…` are checked against the data schema (`W315`, `W316`). A `submit` button in the body may rely on a `form` around the use, so `W313` is not reported there and `grow` on a top-level element is not reported either, because the fragment's body is judged where it is placed.
+```json
+{
+  "kind": "use",
+  "id": "header",
+  "props": { "fragment": "page-header", "title": "Your cart" },
+  "on": { "back": "nav.back" },
+  "slots": { "actions": [{ "kind": "button", "id": "clear", "on": { "press": "cart.clear" }, "children": ["Clear"] }] }
+}
+```
+
+- `<use>` is structural. It takes `id` (required, as on `<each>`), `fragment` (the fragment's name, a literal), one attribute per value parameter, `on-<name>` per action parameter, and one `<slot name="…">` per slot parameter. It has no default content and none of the universal attributes of §2.2: a header that can be hidden declares a `hidden` boolean parameter and passes it on. Extension attributes (`x-…`) are allowed.
+- A value parameter takes every value form of §2.1: a literal typed by the parameter, a binding, a negated binding, or a token reference. A binding is read where the `<use>` stands, so `{$line.name}` works inside an `<each as="line">`.
+- The canonical form keeps a `<use>` as it is written. Expansion (below) is something a renderer or a checker does, never a rewrite of the document.
+
+**Ids.**
+
+- Ids inside a fragment body are local. They are unique within the fragment (`W301` there) and may repeat the ids of any screen.
+- The id of a `<use>` is a screen id like any other.
+- An expanded element is addressed by its *instance path*: the id of the `<use>` and the local id, joined by `/`, as in `header/title`. Nested uses join further: `header/crumbs/home`. `/` is outside the id grammar, so an instance path never collides with a document id. Inside `<each>` the index suffix of §4.3 follows the whole instance path: `card/price[2]`.
+
+**Meaning: expansion.** A use means its fragment's body, placed where the `<use>` stands, with:
+
+1. every parameter read replaced by the use's value. A negated read of a binding toggles its negation, and a negated read of a boolean literal is its opposite. An absent optional parameter takes its `default`; without one, the attribute is left out;
+2. every `<outlet name="x">` replaced by the content of the use's `<slot name="x">`, or by nothing;
+3. every id replaced by its instance path.
+
+Evaluation is scoped, not textual. The loop variables of the body never capture names from the use site, and the reverse. An implementation that expands by rewriting renames the body's loop variables that would clash.
+
+`<use>` is transparent for structure, as `<each>` is. The top-level elements of the body are checked against the parent's (or slot's) `allowedChildren` and against their own `allowedParents` where the `<use>` stands. `<use>` itself adds no node to the accessibility tree.
+
+**Validation.** A fragment is checked once on its own, and each use is checked against the fragment's parameters. Expanded content is not checked again element by element.
+
+A fragment is checked as a screen body, with the project's catalog, tokens, actions and data schema. Each parameter read counts as a value of the parameter's type. A `string` prop takes `string` and `enum` parameters, a `number` prop takes `number` parameters, a `boolean` prop takes `boolean` parameters, an `enum` prop takes an `enum` parameter whose values it allows (`W203`), and a `token` prop takes a `token` parameter with the same `token-type` (`W307`). Any other pairing is `W204`. A literal-only prop takes no read (`W217`), and a negated read needs a boolean parameter in a boolean prop (`W218`). Reads of `$.…` are checked against the data schema (`W315`, `W316`). A `submit` button in the body may rely on a `form` around the use, so `W313` is not reported there, and `grow` on a top-level element is checked where the fragment is used.
+
+At a use:
+
+| Situation | Code |
+| --- | --- |
+| `fragment` names no fragment of the project | `W801` (mode severity; the hint is the nearest name) |
+| An attribute, `on-*` or slot that the fragment does not declare | `W802` |
+| A required parameter or slot is missing | `W205`, `W208` |
+| A value is not of the parameter's type, enum values or range | `W204`, `W203`, `W224` |
+| A binding or token problem in a value | the codes of §6, such as `W214`, `W306`, `W315` |
+| A top-level body element is not allowed where the `<use>` stands | `W302`, `W303`, `W304` |
+| Slot content against the slot parameter's `allowed-children` | `W302`, `W304` |
 
 In a fragment:
 
@@ -806,4 +863,11 @@ In a fragment:
 | An `<outlet>` for a name that is no `slot` parameter, twice for one name, with other attributes or content, or outside a fragment | `W804` |
 | A read where its type cannot go: an `action` or `slot` parameter in a prop, a value parameter in `on-*`, a read with more after the name | `W807` |
 
-**Patches.** A fragment file is edited with the same patches as a screen, with `<fragment>` as its root.
+A reader without fragments (no project) reads `<use>` as content it does not know (§8). In lenient mode it warns with `W801` and treats the use as an element with role `group` that holds its slots' content. In strict mode `W801` is an error.
+
+**Patches.** Patches address the screen and never reach into a fragment (§7).
+
+- `set` on the id of a `<use>` changes a parameter (`"prop": "title"`), an action parameter (`"prop": "on-back"`), or the fragment itself (`"prop": "fragment"`). The result is validated as every patch result is.
+- `insert` and `move` with `"parent": "header", "slot": "actions"` fill a slot parameter. The slot must be one the fragment declares (`W504`).
+- `remove` and `move` of a `<use>` take the whole instance.
+- An id inside a fragment body (`title`, or the instance path `header/title`) is not a screen id. It is `W502`, and the hint names the fragment to edit. A fragment file is edited with the same patches as a screen, with `<fragment>` as its root.

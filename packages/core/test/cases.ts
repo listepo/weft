@@ -106,6 +106,8 @@ export const cases: Record<DocumentCode, Case> = {
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
   W403: { markup: screen("", "0.3") },
   W404: { markup: screen("", "1.0") },
+  W801: { markup: screen('<use id="u" fragment="page-headr"/>') },
+  W802: { markup: screen('<use id="u" fragment="page-header" title="T" subtitle="S"/>') },
   W803: { markup: fragment('<param name="title" type="text"/><stack id="a"/>') },
   W804: { markup: fragment('<stack id="a"><outlet name="nope"/></stack>') },
   W807: { markup: fragment('<param name="back" type="action"/><text id="a" text="{$back}"/>') },

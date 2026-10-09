@@ -244,6 +244,11 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W509",
             json!([{"op": "insert", "parent": "main", "markup": "<stack id=\"go\"/>"}]),
         ),
+        ("W801", in_screen(r#"<use id="u" fragment="page-headr"/>"#)),
+        (
+            "W802",
+            in_screen(r#"<use id="u" fragment="page-header" title="T" subtitle="S"/>"#),
+        ),
         fragment(
             "W803",
             r#"<param name="title" type="text"/><stack id="a"/>"#,
@@ -357,7 +362,7 @@ fn severities_are_errors_except_the_mode_codes_and_the_import_warning() {
     for code in Code::ALL {
         let (lenient, strict) = (code.severity(Mode::Lenient), code.severity(Mode::Strict));
         match code.as_str() {
-            "W401" | "W402" | "W403" => {
+            "W401" | "W402" | "W403" | "W801" => {
                 assert_eq!((lenient, strict), (Severity::Warning, Severity::Error));
             }
             "W602" | "W702" | "W710" | "W714" => {
