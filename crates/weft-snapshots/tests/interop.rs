@@ -10,7 +10,7 @@ mod common;
 
 use std::collections::HashSet;
 
-use serde_json::Value as Json;
+use serde_json::{Value as Json, json};
 use weft_core::{Catalog, Document, Mode, ValidateOptions, has_errors, validate_document};
 use weft_interop::ImportResult;
 use weft_interop::a2ui::{from_a2ui, to_a2ui};
@@ -529,6 +529,246 @@ fn json_render_export_reports_its_losses() {
     );
 }
 
+fn screen_named(name: &str) -> Document {
+    screens()
+        .into_iter()
+        .find(|(n, _)| n == name)
+        .unwrap_or_else(|| panic!("no screen {name}"))
+        .1
+}
+
+fn parsed(markup: &str) -> Document {
+    let (document, diagnostics) =
+        common::parse_strict(markup, &common::catalog(), &common::tokens());
+    document.unwrap_or_else(|| panic!("{diagnostics:#?}"))
+}
+
+/// `layout` keeps `justify` and `grow` through A2UI. `start` is the default, so it is omitted
+/// on the way out and not written back.
+#[test]
+fn a2ui_layout_round_trip_keeps_mapped_forms() {
+    let catalog = common::catalog();
+    let document = screen_named("corpus-layout");
+    let exported = to_a2ui(&document);
+    let text = serde_json::to_string(&exported.messages).unwrap();
+    let messages: Json = serde_json::from_str(&text).unwrap();
+    let components = messages[1]["updateComponents"]["components"]
+        .as_array()
+        .unwrap();
+    let component = |id: &str| components.iter().find(|c| c["id"] == id).unwrap();
+    assert!(component("toolbar").get("justify").is_none(), "{text}");
+    assert_eq!(component("pager")["justify"], "center");
+    assert_eq!(component("actions")["justify"], "end");
+    assert_eq!(component("search")["weight"], 1);
+    assert!(
+        exported
+            .losses
+            .iter()
+            .all(|l| !l.note.contains("justify") && !l.note.contains("grow")),
+        "{:#?}",
+        exported.losses
+    );
+    let back = from_a2ui(&text, &catalog);
+    assert_lenient_valid("layout", &back, &catalog);
+    let markup = weft_core::serialize(&back.document);
+    assert!(markup.contains(r#"grow="true""#), "{markup}");
+    assert!(markup.contains(r#"justify="center""#), "{markup}");
+    assert!(markup.contains(r#"justify="end""#), "{markup}");
+    assert!(!markup.contains(r#"justify="start""#), "{markup}");
+    assert!(
+        back.losses
+            .iter()
+            .all(|l| !l.note.contains("justify") && !l.note.contains("weight")),
+        "{:#?}",
+        back.losses
+    );
+}
+
+/// Each layout form A2UI cannot say is one `layout` loss, and the forms it can say come back.
+#[test]
+fn a2ui_layout_reports_each_loss() {
+    let catalog = common::catalog();
+    let document = parsed(
+        r#"<screen id="s" weft="0.1">
+  <stack id="bar" direction="row" justify="space-between" max-width="{token.size.md}" padding="{token.space.md}" wrap="true">
+    <text id="a">A</text>
+    <text id="b" grow="true">B</text>
+  </stack>
+  <stack id="col" justify="end">
+    <text id="c">C</text>
+  </stack>
+  <grid id="g" columns="3" min-column-width="{token.size.sm}" padding="{token.space.sm}">
+    <text id="t">Hi</text>
+  </grid>
+</screen>"#,
+    );
+    let exported = to_a2ui(&document);
+    let text = serde_json::to_string(&exported.messages).unwrap();
+    assert!(text.contains(r#""justify":"spaceBetween""#), "{text}");
+    assert!(text.contains(r#""justify":"end""#), "{text}");
+    assert!(text.contains(r#""weight":1"#), "{text}");
+    let notes: Vec<&str> = exported
+        .losses
+        .iter()
+        .filter(|l| format!("{:?}", l.kind) == "Layout")
+        .map(|l| l.note.as_str())
+        .collect();
+    for prop in [
+        "wrap",
+        "padding",
+        "max-width",
+        "columns",
+        "min-column-width",
+    ] {
+        assert!(
+            notes.iter().any(|n| n.starts_with(prop)),
+            "{prop} missing from {notes:?}"
+        );
+    }
+    assert!(
+        !exported
+            .losses
+            .iter()
+            .any(|l| l.note.contains("justify") || l.note.contains("grow")),
+        "{:#?}",
+        exported.losses
+    );
+
+    let surface = |components: Json| {
+        serde_json::to_string(&json!([
+            { "version": "v0.9", "createSurface": { "surfaceId": "s", "catalogId": weft_interop::a2ui::CATALOG_ID } },
+            { "version": "v0.9", "updateComponents": { "surfaceId": "s", "components": components } }
+        ]))
+        .unwrap()
+    };
+    let row = |justify: &str, a_weight: Option<Json>, b_weight: Option<Json>| {
+        let mut a = json!({"id": "a", "component": "Text", "text": "A"});
+        let mut b = json!({"id": "b", "component": "Text", "text": "B"});
+        if let Some(w) = a_weight {
+            a["weight"] = w;
+        }
+        if let Some(w) = b_weight {
+            b["weight"] = w;
+        }
+        surface(json!([
+            {"id": "root", "component": "Column", "children": ["row"]},
+            {"id": "row", "component": "Row", "justify": justify, "children": ["a", "b"]},
+            a,
+            b
+        ]))
+    };
+    for justify in ["spaceAround", "spaceEvenly", "stretch"] {
+        let result = from_a2ui(&row(justify, None, None), &catalog);
+        assert_lenient_valid(justify, &result, &catalog);
+        let markup = weft_core::serialize(&result.document);
+        assert!(!markup.contains("justify="), "{justify}: {markup}");
+        assert!(
+            result
+                .losses
+                .iter()
+                .any(|l| format!("{:?}", l.kind) == "Layout" && l.note.contains(justify)),
+            "{justify}: {:#?}",
+            result.losses
+        );
+    }
+    let unequal = from_a2ui(&row("center", Some(json!(1)), Some(json!(2))), &catalog);
+    assert_lenient_valid("unequal", &unequal, &catalog);
+    let markup = weft_core::serialize(&unequal.document);
+    assert_eq!(markup.matches(r#"grow="true""#).count(), 2, "{markup}");
+    assert!(markup.contains(r#"justify="center""#), "{markup}");
+    assert!(
+        unequal
+            .losses
+            .iter()
+            .any(|l| l.note.contains("unequal weights")),
+        "{:#?}",
+        unequal.losses
+    );
+    let equal = from_a2ui(&row("start", Some(json!(2)), Some(json!(2))), &catalog);
+    assert_lenient_valid("equal", &equal, &catalog);
+    let markup = weft_core::serialize(&equal.document);
+    assert_eq!(markup.matches(r#"grow="true""#).count(), 2, "{markup}");
+    assert!(
+        !equal.losses.iter().any(|l| l.note.contains("unequal")),
+        "{:#?}",
+        equal.losses
+    );
+    let negative = from_a2ui(&row("start", Some(json!(-1)), None), &catalog);
+    assert_lenient_valid("negative", &negative, &catalog);
+    assert!(
+        !weft_core::serialize(&negative.document).contains("grow="),
+        "{}",
+        weft_core::serialize(&negative.document)
+    );
+    assert!(
+        negative
+            .losses
+            .iter()
+            .any(|l| l.note.contains("below zero")),
+        "{:#?}",
+        negative.losses
+    );
+    let text_weight = from_a2ui(&row("start", Some(json!("fill")), None), &catalog);
+    assert_lenient_valid("text-weight", &text_weight, &catalog);
+    assert!(!weft_core::serialize(&text_weight.document).contains("grow="));
+    assert!(
+        text_weight
+            .losses
+            .iter()
+            .any(|l| l.note.contains("weight has no Weft form")),
+        "{:#?}",
+        text_weight.losses
+    );
+    // A plain root column folds into the screen, so a weight there is not `grow`.
+    let folded = from_a2ui(
+        &surface(json!([
+            {"id": "root", "component": "Column", "children": ["a"]},
+            {"id": "a", "component": "Text", "text": "A", "weight": 1}
+        ])),
+        &catalog,
+    );
+    assert_lenient_valid("folded", &folded, &catalog);
+    assert!(!weft_core::serialize(&folded.document).contains("grow="));
+    assert!(
+        folded
+            .losses
+            .iter()
+            .any(|l| l.note.contains("weight has no Weft form")),
+        "{:#?}",
+        folded.losses
+    );
+}
+
+/// json-render keeps every layout form, including the ones A2UI loses.
+#[test]
+fn json_render_layout_round_trip_keeps_every_form() {
+    let catalog = common::catalog();
+    let want = [
+        ("corpus-layout", r#"justify="start""#),
+        ("corpus-layout", r#"grow="true""#),
+        ("corpus-layout", r#"justify="center""#),
+        ("corpus-layout", r#"justify="end""#),
+        ("corpus-dashboard", r#"justify="space-between""#),
+        ("corpus-dashboard", r#"min-column-width="{token.size.sm}""#),
+        ("corpus-dashboard", r#"max-width="{token.size.lg}""#),
+        ("corpus-glass", r#"padding="{token.space.lg}""#),
+        ("corpus-glass", r#"max-width="{token.size.md}""#),
+        ("corpus-glass", r#"padding="{token.space.xl}""#),
+    ];
+    let mut seen = HashSet::new();
+    for (name, needle) in want {
+        let document = screen_named(name);
+        let exported = to_json_render(&document, &catalog, None);
+        assert!(exported.losses.is_empty(), "{name}: {:#?}", exported.losses);
+        let back = from_json_render(&exported.spec.to_string(), &catalog);
+        assert_lenient_valid(name, &back, &catalog);
+        let markup = weft_core::serialize(&back.document);
+        assert_eq!(weft_core::serialize(&document), markup, "{name}");
+        assert!(markup.contains(needle), "{name} missing {needle}: {markup}");
+        seen.insert(name);
+    }
+    assert_eq!(seen.len(), 3);
+}
 /// A literal `href` or `src` is `http`, `https`, `mailto` or relative. `javascript:` and `data:`
 /// are left out on the way out and on the way in; a relative URL is kept (SPEC §9 Trust).
 #[test]

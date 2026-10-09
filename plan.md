@@ -36,7 +36,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.4 | todo | P2 | 4 | 0% | |
 | T16.5 | todo | P2 | 3 | 0% | |
-| T16.6 | todo | P2 | 2 | 0% | |
 | T16.7 | todo | P2 | 3 | 0% | |
 | T17 | todo | P2 | 4 | 50% | |
 | T17.2 | todo | P2 | 3 | 0% | |
@@ -465,7 +464,7 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 
 **Dependencies.** T55 and T52 (done) are the precedents. T39 is independent: this ships within `weft` 0.1 (decision 9). T14's style overrides add no `style-padding` for `stack` and `grid` (decision 6). T67.4 and T67.5, which edit the same Slint `read.rs`, are done. T69's "resize within the layout rules" builds on this.
 
-**Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render. T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
+**Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render (done). T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
 
 ### T16.3. Layout vocabulary: web generators and the reference renderer
 
@@ -523,21 +522,6 @@ Steps:
 Size: about 150 lines of code.
 
 Done when: the three screens compile, their screenshots are reviewed, and they read back to the same props without the source comment; `moon run root:changed` exits 0.
-
-### T16.6. Layout vocabulary: A2UI and json-render
-
-T16 scope items 3 and 4 for `crates/weft-interop`. Depends on T16.2.
-
-Steps:
-
-1. A2UI export: `justify` (`spaceBetween` in A2UI's spelling) and `grow` as `weight: 1`; `padding`, `max-width` and `min-column-width` are losses.
-2. A2UI import: those back; `spaceAround`, `spaceEvenly`, `stretch` and unequal weights are `layout` losses.
-3. json-render export and import: check that the props pass through one to one and add a round-trip test for `layout`.
-4. §9 rows updated.
-
-Size: about 100 lines of code.
-
-Done when: the A2UI and json-render round trips of `layout` keep every mapped form, a test covers each listed loss, and `moon run root:changed` exits 0.
 
 ### T16.7. Layout vocabulary: Figma and Penpot
 
