@@ -297,7 +297,17 @@ pub fn document_issues(v: &Json) -> Vec<Issue> {
     issues
 }
 
-const OPS: [&str; 4] = ["set", "insert", "remove", "move"];
+const OPS: [&str; 8] = [
+    "set",
+    "insert",
+    "remove",
+    "move",
+    "add-context",
+    "set-context",
+    "resolve-context",
+    "remove-context",
+];
+const FIELDS: [&str; 3] = ["text", "kind", "for"];
 /// `Number.MAX_SAFE_INTEGER`: zod's `int()` admits safe integers only.
 const MAX_SAFE_INTEGER: f64 = 9_007_199_254_740_991.0;
 
@@ -336,9 +346,13 @@ pub fn patch_issues(v: &Json) -> Vec<Issue> {
         .and_then(Json::as_str)
         .filter(|op| OPS.contains(op));
     let Some(op) = op else {
+        let expected: Vec<String> = OPS.iter().map(|op| format!("'{op}'")).collect();
         issues.push(hard(
             &[Segment::Key("op".into())],
-            "Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move'",
+            format!(
+                "Invalid discriminator value. Expected {}",
+                expected.join(" | ")
+            ),
         ));
         return issues;
     };
@@ -363,17 +377,52 @@ pub fn patch_issues(v: &Json) -> Vec<Issue> {
             ("index", &index),
             ("markup", &string),
         ],
-        "remove" => vec![("op", &nothing), ("id", &string)],
-        _ => vec![
+        "remove" | "resolve-context" | "remove-context" => vec![("op", &nothing), ("id", &string)],
+        "move" => vec![
             ("op", &nothing),
             ("id", &string),
             ("parent", &string),
             ("slot", &slot),
             ("index", &index),
         ],
+        "add-context" => vec![("op", &nothing), ("entry", &entry)],
+        _ => vec![
+            ("op", &nothing),
+            ("id", &string),
+            ("field", &field),
+            ("value", &nullable_string),
+        ],
     };
     strict_object(Some(v), &[], &fields, &mut issues);
+    // Only `for` can be cleared: an entry always has a kind and a text (SPEC §7).
+    let clears = map.get("value") == Some(&Json::Null);
+    let field = map.get("field").and_then(Json::as_str);
+    if op == "set-context" && clears && field.is_some_and(|f| f != "for" && FIELDS.contains(&f)) {
+        issues.push(invalid_type(
+            &[Segment::Key("value".into())],
+            "string",
+            Some(&Json::Null),
+        ));
+    }
     issues
+}
+
+fn field(v: Option<&Json>, path: Path<'_>, issues: &mut Vec<Issue>) {
+    if !v
+        .and_then(Json::as_str)
+        .is_some_and(|f| FIELDS.contains(&f))
+    {
+        issues.push(hard(
+            path,
+            r#"Invalid option: expected one of "text"|"kind"|"for""#,
+        ));
+    }
+}
+
+fn nullable_string(v: Option<&Json>, path: Path<'_>, issues: &mut Vec<Issue>) {
+    if v != Some(&Json::Null) {
+        string(v, path, issues);
+    }
 }
 
 /// A JSON value as a `Value`, read leniently like the props of `to_document`.
@@ -443,7 +492,7 @@ fn to_node(v: &Json) -> Node {
     }
 }
 
-fn to_entry(v: &Json) -> Entry {
+pub(crate) fn to_entry(v: &Json) -> Entry {
     let text = |k: &str| v.get(k).and_then(Json::as_str).map(str::to_owned);
     Entry {
         id: text("id"),
@@ -549,7 +598,7 @@ mod tests {
             messages(patch_issues(&json!({"op": "explode"}))),
             [(
                 "op".into(),
-                "Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move'".into()
+                "Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context'".into()
             )]
         );
         assert_eq!(

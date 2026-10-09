@@ -37,6 +37,8 @@ enum Case {
     Json(Json),
     /// Patches applied to the fixture's patch base.
     Patch(Json),
+    /// Patches applied with the context read-only (SPEC §7).
+    ReadOnly(Json),
     /// A data schema, compiled, then markup checked against it (SPEC §10.5).
     Data(Json, String),
 }
@@ -268,6 +270,18 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W509",
             json!([{"op": "insert", "parent": "main", "markup": "<stack id=\"go\"/>"}]),
         ),
+        patch(
+            "W510",
+            json!([{"op": "add-context", "entry": {"id": "why", "kind": "todo", "by": "agent", "name": "m", "status": "open", "text": "x"}}]),
+        ),
+        patch(
+            "W511",
+            json!([{"op": "resolve-context", "id": "reset-were"}]),
+        ),
+        (
+            "W512",
+            Case::ReadOnly(json!([{"op": "remove-context", "id": "why"}])),
+        ),
     ]
 }
 
@@ -308,7 +322,7 @@ fn run(case: &Case) -> Vec<&'static str> {
             };
             codes(&validate(input, &options))
         }
-        Case::Patch(patches) => {
+        Case::Patch(patches) | Case::ReadOnly(patches) => {
             let fixture = parse_json(FIXTURE).unwrap();
             let base = parse(
                 fixture["patchBase"].as_str().unwrap(),
@@ -319,7 +333,11 @@ fn run(case: &Case) -> Vec<&'static str> {
             )
             .document
             .unwrap();
-            codes(&apply_patches(&base, patches, &ApplyOptions::new(&catalog)).diagnostics)
+            let options = ApplyOptions {
+                read_only_context: matches!(case, Case::ReadOnly(_)),
+                ..ApplyOptions::new(&catalog)
+            };
+            codes(&apply_patches(&base, patches, &options).diagnostics)
         }
     }
 }

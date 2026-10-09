@@ -36,6 +36,9 @@ Patches (addressed by id, applied in order, all-or-nothing):
 - {"op":"remove","id":"go"}: removes the element and everything in it.
 - {"op":"move","id":"go","parent":"f","slot":"footer","index":0}: index counts the target list after the element left it.
 - {"op":"set","id":"go","prop":"text","value":"Save"}: changes an element's text. Text written as content stays content; a binding value moves it into the text attribute.
+- {"op":"add-context","entry":{"id":"why-go","kind":"decision","by":"agent","name":"your-model-id","for":"go","text":"…"}}: appends a context entry with a new id.
+- {"op":"set-context","id":"why-go","field":"text","value":"…"}: field is text, kind or for; null only for for.
+- {"op":"resolve-context","id":"q1"} resolves a question or todo; {"op":"remove-context","id":"why-go"} deletes an entry. Removing an element that an entry names in for fails (W309) until you remove the entry or change its for.
 The root cannot be removed or moved.
 
 Workflow: write or edit, call weft_validate (or let weft_patch validate), and fix every error using its hint before you answer. Limits: markup at most ${limits.markupChars} characters, at most ${limits.patches} patches per call.`;

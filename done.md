@@ -1,5 +1,11 @@
 # Done
 
+### T39.3. Context: patch operations
+
+`add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.
+
+Built: `context_patch.rs` applies the four operations on the working copy, so a later patch sees an earlier one and a failure leaves no trace. With `author` set, an added entry must carry its `by`, and its `name` when the host sets one (`W512`); `context: "read-only"` refuses every context operation with `W512`. `set-context` takes `field` and `value`; `value: null` clears `for` only, and a kind change to `question` or `todo` adds `status="open"` while other kinds drop it. A dangling `for` after an element patch is the validator's `W309`, with a hint naming the entry to remove or retarget. The patch base of the shared cases gained a context block, and the differential fuzz draws context operations.
+
 ### T39.2. Context: entry validation
 
 `validate.rs` checks every entry once the block is read: ids shared with elements (`W202`, `W212`, `W301`), `kind`, `by` and `status` values (`W203`), `status` against the kind (`W227`), `for` naming an element other than the root (`W309`), the author name and empty text (`W229`), characters markup cannot carry (`W221`), and the limits (`W228`, a `mode` code). SPEC §2.3, §3 and §6.2 and AGENT-SPEC name the codes; `cases.ts` and `codes.rs` produce each one; fixtures regenerated.

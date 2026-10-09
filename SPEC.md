@@ -501,6 +501,9 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W507 | `remove` or `move` of the root element. |
 | W508 | Inserted `markup` is empty, or holds text or `<slot>` beside its elements. |
 | W509 | Inserted `markup` uses an id that the document already has. |
+| W510 | `add-context` uses an id that an element or entry already has. The hint suggests a free one. |
+| W511 | `set-context`, `resolve-context` or `remove-context` names an id that no entry has. The hint names the nearest entry id, or says that the id is an element's. |
+| W512 | A context patch the host does not allow: `add-context` whose `by` or `name` differs from the host's `author`, or any context patch when the host made context read-only. |
 | W601 | Imported input cannot be read: a snapshot that is neither Playwright aria snapshot YAML nor an accessibility tree, HTML that is not a string, or a catalog the importer cannot map with. |
 | W602 | Imported input exceeds an import limit (length, element count or nesting depth); the rest is not imported. |
 | W701 | Project file is not JSON or not an object, or a member or setting has the wrong type (§10.2, §10.6). |
@@ -540,10 +543,14 @@ type Patch =
   | { op: "set"; id: string; prop: string; value: Value | null }     // null removes the prop
   | { op: "insert"; parent: string; slot?: string; index?: number; markup: string }
   | { op: "remove"; id: string }
-  | { op: "move"; id: string; parent: string; slot?: string; index?: number };
+  | { op: "move"; id: string; parent: string; slot?: string; index?: number }
+  | { op: "add-context"; entry: Entry }                                // appends
+  | { op: "set-context"; id: string; field: "text" | "kind" | "for"; value: string | null }
+  | { op: "resolve-context"; id: string }
+  | { op: "remove-context"; id: string };
 ```
 
-`applyPatches(document, patches, { catalog, mode?, tokens?, actions? })` takes the patch list as untrusted input (any JSON value), never throws and never changes `document`. It returns `{ document?, diagnostics }`.
+`applyPatches(document, patches, { catalog, mode?, tokens?, actions?, author?, context? })` takes the patch list as untrusted input (any JSON value), never throws and never changes `document`. It returns `{ document?, diagnostics }`.
 
 - **Atomic.** The patches apply in order to a copy, so a later patch sees the effects of earlier ones. The result is canonicalized and validated as in §6 with the given options. If any patch fails or the result has errors, nothing is applied: `document` is absent and `diagnostics` explain the first failing patch (or the validation errors). Otherwise `document` is the result and `diagnostics` holds its warnings. A patch list does not repair a document that was already invalid: its errors are reported.
 - **Shape.** A patch has exactly the members shown and nothing else; `index` is a non-negative integer. A list that is not an array, or a patch that breaks the shape, gives `W501`, one diagnostic per problem, each pointing at `#/patches/<n>/…`. An empty list is valid and changes nothing.
@@ -552,6 +559,9 @@ type Patch =
 - **`insert`.** `markup` is one or more sibling elements, parsed like a document (§2) but without a `<screen>` root; literals are typed by the catalog. It must hold elements only (`W508`), with ids that no element of the document has (`W509`; syntax errors keep their `W1xx` codes and point into `#/patches/<n>/markup`). They go into the default slot of `parent`, or into the slot named by `slot` (a name the parent's component declares, `W504`; `<each>` declares none, extension and unknown elements accept any name). `index` counts the entries of that list, text included, and defaults to the end; it must not exceed the length (`W505`).
 - **`remove`.** Deletes the element and everything inside it. The root cannot be removed (`W507`).
 - **`move`.** Takes the element out and puts it into `parent` as `insert` would, keeping its id and content. `index` counts the target list after the element has left it, so the final order is the one the index names, also when the target is the list it came from. The root cannot move (`W507`); an element cannot move into itself or its descendants (`W506`).
+- **Context.** The last four operations edit the context block (§2.3) and never touch elements. `add-context` appends `entry`, typed JSON exactly as in `Document.context`, so its text needs no XML escaping; its id must be new to the document, elements and entries alike (`W510`). `set-context` changes one field: `value` is a string, and `null` is allowed only for `for`, which makes the entry about the screen. Changing `kind` to `question` or `todo` sets `status` to `open` when it is absent; changing it to any other kind drops `status`. `id`, `by` and `name` cannot be changed: to restate someone else's note, add an entry of your own. `resolve-context` sets `status` to `resolved`; resolving a resolved entry does nothing, and resolving a kind without status fails validation (`W227`). There is no reopen: a question that comes back is a new question. `remove-context` deletes the entry. An id that no entry has gives `W511`. Values (`kind`, `for`, the text) are left to validation (`W203`, `W309`, `W228`, `W229`), as `set` leaves them.
+- **Element patches leave context alone.** `move` keeps the id, so `for` still holds. `insert` cannot bring entries (`W120`). `remove` of an element that an entry names, or of an ancestor of one, leaves a dangling `for`, so the list fails with `W309` and its hint names the entry (`remove-context reset-where, or set-context its for`): a `constraint` must not vanish silently with the element it protected.
+- **Host options.** `author: { by, name? }` fixes what `add-context` may claim: an entry whose `by`, or `name` when given, differs is refused (`W512`). `context: "read-only"` refuses every context patch (`W512`); the default is `"read-write"`. Both are set by the host (the MCP server, a plugin), never by the model, so an agent's channel cannot write `by="human"`.
 - **Text.** Text is changed with `set` and `prop: "text"`, wherever the element keeps it (§5.1: content or the `text` prop, never both). When a `text` or `mixed` component holds its text as content and nothing else, the patch writes that content: a string replaces it and stays content, any other value replaces it with the `text` prop, and `null` removes it. Otherwise `text` is set like any other prop, so text already in the prop stays there, and a `mixed` component whose content holds elements keeps them and gets `W310` if it is given `text` as well. Text that shares a content list with elements (an `item` holding text beside a button) is not addressable by a patch: `remove` the element that holds it and `insert` it again with the same id.
 
 ## 8. Versioning and extensibility

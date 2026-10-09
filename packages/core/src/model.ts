@@ -146,5 +146,14 @@ export const PatchSchema = z.discriminatedUnion("op", [
     slot: z.string().optional(),
     index: z.number().int().nonnegative().optional(),
   }),
+  z.strictObject({ op: z.literal("add-context"), entry: EntrySchema }),
+  z.strictObject({
+    op: z.literal("set-context"),
+    id: z.string(),
+    field: z.enum(["text", "kind", "for"]),
+    value: z.string().nullable(),
+  }),
+  z.strictObject({ op: z.literal("resolve-context"), id: z.string() }),
+  z.strictObject({ op: z.literal("remove-context"), id: z.string() }),
 ]);
 export type Patch = z.infer<typeof PatchSchema>;

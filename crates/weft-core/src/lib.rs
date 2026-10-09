@@ -5,6 +5,7 @@
 mod canonical;
 mod context;
 mod context_check;
+mod context_patch;
 pub mod controls;
 mod data;
 mod diagnostics;
@@ -23,6 +24,7 @@ mod validate;
 mod values;
 
 pub use canonical::{canonicalize, stringify};
+pub use context_patch::Author;
 pub use data::{
     DataCheckOptions, DataSchema, DataSchemaProblem, Shape, check_data, check_data_json,
     compile_data_schema, data_schema_diagnostics,

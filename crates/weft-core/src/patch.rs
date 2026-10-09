@@ -6,11 +6,12 @@ use indexmap::{IndexMap, IndexSet};
 use serde_json::Value as Json;
 
 use crate::canonical::canonicalize;
+use crate::context_patch::{Author, ContextPatch, apply_context, dangling_hint};
 use crate::diagnostics::{Code, Diagnostic, Mode, did_you_mean, has_errors, one_of, quote};
 use crate::model::{Catalog, Child, Content, Document, Node, Value};
 use crate::parse::parse_fragment;
 use crate::rules::{EACH, is_name};
-use crate::shape::{patch_issues, value_of};
+use crate::shape::{patch_issues, to_entry, value_of};
 use crate::validate::{ValidateOptions, validate_document};
 
 #[derive(Clone, Copy)]
@@ -19,6 +20,10 @@ pub struct ApplyOptions<'a> {
     pub mode: Mode,
     pub tokens: Option<&'a IndexMap<String, String>>,
     pub actions: Option<&'a [String]>,
+    /// What `add-context` may claim; set by the host, never by the model.
+    pub author: Option<&'a Author>,
+    /// Refuses every context patch (`W512`).
+    pub read_only_context: bool,
 }
 
 impl<'a> ApplyOptions<'a> {
@@ -28,6 +33,8 @@ impl<'a> ApplyOptions<'a> {
             mode: Mode::default(),
             tokens: None,
             actions: None,
+            author: None,
+            read_only_context: false,
         }
     }
 
@@ -47,7 +54,7 @@ pub struct PatchResult {
     pub diagnostics: Vec<Diagnostic>,
 }
 
-const FORMS: [(&str, &str); 4] = [
+const FORMS: [(&str, &str); 8] = [
     (
         "set",
         r#"{"op":"set","id":"…","prop":"…","value":<literal|{bind}|{token}|null>}"#,
@@ -61,6 +68,16 @@ const FORMS: [(&str, &str); 4] = [
         "move",
         r#"{"op":"move","id":"…","parent":"…","slot"?:"…","index"?:0}"#,
     ),
+    (
+        "add-context",
+        r#"{"op":"add-context","entry":{"id":"…","kind":"…","by":"agent","name":"…","for"?:"…","status"?:"open","text":"…"}}"#,
+    ),
+    (
+        "set-context",
+        r#"{"op":"set-context","id":"…","field":"text"|"kind"|"for","value":"…"|null}"#,
+    ),
+    ("resolve-context", r#"{"op":"resolve-context","id":"…"}"#),
+    ("remove-context", r#"{"op":"remove-context","id":"…"}"#),
 ];
 
 fn form(op: &str) -> Option<&'static str> {
@@ -88,6 +105,7 @@ enum Patch {
         slot: Option<String>,
         index: Option<u64>,
     },
+    Context(ContextPatch),
 }
 
 /// Reads a patch that passed [`patch_issues`].
@@ -115,6 +133,16 @@ fn to_patch(v: &Json) -> Patch {
             markup: s("markup"),
         },
         Some("remove") => Patch::Remove { id: s("id") },
+        Some("add-context") => Patch::Context(ContextPatch::Add(
+            v.get("entry").map(to_entry).unwrap_or_default(),
+        )),
+        Some("set-context") => Patch::Context(ContextPatch::Set {
+            id: s("id"),
+            field: s("field"),
+            value: opt("value"),
+        }),
+        Some("resolve-context") => Patch::Context(ContextPatch::Resolve(s("id"))),
+        Some("remove-context") => Patch::Context(ContextPatch::Remove(s("id"))),
         _ => Patch::Move {
             id: s("id"),
             parent: s("parent"),
@@ -140,7 +168,21 @@ pub fn apply_patches(
     };
     let mut work = document.clone();
     for (i, patch) in read.iter().enumerate() {
-        if let Err(failure) = apply_one(&mut work.root, patch, i, options) {
+        let outcome = match patch {
+            Patch::Context(c) => {
+                let ids = all_ids(&work.root);
+                apply_context(
+                    &mut work,
+                    c,
+                    ids,
+                    options.author,
+                    options.read_only_context,
+                    i,
+                )
+            }
+            _ => apply_one(&mut work.root, patch, i, options),
+        };
+        if let Err(failure) = outcome {
             return PatchResult {
                 document: None,
                 diagnostics: failure,
@@ -148,7 +190,8 @@ pub fn apply_patches(
         }
     }
     let result = canonicalize(&work);
-    let diagnostics = validate_document(&result, &options.validate());
+    let mut diagnostics = validate_document(&result, &options.validate());
+    diagnostics.iter_mut().for_each(dangling_hint);
     let document = (!has_errors(&diagnostics)).then_some(result);
     PatchResult {
         document,
@@ -197,7 +240,7 @@ fn read_patches(patches: &Json) -> Result<Vec<Patch>, Vec<Diagnostic>> {
             let expected =
                 form.map_or_else(|| one_of(FORMS.iter().map(|(n, _)| *n)), str::to_owned);
             let hint = form.map_or_else(
-                || "\"op\" must be \"set\", \"insert\", \"remove\" or \"move\"".to_owned(),
+                || format!("\"op\" must be {}", one_of(FORMS.iter().map(|(n, _)| *n))),
                 |f| format!("write the patch as {f}"),
             );
             diagnostics.push(
@@ -331,6 +374,7 @@ fn apply_one(root: &mut Node, patch: &Patch, i: usize, options: &ApplyOptions<'_
     };
 
     let (parent_id, slot, index, moved) = match patch {
+        Patch::Context(_) => return Ok(()),
         Patch::Set { id, prop, value } => {
             let loc = find_or_fail(root, id, "id")?;
             let is_root = loc.is_empty();

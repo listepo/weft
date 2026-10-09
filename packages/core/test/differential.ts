@@ -19,7 +19,7 @@ import {
 import { cases } from "./cases.ts";
 import { dataCases } from "./data-cases.ts";
 import { catalog, tokens } from "./catalog.ts";
-import { BASE, failures } from "./patch-cases.ts";
+import { BASE, ENTRY, failures, type HostOptions } from "./patch-cases.ts";
 
 export const fixturePath = new URL(
   "../../../crates/weft-core/tests/fixtures/differential.json",
@@ -40,7 +40,7 @@ type Options = {
 };
 type MarkupCase = Options & { name: string; markup: string };
 type JsonCase = Options & { name: string; json: unknown };
-type PatchCase = { name: string; mode: Mode; patches: unknown };
+type PatchCase = { name: string; mode: Mode; patches: unknown } & HostOptions;
 type DataCase = { name: string; catalog: "test" | "core"; schema: unknown; markup: string };
 
 const SEED = 20261004;
@@ -215,6 +215,7 @@ const BASE_IDS = [
 
 function patchFuzz(): PatchCase[] {
   const id = fc.constantFrom(...BASE_IDS);
+  const entryId = fc.constantFrom("why", "reset-where", "go", "nope");
   const markup = fc.constantFrom(
     '<text id="n1">New</text>',
     '<button id="n2" on-press="a.b">Go</button><text id="n3">x</text>',
@@ -274,6 +275,24 @@ function patchFuzz(): PatchCase[] {
       { requiredKeys: ["op", "parent", "markup"] },
     ),
     fc.record({ op: fc.constant("remove"), id }),
+    fc.record({
+      op: fc.constant("add-context"),
+      entry: fc.record({
+        id: fc.constantFrom("n", "why", "go"),
+        kind: fc.constantFrom("decision", "todo", "note"),
+        by: fc.constant("agent"),
+        name: fc.constant("m"),
+        for: fc.constantFrom(ENTRY.for, "s", "nope"),
+        text: fc.constantFrom(ENTRY.text, " "),
+      }),
+    }),
+    fc.record({
+      op: fc.constant("set-context"),
+      id: entryId,
+      field: fc.constantFrom("text", "kind", "for"),
+      value: fc.constantFrom("question", "Short.", "go", "nope", null),
+    }),
+    fc.record({ op: fc.constantFrom("resolve-context", "remove-context"), id: entryId }),
     fc.record(
       { op: fc.constant("move"), id, parent: id, slot, index },
       { requiredKeys: ["op", "id", "parent"] },
@@ -453,10 +472,11 @@ export function differential() {
   markupCases.push(...mutations(sources()));
   jsonCases.push(...jsonMutations(docs));
   const patchCases: PatchCase[] = [
-    ...Object.entries(failures).map(([code, [patches]]): PatchCase => ({
+    ...Object.entries(failures).map(([code, [patches, , host]]): PatchCase => ({
       name: code,
       mode: "lenient",
       patches,
+      ...host,
     })),
     ...patchFuzz(),
   ];
@@ -471,7 +491,13 @@ export function differential() {
       const result =
         base === undefined
           ? { diagnostics: [] }
-          : applyPatches(base, c.patches, { catalog, tokens, mode: c.mode });
+          : applyPatches(base, c.patches, {
+              catalog,
+              tokens,
+              mode: c.mode,
+              author: c.author,
+              context: c.context,
+            });
       return {
         ...c,
         expect: {

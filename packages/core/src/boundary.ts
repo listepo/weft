@@ -59,6 +59,10 @@ export type CoreOptions = {
   actions?: readonly string[] | undefined;
   /** `parse` only: the markup may stop anywhere (SPEC §6.3). */
   partial?: boolean | undefined;
+  /** `applyPatches` only: what `add-context` may claim (SPEC §7). Set by the host, never the model. */
+  author?: { by: "human" | "agent"; name?: string | undefined } | undefined;
+  /** `applyPatches` only: `"read-only"` refuses context patches (SPEC §7). */
+  context?: "read-only" | "read-write" | undefined;
 };
 
 export function options(o: CoreOptions): string {
@@ -68,6 +72,8 @@ export function options(o: CoreOptions): string {
       tokens: o.tokens === undefined ? undefined : [...o.tokens],
       actions: o.actions,
       partial: o.partial === true ? true : undefined,
+      author: o.author,
+      context: o.context,
     }) ?? "{}"
   );
 }

@@ -101,6 +101,9 @@ export const DIAGNOSTIC_CODES = {
   W507: { severity: "error", summary: "The root element cannot be removed or moved." },
   W508: { severity: "error", summary: "Inserted markup is not a list of elements." },
   W509: { severity: "error", summary: "Inserted markup reuses an id of the document." },
+  W510: { severity: "error", summary: "An added context entry reuses an id of the document." },
+  W511: { severity: "error", summary: "A context patch names no context entry." },
+  W512: { severity: "error", summary: "The host does not allow this context patch." },
 
   W601: { severity: "error", summary: "Imported input cannot be read." },
   W602: { severity: "warning", summary: "Imported input exceeds an import limit." },

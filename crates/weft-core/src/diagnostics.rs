@@ -139,6 +139,9 @@ codes! {
     W507 => Error, "The root element cannot be removed or moved.";
     W508 => Error, "Inserted markup is not a list of elements.";
     W509 => Error, "Inserted markup reuses an id of the document.";
+    W510 => Error, "An added context entry reuses an id of the document.";
+    W511 => Error, "A context patch names no context entry.";
+    W512 => Error, "The host does not allow this context patch.";
     W601 => Error, "Imported input cannot be read.";
     W602 => Warning, "Imported input exceeds an import limit.";
     W701 => Error, "Project file or one of its members has the wrong shape.";

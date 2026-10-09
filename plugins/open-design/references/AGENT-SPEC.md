@@ -181,6 +181,44 @@ Prefer patches to rewriting. A patch list is JSON, addresses elements by id, app
 - **`move`** `{ op, id, parent, slot?, index? }` moves an element with its content; `index` counts the target list after the element has left it.
 - The root cannot be removed or moved. Text that shares a list with elements is not addressable: remove the element that holds it and insert it again.
 
+Context (§2.9) has four operations of its own. They never touch elements, and element patches never touch context.
+
+```json
+[
+  {
+    "op": "add-context",
+    "entry": {
+      "id": "add-disabled",
+      "kind": "decision",
+      "by": "agent",
+      "name": "claude-opus-5-5",
+      "for": "add-go",
+      "text": "Disabled until a title is typed, so todo.add never gets an empty todo."
+    }
+  },
+  {
+    "op": "add-context",
+    "entry": {
+      "id": "undo",
+      "kind": "question",
+      "by": "agent",
+      "name": "claude-opus-5-5",
+      "status": "open",
+      "text": "Should deleting a todo offer undo?"
+    }
+  },
+  { "op": "set-context", "id": "add-disabled", "field": "for", "value": "add" },
+  { "op": "resolve-context", "id": "undo" },
+  { "op": "remove-context", "id": "add-disabled" }
+]
+```
+
+- **`add-context`** `{ op, entry }` appends an entry, written as JSON with the members of §2.9 (`id`, `kind`, `by`, `name`, `for?`, `status?`, `text`); the text needs no `&amp;`. The id must be new. Write `by: "agent"` and your model id in `name`; the host may refuse anything else.
+- **`set-context`** `{ op, id, field, value }` changes `text`, `kind` or `for`. `value` is a string; `null` only for `for`, which makes the entry about the screen. `id`, `by` and `name` cannot change.
+- **`resolve-context`** `{ op, id }` marks a `question` or `todo` resolved. Record the answer as a `decision`.
+- **`remove-context`** `{ op, id }` deletes an entry.
+- Removing an element that an entry names in `for` fails with `W309`: remove the entry or change its `for` in the same list.
+
 Rewrite the whole screen only when most of it changes. Then keep every id that still names the same thing.
 
 ## 4. Repairing with diagnostics
@@ -283,6 +321,9 @@ What each code asks of you:
 | W507 | Do not remove or move the root; send a whole new screen instead. |
 | W508 | Insert elements only: no loose text, no `<slot>`. |
 | W509 | Give the inserted elements ids the document does not have; `hint` suggests one. |
+| W510 | Give the added entry an id that no element or entry has; `hint` suggests one. |
+| W511 | Name an entry's id from the `<context>` block; element ids do not work here. |
+| W512 | The host refused the context patch: write `by` and `name` as the host says, or leave context alone when it is read-only. |
 | W601 | The importer could not read its input; nothing to repair in a document. |
 | W602 | The import was cut at a limit; the rest of the input is missing. |
 | W701 | The project file, or the member at `path`, has the wrong shape; fix `weft.json` (or the `project` argument), not the screen. |

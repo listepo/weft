@@ -26,8 +26,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
-| T39 | in progress | P1 | 4 | 25% | Claude Code / claude-opus-5-5 |
-| T39.3 | todo | P1 | 3 | 0% | |
+| T39 | in progress | P1 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T39.4 | todo | P2 | 3 | 0% | |
 | T39.5 | todo | P2 | 3 | 0% | |
 | T39.6 | todo | P2 | 3 | 0% | |
@@ -230,10 +229,6 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
 
 The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.6, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.6.
-
-### T39.3. Context: patch operations
-
-`add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.
 
 ### T39.4. Context: explain, MCP and CLI
 

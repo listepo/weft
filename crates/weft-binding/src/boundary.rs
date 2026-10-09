@@ -6,7 +6,9 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value as Json;
 use thiserror::Error;
-use weft_core::{Catalog, Document, JSON_DEPTH_LIMIT, JsonError, Mode, parse_json, to_document};
+use weft_core::{
+    Author, Catalog, Document, JSON_DEPTH_LIMIT, JsonError, Mode, parse_json, to_document,
+};
 
 #[derive(Debug, Error)]
 pub enum BindingError {
@@ -35,6 +37,24 @@ pub struct Options {
     pub actions: Option<Vec<String>>,
     /// `parse` only: the markup may stop anywhere (SPEC §6.3).
     pub partial: bool,
+    /// `applyPatches` only: what `add-context` may claim (SPEC §7).
+    pub author: Option<Author>,
+    /// `applyPatches` only: refuse context patches.
+    pub read_only_context: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WireAuthor {
+    by: String,
+    name: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "kebab-case")]
+enum WireContext {
+    ReadWrite,
+    ReadOnly,
 }
 
 #[derive(Default, Deserialize)]
@@ -47,6 +67,8 @@ struct WireOptions {
     /// Map entries, so that the order of the TypeScript `Map` survives.
     tokens: Option<Vec<(String, String)>>,
     actions: Option<Vec<String>>,
+    author: Option<WireAuthor>,
+    context: Option<WireContext>,
 }
 
 impl Options {
@@ -65,6 +87,11 @@ impl Options {
             tokens: wire.tokens.map(|entries| entries.into_iter().collect()),
             actions: wire.actions,
             partial: wire.partial,
+            author: wire.author.map(|a| Author {
+                by: a.by,
+                name: a.name,
+            }),
+            read_only_context: matches!(wire.context, Some(WireContext::ReadOnly)),
         })
     }
 }
