@@ -25,7 +25,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T28 | in progress | P2 | 3 | 90% | Cursor / grok-4.7 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
-| T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
@@ -41,7 +40,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T17.2 | todo | P2 | 3 | 0% | |
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
-| T94 | in progress | P0 | 2 | 90% | Cursor / grok-4.7 |
 | T96 | todo | P2 | 3 | 0% | |
 | T97 | todo | P2 | 2 | 0% | |
 | T98 | todo | P2 | 2 | 0% | |
@@ -70,21 +68,6 @@ Done when: both CLIs resolve a symlink and write to its target, copy the origina
 Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` makes a single `readSync` call into a buffer of `maxChars*4+1` bytes allocated up front. A short read is unlikely on a regular file but is not handled, and the buffer is sized for the worst case.
 
 Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
-
-### T94. Foreign stack alignment and grid child order
-
-`stackOf` in `packages/design-tool/src/foreign.ts` wrote only `direction`, `columns` and `gap`. `LayerLayout` already has `align` and `wrap`. Figma maps `counterAxisAlignItems` through `ALIGN` (`MIN` → `start`, `CENTER` → `center`, `MAX` → `end`, `BASELINE` → undefined). A foreign horizontal frame with `MIN` alignment became `<stack direction="row">`. SPEC §5.1 says a row without `align` is centered on the cross axis, so an importer must not round-trip a row's center. `wrap` was dropped the same way. Catalog `stack` has the boolean; `grid` has neither `align` nor `wrap`.
-
-**Out of scope.** Padding, fills and fonts (SPEC §9 keeps those as losses; catalog `stack` has no such props). Collapsing vectors into `<image>` (`image` requires `src`). Teaching `crates/weft-slint/src/generate.rs` to emit Slint alignment (SPEC keeps `align` and `wrap` in the source comment). A second Figma simplifier, a new caller of `api.figma.com`, or a copy of Framelink. The REST pull (`packages/figma/src/pull.ts`) and the foreign reader stay the only Figma path.
-
-Execution plan:
-
-1. In `stackOf`, after the direction and columns writes: set `wrap` when `layer.layout.wrap` is true. On a row, set `align` only for `start`, `end` or `stretch`. On a column, set `align` only for `center`, `end` or `stretch`. Leave a row's `center` and a column's `start` unset, and leave `align` unset when it is undefined. Do not set either prop on a grid. Do not emit padding. The painted-loss stays.
-2. Tests in `packages/design-tool/test/foreign-layout.test.ts`: a horizontal frame at `MIN` reads `align="start"` with no `wrap`; a horizontal frame at `CENTER` with wrap reads `wrap` and no `align`; a vertical frame at `MIN` reads neither; a layer that already stores `weft.source` is unchanged, including a row's stored `center` and a column's stored `start`. The sourced-frame snapshots in `packages/figma/test/__snapshots__/layers/` stay as they are. The foreign promo frames in the Figma and Penpot edit tests expect `align="start"`.
-3. Thread `gridRowAnchorIndex`, `gridColumnAnchorIndex` and `layoutPositioning` from the REST node (`rest.ts`) and the plugin node (`layer.ts`) onto `Layer`. When the mode is `grid`, order in-flow children by row anchor, then column anchor, then original index before `convertChildren`. Absolutely positioned children keep their index. Add a `layout` loss only when the order actually changes. Skip when no in-flow child carries an anchor, so z-order remains. A missing or non-numeric anchor stays absent, not zero.
-4. Verify with `mise exec -- pnpm exec vitest run packages/design-tool/test packages/figma/test`.
-
-Progress: steps 1–3 are in the tree. The Vitest command in step 4 exits 0. Remaining: the pull request's CI.
 
 ### T8. Evaluation
 
@@ -208,12 +191,6 @@ Scope extension (creator): everything that can be configured is configurable thr
 14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
 
 Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). Left: the fragments proposal in `docs/fragments-design.md` waits for the creator; once approved, fragments are built (format, both parsers, patches, fixtures) and the example project gains a shared fragment, which the done criteria ask for.
-
-### T32. Claude Code plugin from GitHub
-
-The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
-
-Progress: the bundle carries the WebAssembly core (T22 merged): `plugins/claude-code/build.ts` bundles the scripts and the MCP server with Vite 8 into the committed `dist/` and copies `weft_bg.wasm` to `dist/wasm/`, where `@weft/core` reads it relative to the shared chunk; `claude-code:build` depends on `root:wasm`. The plugin folder alone runs (tests copy only it to a temp folder and run every script and the server there; `claude --plugin-dir <copy> mcp list` shows `weft` connected; `claude plugin validate --strict` passes). The Desktop `node` requirement (24.2 or later on the PATH) is in the plugin README. `root:wasm` remaps build paths, so the `.wasm` is byte-reproducible and the up-to-date test compares it byte for byte. Remaining: `repository` in `plugin.json` once a remote exists, and the done criterion itself, `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` on a clean machine.
 
 ### T39. Context in the document
 
