@@ -37,7 +37,7 @@ The suite never deletes a device: remove the device of a worktree when you remov
 
 ## Baselines
 
-Baselines live in `baselines/<platform>-<arch>/` (`web/`, `html/`, `swiftui/`), because fonts render differently on each operating system. A platform without a baselines folder skips the baseline comparisons; the comparisons across targets and round trips still run.
+Baselines live in `baselines/<platform>-<arch>/` (`web/`, `html/`, `swiftui/`), because fonts render differently on each operating system. A platform without a baselines folder skips the baseline comparisons; the comparisons across targets and round trips still run. `WEFT_BASELINE_PLATFORM` overrides the folder name: CI sets it to `github-runner`, because a hosted macOS runner is `darwin-arm64` yet renders fonts unlike the machine the baselines were reviewed on.
 
 A failed comparison writes `diffs/<label>.diff.png` with the expected and actual images beside it (`diffs/` is not committed).
 
