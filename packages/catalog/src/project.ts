@@ -102,6 +102,7 @@ type JsxExportSettings = { outDir?: string; typescript?: boolean; source?: boole
 export type Settings = {
   validate?: { mode?: Mode };
   format?: { write?: boolean };
+  explain?: { context?: boolean };
   render?: {
     data?: string;
     tokens?: string[] | string;

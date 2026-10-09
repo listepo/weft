@@ -1,5 +1,11 @@
 # Done
 
+### T39.5. Context: explain
+
+`weft explain --context` lists each element's entries after its readbacks, and the entries about the screen after the root's; `weft explain --against` always lists context changes (added, changed, removed entries), so a reviewer sees every note an edit touched. The option is also the `explain.context` key of `weft.json` (SPEC §10.6, `settings.rs`, the schema).
+
+Built: `explain_with_context` in `crates/weft-core/src/explain.rs` (`explain` itself leaves entries out, so its callers do not change); `explain_changes` compares entries by id like props, so moving an entry to another element is one change. An entry whose `for` names no element (a lenient read) still reads back, against the screen, and text over the 500-character limit is cut and says so. The CLI takes `--context`, else `explain.context`. `docs/cli.md` and `docs/projects.md` describe both; `docs/projects.md` also gained the `mcp.context` row T39.4 missed.
+
 ### T39.4. Context: MCP
 
 The MCP tool `weft_context` returns a screen's entries under its fixed notice; `weft_patch` takes the four context operations and stamps `author: { by: "agent" }`, so the agent channel cannot write a `human` entry (`W512`); the `mcp.context` setting (`read-write`, `read-only`) of `weft.json` (SPEC §10.6, `settings.rs`, the schema) reaches the server through `weft-mcp --project` and `createServer`.

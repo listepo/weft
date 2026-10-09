@@ -1,14 +1,18 @@
 //! Plain-language readback of what a document's bindings, tokens, events and loops mean.
 //! Validation cannot see intent: an edit that keeps a `!` while changing the condition is valid
 //! markup with the opposite meaning. Reading every reference back as a sentence lets a model or a
-//! person compare the meaning with the instruction. Pure: no I/O.
+//! person compare the meaning with the instruction. Context entries (SPEC §2.3) read back after
+//! the element they are about, so a reviewer sees every note an edit added, changed or removed.
+//! Pure: no I/O.
 
 use std::fmt;
 
 use indexmap::IndexMap;
 use serde::Serialize;
 
-use crate::model::{Catalog, Child, Document, Node, PropDef, PropType, Value};
+use crate::context::entry_path;
+use crate::context_check::MAX_TEXT;
+use crate::model::{Catalog, Child, Document, Entry, Node, PropDef, PropType, Value};
 use crate::rules::{EACH, is_id, universal_prop};
 use crate::source::path_segment;
 use crate::values::format_value;
@@ -75,14 +79,25 @@ impl fmt::Display for Change {
 pub fn explain(document: &Document, catalog: Option<&Catalog>) -> Vec<Readback> {
     collect(document, catalog)
         .into_values()
+        .filter(|item| !item.literal && !item.context)
+        .map(|item| item.readback)
+        .collect()
+}
+
+/// `explain`, with each element's context entries after its own readbacks, and the entries about
+/// the screen after the root's. An entry reads as `context <id>: <kind> by <by> <name>: <text>`.
+pub fn explain_with_context(document: &Document, catalog: Option<&Catalog>) -> Vec<Readback> {
+    collect(document, catalog)
+        .into_values()
         .filter(|item| !item.literal)
         .map(|item| item.readback)
         .collect()
 }
 
-/// Lists the props (literals included), events and loops that were added, removed or changed
-/// between two versions of a document, with the readback before and after. Elements are matched
-/// by id, or by path when they have none, so a moved element with unchanged props is not listed.
+/// Lists the props (literals included), events, loops and context entries that were added,
+/// removed or changed between two versions of a document, with the readback before and after.
+/// Elements are matched by id, or by path when they have none, so a moved element with unchanged
+/// props is not listed.
 /// Additions and changes come in the newer document's order, then removals in the older one's.
 pub fn explain_changes(
     before: &Document,
@@ -132,12 +147,15 @@ enum Raw<'a> {
     Value(&'a Value),
     Action(&'a str),
     Loop(Option<&'a Value>, Option<&'a Value>),
+    Entry(&'a Entry),
 }
 
 struct Item<'a> {
     readback: Readback,
     raw: Raw<'a>,
     literal: bool,
+    /// A context entry: read back by `explain_with_context` and compared by `explain_changes`.
+    context: bool,
 }
 
 /// A loop variable in scope: its name without `$`, and the array it walks as written.
@@ -149,24 +167,80 @@ struct Scope {
 struct Walker<'a> {
     catalog: Option<&'a Catalog>,
     scopes: Vec<Scope>,
-    /// Keyed by element (`#id`, or the path without one) and attribute name.
+    /// Keyed by element (`#id`, or the path without one) and attribute name; entries by
+    /// `context#id`.
     items: IndexMap<String, Item<'a>>,
+    entries: &'a [Entry],
+    root_path: String,
+    /// True until the root has been visited: entries without `for` are about it.
+    at_root: bool,
+    /// The root's target, for entries whose `for` names no element.
+    root_target: String,
 }
 
 fn collect<'a>(document: &'a Document, catalog: Option<&'a Catalog>) -> IndexMap<String, Item<'a>> {
     let root = &document.root;
+    let path = format!("/{}", path_segment(&root.kind, root.id.as_deref(), None));
     let mut walker = Walker {
         catalog,
         scopes: vec![],
         items: IndexMap::new(),
+        entries: &document.context,
+        root_path: path.clone(),
+        at_root: true,
+        root_target: String::new(),
     };
-    let path = format!("/{}", path_segment(&root.kind, root.id.as_deref(), None));
     walker.node(root, path);
+    // A dangling `for` (W229) still reads back, against the screen: a reviewer must see every
+    // note, including one whose element an edit removed.
+    let target = walker.root_target.clone();
+    for (index, entry) in document.context.iter().enumerate() {
+        if !walker.items.contains_key(&entry_key(entry, index)) {
+            walker.entry(index, entry, &target);
+        }
+    }
     walker.items
+}
+
+fn entry_key(entry: &Entry, index: usize) -> String {
+    match entry.id.as_deref().filter(|id| is_id(id)) {
+        Some(id) => format!("context#{id}"),
+        None => format!("context[{index}]"),
+    }
+}
+
+/// `kind (status) by <by> <name>: text`: who claims to have written it is part of the line, so a
+/// reviewer weighs it as a claim (AGENT-SPEC §2.9).
+/// Text over the `W228` limit is cut and says so (SPEC §2.3): explain is lenient.
+fn entry_sentence(entry: &Entry) -> String {
+    let text = if entry.text.encode_utf16().count() > MAX_TEXT {
+        let mut units = 0;
+        let kept: String = entry
+            .text
+            .chars()
+            .take_while(|c| {
+                units += c.len_utf16();
+                units <= MAX_TEXT
+            })
+            .collect();
+        format!("{kept}… (cut at {MAX_TEXT} characters)")
+    } else {
+        entry.text.clone()
+    };
+    let status = entry
+        .status
+        .as_deref()
+        .map(|s| format!(" ({s})"))
+        .unwrap_or_default();
+    format!(
+        "{}{status} by {} {}: {text}",
+        entry.kind, entry.by, entry.name
+    )
 }
 
 impl<'a> Walker<'a> {
     fn node(&mut self, node: &'a Node, path: String) {
+        let is_root = std::mem::take(&mut self.at_root);
         let valid_id = node.id.as_deref().filter(|id| is_id(id));
         let target = match valid_id {
             Some(id) => format!("{}#{id}", node.kind),
@@ -193,6 +267,7 @@ impl<'a> Walker<'a> {
                     readback,
                     raw,
                     literal,
+                    context: false,
                 },
             );
         };
@@ -239,6 +314,18 @@ impl<'a> Walker<'a> {
             );
         }
 
+        if is_root {
+            self.root_target.clone_from(&target);
+        }
+        for (index, entry) in self.entries.iter().enumerate() {
+            let about = match entry.target.as_deref() {
+                Some(id) => valid_id == Some(id),
+                None => is_root,
+            };
+            if about {
+                self.entry(index, entry, &target);
+            }
+        }
         let pushed = match (is_each, node.props.get("as")) {
             (true, Some(Value::String(name))) => {
                 let items = match node.props.get("in") {
@@ -262,6 +349,27 @@ impl<'a> Walker<'a> {
         }
     }
 
+    fn entry(&mut self, index: usize, entry: &'a Entry, target: &str) {
+        let name = match entry.id.as_deref().filter(|id| is_id(id)) {
+            Some(id) => format!("context {id}"),
+            None => "context".to_owned(),
+        };
+        let readback = Readback {
+            path: entry_path(&self.root_path, entry, index),
+            target: target.to_owned(),
+            name,
+            sentence: entry_sentence(entry),
+        };
+        self.items.insert(
+            entry_key(entry, index),
+            Item {
+                readback,
+                raw: Raw::Entry(entry),
+                literal: false,
+                context: true,
+            },
+        );
+    }
     fn children(&mut self, list: &'a [Child], path: &str) {
         for (index, child) in list.iter().enumerate() {
             if let Child::Node(n) = child {

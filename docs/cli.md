@@ -74,7 +74,7 @@ compat/unknown-element.weft:5:5 W401 <hologram> is not in catalog weft-core 0.2.
 exit 1
 ```
 
-**Projects.** Every command first looks for a `weft.json` in the file's folder or above it and, when it finds one, checks against the project's catalog, tokens, actions and data schema, so token names, action names and bindings are checked too. `--project <file>` names another project file, `--no-project` ignores it, and `--catalog` replaces only the project's catalog. The project's `validate.mode` sets the default of `--strict` (`--lenient` overrides it), and its `format.write` the default of `fmt --write` (`--print` overrides it). Project problems are printed first, as `weft.json:#/pointer code message`. See [Projects](projects.md).
+**Projects.** Every command first looks for a `weft.json` in the file's folder or above it and, when it finds one, checks against the project's catalog, tokens, actions and data schema, so token names, action names and bindings are checked too. `--project <file>` names another project file, `--no-project` ignores it, and `--catalog` replaces only the project's catalog. The project's `validate.mode` sets the default of `--strict` (`--lenient` overrides it), and its `format.write` the default of `fmt --write` (`--print` overrides it). Its `explain.context` turns on `explain --context`. Project problems are printed first, as `weft.json:#/pointer code message`. See [Projects](projects.md).
 
 **Output.** One line per diagnostic: `file:line:column code message`, then ` — hint` when there is one. [SPEC §6.2](../SPEC.md#62-codes) lists the codes; a code never changes meaning.
 
@@ -154,6 +154,8 @@ button#submit disabled changed: was true while $.email is falsy (NOT $.email); n
 ```
 
 Sentences never hide a negation: a negated binding always contains `NOT`. If neither file changed anything, you get a message on stderr and no output. If either file has errors, `explain` prints the diagnostics as `validate` does and exits 1. It reads markup only, not `.json` files.
+
+`--context` (or `"explain": { "context": true }` in `weft.json`) also lists the screen's context entries (SPEC section 2.3): each after the readbacks of the element its `for` names, the ones about the screen after the root's, and one whose `for` names no element against the screen. A line reads `button#go context why: decision by agent m: <text>`; `by` and the name are what the entry claims, not checked facts. Text over 500 characters is cut and says so. `--against` always lists context changes, so an edit cannot add, change or remove a note unseen.
 
 ## `weft swiftui`, `weft swiftui-tokens` and `weft import-swiftui`
 

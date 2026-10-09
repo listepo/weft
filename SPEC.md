@@ -741,7 +741,7 @@ Screens that belong together share their resources through a project file named 
 | `actions` | array of action names | The host's actions: `on-*` values are checked against them (`W308`). |
 | `data` | file name | A JSON Schema of the host data model (§10.5). |
 | `$schema` | string | Ignored; for editors, which can point it at `schemas/weft.schema.json` (§10.6). |
-| `validate`, `format`, `render`, `export`, `import`, `mcp`, `plugins` | objects | Tool settings (§10.6). |
+| `validate`, `format`, `explain`, `render`, `export`, `import`, `mcp`, `plugins` | objects | Tool settings (§10.6). |
 
 - Every member is optional. Without `catalog` the project's catalog is the core catalog.
 - A file name is relative to the directory of the project file, uses `/` as separator and stays inside that directory: it is non-empty and has no empty or `..` segment, no leading `/`, no `\`, no `:` and no NUL. Any other name is `W703` and the file is not read.
@@ -800,6 +800,7 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | --- | --- | --- | --- |
 | `validate.mode` | `"strict"` or `"lenient"` | `"lenient"` | `weft validate`; the default of `weft_validate`'s `strict` when the MCP server is started with the project. Writers' tools (`weft_patch`, render, export) always check strictly. |
 | `format.write` | boolean | `false` | `weft fmt` rewrites the file in place instead of printing it. The canonical form itself has no options (§3). |
+| `explain.context` | boolean | `false` | `weft explain` also lists each element's context entries after its readbacks, as `--context` does (§2.3). `--against` always lists context changes. |
 | `render.data` | file name | no data | Sample data the bindings read when a screen is rendered to a static page. |
 | `render.tokens` | array of file names, or one file name | the project's `tokens` | Token files to render with, layered as in §10.3, or one resolver document (§10.3). |
 | `render.outDir` | file name | next to the screen | Where rendered pages go. |

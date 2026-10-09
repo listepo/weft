@@ -345,7 +345,7 @@ What each code asks of you:
 
 A valid document can still mean the opposite of the instruction: `disabled="{!$.busy}"` validates, and it disables the button while `$.busy` is falsy. Before you answer, read back every binding you changed and compare it with the instruction.
 
-With a tool, run `weft explain <new> --against <old> --catalog <catalog>`. It prints one line per prop, event or loop that was added, removed or changed. For the instruction "disable Sign in while `$.busy` is true":
+With a tool, run `weft explain <new> --against <old> --catalog <catalog>`. It prints one line per prop, event, loop or context entry that was added, removed or changed. For the instruction "disable Sign in while `$.busy` is true":
 
 ```text
 button#go disabled changed: was true while $.email is falsy (NOT $.email); now true while $.busy is falsy (NOT $.busy)

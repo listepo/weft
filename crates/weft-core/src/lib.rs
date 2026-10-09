@@ -32,7 +32,7 @@ pub use data::{
 pub use diagnostics::{
     Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors, one_of,
 };
-pub use explain::{Change, ChangeKind, Readback, explain, explain_changes};
+pub use explain::{Change, ChangeKind, Readback, explain, explain_changes, explain_with_context};
 pub use json::{
     JSON_DEPTH_LIMIT, JsonError, js_number, js_round, order_keys, parse_json, to_compact,
 };

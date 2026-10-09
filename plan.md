@@ -26,8 +26,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
-| T39 | in progress | P1 | 4 | 55% | Claude Code / claude-opus-5-5 |
-| T39.5 | todo | P2 | 2 | 0% | |
+| T39 | in progress | P1 | 4 | 70% | Claude Code / claude-opus-5-5 |
 | T39.6 | todo | P2 | 3 | 0% | |
 | T39.7 | todo | P2 | 3 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
@@ -229,10 +228,6 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
 
 The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.7, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.7.
-
-### T39.5. Context: explain
-
-`weft explain --context` lists each element's entries after its readbacks, and the entries about the screen after the root's; `weft explain --against` always lists context changes (added, changed, removed entries), so a reviewer sees every note an edit touched. The option is also the `explain.context` key of `weft.json` (SPEC §10.6, `settings.rs`, the schema).
 
 ### T39.6. Context: code targets
 

@@ -77,6 +77,18 @@
       "additionalProperties": false,
       "description": "How `weft fmt` writes the canonical form. The form itself has no options (SPEC §3)."
     },
+    "explain": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "boolean",
+          "description": "Also list each element's context entries (SPEC §2.3) after its readbacks.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "description": "How `weft explain` reads a screen back."
+    },
     "render": {
       "type": "object",
       "properties": {

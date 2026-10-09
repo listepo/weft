@@ -27,8 +27,8 @@ use clap::{Args, Parser, Subcommand};
 use weft_catalog::{PROJECT_FILE, Project, ProjectOptions, load_project_text, token_types};
 use weft_core::{
     Catalog, DataCheckOptions, Diagnostic, Document, Mode, ParseOptions, ValidateOptions,
-    check_data, check_data_json, explain, explain_changes, has_errors, parse, parse_json,
-    serialize, validate,
+    check_data, check_data_json, explain, explain_changes, explain_with_context, has_errors, parse,
+    parse_json, serialize, validate,
 };
 
 #[derive(Parser)]
@@ -164,6 +164,10 @@ enum Command {
         /// props read as plain reads.
         #[arg(long)]
         catalog: Option<PathBuf>,
+        /// Also list each element's context entries after its readbacks (default: the project's
+        /// `explain.context`, else off). `--against` always lists context changes.
+        #[arg(long)]
+        context: bool,
         #[command(flatten)]
         project: ProjectArgs,
     },
@@ -677,10 +681,15 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             file,
             against,
             catalog,
+            context,
             project,
         } => {
             // Project problems go to stderr: stdout carries the read-back.
             let (project, _) = project_for(&file, project, Mode::Lenient, &mut std::io::stderr())?;
+            let context = context
+                || setting(project.as_ref(), &["explain", "context"])
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(false);
             let explicit = catalog.as_deref().map(load_catalog).transpose()?;
             let catalog = explicit.or_else(|| project.map(|p| p.catalog));
             if catalog.is_none() {
@@ -693,7 +702,12 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 return Ok(DIAGNOSTICS);
             };
             let Some(against) = against else {
-                for readback in explain(&document, catalog) {
+                let readbacks = if context {
+                    explain_with_context(&document, catalog)
+                } else {
+                    explain(&document, catalog)
+                };
+                for readback in readbacks {
                     writeln!(out, "{readback}")?;
                 }
                 return Ok(0);
@@ -703,7 +717,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             };
             let changes = explain_changes(&before, &document, catalog);
             if changes.is_empty() {
-                eprintln!("weft: no prop, event or loop changed");
+                eprintln!("weft: no prop, event, loop or context entry changed");
             }
             for change in changes {
                 writeln!(out, "{change}")?;

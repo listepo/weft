@@ -325,6 +325,26 @@ fn explain_reads_the_catalog_of_the_project() {
 }
 
 #[test]
+fn explain_lists_context_with_the_flag_or_the_project_setting() {
+    let s = Scratch::new("explain-context");
+    let screen = s.write(
+        "screens/noted.weft",
+        "<screen id=\"s\" weft=\"0.2\">\n  <context>\n    \
+         <entry id=\"why\" by=\"human\" for=\"b\" kind=\"intent\" name=\"Ivan\">The one action.</entry>\n  \
+         </context>\n  <button id=\"b\">Go</button>\n</screen>\n",
+    );
+    let line = "button#b context why: intent by human Ivan: The one action.\n";
+    let plain = run(&[&"explain", &screen]);
+    assert_eq!(plain.code, 0, "{}{}", plain.stdout, plain.stderr);
+    assert_eq!(plain.stdout, "");
+    let flag = run(&[&"explain", &screen, &"--context"]);
+    assert_eq!(flag.stdout, line, "{}", flag.stderr);
+    with_settings(&s, serde_json::json!({ "explain": { "context": true } }));
+    let setting = run(&[&"explain", &screen]);
+    assert_eq!(setting.stdout, line, "{}", setting.stderr);
+}
+
+#[test]
 fn bad_settings_are_reported_and_the_defaults_apply() {
     let s = Scratch::new("settings");
     let project = with_settings(

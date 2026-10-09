@@ -121,6 +121,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | --- | --- | --- |
 | `validate.mode` | `"lenient"` | `"strict"` makes unknown elements and attributes errors in `weft validate` (`--lenient` overrides it), and is the default of `strict` in the MCP server started with the project. |
 | `format.write` | `false` | `weft fmt` rewrites the file instead of printing it (`--print` overrides it). |
+| `explain.context` | `false` | `weft explain` also lists the context entries (as `--context` does). |
 | `render.data` | none | Sample data for rendered pages (`--data` overrides it). |
 | `render.tokens` | the project's `tokens` | Token files for rendered pages, layered the same way, or one resolver file (`--tokens` overrides it). |
 | `render.outDir` | next to the screen | Where rendered pages go (an output path overrides it). |
@@ -147,6 +148,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `import.cem.name`, `import.cem.version` | the manifest's file stem; `0.0.0` | The name and version of that catalog (`--name` and `--version` override them). |
 | `import.figma.outDir` | the working directory | Where the plugins' `figma-pull` script writes `<screen id>.weft`, a Figma frame read through the REST API (an output path argument overrides it). |
 | `mcp.limits.*` | see `packages/mcp/README.md` | The MCP server's bounds on one call: `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`. |
+| `mcp.context` | `"read-write"` | `"read-only"` makes `weft_patch` refuse every context patch (`W512`); `weft_context` still reads the context. |
 | `plugins.<name>` | none | Settings of a plugin or tool Weft does not know. Weft only checks that each is an object. |
 | `plugins.open-design.tokensDir` | next to the design system | Where the Open Design plugin's `design-md` script writes the tokens it maps from a `DESIGN.md` or `tokens.css`. A file name like any other (`W703` when it is absolute or leaves the project), and an unknown key in `plugins.open-design` is `W702`. |
 

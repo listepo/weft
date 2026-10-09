@@ -279,6 +279,16 @@ pub(crate) const SECTIONS: &[Setting] = &[
         )]),
     ),
     setting(
+        "explain",
+        "How `weft explain` reads a screen back.",
+        Kind::Section(&[with_default(
+            "context",
+            "Also list each element's context entries (SPEC §2.3) after its readbacks.",
+            Kind::Bool,
+            "false",
+        )]),
+    ),
+    setting(
         "render",
         "Static HTML pages from screens (`write-page`, the Claude Code plugin's render).",
         Kind::Section(&[
