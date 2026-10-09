@@ -1,5 +1,5 @@
-<screen id="cart" label="Cart" weft="0.1">
-  <heading id="title" level="1">Cart</heading>
+<screen id="cart" label="Cart" weft="0.2">
+  <use id="header" fragment="page-header" title="Cart" on-back="nav.back"/>
   <list id="items" label="Items in the cart">
     <each id="lines" as="line" in="{$.cart.items}">
       <item id="line">

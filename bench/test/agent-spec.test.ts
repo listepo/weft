@@ -13,10 +13,22 @@ const tokens = tokenTypes(
     JSON.parse(readFileSync(new URL("packages/catalog/tokens/default.tokens.json", ROOT), "utf8")),
   ).tokens,
 );
-const options = { catalog: coreCatalog, mode: "strict" as const, tokens };
-
 const blocks = (lang: string) =>
   [...guide.matchAll(new RegExp("```" + lang + "\\n([\\s\\S]*?)```", "g"))].map((m) => m[1] ?? "");
+
+// A fragment example is known to the screens by its label in kebab case ("Page header" is
+// `page-header`), as a project would name it (SPEC §10.7).
+const fragments = Object.fromEntries(
+  blocks("xml")
+    .filter((src) => src.startsWith("<fragment"))
+    .map((src) => {
+      const document = parse(src, { catalog: coreCatalog }).document;
+      assert.ok(document);
+      const label = String(document.root.props?.["label"] ?? "");
+      return [label.toLowerCase().replaceAll(" ", "-"), document];
+    }),
+);
+const options = { catalog: { ...coreCatalog, fragments }, mode: "strict" as const, tokens };
 
 test("the guide names every component of the core catalog", () => {
   const missing = Object.keys(coreCatalog.components).filter((k) => !guide.includes(`\`${k}\``));

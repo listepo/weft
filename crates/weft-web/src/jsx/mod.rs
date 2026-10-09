@@ -110,7 +110,12 @@ pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, JsxEr
         g.notes = notes(document);
     }
     let scope = Rc::new(Scope::default());
-    let root = document.as_object().and_then(|o| o.get("root"));
+    let expanded = expanded(document, options.catalog);
+    let root = expanded
+        .as_ref()
+        .unwrap_or(document)
+        .as_object()
+        .and_then(|o| o.get("root"));
     let pieces = match root {
         Some(root) => g.pieces_of(std::slice::from_ref(root), &scope, 0),
         None => Vec::new(),
@@ -167,6 +172,25 @@ fn notes(document: &Json) -> HashMap<String, Vec<String>> {
             .push(crate::provenance::escape(&line));
     }
     out
+}
+
+/// With fragments, the document with each use expanded (SPEC §10.7). Only a document of the right
+/// shape is expanded; anything else renders as written, which draws no use.
+fn expanded(document: &Json, catalog: &weft_core::Catalog) -> Option<Json> {
+    if catalog.fragments.is_empty() {
+        return None;
+    }
+    let options = weft_core::ValidateOptions {
+        catalog: None,
+        mode: weft_core::Mode::Lenient,
+        tokens: None,
+        actions: None,
+    };
+    if weft_core::has_errors(&weft_core::validate(document, &options)) {
+        return None;
+    }
+    let result = weft_core::expand(&weft_core::to_document(document), catalog);
+    serde_json::to_value(&result.document).ok()
 }
 
 /// The `weft:source` comment: the framework, the component name and the flavour on its first

@@ -153,7 +153,7 @@ fn project_problems_point_into_the_project_file_and_fail_the_run() {
         "weft.json",
         r#"{"tokens": ["tokens/base.tokens.json", "../outside.json"], "catalog": ["catalogs/acme-ui.catalog.json", "catalog.json"], "extra": 1}"#,
     );
-    let r = run(&[&"validate", &s.path("screens/cart.weft")]);
+    let r = run(&[&"validate", &s.path("screens/review.weft")]);
     assert_eq!(r.code, 1, "{}", r.stdout);
     let shown = project.display();
     assert_eq!(
@@ -1197,4 +1197,49 @@ fn schema_writes_where_the_project_says_and_keeps_an_existing_file() {
     assert_eq!(r.code, 0, "{}", r.stderr);
     let core = generated_schema(&weft_catalog::core_catalog().unwrap());
     assert_eq!(std::fs::read_to_string(&written).unwrap(), core);
+}
+
+#[test]
+fn a_shared_fragment_renders_as_its_expansion() {
+    let screen = Path::new(EXAMPLE).join("screens/cart.weft");
+    let r = run(&[&"html", &screen]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    assert!(
+        r.stdout.contains(r#"data-weft-id="header/title""#),
+        "{}",
+        r.stdout
+    );
+    assert!(
+        r.stdout.contains(r#"data-action="press:nav.back""#),
+        "{}",
+        r.stdout
+    );
+}
+
+#[test]
+fn a_broken_fragment_file_is_a_diagnostic_of_the_project() {
+    let s = Scratch::new("fragment-broken");
+    s.write(
+        "fragments/page-header.weft",
+        r#"<fragment weft="0.2"><stack id="bar"><outlet name="nope"/></stack></fragment>"#,
+    );
+    let r = run(&[&"validate", &s.path("screens/cart.weft")]);
+    assert_eq!(r.code, 1, "{}", r.stdout);
+    // The problem is shown where it is: in the fragment's file.
+    let fragment = s.path("fragments/page-header.weft").display().to_string();
+    assert!(
+        r.stdout.starts_with(&format!("{fragment}:1:46 W804 ")),
+        "{}",
+        r.stdout
+    );
+    // A use of a fragment whose file is gone is reported where the screen uses it.
+    std::fs::remove_file(s.path("fragments/page-header.weft")).unwrap();
+    let r = run(&[&"validate", &s.path("screens/cart.weft")]);
+    assert_eq!(r.code, 1, "{}", r.stdout);
+    assert!(
+        r.stdout.contains("#/fragments/page-header W704"),
+        "{}",
+        r.stdout
+    );
+    assert!(r.stdout.contains("W801"), "{}", r.stdout);
 }

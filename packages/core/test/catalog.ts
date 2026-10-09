@@ -178,6 +178,76 @@ export const catalog: Catalog = CatalogSchema.parse({
       events: ["close"],
     },
   },
+  // The page header of SPEC §10.7, so that its examples check against a fragment.
+  fragments: {
+    // Uses itself, so that a screen using it has a cycle (W805).
+    loop: {
+      weft: "0.2",
+      root: {
+        kind: "fragment",
+        children: [
+          {
+            kind: "stack",
+            id: "again",
+            children: [{ kind: "use", id: "inner", props: { fragment: "loop" } }],
+          },
+        ],
+      },
+    },
+    "page-header": {
+      weft: "0.2",
+      root: {
+        kind: "fragment",
+        props: { label: "Page header" },
+        children: [
+          { kind: "param", props: { name: "title", required: true, type: "string" } },
+          {
+            kind: "param",
+            props: { default: "muted", name: "tone", type: "enum", values: "default muted" },
+          },
+          { kind: "param", props: { name: "back", type: "action" } },
+          {
+            kind: "param",
+            props: { "allowed-children": "button link", name: "actions", type: "slot" },
+          },
+          {
+            kind: "stack",
+            id: "bar",
+            props: { direction: "row" },
+            children: [
+              { kind: "button", id: "back", on: { press: "{$back}" }, children: ["Back"] },
+              { kind: "heading", id: "title", props: { level: 1, text: { bind: "$title" } } },
+              {
+                kind: "text",
+                id: "note",
+                props: { tone: { bind: "$tone" } },
+                children: ["Signed in"],
+              },
+              { kind: "outlet", props: { name: "actions" } },
+            ],
+          },
+        ],
+      },
+    },
+    // A hundred and one elements, so that a screen of a hundred uses passes the limit (W806).
+    wide: {
+      weft: "0.2",
+      root: {
+        kind: "fragment",
+        children: [
+          {
+            kind: "stack",
+            id: "rows",
+            children: Array.from({ length: 100 }, (_, i) => ({
+              kind: "text",
+              id: `t${i}`,
+              children: ["x"],
+            })),
+          },
+        ],
+      },
+    },
+  },
 });
 
 export const tokens: ReadonlyMap<string, string> = new Map([

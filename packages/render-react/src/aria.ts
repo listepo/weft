@@ -6,6 +6,7 @@ import {
   contentText,
   dateValue,
   dialogOpen,
+  drawnRoot,
   expandRoot,
   fieldRole,
   fieldInvalid,
@@ -263,7 +264,7 @@ function tabsTree(n: Inst, ctx: Ctx): AriaNode[] {
 }
 
 export function expectedTree(document: Document, options: ExpectedTreeOptions): AriaNode {
-  const root = expandRoot(document?.root, options.catalog, options.data);
+  const root = expandRoot(drawnRoot(document, options.catalog), options.catalog, options.data);
   const children = root ? build(root, { group: undefined }) : [];
   return normalizeAria({ role: "fragment", name: "", children });
 }

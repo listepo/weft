@@ -77,13 +77,13 @@ private func editor() throws -> WeftEditor {
         let swift = try #require(generated.clipboard)
         #expect(swift.contains("struct LoginScreen: View"))
 
-        // The importer gives back what the generator printed (SPEC §9): the canonical screen.
+        // The importer gives back what the generator printed (SPEC §9): the canonical screen,
+        // stamped with the current version (the corpus stays at 0.1, which 0.2 reads unchanged).
         let imported = editor.perform(.importSelection, on: Buffer(lines: lines(swift), isSwift: true))
         #expect(!imported.isError, Comment(rawValue: imported.message))
         let formatted = try editor.runner.run("fmt", text: screen, fileName: "screen.weft")
-        // The importer stamps the current version; the corpus stays at 0.1.
-        let current = formatted.standardOutput.replacingOccurrences(of: "weft=\"0.1\"", with: "weft=\"0.2\"")
-        #expect(imported.clipboard == current)
+        let stamped = formatted.standardOutput.replacingOccurrences(of: "weft=\"0.1\"", with: "weft=\"0.2\"")
+        #expect(imported.clipboard == stamped)
     }
 
     @Test func aSelectionIsImportedAndItsLossesAreListed() throws {

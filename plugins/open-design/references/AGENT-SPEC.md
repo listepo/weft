@@ -158,6 +158,38 @@ How to write it: one `<context>` as the first child of `<screen>`, holding only 
 </screen>
 ```
 
+### 2.10 Fragments
+
+A project can share a block between screens, such as a page header, as a *fragment* in its own file (SPEC §10.7). Place it with `<use>`; never copy its body into the screen.
+
+```xml
+<fragment label="Page header" weft="0.2">
+  <param name="title" required="true" type="string"/>
+  <param name="back" type="action"/>
+  <param name="actions" type="slot"/>
+  <stack id="bar" direction="row">
+    <button id="back" on-press="{$back}">Back</button>
+    <heading id="title" level="1" text="{$title}"/>
+    <outlet name="actions"/>
+  </stack>
+</fragment>
+```
+
+```xml
+<screen id="cart" label="Cart" weft="0.2">
+  <use id="header" fragment="page-header" title="Your cart" on-back="nav.back">
+    <slot name="actions">
+      <button id="clear" on-press="cart.clear">Clear</button>
+    </slot>
+  </use>
+</screen>
+```
+
+- `<use>` takes an `id`, `fragment` (the name), one attribute per value parameter with a value of its type (a literal, binding or token), `on-<name>` per action parameter, and `<slot name="…">` per slot parameter. It takes no `label`, `hidden` or other universal attribute and no default content.
+- What a use places must be allowed where the `<use>` stands, as if the body were written there.
+- Ids inside a fragment belong to it. A rendered element is addressed as `header/title`. A patch sets a parameter on the `<use>` (`"prop": "title"`, `"prop": "on-back"`) or fills its slot; it never names an id inside the fragment (`W502`): edit the fragment instead.
+- In a fragment the `<param>` elements come first, then the body. Read a value parameter whole, `{$title}`, where its type fits; an action parameter as `on-press="{$back}"`; a slot parameter with `<outlet name="actions"/>`.
+
 ## 3. Editing a screen
 
 Prefer patches to rewriting. A patch list is JSON, addresses elements by id, applies in order and is all-or-nothing: if one patch fails or the result is invalid, nothing changes and the diagnostics explain why.
@@ -264,7 +296,7 @@ What each code asks of you:
 | W120 | Keep one `<context>`, as a direct child of `<screen>`, with no attributes and only `<entry>` elements inside. |
 | W121 | Put the `<entry>` inside `<context>`, with plain text only, the attributes `id`, `kind`, `by`, `name`, `for`, `status`, and `kind`, `by` and `name` all present. |
 | W200 | Give the JSON the shape of SPEC §3: `{ weft, root }`, nodes with `kind`, `id`, `props`, `on`, `slots`, `children` and nothing else. |
-| W201 | Make `<screen>` the root. |
+| W201 | Make `<screen>` the root; in a project fragment file, `<fragment>`. |
 | W202 | Add a unique `id`. |
 | W203 | Use one of the values in `expected`. |
 | W204 | Use the type in `expected`: `level="2"`, not `level="two"`; a token, not a raw size. |
@@ -328,7 +360,7 @@ What each code asks of you:
 | W601 | The importer could not read its input; nothing to repair in a document. |
 | W602 | The import was cut at a limit; the rest of the input is missing. |
 | W701 | The project file, or the member at `path`, has the wrong shape; fix `weft.json` (or the `project` argument), not the screen. |
-| W702 | A warning: correct the name using the hint, or remove the key. Members are `tokens`, `catalog`, `actions`, `data`, `$schema` and the tool sections of SPEC §10.6. |
+| W702 | A warning: correct the name using the hint, or remove the key. Members are `tokens`, `catalog`, `actions`, `data`, `fragments`, `$schema` and the tool sections of SPEC §10.6. |
 | W703 | Name the file relative to the project file, inside its directory, with `/`. |
 | W704 | Point at a file that exists, holds JSON, and stays inside the project directory after following symbolic links. |
 | W705 | Fix the token file named in the message: give the token a `$type`, point the alias at an existing token, break the cycle. |
@@ -341,6 +373,13 @@ What each code asks of you:
 | W712 | Give a shared catalog its own `prefix`: one lowercase segment, not `x`, `weft` or a core kind's first segment. Only the project's own catalog has none. |
 | W713 | A library defines only kinds named `<prefix>-…`; extend core and library kinds in the project's own catalog, and name its new kinds outside the libraries' prefixes. |
 | W714 | A warning: add the required catalog to `catalog`, or load a version compatible with the one `requires` names. |
+| W801 | Use a fragment the project has (`hint` names the nearest), or write the elements without `<use>`. |
+| W802 | Give the `<use>` only the attributes, `on-*` actions and slots its fragment declares as parameters; `expected` lists them. |
+| W803 | Fix the `<param>`: a name of lowercase letters and digits, a known `type`, only the attributes its type takes, a `default` of that type, every `<param>` before the body, each name once; and give the fragment a body. |
+| W804 | Give `<outlet>` only `name`, naming a slot parameter of the fragment, once; outside a fragment use a `<slot>` of a `<use>`. |
+| W805 | Break the cycle: a fragment may not use itself, directly or through other fragments; write the repeated part out once. |
+| W806 | Use fewer or smaller fragments: a screen expands to at most 10,000 elements and 256 levels. |
+| W807 | Read a value parameter whole (`{$title}`, not `{$title.x}`) in a prop, an action parameter in `on-*`, and a slot parameter with `<outlet>`. |
 
 ### 4.1 Reading back an edit
 

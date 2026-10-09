@@ -13,7 +13,7 @@ use weft_core::{
 
 use crate::Unsupported;
 use crate::data::{Data, Ty, prop_type};
-use crate::names::{clash_key, identifier, string, type_name};
+use crate::names::{clash_key, element_name, identifier, string, type_name};
 
 /// The first line of the source comment; `import_slint` looks for it.
 pub(crate) const MARKER: &str = "// weft:source slint";
@@ -61,6 +61,9 @@ pub fn generate(
     if has_errors(&diagnostics) {
         return Err(GenerateError::Invalid(diagnostics));
     }
+    // A use means its fragment's body (SPEC §10.7); validation reported any cycle or excess.
+    let expanded = weft_core::expand(document, options.catalog).document;
+    let document = &expanded;
     let mut problems = vec![];
     check_ids(&document.root, &mut HashMap::new(), &mut problems);
     let data = Data::infer(&document.root, options.catalog, &mut problems);
@@ -115,7 +118,8 @@ fn element_children(node: &Node) -> impl Iterator<Item = &Node> {
 
 /// Every id must be a Slint element id, and no two may be the same id to Slint.
 fn check_ids(node: &Node, seen: &mut HashMap<String, String>, problems: &mut Vec<Unsupported>) {
-    if let Some(id) = &node.id {
+    if let Some(id) = node.id.as_deref().map(element_name) {
+        let id = &id;
         if identifier(id).is_none() {
             problems.push(Unsupported::new(
                 path_of(node),
@@ -259,8 +263,8 @@ impl Gen<'_> {
     }
 
     fn open(&mut self, depth: usize, node: &Node, widget: &str, place: &[String]) {
-        let head = match &node.id {
-            Some(id) if !self.aliases.iter().any(|alias| alias == id) => {
+        let head = match node.id.as_deref().map(element_name) {
+            Some(id) if !self.aliases.contains(&id) => {
                 format!("{id} := {widget} {{")
             }
             _ => format!("{widget} {{"),
@@ -974,7 +978,7 @@ impl Gen<'_> {
 
     fn tab(&mut self, node: &Node, depth: usize) {
         let d = depth + 1;
-        match &node.id {
+        match node.id.as_deref().map(element_name) {
             Some(id) => self.line(depth, &format!("{id} := Tab {{")),
             None => self.line(depth, "Tab {"),
         }
@@ -1010,7 +1014,9 @@ impl Gen<'_> {
     }
 
     fn dialog_open(&mut self, node: &Node) {
-        let Some(id) = node.id.as_deref() else { return };
+        let Some(id) = node.id.as_deref().map(element_name) else {
+            return;
+        };
         let Some(Value::Bind { bind, not }) = node.props.get("open") else {
             if matches!(node.props.get("open"), Some(Value::Bool(true))) {
                 self.inits.push(format!("{id}.show();"));
@@ -1089,7 +1095,7 @@ impl Gen<'_> {
 
     fn menu_item(&mut self, node: &Node, depth: usize) {
         let d = depth + 1;
-        match &node.id {
+        match node.id.as_deref().map(element_name) {
             Some(id) => self.line(depth, &format!("{id} := MenuItem {{")),
             None => self.line(depth, "MenuItem {"),
         }
@@ -1165,7 +1171,7 @@ impl Gen<'_> {
         };
         for (label, value, child) in &pairs {
             let inner = d + 1;
-            match &child.id {
+            match child.id.as_deref().map(element_name) {
                 Some(id) => self.line(d, &format!("{id} := RadioButton {{")),
                 None => self.line(d, "RadioButton {"),
             }

@@ -19,9 +19,9 @@ import { catalog } from "./catalog.ts";
 const spec = readFileSync(new URL("../../../SPEC.md", import.meta.url), "utf8");
 const examples = [...spec.matchAll(/```xml\n([\s\S]*?)```/g)].map((m) => m[1] ?? "");
 
-/** Fragments in the spec are wrapped in a canonical screen so that they form a document. */
+/** Snippets in the spec are wrapped in a canonical screen so that they form a document. */
 function asDocument(example: string): string {
-  if (example.startsWith("<screen")) return example;
+  if (example.startsWith("<screen") || example.startsWith("<fragment")) return example;
   const body = example
     .trimEnd()
     .split("\n")

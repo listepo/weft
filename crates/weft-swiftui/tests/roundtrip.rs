@@ -1,5 +1,5 @@
 //! Weft → SwiftUI → Weft is the identity for every corpus screen, catalog example and example
-//! project screen, with the tokens in the screen file and in the shared `WeftTokens`, and with and
+//! project screen that places no fragment, with the tokens in the screen file and in the shared `WeftTokens`, and with and
 //! without sample data: the document reads back byte-identical after canonical formatting, with
 //! no losses. What the generator adds for the data (initializer, `sample`, `#Preview`) is not
 //! part of the screen.
@@ -20,7 +20,9 @@ fn round_trip(
     shared_tokens: bool,
 ) -> Vec<String> {
     let mut failures = vec![];
-    for screen in screens {
+    // The generator draws a use's expansion, whose instance paths are no document ids, and
+    // importers never write `<use>` (SPEC §10.7): such a screen cannot read back as written.
+    for screen in screens.iter().filter(|s| !s.markup.contains("<use ")) {
         let mut document = common::parse_screen(&screen.markup, catalog, tokens);
         // The importer stamps the current version; the corpus stays at 0.1.
         document.weft = WEFT_VERSION.into();

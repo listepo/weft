@@ -524,8 +524,30 @@ fn project_for(
         return Ok((None, false));
     };
     let (project, diagnostics) = load_project(&file, mode)?;
-    print(&file, &diagnostics, out)?;
+    print_project(&file, &diagnostics, out)?;
     Ok((Some(project), has_errors(&diagnostics)))
+}
+
+/// Project diagnostics. A markup problem in a fragment (SPEC §10.7) has its position in the
+/// fragment's file, so it is shown in that file.
+fn print_project(file: &Path, diagnostics: &[Diagnostic], out: &mut dyn Write) -> Result<()> {
+    let members = std::fs::read_to_string(file)
+        .ok()
+        .and_then(|text| parse_json(&text).ok());
+    let dir = file.parent().unwrap_or(Path::new("."));
+    for d in diagnostics {
+        let shown = (d.line.and(d.path.strip_prefix("#/fragments/")))
+            .and_then(|rest| rest.split('/').next())
+            .map(|name| name.replace("~1", "/").replace("~0", "~"))
+            .and_then(|name| members.as_ref()?.get("fragments")?.get(&name)?.as_str())
+            .map(|name| dir.join(name));
+        print(
+            shown.as_deref().unwrap_or(file),
+            std::slice::from_ref(d),
+            out,
+        )?;
+    }
+    Ok(())
 }
 
 /// A setting of the project's §10.6 sections, when there is a project and it sets one.

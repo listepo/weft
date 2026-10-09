@@ -223,3 +223,28 @@ fn edited_or_foreign_slint_is_not_taken_for_its_comment() {
         Err(ImportError::TooLong)
     ));
 }
+
+#[test]
+fn a_fragment_use_is_generated_as_its_expansion() {
+    let (mut catalog, tokens) = setup();
+    let fragment = r#"<fragment weft="0.2"><param name="back" type="action"/><stack id="bar"><button id="back" on-press="{$back}">Back</button></stack></fragment>"#;
+    let fragment = document(fragment, &catalog, &tokens);
+    catalog
+        .fragments
+        .insert("header".into(), weft_core::Fragment::new(fragment));
+    let markup = r#"<screen id="s" weft="0.2"><use id="top" fragment="header" on-back="nav.back"/></screen>"#;
+    let doc = document(markup, &catalog, &tokens);
+    let options = GenerateOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+        name: None,
+    };
+    let source = generate(&doc, &options).unwrap();
+    assert!(source.contains("top--back := Button"), "{source}");
+    assert!(
+        source.contains(r#"root.perform("nav.back", "top/back");"#),
+        "{source}"
+    );
+    let (errors, built) = compile(&source, exported_component(&source));
+    assert!(built, "{errors:?}");
+}

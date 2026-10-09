@@ -191,6 +191,7 @@ function projectExpect(c: ProjectCase) {
       changed: Object.entries(components).filter(
         ([kind, def]) => !Object.hasOwn(core, kind) || !isDeepStrictEqual(core[kind], def),
       ),
+      fragments: project.catalog.fragments ?? {},
     },
     catalogs: project.catalogs,
     // Every other kind is defined by the core and extended by nothing.

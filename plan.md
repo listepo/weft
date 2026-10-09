@@ -21,11 +21,8 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
-| T8 | in progress | P1 | 3 | 70% | Cursor / grok-4.7 |
-| T28 | in progress | P2 | 3 | 90% | Cursor / grok-4.7 |
+| T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
-| T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
-| T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 80% | Claude Code / claude-opus-5-5 |
 | T39.7 | todo | P2 | 3 | 0% | |
 | T39.9 | todo | P2 | 3 | 0% | |
@@ -43,7 +40,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T17.2 | todo | P2 | 3 | 0% | |
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
-| T94 | in progress | P0 | 2 | 90% | Cursor / grok-4.7 |
 | T96 | todo | P2 | 3 | 0% | |
 | T97 | todo | P2 | 2 | 0% | |
 | T98 | todo | P2 | 2 | 0% | |
@@ -73,21 +69,6 @@ Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` m
 
 Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
 
-### T94. Foreign stack alignment and grid child order
-
-`stackOf` in `packages/design-tool/src/foreign.ts` wrote only `direction`, `columns` and `gap`. `LayerLayout` already has `align` and `wrap`. Figma maps `counterAxisAlignItems` through `ALIGN` (`MIN` → `start`, `CENTER` → `center`, `MAX` → `end`, `BASELINE` → undefined). A foreign horizontal frame with `MIN` alignment became `<stack direction="row">`. SPEC §5.1 says a row without `align` is centered on the cross axis, so an importer must not round-trip a row's center. `wrap` was dropped the same way. Catalog `stack` has the boolean; `grid` has neither `align` nor `wrap`.
-
-**Out of scope.** Padding, fills and fonts (SPEC §9 keeps those as losses; catalog `stack` has no such props). Collapsing vectors into `<image>` (`image` requires `src`). Teaching `crates/weft-slint/src/generate.rs` to emit Slint alignment (SPEC keeps `align` and `wrap` in the source comment). A second Figma simplifier, a new caller of `api.figma.com`, or a copy of Framelink. The REST pull (`packages/figma/src/pull.ts`) and the foreign reader stay the only Figma path.
-
-Execution plan:
-
-1. In `stackOf`, after the direction and columns writes: set `wrap` when `layer.layout.wrap` is true. On a row, set `align` only for `start`, `end` or `stretch`. On a column, set `align` only for `center`, `end` or `stretch`. Leave a row's `center` and a column's `start` unset, and leave `align` unset when it is undefined. Do not set either prop on a grid. Do not emit padding. The painted-loss stays.
-2. Tests in `packages/design-tool/test/foreign-layout.test.ts`: a horizontal frame at `MIN` reads `align="start"` with no `wrap`; a horizontal frame at `CENTER` with wrap reads `wrap` and no `align`; a vertical frame at `MIN` reads neither; a layer that already stores `weft.source` is unchanged, including a row's stored `center` and a column's stored `start`. The sourced-frame snapshots in `packages/figma/test/__snapshots__/layers/` stay as they are. The foreign promo frames in the Figma and Penpot edit tests expect `align="start"`.
-3. Thread `gridRowAnchorIndex`, `gridColumnAnchorIndex` and `layoutPositioning` from the REST node (`rest.ts`) and the plugin node (`layer.ts`) onto `Layer`. When the mode is `grid`, order in-flow children by row anchor, then column anchor, then original index before `convertChildren`. Absolutely positioned children keep their index. Add a `layout` loss only when the order actually changes. Skip when no in-flow child carries an anchor, so z-order remains. A missing or non-numeric anchor stays absent, not zero.
-4. Verify with `mise exec -- pnpm exec vitest run packages/design-tool/test packages/figma/test`.
-
-Progress: steps 1–3 are in the tree. The Vitest command in step 4 exits 0. Remaining: the pull request's CI.
-
 ### T8. Evaluation
 
 T20–T25 have landed, so the final runs are the ones on the Rust core and the stricter benchmark. The harness steps below are in the tree. The full edit and read runs are not: this environment has no `ANTHROPIC_API_KEY` and no LM Studio server, and the runs already in `test.md` are the earlier one-sample measurements.
@@ -106,26 +87,6 @@ Execution plan:
 8. Verify with `pnpm run ci`.
 
 Progress: steps 1–5 are done (repair cycle, summaries, `DEFAULT_MODELS`, results committed under `bench/results/`, trial row in `test.md`). `bench/EVALUATION.md` records those runs against the numeric bar and does not close the task. Remaining: step 6, the three-sample edit and read runs on the current harness, then a history row and a revision of the report. Step 8 waits on that.
-
-### T28. Binding readback against inverted conditions
-
-In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in while `$.busy` is true. It changed `{!$.email}` to `{!$.busy}` and kept the `!`. The markup is valid, but the condition is inverted. The HTML and JSX baselines got it right. Validation cannot see intent. The model can, if the core tells it in plain words what a binding means. Depends on T20.
-
-1. `weft-core`: `explain(document)` reads every binding as a sentence, e.g. `button#submit disabled: while $.busy is false`. `explain_changes(before, after)` lists only the props, events and bindings that changed.
-2. CLI: `weft explain <file> [--against <old-file>]`.
-3. `AGENT-SPEC.md` repair loop: before answering, read back the changed bindings and compare them with the instruction.
-4. Benchmark: an optional readback turn after a valid edit, the same for every format. This is a method change, recorded in `test.md`. Rerun `login` on Bonsai with 3 samples.
-
-Done when the tests for `explain` pass, the CLI prints readbacks, and the rerun is in the `test.md` history.
-
-Execution plan (steps 1–3 are done; step 4 is the benchmark turn, now in the harness, and the live rerun still needs a local LM Studio model):
-
-- Core, new module `crates/weft-core/src/explain.rs` with exports in `lib.rs` only, so no other core module changes. `explain(document, catalog)` returns one `Readback { path, target, name, sentence }` per bound or token prop, event and `<each>`; `explain_changes(before, after, catalog)` returns `Change { target, name, kind, before, after }` for every prop (literals included), event and loop that was added, removed or changed, matching elements by id. Elements are named `kind#id`, or by their SPEC §6.1 diagnostic path when they have no valid id (reusing `path_segment`), so slots appear as `slot[name]`. Sentences never hide a negation: a negated binding reads `true while $.busy is falsy (NOT $.busy)`, a plain binding on a boolean prop `true while $.busy is truthy`, other bindings `reads $.x` with `; user input writes $.x` on writable props, tokens `design token space.md`, events `runs action auth.submit`, loops `repeats its children once per item of $.todos, as $todo`. Pure, no I/O; unit tests named as claims in the module.
-- CLI: `weft explain <file> [--against <old-file>] [--catalog <file>]` in `crates/weft-cli`, one line per readback or change on stdout; diagnostics with errors in either file print as in `validate` and exit 1; usage and I/O failures exit 2. End-to-end cases in `crates/weft-cli/tests/cli.rs`, including the `login.e2` inversion.
-- `AGENT-SPEC.md` §4: read back the changed bindings before answering (`weft explain --against` when a tool is available, otherwise read `!` as NOT) and compare each with the instruction; one checklist line. `bench/test/agent-spec.test.ts` must stay green.
-- Verify: `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all --check`, `cargo nextest run --workspace`, the binary on a corpus screen, `moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
-
-Progress: steps 1–3 are done. `explain` and `explain_changes` live in `crates/weft-core/src/explain.rs` with unit tests, `weft explain` in `crates/weft-cli` with end-to-end tests, and `AGENT-SPEC.md` §4.1 holds the readback loop. Step 4's harness is in: `bench/src/readback.ts` diffs the neutral tree, `run.ts edit --readback` sends one follow-up after a valid edit for every format, and `test.md` records the method. A mocked login.e2 inversion is covered in `bench/test/checkers.test.ts`. Remaining: the `login` rerun on Bonsai with 3 samples and its row in the `test.md` history. No LM Studio server is reachable here, so that run is not invented.
 
 ### T14. Figma round trip and plugin
 
@@ -177,45 +138,6 @@ Execution plan, stage 2 (this round; style overrides stay out until the creator 
 2. MCP / Claude Code tools through the Figma MCP server. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. The creator chose to move the Weft source to shared plugin data, which any plugin and the REST API (`plugin_data=shared`) can read: T14.2, done (`done.md`).
 3. T14.3: the creator dropped files that keep the Weft source in private plugin data; only shared plugin data is supported — done (`done.md`).
 
-### T31. Project file and shared resources
-
-Several `.weft` screens share one set of resources through a project file, `weft.json`, which tools find by walking up from the screen, like `tsconfig.json`. Screens themselves do not name what they use. Approved scope:
-
-- **Tokens:** one or more DTCG files, layered in order (base, then theme, then brand), the later file overriding the earlier one.
-- **Catalog:** the core catalog plus project extensions (own kinds, props and variants), declared once for every screen.
-- **Actions and data schema:** one list of action names and one description of the data model, against which every screen is validated (binding paths and their types).
-- **Fragments:** repeated blocks (header, footer, card) kept in their own files and placed in screens by reference. This is the one part that changes the format: a new element (for example `<use>`), with its rules for ids, slots, bindings and patches. Its design goes to the creator before it is built, and it lands in `AGENT-SPEC.md`, `SPEC.md`, both parsers (TypeScript and Rust) and the differential fixtures together.
-- **Tools:** the CLI, the MCP server, the renderer, the Claude Code plugin (T30) and the Figma work (T14) all read the project file, and an explicit argument still overrides it.
-
-Done when a corpus project of several screens with layered tokens, a catalog extension, an action list, a data schema and a shared fragment validates and renders through the CLI and the MCP server, the TypeScript and Rust results match, and a broken project file is reported with a diagnostic, never a crash.
-
-Execution plan (part A is built now; part B, fragments, is design only and waits for the creator):
-
-1. Spec first. `SPEC.md` gets a Project section: `weft.json` found by walking up from the screen (an explicit argument overrides it), its members (`tokens` list of DTCG files layered in order, `catalog` extension file, `actions` list, `data` schema file), paths relative to the project file and never leaving its directory, token layering (later token wins, aliases resolved after the merge, as the DTCG resolver module orders sets), the catalog extension rules (new kinds are added; an entry for a core kind merges into it; the merged catalog may only widen the core catalog by the version rules of §8, anything those rules call major is a conflict), the data schema (a JSON Schema 2020-12 subset), and new codes: `W315`/`W316` for binding paths and types against the data schema, `W7xx` for project problems. `AGENT-SPEC.md`, the MCP primer and tool descriptions follow. Sources go into `research.md`.
-2. Core, TypeScript and Rust (`packages/core/src/data.ts`, `crates/weft-core/src/data.rs`): `compileDataSchema` and `checkData(document, …)` as a separate pass, so `ValidateOptions` and `ParseOptions` keep their fields (T22 and T29 construct them); new codes in both registries.
-3. Catalog, TypeScript and Rust (`packages/catalog/src/project.ts`, `crates/weft-catalog/src/project.rs`): pure `resolveProject(content)` and `loadProject(text, read)` with an injected reader; token layering, catalog extension with conflict diagnostics, action list, data schema. Never throws or panics.
-4. File reading stays at the edges: `packages/catalog/src/node.ts` (walk up, read files) for Node tools; the Rust CLI walks up itself and gets `--project`; `render-react`'s `write-page` reads the project too. The MCP server reads no files: tools take an optional `project` argument with the contents, and `createServer` takes one from the host.
-5. Differential fixtures: data checks in the core fixture, project resolution in the catalog fixture; regenerate with `WEFT_UPDATE_FIXTURES=1`.
-6. An example project (`examples/project/`, outside `corpus/` because corpus tests read every directory there as a screen) with several screens, layered tokens, a catalog extension, actions and a data schema; CLI and MCP tests on it and on broken project files.
-7. Part B: `docs/fragments-design.md`, a proposal for `<use>` fragments, for the creator to approve.
-8. Verify with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
-
-Scope extension (creator): everything that can be configured is configurable through `weft.json`. The file becomes a config with optional sections, each with documented defaults; an explicit CLI or tool argument overrides `weft.json`, which overrides the defaults.
-
-9. Spec: `SPEC.md` §10.6 lists the sections — `validate` (`mode`), `format` (`write`), `render` (`data`, `tokens`, `outDir`), `export.<target>` and `import.<target>` (`react` and `html` today, `outDir`), `mcp` (`limits`), `plugins` (free-form, one object per plugin) — their defaults, the precedence, and how a later task adds its section (T34 SwiftUI, T35 web targets, T14 Figma: `export.swiftui`, `export.html`, `export.solid`, `export.figma` with a rem base and a token strategy, `import.figma`, `import.penpot`). An unknown key is `W702`, now always a warning; a wrong type is `W701` and the default applies.
-10. `schemas/weft.schema.json` (JSON Schema 2020-12), referenced from `$schema`; a test keeps it and the loader in step.
-11. Loader (Rust, through weft-wasm for TypeScript): the sections parsed into `Project.settings`, never throwing.
-12. Tools: the Rust CLI (`validate.mode` with `--lenient` to override, `format.write` with `--print`, `explain` reads the project's catalog), `write-page` (`render.data`, `render.tokens`), the Claude Code plugin scripts (project resources plus `render`, `export.react`, `import.html`), the MCP server (`weft-mcp --project <file>` read once at start by the host: resources, `validate.mode` as the default of `strict`, `mcp.limits`; the `project` tool argument never changes limits).
-13. `AGENTS.md`: every new tool option gets a `weft.json` key in the same change.
-14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
-
-Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). Left: the fragments proposal in `docs/fragments-design.md` waits for the creator; once approved, fragments are built (format, both parsers, patches, fixtures) and the example project gains a shared fragment, which the done criteria ask for.
-
-### T32. Claude Code plugin from GitHub
-
-The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
-
-Progress: the bundle carries the WebAssembly core (T22 merged): `plugins/claude-code/build.ts` bundles the scripts and the MCP server with Vite 8 into the committed `dist/` and copies `weft_bg.wasm` to `dist/wasm/`, where `@weft/core` reads it relative to the shared chunk; `claude-code:build` depends on `root:wasm`. The plugin folder alone runs (tests copy only it to a temp folder and run every script and the server there; `claude --plugin-dir <copy> mcp list` shows `weft` connected; `claude plugin validate --strict` passes). The Desktop `node` requirement (24.2 or later on the PATH) is in the plugin README. `root:wasm` remaps build paths, so the `.wasm` is byte-reproducible and the up-to-date test compares it byte for byte. Remaining: `repository` in `plugin.json` once a remote exists, and the done criterion itself, `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` on a clean machine.
 
 ### T39. Context in the document
 

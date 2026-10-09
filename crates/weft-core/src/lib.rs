@@ -9,7 +9,9 @@ mod context_patch;
 pub mod controls;
 mod data;
 mod diagnostics;
+mod expand;
 mod explain;
+pub mod fragment;
 mod json;
 mod model;
 mod parse;
@@ -32,13 +34,14 @@ pub use data::{
 pub use diagnostics::{
     Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors, one_of,
 };
+pub use expand::{EXPANDED_LIMIT, Expanded, expand};
 pub use explain::{Change, ChangeKind, Readback, explain, explain_changes, explain_with_context};
 pub use json::{
     JSON_DEPTH_LIMIT, JsonError, js_number, js_round, order_keys, parse_json, to_compact,
 };
 pub use model::{
-    Catalog, Child, ComponentDef, Content, Document, Entry, Map, Node, PropDef, PropDefault,
-    PropType, SlotDef, Value, WEFT_VERSION,
+    Catalog, Child, ComponentDef, Content, Document, Entry, Fragment, Map, Node, PropDef,
+    PropDefault, PropType, SlotDef, Value, WEFT_VERSION,
 };
 pub use parse::{ParseOptions, ParseResult, parse, parse_partial};
 pub use patch::{ApplyOptions, PatchResult, apply_patches};

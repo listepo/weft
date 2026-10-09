@@ -371,7 +371,7 @@ impl Checker<'_> {
         let component = if each {
             None
         } else {
-            self.catalog.components.get(&node.kind)
+            self.catalog.def_of(node)
         };
         let mut item = DataSchema::Any;
         for (name, value) in &node.props {

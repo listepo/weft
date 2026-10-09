@@ -20,6 +20,7 @@ import {
   dateType,
   dateValue,
   dialogOpen,
+  drawnRoot,
   expandRoot,
   fieldInvalid,
   fieldValue,
@@ -67,11 +68,7 @@ type Ctx = { o: RenderOptions; prefix: string; group: Inst | undefined; form: In
 type Attrs = Record<string, unknown>;
 
 export function render(document: Document, options: RenderOptions): ReactElement {
-  const root = expandRoot(
-    isRecord(document) ? document["root"] : undefined,
-    options.catalog,
-    options.data,
-  );
+  const root = expandRoot(drawnRoot(document, options.catalog), options.catalog, options.data);
   const ctx: Ctx = {
     o: options,
     prefix: options.idPrefix ?? "weft-",

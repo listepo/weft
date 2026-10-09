@@ -6,9 +6,11 @@ use serde_json::Value as Json;
 
 use crate::context_check::check_entries;
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, did_you_mean, one_of, quote};
+use crate::fragment::{FRAGMENT, OUTLET, PARAM, ParamKind, USE};
 use crate::json::{JSON_DEPTH_LIMIT, js_number, js_round};
 use crate::model::{
-    Catalog, Child, ComponentDef, Content, Document, Node, PropDef, PropType, Value, WEFT_VERSION,
+    Catalog, Child, ComponentDef, Content, Document, Map, Node, PropDef, PropType, Value,
+    WEFT_VERSION,
 };
 use crate::rules::{
     ARIA_ROLES, CONTEXT, EACH, ENTRY, MAX_DEPTH, MODEL_ASSETS, SLOT, asset_problem,
@@ -17,6 +19,9 @@ use crate::rules::{
 };
 use crate::shape::{document_issues, to_document};
 use crate::source::{NodeSource, path_segment};
+
+mod fragments;
+mod uses;
 
 #[derive(Clone, Copy, Default)]
 pub struct ValidateOptions<'a> {
@@ -71,12 +76,19 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
         out: vec![],
         ids: IndexMap::new(),
         references: vec![],
+        in_fragment: false,
+        params: Map::new(),
+        outlets: vec![],
     };
     let root = &document.root;
     let root_path = format!("/{}", path_segment(&root.kind, root.id.as_deref(), None));
     let version_at = node_at(root, &root_path, Some("weft"));
     v.check_version(&document.weft, &version_at);
-    v.visit_node(root, &root_path, None, &[]);
+    if root.kind == FRAGMENT {
+        v.visit_fragment(root, &root_path);
+    } else {
+        v.visit_node(root, &root_path, None, &[]);
+    }
     let root_id = root.id.as_deref();
     for d in check_entries(&document.context, &root_path, root_id, &mut v.ids) {
         v.report(d);
@@ -100,6 +112,12 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
             .hint_opt(did_you_mean(&value, &ids));
             v.report(d);
         }
+    }
+    if !catalog.fragments.is_empty() {
+        // Each use was checked against its fragment above; only the bounds of the whole
+        // expansion remain (SPEC §10.7).
+        v.out
+            .extend(crate::expand::expand(document, catalog).diagnostics);
     }
     v.out
 }
@@ -232,6 +250,8 @@ impl Owner {
 #[derive(PartialEq, Eq, Clone, Copy)]
 enum Category {
     Each,
+    /// A `<use>`; its definition is the fragment's signature when the fragment is known.
+    Use,
     Component,
     Extension,
     Unknown,
@@ -244,6 +264,11 @@ struct Validator<'a> {
     ids: IndexMap<String, (String, String)>,
     /// Literal values of props that name an element, with the kind they must name.
     references: Vec<(String, String, At)>,
+    in_fragment: bool,
+    /// The parameters of the fragment being checked; empty in a screen.
+    params: Map<ParamKind>,
+    /// Slot parameters an `<outlet>` has already placed.
+    outlets: Vec<String>,
 }
 
 impl<'a> Validator<'a> {
@@ -257,6 +282,16 @@ impl<'a> Validator<'a> {
             None
         } else {
             catalog.components.get(kind)
+        }
+    }
+
+    /// What a node answers to: its component, or for a `<use>` its fragment's signature.
+    fn def_of(&self, node: &Node) -> Option<&'a ComponentDef> {
+        let catalog: &'a Catalog = self.catalog;
+        if node.kind == EACH {
+            None
+        } else {
+            catalog.def_of(node)
         }
     }
 
@@ -422,7 +457,11 @@ impl<'a> Validator<'a> {
             );
         } else if !path.starts_with("$.") {
             let variable = path[1..].split('.').next().unwrap_or_default();
-            if !scope.iter().any(|s| s == variable) {
+            if self.params.contains_key(variable) {
+                if !self.check_param_read(path, variable, not, def, at) {
+                    return;
+                }
+            } else if !scope.iter().any(|s| s == variable) {
                 let expected = if scope.is_empty() {
                     "a path starting with $.".to_owned()
                 } else {
@@ -638,8 +677,25 @@ impl<'a> Validator<'a> {
                 path_segment(&child.kind, child.id.as_deref(), Some(index))
             );
             let at = node_at(child, &child_path, None);
-            let component = self.component(&child.kind);
+            if child.kind == PARAM
+                && owner.kind.as_deref() == Some(FRAGMENT)
+                && !owner.slot
+                && !owner.each
+            {
+                // Declarations, checked with the fragment itself.
+                continue;
+            }
+            let component = self.def_of(child);
             let opaque = child.kind != EACH && component.is_none();
+            if child.kind == USE
+                && component.is_some()
+                && !matches!(owner.content, Content::None | Content::Text)
+            {
+                // A use is transparent: what it places answers to this list (SPEC §10.7).
+                self.check_placed(child, &at, owner, &where_);
+                self.visit_node(child, &child_path, Some(owner), scope);
+                continue;
+            }
             if matches!(owner.content, Content::None | Content::Text) {
                 let expected = if owner.content == Content::None {
                     "no content"
@@ -698,9 +754,14 @@ impl<'a> Validator<'a> {
         let at = node_at(node, path, None);
         let props = &node.props;
         let catalog = self.catalog;
-        let component = self.component(kind);
+        if owner.is_some() && (kind == OUTLET || kind == PARAM) {
+            return self.visit_structural(node, path);
+        }
+        let component = self.def_of(node);
         let category = if kind == EACH {
             Category::Each
+        } else if kind == USE {
+            Category::Use
         } else if component.is_some() {
             Category::Component
         } else if kind.starts_with("x-") {
@@ -710,7 +771,9 @@ impl<'a> Validator<'a> {
         };
         let kinds = || catalog.components.keys();
 
-        if category == Category::Unknown {
+        if category == Category::Use && component.is_none() {
+            self.unknown_fragment(node, path);
+        } else if category == Category::Unknown {
             if [SLOT, CONTEXT, ENTRY].contains(&kind) || !is_name(kind) {
                 let (message, hint) = if kind == SLOT {
                     (
@@ -866,6 +929,15 @@ impl<'a> Validator<'a> {
                 ));
                 continue;
             }
+            if let Some(component) = component.filter(|_| category == Category::Use) {
+                let def = component.prop(name);
+                if def.is_none() && !name.starts_with("x-") {
+                    self.undeclared(node, &attr_at, name, "attribute");
+                }
+                let values = def.and_then(|d| d.values.clone()).unwrap_or_default();
+                self.check_value(value, def, &values, &attr_at, scope);
+                continue;
+            }
             if let Some(component) = component {
                 if name == "role" {
                     self.report(
@@ -933,7 +1005,7 @@ impl<'a> Validator<'a> {
             }
         }
 
-        if category != Category::Each
+        if !matches!(category, Category::Each | Category::Use)
             && props.get("grow") == Some(&Value::Bool(true))
             && !self.grows_in_stack(owner)
         {
@@ -985,7 +1057,9 @@ impl<'a> Validator<'a> {
                         .hint("remove the content or the text attribute"),
                 );
             }
-            if props.get("submit") == Some(&Value::Bool(true)) && !owner.is_some_and(|o| o.in_form)
+            if props.get("submit") == Some(&Value::Bool(true))
+                && category != Category::Use
+                && !owner.is_some_and(|o| o.in_form)
             {
                 self.report(
                     diag(
@@ -1111,6 +1185,8 @@ impl<'a> Validator<'a> {
                     )
                     .got(event.clone()),
                 );
+            } else if category == Category::Use && component.is_some() && !events.contains(event) {
+                self.undeclared(node, &event_at, event, "action");
             } else if matches!(category, Category::Component | Category::Each)
                 && !events.contains(event)
             {
@@ -1125,7 +1201,8 @@ impl<'a> Validator<'a> {
                     .hint_opt(did_you_mean(event, &events)),
                 );
             }
-            if !is_action(action) {
+            if self.check_action_read(action, &event_at) {
+            } else if !is_action(action) {
                 self.report(
                     diag(
                         Code::W216,
@@ -1169,6 +1246,8 @@ impl<'a> Validator<'a> {
                     )
                     .got(name.clone()),
                 );
+            } else if category == Category::Use && component.is_some() && declared.is_none() {
+                self.undeclared(node, &slot_at, name, "slot");
             } else if matches!(category, Category::Component | Category::Each) && declared.is_none()
             {
                 let names: Vec<String> = component

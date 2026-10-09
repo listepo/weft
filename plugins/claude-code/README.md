@@ -21,7 +21,7 @@ Each script works in the project of its input (SPEC section 10; figma-pull, whic
 /plugin install weft@weft
 ```
 
-Claude Code copies only `plugins/claude-code` into its plugin cache, without the workspace packages or `node_modules`, so the folder carries everything it runs: the four scripts and the MCP server are bundled into `dist/` (`import.js`, `export.js`, `render.js`, `figma-pull.js`, `server.js`, and shared files in `dist/chunks/`) together with the WebAssembly core they load from `dist/wasm-web/weft_bg.wasm`, with `AGENT-SPEC.md` copied into `skills/spec/`. Only Node built-ins are imported at run time. Installing from a GitHub-hosted marketplace (`/plugin marketplace add <owner>/weft`) therefore needs nothing but the repository. It has not been tried yet, because the repository has no remote; `repository` goes into `plugin.json` once it has one.
+Claude Code copies only `plugins/claude-code` into its plugin cache, without the workspace packages or `node_modules`, so the folder carries everything it runs: the four scripts and the MCP server are bundled into `dist/` (`import.js`, `export.js`, `render.js`, `figma-pull.js`, `server.js`, and shared files in `dist/chunks/`) together with the WebAssembly core they load from `dist/wasm-web/weft_bg.wasm`, with `AGENT-SPEC.md` copied into `skills/spec/`. Only Node built-ins are imported at run time. Installing from the GitHub-hosted marketplace (`/plugin marketplace add listepo/weft`, then `/plugin install weft@weft`) therefore needs nothing but the repository.
 
 ### Node
 
