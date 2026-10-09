@@ -5,8 +5,18 @@ import type {} from "@vitest/browser-playwright";
 import { matchBaseline, type BaselineResult, type MatchOptions } from "./baseline.ts";
 import { compare, type Comparison } from "./compare.ts";
 
+// Playwright's 30s default runs out while the iOS Simulator is building on the same runner:
+// a shot waits until the element keeps one box for two frames, and a stalled main thread
+// never gets those frames in time. Two shots of one comparison have to fit in the test budget.
+const SHOOT_TIMEOUT_MS = 60_000;
+
 const shoot = async (context: Parameters<BrowserCommand<[]>>[0], selector: string) =>
-  new Uint8Array(await context.iframe.locator(selector).screenshot({ animations: "disabled" }));
+  new Uint8Array(
+    await context.iframe.locator(selector).screenshot({
+      animations: "disabled",
+      timeout: SHOOT_TIMEOUT_MS,
+    }),
+  );
 
 /** Screenshots the element and compares it with the baseline `name` (e.g. `web/login`). */
 const matchScreenshot: BrowserCommand<

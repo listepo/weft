@@ -50,7 +50,9 @@ const web: TestProjectInlineConfiguration = hasChromium
 
 export default defineConfig({
   test: {
-    testTimeout: 120_000,
+    // Two 60s shots (commands.ts). The projects run one after the other (moon.yml), so
+    // this only has to cover a slow shot, not a simulator build beside it.
+    testTimeout: 150_000,
     hookTimeout: 300_000,
     projects: [
       web,

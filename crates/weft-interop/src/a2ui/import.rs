@@ -115,17 +115,32 @@ pub fn from_a2ui(text: &str, catalog: &Catalog) -> ImportResult {
     }
     let mut top = sem("screen", "");
     top.id = surface.filter(|s| is_id(s));
-    let mut children = im.conv("root", 0);
+    let mut children = im.conv("root", 0, false);
     // A plain column at the root is the screen itself, as the exporter writes it.
-    if let [only] = children.as_slice()
+    // A weight on one of those children is not `grow`: after this fold the parent is
+    // the screen, and `grow` is valid only inside a stack.
+    let folded = if let [only] = children.as_slice()
         && im.comps["root"]["component"] == "Column"
         && only.kind.as_deref() == Some("stack")
         && only.props.is_empty()
         && only.values.is_empty()
     {
-        top.name = only.name.clone();
-        top.notes.extend(only.notes.clone());
-        children = only.children.clone();
+        Some((only.name.clone(), only.notes.clone(), only.children.clone()))
+    } else {
+        None
+    };
+    if let Some((name, notes, mut hoisted)) = folded {
+        top.name = name;
+        top.notes.extend(notes);
+        for child in &mut hoisted {
+            if child.props.shift_remove("grow").is_some() {
+                child.notes.push(Note {
+                    kind: LossKind::Layout,
+                    note: "weight has no Weft form".into(),
+                });
+            }
+        }
+        children = hoisted;
     }
     top.children = children;
     top.notes.append(&mut im.notes);
@@ -316,7 +331,13 @@ impl Im {
         }
     }
 
-    fn children(&mut self, list: &Json, depth: usize, wrap: Option<&str>) -> Vec<Sem> {
+    fn children(
+        &mut self,
+        list: &Json,
+        depth: usize,
+        wrap: Option<&str>,
+        in_stack: bool,
+    ) -> Vec<Sem> {
         let wrapped = |sems: Vec<Sem>| match wrap {
             Some(kind) => {
                 let mut w = sem(kind, "");
@@ -328,7 +349,7 @@ impl Im {
         let mut out = Vec::new();
         if let Json::Array(ids) = list {
             for id in ids.iter().filter_map(Json::as_str) {
-                let group = self.conv(id, depth + 1);
+                let group = self.conv(id, depth + 1, in_stack);
                 out.extend(wrapped(group));
             }
         } else if let (Some(template), Some(path)) =
@@ -352,7 +373,7 @@ impl Im {
             }
             each.props.insert("as".into(), var.clone());
             self.scope.push(var);
-            let body = self.conv(template, depth + 1);
+            let body = self.conv(template, depth + 1, in_stack);
             self.scope.pop();
             each.children = wrapped(body);
             out.push(each);
@@ -360,7 +381,7 @@ impl Im {
         out
     }
 
-    fn conv(&mut self, id: &str, depth: usize) -> Vec<Sem> {
+    fn conv(&mut self, id: &str, depth: usize, in_stack: bool) -> Vec<Sem> {
         self.nodes += 1;
         if self.nodes > MAX_NODES || depth > MAX_DEPTH {
             self.truncated = true;
@@ -375,6 +396,7 @@ impl Im {
         };
         let mark = self.notes.len();
         let mut out = self.component(&c, depth);
+        self.weight(&c, &mut out, in_stack);
         // The notes of a component belong to the element it became; a dropped one passes them up.
         if let Some(first) = out.first_mut() {
             first.notes.extend(self.notes.drain(mark..));
@@ -387,9 +409,6 @@ impl Im {
 
     fn component(&mut self, c: &Json, depth: usize) -> Vec<Sem> {
         let name = c["component"].as_str().unwrap_or_default();
-        if !c["weight"].is_null() {
-            self.note(LossKind::Layout, "weight has no Weft form");
-        }
         let described = c["accessibility"]["description"].is_null();
         if !described {
             self.note(
@@ -409,10 +428,20 @@ impl Im {
                 {
                     s.props.insert("align".into(), a.to_owned());
                 }
-                if c["justify"].as_str().is_some_and(|j| j != "start") {
-                    self.note(LossKind::Layout, "justify has no Weft form");
+                if let Some(j) = c["justify"].as_str() {
+                    match j {
+                        "start" => {}
+                        "center" | "end" => {
+                            s.props.insert("justify".into(), j.to_owned());
+                        }
+                        "spaceBetween" => {
+                            s.props.insert("justify".into(), "space-between".into());
+                        }
+                        _ => self.note(LossKind::Layout, format!("justify {j} has no Weft form")),
+                    }
                 }
-                s.children = self.children(&c["children"], depth, None);
+                self.note_unequal_weights(&c["children"]);
+                s.children = self.children(&c["children"], depth, None, true);
                 s
             }
             "List" => {
@@ -420,7 +449,7 @@ impl Im {
                 if c["direction"] == "horizontal" {
                     self.note(LossKind::Layout, "a horizontal list has no Weft form");
                 }
-                s.children = self.children(&c["children"], depth, Some("item"));
+                s.children = self.children(&c["children"], depth, Some("item"), false);
                 s
             }
             "Card" => {
@@ -434,7 +463,7 @@ impl Im {
                 let mut s = sem(if labelled { "section" } else { "stack" }, "");
                 s.children = c["child"]
                     .as_str()
-                    .map(|i| self.conv(i, depth + 1))
+                    .map(|i| self.conv(i, depth + 1, false))
                     .unwrap_or_default();
                 s
             }
@@ -527,7 +556,7 @@ impl Im {
                     self.label(&mut tab, &t["title"]);
                     tab.children = t["child"]
                         .as_str()
-                        .map(|i| self.conv(i, depth + 1))
+                        .map(|i| self.conv(i, depth + 1, false))
                         .unwrap_or_default();
                     s.children.push(tab);
                 }
@@ -547,14 +576,14 @@ impl Im {
                 let mut out = if generated {
                     Vec::new()
                 } else {
-                    self.conv(trigger, depth + 1)
+                    self.conv(trigger, depth + 1, false)
                 };
                 let mut dialog = sem("dialog", "");
                 dialog.props.insert("modal".into(), "true".into());
                 dialog.id = generated.then(|| modal.to_owned());
                 dialog.children = c["content"]
                     .as_str()
-                    .map(|i| self.conv(i, depth + 1))
+                    .map(|i| self.conv(i, depth + 1, false))
                     .unwrap_or_default();
                 self.label_from_accessibility(c, Some(&mut dialog));
                 out.push(dialog);
@@ -570,6 +599,48 @@ impl Im {
         };
         self.label_from_accessibility(c, Some(&mut s));
         vec![s]
+    }
+
+    /// `weight` above 0 on a child of a row or column is `grow`. A weight anywhere else,
+    /// or one that is not a positive number, has no Weft form. Zero is the default.
+    fn weight(&mut self, c: &Json, out: &mut [Sem], in_stack: bool) {
+        let Some(w) = c.get("weight").filter(|w| !w.is_null()) else {
+            return;
+        };
+        match w.as_f64() {
+            Some(n) if n > 0.0 && in_stack => {
+                if let Some(first) = out.first_mut() {
+                    first.props.insert("grow".into(), "true".into());
+                }
+            }
+            Some(n) if n > 0.0 => self.note(LossKind::Layout, "weight has no Weft form"),
+            Some(n) if n < 0.0 => {
+                self.note(LossKind::Layout, "a weight below zero has no Weft form");
+            }
+            Some(_) => {}
+            None => self.note(LossKind::Layout, "weight has no Weft form"),
+        }
+    }
+
+    /// Several children that grow by different amounts cannot be equal `grow`s.
+    fn note_unequal_weights(&mut self, list: &Json) {
+        let ids: Vec<&str> = if let Some(ids) = list.as_array() {
+            ids.iter().filter_map(Json::as_str).collect()
+        } else {
+            list["componentId"].as_str().into_iter().collect()
+        };
+        let mut positive = Vec::new();
+        for id in ids {
+            let Some(weight) = self.comps.get(id).and_then(|c| c.get("weight")) else {
+                continue;
+            };
+            if weight.as_f64().is_some_and(|n| n > 0.0) {
+                positive.push(weight);
+            }
+        }
+        if positive.windows(2).any(|pair| pair[0] != pair[1]) {
+            self.note(LossKind::Layout, "unequal weights have no Weft form");
+        }
     }
 
     /// The accessible name A2UI keeps apart from the component's own caption.

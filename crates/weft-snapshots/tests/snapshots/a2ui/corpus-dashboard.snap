@@ -34,7 +34,8 @@ description: corpus-dashboard as a2ui
           "children": [
             "title",
             "updated"
-          ]
+          ],
+          "justify": "spaceBetween"
         },
         {
           "id": "title",
@@ -224,7 +225,8 @@ description: corpus-dashboard as a2ui
             "owner",
             "footer-links"
           ],
-          "align": "end"
+          "align": "end",
+          "justify": "spaceBetween"
         },
         {
           "id": "owner",

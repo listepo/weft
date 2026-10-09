@@ -32,7 +32,8 @@ description: example-stack as a2ui
             "save",
             "discard"
           ],
-          "align": "end"
+          "align": "end",
+          "justify": "spaceBetween"
         },
         {
           "id": "save",

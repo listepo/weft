@@ -13,7 +13,6 @@
 - T16.8. Layout vocabulary: web importers
 - T16.4. Layout vocabulary: SwiftUI
 - T16.5. Layout vocabulary: Slint
-- T16.6. Layout vocabulary: A2UI and json-render
 - T16.7. Layout vocabulary: Figma and Penpot
 - T17. Extension catalogs
 - T17.2. Extension catalogs: tools and docs

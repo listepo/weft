@@ -3,10 +3,6 @@ source: crates/weft-snapshots/tests/interop.rs
 description: corpus-layout as a2ui-losses
 ---
 Props /screen#layout/stack#toolbar/field#search: type search has no A2UI form; a plain text field stands in
-Props /screen#layout/stack#toolbar/field#search: grow: this prop has no A2UI property
 Tokens /screen#layout/stack#toolbar: gap: design tokens have no A2UI form
-Props /screen#layout/stack#toolbar: justify: this prop has no A2UI property
 Tokens /screen#layout/stack#pager: gap: design tokens have no A2UI form
-Props /screen#layout/stack#pager: justify: this prop has no A2UI property
 Tokens /screen#layout/stack#actions: gap: design tokens have no A2UI form
-Props /screen#layout/stack#actions: justify: this prop has no A2UI property
