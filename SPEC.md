@@ -380,7 +380,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W118 | `<slot>` misplaced (root, inside `<each>` or another `<slot>`) or malformed (no valid `name`, other attributes). |
 | W119 | The same slot name twice under one parent. |
 | W200 | Document does not have the JSON shape of §3 (or nests too deep, or the root's `props` holds `weft`). |
-| W201 | Root element is not the catalog's `root` kind (`screen`). |
+| W201 | Root element is not the catalog's `root` kind (`screen`), or a project fragment file's root is not `<fragment>` (§10.7). |
 | W202 | Element without `id`. |
 | W203 | Value not one of the enum values or declared states. |
 | W204 | Value of the wrong type. |
@@ -671,6 +671,7 @@ Screens that belong together share their resources through a project file named 
 | `catalog` | file name; or an array of at most 32 file names | Catalogs merged over the core catalog (§10.4). One file name is an array of one. More than 32 is `W701`. Project content (§10.1) gives a catalog, or an array of catalogs. |
 | `actions` | array of action names | The host's actions: `on-*` values are checked against them (`W308`). |
 | `data` | file name | A JSON Schema of the host data model (§10.5). |
+| `fragments` | object of name → file name | Fragments the screens place with `<use>` (§10.7). |
 | `$schema` | string | Ignored; for editors, which can point it at `schemas/weft.schema.json` (§10.6). |
 | `validate`, `format`, `render`, `export`, `import`, `mcp`, `plugins` | objects | Tool settings (§10.6). |
 
@@ -770,7 +771,18 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 
 A fragment is a block that several screens of a project share, such as a page header, a footer or a product card. It is kept once, in its own file, and screens place it by reference.
 
-The project's merged catalog (§10.4) carries the fragments in a `fragments` member, which maps each name to its fragment document in canonical JSON. So every tool that is given the project's catalog knows the fragments. Without a project there are no fragments. A fragment adds elements to the format, not a new model, and it is an addition of format 0.2 (§8).
+A fragment adds elements to the format, not a new model, and it is an addition of format 0.2 (§8).
+
+**Where fragments live.** The project file maps fragment names to files:
+
+```json
+{ "fragments": { "page-header": "fragments/page-header.weft" } }
+```
+
+- A key is the fragment's name and follows the name grammar of §2. The name lives only here. A value is a file name under the rules of §10.2. In project content (§10.1) a value is the fragment's markup as a string.
+- A `fragments` member that is not an object, a key that breaks the name grammar, or a value that is not a string is `W701`. A bad file name is `W703`, and a file that cannot be read is `W704`. A file whose root is not `<fragment>` is `W201`. In each of these cases the fragment is left out.
+- Each fragment is parsed against the merged catalog, with the project's tokens and actions and with the other fragments. Its markup problems keep their codes and their positions in its file. Their path starts at `#/fragments/<name>`, as in `#/fragments/page-header/fragment/stack#bar`.
+- The project's merged catalog (§10.4) carries the fragments in a `fragments` member, which maps each name to its fragment document in canonical JSON. So every tool that is given the project's catalog knows the fragments. A catalog file that has `fragments` is `W706`. Without a project there are no fragments.
 
 **A fragment file.**
 
@@ -877,4 +889,4 @@ A reader without fragments (no project) reads `<use>` as content it does not kno
 - `remove` and `move` of a `<use>` take the whole instance.
 - An id inside a fragment body (`title`, or the instance path `header/title`) is not a screen id. It is `W502`, and the hint names the fragment to edit. A fragment file is edited with the same patches as a screen, with `<fragment>` as its root.
 
-**Tools.** Renderers and generators expand uses before they draw (as above) and write instance paths to `data-weft-id`; the Slint generator, whose element names cannot hold `/`, names an element by its instance path with `--` for `/`. The accessibility tree of the reference renderer equals that of the expanded document. Importers never produce `<use>`, because they cannot tell a fragment from a copy. The core exports `expand(document, catalog)`, which returns the expanded document and its `W805`/`W806` diagnostics.
+**Tools.** Renderers and generators expand uses before they draw (as above) and write instance paths to `data-weft-id`; the Slint generator, whose element names cannot hold `/`, names an element by its instance path with `--` for `/`. The accessibility tree of the reference renderer equals that of the expanded document. Importers never produce `<use>`, because they cannot tell a fragment from a copy. The core exports `expand(document, catalog)`, which returns the expanded document and its `W805`/`W806` diagnostics. The CLI, the MCP server and `write-page` load fragments with the rest of the project. `weft_catalog` lists the project's fragments with their parameters after the components.

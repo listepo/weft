@@ -65,6 +65,7 @@ fn projects_match_the_typescript_package() {
                 "name": project.catalog.name,
                 "version": project.catalog.version,
                 "changed": changed,
+                "fragments": js(&project.catalog.fragments),
             },
             "catalogs": project.catalogs,
             "kinds": kinds,

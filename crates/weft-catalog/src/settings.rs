@@ -608,6 +608,12 @@ pub fn project_file_schema() -> Json {
         "$ref": "#/$defs/fileName",
         "description": "A JSON Schema of the host data model; bindings are checked against it (SPEC §10.5).",
     }));
+    properties.insert("fragments".to_owned(), json!({
+        "type": "object",
+        "propertyNames": { "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+        "additionalProperties": { "$ref": "#/$defs/fileName" },
+        "description": "Fragments the project's screens place with <use>: each name maps to a file of fragment markup (SPEC §10.7).",
+    }));
     for setting in SECTIONS {
         properties.insert(setting.name.to_owned(), schema_of(setting));
     }

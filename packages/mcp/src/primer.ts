@@ -10,6 +10,7 @@ export const primer = (
 - One root <screen id="…" weft="0.2" label="…">. Every element has an id, unique in the document: a letter, then letters, digits, "_" or "-".
 - Element and attribute names are lowercase with hyphens. Attribute values are always in double quotes. Booleans are true or false. An element without content is self-closing.
 - Only components of the catalog exist. Do not invent elements or attributes; call weft_catalog to see them.
+- A project's fragments, which weft_catalog lists after the components, are placed with <use id="…" fragment="name" title="…" on-back="action">, one attribute per parameter. Use only listed fragments.
 - A value is a literal ("Email"), a binding value="{$.user.email}", a negated binding disabled="{!$.busy}", or a design token gap="{token.space.md}". A literal that starts with "{" is written "{{". Never mix text and a binding in one value.
 - Inside <each in="{$.items}" as="item"> the loop variable is bound as {$item.field}; ids inside it are templates.
 - Events are on-<event>="action.name", for example on-press="auth.submit". Actions take no arguments and no code.
@@ -19,7 +20,7 @@ export const primer = (
 
 Tools:
 - weft_capabilities: what the host accepts: the format version, the catalogs and, when the host checks them, the design token paths and action names. Write only what it lists.
-- weft_catalog: no arguments lists every component; pass kind for one component in full (props, slots, states, events).
+- weft_catalog: no arguments lists every component and fragment; pass kind for one component in full (props, slots, states, events) or for a fragment's markup.
 - weft_schema: the JSON Schema of a screen written as canonical JSON, for a host whose model output is constrained by a schema. You do not need it to write markup.
 - weft_validate: check markup. Diagnostics carry a code, a path, what was expected and often the fix in "hint".
 - weft_format: canonical markup, the one form that diffs and hashes.

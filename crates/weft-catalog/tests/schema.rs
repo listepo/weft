@@ -67,7 +67,7 @@ fn everything_the_schema_allows_loads_without_a_diagnostic() {
     let schema = project_file_schema();
     let mut file = example(&schema, &schema["$defs"]);
     // The resources name files; this test is about keys, so content mode keeps them out.
-    for resource in ["tokens", "catalog", "data"] {
+    for resource in ["tokens", "catalog", "data", "fragments"] {
         file.as_object_mut().unwrap().remove(resource);
     }
     let read = |_: &str| None;

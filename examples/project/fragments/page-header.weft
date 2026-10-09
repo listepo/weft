@@ -1,0 +1,8 @@
+<fragment label="Page header" weft="0.2">
+  <param name="title" required="true" type="string"/>
+  <param name="back" type="action"/>
+  <stack id="bar" direction="row" gap="{token.space.sm}">
+    <button id="back" variant="ghost" on-press="{$back}">Back</button>
+    <heading id="title" level="1" text="{$title}"/>
+  </stack>
+</fragment>

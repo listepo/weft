@@ -1,8 +1,6 @@
 - T8. Evaluation
 - T28. Binding readback against inverted conditions
 - T14. Figma round trip and plugin
-- T31. Project file and shared resources
-- T31.4. Fragments: project, tools and example
 - T32. Claude Code plugin from GitHub
 - T39. Context in the document
 - T68. Slint bindings for SwiftUI and WinUI

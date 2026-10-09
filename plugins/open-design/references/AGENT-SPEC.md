@@ -228,7 +228,7 @@ What each code asks of you:
 | W118 | Make `<slot name="…">` a direct child of a component, with only the `name` attribute. |
 | W119 | Merge the two slots of the same name. |
 | W200 | Give the JSON the shape of SPEC §3: `{ weft, root }`, nodes with `kind`, `id`, `props`, `on`, `slots`, `children` and nothing else. |
-| W201 | Make `<screen>` the root. |
+| W201 | Make `<screen>` the root; in a project fragment file, `<fragment>`. |
 | W202 | Add a unique `id`. |
 | W203 | Use one of the values in `expected`. |
 | W204 | Use the type in `expected`: `level="2"`, not `level="two"`; a token, not a raw size. |
@@ -286,7 +286,7 @@ What each code asks of you:
 | W601 | The importer could not read its input; nothing to repair in a document. |
 | W602 | The import was cut at a limit; the rest of the input is missing. |
 | W701 | The project file, or the member at `path`, has the wrong shape; fix `weft.json` (or the `project` argument), not the screen. |
-| W702 | A warning: correct the name using the hint, or remove the key. Members are `tokens`, `catalog`, `actions`, `data`, `$schema` and the tool sections of SPEC §10.6. |
+| W702 | A warning: correct the name using the hint, or remove the key. Members are `tokens`, `catalog`, `actions`, `data`, `fragments`, `$schema` and the tool sections of SPEC §10.6. |
 | W703 | Name the file relative to the project file, inside its directory, with `/`. |
 | W704 | Point at a file that exists, holds JSON, and stays inside the project directory after following symbolic links. |
 | W705 | Fix the token file named in the message: give the token a `$type`, point the alias at an existing token, break the cycle. |
