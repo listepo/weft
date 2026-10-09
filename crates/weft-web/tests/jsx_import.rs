@@ -7,7 +7,7 @@
 use std::path::Path;
 
 use weft_catalog::{DEFAULT_TOKENS_JSON, core_catalog, load_tokens};
-use weft_core::{Document, ParseOptions, has_errors, parse, parse_json, serialize};
+use weft_core::{Document, ParseOptions, WEFT_VERSION, has_errors, parse, parse_json, serialize};
 use weft_import::LossKind;
 use weft_web::{Framework, ImportOptions, JsxOptions, import_jsx, to_jsx};
 
@@ -137,7 +137,9 @@ fn generated_components_without_their_source_come_back_by_convention() {
         tokens: &tokens,
     };
     let mut failures = Vec::new();
-    for (name, document) in corpus() {
+    for (name, mut document) in corpus() {
+        // Importers stamp the current version; the corpus stays at 0.1.
+        document.weft = WEFT_VERSION.into();
         for (framework, typescript) in FLAVOURS {
             let code = generate(&document, framework, typescript, false);
             let back = import_jsx(&code, typescript, &options);

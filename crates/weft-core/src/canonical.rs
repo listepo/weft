@@ -2,6 +2,7 @@
 
 use std::cmp::Ordering;
 
+use crate::context::canonical_entry;
 use crate::json::{array_index, to_pretty};
 use crate::model::{Child, Document, Map, Node, Value};
 
@@ -116,6 +117,7 @@ fn canonical_node(node: &Node) -> Node {
 pub fn canonicalize(document: &Document) -> Document {
     Document {
         weft: document.weft.clone(),
+        context: document.context.iter().map(canonical_entry).collect(),
         root: canonical_node(&document.root),
     }
 }
@@ -167,6 +169,7 @@ mod tests {
         root.children = vec![Child::Text(" hi ".into())];
         let doc = Document {
             weft: "0.1".into(),
+            context: vec![],
             root,
         };
         assert_eq!(

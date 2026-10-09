@@ -1,6 +1,6 @@
 # Design: context in the document
 
-Status: **proposal, not approved.** Nothing here is implemented. This document is for the creator to approve, change or reject before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change. It is the design stage of T39.
+Status: **approved** by the creator, with the recommendation of each open question below. It is built in T39.1–T39.5 (`plan.md`); `SPEC.md` and `AGENT-SPEC.md` are the contract, and this document records the reasons.
 
 ## Problem
 

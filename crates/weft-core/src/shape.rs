@@ -4,7 +4,7 @@
 
 use serde_json::Value as Json;
 
-use crate::model::{Child, Document, Map, Node, Value};
+use crate::model::{Child, Document, Entry, Map, Node, Value};
 
 pub enum Segment {
     Key(String),
@@ -261,13 +261,37 @@ fn child(v: Option<&Json>, path: Path<'_>, issues: &mut Vec<Issue>) {
     union(path, vec![as_node, vec![hard(path, INVALID)]], issues);
 }
 
+/// `EntrySchema`: every member a string, so that validation names a bad value (SPEC §2.3).
+fn entry(v: Option<&Json>, path: Path<'_>, issues: &mut Vec<Issue>) {
+    let text = optional(string);
+    strict_object(
+        v,
+        path,
+        &[
+            ("id", &text),
+            ("kind", &string),
+            ("by", &string),
+            ("name", &string),
+            ("for", &text),
+            ("status", &text),
+            ("text", &string),
+        ],
+        issues,
+    );
+}
+
+fn context(v: Option<&Json>, path: Path<'_>, issues: &mut Vec<Issue>) {
+    array(v, path, issues, entry);
+}
+
 /// Issues of `DocumentSchema`, in zod's order.
 pub fn document_issues(v: &Json) -> Vec<Issue> {
     let mut issues = Vec::new();
+    let block = optional(context);
     strict_object(
         Some(v),
         &[],
-        &[("weft", &string), ("root", &node)],
+        &[("weft", &string), ("context", &block), ("root", &node)],
         &mut issues,
     );
     issues
@@ -419,6 +443,20 @@ fn to_node(v: &Json) -> Node {
     }
 }
 
+fn to_entry(v: &Json) -> Entry {
+    let text = |k: &str| v.get(k).and_then(Json::as_str).map(str::to_owned);
+    Entry {
+        id: text("id"),
+        kind: text("kind").unwrap_or_default(),
+        by: text("by").unwrap_or_default(),
+        name: text("name").unwrap_or_default(),
+        target: text("for"),
+        status: text("status"),
+        text: text("text").unwrap_or_default(),
+        source: Default::default(),
+    }
+}
+
 /// The model of JSON that passed [`document_issues`]; members it lacks read as empty.
 pub fn to_document(v: &Json) -> Document {
     Document {
@@ -427,6 +465,11 @@ pub fn to_document(v: &Json) -> Document {
             .and_then(Json::as_str)
             .unwrap_or_default()
             .to_owned(),
+        context: v
+            .get("context")
+            .and_then(Json::as_array)
+            .map(|list| list.iter().map(to_entry).collect())
+            .unwrap_or_default(),
         root: v.get("root").map(to_node).unwrap_or_default(),
     }
 }

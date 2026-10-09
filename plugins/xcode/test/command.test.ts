@@ -46,7 +46,9 @@ describe.skipIf(skipReason)("command plugin", () => {
     // The importer reads back exactly what the generator printed (SPEC §9), so the result is the
     // canonical form of the original screen.
     const canonical = run(weftBinary(), ["fmt", join(ws.sample, screen)], ws.sample).output;
-    expect(readFileSync(join(ws.sample, "Imported/login.weft"), "utf8")).toBe(canonical);
+    // The importer stamps the current version; the corpus screen stays at 0.1.
+    const current = canonical.replace('weft="0.1"', 'weft="0.2"');
+    expect(readFileSync(join(ws.sample, "Imported/login.weft"), "utf8")).toBe(current);
   });
 
   test("refuses to replace a file unless told to", { timeout: 300_000 }, () => {

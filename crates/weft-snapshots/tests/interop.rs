@@ -368,7 +368,11 @@ fn json_render_round_trip() {
         assert_lenient_valid(&name, &back, &catalog);
         let markup = weft_core::serialize(&back.document);
         if lost.is_empty() {
-            assert_eq!(weft_core::serialize(&document), markup, "{name}");
+            assert_eq!(
+                common::as_imported(&weft_core::serialize(&document)),
+                markup,
+                "{name}"
+            );
             assert!(back.losses.is_empty(), "{name}: {:#?}", back.losses);
             exact += 1;
         }
@@ -763,7 +767,11 @@ fn json_render_layout_round_trip_keeps_every_form() {
         let back = from_json_render(&exported.spec.to_string(), &catalog);
         assert_lenient_valid(name, &back, &catalog);
         let markup = weft_core::serialize(&back.document);
-        assert_eq!(weft_core::serialize(&document), markup, "{name}");
+        assert_eq!(
+            common::as_imported(&weft_core::serialize(&document)),
+            markup,
+            "{name}"
+        );
         assert!(markup.contains(needle), "{name} missing {needle}: {markup}");
         seen.insert(name);
     }

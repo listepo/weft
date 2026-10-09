@@ -2,7 +2,7 @@
 // change them only together with the specification.
 import { z } from "zod";
 
-export const WEFT_VERSION = "0.1";
+export const WEFT_VERSION = "0.2";
 
 export const BindingSchema = z.strictObject({ bind: z.string(), not: z.literal(true).optional() });
 export const TokenRefSchema = z.strictObject({ token: z.string() });
@@ -40,7 +40,24 @@ export const NodeSchema: z.ZodType<Node> = z.lazy(() =>
 );
 export const ChildSchema: z.ZodType<Child> = z.lazy(() => z.union([NodeSchema, z.string()]));
 
-export const DocumentSchema = z.strictObject({ weft: z.string(), root: NodeSchema });
+// A context entry (SPEC §2.3). Every member is a string here, so that validation, not the shape
+// check, names a wrong kind, author or status.
+export const EntrySchema = z.strictObject({
+  id: z.string().optional(),
+  kind: z.string(),
+  by: z.string(),
+  name: z.string(),
+  for: z.string().optional(),
+  status: z.string().optional(),
+  text: z.string(),
+});
+export type Entry = z.infer<typeof EntrySchema>;
+
+export const DocumentSchema = z.strictObject({
+  weft: z.string(),
+  context: z.array(EntrySchema).optional(),
+  root: NodeSchema,
+});
 export type Document = z.infer<typeof DocumentSchema>;
 
 export const ContentModelSchema = z.enum(["none", "text", "nodes", "mixed"]);

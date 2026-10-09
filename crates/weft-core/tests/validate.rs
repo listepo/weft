@@ -233,8 +233,9 @@ fn an_unsupported_major_version_is_an_error_in_every_mode() {
 fn version_checks_follow_major_dot_minor() {
     for (version, expect) in [
         ("0.1", vec![]),
+        ("0.2", vec![]),
         ("0.0", vec![]),
-        ("0.2", vec!["W403"]),
+        ("0.3", vec!["W403"]),
         ("0.10", vec!["W403"]),
         ("1.0", vec!["W404"]),
         ("2.1", vec!["W404"]),

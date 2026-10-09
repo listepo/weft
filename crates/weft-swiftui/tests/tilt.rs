@@ -10,7 +10,7 @@ use weft_swiftui::{GenerateOptions, ImportOptions, generate, import_swiftui};
 fn swift(body: &str) -> (String, weft_core::Document) {
     let catalog = common::catalog();
     let tokens = common::tokens();
-    let markup = format!("<screen id=\"root\" label=\"Test\" weft=\"0.1\">\n  {body}\n</screen>\n");
+    let markup = format!("<screen id=\"root\" label=\"Test\" weft=\"0.2\">\n  {body}\n</screen>\n");
     let document = common::parse_screen(&markup, &catalog, &tokens);
     let options = GenerateOptions {
         catalog: &catalog,

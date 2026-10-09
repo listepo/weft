@@ -1,4 +1,4 @@
-# Weft 0.1 — specification (draft)
+# Weft 0.2 — specification (draft)
 
 Weft is an open format for describing user interfaces so that AI agents can read, write, validate and patch them. One semantic model has two serializations:
 
@@ -95,10 +95,71 @@ Action names match `[a-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*)*`. Actions take no ar
 - `<slot name="…">` takes exactly one attribute, `name`, which follows the name grammar. A slot holds elements only, no text.
 - `<each id="…" in="{…}" as="…">` takes `id`, `in` and `as` (§4.3).
 
+### 2.3 Context
+
+A screen MAY carry a `<context>` block: notes that people and agents left for whoever works on the screen next. It holds why the screen is the way it is (its purpose, decisions, rules it must keep, open questions, work left, where its content came from), not what it shows. Context is data for a reader: no tool follows, executes, fetches or renders anything in it, and end users never see it. The reasons for this design are in `docs/context-design.md`.
+
+```xml
+<screen id="login" label="Sign in" weft="0.2">
+  <context>
+    <entry id="why" by="human" kind="intent" name="Ivan">Returning users sign in with email and password.</entry>
+    <entry id="submit-disabled" by="agent" for="go" kind="decision" name="claude-opus-5-5">Disabled until an email is typed, so auth.submit never gets an empty request.</entry>
+    <entry id="reset-where" by="agent" for="reset" kind="question" name="claude-opus-5-5" status="open">Should reset open a dialog or a screen of its own?</entry>
+  </context>
+  <form id="f1" state="idle" on-submit="auth.submit">
+    <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
+    <button id="go" disabled="{!$.email}" submit="true" variant="primary">Sign in</button>
+    <slot name="footer">
+      <link id="reset" on-press="nav.reset">Forgot password?</link>
+    </slot>
+  </form>
+</screen>
+```
+
+- `<context>` is a structural element, like `<slot>` and `<each>`: not a component, no attributes, no `id`. It is a direct child of the root, at most once, and holds `<entry>` elements and whitespace only. Anywhere else (deeper in the tree, inside `<each>` or a `<slot>`, in patch `insert` markup) it is `W120`, as are a second block, an attribute on it and other content in it.
+- The parser accepts `<context>` anywhere among the root's children and lifts it out of the content, so it never counts in content models, `index` positions or text joining. The serializer always writes it first.
+- `<entry>` takes exactly the attributes `id`, `kind`, `by`, `name`, and where they apply `for` and `status`; extension attributes are not allowed on it. Its content is its text: one run of text, whitespace-normalized like all text (§2), no elements. An `<entry>` outside `<context>`, an element inside it, another attribute, or `kind`, `by` or `name` missing is `W121`.
+- Entry attribute values are plain text, like `id` and `on-*` (§2.1): never references, so `{` needs no escape. The text is content, so a note may say `{$.email}` without `W116` or `W213`; like all text it escapes `&` and `<`.
+
+| Field | Required | Value |
+| --- | --- | --- |
+| `id` | yes | The id grammar of §2.2, document-unique across elements and entries |
+| `kind` | yes | `intent`, `decision`, `constraint`, `question`, `todo` or `source`. |
+| `by` | yes | `human` or `agent`. |
+| `name` | yes | Who wrote it: a person's name or handle, or an agent's model id. 1–64 characters: letters and digits of any script, space, `.`, `_`, `@`, `/`, `+`, `-`, starting with a letter or digit. |
+| `for` | no | The id of the element the entry is about: any element but the root, including `<each>`, extension elements and template ids inside `<each>`. Absent means the screen. |
+| `status` | on `question` and `todo` only | `open` or `resolved`: required on those two kinds and not allowed on the others. |
+| text | yes | 1–500 characters after normalization. |
+
+| Kind | Meaning |
+| --- | --- |
+| `intent` | What the screen or element is for: the goal it serves. |
+| `decision` | A choice that was made, and why. Keep it unless asked to revisit it. |
+| `constraint` | A rule the design must keep: legal, accessibility, product or technical. |
+| `question` | Something not decided yet. Open until answered. |
+| `todo` | Work left to do. Open until done. |
+| `source` | Where content or design came from: a guide, a ticket, research, a design file. A URL in the text is text; no tool fetches it. |
+
+Limits, because context is the one part of a document written as free prose for models to read: at most 100 entries, 500 characters per text and 16,000 characters of text in all. Characters are UTF-16 code units, as diagnostic columns are. `by` and `name` are claims nobody verifies; an entry has no date.
+
 ## 3. Canonical JSON
 
 ```ts
-type Document = { weft: "0.1"; root: Node };  // `weft` is the root element's `weft` attribute
+type Document = {
+  weft: "0.2";                       // the root element's `weft` attribute
+  context?: Entry[];                 // the `<context>` block (§2.3), in written order
+  root: Node;
+};
+
+type Entry = {
+  id: string;
+  kind: "intent" | "decision" | "constraint" | "question" | "todo" | "source";
+  by: "human" | "agent";
+  name: string;
+  for?: string;                      // element id; absent = the screen
+  status?: "open" | "resolved";      // question and todo only
+  text: string;
+};
 
 type Node = {
   kind: string;                      // element name
@@ -120,12 +181,13 @@ type Value =
 Canonical form rules, so that equal documents are byte-equal:
 
 - Object keys in the order shown above; `props`, `on` and `slots` keys sorted lexicographically by UTF-16 code unit.
-- Empty `props`, `on`, `slots`, `children` and empty slot lists are omitted.
+- Empty `props`, `on`, `slots`, `children` and empty slot lists are omitted, and so are an empty `context` and the absent members of an entry.
+- `context` keeps the order the entries were written in; it is not sorted. Entry text is whitespace-normalized like text children. The JSON shape check reads every entry member as a string, so a wrong value is never `W200`.
 - Text children are whitespace-normalized as in §2, and adjacent text children are joined with one space. `-0` is written `0`.
 - Props whose value equals the catalog default are kept as written (no default elision).
 - The `weft` attribute of the root element is `Document.weft` and never appears in the root's `props`.
 - The JSON text is indented by two spaces and ends with a newline.
-- Markup serialization writes attributes as: `id`, then props sorted (the root's `weft` sorts with them), then `on-*` sorted; two-space indentation; named slots after default-slot children, sorted by name. An element with no content is self-closing; an element whose only content is one text child is written on one line; otherwise every child goes on its own line. The text ends with a newline.
+- Markup serialization writes attributes as: `id`, then props sorted (the root's `weft` sorts with them), then `on-*` sorted; two-space indentation; named slots after default-slot children, sorted by name. The root writes the `<context>` block before its children, one entry per line with `id` first and the other attributes sorted, the text as the entry's content; a document without context is written as if the block did not exist. An element with no content is self-closing; an element whose only content is one text child is written on one line; otherwise every child goes on its own line. The text ends with a newline.
 - Escaping: in attribute values `&`, `<`, `"`, tab, LF and CR are written as references; in text `&`, `<` and `>` are. No other references are written.
 
 Literal typing needs the catalog: `level="2"` is the number `2` only because `heading.level` is declared a number. For extension elements and unknown attributes, literals stay strings.
@@ -136,7 +198,7 @@ A catalog (§5) determines a JSON Schema of the canonical JSON documents it admi
 
 | Catalog construct | Schema |
 | --- | --- |
-| Document | A closed object (`additionalProperties: false`) with `weft` (`const`, the format version) and `root`, both required. |
+| Document | A closed object (`additionalProperties: false`) with `weft` (`enum` of the versions this reader reads without a diagnostic, `0.1` and `0.2`) and `root`, both required. |
 | `root` kind | `root` is a `$ref` to the kind marked `root` (`anyOf` when several are); with none, any kind. That kind is admitted nowhere else, and its `weft` prop is not in its `props` (it is `Document.weft`). |
 | Kind | One `$defs` entry per kind, named after it: a closed object with `kind` (`const`), `id` (the id grammar as `pattern`), `props`, `on`, `slots` and `children`, in that order. `kind` and `id` are required, `props` when a prop or `label` is. `on`, `slots` and `children` are present only when the kind declares events, slots, or a content model other than `none`. |
 | Props | A closed object: the declared props, then the universal `label`, `hidden`, `state` (only when the kind declares `states`) and the tilt attributes (§2.2), sorted as canonical JSON sorts keys. `required` lists the required props, and `label` when `requiresLabel` is set. `role` is not admitted on a catalog component. |
@@ -153,7 +215,7 @@ Helper entries (`Id`, `Binding`, `NegatableBinding`, `Token`, `Action`, `Node`) 
 
 The schema leaves out what it cannot express, and the validator still checks it: unique ids (`W301`), loop variables in scope and not shadowed (`W305`, `W311`), `references` (`W309`), text given both as content and as `text` (`W310`), a submit button outside a `form` (`W313`), the asset paths of a `model` (`W317`), a reference inside a literal (`W213`) and characters XML cannot carry (`W221`), whose patterns would need look-around or ranges beyond the Basic Multilingual Plane that structured-output modes do not reliably support. It describes the catalog only, so the project's tokens, actions and data schema (`W306`–`W308`, `W315`, `W316`) are not narrowed into it.
 
-It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with two exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for, and it admits no `state` on a kind that declares no states, where validation lets a bound one through. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
+It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with three exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for, it admits no `state` on a kind that declares no states, where validation lets a bound one through, and it admits no `context` (§2.3), which describes no part of the screen a writer builds. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
 
 `weft schema` prints the schema of the project's catalog (or of `--catalog`) indented, or writes it as `document.schema.json` (§10.6); `documentSchema` of `@weft/core/document-schema` and the MCP tool `weft_schema` return the same schema as compact JSON text, byte for byte what the generator writes. The schema of §3 that `documentJsonSchema()` of `@weft/core` returns is a different one: it knows no catalog and admits any kind and any prop.
 
@@ -329,7 +391,7 @@ Validation has three layers, each reporting diagnostics rather than throwing:
 
 1. **Syntax** — §2. The document is well-formed restricted XML.
 2. **Schema** — the tree matches the catalog: known kinds, known and correctly typed props, numbers within their declared `min`, `max` and `integer`, required props present, declared slots, states and events.
-3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), binding paths are declared, with a type the attribute takes, in the supplied data schema (when one is supplied, §10.5), a prop the catalog marks `references` holds the id of an element of that kind (`tabs.selected` names a `tab`), the root is the kind the catalog marks `root` (`screen`) and that kind stands nowhere else, a `submit` button inside a `form`, the asset paths of a `model` (`W317`), `grow` only on a child of a `stack` (`W318`), and a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both.
+3. **Semantics** — unique ids, parent/child rules, binding paths resolve to a loop variable in scope, token references exist in the supplied token set (when one is supplied), action names exist in the supplied action list (when one is supplied), binding paths are declared, with a type the attribute takes, in the supplied data schema (when one is supplied, §10.5), a prop the catalog marks `references` holds the id of an element of that kind (`tabs.selected` names a `tab`), the root is the kind the catalog marks `root` (`screen`) and that kind stands nowhere else, a `submit` button inside a `form`, the asset paths of a `model` (`W317`), `grow` only on a child of a `stack` (`W318`), a component whose content model is `text` or `mixed` takes its text from content or from the `text` prop, not both, and the context entries of §2.3 (their values, `status`, `for`, ids and limits).
 
 A document that does not have the JSON shape of §3 gets `W200` diagnostics only; the other checks need the shape.
 
@@ -351,7 +413,7 @@ type Diagnostic = {
 
 Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility, `W5xx` patches, `W6xx` import (§9), `W7xx` projects (§10). A code, once published, never changes meaning.
 
-`path` addresses the element from the root: one segment per element, `kind#id`, or `kind[index]` when the element has no valid id (the index counts the parent's list, text included). A named slot adds `slot[name]`, a text child `#text[index]`, an attribute `@name` (`@on-press` for events, `@weft` for the version). Syntax diagnostics name the open elements only. For JSON that does not have the shape of §3, the path is a JSON Pointer prefixed with `#`, e.g. `#/root/children/0/kind`. A patch diagnostic (§7) about the patch itself points into the patch list the same way, e.g. `#/patches/2/parent`.
+`path` addresses the element from the root: one segment per element, `kind#id`, or `kind[index]` when the element has no valid id (the index counts the parent's list, text included). A named slot adds `slot[name]`, a text child `#text[index]`, an attribute `@name` (`@on-press` for events, `@weft` for the version). The context block is `context` under the root, and an entry `entry#id`, or `entry[index]` (its position in the block) without a valid id: `/screen#login/context/entry#reset-where/@status`. Syntax diagnostics name the open elements only. For JSON that does not have the shape of §3, the path is a JSON Pointer prefixed with `#`, e.g. `#/root/children/0/kind`. A patch diagnostic (§7) about the patch itself points into the patch list the same way, e.g. `#/patches/2/parent`.
 
 ### 6.2 Codes
 
@@ -378,6 +440,8 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W117 | Nesting deeper than 256 levels. |
 | W118 | `<slot>` misplaced (root, inside `<each>` or another `<slot>`) or malformed (no valid `name`, other attributes). |
 | W119 | The same slot name twice under one parent. |
+| W120 | `<context>` misplaced or malformed (§2.3): not a direct child of the root (also inside `<each>`, `<slot>` or `insert` markup), a second one, an attribute on it, or content other than `<entry>` elements. |
+| W121 | `<entry>` misplaced or malformed (§2.3): outside `<context>`, an element inside it, an attribute it does not take, or `kind`, `by` or `name` missing. |
 | W200 | Document does not have the JSON shape of §3 (or nests too deep, or the root's `props` holds `weft`). |
 | W201 | Root element is not the catalog's `root` kind (`screen`). |
 | W202 | Element without `id`. |
@@ -401,7 +465,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W220 | Extension name lacks the `x-<vendor>-` prefix. |
 | W221 | String holds a character XML cannot carry. |
 | W222 | `<each>` without a binding `in` or a valid `as`. |
-| W223 | Kind, prop, event or slot name invalid or reserved (`slot` as a kind, `id` or `on-*` in `props`). |
+| W223 | Kind, prop, event or slot name invalid or reserved (`slot`, `context` or `entry` as a kind, `id` or `on-*` in `props`). |
 | W224 | Number below `min`, above `max`, or not whole where the prop is `integer`. |
 | W301 | Duplicate id. |
 | W302 | Child kind not in the parent's (or slot's) `allowedChildren`. |
@@ -501,6 +565,7 @@ type Patch =
   - A numeric range narrows when its lower bound rises, its upper bound falls, or a bound appears; the opposite is widening. A prop field the classifier does not know is major when it changes.
   - A change to a `description` only is none.
 - The core catalog of §5.1 is `weft-core` 0.2.0. It moved from 0.1.0 when it gained `stack.justify`, `padding`, `max-width` and `grid.min-column-width`, all minor changes (a new optional prop with a default is not a default that appears); the format stays `weft` 0.1, as it did when the universal attributes of §2.2 grew.
+- The format is `weft` 0.2 since the context block (§2.3), a minor addition: a 0.1 document is a valid 0.2 document and needs no migration, and writers write `weft="0.2"`. There is no per-feature gate: a 0.2 reader accepts context in a document marked 0.1. A 0.1 reader of canonical JSON rejects `context` (`W200`), which fails closed; a 0.1 markup reader warns about the version (`W403`) and reads `<context>` and `<entry>` as unknown elements with role `group` (`W401`), so a 0.1 renderer would show the notes. No syntax avoids both; every 0.1 reader of this repository moved to 0.2 in the same change.
 - A host advertises `{ weft, catalogs: [{ name, version, prefix? }] }`; an agent writes only what the host advertises. A host that also checks design tokens, action names or a data schema (§10) adds `tokens`, `actions` and `data` to the advertisement, so a writer knows which of them are enforced: a category that is absent is not checked. The MCP server (`weft_capabilities`) does this; the catalog list names the core catalog first and then every catalog the project loaded (§10.4), in the order the project lists them, each library with its `prefix`. A kind under a library's prefix (`acme-button`) is an ordinary catalog kind, typed and checked; an `x-acme-button` element stays an opaque extension.
 
 ## 9. Mapping

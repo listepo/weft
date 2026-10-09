@@ -7,9 +7,10 @@ use std::collections::{HashMap, HashSet};
 use indexmap::IndexMap;
 
 use crate::canonical::{Parts, append_text, assemble_node, normalize_text};
+use crate::context::{misplaced_context, misplaced_entry, read_block};
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, has_errors, sort_by_position};
-use crate::model::{Catalog, Child, Document, Node, PropType};
-use crate::rules::{EACH, SLOT, is_name, universal_prop};
+use crate::model::{Catalog, Child, Document, Entry, Node, PropType};
+use crate::rules::{CONTEXT, EACH, ENTRY, SLOT, is_name, universal_prop};
 use crate::source::{ListSource, NodeSource, Source};
 use crate::syntax::{RawChild, RawElement, SyntaxResult, tokenize, tokenize_with};
 use crate::validate::{ValidateOptions, validate_document};
@@ -157,6 +158,8 @@ struct Builder<'a> {
     catalog: Option<&'a Catalog>,
     diagnostics: Vec<Diagnostic>,
     weft: String,
+    /// The root's `<context>` block, lifted out of its content (SPEC §2.3).
+    context: Option<Vec<Entry>>,
     /// Paths of the elements the end of a partial input left open.
     open: HashSet<String>,
 }
@@ -168,6 +171,23 @@ impl Builder<'_> {
         if syntax.open.contains(&index) {
             self.open.insert(path.to_owned());
         }
+        if raw.name == CONTEXT {
+            self.diagnostics.push(
+                misplaced_context(
+                    raw.pos,
+                    path,
+                    "A <context> can only be a direct child of the root <screen>.",
+                )
+                .hint("move the entries into the <context> block under <screen>"),
+            );
+        } else if raw.name == ENTRY {
+            self.diagnostics.push(
+                misplaced_entry(raw.pos, path, "An <entry> can only stand inside <context>.")
+                    .hint("move the <entry> into the <context> block under <screen>"),
+            );
+        }
+        // Insert markup is parsed under a wrapper root, where a block is as misplaced as anywhere.
+        let lifts_context = is_root && raw.name != FRAGMENT && raw.name != CONTEXT;
         let kind = raw.name.clone();
         let mut id = None;
         let mut props = Vec::new();
@@ -214,6 +234,19 @@ impl Builder<'_> {
                 RawChild::Element(i) => *i,
             };
             let child_raw = &syntax.elements[child_index];
+            if lifts_context && child_raw.name == CONTEXT {
+                let first = self.context.is_none();
+                let entries = self.context.get_or_insert_with(Vec::new);
+                read_block(
+                    syntax,
+                    child_raw,
+                    path,
+                    first,
+                    entries,
+                    &mut self.diagnostics,
+                );
+                continue;
+            }
             if child_raw.name != SLOT {
                 let child_path = format!("{path}/{}", child_raw.segment());
                 let pos = child_raw.pos;
@@ -377,6 +410,7 @@ fn build_open(
         catalog,
         diagnostics: vec![],
         weft: String::new(),
+        context: None,
         open: HashSet::new(),
     };
     let raw_root = &syntax.elements[root];
@@ -387,7 +421,12 @@ fn build_open(
         let path = format!("/{}", raw_root.segment());
         b.element(root, &path, true)
     };
-    (Document { weft: b.weft, root }, b.diagnostics, b.open)
+    let document = Document {
+        weft: b.weft,
+        context: b.context.unwrap_or_default(),
+        root,
+    };
+    (document, b.diagnostics, b.open)
 }
 
 #[cfg(test)]

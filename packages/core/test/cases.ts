@@ -46,6 +46,8 @@ export const cases: Record<DocumentCode, Case> = {
       '<form id="f"><slot name="footer"><text id="a">a</text></slot><slot name="footer"><text id="b">b</text></slot></form>',
     ),
   },
+  W120: { markup: screen('<form id="f"><context/></form>') },
+  W121: { markup: screen('<context><entry id="n" by="agent" name="m">x</entry></context>') },
   W200: { json: { weft: "0.1", root: { kind: "screen", id: "s", children: [{ id: 1 }] } } },
   W201: { markup: '<form id="f" weft="0.1"/>' },
   W202: { markup: screen("<text>x</text>") },
@@ -102,6 +104,6 @@ export const cases: Record<DocumentCode, Case> = {
   W318: { markup: screen('<text id="t" grow="true">x</text>') },
   W401: { markup: screen('<fancy id="f"/>') },
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
-  W403: { markup: screen("", "0.2") },
+  W403: { markup: screen("", "0.3") },
   W404: { markup: screen("", "1.0") },
 };

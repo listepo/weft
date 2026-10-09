@@ -10,9 +10,9 @@ use crate::model::{
     Catalog, Child, ComponentDef, Content, Document, Node, PropDef, PropType, Value, WEFT_VERSION,
 };
 use crate::rules::{
-    ARIA_ROLES, EACH, MAX_DEPTH, MODEL_ASSETS, SLOT, asset_problem, embedded_reference,
-    has_non_xml_char, is_action, is_binding, is_extension_name, is_id, is_loop_variable, is_name,
-    is_token, universal_prop, version,
+    ARIA_ROLES, CONTEXT, EACH, ENTRY, MAX_DEPTH, MODEL_ASSETS, SLOT, asset_problem,
+    embedded_reference, has_non_xml_char, is_action, is_binding, is_extension_name, is_id,
+    is_loop_variable, is_name, is_token, universal_prop, version,
 };
 use crate::shape::{document_issues, to_document};
 use crate::source::{NodeSource, path_segment};
@@ -706,10 +706,15 @@ impl<'a> Validator<'a> {
         let kinds = || catalog.components.keys();
 
         if category == Category::Unknown {
-            if kind == SLOT || !is_name(kind) {
+            if [SLOT, CONTEXT, ENTRY].contains(&kind) || !is_name(kind) {
                 let (message, hint) = if kind == SLOT {
                     (
                         "`slot` is structural; named slots live in `slots`.".to_owned(),
+                        None,
+                    )
+                } else if kind == CONTEXT || kind == ENTRY {
+                    (
+                        format!("`{kind}` is structural; context lives in `Document.context`."),
                         None,
                     )
                 } else {

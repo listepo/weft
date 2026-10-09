@@ -81,7 +81,9 @@ private func editor() throws -> WeftEditor {
         let imported = editor.perform(.importSelection, on: Buffer(lines: lines(swift), isSwift: true))
         #expect(!imported.isError, Comment(rawValue: imported.message))
         let formatted = try editor.runner.run("fmt", text: screen, fileName: "screen.weft")
-        #expect(imported.clipboard == formatted.standardOutput)
+        // The importer stamps the current version; the corpus stays at 0.1.
+        let current = formatted.standardOutput.replacingOccurrences(of: "weft=\"0.1\"", with: "weft=\"0.2\"")
+        #expect(imported.clipboard == current)
     }
 
     @Test func aSelectionIsImportedAndItsLossesAreListed() throws {

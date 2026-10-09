@@ -1,5 +1,18 @@
 # Done
 
+### T39.1. Context: spec, model, markup and JSON
+
+The `<context>` block and its entries in the format and the Rust core, without value checks (T39.2), patches or targets.
+
+1. `SPEC.md`: §2.3 Context (syntax), §3 `Document.context` and `Entry` with ordering and canonical markup, §3.1 (the generated schema admits no context, like extensions), §6 paths (`context`, `entry#id`) and codes `W120`, `W121` and the reserved kinds in `W223`, §8 version 0.2 and the 0.1-reader note. `AGENT-SPEC.md` §2.9 Context in the approved wording, the new codes, the §5 and §6 lines; the MCP primer gets the first two bullets.
+2. `crates/weft-core`: `Entry` and `Document.context` in `model.rs`; `parse.rs` lifts `<context>` from the root; `serialize.rs` writes it first; `canonical.rs` normalizes entry text and drops an empty block; `shape.rs` reads the JSON shape; `validate.rs` reserves `context` and `entry` as kinds; `diagnostics.rs` registers the codes; `WEFT_VERSION` 0.2. `crates/weft-catalog` reserves `context` and `entry`.
+3. `packages/core`: `EntrySchema`, `Document.context`, the codes; differential cases in `cases.ts`, fixtures regenerated with `WEFT_UPDATE_FIXTURES=1`.
+4. Tests: markup ↔ JSON round trip of the design's login example byte for byte, every new code, fmt of a document without context unchanged.
+
+Built: the block is lifted from under the root wherever it stands and written first; canonical JSON keeps entries in written order; the JSON shape reads every member as a string, so a wrong value is left to validation rather than `W200`. Splitting the value checks into T39.2 kept this task under 500 lines of code. The format, `WEFT_VERSION` and the core catalog's `weft` moved to 0.2; the corpus keeps `weft="0.1"`, so the generated document schema admits both versions and round-trip tests that compare an import with a corpus screen stamp the current version first; the compat fixtures moved to 0.3.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 4
+Check: `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint` green except the SwiftUI screenshot baselines in `packages/visual` and the Swift typecheck tests, which time out or differ under the machine's load (see the PR).
+
 ### T95. json-render export: only trusted URLs
 
 A literal `href` or `src` now passes through the Trust allowlist on the way to json-render and back. `http`, `https`, `mailto` and a relative URL are kept (surrounding space and line breaks stripped, as `safe_url` does). `javascript:`, `data:` and any other scheme are a `props` loss and are left out, the same way A2UI drops an unsafe image `src`. A binding of either prop is still an expression. SPEC §9's json-render rows say so.

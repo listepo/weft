@@ -17,6 +17,9 @@ const BINDING: &str = "^\\$(?:(?:\\.(?:[A-Za-z_][A-Za-z0-9_]*|0|[1-9][0-9]*))+|[
 const TOKEN: &str = "^[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)*$";
 const ACTION: &str = "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)*$";
 const LOOP_VARIABLE: &str = "^[a-z][A-Za-z0-9]*$";
+/// The versions a reader of `WEFT_VERSION` reads without a diagnostic: a 0.1 document is a valid
+/// 0.2 document, and the corpus stays at 0.1.
+const VERSIONS: [&str; 2] = ["0.1", WEFT_VERSION];
 
 /// Room for the project values a schema may later be narrowed with (token and action names);
 /// for now the schema describes the catalog only.
@@ -344,7 +347,7 @@ pub fn document_schema(catalog: &Catalog, _options: &DocumentSchemaOptions) -> J
         one_of_these(roots)
     };
     let mut properties = Object::new();
-    properties.insert("weft".into(), json!({ "const": WEFT_VERSION }));
+    properties.insert("weft".into(), json!({ "enum": VERSIONS }));
     properties.insert("root".into(), root);
     let mut schema = Object::new();
     schema.insert("$schema".into(), DIALECT.into());

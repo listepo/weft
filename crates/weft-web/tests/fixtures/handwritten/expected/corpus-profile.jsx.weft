@@ -1,4 +1,4 @@
-<screen id="screen-profile" label="Profile" weft="0.1">
+<screen id="screen-profile" label="Profile" weft="0.2">
   <image id="image-profile-photo" label="Profile photo" src="{$.user.avatar}"/>
   <heading id="heading-1" level="1" text="{$.user.name}"/>
   <text id="text-1" text="{$.user.bio}"/>

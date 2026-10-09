@@ -320,6 +320,7 @@ pub fn read(
     Some(ImportResult {
         document: Document {
             weft: WEFT_VERSION.to_owned(),
+            context: Vec::new(),
             root,
         },
         losses: reader.losses.0,

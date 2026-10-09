@@ -114,7 +114,7 @@ for (const { name, diagnostics, kept } of fixtures) {
 }
 
 test("the parent's content model still applies to an unknown child", () => {
-  const markup = `<screen id="s" label="L" weft="0.2"><button id="b"><hologram id="h"/></button></screen>`;
+  const markup = `<screen id="s" label="L" weft="0.3"><button id="b"><hologram id="h"/></button></screen>`;
   const result = parse(markup, { catalog, mode: "lenient" });
   assert.deepEqual(
     result.diagnostics.map((d) => [d.code, d.severity]),
@@ -127,7 +127,7 @@ test("the parent's content model still applies to an unknown child", () => {
 });
 
 test("a known child keeps its own rules below an unknown parent", () => {
-  const markup = `<screen id="s" label="L" weft="0.2"><hologram id="h"><item id="i">x</item><button id="b" bogus="1">B</button></hologram></screen>`;
+  const markup = `<screen id="s" label="L" weft="0.3"><hologram id="h"><item id="i">x</item><button id="b" bogus="1">B</button></hologram></screen>`;
   const result = parse(markup, { catalog, mode: "lenient" });
   assert.deepEqual(
     result.diagnostics.map((d) => [d.code, d.severity]),
@@ -140,7 +140,7 @@ test("a known child keeps its own rules below an unknown parent", () => {
 });
 
 test("undeclared events, slots and states of a known component stay schema errors", () => {
-  const markup = `<screen id="s" label="L" weft="0.2"><button id="b" state="melting" on-hover="a.b"><slot name="extra"><text id="t">x</text></slot>B</button></screen>`;
+  const markup = `<screen id="s" label="L" weft="0.3"><button id="b" state="melting" on-hover="a.b"><slot name="extra"><text id="t">x</text></slot>B</button></screen>`;
   const codes = parse(markup, { catalog, mode: "lenient" }).diagnostics.map((d) => d.code);
   assert.deepEqual(codes.toSorted(), ["W203", "W206", "W207", "W403"]);
 });

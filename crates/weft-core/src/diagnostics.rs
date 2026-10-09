@@ -78,6 +78,8 @@ codes! {
     W117 => Error, "Nesting deeper than the limit.";
     W118 => Error, "Misplaced or malformed `<slot>`.";
     W119 => Error, "Slot name used twice under one parent.";
+    W120 => Error, "Misplaced or malformed `<context>`.";
+    W121 => Error, "Misplaced or malformed `<entry>`.";
     W200 => Error, "Document does not have the canonical JSON shape.";
     W201 => Error, "Root element is not `screen`.";
     W202 => Error, "Element without `id`.";

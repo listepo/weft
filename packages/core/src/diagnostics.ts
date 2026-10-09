@@ -30,6 +30,8 @@ export const DIAGNOSTIC_CODES = {
   W117: { severity: "error", summary: "Nesting deeper than the limit." },
   W118: { severity: "error", summary: "Misplaced or malformed `<slot>`." },
   W119: { severity: "error", summary: "Slot name used twice under one parent." },
+  W120: { severity: "error", summary: "Misplaced or malformed `<context>`." },
+  W121: { severity: "error", summary: "Misplaced or malformed `<entry>`." },
 
   W200: { severity: "error", summary: "Document does not have the canonical JSON shape." },
   W201: { severity: "error", summary: "Root element is not `screen`." },

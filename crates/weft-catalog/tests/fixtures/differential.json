@@ -17310,7 +17310,7 @@
       "severity": "error",
       "message": "The new component name \"2\" is not allowed.",
       "path": "#/catalog/components/2",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not \"context\", \"each\", \"entry\" or \"slot\" and does not start with \"x-\"",
       "got": "2"
      },
      {
@@ -17326,7 +17326,7 @@
       "severity": "error",
       "message": "The new component name \"each\" is not allowed.",
       "path": "#/catalog/components/each",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not \"context\", \"each\", \"entry\" or \"slot\" and does not start with \"x-\"",
       "got": "each"
      },
      {
@@ -17334,7 +17334,7 @@
       "severity": "error",
       "message": "The new component name \"slot\" is not allowed.",
       "path": "#/catalog/components/slot",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not \"context\", \"each\", \"entry\" or \"slot\" and does not start with \"x-\"",
       "got": "slot"
      },
      {
@@ -17342,7 +17342,7 @@
       "severity": "error",
       "message": "The new component name \"Rating\" is not allowed.",
       "path": "#/catalog/components/Rating",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not \"context\", \"each\", \"entry\" or \"slot\" and does not start with \"x-\"",
       "got": "Rating"
      },
      {
@@ -17350,7 +17350,7 @@
       "severity": "error",
       "message": "The new component name \"__proto__\" is not allowed.",
       "path": "#/catalog/components/__proto__",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not \"context\", \"each\", \"entry\" or \"slot\" and does not start with \"x-\"",
       "got": "__proto__"
      }
     ]

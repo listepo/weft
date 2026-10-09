@@ -27,7 +27,7 @@ test("a host with no configuration advertises the core catalog and nothing it do
   const { isError, json } = await capabilities();
   assert.equal(isError, false);
   assert.deepEqual(json, {
-    weft: "0.1",
+    weft: "0.2",
     catalogs: [{ name: "weft-core", version: json.catalogs[0].version }],
   });
 });

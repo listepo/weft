@@ -72,6 +72,11 @@ fn cases() -> Vec<(&'static str, Case)> {
         ("W117", Case::Syntax("<a>".repeat(MAX_DEPTH + 1))),
         syntax("W118", "<a><slot/></a>"),
         syntax("W119", "<a><slot name=\"s\"/><slot name=\"s\"/></a>"),
+        syntax("W120", "<a><b><context/></b></a>"),
+        syntax(
+            "W121",
+            "<a><context><entry id=\"e\" by=\"agent\" name=\"m\">x</entry></context></a>",
+        ),
         ("W200", Case::Json(json!({"weft": "0.1"}))),
         (
             "W201",

@@ -1,8 +1,9 @@
 //! Canonical markup (SPEC §3): the serializer emits exactly one text per canonical document.
 
 use crate::canonical::{canonicalize, compare_keys};
-use crate::model::{Child, Document, Node};
-use crate::rules::SLOT;
+use crate::context::entry_markup;
+use crate::model::{Child, Document, Entry, Node};
+use crate::rules::{CONTEXT, SLOT};
 use crate::values::format_value;
 
 const INDENT: &str = "  ";
@@ -10,7 +11,7 @@ const INDENT: &str = "  ";
 pub fn serialize(document: &Document) -> String {
     let doc = canonicalize(document);
     let mut lines = Vec::new();
-    write_node(&doc.root, "", &mut lines, Some(&doc.weft));
+    write_node(&doc.root, "", &mut lines, Some(&doc.weft), &doc.context);
     format!("{}\n", lines.join("\n"))
 }
 
@@ -45,7 +46,14 @@ fn escape_text(value: &str) -> String {
     out
 }
 
-fn write_node(node: &Node, indent: &str, lines: &mut Vec<String>, weft: Option<&str>) {
+/// `context` is the document's block, written first under the root (SPEC §2.3).
+fn write_node(
+    node: &Node,
+    indent: &str,
+    lines: &mut Vec<String>,
+    weft: Option<&str>,
+    context: &[Entry],
+) {
     let mut attributes: Vec<(String, String)> = Vec::new();
     if let Some(id) = &node.id {
         attributes.push(("id".into(), id.clone()));
@@ -73,7 +81,15 @@ fn write_node(node: &Node, indent: &str, lines: &mut Vec<String>, weft: Option<&
         .collect();
     let head = format!("<{}{attrs}", node.kind);
     let slots: Vec<(&String, &Vec<Child>)> = node.slots.iter().collect();
-    write_element(&head, &node.kind, &node.children, &slots, indent, lines);
+    write_element(
+        &head,
+        &node.kind,
+        &node.children,
+        &slots,
+        context,
+        indent,
+        lines,
+    );
 }
 
 fn write_element(
@@ -81,10 +97,11 @@ fn write_element(
     kind: &str,
     children: &[Child],
     slots: &[(&String, &Vec<Child>)],
+    context: &[Entry],
     indent: &str,
     lines: &mut Vec<String>,
 ) {
-    match (children, slots.is_empty()) {
+    match (children, slots.is_empty() && context.is_empty()) {
         ([], true) => lines.push(format!("{indent}{head}/>")),
         ([Child::Text(only)], true) => {
             lines.push(format!("{indent}{head}>{}</{kind}>", escape_text(only)));
@@ -92,15 +109,23 @@ fn write_element(
         _ => {
             lines.push(format!("{indent}{head}>"));
             let inner = format!("{indent}{INDENT}");
+            if !context.is_empty() {
+                lines.push(format!("{inner}<{CONTEXT}>"));
+                for entry in context {
+                    let line = entry_markup(entry, escape_attribute, escape_text);
+                    lines.push(format!("{inner}{INDENT}{line}"));
+                }
+                lines.push(format!("{inner}</{CONTEXT}>"));
+            }
             for child in children {
                 match child {
                     Child::Text(t) => lines.push(format!("{inner}{}", escape_text(t))),
-                    Child::Node(n) => write_node(n, &inner, lines, None),
+                    Child::Node(n) => write_node(n, &inner, lines, None, &[]),
                 }
             }
             for (name, list) in slots {
                 let head = format!("<{SLOT} name=\"{}\"", escape_attribute(name));
-                write_element(&head, SLOT, list, &[], &inner, lines);
+                write_element(&head, SLOT, list, &[], &[], &inner, lines);
             }
             lines.push(format!("{indent}</{kind}>"));
         }
@@ -128,6 +153,7 @@ mod tests {
         root.children = vec![Child::Node(Box::new(text))];
         let doc = Document {
             weft: "0.1".into(),
+            context: vec![],
             root,
         };
         assert_eq!(

@@ -10,7 +10,7 @@ mod common;
 
 use indexmap::IndexMap;
 use weft_catalog::Token;
-use weft_core::{Catalog, serialize};
+use weft_core::{Catalog, WEFT_VERSION, serialize};
 use weft_swiftui::{GenerateOptions, ImportOptions, generate, import_swiftui};
 
 fn round_trip(
@@ -21,7 +21,9 @@ fn round_trip(
 ) -> Vec<String> {
     let mut failures = vec![];
     for screen in screens {
-        let document = common::parse_screen(&screen.markup, catalog, tokens);
+        let mut document = common::parse_screen(&screen.markup, catalog, tokens);
+        // The importer stamps the current version; the corpus stays at 0.1.
+        document.weft = WEFT_VERSION.into();
         let mut variants = vec![None];
         if let Some(data) = &screen.data {
             variants.push(Some(data));
