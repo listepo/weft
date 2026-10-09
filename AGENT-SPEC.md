@@ -12,7 +12,7 @@ The examples are valid in strict mode against the core catalog `weft-core` 0.2 a
 | The data model (paths such as `$.user.email`) | The targets of bindings. Do not invent paths the host does not have. When the host has a data schema, a path it does not declare is `W315` and data of the wrong type for the attribute is `W316`. |
 | The action names (`auth.submit`, `nav.back`) | The values of `on-<event>`. When the host lists actions, use only those (`W308`). |
 | The design tokens (`space.md`, `color.accent`) | The values of token props. When the host lists tokens, use only those (`W306`). |
-| The format version and catalogs it reads | `weft="0.1"` on the root; write nothing a host does not advertise. |
+| The format version and catalogs it reads | `weft="0.2"` on the root; write nothing a host does not advertise. |
 | The document schema (`weft_schema`, or `weft schema`) | Only when the host constrains your output to a JSON Schema: the canonical JSON (SPEC §3) its catalog admits. You then write that JSON instead of markup, and validate it all the same: the schema cannot check unique ids, bindings, tokens or actions (SPEC §3.1). |
 
 Validate in **strict** mode before you answer: unknown elements and attributes are warnings for readers but errors for writers.
@@ -33,7 +33,7 @@ Use the project's kinds as you use core kinds: look them up in `weft_catalog` wi
 ## 2. Writing a screen
 
 ```xml
-<screen id="todos" label="Todos" weft="0.1">
+<screen id="todos" label="Todos" weft="0.2">
   <form id="add" label="Add a todo" on-submit="todo.add">
     <stack id="add-row" direction="row" gap="{token.space.sm}">
       <field id="title" label="Title" required="true" value="{$.draft}"/>
@@ -56,7 +56,7 @@ Use the project's kinds as you use core kinds: look them up in `weft_catalog` wi
 
 ### 2.1 Syntax
 
-- One root `<screen id="…" weft="0.1">`, with a `label` naming the screen. Nothing outside it but comments and whitespace.
+- One root `<screen id="…" weft="0.2">`, with a `label` naming the screen. Nothing outside it but comments and whitespace.
 - Names are lowercase with hyphens: `radio-group`, `on-press`. No `class`, `style`, `onClick`, `aria-*` or `data-*`: they are not Weft.
 - Every attribute has a value in double quotes. No bare attributes: `required="true"`, not `required`.
 - An element without content is self-closing: `<field id="f" label="Name"/>`.
@@ -130,6 +130,26 @@ Props are strings unless a type is given; `*` marks a required prop; "label" mea
 
 When nothing in the catalog fits, an extension element `x-<vendor>-<name>` with a `role` (its ARIA fallback) is allowed, and extension attributes `x-<vendor>-<name>` go on any element. Use them only when the host knows them; never as a way around a catalog rule.
 
+### 2.9 Fragments
+
+A project can share a block between screens, such as a page header, as a *fragment* in its own file (SPEC §10.7).
+
+```xml
+<fragment label="Page header" weft="0.2">
+  <param name="title" required="true" type="string"/>
+  <param name="back" type="action"/>
+  <param name="actions" type="slot"/>
+  <stack id="bar" direction="row">
+    <button id="back" on-press="{$back}">Back</button>
+    <heading id="title" level="1" text="{$title}"/>
+    <outlet name="actions"/>
+  </stack>
+</fragment>
+```
+
+- The `<param>` elements come first, then the body. Read a value parameter whole, `{$title}`, where its type fits; an action parameter as `on-press="{$back}"`; a slot parameter with `<outlet name="actions"/>`.
+- Ids inside a fragment belong to it and may repeat the ids of a screen.
+
 ## 3. Editing a screen
 
 Prefer patches to rewriting. A patch list is JSON, addresses elements by id, applies in order and is all-or-nothing: if one patch fails or the result is invalid, nothing changes and the diagnostics explain why.
@@ -200,7 +220,7 @@ What each code asks of you:
 | W202 | Add a unique `id`. |
 | W203 | Use one of the values in `expected`. |
 | W204 | Use the type in `expected`: `level="2"`, not `level="two"`; a token, not a raw size. |
-| W205 | Add the required prop, `label` or the root's `weft="0.1"`. |
+| W205 | Add the required prop, `label` or the root's `weft="0.2"`. |
 | W206 | Use an event the component declares, or move the action to a component that has it. |
 | W207 | Use a slot the component declares, or put the elements in the default content. |
 | W208 | Add the required slot. |
@@ -214,7 +234,7 @@ What each code asks of you:
 | W216 | Fix the action name: `group.name`, lowercase start, no spaces or calls. |
 | W217 | Use a literal: this prop takes no binding. |
 | W218 | Use a plain binding; negation is for read-only boolean props. |
-| W219 | Write the version as `major.minor`: `weft="0.1"`. |
+| W219 | Write the version as `major.minor`: `weft="0.2"`. |
 | W220 | Name the extension `x-<vendor>-<name>`. |
 | W221 | Remove control characters from the string. |
 | W222 | Give `<each>` `in="{$.items}"` and `as="item"`. |
@@ -240,8 +260,8 @@ What each code asks of you:
 | W318 | Move the element with `grow="true"` into a `stack`, or remove `grow`. |
 | W401 | Use a catalog component (see `hint`), or an extension the host knows. |
 | W402 | Use an attribute the component declares, or remove it. |
-| W403 | Write `weft="0.1"`: the reader is older than the version you wrote. |
-| W404 | Write `weft="0.1"`: the reader cannot read that major version. |
+| W403 | Write `weft="0.2"`: the reader is older than the version you wrote. |
+| W404 | Write `weft="0.2"`: the reader cannot read that major version. |
 | W501 | Send an array of patches, each with exactly the members shown in section 3. |
 | W502 | Use an id that exists in the current document; `hint` names the nearest. |
 | W503 | Do not set `id` or `weft`; use a valid prop name and an action name for `on-*`. |
@@ -267,6 +287,9 @@ What each code asks of you:
 | W712 | Give a shared catalog its own `prefix`: one lowercase segment, not `x`, `weft` or a core kind's first segment. Only the project's own catalog has none. |
 | W713 | A library defines only kinds named `<prefix>-…`; extend core and library kinds in the project's own catalog, and name its new kinds outside the libraries' prefixes. |
 | W714 | A warning: add the required catalog to `catalog`, or load a version compatible with the one `requires` names. |
+| W803 | Fix the `<param>`: a name of lowercase letters and digits, a known `type`, only the attributes its type takes, a `default` of that type, every `<param>` before the body, each name once; and give the fragment a body. |
+| W804 | Give `<outlet>` only `name`, naming a slot parameter of the fragment, once; use `<outlet>` only in a fragment. |
+| W807 | Read a value parameter whole (`{$title}`, not `{$title.x}`) in a prop, an action parameter in `on-*`, and a slot parameter with `<outlet>`. |
 
 ### 4.1 Reading back an edit
 
@@ -296,7 +319,7 @@ The instruction needs `now true while $.busy is truthy`. This line says falsy, s
 
 Before you answer, every one of these holds:
 
-1. One `<screen>` root with `weft="0.1"` and a `label`.
+1. One `<screen>` root with `weft="0.2"` and a `label`.
 2. Every element has a unique id; untouched elements keep theirs.
 3. Only catalog kinds, props, states, slots and events, or extensions the host knows.
 4. Every value is one literal or one whole reference; tokens for design values.

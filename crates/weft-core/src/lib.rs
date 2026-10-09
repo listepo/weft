@@ -7,6 +7,7 @@ pub mod controls;
 mod data;
 mod diagnostics;
 mod explain;
+pub mod fragment;
 mod json;
 mod model;
 mod parse;

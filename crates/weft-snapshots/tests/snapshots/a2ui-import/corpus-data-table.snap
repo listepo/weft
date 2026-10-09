@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-data-table as a2ui-import
 ---
-<screen id="users" weft="0.1">
+<screen id="users" weft="0.2">
   <heading id="title" level="1">Users</heading>
   <stack id="table" label="Users">
     <stack id="table-header" direction="row">

@@ -17276,9 +17276,11 @@
    "name": "new kinds with bad names",
    "project": "{\"catalog\":\"c.json\"}",
    "files": {
-    "c.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"2\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"x-acme-map\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"each\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"slot\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"Rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"__proto__\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}}}}"
+    "c.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"2\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"x-acme-map\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"each\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"slot\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"use\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"outlet\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"Rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"__proto__\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}}}}"
    },
    "codes": [
+    "W706",
+    "W706",
     "W706",
     "W706",
     "W706",
@@ -17310,7 +17312,7 @@
       "severity": "error",
       "message": "The new component name \"2\" is not allowed.",
       "path": "#/catalog/components/2",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
       "got": "2"
      },
      {
@@ -17326,7 +17328,7 @@
       "severity": "error",
       "message": "The new component name \"each\" is not allowed.",
       "path": "#/catalog/components/each",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
       "got": "each"
      },
      {
@@ -17334,15 +17336,31 @@
       "severity": "error",
       "message": "The new component name \"slot\" is not allowed.",
       "path": "#/catalog/components/slot",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
       "got": "slot"
+     },
+     {
+      "code": "W706",
+      "severity": "error",
+      "message": "The new component name \"use\" is not allowed.",
+      "path": "#/catalog/components/use",
+      "expected": "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
+      "got": "use"
+     },
+     {
+      "code": "W706",
+      "severity": "error",
+      "message": "The new component name \"outlet\" is not allowed.",
+      "path": "#/catalog/components/outlet",
+      "expected": "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
+      "got": "outlet"
      },
      {
       "code": "W706",
       "severity": "error",
       "message": "The new component name \"Rating\" is not allowed.",
       "path": "#/catalog/components/Rating",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
       "got": "Rating"
      },
      {
@@ -17350,7 +17368,7 @@
       "severity": "error",
       "message": "The new component name \"__proto__\" is not allowed.",
       "path": "#/catalog/components/__proto__",
-      "expected": "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+      "expected": "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
       "got": "__proto__"
      }
     ]

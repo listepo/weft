@@ -25,6 +25,9 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T28 | in progress | P2 | 3 | 90% | Cursor / grok-4.7 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
+| T31.2 | todo | P1 | 4 | 0% | |
+| T31.3 | todo | P1 | 4 | 0% | |
+| T31.4 | todo | P1 | 3 | 0% | |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
 | T39 | in progress | P1 | 4 | 20% | Claude Code / claude-opus-5-5 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
@@ -207,7 +210,27 @@ Scope extension (creator): everything that can be configured is configurable thr
 13. `AGENTS.md`: every new tool option gets a `weft.json` key in the same change.
 14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
 
-Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). Left: the fragments proposal in `docs/fragments-design.md` waits for the creator; once approved, fragments are built (format, both parsers, patches, fixtures) and the example project gains a shared fragment, which the done criteria ask for.
+Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). The creator approved `docs/fragments-design.md` with its recommendations (a name → file map, braced `on-*` action parameters, named slots only, 10,000 expanded elements, format 0.2). Part B is built in four subtasks; T31.1 (fragment files) is done, and T31 closes with T31.4.
+
+Part B build plan (fragments):
+
+- The project's merged catalog carries the fragments (`Catalog.fragments`, name → fragment document in canonical JSON), so every tool that takes the project's catalog (parse, validate, patch, render, the WebAssembly `Catalog` object) knows them without new option fields. A catalog file of §10.4 with `fragments` is `W706`.
+- A fragment's parameters become a component definition of its own (value parameters as props, action parameters as events, slot parameters as slots), so `<use>` literals are typed, and use sites checked, by the code that types and checks components.
+- Format version: T31.1 moves `weft` to 0.2 with the same edits T39 makes for context, which shares that 0.2 (`docs/context-design.md`, version bundling); whichever lands second keeps one bump.
+
+Each subtask gets one pull request, verified with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+### T31.2. Fragments: uses and patches
+
+The `<use>` element (SPEC §10.7): `Catalog.fragments` in the Rust and TypeScript models, the parameter signature as a component definition, literal typing of `<use>` attributes in the parser, use-site checks (`W801`, `W802`, `W205`, values, placement of the body's top-level elements, slot content), the data check of use values, patches (`W504` for undeclared slot parameters, a `W502` hint naming the fragment), the SPEC and AGENT-SPEC parts on uses, ids and patches, and differential fixtures with a catalog that has fragments. Done when `W801` and `W802` have producing cases in `crates/weft-core/tests/codes.rs` and the TypeScript and Rust fixtures match.
+
+### T31.3. Fragments: expansion and renderers
+
+`expand` in the core (SPEC §10.7): parameter reads replaced by use values, outlets by slot content, ids by instance paths (`header/title`), body loop variables renamed when they would capture a use-site name, cycles (`W805`) and the 10,000-element and depth limits (`W806`) guarded, also reported by validation. Exported through `weft-binding`, `weft-wasm` and `weft-node` and `@weft/core`; the reference renderer (`@weft/render-react`), the static HTML page and the code generators render the expansion. Done when a screen with nested uses renders the same accessibility tree as its hand-expanded copy, and hostile fragments (cycles, exponential fan-out) are diagnostics.
+
+### T31.4. Fragments: project, tools and example
+
+The `fragments` member of `weft.json` (`crates/weft-catalog/src/project.rs`, `W701`/`W703`/`W704`, fragment markup errors under `#/fragments/<name>`, fragments parsed against the merged catalog and checked with the project's tokens, actions and data schema), `schemas/weft.schema.json`, project content with fragment markup as strings (MCP `project` argument), the CLI (`validate`, `html`), the MCP server (`weft_catalog` lists fragments with their parameters, `weft_render` expands), `write-page`, the plugin bundles, and `examples/project/` gains a shared fragment used by several screens, with CLI and MCP tests on it and on broken fragment files. Closes T31.
 
 ### T32. Claude Code plugin from GitHub
 

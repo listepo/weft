@@ -7,7 +7,7 @@ import { LIMITS, type Limits } from "./context.ts";
 export const primer = (
   limits: Limits,
 ): string => `Weft describes a UI screen as strict XML-subset markup. Rules:
-- One root <screen id="…" weft="0.1" label="…">. Every element has an id, unique in the document: a letter, then letters, digits, "_" or "-".
+- One root <screen id="…" weft="0.2" label="…">. Every element has an id, unique in the document: a letter, then letters, digits, "_" or "-".
 - Element and attribute names are lowercase with hyphens. Attribute values are always in double quotes. Booleans are true or false. An element without content is self-closing.
 - Only components of the catalog exist. Do not invent elements or attributes; call weft_catalog to see them.
 - A value is a literal ("Email"), a binding value="{$.user.email}", a negated binding disabled="{!$.busy}", or a design token gap="{token.space.md}". A literal that starts with "{" is written "{{". Never mix text and a binding in one value.

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::source::Source;
 
-pub const WEFT_VERSION: &str = "0.1";
+pub const WEFT_VERSION: &str = "0.2";
 
 /// Objects keep their key order, as JavaScript objects do.
 pub type Map<V> = IndexMap<String, V>;

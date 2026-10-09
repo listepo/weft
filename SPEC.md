@@ -1,4 +1,4 @@
-# Weft 0.1 — specification (draft)
+# Weft 0.2 — specification (draft)
 
 Weft is an open format for describing user interfaces so that AI agents can read, write, validate and patch them. One semantic model has two serializations:
 
@@ -36,7 +36,7 @@ A Weft document is a well-formed XML 1.0 document restricted as follows:
 The root element is `<screen>` and carries the format version. Every example in this document is in canonical form (§3):
 
 ```xml
-<screen id="login" label="Sign in" weft="0.1">
+<screen id="login" label="Sign in" weft="0.2">
   <form id="f1" state="idle" on-submit="auth.submit">
     <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
     <button id="go" disabled="{!$.email}" submit="true" variant="primary">Sign in</button>
@@ -98,7 +98,7 @@ Action names match `[a-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*)*`. Actions take no ar
 ## 3. Canonical JSON
 
 ```ts
-type Document = { weft: "0.1"; root: Node };  // `weft` is the root element's `weft` attribute
+type Document = { weft: "0.2"; root: Node };  // `weft` is the root element's `weft` attribute
 
 type Node = {
   kind: string;                      // element name
@@ -349,7 +349,7 @@ type Diagnostic = {
 };
 ```
 
-Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility, `W5xx` patches, `W6xx` import (§9), `W7xx` projects (§10). A code, once published, never changes meaning.
+Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibility, `W5xx` patches, `W6xx` import (§9), `W7xx` projects (§10), `W8xx` fragments (§10.7). A code, once published, never changes meaning.
 
 `path` addresses the element from the root: one segment per element, `kind#id`, or `kind[index]` when the element has no valid id (the index counts the parent's list, text included). A named slot adds `slot[name]`, a text child `#text[index]`, an attribute `@name` (`@on-press` for events, `@weft` for the version). Syntax diagnostics name the open elements only. For JSON that does not have the shape of §3, the path is a JSON Pointer prefixed with `#`, e.g. `#/root/children/0/kind`. A patch diagnostic (§7) about the patch itself points into the patch list the same way, e.g. `#/patches/2/parent`.
 
@@ -450,6 +450,9 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W712 | Catalog prefix is malformed or reserved, or a second catalog has no prefix; the catalog is ignored (§5, §10.4). |
 | W713 | Catalog defines or extends a kind it does not own: a library's kind outside its prefix, or a project catalog's new kind under a library's prefix (§10.4). |
 | W714 | Catalog requirement names a catalog that is not loaded, or is loaded at an incompatible version (§5, §10.4). |
+| W803 | Malformed `<param>` or `<fragment>`: a bad declaration, a duplicate or misplaced `<param>`, a fragment without a body (§10.7). |
+| W804 | `<outlet>` names no slot parameter, places one twice, has other attributes or content, or stands outside a fragment (§10.7). |
+| W807 | Parameter read where its type cannot go: an action or slot parameter in a prop, a value parameter in `on-*`, a read with more after the name (§10.7). |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
@@ -490,6 +493,7 @@ type Patch =
 ## 8. Versioning and extensibility
 
 - `weft` on `<screen>` is `major.minor`. A minor version only adds; a reader of `0.x` MUST accept any `0.y` document under the rules below. A major version may break.
+- The format is `weft` 0.2 since fragments (§10.7), a minor addition: a 0.1 document is a valid 0.2 document and needs no migration, and writers write `weft="0.2"`. There is no per-feature gate: a 0.2 reader accepts a fragment file marked 0.1. A 0.1 reader warns about the version (`W403`) and reads `<fragment>`, `<param>` and `<outlet>` as unknown elements, which it keeps.
 - **Extensions** are elements or attributes whose name starts with `x-<vendor>-`. An extension element MUST carry `role` (its ARIA fallback) and follows `content: "mixed"`; it may have any attributes, slots and events, and its literals stay strings. A reader that does not know it renders its children inside a container with that role. Extension attributes are allowed on every element in both modes.
 - **Unknown, non-extension** elements or attributes come from a newer minor version or another catalog. In *lenient* mode (default for readers) they produce a `W4xx` warning; an unknown element is treated as an extension with role `group`, an unknown attribute is kept in the model and ignored. In *strict* mode (default for writers and CI) they are errors. A newer minor `weft` version is reported the same way. Unknown and extension elements are opaque: parent/child rules skip them, but the parent's content model still applies. Undeclared events, slots, states and enum values of a known component are schema errors, not compatibility warnings.
 - A reader MUST NOT drop unknown content when it round-trips a document.
@@ -696,7 +700,7 @@ Each `catalog` file is a catalog (§5): `weft`, `name`, `version` and `component
 - **Merge.** The project's catalog starts from the core catalog. The libraries merge next, in list order, and the project catalog last, wherever it is listed, so the order changes listings and diagnostics but never the result. The merged catalog takes the project catalog's `weft`, `name` and `version`, or else the last library's.
 - **Libraries** define only new kinds named `<prefix>-…`; an entry for any other kind, including a core kind or another library's, is `W713` and is ignored. A kind already defined by another catalog is `W711` and is ignored.
 - **The project catalog** may define new kinds outside every loaded library's prefix (a new kind under one is `W713` and is ignored), and extend any kind already merged, core or library.
-- A new kind needs a whole definition (`description`, `role`, `content`, …). Its name follows the name grammar, is not `each` or `slot`, and does not start with `x-`, because `x-` elements are opaque to every catalog (§8).
+- A new kind needs a whole definition (`description`, `role`, `content`, …). Its name follows the name grammar, is not a structural element (`each`, `slot`, `use`, `fragment`, `param` or `outlet`), and does not start with `x-`, because `x-` elements are opaque to every catalog (§8).
 - An extended kind's entry may leave out `description`, `role` and `content` to keep the ones it extends. `props` and `slots` merge by name, an entry replacing the definition of that name (to add a variant, restate the prop with the longer `values` list). `states`, `events`, `allowedChildren` and `allowedParents` are joined: the existing values, then the new ones. Every other field replaces the existing one.
 - An extension may only widen. The merged definition is compared with the definition it extends (the core's, or the library's) by the rules of §8: a kind whose merged definition makes a change those rules call major (a changed role or type, a new required prop, a narrowed content model, …) is `W707`, and that kind keeps the definition it had.
 - A catalog that is not a catalog, including a `prefix` that is not a string or a `requires` that is not an object of versions, is `W706` and is ignored; an entry that is not a valid definition, or names a kind that breaks the rules above, is `W706` and only that entry is ignored.
@@ -756,3 +760,50 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 - `schemas/weft.schema.json` is the JSON Schema (2020-12) of the project file. It is generated from the same table the loader checks against, so the two cannot disagree; editors that follow `$schema` complete and check every key.
 - **Adding a setting.** A tool option that a user can set gets a key here in the same change: a row in this table, an entry in the loader's table (`crates/weft-catalog/src/settings.rs`), which regenerates the schema, and the tool reading it with the precedence above. A new export or import target adds its section under `export.<target>` or `import.<target>`. The names reserved for targets in progress are `export.figma` (T14, where a rem base and the token strategy belong), `export.penpot` and `import.penpot`. Until a target's section lands, its key is unknown and warns.
 
+
+### 10.7 Fragments
+
+A fragment is a block that several screens of a project share, such as a page header, a footer or a product card. It is kept once, in its own file. A fragment adds elements to the format, not a new model, and it is an addition of format 0.2 (§8).
+
+**A fragment file.**
+
+```xml
+<fragment label="Page header" weft="0.2">
+  <param name="title" required="true" type="string"/>
+  <param default="muted" name="tone" type="enum" values="default muted"/>
+  <param name="back" type="action"/>
+  <param allowed-children="button link" name="actions" type="slot"/>
+  <stack id="bar" direction="row">
+    <button id="back" on-press="{$back}">Back</button>
+    <heading id="title" level="1" text="{$title}"/>
+    <text id="note" tone="{$tone}">Signed in</text>
+    <outlet name="actions"/>
+  </stack>
+</fragment>
+```
+
+- The root is `<fragment>`. It takes `weft` and an optional `label`, a description for tools rather than an accessible name. It has no `id`.
+- The `<param>` elements come first, one per parameter. A parameter has the vocabulary of a catalog prop (§5): `name`, which matches `[a-z][a-z0-9]*` (so that it is both an attribute name and a loop-variable name) and is not `fragment` or `id`; and `type`, which is one of `string`, `number`, `boolean`, `enum`, `token`, `action` or `slot`. As the type allows, it also takes `values` (space-separated, for `enum` only), `token-type` (for `token`), `min`, `max` and `integer` (for `number`), `required`, and `default` (for value types, not together with `required`). A `slot` parameter takes `required`, `allowed-children` (space-separated kinds) and `content`, whose only value is `nodes` because a slot holds elements. `required` and `integer` are booleans, `min` and `max` are numbers, and `default` is a value of the parameter's type: a literal, or a token reference for a `token` parameter.
+- The body comes after the parameters. It holds one or more elements, as they could stand inside a `<screen>`.
+- `<outlet name="…"/>` marks where the content of a `slot` parameter goes. It is structural, like `<slot>` and `<each>`: it has no id, no other attribute and no content.
+- The body reads a value parameter with the loop-variable form of a binding, `{$title}`, in any prop value. It reads a boolean parameter negated as `{!$busy}`. A read names the parameter and nothing after it. An action parameter is read as the whole value of an `on-*` attribute, `on-press="{$back}"`. This is the one place where an `on-*` value is braced. Bindings of `$.…` in the body read the host data model of the screen that uses the fragment.
+
+In canonical JSON a fragment file is a `Document` whose root has the kind `fragment`. `param` and `outlet` are nodes without an id, and their attributes sit in `props`, typed as above. A parameter read is an ordinary binding value, `{ "bind": "$title" }`. An action parameter in `on` is the string `"{$back}"`. The rules of §3 apply unchanged, and the `<param>` elements keep their document order before the body.
+
+**Ids.** Ids inside a fragment body are local. They are unique within the fragment (`W301` there) and may repeat the ids of any screen.
+
+**Validation.** A fragment is checked once on its own.
+
+A fragment is checked as a screen body, with the project's catalog, tokens, actions and data schema. Each parameter read counts as a value of the parameter's type. A `string` prop takes `string` and `enum` parameters, a `number` prop takes `number` parameters, a `boolean` prop takes `boolean` parameters, an `enum` prop takes an `enum` parameter whose values it allows (`W203`), and a `token` prop takes a `token` parameter with the same `token-type` (`W307`). Any other pairing is `W204`. A literal-only prop takes no read (`W217`), and a negated read needs a boolean parameter in a boolean prop (`W218`). Reads of `$.…` are checked against the data schema (`W315`, `W316`). A `submit` button in the body may rely on a `form` around the use, so `W313` is not reported there and `grow` on a top-level element is not reported either, because the fragment's body is judged where it is placed.
+
+In a fragment:
+
+| Situation | Code |
+| --- | --- |
+| A read of a name that is no parameter or loop variable | `W305` |
+| A body `as` that reuses a parameter name | `W311` |
+| A `<param>` after the body or outside a fragment, a duplicate parameter, a bad declaration (a bad name or type, `values` on a `string`, a `default` of the wrong type), or a fragment without a body | `W803` |
+| An `<outlet>` for a name that is no `slot` parameter, twice for one name, with other attributes or content, or outside a fragment | `W804` |
+| A read where its type cannot go: an `action` or `slot` parameter in a prop, a value parameter in `on-*`, a read with more after the name | `W807` |
+
+**Patches.** A fragment file is edited with the same patches as a screen, with `<fragment>` as its root.

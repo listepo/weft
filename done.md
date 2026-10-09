@@ -1,5 +1,11 @@
 # Done
 
+### T31.1. Fragments: fragment files
+
+A fragment file (SPEC §10.7) is a document whose root is `<fragment label weft>`: leading `<param>` declarations (`string`, `number`, `boolean`, `enum`, `token`, `action`, `slot`, with the vocabulary of a catalog prop), then a body as it could stand in a screen, with `<outlet name>` for slot parameters. The parser types `<param>` literals (`min`, `max`, `required`, `integer`, and `default` by the parameter's type); the validator checks a fragment on its own: declarations (`W803`), outlets (`W804`), and every parameter read as a value of its declared type (`W204`, `W203`, `W307`, `W218`, `W807` for an action or slot parameter in a prop or a read past the name), with `on-press="{$back}"` forwarding an action parameter and `W305` for an unknown one. `use`, `fragment`, `param` and `outlet` are reserved kind names in catalogs (`W706`). The format moves to `weft` 0.2. `AGENT-SPEC.md` gains a fragments section and repair rows.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 4 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-core/src/{fragment.rs,validate.rs,validate/fragments.rs,parse.rs,diagnostics.rs}`, `crates/weft-catalog/src/project.rs`, `crates/weft-core/tests/{fragments.rs,codes.rs}`
+Check: `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
 ### T95. json-render export: only trusted URLs
 
 A literal `href` or `src` now passes through the Trust allowlist on the way to json-render and back. `http`, `https`, `mailto` and a relative URL are kept (surrounding space and line breaks stripped, as `safe_url` does). `javascript:`, `data:` and any other scheme are a `props` loss and are left out, the same way A2UI drops an unsafe image `src`. A binding of either prop is still an expression. SPEC §9's json-render rows say so.

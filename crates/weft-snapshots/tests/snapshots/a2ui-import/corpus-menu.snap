@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-menu as a2ui-import
 ---
-<screen id="account-menu" weft="0.1">
+<screen id="account-menu" weft="0.2">
   <text id="signed-in" text="{$.user.email}"/>
   <list id="menu" label="Account">
     <item id="item-1">

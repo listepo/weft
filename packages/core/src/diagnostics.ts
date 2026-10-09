@@ -117,6 +117,9 @@ export const DIAGNOSTIC_CODES = {
     severity: "warning",
     summary: "Catalog requirement is not loaded at a compatible version.",
   },
+  W803: { severity: "error", summary: "Malformed `<param>` or `<fragment>`." },
+  W804: { severity: "error", summary: "`<outlet>` names no slot parameter, or one twice." },
+  W807: { severity: "error", summary: "Parameter read where its type cannot go." },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;

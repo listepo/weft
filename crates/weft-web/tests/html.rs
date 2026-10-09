@@ -7,7 +7,7 @@
 use std::path::Path;
 
 use weft_catalog::{DEFAULT_TOKENS_JSON, core_catalog, load_tokens};
-use weft_core::{Document, ParseOptions, has_errors, parse, parse_json, serialize};
+use weft_core::{Document, ParseOptions, WEFT_VERSION, has_errors, parse, parse_json, serialize};
 use weft_web::{HNode, HtmlOptions, ImportOptions, import_html, parse_html, to_html};
 
 fn corpus() -> Vec<(String, Document)> {
@@ -114,7 +114,9 @@ fn generated_pages_without_their_source_come_back_by_convention() {
     let catalog = core_catalog().unwrap();
     let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
     let mut failures = Vec::new();
-    for (name, document) in corpus() {
+    for (name, mut document) in corpus() {
+        // Importers stamp the current version; the corpus stays at 0.1.
+        document.weft = WEFT_VERSION.into();
         let options = HtmlOptions {
             catalog: &catalog,
             tokens: &tokens,
@@ -141,7 +143,7 @@ fn generated_pages_without_their_source_come_back_by_convention() {
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
 
-const TILTED: &str = r#"<screen id="s" weft="0.1"><stack id="a" gap="{token.space.md}" perspective="800" rotate-y="30"><button id="b" rotate-z="-5.5">Go</button></stack></screen>"#;
+const TILTED: &str = r#"<screen id="s" weft="0.2"><stack id="a" gap="{token.space.md}" perspective="800" rotate-y="30"><button id="b" rotate-z="-5.5">Go</button></stack></screen>"#;
 
 fn tilted() -> Document {
     let catalog = core_catalog().unwrap();
@@ -193,7 +195,7 @@ fn a_transform_that_is_not_a_tilt_is_a_loss() {
     );
 }
 
-const SHOWN: &str = r#"<screen id="s" weft="0.1"><model id="m" fallback="assets/gem.png" label="A gem" src="assets/gem.glb" usdz="assets/gem.usdz"/></screen>"#;
+const SHOWN: &str = r#"<screen id="s" weft="0.2"><model id="m" fallback="assets/gem.png" label="A gem" src="assets/gem.glb" usdz="assets/gem.usdz"/></screen>"#;
 
 fn shown(markup: &str) -> Document {
     let catalog = core_catalog().unwrap();

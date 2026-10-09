@@ -1,4 +1,4 @@
-<screen id="screen-account-menu" label="Account menu" weft="0.1">
+<screen id="screen-account-menu" label="Account menu" weft="0.2">
   <text id="text-1" text="{$.user.email}"/>
   <menu id="menu-account" label="Account">
     <menu-item id="menu-item-profile" on-press="nav.profile">Profile</menu-item>

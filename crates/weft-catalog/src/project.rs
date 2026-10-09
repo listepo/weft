@@ -29,8 +29,8 @@ const RESOURCES: [&str; 5] = ["$schema", "tokens", "catalog", "actions", "data"]
 const JOINED: [&str; 4] = ["states", "events", "allowedChildren", "allowedParents"];
 /// Merged by name rather than replaced by an extension entry.
 const MERGED: [&str; 2] = ["props", "slots"];
-/// Element names with a fixed meaning in markup, which no component may take.
-const STRUCTURAL: [&str; 2] = ["each", "slot"];
+/// Element names with a fixed meaning in markup (SPEC §10.4), which no component may take.
+const STRUCTURAL: [&str; 6] = ["each", "slot", "use", "fragment", "param", "outlet"];
 const CATALOG_MEMBERS: [&str; 6] = [
     "weft",
     "name",
@@ -880,7 +880,7 @@ impl Loader<'_> {
             if base.is_none() && (!is_name(kind) || STRUCTURAL.contains(&kind.as_str())) {
                 let d = invalid(
                     format!("The new component name {} is not allowed.", quote(kind)),
-                    "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+                    "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
                 );
                 self.report(d);
                 continue;

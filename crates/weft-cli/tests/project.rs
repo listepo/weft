@@ -346,7 +346,7 @@ fn bad_settings_are_reported_and_the_defaults_apply() {
     );
 }
 
-const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.1">
+const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.2">
   <stack id="row" direction="row" gap="{token.space.sm}">
     <button id="back" on-press="nav.back">Back</button>
   </stack>

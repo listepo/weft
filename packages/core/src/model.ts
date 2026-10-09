@@ -2,7 +2,7 @@
 // change them only together with the specification.
 import { z } from "zod";
 
-export const WEFT_VERSION = "0.1";
+export const WEFT_VERSION = "0.2";
 
 export const BindingSchema = z.strictObject({ bind: z.string(), not: z.literal(true).optional() });
 export const TokenRefSchema = z.strictObject({ token: z.string() });

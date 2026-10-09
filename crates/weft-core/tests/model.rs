@@ -12,7 +12,7 @@ use weft_core::{
 
 #[test]
 fn the_format_version_and_the_depth_limit_are_the_ones_of_the_spec() {
-    assert_eq!(WEFT_VERSION, "0.1");
+    assert_eq!(WEFT_VERSION, "0.2");
     assert_eq!(MAX_DEPTH, 256);
 }
 

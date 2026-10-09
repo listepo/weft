@@ -8,6 +8,7 @@ use indexmap::IndexMap;
 
 use crate::canonical::{Parts, append_text, assemble_node, normalize_text};
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, has_errors, sort_by_position};
+use crate::fragment;
 use crate::model::{Catalog, Child, Document, Node, PropType};
 use crate::rules::{EACH, SLOT, is_name, universal_prop};
 use crate::source::{ListSource, NodeSource, Source};
@@ -140,16 +141,24 @@ pub fn parse_fragment(markup: &str, catalog: &Catalog) -> (Option<Node>, Vec<Dia
     (wrapper, diagnostics)
 }
 
-fn prop_type(catalog: Option<&Catalog>, kind: &str, name: &str) -> Option<PropType> {
+/// `typing` is the `type` attribute of a `<param>`.
+fn prop_type(
+    catalog: Option<&Catalog>,
+    kind: &str,
+    typing: Option<&str>,
+    name: &str,
+) -> Option<PropType> {
     // Extension and unknown elements keep every literal a string (SPEC §3).
-    if kind == EACH {
-        return None;
+    match kind {
+        EACH => None,
+        fragment::PARAM => fragment::param_attr_type(name, typing),
+        _ => catalog?
+            .components
+            .get(kind)?
+            .prop(name)
+            .or_else(|| universal_prop(name))
+            .map(|d| d.kind),
     }
-    let component = catalog?.components.get(kind)?;
-    component
-        .prop(name)
-        .or_else(|| universal_prop(name))
-        .map(|d| d.kind)
 }
 
 struct Builder<'a> {
@@ -173,6 +182,11 @@ impl Builder<'_> {
         let mut props = Vec::new();
         let mut on = Vec::new();
         let mut attrs: HashMap<String, Position> = HashMap::new();
+        let typing = raw
+            .attrs
+            .iter()
+            .find(|a| kind == fragment::PARAM && a.name == "type")
+            .map(|a| a.value.as_str());
         for attr in &raw.attrs {
             attrs.insert(attr.name.clone(), attr.pos);
             if attr.name == "id" {
@@ -182,7 +196,10 @@ impl Builder<'_> {
             } else if is_root && attr.name == "weft" {
                 self.weft = attr.value.clone();
             } else {
-                match read_value(&attr.value, prop_type(self.catalog, &kind, &attr.name)) {
+                match read_value(
+                    &attr.value,
+                    prop_type(self.catalog, &kind, typing, &attr.name),
+                ) {
                     Ok(value) => props.push((attr.name.clone(), value)),
                     Err(bad) => self.diagnostics.push(
                         Diagnostic::new(

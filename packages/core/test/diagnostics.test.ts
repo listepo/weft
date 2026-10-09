@@ -131,7 +131,7 @@ test("extension elements and attributes pass in both modes", () => {
 
 test("unknown content survives a round-trip", () => {
   const markup = [
-    '<screen id="s" weft="0.2">',
+    '<screen id="s" weft="0.3">',
     '  <fancy id="f" level="3" mood="calm">',
     "    Hello",
     '    <x-acme-chart id="c" role="img"/>',

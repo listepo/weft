@@ -340,7 +340,7 @@ const NEGATIVES: &[(&str, &str, Option<&str>, Code)] = &[
     (
         "newer format version",
         "/weft",
-        Some(r#""0.2""#),
+        Some(r#""0.3""#),
         Code::W403,
     ),
 ];

@@ -244,7 +244,21 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W509",
             json!([{"op": "insert", "parent": "main", "markup": "<stack id=\"go\"/>"}]),
         ),
+        fragment(
+            "W803",
+            r#"<param name="title" type="text"/><stack id="a"/>"#,
+        ),
+        fragment("W804", r#"<stack id="a"><outlet name="nope"/></stack>"#),
+        fragment(
+            "W807",
+            r#"<param name="back" type="action"/><text id="a" text="{$back}"/>"#,
+        ),
     ]
+}
+
+fn fragment(code: &'static str, body: &str) -> (&'static str, Case) {
+    let markup = format!("<fragment weft=\"0.2\">{body}</fragment>");
+    (code, Case::Markup(markup))
 }
 
 fn run(case: &Case) -> Vec<&'static str> {

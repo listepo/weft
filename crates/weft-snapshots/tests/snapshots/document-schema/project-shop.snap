@@ -4,11 +4,14 @@ description: the document JSON Schema of project-shop
 ---
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "A Weft 0.1 document in canonical JSON (SPEC §3) for catalog shop 1.1.0. Checks the validator makes beyond this schema are listed in SPEC §3.1.",
+  "description": "A Weft 0.2 document in canonical JSON (SPEC §3) for catalog shop 1.1.0. Checks the validator makes beyond this schema are listed in SPEC §3.1.",
   "type": "object",
   "properties": {
     "weft": {
-      "const": "0.1"
+      "enum": [
+        "0.1",
+        "0.2"
+      ]
     },
     "root": {
       "$ref": "#/$defs/screen"
