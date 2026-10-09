@@ -210,7 +210,7 @@ impl<'a> Walker<'a> {
                 false,
             );
         }
-        let component = self.catalog.and_then(|c| c.components.get(&node.kind));
+        let component = self.catalog.and_then(|c| c.def_of(node));
         for (name, value) in &node.props {
             if is_each && (name == "in" || name == "as") {
                 continue;

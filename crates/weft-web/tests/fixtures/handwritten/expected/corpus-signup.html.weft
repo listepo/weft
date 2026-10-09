@@ -1,4 +1,4 @@
-<screen id="screen-create-account" label="Create account" weft="0.1">
+<screen id="screen-create-account" label="Create account" weft="0.2">
   <form id="form-1" state="idle" on-submit="auth.signup">
     <heading id="heading-create-your-account" level="1">Create your account</heading>
     <stack id="stack-1" gap="{token.space.md}">

@@ -556,7 +556,7 @@ for (const def of Object.values(components)) {
 }
 
 export const coreCatalog: Catalog = {
-  weft: "0.1",
+  weft: "0.2",
   name: "weft-core",
   version: "0.2.0",
   components,

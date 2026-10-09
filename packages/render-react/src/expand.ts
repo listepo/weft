@@ -2,7 +2,7 @@
 // and `expectedTree` read: `each` expanded with instance ids, `hidden` nodes removed, and every
 // node paired with the scope its bindings resolve in. Both consumers share it so the renderer
 // and the oracle it is tested against can never disagree about what is on screen.
-import type { Catalog, ComponentDef, PropDef } from "@weft/core";
+import { expand, type Catalog, type ComponentDef, type Document, type PropDef } from "@weft/core";
 import { isRecord, resolveValue, toText, truthy, type Resolved, type Scope } from "./values.ts";
 
 export type Inst = {
@@ -25,6 +25,20 @@ export type InstChild = Inst | string;
 // memory); past this depth content is not rendered rather than overflowing the stack.
 const MAX_DEPTH = 200;
 const LOOP_VAR = /^[a-z][A-Za-z0-9]*$/;
+
+/**
+ * The root to draw: with the catalog's fragments, each use is its fragment's body (SPEC §10.7). A
+ * document the core cannot read is drawn as written, as the rest of this file draws it.
+ */
+export function drawnRoot(document: unknown, catalog: Catalog): unknown {
+  const root = isRecord(document) ? document["root"] : undefined;
+  if (Object.keys(catalog.fragments ?? {}).length === 0) return root;
+  try {
+    return expand(document as Document, catalog).document.root;
+  } catch {
+    return root;
+  }
+}
 
 export function expandRoot(root: unknown, catalog: Catalog, data: unknown): Inst | undefined {
   const scope: Scope = { data, vars: new Map(), suffix: "" };

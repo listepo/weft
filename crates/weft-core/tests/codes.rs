@@ -244,7 +244,35 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W509",
             json!([{"op": "insert", "parent": "main", "markup": "<stack id=\"go\"/>"}]),
         ),
+        ("W801", in_screen(r#"<use id="u" fragment="page-headr"/>"#)),
+        (
+            "W802",
+            in_screen(r#"<use id="u" fragment="page-header" title="T" subtitle="S"/>"#),
+        ),
+        fragment(
+            "W803",
+            r#"<param name="title" type="text"/><stack id="a"/>"#,
+        ),
+        fragment("W804", r#"<stack id="a"><outlet name="nope"/></stack>"#),
+        ("W805", in_screen(r#"<use id="u" fragment="loop"/>"#)),
+        (
+            "W806",
+            in_screen(
+                &(0..100)
+                    .map(|i| format!(r#"<use id="u{i}" fragment="wide"/>"#))
+                    .collect::<String>(),
+            ),
+        ),
+        fragment(
+            "W807",
+            r#"<param name="back" type="action"/><text id="a" text="{$back}"/>"#,
+        ),
     ]
+}
+
+fn fragment(code: &'static str, body: &str) -> (&'static str, Case) {
+    let markup = format!("<fragment weft=\"0.2\">{body}</fragment>");
+    (code, Case::Markup(markup))
 }
 
 fn run(case: &Case) -> Vec<&'static str> {
@@ -343,7 +371,7 @@ fn severities_are_errors_except_the_mode_codes_and_the_import_warning() {
     for code in Code::ALL {
         let (lenient, strict) = (code.severity(Mode::Lenient), code.severity(Mode::Strict));
         match code.as_str() {
-            "W401" | "W402" | "W403" => {
+            "W401" | "W402" | "W403" | "W801" => {
                 assert_eq!((lenient, strict), (Severity::Warning, Severity::Error));
             }
             "W602" | "W702" | "W710" | "W714" => {

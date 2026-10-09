@@ -74,7 +74,23 @@ const shop = (variants: string[]) => ({
   },
 });
 
+/** Fragment files (SPEC §10.7): a header, a page that uses it, and broken ones. */
+const header =
+  '<fragment label="Page header" weft="0.2"><param name="title" type="string" required="true"/>' +
+  '<param name="back" type="action"/><stack id="bar" direction="row">' +
+  '<button id="back" on-press="{$back}">Back</button>' +
+  '<heading id="title" level="1" text="{$title}"/></stack></fragment>';
+
 export const sharedFiles: Record<string, string> = {
+  "fragments/header.weft": header,
+  "fragments/page.weft":
+    '<fragment weft="0.2"><use id="top" fragment="page-header" title="Shop"/><text id="t">Hi</text></fragment>',
+  "fragments/loop.weft":
+    '<fragment weft="0.2"><stack id="s"><use id="again" fragment="loop"/></stack></fragment>',
+  "fragments/broken.weft":
+    '<fragment weft="0.2"><stack id="a"><outlet name="nope"/></stack></fragment>',
+  "fragments/screen.weft": '<screen id="s" weft="0.2"><text id="t">x</text></screen>',
+  "fragments/bad.weft": "<fragment><",
   "tokens/base.tokens.json": text(base),
   "tokens/brand.tokens.json": text(brand),
   "tokens/list.tokens.json": "[1, 2]",
@@ -220,12 +236,14 @@ export const projectCases: Record<string, ProjectCase> = {
         "x-acme-map": rating,
         each: rating,
         slot: rating,
+        use: rating,
+        outlet: rating,
         Rating: rating,
         ["__proto__"]: rating,
         "2": rating,
       }),
     },
-    codes: ["W706", "W706", "W706", "W706", "W706", "W706"],
+    codes: ["W706", "W706", "W706", "W706", "W706", "W706", "W706", "W706"],
   },
   "a new kind without a role": {
     project: project({ catalog: "c.json" }),
@@ -459,6 +477,45 @@ export const projectCases: Record<string, ProjectCase> = {
   "file names in tool sections follow the project rules": {
     project: project({ render: { tokens: ["ok.json", "/abs.json", "a\\b.json"], data: "c:/x" } }),
     codes: ["W703", "W703", "W703"],
+  },
+  "fragments named by files, one using another": {
+    project: project({
+      fragments: { "page-header": "fragments/header.weft", page: "fragments/page.weft" },
+    }),
+    codes: [],
+  },
+  "fragments that are not an object": { project: project({ fragments: [] }), codes: ["W701"] },
+  "fragments with a bad name, a non-string, a bad file name and a missing file": {
+    project: project({
+      fragments: { Bad: "fragments/header.weft", a: 1, b: "../x.weft", c: "fragments/none.weft" },
+    }),
+    codes: ["W701", "W701", "W703", "W704"],
+  },
+  "fragment markup problems keep their codes": {
+    project: project({
+      fragments: {
+        bad: "fragments/bad.weft",
+        broken: "fragments/broken.weft",
+        screen: "fragments/screen.weft",
+      },
+    }),
+    codes: ["W110", "W101", "W804", "W201"],
+  },
+  "a fragment that uses itself": {
+    project: project({ fragments: { loop: "fragments/loop.weft" } }),
+    codes: ["W805"],
+  },
+  "a catalog file with fragments": {
+    project: project({ catalog: "bad.json" }),
+    files: {
+      "bad.json": text({ weft: "0.1", name: "a", version: "1.0.0", components: {}, fragments: {} }),
+    },
+    codes: ["W706"],
+  },
+  "content: fragments as markup": {
+    project: project({ fragments: { "page-header": header } }),
+    content: true,
+    codes: [],
   },
   "content: tool settings point below the argument": {
     project: project({ validate: { mode: 1 } }),

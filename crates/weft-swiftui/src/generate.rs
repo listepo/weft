@@ -83,6 +83,9 @@ pub fn generate(
     if has_errors(&diagnostics) {
         return Err(GenerateError::Invalid(diagnostics));
     }
+    // A use means its fragment's body (SPEC §10.7); validation reported any cycle or excess.
+    let expanded = weft_core::expand(document, options.catalog).document;
+    let document = &expanded;
     let mut problems = vec![];
     check_extensions(&document.root, "", &mut problems);
     if !problems.is_empty() {

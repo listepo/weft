@@ -7,6 +7,7 @@ use serde_json::Value as Json;
 
 use crate::canonical::canonicalize;
 use crate::diagnostics::{Code, Diagnostic, Mode, did_you_mean, has_errors, one_of, quote};
+use crate::fragment::{FRAGMENT, USE};
 use crate::model::{Catalog, Child, Content, Document, Node, Value};
 use crate::parse::parse_fragment;
 use crate::rules::{EACH, is_name};
@@ -309,13 +310,47 @@ fn free_id(id: &str, taken: &IndexSet<String>) -> String {
     format!("{id}-{n}")
 }
 
+/// The fragment used by the document whose body has `id`, given locally or as an instance path
+/// (SPEC §10.7): patches never reach into a fragment, so the hint names the file to edit.
+fn fragment_holding(top: &Node, id: &str, catalog: &Catalog) -> Option<String> {
+    if catalog.fragments.is_empty() {
+        return None;
+    }
+    let local = id.rsplit('/').next().unwrap_or(id);
+    let mut used = IndexSet::new();
+    uses(top, &mut used);
+    used.into_iter().find(|name| {
+        catalog
+            .fragments
+            .get(name)
+            .is_some_and(|f| all_ids(&f.document.root).contains(local))
+    })
+}
+
+fn uses(top: &Node, into: &mut IndexSet<String>) {
+    if let (USE, Some(Value::String(name))) = (top.kind.as_str(), top.props.get(FRAGMENT)) {
+        into.insert(name.clone());
+    }
+    for (_, list) in child_lists(top) {
+        for child in list {
+            if let Child::Node(n) = child {
+                uses(n, into);
+            }
+        }
+    }
+}
+
 type Outcome = Result<(), Vec<Diagnostic>>;
 
 fn apply_one(root: &mut Node, patch: &Patch, i: usize, options: &ApplyOptions<'_>) -> Outcome {
     let at = |field: &str| format!("#/patches/{i}/{field}");
     let find_or_fail = |root: &Node, id: &str, field: &str| -> Result<Loc, Vec<Diagnostic>> {
         find(root, id).ok_or_else(|| {
-            let hint = did_you_mean(id, all_ids(root))
+            let hint = fragment_holding(root, id, options.catalog)
+                .map(|name| {
+                    format!("{} is inside fragment \"{name}\"; edit the fragment, or set a parameter of its <use>", quote(id))
+                })
+                .or_else(|| did_you_mean(id, all_ids(root)))
                 .unwrap_or_else(|| "copy an id from the document".to_owned());
             vec![
                 Diagnostic::new(
@@ -583,7 +618,7 @@ fn declared_slots(node: &Node, catalog: &Catalog) -> Option<Vec<String>> {
     if node.kind == EACH {
         return Some(vec![]);
     }
-    let component = catalog.components.get(&node.kind)?;
+    let component = catalog.def_of(node)?;
     Some(
         component
             .slots

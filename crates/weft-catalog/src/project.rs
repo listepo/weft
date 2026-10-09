@@ -8,29 +8,38 @@ use indexmap::IndexMap;
 use semver::{Comparator, Op, Version, VersionReq};
 use serde::Serialize;
 use serde_json::{Map as Object, Value as Json};
+use weft_core::fragment::FRAGMENT;
 use weft_core::{
-    Catalog, Code, ComponentDef, DataSchema, Diagnostic, Mode, compile_data_schema,
-    data_schema_diagnostics, did_you_mean, is_action, is_name, one_of, order_keys, parse_json,
+    Catalog, Code, ComponentDef, DataSchema, Diagnostic, Fragment, Map, Mode, ParseOptions,
+    ParseResult, compile_data_schema, data_schema_diagnostics, did_you_mean, is_action, is_name,
+    one_of, order_keys, parse, parse_json,
 };
 
 use crate::core::{CORE_CATALOG_JSON, CatalogError, core_catalog};
 use crate::diff::{ChangeLevel, diff_catalogs};
 use crate::resolver::{Env, TokenModifier, read_resolver};
 use crate::settings::{SECTIONS, sanitize};
-use crate::tokens::{Token, TokenCode, TokenProblem, load_tokens};
+use crate::tokens::{Token, TokenCode, TokenProblem, load_tokens, token_types};
 
 pub const PROJECT_FILE: &str = "weft.json";
 pub const MAX_TOKEN_FILES: usize = 64;
 pub const MAX_CATALOGS: usize = 32;
 
 /// The shared resources; the tool sections follow them (`settings::SECTIONS`).
-const RESOURCES: [&str; 5] = ["$schema", "tokens", "catalog", "actions", "data"];
+const RESOURCES: [&str; 6] = [
+    "$schema",
+    "tokens",
+    "catalog",
+    "actions",
+    "data",
+    "fragments",
+];
 /// Joined rather than replaced by an extension entry (SPEC §10.4).
 const JOINED: [&str; 4] = ["states", "events", "allowedChildren", "allowedParents"];
 /// Merged by name rather than replaced by an extension entry.
 const MERGED: [&str; 2] = ["props", "slots"];
-/// Element names with a fixed meaning in markup, which no component may take.
-const STRUCTURAL: [&str; 2] = ["each", "slot"];
+/// Element names with a fixed meaning in markup (SPEC §10.4), which no component may take.
+const STRUCTURAL: [&str; 6] = ["each", "slot", "use", "fragment", "param", "outlet"];
 const CATALOG_MEMBERS: [&str; 6] = [
     "weft",
     "name",
@@ -319,9 +328,9 @@ impl Loader<'_> {
 
     /// The JSON a member names: read from a file, or the member itself without a reader.
     fn content(&mut self, pointer: &str, value: &Json, what: &str) -> Option<Json> {
-        let Some(read) = self.options.read else {
+        if self.options.read.is_none() {
             return Some(value.clone());
-        };
+        }
         let Some(name) = value.as_str() else {
             self.wrong_type(
                 pointer.to_owned(),
@@ -330,6 +339,27 @@ impl Loader<'_> {
             );
             return None;
         };
+        let text = self.file(pointer, name)?;
+        match text.as_deref().map(parse_json) {
+            Some(Ok(json)) => Some(json),
+            _ => {
+                let message = if text.is_none() {
+                    format!("The file {} cannot be read.", quote(name))
+                } else {
+                    format!("The file {} is not JSON.", quote(name))
+                };
+                self.report(
+                    Diagnostic::new(Code::W704, pointer, message, "a readable JSON file").got(name),
+                );
+                None
+            }
+        }
+    }
+
+    /// The text of a file the project names: `None` for a name it may not use (`W703`), and
+    /// `Some(None)` for a file that cannot be read.
+    fn file(&mut self, pointer: &str, name: &str) -> Option<Option<String>> {
+        let read = self.options.read?;
         if !is_project_file_name(name) {
             self.report(
                 Diagnostic::new(
@@ -345,21 +375,88 @@ impl Loader<'_> {
             );
             return None;
         }
-        let text = read(name);
-        match text.as_deref().map(parse_json) {
-            Some(Ok(json)) => Some(json),
-            _ => {
-                let message = if text.is_none() {
-                    format!("The file {} cannot be read.", quote(name))
-                } else {
-                    format!("The file {} is not JSON.", quote(name))
-                };
-                self.report(
-                    Diagnostic::new(Code::W704, pointer, message, "a readable JSON file").got(name),
-                );
-                None
+        Some(read(name))
+    }
+
+    /// The project's `fragments` (SPEC §10.7): a name → file map, or name → markup in project
+    /// content. Each is parsed against the merged catalog with the project's tokens and actions,
+    /// and its problems point at `#/fragments/<name>`.
+    fn fragments(&mut self, member: &Json, project: &Project) -> Map<Fragment> {
+        let pointer = self.at("/fragments");
+        let Some(entries) = member.as_object() else {
+            let expected = "a JSON object of fragment names and file names";
+            let message = "\"fragments\" must map fragment names to files.".to_owned();
+            self.wrong_type(pointer, message, expected);
+            return Map::new();
+        };
+        let mut texts = Vec::new();
+        for (name, value) in entries {
+            let at = format!("{pointer}/{}", escape_pointer(name));
+            let text = match value.as_str() {
+                _ if !is_name(name) => {
+                    let message = format!("{} is not a fragment name.", quote(name));
+                    self.wrong_type(at, message, "a name such as \"page-header\"");
+                    continue;
+                }
+                None => {
+                    let message = format!("Fragment {} must be a file name.", quote(name));
+                    self.wrong_type(at, message, "a file name relative to the project");
+                    continue;
+                }
+                Some(markup) if self.options.read.is_none() => markup.to_owned(),
+                Some(file) => match self.file(&at, file) {
+                    Some(Some(text)) => text,
+                    Some(None) => {
+                        let message = format!("The file {} cannot be read.", quote(file));
+                        let d = Diagnostic::new(Code::W704, &at, message, "a readable Weft file");
+                        self.report(d.got(file));
+                        continue;
+                    }
+                    None => continue,
+                },
+            };
+            texts.push((name.clone(), at, text));
+        }
+        let types = project.tokens.as_ref().map(token_types);
+        let parse_in = |catalog: &Catalog, text: &str| -> ParseResult {
+            let options = ParseOptions {
+                catalog: Some(catalog),
+                mode: self.options.mode,
+                tokens: types.as_ref(),
+                actions: project.actions.as_deref(),
+            };
+            parse(text, &options)
+        };
+        // The parameters come first, so that uses between fragments are typed in the second pass.
+        let mut catalog = project.catalog.clone();
+        for (name, _, text) in &texts {
+            let document = parse_in(&project.catalog, text).document;
+            if let Some(document) = document.filter(|d| d.root.kind == FRAGMENT) {
+                catalog
+                    .fragments
+                    .insert(name.clone(), Fragment::new(document));
             }
         }
+        let mut out = Map::new();
+        for (name, at, text) in texts {
+            let parsed = parse_in(&catalog, &text);
+            for mut d in parsed.diagnostics {
+                d.path = format!("{at}{}", d.path.trim_start_matches('#'));
+                self.report(d);
+            }
+            match parsed.document {
+                Some(document) if document.root.kind == FRAGMENT => {
+                    out.insert(name, Fragment::new(document));
+                }
+                Some(_) => {
+                    let message = format!("Fragment {} is not a <fragment> file.", quote(&name));
+                    let d = Diagnostic::new(Code::W201, at, message, "<fragment> as the root");
+                    self.report(d);
+                }
+                None => {}
+            }
+        }
+        out
     }
 
     /// The project's `tokens`: layered token files, or a resolver document (SPEC §10.3).
@@ -880,7 +977,7 @@ impl Loader<'_> {
             if base.is_none() && (!is_name(kind) || STRUCTURAL.contains(&kind.as_str())) {
                 let d = invalid(
                     format!("The new component name {} is not allowed.", quote(kind)),
-                    "a lowercase name such as \"rating\" that is not \"each\" or \"slot\" and does not start with \"x-\"",
+                    "a lowercase name such as \"rating\" that is not a structural element (SPEC §10.4) and does not start with \"x-\"",
                 );
                 self.report(d);
                 continue;
@@ -1074,6 +1171,9 @@ pub fn load_project(
             d.path = loader.at(&format!("/data{}", &d.path[1..]));
             loader.report(d);
         }
+    }
+    if let Some(member) = members.get("fragments") {
+        project.catalog.fragments = loader.fragments(member, &project);
     }
     for section in SECTIONS {
         if let Some(member) = members.get(section.name) {

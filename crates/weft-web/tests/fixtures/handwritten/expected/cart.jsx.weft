@@ -1,4 +1,4 @@
-<screen id="screen-cart" label="Cart" weft="0.1">
+<screen id="screen-cart" label="Cart" weft="0.2">
   <heading id="heading-your-cart" level="1">Your cart</heading>
   <list id="list-1">
     <each id="each-1" as="item" in="{$.items}">

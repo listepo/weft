@@ -1,4 +1,4 @@
-<screen id="screen-sign-in" label="Sign in" weft="0.1">
+<screen id="screen-sign-in" label="Sign in" weft="0.2">
   <form id="form-1" state="idle" on-submit="auth.submit">
     <heading id="heading-sign-in" level="1">Sign in</heading>
     <stack id="stack-1" gap="{token.space.md}">

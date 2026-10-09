@@ -4,6 +4,8 @@ import { tokens } from "./catalog.ts";
 
 export const screen = (inner: string, weft = "0.1") =>
   `<screen id="s" weft="${weft}">${inner}</screen>`;
+/** A fragment file (SPEC §10.7) with the given parameters and body. */
+export const fragment = (inner: string) => `<fragment weft="0.2">${inner}</fragment>`;
 export const doc = (child: unknown) => ({
   weft: "0.1",
   root: { kind: "screen", id: "s", children: [child] },
@@ -102,6 +104,17 @@ export const cases: Record<DocumentCode, Case> = {
   W318: { markup: screen('<text id="t" grow="true">x</text>') },
   W401: { markup: screen('<fancy id="f"/>') },
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
-  W403: { markup: screen("", "0.2") },
+  W403: { markup: screen("", "0.3") },
   W404: { markup: screen("", "1.0") },
+  W801: { markup: screen('<use id="u" fragment="page-headr"/>') },
+  W802: { markup: screen('<use id="u" fragment="page-header" title="T" subtitle="S"/>') },
+  W803: { markup: fragment('<param name="title" type="text"/><stack id="a"/>') },
+  W804: { markup: fragment('<stack id="a"><outlet name="nope"/></stack>') },
+  W805: { markup: screen('<use id="u" fragment="loop"/>') },
+  W806: {
+    markup: screen(
+      Array.from({ length: 100 }, (_, i) => `<use id="u${i}" fragment="wide"/>`).join(""),
+    ),
+  },
+  W807: { markup: fragment('<param name="back" type="action"/><text id="a" text="{$back}"/>') },
 };

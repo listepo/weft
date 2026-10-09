@@ -1,5 +1,6 @@
 export * from "./model.ts";
 export { canonicalize, stringify } from "./canonical.ts";
+export { expand, type Expanded } from "./expand.ts";
 export {
   checkData,
   compileDataSchema,

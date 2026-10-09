@@ -49,6 +49,12 @@ impl Catalog {
         ))
     }
 
+    /// The document with its fragment uses expanded (SPEC §10.7), as `{document, diagnostics}`.
+    #[napi]
+    pub fn expand(&self, document: Option<String>) -> Result<String> {
+        js(api::expand_document(document.as_deref(), &self.inner))
+    }
+
     #[napi]
     pub fn apply_patches(
         &self,

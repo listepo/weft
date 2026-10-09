@@ -101,17 +101,28 @@ fn every_screen_passes_the_core_schema() {
 #[test]
 fn every_screen_passes_the_project_schema() {
     let project = common::project("examples/project");
+    // The schema admits no `<use>` (SPEC §3.1): fragment parameters are not the catalog's.
+    let (uses, plain): (Vec<_>, Vec<_>) = project_screens()
+        .into_iter()
+        .partition(|screen| screen.markup.contains("<use "));
     let screens = canonical(
         common::corpus()
             .into_iter()
             .chain(common::examples())
-            .chain(project_screens())
+            .chain(plain)
             .collect(),
         &project.catalog,
         &project.tokens,
     );
     assert!(screens.iter().any(|(name, _)| name == "project-review"));
-    assert_all_pass(&schema(&project.catalog), &screens);
+    let schema = schema(&project.catalog);
+    assert_all_pass(&schema, &screens);
+    let validator = jsonschema::validator_for(&schema).unwrap();
+    let uses = canonical(uses, &project.catalog, &project.tokens);
+    assert!(!uses.is_empty());
+    for (name, document) in &uses {
+        assert!(!validator.is_valid(document), "{name}");
+    }
 }
 
 fn base() -> Json {
@@ -340,7 +351,7 @@ const NEGATIVES: &[(&str, &str, Option<&str>, Code)] = &[
     (
         "newer format version",
         "/weft",
-        Some(r#""0.2""#),
+        Some(r#""0.3""#),
         Code::W403,
     ),
 ];

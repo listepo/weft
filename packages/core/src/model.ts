@@ -2,7 +2,7 @@
 // change them only together with the specification.
 import { z } from "zod";
 
-export const WEFT_VERSION = "0.1";
+export const WEFT_VERSION = "0.2";
 
 export const BindingSchema = z.strictObject({ bind: z.string(), not: z.literal(true).optional() });
 export const TokenRefSchema = z.strictObject({ token: z.string() });
@@ -91,6 +91,8 @@ export const CatalogSchema = z.strictObject({
   name: z.string(),
   version: z.string(),
   components: z.record(z.string(), ComponentDefSchema),
+  /** A project's fragments by name (SPEC §10.7), each a document whose root is `fragment`. */
+  fragments: z.record(z.string(), DocumentSchema).optional(),
 });
 export type Catalog = z.infer<typeof CatalogSchema>;
 

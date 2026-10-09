@@ -15,8 +15,12 @@ const PROJECT = {
   catalog: [file("catalogs/acme-ui.catalog.json"), file("catalog.json")],
   actions: (file("weft.json") as { actions: string[] }).actions,
   data: file("data.schema.json"),
+  fragments: {
+    "page-header": readFileSync(new URL("fragments/page-header.weft", dir), "utf8"),
+  },
 };
 const REVIEW = readFileSync(new URL("screens/review.weft", dir), "utf8");
+const CART = readFileSync(new URL("screens/cart.weft", dir), "utf8");
 
 type Diagnostics = { valid?: boolean; diagnostics: { code: string; path: string }[] };
 const json = (text: string | undefined) => JSON.parse(text ?? "null") as Diagnostics;
@@ -143,5 +147,46 @@ test("a project argument is size-limited and hostile content never throws", asyn
   assert.equal(proto.isError, false);
   assert.equal(json(proto.blocks[0]).diagnostics[0]?.path, "#/project/__proto__");
   assert.equal(({} as Record<string, unknown>)["actions"], undefined);
+  await close();
+});
+
+test("a shared fragment is listed, checked and rendered as its expansion", async () => {
+  const { client, close } = await connect();
+  const index = await call(client, "weft_catalog", { project: PROJECT });
+  assert.match(
+    index.blocks[0] ?? "",
+    /\nfragment page-header \| title: string \(required\), back: action$/,
+  );
+  const markup = await call(client, "weft_catalog", { kind: "page-header", project: PROJECT });
+  assert.match(markup.blocks[0] ?? "", /^<fragment label="Page header" weft="0\.2">/);
+
+  const valid = await call(client, "weft_validate", {
+    markup: CART,
+    project: PROJECT,
+    strict: true,
+  });
+  assert.deepEqual(json(valid.blocks[0]).diagnostics, []);
+  const rendered = await call(client, "weft_render", {
+    markup: CART,
+    data: { cart: { items: [], empty: true, total: "0" }, busy: false },
+    project: PROJECT,
+  });
+  assert.equal(rendered.isError, false, rendered.blocks.join("\n"));
+  assert.match(rendered.blocks[0] ?? "", /button "Back"/);
+  assert.match(rendered.blocks[0] ?? "", /heading "Cart" \[level=1\]/);
+
+  // A broken fragment is a diagnostic of the project argument, never a crash.
+  const broken = {
+    ...PROJECT,
+    fragments: { "page-header": '<fragment weft="0.2"><stack id="a"><outlet name="x"/></stack>' },
+  };
+  const result = await call(client, "weft_validate", { markup: CART, project: broken });
+  assert.equal(json(result.blocks[0]).valid, false);
+  assert.ok(
+    json(result.blocks[0]).diagnostics.some((d) =>
+      d.path.startsWith("#/project/fragments/page-header"),
+    ),
+    result.blocks.join("\n"),
+  );
   await close();
 });

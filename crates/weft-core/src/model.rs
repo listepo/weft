@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::source::Source;
 
-pub const WEFT_VERSION: &str = "0.1";
+pub const WEFT_VERSION: &str = "0.2";
 
 /// Objects keep their key order, as JavaScript objects do.
 pub type Map<V> = IndexMap<String, V>;
@@ -258,4 +258,69 @@ pub struct Catalog {
     pub name: String,
     pub version: String,
     pub components: Map<ComponentDef>,
+    /// A project's fragments (SPEC §10.7). Only the merged catalog of a project has them, so
+    /// every tool that is handed that catalog knows them; a catalog file never does.
+    #[serde(default, skip_serializing_if = "IndexMap::is_empty")]
+    pub fragments: Map<Fragment>,
+}
+
+impl Catalog {
+    /// The fragment a `<use>` names, when the catalog has it.
+    pub fn fragment_of(&self, node: &Node) -> Option<&Fragment> {
+        match node.props.get("fragment") {
+            Some(Value::String(name)) if node.kind == crate::fragment::USE => {
+                self.fragments.get(name)
+            }
+            _ => None,
+        }
+    }
+
+    /// What a node answers to: its component, or for a `<use>` its fragment's signature.
+    pub fn def_of(&self, node: &Node) -> Option<&ComponentDef> {
+        if node.kind == crate::fragment::USE {
+            self.fragment_of(node).map(|f| &f.signature)
+        } else {
+            self.components.get(&node.kind)
+        }
+    }
+}
+
+/// A fragment document with its parameters read once (SPEC §10.7). In JSON it is the document.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Fragment {
+    pub document: Document,
+    /// The parameters as the definition a `<use>` answers to: value parameters are its props
+    /// (with `fragment` itself), action parameters its events, slot parameters its slots.
+    pub signature: ComponentDef,
+}
+
+impl Fragment {
+    pub fn new(document: Document) -> Self {
+        let signature = crate::fragment::signature(&document.root);
+        Fragment {
+            document,
+            signature,
+        }
+    }
+}
+
+impl Serialize for Fragment {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        self.document.serialize(s)
+    }
+}
+
+impl<'de> Deserialize<'de> for Fragment {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let json = serde_json::Value::deserialize(d)?;
+        // A catalog is untrusted input like a document: only the shape of SPEC §3 is read.
+        if crate::validate::json_exceeds_depth(&json)
+            || !crate::shape::document_issues(&json).is_empty()
+        {
+            return Err(serde::de::Error::custom(
+                "a fragment is not a document in canonical JSON",
+            ));
+        }
+        Ok(Fragment::new(crate::shape::to_document(&json)))
+    }
 }

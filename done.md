@@ -1,5 +1,70 @@
 # Done
 
+### T31. Project file and shared resources
+
+Several `.weft` screens share one set of resources through a project file, `weft.json`, which tools find by walking up from the screen, like `tsconfig.json`. Screens themselves do not name what they use. Approved scope:
+
+- **Tokens:** one or more DTCG files, layered in order (base, then theme, then brand), the later file overriding the earlier one.
+- **Catalog:** the core catalog plus project extensions (own kinds, props and variants), declared once for every screen.
+- **Actions and data schema:** one list of action names and one description of the data model, against which every screen is validated (binding paths and their types).
+- **Fragments:** repeated blocks (header, footer, card) kept in their own files and placed in screens by reference. This is the one part that changes the format: a new element (for example `<use>`), with its rules for ids, slots, bindings and patches. Its design goes to the creator before it is built, and it lands in `AGENT-SPEC.md`, `SPEC.md`, both parsers (TypeScript and Rust) and the differential fixtures together.
+- **Tools:** the CLI, the MCP server, the renderer, the Claude Code plugin (T30) and the Figma work (T14) all read the project file, and an explicit argument still overrides it.
+
+Done when a corpus project of several screens with layered tokens, a catalog extension, an action list, a data schema and a shared fragment validates and renders through the CLI and the MCP server, the TypeScript and Rust results match, and a broken project file is reported with a diagnostic, never a crash.
+
+Execution plan (part A is built now; part B, fragments, is design only and waits for the creator):
+
+1. Spec first. `SPEC.md` gets a Project section: `weft.json` found by walking up from the screen (an explicit argument overrides it), its members (`tokens` list of DTCG files layered in order, `catalog` extension file, `actions` list, `data` schema file), paths relative to the project file and never leaving its directory, token layering (later token wins, aliases resolved after the merge, as the DTCG resolver module orders sets), the catalog extension rules (new kinds are added; an entry for a core kind merges into it; the merged catalog may only widen the core catalog by the version rules of §8, anything those rules call major is a conflict), the data schema (a JSON Schema 2020-12 subset), and new codes: `W315`/`W316` for binding paths and types against the data schema, `W7xx` for project problems. `AGENT-SPEC.md`, the MCP primer and tool descriptions follow. Sources go into `research.md`.
+2. Core, TypeScript and Rust (`packages/core/src/data.ts`, `crates/weft-core/src/data.rs`): `compileDataSchema` and `checkData(document, …)` as a separate pass, so `ValidateOptions` and `ParseOptions` keep their fields (T22 and T29 construct them); new codes in both registries.
+3. Catalog, TypeScript and Rust (`packages/catalog/src/project.ts`, `crates/weft-catalog/src/project.rs`): pure `resolveProject(content)` and `loadProject(text, read)` with an injected reader; token layering, catalog extension with conflict diagnostics, action list, data schema. Never throws or panics.
+4. File reading stays at the edges: `packages/catalog/src/node.ts` (walk up, read files) for Node tools; the Rust CLI walks up itself and gets `--project`; `render-react`'s `write-page` reads the project too. The MCP server reads no files: tools take an optional `project` argument with the contents, and `createServer` takes one from the host.
+5. Differential fixtures: data checks in the core fixture, project resolution in the catalog fixture; regenerate with `WEFT_UPDATE_FIXTURES=1`.
+6. An example project (`examples/project/`, outside `corpus/` because corpus tests read every directory there as a screen) with several screens, layered tokens, a catalog extension, actions and a data schema; CLI and MCP tests on it and on broken project files.
+7. Part B: `docs/fragments-design.md`, a proposal for `<use>` fragments, for the creator to approve.
+8. Verify with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Scope extension (creator): everything that can be configured is configurable through `weft.json`. The file becomes a config with optional sections, each with documented defaults; an explicit CLI or tool argument overrides `weft.json`, which overrides the defaults.
+
+9. Spec: `SPEC.md` §10.6 lists the sections — `validate` (`mode`), `format` (`write`), `render` (`data`, `tokens`, `outDir`), `export.<target>` and `import.<target>` (`react` and `html` today, `outDir`), `mcp` (`limits`), `plugins` (free-form, one object per plugin) — their defaults, the precedence, and how a later task adds its section (T34 SwiftUI, T35 web targets, T14 Figma: `export.swiftui`, `export.html`, `export.solid`, `export.figma` with a rem base and a token strategy, `import.figma`, `import.penpot`). An unknown key is `W702`, now always a warning; a wrong type is `W701` and the default applies.
+10. `schemas/weft.schema.json` (JSON Schema 2020-12), referenced from `$schema`; a test keeps it and the loader in step.
+11. Loader (Rust, through weft-wasm for TypeScript): the sections parsed into `Project.settings`, never throwing.
+12. Tools: the Rust CLI (`validate.mode` with `--lenient` to override, `format.write` with `--print`, `explain` reads the project's catalog), `write-page` (`render.data`, `render.tokens`), the Claude Code plugin scripts (project resources plus `render`, `export.react`, `import.html`), the MCP server (`weft-mcp --project <file>` read once at start by the host: resources, `validate.mode` as the default of `strict`, `mcp.limits`; the `project` tool argument never changes limits).
+13. `AGENTS.md`: every new tool option gets a `weft.json` key in the same change.
+14. Rebuild `plugins/claude-code/dist`, merge `main`, full check.
+
+Progress: part A and steps 9–14 are done (the TypeScript side runs on the Rust core through weft-wasm since T22). The creator approved `docs/fragments-design.md` with its recommendations (a name → file map, braced `on-*` action parameters, named slots only, 10,000 expanded elements, format 0.2). Part B was built in four subtasks: T31.1 (fragment files), T31.2 (uses and patches), T31.3 (expansion and renderers) and T31.4 (project, tools and example), all done.
+
+Part B build plan (fragments):
+
+- The project's merged catalog carries the fragments (`Catalog.fragments`, name → fragment document in canonical JSON), so every tool that takes the project's catalog (parse, validate, patch, render, the WebAssembly `Catalog` object) knows them without new option fields. A catalog file of §10.4 with `fragments` is `W706`.
+- A fragment's parameters become a component definition of its own (value parameters as props, action parameters as events, slot parameters as slots), so `<use>` literals are typed, and use sites checked, by the code that types and checks components.
+- Format version: T31.1 moves `weft` to 0.2 with the same edits T39 makes for context, which shares that 0.2 (`docs/context-design.md`, version bundling); whichever lands second keeps one bump.
+
+Each subtask gets one pull request, verified with `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 5
+
+### T31.4. Fragments: project, tools and example
+
+The `fragments` member of `weft.json` (SPEC §10.2, §10.7) maps names to fragment files, or to markup in project content. The loader (`crates/weft-catalog/src/project.rs`) reports a member that is not an object, a bad name or a non-string as `W701`, a bad file name as `W703`, an unreadable file as `W704`, and a file whose root is not `<fragment>` as `W201`. It parses each fragment against the merged catalog with the project's tokens and actions and with the other fragments (two passes, so uses between fragments are typed). Markup problems keep their codes and positions and point at `#/fragments/<name>`, and the CLI shows them in the fragment's file. The merged catalog carries the fragments, so the CLI, the MCP server and `write-page` validate and render uses. A catalog file with `fragments` is `W706`. `schemas/weft.schema.json` has the member. `weft_catalog` lists fragments with their parameters and gives a fragment's markup by name, and the primer says how to place one. `examples/project/` has a `page-header` fragment used by the cart and order screens, with CLI and MCP tests on it and on broken fragment files. The project differential compares the loaded fragments.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 3 · Files: `SPEC.md`, `AGENT-SPEC.md`, `schemas/weft.schema.json`, `crates/weft-catalog/src/project.rs`, `crates/weft-cli/src/main.rs`, `packages/mcp/src/{tools/catalog.ts,primer.ts,project.ts}`, `examples/project/`
+
+### T31.3. Fragments: expansion and renderers
+
+`expand` in the core (SPEC §10.7): parameter reads replaced by use values (a negated read toggles a binding's negation and flips a boolean literal; an absent value takes the default or leaves the attribute out), outlets by slot content expanded in the use's context at the outlet's depth, ids by instance paths (`header/title`), references to body ids followed into instance paths, and body loop variables renamed when they would capture a use-site name. A cycle (`W805`) expands to nothing, and an expansion past 10,000 elements or 256 levels (`W806`, a use counting as a level) keeps only the root; validation reports both at the use that leads to them. Exported through `weft-binding`, `weft-wasm`, `weft-node` and `@weft/core` (`expand`). The reference renderer (`@weft/render-react`), the static HTML page, the React, SolidJS and Lit components and the SwiftUI and Slint generators draw the expansion; Slint names an element by its instance path with `--` for `/`. A screen with nested uses, in a loop and in a slot, has the accessibility tree and the rendered markup of its hand-expanded copy.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 4 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-core/src/{expand.rs,validate.rs,diagnostics.rs}`, `crates/weft-binding/src/api.rs`, `crates/{weft-wasm,weft-node}/src/lib.rs`, `crates/weft-web/src/{html.rs,jsx/mod.rs}`, `crates/weft-slint/src/{generate.rs,names.rs}`, `crates/weft-swiftui/src/generate.rs`, `packages/core/src/expand.ts`, `packages/render-react/src/{expand.ts,render.ts,aria.ts}`
+
+### T31.2. Fragments: uses and patches
+
+`<use id fragment …>` places a fragment (SPEC §10.7). The project's merged catalog carries the fragments (`Catalog.fragments`, name → fragment document, in the Rust and TypeScript models), and each fragment's parameters form a component definition of its own: value parameters as props, action parameters as events, slot parameters as slots. So the parser types `<use>` literals and the validator checks use sites with the code that checks components: `W801` (no such fragment, mode severity, nearest-name hint), `W802` (an undeclared attribute, action or slot), `W205`, value types and ranges, and the body's top-level elements against where the use stands (`W302`, `W303`, `W318`). Patches set parameters on the `<use>`, fill its slot parameters (`W504` for an undeclared one), and an id inside a fragment body is `W502` with a hint naming the fragment. `AGENT-SPEC.md` shows a use; the differential catalog has a fragment.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 4 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-core/src/{model.rs,fragment.rs,validate.rs,validate/uses.rs,parse.rs,patch.rs}`, `packages/core/src/model.ts`, `crates/weft-core/tests/fragments.rs`
+Check: `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+### T31.1. Fragments: fragment files
+
+A fragment file (SPEC §10.7) is a document whose root is `<fragment label weft>`: leading `<param>` declarations (`string`, `number`, `boolean`, `enum`, `token`, `action`, `slot`, with the vocabulary of a catalog prop), then a body as it could stand in a screen, with `<outlet name>` for slot parameters. The parser types `<param>` literals (`min`, `max`, `required`, `integer`, and `default` by the parameter's type); the validator checks a fragment on its own: declarations (`W803`), outlets (`W804`), and every parameter read as a value of its declared type (`W204`, `W203`, `W307`, `W218`, `W807` for an action or slot parameter in a prop or a read past the name), with `on-press="{$back}"` forwarding an action parameter and `W305` for an unknown one. `use`, `fragment`, `param` and `outlet` are reserved kind names in catalogs (`W706`). The format moves to `weft` 0.2. `AGENT-SPEC.md` gains a fragments section and repair rows.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 4 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-core/src/{fragment.rs,validate.rs,validate/fragments.rs,parse.rs,diagnostics.rs}`, `crates/weft-catalog/src/project.rs`, `crates/weft-core/tests/{fragments.rs,codes.rs}`
+Check: `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
 ### T28. Binding readback against inverted conditions
 
 In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in while `$.busy` is true. It changed `{!$.email}` to `{!$.busy}` and kept the `!`. The markup is valid, but the condition is inverted. The HTML and JSX baselines got it right. Validation cannot see intent. The model can, if the core tells it in plain words what a binding means. Depends on T20.

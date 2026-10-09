@@ -38,6 +38,11 @@ impl Catalog {
         )?)
     }
 
+    /// The document with its fragment uses expanded (SPEC §10.7), as `{document, diagnostics}`.
+    pub fn expand(&self, document: Option<String>) -> Result<String, JsError> {
+        Ok(api::expand_document(document.as_deref(), &self.0)?)
+    }
+
     #[wasm_bindgen(js_name = applyPatches)]
     pub fn apply_patches(
         &self,

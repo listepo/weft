@@ -15,6 +15,16 @@ pub struct Screen {
     pub markup: String,
 }
 
+/// The markup as an importer writes it back: importers stamp the current version, while the
+/// corpus stays at 0.1, which a current reader reads unchanged.
+pub fn as_imported(markup: &str) -> String {
+    markup.replacen(
+        "weft=\"0.1\"",
+        &format!("weft=\"{}\"", weft_core::WEFT_VERSION),
+        1,
+    )
+}
+
 pub fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
 }

@@ -1,5 +1,5 @@
-<screen id="order" label="Order" weft="0.1">
-  <heading id="title" level="1">Your order</heading>
+<screen id="order" label="Order" weft="0.2">
+  <use id="header" fragment="page-header" title="Your order" on-back="nav.back"/>
   <each id="lines" as="line" in="{$.cart.items}">
     <acme-card id="line" elevated="true">
       <text id="line-name" text="{$line.name}"/>
