@@ -73,6 +73,10 @@ struct WebExport {
     /// Leave the source comment out, whatever the project says.
     #[arg(long)]
     no_source: bool,
+    /// Whether the source comment carries the screen's context (default: the project's
+    /// `export.<target>.context`, else `strip` for HTML and `keep` for the others).
+    #[arg(long, value_enum)]
+    context: Option<convert::ExportContext>,
     /// Overwrite the output file when it already exists.
     #[arg(long)]
     force: bool,
@@ -117,6 +121,10 @@ struct WebImport {
     /// `import.<target>.outDir`, else print).
     #[arg(long)]
     out_dir: Option<PathBuf>,
+    /// Whether context read back from a generated file enters the document (default: the
+    /// project's `import.<target>.context`, else `keep`).
+    #[arg(long, value_enum)]
+    context: Option<convert::ImportContext>,
     /// Overwrite the output file when it already exists.
     #[arg(long)]
     force: bool,
@@ -253,6 +261,10 @@ enum Command {
         /// `export.slint.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Whether the source comment carries the screen's context (default: the project's
+        /// `export.slint.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ExportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -269,6 +281,10 @@ enum Command {
         /// `import.slint.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Whether context read back from the source comment enters the document (default: the
+        /// project's `import.slint.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ImportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -820,6 +836,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             name,
             project,
             out_dir,
+            context,
             force,
         } => slint::export(
             slint::ExportArgs {
@@ -829,6 +846,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 name,
                 project,
                 out_dir,
+                context: context.map(|c| c == convert::ExportContext::Keep),
                 force,
             },
             out,
@@ -838,6 +856,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             catalog,
             project,
             out_dir,
+            context,
             force,
         } => slint::import(
             slint::ImportArgs {
@@ -845,6 +864,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 catalog,
                 project,
                 out_dir,
+                context: context.map(|c| c == convert::ImportContext::Keep),
                 force,
             },
             out,
@@ -945,6 +965,7 @@ fn web_export(
             javascript,
             source: common.source,
             no_source: common.no_source,
+            context: common.context.map(|c| c == convert::ExportContext::Keep),
             data,
         },
         out,
@@ -960,6 +981,7 @@ fn web_import(target: web::Target, args: WebImport, out: &mut dyn Write) -> Resu
             tokens: args.tokens,
             project: args.project,
             out_dir: args.out_dir,
+            context: args.context.map(|c| c == convert::ImportContext::Keep),
             force: args.force,
         },
         out,

@@ -4,7 +4,8 @@
 //     [--project weft.json | --no-project]
 // The project above the screen (SPEC §10.1) supplies the catalog, tokens, actions and data schema
 // the screen is checked against, and `export.react` (SPEC §10.6) where the file goes (`outDir`),
-// whether it is TSX (`typescript`) and whether it keeps its source comment (`source`).
+// whether it is TSX (`typescript`), whether it keeps its source comment (`source`) and whether
+// that comment carries the screen's context (`context`, `keep` by default).
 import { parseArgs } from "node:util";
 import { LIMITS } from "@weft/mcp";
 import { toJsx } from "@weft/to-jsx";
@@ -50,7 +51,9 @@ export function main(argv: readonly string[], io: Io = defaultIo): number {
   const typescript = settings?.typescript === true;
   let jsx: string;
   try {
-    jsx = toJsx(document, {
+    // An empty block is left out of the canonical source, so `strip` needs no other change.
+    const screen = settings?.context === "strip" ? { ...document, context: [] } : document;
+    jsx = toJsx(screen, {
       catalog: context.catalog,
       typescript,
       source: settings?.source === true,

@@ -152,6 +152,36 @@ pub fn switch_or(
         .unwrap_or(default)
 }
 
+/// `--context` of a generator: whether the output carries the screen's context (SPEC §2.3).
+#[derive(Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
+pub enum ExportContext {
+    Keep,
+    Strip,
+}
+
+/// `--context` of an importer: whether context read back from the source enters the document.
+#[derive(Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
+pub enum ImportContext {
+    Keep,
+    Drop,
+}
+
+/// Whether context is kept: the flag, else the project's `<section>.<target>.context`, else
+/// `default`. Only `"keep"` keeps: the loader already reported any other value (`W701`).
+pub fn keeps_context(
+    flag: Option<bool>,
+    project: Option<&Project>,
+    section: &str,
+    target: &str,
+    default: bool,
+) -> bool {
+    flag.or_else(|| {
+        let value = project?.setting(&[section, target, "context"])?.as_str()?;
+        Some(value == "keep")
+    })
+    .unwrap_or(default)
+}
+
 /// `--out-dir` (relative to the working directory), else the project's `<section>.<target>.outDir`
 /// (relative to the project file), else none: print.
 pub fn out_dir(

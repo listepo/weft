@@ -68,10 +68,13 @@ const OUT_DIR: &str = "Directory, relative to the project file, that output file
 
 const SOURCE: &str = "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.";
 const TYPESCRIPT: &str = "Write TSX with typed props instead of JSX.";
+const CONTEXT_EXPORT: &str = "Whether the source comment carries the screen's context (SPEC §2.3): `keep` or `strip`. The CLI's `--context` overrides it.";
+const KEEP_STRIP: Kind = Kind::OneOf(&["keep", "strip"]);
 
 const HTML_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
     with_default("source", SOURCE, Kind::Bool, "false"),
+    with_default("context", CONTEXT_EXPORT, KEEP_STRIP, "\"strip\""),
     setting(
         "data",
         "Sample data (a JSON file, relative to the project file) the page shows: bindings read it and `<each>` repeats over it. Default: none, the page is a template for a host to fill.",
@@ -92,8 +95,23 @@ const JSX_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
     with_default("typescript", TYPESCRIPT, Kind::Bool, "false"),
     with_default("source", SOURCE, Kind::Bool, "false"),
+    with_default("context", CONTEXT_EXPORT, KEEP_STRIP, "\"keep\""),
+];
+const SLINT_EXPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default("context", CONTEXT_EXPORT, KEEP_STRIP, "\"keep\""),
 ];
 const OUT_ONLY: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
+/// Importers that give back a generated file's source comment, and with it its context.
+const SOURCE_IMPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default(
+        "context",
+        "Whether context read back from a generated file's source comment enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team. The CLI's `--context` overrides it.",
+        Kind::OneOf(&["keep", "drop"]),
+        "\"keep\"",
+    ),
+];
 const CEM_IMPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
     setting(
@@ -149,7 +167,7 @@ const EXPORT: &[Setting] = &[
     setting(
         "slint",
         "Slint components for Slint 1.x (`weft slint`).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SLINT_EXPORT),
     ),
     setting(
         "schema",
@@ -161,17 +179,17 @@ const IMPORT: &[Setting] = &[
     setting(
         "html",
         "HTML pages (`weft import-html`, @weft/from-aria).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SOURCE_IMPORT),
     ),
     setting(
         "react",
         "React components, .jsx or .tsx (`weft import-react`).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SOURCE_IMPORT),
     ),
     setting(
         "solid",
         "SolidJS components, .jsx or .tsx (`weft import-solid`).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SOURCE_IMPORT),
     ),
     setting(
         "swiftui",
@@ -186,7 +204,7 @@ const IMPORT: &[Setting] = &[
     setting(
         "slint",
         "Slint source files (`weft import-slint`).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SOURCE_IMPORT),
     ),
     setting(
         "cem",

@@ -141,6 +141,14 @@
               "description": "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.",
               "default": false
             },
+            "context": {
+              "enum": [
+                "keep",
+                "strip"
+              ],
+              "description": "Whether the source comment carries the screen's context (SPEC §2.3): `keep` or `strip`. The CLI's `--context` overrides it.",
+              "default": "strip"
+            },
             "data": {
               "$ref": "#/$defs/fileName",
               "description": "Sample data (a JSON file, relative to the project file) the page shows: bindings read it and `<each>` repeats over it. Default: none, the page is a template for a host to fill."
@@ -165,6 +173,14 @@
               "type": "boolean",
               "description": "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.",
               "default": false
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "strip"
+              ],
+              "description": "Whether the source comment carries the screen's context (SPEC §2.3): `keep` or `strip`. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,
@@ -186,6 +202,14 @@
               "type": "boolean",
               "description": "Keep the canonical screen in a leading comment, so the importer gives it back exactly instead of reading the code by convention.",
               "default": false
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "strip"
+              ],
+              "description": "Whether the source comment carries the screen's context (SPEC §2.3): `keep` or `strip`. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,
@@ -250,6 +274,14 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "strip"
+              ],
+              "description": "Whether the source comment carries the screen's context (SPEC §2.3): `keep` or `strip`. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,
@@ -279,6 +311,14 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "drop"
+              ],
+              "description": "Whether context read back from a generated file's source comment enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,
@@ -290,6 +330,14 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "drop"
+              ],
+              "description": "Whether context read back from a generated file's source comment enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,
@@ -301,6 +349,14 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "drop"
+              ],
+              "description": "Whether context read back from a generated file's source comment enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,
@@ -334,6 +390,14 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "drop"
+              ],
+              "description": "Whether context read back from a generated file's source comment enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,

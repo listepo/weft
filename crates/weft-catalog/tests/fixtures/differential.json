@@ -20414,7 +20414,7 @@
       "severity": "warning",
       "message": "Unknown key \"outdir\" in \"export.react\".",
       "path": "#/export/react/outdir",
-      "expected": "one of: \"outDir\", \"typescript\", \"source\"",
+      "expected": "one of: \"outDir\", \"typescript\", \"source\", \"context\"",
       "got": "outdir",
       "hint": "did you mean \"outDir\"?"
      },

@@ -361,6 +361,26 @@ describe("project settings (SPEC §10.6)", () => {
     assert.match(tsx, /typescript/);
   });
 
+  test("export.react.context decides whether the source comment carries the notes", () => {
+    for (const [context, kept] of [
+      ["keep", true],
+      ["strip", false],
+    ] as const) {
+      const { root, cart } = copy({ export: { react: { source: true, context } } });
+      const entry =
+        '<entry id="why" by="human" kind="intent" name="Ivan">Carts stay small.</entry>';
+      const text = readFileSync(cart, "utf8");
+      writeFileSync(
+        cart,
+        text.replace(/(<screen[^>]*>\n)/, `$1  <context>\n    ${entry}\n  </context>\n`),
+      );
+      const result = run(exportMain, cart);
+      assert.equal(result.code, 0, result.stderr);
+      const jsx = readFileSync(join(root, "screens", "cart.jsx"), "utf8");
+      assert.equal(jsx.includes("Carts stay small."), kept, context);
+    }
+  });
+
   test("--no-project and --project choose the project", () => {
     const { root, cart } = copy();
     // The screen uses the project's own component, unknown to the core catalog.

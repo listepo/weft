@@ -1,5 +1,11 @@
 # Done
 
+### T39.6. Context: web and Slint source comments
+
+The generated code that Weft reads back keeps the screen's context in its source comment, and a static page leaves it out by default. The `export.<target>.context` (`keep`, `strip`) and `import.<target>.context` (`keep`, `drop`) keys of `weft.json` cover React, SolidJS, HTML and Slint (SPEC §10.6, `settings.rs`, the schema), and the CLI's `--context` overrides them. Round-trip tests on a context-bearing screen outside the benchmark list.
+
+Built: the context already travelled in the canonical markup of the `weft:source` comment, so the work is the policy around it. `crates/weft-cli/src/convert.rs` resolves `--context`, then the key, then the default (`strip` for `html`, `keep` otherwise), and clears `document.context` before generating or after importing. `crates/weft-web/src/provenance.rs` now writes every `@` as `@\`, so a note cannot carry `@license` or `@preserve` into a minified bundle. Older comments still read back unchanged, because unescaping a plain `@` is a no-op. The plugins' export script honours `export.react.context`. The claimed card was split. Readable per-element comments are T39.8. SwiftUI, which has no source comment yet, is T39.9. Escaping U+2028 and U+2029 was not needed: block comments and HTML comments may hold them, and a Slint line comment ends only at `\n`.
+
 ### T39.5. Context: explain
 
 `weft explain --context` lists each element's entries after its readbacks, and the entries about the screen after the root's; `weft explain --against` always lists context changes (added, changed, removed entries), so a reviewer sees every note an edit touched. The option is also the `explain.context` key of `weft.json` (SPEC §10.6, `settings.rs`, the schema).

@@ -12,7 +12,7 @@ use weft_slint::{
     GenerateError, GenerateOptions, ImportError, ImportOptions, generate, import_slint,
 };
 
-use crate::convert::{catalog, emit, out_dir, project, strict_document, tokens};
+use crate::convert::{catalog, emit, keeps_context, out_dir, project, strict_document, tokens};
 use crate::{DIAGNOSTICS, ProjectArgs, print, read};
 
 pub struct ExportArgs {
@@ -22,6 +22,8 @@ pub struct ExportArgs {
     pub name: Option<String>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
+    /// `--context`: `Some(true)` keeps, `Some(false)` strips.
+    pub context: Option<bool>,
     pub force: bool,
 }
 
@@ -30,9 +32,12 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     let loaded = loaded.as_ref();
     let catalog = catalog(args.catalog.as_deref(), loaded)?;
     let tokens = tokens(args.tokens.as_deref(), loaded)?;
-    let Some(document) = strict_document(&args.file, &catalog)? else {
+    let Some(mut document) = strict_document(&args.file, &catalog)? else {
         return Ok(DIAGNOSTICS);
     };
+    if !keeps_context(args.context, loaded, "export", "slint", true) {
+        document.context.clear();
+    }
     let slint = match generate(
         &document,
         &GenerateOptions {
@@ -70,6 +75,8 @@ pub struct ImportArgs {
     pub catalog: Option<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
+    /// `--context`: `Some(true)` keeps, `Some(false)` drops.
+    pub context: Option<bool>,
     pub force: bool,
 }
 
@@ -82,7 +89,7 @@ pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
     // or the default tokens, are that set.
     let tokens = tokens(None, loaded)?;
     let text = read(&args.file)?;
-    let document = match import_slint(
+    let mut document = match import_slint(
         &text,
         &ImportOptions {
             catalog: &catalog,
@@ -106,6 +113,9 @@ pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
         "import",
         "slint",
     );
+    if !keeps_context(args.context, loaded, "import", "slint", true) {
+        document.context.clear();
+    }
     emit(
         &serialize(&document),
         &args.file,
