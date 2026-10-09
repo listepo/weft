@@ -826,6 +826,7 @@ Precedence: an argument given to a tool (a command-line flag, a tool argument) o
 | `import.figma.outDir` | file name | the working directory | Where the `figma-pull` script of the plugins writes `<screen id>.weft`, a frame read through the Figma REST API. |
 | `mcp.limits.markupChars`, `dataChars`, `patchesChars`, `projectChars` | whole number ≥ 1 | 200,000; 200,000; 200,000; 500,000 | Bounds, in UTF-16 code units, on the arguments of one MCP call. |
 | `mcp.limits.patches`, `diagnostics`, `inputElements` | whole number ≥ 1 | 100; 40; 20,000 | Patches per call, diagnostics listed per result, JSON values per call. |
+| `mcp.context` | `"read-write"` or `"read-only"` | `"read-write"` | Whether `weft_patch` may change a screen's context (§2.3, §7): `"read-only"` refuses every context patch with `W512`; `weft_context` still reads it. |
 | `plugins.open-design.tokensDir` | file name | next to the design system | Where the Open Design plugin's `design-md` script writes the tokens it maps from a `DESIGN.md` or `tokens.css`. |
 | `plugins.<name>` | object | — | Settings of a plugin or tool Weft does not know, under its own name. Weft checks only that each is an object. |
 

@@ -26,10 +26,10 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T31 | in progress | P1 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T32 | in progress | P2 | 2 | 85% | Claude Code / claude-sonnet-5-5 |
-| T39 | in progress | P1 | 4 | 40% | Claude Code / claude-opus-5-5 |
-| T39.4 | todo | P2 | 3 | 0% | |
-| T39.5 | todo | P2 | 3 | 0% | |
+| T39 | in progress | P1 | 4 | 55% | Claude Code / claude-opus-5-5 |
+| T39.5 | todo | P2 | 2 | 0% | |
 | T39.6 | todo | P2 | 3 | 0% | |
+| T39.7 | todo | P2 | 3 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
@@ -228,19 +228,19 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
 
-The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.6, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.6.
+The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.7, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.7.
 
-### T39.4. Context: explain, MCP and CLI
+### T39.5. Context: explain
 
-`weft explain --context` (entries after each element's readbacks) and context changes in `explain --against`; the MCP tool `weft_context` with its fixed notice, the server stamping `author: { by: "agent" }`, the `mcp.context` setting (`read-write`, `read-only`); `export.<target>.context` and `import.<target>.context` keys in `weft.json` (SPEC §10.6, `settings.rs`, the schema) and the CLI `--context keep|strip`.
+`weft explain --context` lists each element's entries after its readbacks, and the entries about the screen after the root's; `weft explain --against` always lists context changes (added, changed, removed entries), so a reviewer sees every note an edit touched. The option is also the `explain.context` key of `weft.json` (SPEC §10.6, `settings.rs`, the schema).
 
-### T39.5. Context: code targets
+### T39.6. Context: code targets
 
-React and SolidJS keep context through the `weft:source` comment, with `@` escaped so no note can carry a minifier keep marker, and a readable comment above each element that entries name; static HTML strips context by default (`export.html.context`); SwiftUI keeps it through its source comment. Round-trip tests on a context-bearing example screen outside the benchmark list.
+React and SolidJS keep context through the `weft:source` comment, with `@` escaped so no note can carry a minifier keep marker, and a readable comment above each element that entries name; static HTML strips context by default; SwiftUI keeps it through its source comment. The `export.<target>.context` (`keep`, `strip`) and `import.<target>.context` (`keep`, `drop`) keys in `weft.json` (SPEC §10.6, `settings.rs`, the schema) and the CLI `--context`. Round-trip tests on a context-bearing example screen outside the benchmark list.
 
-### T39.6. Context: Figma and Penpot
+### T39.7. Context: Figma and Penpot
 
-The canonical entries in plugin data (`weft.context`) on the root frame, read back with entries about removed layers dropped as a `context` loss (SPEC §9 loss row); the plugin panel lists the selected layer's entries read-only.
+The canonical entries in plugin data (`weft.context`) on the root frame, read back with entries about removed layers dropped as a `context` loss (SPEC §9 loss row), and `import.figma.context`; the plugin panel lists the selected layer's entries read-only.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 

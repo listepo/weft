@@ -62,6 +62,7 @@ export async function startServer(args: string[], cwd: string): Promise<McpSessi
 export const WEFT_TOOLS = [
   "weft_capabilities",
   "weft_catalog",
+  "weft_context",
   "weft_format",
   "weft_patch",
   "weft_primer",

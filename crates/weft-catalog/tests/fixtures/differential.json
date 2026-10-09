@@ -20431,7 +20431,7 @@
       "severity": "warning",
       "message": "Unknown key \"limit\" in \"mcp\".",
       "path": "#/mcp/limit",
-      "expected": "one of: \"limits\"",
+      "expected": "one of: \"limits\", \"context\"",
       "got": "limit",
       "hint": "did you mean \"limits\"?"
      }

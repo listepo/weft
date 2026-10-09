@@ -21,15 +21,23 @@ export function contextOf(project: Project): Context {
 
 /**
  * What a project file sets for a server started with it (`weft-mcp --project`): its resources
- * and the `validate.mode` and `mcp.limits` settings (SPEC §10.6).
+ * and the `validate.mode`, `mcp.limits` and `mcp.context` settings (SPEC §10.6).
  */
 export function hostOptions(project: Project): {
   context: Context;
-  settings: { mode?: ServerSettings["mode"] | undefined; limits?: Partial<Limits> | undefined };
+  settings: {
+    mode?: ServerSettings["mode"] | undefined;
+    limits?: Partial<Limits> | undefined;
+    context?: ServerSettings["context"] | undefined;
+  };
 } {
   return {
     context: contextOf(project),
-    settings: { mode: project.settings.validate?.mode, limits: project.settings.mcp?.limits },
+    settings: {
+      mode: project.settings.validate?.mode,
+      limits: project.settings.mcp?.limits,
+      context: project.settings.mcp?.context,
+    },
   };
 }
 

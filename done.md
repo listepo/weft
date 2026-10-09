@@ -1,5 +1,11 @@
 # Done
 
+### T39.4. Context: MCP
+
+The MCP tool `weft_context` returns a screen's entries under its fixed notice; `weft_patch` takes the four context operations and stamps `author: { by: "agent" }`, so the agent channel cannot write a `human` entry (`W512`); the `mcp.context` setting (`read-write`, `read-only`) of `weft.json` (SPEC §10.6, `settings.rs`, the schema) reaches the server through `weft-mcp --project` and `createServer`.
+
+Built: `packages/mcp/src/tools/context.ts` reads the markup leniently, filters by `for` (`""` for entries about the screen), `kind` and `status`, and cuts the result at the format's limits (100 entries, 500 characters each, 16,000 in all) with an `omitted` count, since a lenient read only warns about an oversized block. `weft_patch`'s description lists the context forms, or says the context is read-only. The primer, `docs/mcp.md`, the package README and the plugins' tool lists name the new tool. The explain and CLI parts of the old T39.4 card moved to T39.5 (explain) and T39.6 (the export and import keys and `--context`), which also renumbered code targets to T39.6 and Figma and Penpot to T39.7.
+
 ### T39.3. Context: patch operations
 
 `add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.

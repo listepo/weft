@@ -124,7 +124,7 @@ export type Settings = {
     a2ui?: { outDir?: string };
     figma?: { outDir?: string };
   };
-  mcp?: { limits?: Partial<Record<LimitName, number>> };
+  mcp?: { limits?: Partial<Record<LimitName, number>>; context?: "read-write" | "read-only" };
   plugins?: Record<string, Record<string, unknown>>;
 };
 

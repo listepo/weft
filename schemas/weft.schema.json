@@ -422,6 +422,14 @@
           },
           "additionalProperties": false,
           "description": "Bounds on what one tool call may ask of the server."
+        },
+        "context": {
+          "enum": [
+            "read-write",
+            "read-only"
+          ],
+          "description": "Whether weft_patch may change a screen's context (SPEC §2.3): \"read-only\" refuses every context patch (W512); weft_context still reads it.",
+          "default": "read-write"
         }
       },
       "additionalProperties": false,

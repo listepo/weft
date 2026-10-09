@@ -3,7 +3,7 @@
 // may write to it.
 //   weft-mcp [--project weft.json]
 // With a project file its catalog, tokens, actions and data schema are the server's, and its
-// `validate.mode` and `mcp.limits` settings apply (SPEC §10.6). The host names the file; the
+// `validate.mode`, `mcp.limits` and `mcp.context` settings apply (SPEC §10.6). The host names the file; the
 // server never looks for one, because it has no screen to look from.
 import { parseArgs } from "node:util";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";

@@ -313,11 +313,19 @@ pub(crate) const SECTIONS: &[Setting] = &[
     setting(
         "mcp",
         "The MCP server, when the host starts it with this project file. A project passed as a tool argument never changes these.",
-        Kind::Section(&[setting(
-            "limits",
-            "Bounds on what one tool call may ask of the server.",
-            Kind::Section(LIMITS),
-        )]),
+        Kind::Section(&[
+            setting(
+                "limits",
+                "Bounds on what one tool call may ask of the server.",
+                Kind::Section(LIMITS),
+            ),
+            with_default(
+                "context",
+                "Whether weft_patch may change a screen's context (SPEC §2.3): \"read-only\" refuses every context patch (W512); weft_context still reads it.",
+                Kind::OneOf(&["read-write", "read-only"]),
+                "\"read-write\"",
+            ),
+        ]),
     ),
     setting(
         "plugins",

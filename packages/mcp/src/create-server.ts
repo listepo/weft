@@ -7,6 +7,7 @@ export type ServerOptions = {
   mode?: ServerSettings["mode"] | undefined;
   /** Limits to change; the rest keep their defaults (`LIMITS`). */
   limits?: Partial<Limits> | undefined;
+  context?: ServerSettings["context"] | undefined;
 };
 
 export function createServer(
@@ -17,13 +18,14 @@ export function createServer(
   const settings: ServerSettings = {
     limits: { ...LIMITS, ...options.limits },
     mode: options.mode ?? "lenient",
+    context: options.context ?? "read-write",
   };
   const server = new McpServer(
     { name: "weft", version: "0.1.0" },
     {
       maxToolInputElements: settings.limits.inputElements,
       instructions:
-        "Weft is a UI description format. Call weft_primer first, then weft_capabilities to see which catalogs, tokens and actions this host accepts, and use weft_catalog, weft_validate, weft_format, weft_patch and weft_render. The server only works on markup you pass in; it reads no files.",
+        "Weft is a UI description format. Call weft_primer first, then weft_capabilities to see which catalogs, tokens and actions this host accepts, and use weft_catalog, weft_validate, weft_format, weft_patch, weft_render and weft_context. The server only works on markup you pass in; it reads no files.",
     },
   );
   for (const register of TOOLS) register(server, context, settings);

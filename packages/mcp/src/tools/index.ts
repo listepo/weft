@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Context, ServerSettings } from "../context.ts";
 import { registerCapabilities } from "./capabilities.ts";
 import { registerCatalog } from "./catalog.ts";
+import { registerContext } from "./context.ts";
 import { registerFormat } from "./format.ts";
 import { registerPatch } from "./patch.ts";
 import { registerPrimer } from "./primer.ts";
@@ -23,4 +24,5 @@ export const TOOLS: readonly ((
   registerFormat,
   registerPatch,
   registerRender,
+  registerContext,
 ];
