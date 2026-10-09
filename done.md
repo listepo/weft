@@ -65,6 +65,57 @@ A fragment file (SPEC §10.7) is a document whose root is `<fragment label weft>
 Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 4 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-core/src/{fragment.rs,validate.rs,validate/fragments.rs,parse.rs,diagnostics.rs}`, `crates/weft-catalog/src/project.rs`, `crates/weft-core/tests/{fragments.rs,codes.rs}`
 Check: `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
 
+### T28. Binding readback against inverted conditions
+
+In the Bonsai edit smoke run (`login.e2`) the model was asked to disable Sign in while `$.busy` is true. It changed `{!$.email}` to `{!$.busy}` and kept the `!`. The markup is valid, but the condition is inverted. The HTML and JSX baselines got it right. Validation cannot see intent. The model can, if the core tells it in plain words what a binding means. Depends on T20.
+
+1. `weft-core`: `explain(document)` reads every binding as a sentence, e.g. `button#submit disabled: while $.busy is false`. `explain_changes(before, after)` lists only the props, events and bindings that changed.
+2. CLI: `weft explain <file> [--against <old-file>]`.
+3. `AGENT-SPEC.md` repair loop: before answering, read back the changed bindings and compare them with the instruction.
+4. Benchmark: an optional readback turn after a valid edit, the same for every format. This is a method change, recorded in `test.md`. Rerun `login` on Bonsai with 3 samples.
+
+Done when the tests for `explain` pass, the CLI prints readbacks, and the rerun is in the `test.md` history.
+
+Execution plan (steps 1–3 are done; step 4 is the benchmark turn, now in the harness, and the live rerun still needs a local LM Studio model):
+
+- Core, new module `crates/weft-core/src/explain.rs` with exports in `lib.rs` only, so no other core module changes. `explain(document, catalog)` returns one `Readback { path, target, name, sentence }` per bound or token prop, event and `<each>`; `explain_changes(before, after, catalog)` returns `Change { target, name, kind, before, after }` for every prop (literals included), event and loop that was added, removed or changed, matching elements by id. Elements are named `kind#id`, or by their SPEC §6.1 diagnostic path when they have no valid id (reusing `path_segment`), so slots appear as `slot[name]`. Sentences never hide a negation: a negated binding reads `true while $.busy is falsy (NOT $.busy)`, a plain binding on a boolean prop `true while $.busy is truthy`, other bindings `reads $.x` with `; user input writes $.x` on writable props, tokens `design token space.md`, events `runs action auth.submit`, loops `repeats its children once per item of $.todos, as $todo`. Pure, no I/O; unit tests named as claims in the module.
+- CLI: `weft explain <file> [--against <old-file>] [--catalog <file>]` in `crates/weft-cli`, one line per readback or change on stdout; diagnostics with errors in either file print as in `validate` and exit 1; usage and I/O failures exit 2. End-to-end cases in `crates/weft-cli/tests/cli.rs`, including the `login.e2` inversion.
+- `AGENT-SPEC.md` §4: read back the changed bindings before answering (`weft explain --against` when a tool is available, otherwise read `!` as NOT) and compare each with the instruction; one checklist line. `bench/test/agent-spec.test.ts` must stay green.
+- Verify: `cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all --check`, `cargo nextest run --workspace`, the binary on a corpus screen, `moon run :test root:typecheck root:lint root:rust-test root:rust-lint`.
+
+Progress: steps 1–3 are done. `explain` and `explain_changes` live in `crates/weft-core/src/explain.rs` with unit tests, `weft explain` in `crates/weft-cli` with end-to-end tests, and `AGENT-SPEC.md` §4.1 holds the readback loop. Step 4's harness is in: `bench/src/readback.ts` diffs the neutral tree, `run.ts edit --readback` sends one follow-up after a valid edit for every format, and `test.md` records the method. A mocked login.e2 inversion is covered in `bench/test/checkers.test.ts`.
+
+Result: the `login` rerun on LM Studio / prism-ml/bonsai-27b with `--readback` and 3 samples is `bench/results/edit-2026-10-09T09-08-11-689Z` and has its row in the `test.md` history. Weft: 88.9% first-try valid, 100% after repair, 88.9% success after repair, 100% success after readback. `login.e2` sample 1 repeated the inversion (`{!$.busy}`), valid markup, so the repair cycle did not fire; the readback turn corrected it. The baselines' success after readback equals their success after repair (HTML 88.9%, JSX 55.6%, A2UI 100%).
+Model: Cursor / grok-4.7 (harness), Claude Code / claude-opus-5-5 (rerun) · Status: done · Priority: P2 · Complexity: 3 · Files: `crates/weft-core/src/explain.rs`, `crates/weft-cli`, `AGENT-SPEC.md`, `bench/src/{readback,run,run-tasks}.ts`, `bench/test/checkers.test.ts`, `test.md`, `bench/results/edit-2026-10-09T09-08-11-689Z.*`
+Check: `node bench/src/run.ts edit --provider openai --model prism-ml/bonsai-27b --screens login --samples 3 --readback --concurrency 1`.
+
+### T94. Foreign stack alignment and grid child order
+
+`stackOf` in `packages/design-tool/src/foreign.ts` wrote only `direction`, `columns` and `gap`. `LayerLayout` already has `align` and `wrap`. Figma maps `counterAxisAlignItems` through `ALIGN` (`MIN` → `start`, `CENTER` → `center`, `MAX` → `end`, `BASELINE` → undefined). A foreign horizontal frame with `MIN` alignment became `<stack direction="row">`. SPEC §5.1 says a row without `align` is centered on the cross axis, so an importer must not round-trip a row's center. `wrap` was dropped the same way. Catalog `stack` has the boolean; `grid` has neither `align` nor `wrap`.
+
+**Out of scope.** Padding, fills and fonts (SPEC §9 keeps those as losses; catalog `stack` has no such props). Collapsing vectors into `<image>` (`image` requires `src`). Teaching `crates/weft-slint/src/generate.rs` to emit Slint alignment (SPEC keeps `align` and `wrap` in the source comment). A second Figma simplifier, a new caller of `api.figma.com`, or a copy of Framelink. The REST pull (`packages/figma/src/pull.ts`) and the foreign reader stay the only Figma path.
+
+Execution plan:
+
+1. In `stackOf`, after the direction and columns writes: set `wrap` when `layer.layout.wrap` is true. On a row, set `align` only for `start`, `end` or `stretch`. On a column, set `align` only for `center`, `end` or `stretch`. Leave a row's `center` and a column's `start` unset, and leave `align` unset when it is undefined. Do not set either prop on a grid. Do not emit padding. The painted-loss stays.
+2. Tests in `packages/design-tool/test/foreign-layout.test.ts`: a horizontal frame at `MIN` reads `align="start"` with no `wrap`; a horizontal frame at `CENTER` with wrap reads `wrap` and no `align`; a vertical frame at `MIN` reads neither; a layer that already stores `weft.source` is unchanged, including a row's stored `center` and a column's stored `start`. The sourced-frame snapshots in `packages/figma/test/__snapshots__/layers/` stay as they are. The foreign promo frames in the Figma and Penpot edit tests expect `align="start"`.
+3. Thread `gridRowAnchorIndex`, `gridColumnAnchorIndex` and `layoutPositioning` from the REST node (`rest.ts`) and the plugin node (`layer.ts`) onto `Layer`. When the mode is `grid`, order in-flow children by row anchor, then column anchor, then original index before `convertChildren`. Absolutely positioned children keep their index. Add a `layout` loss only when the order actually changes. Skip when no in-flow child carries an anchor, so z-order remains. A missing or non-numeric anchor stays absent, not zero.
+4. Verify with `mise exec -- pnpm exec vitest run packages/design-tool/test packages/figma/test`.
+
+Result: `stackOf` writes `align` and `wrap` as the plan says, and grid children with anchors are ordered by cell, with a `layout` loss only when the order differs from z-order. Merged in PR #21 (`118fa3b`); the PR predates the CI workflow (T73), so it ran no checks, and later CI runs on `main` cover the change.
+Model: Cursor / grok-4.7 · Status: done · Priority: P0 · Complexity: 2 · Files: `packages/design-tool/src/{foreign,layer}.ts`, `packages/figma/src/{layer,rest}.ts`, `packages/figma/README.md`, `vitest.config.ts`, tests
+Check: `mise exec -- pnpm exec vitest run packages/design-tool/test packages/figma/test` exits 0.
+
+### T32. Claude Code plugin from GitHub
+
+The T30 plugin works only when its marketplace is added from a local clone: Claude Code copies just the plugin folder into its cache, and the `@weft/*` packages run from the repository's sources. Bundle the plugin's scripts and the MCP server into self-contained files at release, so the plugin installs from the GitHub-hosted marketplace once the repository has a remote, and add the `repository` field to `plugin.json`. Check that Claude Code Desktop finds `node` when started from the GUI. Done when `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` work on a clean machine.
+
+Progress: the bundle carries the WebAssembly core (T22 merged): `plugins/claude-code/build.ts` bundles the scripts and the MCP server with Vite 8 into the committed `dist/` and copies `weft_bg.wasm` to `dist/wasm/`, where `@weft/core` reads it relative to the shared chunk; `claude-code:build` depends on `root:wasm`. The plugin folder alone runs (tests copy only it to a temp folder and run every script and the server there; `claude --plugin-dir <copy> mcp list` shows `weft` connected; `claude plugin validate --strict` passes). The Desktop `node` requirement (24.2 or later on the PATH) is in the plugin README. `root:wasm` remaps build paths, so the `.wasm` is byte-reproducible and the up-to-date test compares it byte for byte. Remaining: `repository` in `plugin.json` once a remote exists, and the done criterion itself, `/plugin marketplace add <owner>/weft` and `/plugin install weft@weft` on a clean machine.
+
+Result: `plugin.json` gains `repository` and `homepage` (https://github.com/listepo/weft). With an empty `CLAUDE_CONFIG_DIR`, `claude plugin marketplace add listepo/weft` and `claude plugin install weft@weft` (Claude Code 2.1.267) install the plugin from GitHub; `claude mcp list` shows `plugin:weft:weft` connected from the plugin cache, and `dist/export.js` run from the cache converts a corpus screen.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 2 · Files: `plugins/claude-code/.claude-plugin/plugin.json`, `plugins/claude-code/README.md`
+Check: the install above; `claude plugin validate --strict plugins/claude-code`; `plugins/claude-code` tests.
+
 ### T95. json-render export: only trusted URLs
 
 A literal `href` or `src` now passes through the Trust allowlist on the way to json-render and back. `http`, `https`, `mailto` and a relative URL are kept (surrounding space and line breaks stripped, as `safe_url` does). `javascript:`, `data:` and any other scheme are a `props` loss and are left out, the same way A2UI drops an unsafe image `src`. A binding of either prop is still an expression. SPEC §9's json-render rows say so.
