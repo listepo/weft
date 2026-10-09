@@ -42,7 +42,8 @@ description: corpus-layout as a2ui
           "variant": "shortText",
           "value": {
             "path": "/query"
-          }
+          },
+          "weight": 1
         },
         {
           "id": "filter",
@@ -66,7 +67,8 @@ description: corpus-layout as a2ui
           "children": [
             "previous",
             "next"
-          ]
+          ],
+          "justify": "center"
         },
         {
           "id": "previous",
@@ -106,7 +108,8 @@ description: corpus-layout as a2ui
           "children": [
             "cancel",
             "save"
-          ]
+          ],
+          "justify": "end"
         },
         {
           "id": "cancel",

@@ -187,11 +187,13 @@ impl Ex {
                     LossKind::Hidden,
                     "a bound `hidden` has no A2UI form; the element is always shown",
                 ),
+                ("columns" | "wrap" | "padding" | "max-width" | "min-column-width", _) => {
+                    (LossKind::Layout, "this layout has no A2UI form")
+                }
                 (_, Value::Token(_)) => (LossKind::Tokens, "design tokens have no A2UI form"),
                 (_, Value::Bind { .. }) => {
                     (LossKind::Bindings, "this binding has no A2UI property")
                 }
-                ("columns" | "wrap", _) => (LossKind::Layout, "this layout has no A2UI form"),
                 _ => (LossKind::Props, "this prop has no A2UI property"),
             };
             self.lose(kind, path, format!("{k}: {why}"));
@@ -288,6 +290,16 @@ impl Ex {
                             format!("the {name} slot has no place in A2UI; it is left out"),
                         );
                     }
+                }
+                // `grow` is the child's share of the stack. A2UI says that as `weight` 1;
+                // `false` is the default and is not written.
+                match parts.p.shift_remove("grow") {
+                    Some(Value::Bool(true)) => fields["weight"] = json!(1),
+                    Some(Value::Bool(false)) => {}
+                    Some(other) => {
+                        parts.p.insert("grow".into(), other);
+                    }
+                    None => {}
                 }
                 self.finish(&mut fields, &mut parts, &path);
                 self.fill(at, &id, component, fields);
@@ -539,6 +551,27 @@ impl Ex {
                 let mut f = json!({ "children": self.kids(&n.children, path, form) });
                 if let Some(Value::String(a)) = p.shift_remove("align") {
                     f["align"] = a.into();
+                }
+                // `start` is A2UI's default, so it is omitted. A grid has no `justify`.
+                if kind == "stack" {
+                    match p.shift_remove("justify") {
+                        Some(Value::String(j)) if j == "start" => {}
+                        Some(Value::String(j)) if j == "center" || j == "end" => {
+                            f["justify"] = j.into();
+                        }
+                        Some(Value::String(j)) if j == "space-between" => {
+                            f["justify"] = "spaceBetween".into();
+                        }
+                        Some(Value::String(j)) => self.lose(
+                            LossKind::Layout,
+                            path,
+                            format!("justify {j} has no A2UI form"),
+                        ),
+                        Some(other) => {
+                            p.insert("justify".into(), other);
+                        }
+                        None => {}
+                    }
                 }
                 Built(if row { "Row" } else { "Column" }, f, Vec::new())
             }
