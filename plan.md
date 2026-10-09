@@ -43,17 +43,10 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
 | T94 | in progress | P0 | 2 | 90% | Cursor / grok-4.7 |
-| T95 | todo | P1 | 2 | 0% | |
 | T96 | todo | P2 | 3 | 0% | |
 | T97 | todo | P2 | 2 | 0% | |
 | T98 | todo | P2 | 2 | 0% | |
 | T99 | todo | P3 | 1 | 0% | |
-
-### T95. json-render export: only trusted URLs
-
-Found while merging #18. T76/T82 restricted A2UI `openUrl`, `href` and `src` to `http`, `https` and `mailto` through `weft_import::safe_url`, and A2UI export drops anything else as a loss. The json-render exporter (`crates/weft-interop/src/json_render/export.rs`) still copies `link.href` and `image.src` verbatim, `javascript:` included, so an untrusted document can carry a script URL into a json-render tree.
-
-Done when: json-render export passes every `href` and `src` through `safe_url`, drops a rejected value with a loss diagnostic like A2UI's, and has tests for `javascript:`, `data:` and a relative URL; the import side is checked the same way; SPEC §9's json-render row says so.
 
 ### T96. Too-deep documents: report, do not hide
 

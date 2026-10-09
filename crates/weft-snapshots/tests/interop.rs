@@ -528,3 +528,73 @@ fn json_render_export_reports_its_losses() {
         "{markup}"
     );
 }
+
+/// A literal `href` or `src` is `http`, `https`, `mailto` or relative. `javascript:` and `data:`
+/// are left out on the way out and on the way in; a relative URL is kept (SPEC §9 Trust).
+#[test]
+fn json_render_keeps_only_trusted_urls() {
+    let catalog = common::catalog();
+    let markup = r#"<screen id="s" weft="0.1">
+  <link id="js" href="javascript:alert(1)">Go</link>
+  <image id="pic" src="data:text/html,x" label="pic"/>
+  <link id="rel" href="/docs">Docs</link>
+</screen>"#;
+    let (document, diagnostics) = common::parse_strict(markup, &catalog, &common::tokens());
+    let document = document.unwrap_or_else(|| panic!("{diagnostics:#?}"));
+    let exported = to_json_render(&document, &catalog, None);
+    let text = exported.spec.to_string();
+    assert!(!text.contains("javascript:"), "{text}");
+    assert!(!text.contains("data:"), "{text}");
+    assert!(text.contains("/docs"), "{text}");
+    let notes: Vec<&str> = exported.losses.iter().map(|l| l.note.as_str()).collect();
+    assert!(
+        notes
+            .iter()
+            .any(|n| n.contains("href") && n.contains("left out")),
+        "{notes:?}"
+    );
+    assert!(
+        notes
+            .iter()
+            .any(|n| n.contains("src") && n.contains("left out")),
+        "{notes:?}"
+    );
+    assert!(
+        exported
+            .losses
+            .iter()
+            .all(|l| l.kind == weft_interop::LossKind::Props),
+        "{:#?}",
+        exported.losses
+    );
+
+    let foreign = r#"{
+      "root": "s",
+      "elements": {
+        "s": {"type": "screen", "props": {"weft": "0.1"}, "children": ["js", "pic", "rel"]},
+        "js": {"type": "link", "props": {"href": "javascript:alert(1)", "text": "Go"}, "children": []},
+        "pic": {"type": "image", "props": {"src": "data:text/html,x", "label": "pic"}, "children": []},
+        "rel": {"type": "link", "props": {"href": "/docs", "text": "Docs"}, "children": []}
+      }
+    }"#;
+    let back = from_json_render(foreign, &catalog);
+    assert_lenient_valid("trusted-urls", &back, &catalog);
+    let markup = weft_core::serialize(&back.document);
+    assert!(!markup.contains("javascript:"), "{markup}");
+    assert!(!markup.contains("data:"), "{markup}");
+    assert!(markup.contains(r#"href="/docs""#), "{markup}");
+    assert!(
+        back.losses
+            .iter()
+            .any(|l| l.kind == weft_interop::LossKind::Props && l.note.contains("href")),
+        "{:#?}",
+        back.losses
+    );
+    assert!(
+        back.losses
+            .iter()
+            .any(|l| l.kind == weft_interop::LossKind::Props && l.note.contains("src")),
+        "{:#?}",
+        back.losses
+    );
+}

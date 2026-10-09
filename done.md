@@ -1,5 +1,11 @@
 # Done
 
+### T95. json-render export: only trusted URLs
+
+A literal `href` or `src` now passes through the Trust allowlist on the way to json-render and back. `http`, `https`, `mailto` and a relative URL are kept (surrounding space and line breaks stripped, as `safe_url` does). `javascript:`, `data:` and any other scheme are a `props` loss and are left out, the same way A2UI drops an unsafe image `src`. A binding of either prop is still an expression. SPEC §9's json-render rows say so.
+Model: Cursor / grok-4.7 · Status: done · Priority: P1 · Complexity: 2 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-interop/src/json_render/{export,import}.rs`, `crates/weft-snapshots/tests/interop.rs`
+Check: `cargo clippy -p weft-interop --all-targets -- -D warnings`; `cargo test -p weft-snapshots --test interop` — 12 passed.
+
 ### T75–T77, T79–T86, T89, T91. Cloud review findings (2026-10-08)
 
 Confirmed P1/P2 bugs and the shared Trust URL move from the 2026-10-08 cloud review, done together. SPEC §10.2 now refuses a project member whose resolved path (symbolic links followed) leaves the project directory (`W704`); the Node and CLI readers enforce that for every member, each entry of a `catalog` list included, and cap `maxChars` on the read itself. SPEC §9 Trust and To A2UI restrict `openUrl` to `http`/`https`/`mailto`; `safe_url` lives in `weft-import` (the generated JSX `_url` and Swift `weftURL` stay language-specific copies of the same rule) and A2UI export drops `javascript:` (and other) `href`/`src`. `applyPatches` returns W200 instead of throwing on a cyclic or too-deep document; `checkData` includes W709/W710; `weft fmt --write` and the TypeScript CLI write a sibling temp file and rename; Figma/Penpot `writeJson` refuses entries over 100 kB; `xcode-agents` continues after an unknown name; Bun engine tests have a 15 s `spawnSync` timeout; `AGENTS.md` names the Rust core and the missing layout crates.

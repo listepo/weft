@@ -6,7 +6,7 @@ use std::collections::HashSet;
 
 use serde_json::{Map, Value as Json, json};
 use weft_core::{Catalog, Child, Content, Document, Node, Value};
-use weft_import::{Loss, LossKind, Losses};
+use weft_import::{Loss, LossKind, Losses, safe_url};
 
 use crate::ids::{collect_ids, fresh_id};
 use crate::number;
@@ -162,7 +162,25 @@ impl Ex<'_> {
                         .and_then(|d| d.prop(name))
                         .is_some_and(|p| p.writable == Some(true));
                     if let Some(j) = self.value(v, writable, &path, name) {
-                        props.insert(name.clone(), j);
+                        // SPEC §9 Trust: a literal href or src is http, https, mailto or relative.
+                        if matches!(name.as_str(), "href" | "src")
+                            && let Json::String(s) = &j
+                        {
+                            match safe_url(s) {
+                                Some(url) => {
+                                    props.insert(name.clone(), url.into());
+                                }
+                                None => self.losses.push(
+                                    LossKind::Props,
+                                    &path,
+                                    format!(
+                                        "{name} is not http, https, mailto or relative; it is left out"
+                                    ),
+                                ),
+                            }
+                        } else {
+                            props.insert(name.clone(), j);
+                        }
                     }
                 }
             }
