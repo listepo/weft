@@ -12,7 +12,7 @@ use weft_core::{
 };
 use weft_import::{
     BuildOptions, ImportResult, LossKind, Losses, MAX_DEPTH, MAX_NODES, Note, Sem, build_document,
-    empty_result, limit_reached, literal,
+    empty_result, limit_reached, literal, safe_url,
 };
 
 use crate::paths::from_pointer;
@@ -215,6 +215,16 @@ impl<'a> Im<'a> {
                 ("hidden", Dyn::Lit(t)) => {
                     s.values.insert(name.clone(), Value::Bool(t == "true"));
                 }
+                // SPEC §9 Trust, the same allowlist the exporter uses.
+                ("href" | "src", Dyn::Lit(t)) => match safe_url(&t) {
+                    Some(url) => {
+                        s.props.insert(name.clone(), url);
+                    }
+                    None => self.note(
+                        LossKind::Props,
+                        format!("{name} is not http, https, mailto or relative; it is left out"),
+                    ),
+                },
                 (_, Dyn::Lit(t)) => {
                     s.props.insert(name.clone(), t);
                 }

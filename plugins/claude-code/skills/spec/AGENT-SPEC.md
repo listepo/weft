@@ -122,6 +122,8 @@ Props are strings unless a type is given; `*` marks a required prop; "label" mea
 - Containers: `tabs` (`selected` writable, the id of a `tab`; change) holding `tab` (label; holds its panel content), `dialog` (label, `modal`, `open` writable; slot `actions`; close).
 - Root: `screen` (states ready|loading|error).
 
+`link.href` and any `src` (`image`, `model`) are `http`, `https`, `mailto` or a relative path. A json-render conversion leaves any other literal out (SPEC §9); A2UI does the same for `openUrl` and an image URL.
+
 `state` takes only the states listed for the component. The catalog the host serves is the source of truth; ask for a component in full when unsure.
 
 ### 2.8 Extensions
