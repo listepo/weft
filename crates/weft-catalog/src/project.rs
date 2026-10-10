@@ -150,6 +150,46 @@ pub fn is_project_file_name(name: &str) -> bool {
         && name.split('/').all(|s| !s.is_empty() && s != "..")
 }
 
+/// How the loader asks its reader for a file of an npm package (SPEC §10.2):
+/// `package:<npm name>/<file>`. A project file name never holds `:`, so a reader cannot mistake
+/// one for the other.
+const PACKAGE_READ: &str = "package:";
+
+/// An npm package name, plain or scoped (`acme-ui`, `@acme/ui`), as npm accepts new ones: at most
+/// 214 characters, lowercase, URL-safe, not starting with `.` or `_`. So it never names `..`, an
+/// absolute path or another directory level than a scope.
+pub fn is_package_name(name: &str) -> bool {
+    let part = |p: &str| {
+        !p.is_empty()
+            && !p.starts_with(['.', '_'])
+            && p.bytes().all(|b| {
+                b.is_ascii_lowercase()
+                    || b.is_ascii_digit()
+                    || matches!(b, b'-' | b'.' | b'_' | b'~')
+            })
+    };
+    name.len() <= 214
+        && match name.strip_prefix('@').map(|scoped| scoped.split_once('/')) {
+            Some(Some((scope, rest))) => part(scope) && part(rest),
+            Some(None) => false,
+            None => part(name),
+        }
+}
+
+/// The package and the file inside it that a reader is asked for, when `name` is a package read
+/// (`package:@acme/ui/weft.catalog.json` → `("@acme/ui", "weft.catalog.json")`); both parts are
+/// checked again, so a reader can trust them.
+pub fn split_package_read(name: &str) -> Option<(&str, &str)> {
+    let rest = name.strip_prefix(PACKAGE_READ)?;
+    let cut = if rest.starts_with('@') {
+        rest.match_indices('/').nth(1)?.0
+    } else {
+        rest.find('/')?
+    };
+    let (package, file) = (&rest[..cut], &rest[cut + 1..]);
+    (is_package_name(package) && is_project_file_name(file)).then_some((package, file))
+}
+
 pub(crate) fn escape_pointer(name: &str) -> String {
     name.replace('~', "~0").replace('/', "~1")
 }
@@ -378,6 +418,85 @@ impl Loader<'_> {
             return None;
         }
         Some(read(name))
+    }
+
+    /// The file an npm package names under `weft.<field>` in its `package.json` (SPEC §10.2), as
+    /// JSON, with its source: the package and the version its `package.json` gives
+    /// (`@acme/ui@1.0.0`). The reader finds the package; the loader asks it
+    /// only for `package.json` and that file, and the file name follows the rules of a project
+    /// file name, relative to the package directory. A bad name is `W703`; a package, field or
+    /// file that cannot be found or read is `W704`.
+    fn package_file(
+        &mut self,
+        pointer: &str,
+        package: &Json,
+        field: &str,
+    ) -> Option<(Json, String)> {
+        let read = self.options.read?;
+        let at = format!("{pointer}/package");
+        let Some(name) = package.as_str().filter(|n| is_package_name(n)) else {
+            let message = "The package name is not an npm package name.".to_owned();
+            let expected = "an npm package name such as \"acme-ui\" or \"@acme/ui\"";
+            self.report(
+                Diagnostic::new(Code::W703, at, message, expected).got(package.to_string()),
+            );
+            return None;
+        };
+        let ask = |file: &str| read(&format!("{PACKAGE_READ}{name}/{file}"));
+        let unreadable = |message: String| {
+            Diagnostic::new(
+                Code::W704,
+                &at,
+                message,
+                "an installed package with a readable JSON file",
+            )
+            .got(name)
+        };
+        let manifest = ask("package.json").and_then(|text| parse_json(&text).ok());
+        let Some(manifest) = manifest else {
+            let message = format!(
+                "The package {} is not in node_modules of the project directory or a parent, or its package.json cannot be read.",
+                quote(name)
+            );
+            self.report(unreadable(message));
+            return None;
+        };
+        let Some(file) = manifest
+            .get("weft")
+            .and_then(|w| w.get(field))
+            .and_then(Json::as_str)
+        else {
+            let message = format!(
+                "The package {} names no \"weft.{field}\" in its package.json.",
+                quote(name)
+            );
+            self.report(unreadable(message));
+            return None;
+        };
+        if !is_project_file_name(file) {
+            let message = format!(
+                "The package {} names {} as \"weft.{field}\", which is absolute, leaves the package directory or is malformed.",
+                quote(name),
+                quote(file)
+            );
+            let expected = "a relative path inside the package directory, separated by \"/\"";
+            self.report(Diagnostic::new(Code::W703, at, message, expected).got(file));
+            return None;
+        }
+        let Some(Ok(json)) = ask(file).as_deref().map(parse_json) else {
+            let message = format!(
+                "The file {} of the package {} cannot be read or is not JSON.",
+                quote(file),
+                quote(name)
+            );
+            self.report(unreadable(message));
+            return None;
+        };
+        let source = match manifest.get("version").and_then(Json::as_str) {
+            Some(version) => format!("{name}@{version}"),
+            None => name.to_owned(),
+        };
+        Some((json, source))
     }
 
     /// The project's `fragments` (SPEC §10.7): a name → file map, or name → markup in project
@@ -718,10 +837,24 @@ impl Loader<'_> {
         let base = self.read_catalog(String::new(), core, None)?;
         let mut entries: Vec<Entry> = Vec::new();
         for (at, what, item) in listed {
-            let Some(found) = self.content(&at, item, &what) else {
-                continue;
+            // Project content gives catalogs themselves, so only a project file names packages.
+            let package = (self.options.read.is_some())
+                .then(|| item.as_object().filter(|o| o.len() == 1)?.get("package"))
+                .flatten();
+            let (found, source) = if let Some(package) = package {
+                let Some((found, source)) = self.package_file(&at, package, "catalog") else {
+                    continue;
+                };
+                (found, Some(source))
+            } else {
+                let Some(found) = self.content(&at, item, &what) else {
+                    continue;
+                };
+                (
+                    found,
+                    self.options.read.and(item.as_str()).map(str::to_owned),
+                )
             };
-            let source = self.options.read.and(item.as_str()).map(str::to_owned);
             if let Some(entry) = self.read_catalog(at, &found, source)
                 && self.claims(&entry, &entries, &base)
             {

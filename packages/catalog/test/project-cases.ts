@@ -326,6 +326,45 @@ export const projectCases: Record<string, ProjectCase> = {
     project: project({ catalog: ["lib/acme-ui.json", 5, "../x.json", "missing.json"] }),
     codes: ["W701", "W703", "W704"],
   },
+  "a library from an npm package and the project catalog": {
+    project: project({ catalog: [{ package: "@acme/ui" }, "shop.json"] }),
+    files: {
+      ...sharedFiles,
+      "package:@acme/ui/package.json": text({
+        name: "@acme/ui",
+        version: "1.0.0",
+        weft: { catalog: "dist/weft.json" },
+      }),
+      "package:@acme/ui/dist/weft.json": text(acmeUi),
+    },
+    codes: [],
+  },
+  "package entries that cannot be used": {
+    project: project({
+      catalog: [
+        { package: "../acme" },
+        { package: "Acme" },
+        { package: 5 },
+        { package: "missing" },
+        { package: "no-field" },
+        { package: "escapes" },
+        { package: "broken" },
+        { package: "acme-ui", extra: 1 },
+      ],
+    }),
+    files: {
+      "package:no-field/package.json": text({ name: "no-field" }),
+      "package:escapes/package.json": text({ weft: { catalog: "../shop.json" } }),
+      "package:broken/package.json": text({ weft: { catalog: "c.json" } }),
+      "package:broken/c.json": "{",
+    },
+    codes: ["W703", "W703", "W703", "W704", "W704", "W703", "W704", "W701"],
+  },
+  "a package entry in project content is a catalog object": {
+    project: project({ catalog: [{ package: "@acme/ui" }] }),
+    content: true,
+    codes: ["W706"],
+  },
   "a catalog named after the core": {
     project: project({ catalog: ["core.json"] }),
     files: { "core.json": text({ ...shop([]), name: "weft-core", requires: undefined }) },

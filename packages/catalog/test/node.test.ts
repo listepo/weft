@@ -117,6 +117,60 @@ describe("readProject", () => {
   });
 });
 
+describe("readProject with a catalog package", () => {
+  // `@acme/ui` in `node_modules` above the project directory, as a workspace installs it.
+  const installed = (body: (root: string, pkg: string) => void) => {
+    const root = mkdtempSync(join(tmpdir(), "weft-package-"));
+    const pkg = join(root, "node_modules/@acme/ui");
+    try {
+      mkdirSync(join(pkg, "dist"), { recursive: true });
+      writeFileSync(join(pkg, "package.json"), '{"weft": {"catalog": "dist/weft.json"}}');
+      const acme = readFileSync(join(example, "catalogs/acme-ui.catalog.json"), "utf8");
+      writeFileSync(join(pkg, "dist/weft.json"), acme);
+      mkdirSync(join(root, "app/deep"), { recursive: true });
+      writeFileSync(join(root, "app/deep/weft.json"), '{"catalog": [{"package": "@acme/ui"}]}');
+      body(root, pkg);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  };
+
+  test("finds it in node_modules of a parent and reads the catalog it names", () => {
+    installed((root) => {
+      const { project, diagnostics } = readProject(join(root, "app/deep/weft.json"));
+      assert.deepEqual(diagnostics, []);
+      assert.deepEqual(project.catalogs, [
+        { name: "acme-ui", version: "1.0.0", prefix: "acme", source: "@acme/ui" },
+      ]);
+      assert.equal(project.kinds["acme-button"]?.catalog, "acme-ui");
+    });
+  });
+
+  test("reports a package that is not installed", () => {
+    installed((root) => {
+      rmSync(join(root, "node_modules"), { recursive: true });
+      const { diagnostics } = readProject(join(root, "app/deep/weft.json"));
+      assert.deepEqual(
+        diagnostics.map((d) => [d.code, d.path]),
+        [["W704", "#/catalog/0/package"]],
+      );
+    });
+  });
+
+  test("does not follow a catalog file that links out of the package", () => {
+    installed((root, pkg) => {
+      writeFileSync(join(root, "outside.json"), readFileSync(join(pkg, "dist/weft.json")));
+      rmSync(join(pkg, "dist/weft.json"));
+      symlinkSync(join(root, "outside.json"), join(pkg, "dist/weft.json"));
+      const { diagnostics } = readProject(join(root, "app/deep/weft.json"));
+      assert.deepEqual(
+        diagnostics.map((d) => [d.code, d.path]),
+        [["W704", "#/catalog/0/package"]],
+      );
+    });
+  });
+});
+
 describe("project settings helpers", () => {
   test("chooseProject: an explicit file wins, --no-project means none", () => {
     const screen = join(example, "screens/cart.weft");

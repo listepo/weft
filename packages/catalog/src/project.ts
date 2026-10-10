@@ -172,7 +172,8 @@ type Loaded = {
 export function loadProjectText(text: string, options: ProjectOptions = {}): ProjectResult {
   const source = wellFormed(text);
   // The Rust side cannot call back into JavaScript, so it first names the files it would read
-  // (never one outside the project directory), and then loads with their text.
+  // (never one outside the project directory, except a file of an npm package as
+  // `package:<name>/<file>`, which the reader looks up), and then loads with their text.
   let files: string | undefined;
   if (options.read !== undefined) {
     // A resolver names more files once it is read, so ask until nothing new is missing.

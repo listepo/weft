@@ -89,11 +89,37 @@ function reader(projectFile: string, maxChars: number | undefined) {
   const root = dirname(resolve(projectFile));
   return (name: string): string | undefined => {
     try {
-      return readBounded(confinedPath(root, name), maxChars);
+      const path = name.startsWith(PACKAGE_READ)
+        ? packagePath(root, name)
+        : confinedPath(root, name);
+      return readBounded(path, maxChars);
     } catch {
       return undefined;
     }
   };
+}
+
+/** How the loader asks for a file of an npm package: `package:<npm name>/<file>` (SPEC §10.2). */
+const PACKAGE_READ = "package:";
+/** An npm package name, plain or scoped, as the loader accepts it. */
+const PACKAGE_NAME = /^(?:@[a-z0-9~-][a-z0-9._~-]*\/)?[a-z0-9~-][a-z0-9._~-]*$/;
+
+/**
+ * SPEC §10.2 packages: the package is `node_modules/<name>` of the project directory or of the
+ * nearest parent that has it, as Node resolves one, and the file must stay inside that package
+ * directory (symbolic links followed). Nothing is run and nothing is fetched.
+ */
+function packagePath(root: string, name: string): string {
+  const rest = name.slice(PACKAGE_READ.length);
+  const cut = rest.startsWith("@") ? rest.indexOf("/", rest.indexOf("/") + 1) : rest.indexOf("/");
+  const pkg = rest.slice(0, cut);
+  if (cut < 0 || pkg.length > 214 || !PACKAGE_NAME.test(pkg)) throw new Error(`bad package ${pkg}`);
+  for (let dir = root; ; dir = dirname(dir)) {
+    const candidate = join(dir, "node_modules", pkg);
+    if (statSync(join(candidate, "package.json"), { throwIfNoEntry: false })?.isFile() === true)
+      return confinedPath(candidate, rest.slice(cut + 1));
+    if (dirname(dir) === dir) throw new Error(`${pkg} is not installed`);
+  }
 }
 
 /** SPEC §10.2: the resolved path (symbolic links followed) must stay inside the project directory. */
