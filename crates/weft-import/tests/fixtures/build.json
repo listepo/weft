@@ -3432,6 +3432,77 @@
   "sems": [
    {
     "role": "main",
+    "name": "Receipt",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "group",
+      "name": "Subtotal",
+      "states": {},
+      "props": {},
+      "children": []
+     },
+     {
+      "role": "group",
+      "name": "Total",
+      "states": {},
+      "props": {},
+      "children": []
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.2",
+    "root": {
+     "kind": "screen",
+     "id": "screen-receipt",
+     "props": {
+      "label": "Receipt"
+     },
+     "children": [
+      {
+       "kind": "x-aria-group",
+       "id": "group-subtotal",
+       "props": {
+        "label": "Subtotal",
+        "role": "group"
+       }
+      },
+      {
+       "kind": "x-aria-group",
+       "id": "group-total",
+       "props": {
+        "label": "Total",
+        "role": "group"
+       }
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "kinds",
+     "path": "/screen#screen-receipt/x-aria-group#group-subtotal",
+     "note": "role group has no kind in the catalog"
+    },
+    {
+     "kind": "kinds",
+     "path": "/screen#screen-receipt/x-aria-group#group-total",
+     "note": "role group has no kind in the catalog"
+    }
+   ],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-receipt"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
     "name": "Search",
     "states": {},
     "props": {},

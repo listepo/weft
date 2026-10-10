@@ -168,6 +168,8 @@ const SNAPSHOT_SHARED_ROLES = new Set(["booking", "appearance"]);
 const SNAPSHOT_MODEL_IS_IMAGE = new Set(["showroom"]);
 
 for (const s of screens()) {
+  // An inline fragment and its uses are not an accessibility tree (SPEC §10.7).
+  if (s.name === "receipt") continue;
   const structure = TABLE_EMPTY_SLOT.has(s.name) ? test.fails : test;
   // Vitest has no subtests: each check is a test of its own under the screen's name, and the import runs once per block in
   // `beforeAll` so a failing import fails its own tests instead of the whole file.

@@ -103,6 +103,10 @@ const HTML_CONVENTION_GAPS: &[(&str, &str)] = &[
     ("dashboard", "an explicit direction=\"column\" is dropped"),
     ("glass", "an explicit direction=\"column\" is dropped"),
     (
+        "receipt",
+        "an inline fragment and its uses are not reconstructed",
+    ),
+    (
         "inbox",
         "the tabs selected binding and on-change are lost; a bound tab label comes back empty; \
          dialog modal=\"false\" is dropped",
