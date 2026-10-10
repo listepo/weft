@@ -137,6 +137,11 @@ const CEM_IMPORT: &[Setting] = &[
         Kind::Text,
         "\"0.0.0\"",
     ),
+    setting(
+        "prefix",
+        "The prefix of the imported catalog: it owns the kinds named `<prefix>-…` and requires the core, so it loads beside a project catalog (SPEC §10.4). Default: none, which makes it the project catalog.",
+        Kind::Text,
+    ),
 ];
 
 /// One section per target (SPEC §10.6 lists the names reserved for targets in progress).

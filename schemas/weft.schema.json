@@ -446,6 +446,11 @@
               "minLength": 1,
               "description": "The version of the imported catalog.",
               "default": "0.0.0"
+            },
+            "prefix": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The prefix of the imported catalog: it owns the kinds named `<prefix>-…` and requires the core, so it loads beside a project catalog (SPEC §10.4). Default: none, which makes it the project catalog."
             }
           },
           "additionalProperties": false,

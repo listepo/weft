@@ -26,7 +26,7 @@ pub struct ExportArgs {
     pub force: bool,
 
     pub file: PathBuf,
-    pub catalog: Option<PathBuf>,
+    pub catalog: Vec<PathBuf>,
     pub tokens: Option<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
@@ -39,7 +39,7 @@ pub struct ExportArgs {
 
 pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(&args.file, args.project)?;
-    let catalog = catalog(args.catalog.as_deref(), project.as_ref())?;
+    let catalog = catalog(&args.catalog, project.as_ref())?;
     let tokens = tokens(args.tokens.as_deref(), project.as_ref())?;
     let data = sample_data(
         args.data,
@@ -137,7 +137,7 @@ pub struct ImportArgs {
     pub force: bool,
 
     pub file: PathBuf,
-    pub catalog: Option<PathBuf>,
+    pub catalog: Vec<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
     /// `--context`: `Some(true)` keeps, `Some(false)` drops.
@@ -146,7 +146,7 @@ pub struct ImportArgs {
 
 pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(&args.file, args.project)?;
-    let catalog = catalog(args.catalog.as_deref(), project.as_ref())?;
+    let catalog = catalog(&args.catalog, project.as_ref())?;
     let text = read(&args.file)?;
     let mut result = import_swiftui(&text, &ImportOptions { catalog: &catalog });
     if !keeps_context(args.context, project.as_ref(), "import", "swiftui", true) {

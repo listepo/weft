@@ -64,3 +64,18 @@ describe("unreadable input is W601, never an exception", () => {
     });
   }
 });
+
+test("a prefix makes a library: it says so, requires the core and keeps only its own tags", () => {
+  const result = importCem(MANIFEST, {
+    catalog: fixture,
+    name: "acme-ui",
+    version: "1.0.0",
+    prefix: "acme",
+  });
+  assert.equal(result.catalog.prefix, "acme");
+  assert.deepEqual(Object.keys(result.catalog.requires ?? {}), ["weft-core"]);
+  assert.equal(Object.hasOwn(result.catalog.components, "date-picker"), false);
+  assert.ok(
+    result.losses.some((l) => l.kind === "kinds" && l.note.includes("outside the catalog's prefix")),
+  );
+});

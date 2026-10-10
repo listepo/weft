@@ -20,11 +20,11 @@ impl Scratch {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let fixture: serde_json::Value = serde_json::from_str(FIXTURE).unwrap();
-        std::fs::write(
-            dir.join("catalog.json"),
-            fixture["catalogs"]["test"].to_string(),
-        )
-        .unwrap();
+        let mut catalog = fixture["catalogs"]["test"].clone();
+        // A whole catalog replaces the core only under the core's name (SPEC §10.2); any other
+        // `--catalog` file is merged over the core, as the TypeScript CLI does not do.
+        catalog["name"] = "weft-core".into();
+        std::fs::write(dir.join("catalog.json"), catalog.to_string()).unwrap();
         Scratch(dir)
     }
 

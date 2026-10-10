@@ -1100,6 +1100,36 @@ fn empty_project() -> Result<Project, CatalogError> {
     })
 }
 
+/// Catalogs a host gives by content in place of a project's `catalog` member, such as the CLI's
+/// repeated `--catalog` (SPEC §10.2): merged over `base` by the rules of §10.4, with diagnostics at
+/// `#/catalog/<i>`. `base` is the core catalog unless a whole catalog named `weft-core` replaces it.
+/// Only the catalog members of the result are set.
+pub fn merge_catalogs(
+    base: &Json,
+    catalogs: &[Json],
+    mode: Mode,
+) -> Result<ProjectLoad, CatalogError> {
+    let options = ProjectOptions {
+        mode,
+        ..Default::default()
+    };
+    let mut project = empty_project()?;
+    let mut loader = Loader {
+        options: &options,
+        diagnostics: Vec::new(),
+    };
+    if let Some((catalog, catalogs, kinds)) = loader.catalogs(&Json::Array(catalogs.to_vec()), base)
+    {
+        project.catalog = catalog;
+        project.catalogs = catalogs;
+        project.kinds = kinds;
+    }
+    Ok(ProjectLoad {
+        project,
+        diagnostics: loader.diagnostics,
+    })
+}
+
 /// Loads a project from its parsed project file, or from project content without a reader.
 pub fn load_project(
     json: &Json,

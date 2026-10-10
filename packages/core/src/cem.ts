@@ -11,6 +11,11 @@ export type CemOptions = {
   catalog: Catalog;
   name: string;
   version: string;
+  /**
+   * The kinds the catalog owns, `<prefix>-…` (SPEC §5). With one, the catalog also `requires` the
+   * core, and a tag outside the prefix is a `kinds` loss.
+   */
+  prefix?: string | undefined;
 };
 
 export type CemImport = { catalog: Catalog; losses: Loss[]; diagnostics: Diagnostic[] };
@@ -27,7 +32,8 @@ export function importCem(manifest: string, options: CemOptions): CemImport {
     const catalog = { weft: WEFT_VERSION, name, version, components: {} };
     return { catalog, losses: [], diagnostics: [unread] };
   }
-  const wire = toJson({ name: options.name, version: options.version }) ?? "{}";
+  const { name, version, prefix } = options;
+  const wire = toJson({ name, version, ...(prefix === undefined ? {} : { prefix }) }) ?? "{}";
   const out = catalogHandle(options.catalog).importCem(wellFormed(manifest), wire);
   return JSON.parse(out) as CemImport;
 }
