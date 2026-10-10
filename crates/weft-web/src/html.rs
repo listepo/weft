@@ -132,6 +132,11 @@ const LAYOUT_CSS: &str = "\
 [data-align=\"center\"] { align-items: center; }
 [data-align=\"end\"] { align-items: flex-end; }
 [data-align=\"stretch\"] { align-items: stretch; }
+[data-justify=\"center\"] { justify-content: center; }
+[data-justify=\"end\"] { justify-content: flex-end; }
+[data-justify=\"space-between\"] { justify-content: space-between; }
+.weft-row > [data-grow] { flex: 1 1 0%; min-width: 0; }
+.weft-stack > [data-grow] { flex: 1 1 0%; min-height: 0; }
 [data-wrap] { flex-wrap: wrap; }
 a { display: inline-block; }
 [hidden] { display: none !important; }
@@ -428,6 +433,25 @@ fn is_true(v: Option<&Value>) -> bool {
     matches!(v, Some(Value::Bool(true)))
 }
 
+/// `grid-template-columns` for a grid. With `min-column-width` the track is at least that token
+/// and at least a `columns`-th of the grid, so `auto-fill` never exceeds `columns` and drops to
+/// fewer tracks while the grid is narrower. `min` and `gap` are CSS values (`var(--weft-…)`).
+pub(crate) fn capped_columns(columns: u32, min: &str, gap: Option<&str>) -> String {
+    let gaps = columns - 1;
+    let floor = match gap {
+        Some(gap) if gaps > 0 => {
+            format!("max({min}, calc((100% - {gaps} * {gap}) / {columns}))")
+        }
+        _ => format!("max({min}, calc(100% / {columns}))"),
+    };
+    format!("repeat(auto-fill, minmax({floor}, 1fr))")
+}
+
+/// A catalog `columns` value: an integer from 1 to 64.
+fn integer_columns(n: f64) -> Option<u32> {
+    (n.fract() == 0.0 && (1.0..=64.0).contains(&n)).then_some(n as u32)
+}
+
 /// `$.path` or `!$.path`, as `data-bind` writes a binding.
 fn binding(v: &Value) -> Option<String> {
     match v {
@@ -574,6 +598,8 @@ impl Writer<'_> {
                 }
                 "label" => {}
                 "role" => attrs.set("role", literal_text(Some(value)).unwrap_or_default()),
+                // `grow` is also `data-grow` (see `finish`). It stays here so the HTML importer,
+                // which does not read `data-grow` yet, still recovers the prop.
                 _ => attrs.set(&format!("data-prop-{name}"), format_value(value)),
             }
         }
@@ -588,6 +614,11 @@ impl Writer<'_> {
         if !n.on.is_empty() {
             let actions: Vec<String> = n.on.iter().map(|(e, a)| format!("{e}:{a}")).collect();
             attrs.set("data-action", actions.join("; "));
+        }
+        // A shell (a field's wrapper, a control's label) is the flex item and carries this
+        // itself; the control inside it is not the item.
+        if is_true(n.props.get("grow")) && !Self::shelled(n) {
+            attrs.flag("data-grow");
         }
         if let Some(transform) = tilt::css_of(&n.props) {
             attrs.style(&format!("transform: {transform}"));
@@ -767,7 +798,8 @@ impl Writer<'_> {
                     b.attrs.flag("disabled");
                 }
                 let a = Self::finish(n, b);
-                self.open(depth, "label", &Attrs::default());
+                let shell = Self::grow_shell(n);
+                self.open(depth, "label", &shell);
                 self.caption(depth + 1, &Self::label(n));
                 self.open(depth + 1, "select", &a);
                 let inner = Ctx {
@@ -990,7 +1022,45 @@ impl Writer<'_> {
         self.container_with(n, ctx, depth, "div", a);
     }
 
+    /// Kinds whose own element sits inside a label or field shell. The shell is the flex item.
+    fn shelled(n: &Node) -> bool {
+        matches!(
+            n.kind.as_str(),
+            "field"
+                | "checkbox"
+                | "switch"
+                | "radio"
+                | "segment"
+                | "select"
+                | "combobox"
+                | "slider"
+                | "stepper"
+                | "date-picker"
+                | "color-picker"
+                | "tabs"
+        )
+    }
+
+    /// The outermost box of a control whose own element sits inside a label or field shell.
+    /// That box is the flex item, so `grow` has to be on it.
+    fn grow_shell(n: &Node) -> Attrs {
+        let mut a = Attrs::default();
+        if is_true(n.props.get("grow")) {
+            a.flag("data-grow");
+        }
+        a
+    }
+
+    fn token_decl(n: &Node, name: &str) -> Option<String> {
+        match n.props.get(name) {
+            Some(Value::Token(t)) => token_var(t).map(|var| format!("var({var})")),
+            _ => None,
+        }
+    }
+
     fn layout(&mut self, n: &Node, ctx: &Ctx, depth: usize) {
+        // `justify`, `padding`, `max-width` and `min-column-width` are drawn below and also kept
+        // as `data-prop-*`: the HTML importer does not read the drawn form yet.
         let mut b = self.base(
             n,
             &["direction", "gap", "align", "wrap", "columns", "material"],
@@ -999,10 +1069,14 @@ impl Writer<'_> {
         let mut style = Vec::new();
         let class = if n.kind == "grid" {
             if let Some(Value::Number(c)) = n.props.get("columns") {
-                style.push(format!(
-                    "grid-template-columns: repeat({}, minmax(0, 1fr))",
-                    js_number(*c)
-                ));
+                let template = match (integer_columns(*c), Self::token_decl(n, "min-column-width"))
+                {
+                    (Some(count), Some(min)) => {
+                        capped_columns(count, &min, Self::token_decl(n, "gap").as_deref())
+                    }
+                    _ => format!("repeat({}, minmax(0, 1fr))", js_number(*c)),
+                };
+                style.push(format!("grid-template-columns: {template}"));
             }
             "weft-grid"
         } else if literal_text(n.props.get("direction")).as_deref() == Some("row") {
@@ -1022,8 +1096,23 @@ impl Writer<'_> {
             style.extend(decls);
             b.attrs.flag("data-weft-material");
         }
+        if let Some(padding) = Self::token_decl(n, "padding") {
+            style.push(format!("padding: {padding}"));
+        }
+        if let Some(max) = Self::token_decl(n, "max-width") {
+            // The cap is the border box, so padding stays inside it.
+            style.push("width: 100%".to_owned());
+            style.push(format!("max-width: {max}"));
+            style.push("box-sizing: border-box".to_owned());
+        }
         if let Some(align) = literal_text(n.props.get("align")) {
             b.attrs.set("data-align", align);
+        }
+        // `start` is the initial value, so it is not written (SPEC §5.1).
+        if let Some(justify) = literal_text(n.props.get("justify"))
+            && matches!(justify.as_str(), "center" | "end" | "space-between")
+        {
+            b.attrs.set("data-justify", justify);
         }
         if is_true(n.props.get("wrap")) {
             b.attrs.flag("data-wrap");
@@ -1077,7 +1166,7 @@ impl Writer<'_> {
             b.attrs.set("value", v.clone());
         }
         let a = Self::finish(n, b);
-        let mut wrapper = Attrs::default();
+        let mut wrapper = Self::grow_shell(n);
         wrapper.flag("data-weft-field");
         self.open(depth, "div", &wrapper);
         self.open(depth + 1, "label", &Attrs::default());
@@ -1115,7 +1204,8 @@ impl Writer<'_> {
     /// A control in its label with the caption before it: the control carries the accessible
     /// name, so the caption is hidden from the tree.
     fn labelled(&mut self, n: &Node, depth: usize, input: Attrs) {
-        self.open(depth, "label", &Attrs::default());
+        let shell = Self::grow_shell(n);
+        self.open(depth, "label", &shell);
         self.caption(depth + 1, &Self::label(n));
         self.inline(depth + 1, "input", &input, "");
         self.close(depth, "label");
@@ -1166,7 +1256,8 @@ impl Writer<'_> {
             b.attrs.flag("disabled");
         }
         let input = Self::finish(n, b);
-        self.open(depth, "label", &Attrs::default());
+        let shell = Self::grow_shell(n);
+        self.open(depth, "label", &shell);
         self.caption(depth + 1, &Self::label(n));
         let mut wrapper = Attrs::default();
         wrapper.flag("data-weft-stepper");
@@ -1249,7 +1340,8 @@ impl Writer<'_> {
             literal_text(n.props.get("value")).unwrap_or_default(),
         );
         let input = Self::finish(n, b);
-        self.open(depth, "label", &Attrs::default());
+        let shell = Self::grow_shell(n);
+        self.open(depth, "label", &shell);
         self.caption(depth + 1, &Self::label(n));
         self.inline(depth + 1, "input", &input, "");
         if let Some(list) = list {
@@ -1279,7 +1371,8 @@ impl Writer<'_> {
             b.attrs.flag("disabled");
         }
         let a = Self::finish(n, b);
-        self.open(depth, "label", &Attrs::default());
+        let shell = Self::grow_shell(n);
+        self.open(depth, "label", &shell);
         self.inline(depth + 1, "input", &a, "");
         self.caption(depth + 1, &Self::label(n));
         self.close(depth, "label");
@@ -1318,7 +1411,8 @@ impl Writer<'_> {
         }
         let a = Self::finish(n, b);
         let shown = escape_text(if own.is_empty() { &label_text } else { &own });
-        self.open(depth, "label", &Attrs::default());
+        let shell = Self::grow_shell(n);
+        self.open(depth, "label", &shell);
         self.inline(depth + 1, "input", &a, "");
         if !shown.is_empty() {
             let mut caption = Attrs::default();
@@ -1394,7 +1488,8 @@ impl Writer<'_> {
         let mut b = self.base(n, &["selected"], true);
         b.attrs.set("role", "tablist");
         let a = Self::finish(n, b);
-        self.open(depth, "div", &Attrs::default());
+        let shell = Self::grow_shell(n);
+        self.open(depth, "div", &shell);
         self.open(depth + 1, "div", &a);
         let mut index = 0;
         self.tab_part(&n.children, ctx, depth + 2, chosen, &mut index, false);

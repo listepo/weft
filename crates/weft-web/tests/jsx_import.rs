@@ -112,8 +112,14 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
         "booking",
         "the options of a bound <each> in a combobox are lost; the segmented-control on-change is lost",
     ),
-    ("dashboard", "an explicit direction=\"column\" is dropped"),
-    ("glass", "an explicit direction=\"column\" is dropped"),
+    (
+        "dashboard",
+        "an explicit direction=\"column\" is dropped; justify, max-width and min-column-width are drawn and read back by T16.8",
+    ),
+    (
+        "glass",
+        "an explicit direction=\"column\" is dropped; padding and max-width are drawn and read back by T16.8",
+    ),
     (
         "inbox",
         "the tabs on-change is lost; dialog modal=\"false\" is dropped",
@@ -124,7 +130,7 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
     ),
     (
         "layout",
-        "`justify` and `grow` are neither drawn nor carried until the web layout tasks (T16.3, T16.8)",
+        "justify and grow are drawn, and read back by T16.8; an explicit justify=\"start\" is not written",
     ),
     (
         "receipt",

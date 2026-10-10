@@ -63,8 +63,16 @@ export type RenderOptions = {
   idPrefix?: string;
 };
 
-// `group` is the enclosing radio-group, `form` the nearest enclosing form.
-type Ctx = { o: RenderOptions; prefix: string; group: Inst | undefined; form: Inst | undefined };
+// `group` is the enclosing radio-group, `form` the nearest enclosing form. `grow` is the parent
+// stack's direction, set only for that stack's own children (a named slot is not one, SPEC §2.2).
+type GrowAxis = "row" | "column";
+type Ctx = {
+  o: RenderOptions;
+  prefix: string;
+  group: Inst | undefined;
+  form: Inst | undefined;
+  grow: GrowAxis | undefined;
+};
 type Attrs = Record<string, unknown>;
 
 export function render(document: Document, options: RenderOptions): ReactElement {
@@ -74,6 +82,7 @@ export function render(document: Document, options: RenderOptions): ReactElement
     prefix: options.idPrefix ?? "weft-",
     group: undefined,
     form: undefined,
+    grow: undefined,
   };
   return h(Fragment, null, root ? renderNode(root, ctx) : null);
 }
@@ -139,10 +148,15 @@ const kids = (list: InstChild[], ctx: Ctx): ReactNode[] =>
 // box, so a host stylesheet can lay out a form footer or a dialog's button bar; the box is a
 // plain div and adds nothing to the accessibility tree.
 function content(n: Inst, ctx: Ctx): ReactNode[] {
+  const body: Ctx = {
+    ...ctx,
+    grow: n.kind === "stack" ? (text(n, "direction") === "row" ? "row" : "column") : undefined,
+  };
+  const slotted: Ctx = { ...ctx, grow: undefined };
   return regions(n).map((r) =>
     r.slot === undefined
-      ? h(Fragment, null, ...kids(r.list, ctx))
-      : h("div", { "data-weft-slot": r.slot }, ...kids(r.list, ctx)),
+      ? h(Fragment, null, ...kids(r.list, body))
+      : h("div", { "data-weft-slot": r.slot }, ...kids(r.list, slotted)),
   );
 }
 
@@ -158,16 +172,44 @@ const ALIGN: Record<string, string> = {
   stretch: "stretch",
 };
 
+// `start` is the initial value, so it is not written (SPEC §5.1).
+const JUSTIFY: Record<string, NonNullable<CSSProperties["justifyContent"]>> = {
+  center: "center",
+  end: "flex-end",
+  "space-between": "space-between",
+};
+
+// The same cap as `capped_columns` in the static page: at most `columns` tracks, fewer when narrow.
+function cappedColumns(columns: number, min: string, gap: string | undefined): string {
+  const gaps = columns - 1;
+  const floor =
+    gaps > 0 && gap !== undefined
+      ? `max(${min}, calc((100% - ${gaps} * ${gap}) / ${columns}))`
+      : `max(${min}, calc(100% / ${columns}))`;
+  return `repeat(auto-fill, minmax(${floor}, 1fr))`;
+}
+
 function layoutStyle(n: Inst, ctx: Ctx): CSSProperties {
   const style: CSSProperties = {};
   const gap = tokenCss(n.props["gap"], ctx.o.tokens);
   if (gap !== undefined) style.gap = gap;
   Object.assign(style, materialStyle(n.props["material"], ctx.o.tokens));
+  const padding = tokenCss(n.props["padding"], ctx.o.tokens);
+  if (padding !== undefined) style.padding = padding;
+  const max = tokenCss(n.props["max-width"], ctx.o.tokens);
+  if (max !== undefined) {
+    // The cap is the border box, so padding stays inside it.
+    style.width = "100%";
+    style.maxWidth = max;
+    style.boxSizing = "border-box";
+  }
   if (n.kind === "grid") {
     style.display = "grid";
     const columns = prop(n, "columns").value;
+    const min = tokenCss(n.props["min-column-width"], ctx.o.tokens);
     if (typeof columns === "number" && Number.isInteger(columns) && columns >= 1 && columns <= 64) {
-      style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+      style.gridTemplateColumns =
+        min === undefined ? `repeat(${columns}, minmax(0, 1fr))` : cappedColumns(columns, min, gap);
     }
     return style;
   }
@@ -179,20 +221,28 @@ function layoutStyle(n: Inst, ctx: Ctx): CSSProperties {
   if (Object.hasOwn(ALIGN, align)) style.alignItems = ALIGN[align];
   else if (row) style.alignItems = "center";
   if (flag(n, "wrap")) style.flexWrap = "wrap";
+  if (Object.hasOwn(JUSTIFY, text(n, "justify"))) style.justifyContent = JUSTIFY[text(n, "justify")];
   return style;
 }
 
 // ---- Kinds ----
 
-// SPEC §2.2: the tilt is a `transform` on the element the node draws; a dialog, drawn into the
-// top layer, is the one exception.
+// SPEC §2.2: the tilt is a `transform` on the element the node draws, and `grow` is the flex
+// share on that same element. A dialog, drawn into the top layer, is the one exception.
 function renderNode(n: Inst, ctx: Ctx): ReactNode {
   const out = renderKind(n, ctx);
+  if (n.kind === "dialog" || !isValidElement(out)) return out;
   const transform = tiltCss(n.props);
-  if (transform === undefined || n.kind === "dialog" || !isValidElement(out)) return out;
+  const grow =
+    ctx.grow === undefined || !flag(n, "grow")
+      ? undefined
+      : ctx.grow === "row"
+        ? { flex: "1 1 0%", minWidth: "0" }
+        : { flex: "1 1 0%", minHeight: "0" };
+  if (transform === undefined && grow === undefined) return out;
   const { style } = out.props as { style?: CSSProperties };
   return cloneElement(out as ReactElement<{ style?: CSSProperties }>, {
-    style: { ...style, transform },
+    style: { ...style, ...(transform === undefined ? {} : { transform }), ...grow },
   });
 }
 

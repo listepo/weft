@@ -29,7 +29,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16 | todo | P2 | 5 | 30% | |
-| T16.3 | todo | P2 | 3 | 0% | |
+| T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.4 | todo | P2 | 4 | 0% | |
 | T16.5 | todo | P2 | 3 | 0% | |
@@ -412,6 +412,8 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 ### T16.3. Layout vocabulary: web generators and the reference renderer
 
 T16 scope items 3 and 5 for the web, as the design's generate table says. Depends on T16.2.
+
+Execution plan: follow the four steps below, and only those. Read `docs/layout-design.md` generate table before editing. Update SPEC §9 web rows in the same change as the generators. Retake and review insta snapshots and the `packages/visual` web baselines for `dashboard`, `glass` and `layout`. Do not implement importers (T16.8), SwiftUI, Slint, or design tools. Verify with the visual comparison (including a narrow viewport at one column and a wide one at three) and `moon run root:changed`.
 
 Steps:
 
