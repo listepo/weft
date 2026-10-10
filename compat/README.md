@@ -1,6 +1,6 @@
 # Compatibility fixtures
 
-Fixtures for SPEC §8: a reader built for Weft 0.2 must survive documents from the future and from other vendors. They are read by `packages/core/test/compat.test.ts` and `packages/render-react/test/compat.test.ts`. Each file starts with a comment naming what it exercises. Diagnostics below are for the `weft-core` catalog; "lenient" and "strict" are the validator modes.
+Fixtures for SPEC §8: a reader built for Weft 0.3 must survive documents from the future and from other vendors. They are read by `packages/core/test/compat.test.ts` and `packages/render-react/test/compat.test.ts`. Each file starts with a comment naming what it exercises. Diagnostics below are for the `weft-core` catalog; "lenient" and "strict" are the validator modes.
 
 | Fixture | Lenient | Strict | Rendering |
 | --- | --- | --- | --- |

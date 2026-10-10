@@ -20,7 +20,7 @@ test("every registered code has a case", () => {
   assert.deepEqual(
     Object.keys(cases).toSorted(),
     Object.keys(DIAGNOSTIC_CODES)
-      .filter((code) => !/^W[567]|^W31[56]$/.test(code))
+      .filter((code) => !/^W[567]|^W31[56]$|^W810$/.test(code))
       .toSorted(),
   );
 });
@@ -131,7 +131,7 @@ test("extension elements and attributes pass in both modes", () => {
 
 test("unknown content survives a round-trip", () => {
   const markup = [
-    '<screen id="s" weft="0.3">',
+    '<screen id="s" weft="0.4">',
     '  <fancy id="f" level="3" mood="calm">',
     "    Hello",
     '    <x-acme-chart id="c" role="img"/>',

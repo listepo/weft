@@ -11,7 +11,14 @@ const INDENT: &str = "  ";
 pub fn serialize(document: &Document) -> String {
     let doc = canonicalize(document);
     let mut lines = Vec::new();
-    write_node(&doc.root, "", &mut lines, Some(&doc.weft), &doc.context);
+    write_node(
+        &doc.root,
+        "",
+        &mut lines,
+        Some(&doc.weft),
+        doc.version.as_deref(),
+        &doc.context,
+    );
     format!("{}\n", lines.join("\n"))
 }
 
@@ -52,6 +59,7 @@ fn write_node(
     indent: &str,
     lines: &mut Vec<String>,
     weft: Option<&str>,
+    version: Option<&str>,
     context: &[Entry],
 ) {
     let mut attributes: Vec<(String, String)> = Vec::new();
@@ -64,7 +72,10 @@ fn write_node(
         .filter(|(name, _)| weft.is_none() || name.as_str() != "weft")
         .map(|(name, value)| (name.clone(), format_value(value)))
         .collect();
-    // The root carries the document version as an ordinary attribute, sorted with the props.
+    // The root carries the format version and its own version as ordinary attributes.
+    if let Some(version) = version.filter(|w| !w.is_empty()) {
+        props.push(("version".into(), version.to_owned()));
+    }
     if let Some(weft) = weft.filter(|w| !w.is_empty()) {
         props.push(("weft".into(), weft.to_owned()));
     }
@@ -120,7 +131,7 @@ fn write_element(
             for child in children {
                 match child {
                     Child::Text(t) => lines.push(format!("{inner}{}", escape_text(t))),
-                    Child::Node(n) => write_node(n, &inner, lines, None, &[]),
+                    Child::Node(n) => write_node(n, &inner, lines, None, None, &[]),
                 }
             }
             for (name, list) in slots {
@@ -153,6 +164,7 @@ mod tests {
         root.children = vec![Child::Node(Box::new(text))];
         let doc = Document {
             weft: "0.1".into(),
+            version: None,
             context: vec![],
             root,
         };

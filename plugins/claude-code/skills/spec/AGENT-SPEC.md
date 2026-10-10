@@ -12,7 +12,7 @@ The examples are valid in strict mode against the core catalog `weft-core` 0.2 a
 | The data model (paths such as `$.user.email`) | The targets of bindings. Do not invent paths the host does not have. When the host has a data schema, a path it does not declare is `W315` and data of the wrong type for the attribute is `W316`. |
 | The action names (`auth.submit`, `nav.back`) | The values of `on-<event>`. When the host lists actions, use only those (`W308`). |
 | The design tokens (`space.md`, `color.accent`) | The values of token props. When the host lists tokens, use only those (`W306`). |
-| The format version and catalogs it reads | `weft="0.2"` on the root; write nothing a host does not advertise. |
+| The format version and catalogs it reads | `weft="0.3"` on the root; write nothing a host does not advertise. An optional `version="MAJOR.MINOR.PATCH"` on the root `<screen>` or `<fragment>` is that document's own version, a literal (`W230`). |
 | The document schema (`weft_schema`, or `weft schema`) | Only when the host constrains your output to a JSON Schema: the canonical JSON (SPEC §3) its catalog admits. You then write that JSON instead of markup, and validate it all the same: the schema cannot check unique ids, bindings, tokens or actions (SPEC §3.1). |
 
 Validate in **strict** mode before you answer: unknown elements and attributes are warnings for readers but errors for writers.
@@ -33,7 +33,7 @@ Use the project's kinds as you use core kinds: look them up in `weft_catalog` wi
 ## 2. Writing a screen
 
 ```xml
-<screen id="todos" label="Todos" weft="0.2">
+<screen id="todos" label="Todos" version="1.0.0" weft="0.3">
   <form id="add" label="Add a todo" on-submit="todo.add">
     <stack id="add-row" direction="row" gap="{token.space.sm}">
       <field id="title" label="Title" required="true" value="{$.draft}"/>
@@ -56,7 +56,7 @@ Use the project's kinds as you use core kinds: look them up in `weft_catalog` wi
 
 ### 2.1 Syntax
 
-- One root `<screen id="…" weft="0.2">`, with a `label` naming the screen. Nothing outside it but comments and whitespace.
+- One root `<screen id="…" weft="0.3">`, with a `label` naming the screen. Nothing outside it but comments and whitespace. Optional `version="MAJOR.MINOR.PATCH"` on that root, or on the root `<fragment>` of a fragment file, is the document's own version: a literal, never a binding (`W230`). `weft version-check` says when a change must raise it (`W810`).
 - Names are lowercase with hyphens: `radio-group`, `on-press`. No `class`, `style`, `onClick`, `aria-*` or `data-*`: they are not Weft.
 - Every attribute has a value in double quotes. No bare attributes: `required="true"`, not `required`.
 - An element without content is self-closing: `<field id="f" label="Name"/>`.
@@ -145,7 +145,7 @@ A screen may carry a `<context>` block: notes that people and agents left for wh
 How to write it: one `<context>` as the first child of `<screen>`, holding only `<entry>` elements, one per line. An entry takes `id` (unique among elements and entries), `kind` (`intent`, `decision`, `constraint`, `question`, `todo` or `source`), `by`, `name` (1–64 letters, digits, spaces or `._@/+-`), `for` when it is about an element other than the root, and `status="open"` or `status="resolved"` on a `question` or `todo` only. The text is the entry's content, 1–500 characters of plain text, with `&` and `<` written `&amp;` and `&lt;`. At most 100 entries and 16,000 characters of text in all.
 
 ```xml
-<screen id="signin" label="Sign in" weft="0.2">
+<screen id="signin" label="Sign in" weft="0.3">
   <context>
     <entry id="why" by="human" kind="intent" name="Ivan">Returning users sign in with email &amp; password.</entry>
     <entry id="go-disabled" by="agent" for="go" kind="decision" name="claude-opus-5-5">Disabled until an email is typed, so auth.submit never gets an empty request.</entry>
@@ -163,7 +163,7 @@ How to write it: one `<context>` as the first child of `<screen>`, holding only 
 A project can share a block between screens, such as a page header, as a *fragment* in its own file (SPEC §10.7). Place it with `<use>`; never copy its body into the screen.
 
 ```xml
-<fragment label="Page header" weft="0.2">
+<fragment label="Page header" version="1.0.0" weft="0.3">
   <param name="title" required="true" type="string"/>
   <param name="back" type="action"/>
   <param name="actions" type="slot"/>
@@ -176,7 +176,7 @@ A project can share a block between screens, such as a page header, as a *fragme
 ```
 
 ```xml
-<screen id="cart" label="Cart" weft="0.2">
+<screen id="cart" label="Cart" weft="0.3">
   <use id="header" fragment="page-header" title="Your cart" on-back="nav.back">
     <slot name="actions">
       <button id="clear" on-press="cart.clear">Clear</button>
@@ -209,6 +209,7 @@ Prefer patches to rewriting. A patch list is JSON, addresses elements by id, app
 ```
 
 - **`set`** `{ op, id, prop, value }` changes one prop. `value` is typed JSON, not markup: `"text"`, `7`, `true`, `{ "bind": "$.busy" }`, `{ "bind": "$.busy", "not": true }`, `{ "token": "space.md" }`. `null` removes the prop. A prop `on-<event>` sets or (with `null`) removes an action. `prop: "text"` changes an element's text wherever it is kept. `id` and the root's `weft` cannot be set.
+- **`set-version`** `{ op, value }` sets the document's `version`. `value` is a string, or `null` to remove it. A value that is not `MAJOR.MINOR.PATCH` is `W230` and nothing is applied.
 - **`insert`** `{ op, parent, slot?, index?, markup }` adds one or more elements written as markup, with ids the document does not have yet. Without `slot` they go into the default content; `index` counts that list, text included, and defaults to the end.
 - **`remove`** `{ op, id }` deletes an element and everything in it.
 - **`move`** `{ op, id, parent, slot?, index? }` moves an element with its content; `index` counts the target list after the element has left it.
@@ -300,7 +301,7 @@ What each code asks of you:
 | W202 | Add a unique `id`. |
 | W203 | Use one of the values in `expected`. |
 | W204 | Use the type in `expected`: `level="2"`, not `level="two"`; a token, not a raw size. |
-| W205 | Add the required prop, `label` or the root's `weft="0.2"`. |
+| W205 | Add the required prop, `label` or the root's `weft="0.3"`. |
 | W206 | Use an event the component declares, or move the action to a component that has it. |
 | W207 | Use a slot the component declares, or put the elements in the default content. |
 | W208 | Add the required slot. |
@@ -314,7 +315,7 @@ What each code asks of you:
 | W216 | Fix the action name: `group.name`, lowercase start, no spaces or calls. |
 | W217 | Use a literal: this prop takes no binding. |
 | W218 | Use a plain binding; negation is for read-only boolean props. |
-| W219 | Write the version as `major.minor`: `weft="0.2"`. |
+| W219 | Write the format version as `major.minor`: `weft="0.3"`. |
 | W220 | Name the extension `x-<vendor>-<name>`. |
 | W221 | Remove control characters from the string. |
 | W222 | Give `<each>` `in="{$.items}"` and `as="item"`. |
@@ -323,6 +324,7 @@ What each code asks of you:
 | W227 | Give a `question` or `todo` entry `status="open"` (or `"resolved"`); remove `status` from any other kind. |
 | W228 | Shorten the entry to 500 characters, or remove resolved and outdated entries (at most 100, 16,000 characters in all). |
 | W229 | Write the entry's text; give `name` 1–64 letters, digits, spaces or `._@/+-`, starting with a letter or digit. |
+| W230 | Write `version` as a literal `MAJOR.MINOR.PATCH` (`1.4.2`), or remove it. A binding or a token is not a version. |
 | W301 | Give one of the two elements (or entries) another id; elements and entries share ids. |
 | W302 | Use a kind the parent (or slot) accepts, or move the element. |
 | W303 | Put the element inside its required parent. |
@@ -343,8 +345,8 @@ What each code asks of you:
 | W318 | Move the element with `grow="true"` into a `stack`, or remove `grow`. |
 | W401 | Use a catalog component (see `hint`), or an extension the host knows. |
 | W402 | Use an attribute the component declares, or remove it. |
-| W403 | Write `weft="0.2"`: the reader is older than the version you wrote. |
-| W404 | Write `weft="0.2"`: the reader cannot read that major version. |
+| W403 | Write `weft="0.3"`: the reader is older than the version you wrote. |
+| W404 | Write `weft="0.3"`: the reader cannot read that major version. |
 | W501 | Send an array of patches, each with exactly the members shown in section 3. |
 | W502 | Use an id that exists in the current document; `hint` names the nearest. |
 | W503 | Do not set `id` or `weft`; use a valid prop name and an action name for `on-*`. |
@@ -380,6 +382,7 @@ What each code asks of you:
 | W805 | Break the cycle: a fragment may not use itself, directly or through other fragments; write the repeated part out once. |
 | W806 | Use fewer or smaller fragments: a screen expands to at most 10,000 elements and 256 levels. |
 | W807 | Read a value parameter whole (`{$title}`, not `{$title.x}`) in a prop, an action parameter in `on-*`, and a slot parameter with `<outlet>`. |
+| W810 | `weft version-check` only: the declared `version` is lower than the changes require. Raise it to at least the version the command prints. |
 
 ### 4.1 Reading back an edit
 
@@ -410,7 +413,7 @@ The instruction needs `now true while $.busy is truthy`. This line says falsy, s
 
 Before you answer, every one of these holds:
 
-1. One `<screen>` root with `weft="0.2"` and a `label`.
+1. One `<screen>` root with `weft="0.3"` and a `label`. `version`, when present, is `MAJOR.MINOR.PATCH`.
 2. Every element has a unique id; untouched elements keep theirs.
 3. Only catalog kinds, props, states, slots and events, or extensions the host knows.
 4. Every value is one literal or one whole reference; tokens for design values.

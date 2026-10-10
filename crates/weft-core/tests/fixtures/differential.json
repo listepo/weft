@@ -1217,7 +1217,7 @@
    }
   },
   "core": {
-   "weft": "0.2",
+   "weft": "0.3",
    "name": "weft-core",
    "version": "0.2.0",
    "components": {
@@ -1228,7 +1228,7 @@
      "root": true,
      "props": {
       "weft": {
-       "description": "The Weft format version of the document: \"0.2\", or \"0.1\" for a document written before 0.2.",
+       "description": "The Weft format version of the document: \"0.3\". A document written as \"0.1\" or \"0.2\" stays valid.",
        "type": "string",
        "required": true,
        "bindable": false
@@ -27425,7 +27425,7 @@
       "column": 16,
       "expected": "major.minor",
       "got": "one",
-      "hint": "write weft=\"0.2\""
+      "hint": "write weft=\"0.3\""
      }
     ],
     "json": "{\n  \"weft\": \"one\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
@@ -27450,7 +27450,7 @@
       "column": 16,
       "expected": "major.minor",
       "got": "one",
-      "hint": "write weft=\"0.2\""
+      "hint": "write weft=\"0.3\""
      }
     ],
     "json": "{\n  \"weft\": \"one\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
@@ -27745,6 +27745,56 @@
     ],
     "json": "{\n  \"weft\": \"0.1\",\n  \"context\": [\n    {\n      \"id\": \"n\",\n      \"kind\": \"intent\",\n      \"by\": \"agent\",\n      \"name\": \"m\",\n      \"text\": \"\"\n    }\n  ],\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
     "markup": "<screen id=\"s\" weft=\"0.1\">\n  <context>\n    <entry id=\"n\" by=\"agent\" kind=\"intent\" name=\"m\"/>\n  </context>\n</screen>\n"
+   }
+  },
+  {
+   "name": "W230 lenient",
+   "markup": "<screen id=\"s\" label=\"S\" version=\"1.2\" weft=\"0.3\"/>",
+   "mode": "lenient",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W230",
+      "severity": "error",
+      "message": "version must be a literal MAJOR.MINOR.PATCH.",
+      "path": "/screen#s/@version",
+      "line": 1,
+      "column": 26,
+      "expected": "MAJOR.MINOR.PATCH",
+      "got": "1.2",
+      "hint": "write version=\"1.0.0\", or remove it"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.3\",\n  \"version\": \"1.2\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"S\"\n    }\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"S\" version=\"1.2\" weft=\"0.3\"/>\n"
+   }
+  },
+  {
+   "name": "W230 strict",
+   "markup": "<screen id=\"s\" label=\"S\" version=\"1.2\" weft=\"0.3\"/>",
+   "mode": "strict",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W230",
+      "severity": "error",
+      "message": "version must be a literal MAJOR.MINOR.PATCH.",
+      "path": "/screen#s/@version",
+      "line": 1,
+      "column": 26,
+      "expected": "MAJOR.MINOR.PATCH",
+      "got": "1.2",
+      "hint": "write version=\"1.0.0\", or remove it"
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.3\",\n  \"version\": \"1.2\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"S\"\n    }\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"S\" version=\"1.2\" weft=\"0.3\"/>\n"
    }
   },
   {
@@ -28649,7 +28699,7 @@
   },
   {
    "name": "W403 lenient",
-   "markup": "<screen id=\"s\" weft=\"0.3\"></screen>",
+   "markup": "<screen id=\"s\" weft=\"0.4\"></screen>",
    "mode": "lenient",
    "catalog": "test",
    "tokens": false,
@@ -28659,21 +28709,21 @@
      {
       "code": "W403",
       "severity": "warning",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 1,
       "column": 16,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
-    "markup": "<screen id=\"s\" weft=\"0.3\"/>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.4\"/>\n"
    }
   },
   {
    "name": "W403 strict",
-   "markup": "<screen id=\"s\" weft=\"0.3\"></screen>",
+   "markup": "<screen id=\"s\" weft=\"0.4\"></screen>",
    "mode": "strict",
    "catalog": "test",
    "tokens": false,
@@ -28683,16 +28733,16 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 1,
       "column": 16,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
-    "markup": "<screen id=\"s\" weft=\"0.3\"/>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\"\n  }\n}\n",
+    "markup": "<screen id=\"s\" weft=\"0.4\"/>\n"
    }
   },
   {
@@ -28707,7 +28757,7 @@
      {
       "code": "W404",
       "severity": "error",
-      "message": "Version 1.0 is not readable by a 0.2 reader.",
+      "message": "Version 1.0 is not readable by a 0.3 reader.",
       "path": "/screen#s/@weft",
       "line": 1,
       "column": 16,
@@ -28731,7 +28781,7 @@
      {
       "code": "W404",
       "severity": "error",
-      "message": "Version 1.0 is not readable by a 0.2 reader.",
+      "message": "Version 1.0 is not readable by a 0.3 reader.",
       "path": "/screen#s/@weft",
       "line": 1,
       "column": 16,
@@ -29195,7 +29245,7 @@
       "path": "/dialog#confirm/@weft",
       "line": 1,
       "column": 1,
-      "expected": "weft=\"0.2\""
+      "expected": "weft=\"0.3\""
      },
      {
       "code": "W201",
@@ -29228,7 +29278,7 @@
       "path": "/dialog#confirm/@weft",
       "line": 1,
       "column": 1,
-      "expected": "weft=\"0.2\""
+      "expected": "weft=\"0.3\""
      },
      {
       "code": "W201",
@@ -29287,7 +29337,7 @@
       "path": "/list#todos/@weft",
       "line": 1,
       "column": 1,
-      "expected": "weft=\"0.2\""
+      "expected": "weft=\"0.3\""
      },
      {
       "code": "W201",
@@ -29320,7 +29370,7 @@
       "path": "/list#todos/@weft",
       "line": 1,
       "column": 1,
-      "expected": "weft=\"0.2\""
+      "expected": "weft=\"0.3\""
      },
      {
       "code": "W201",
@@ -29365,59 +29415,59 @@
   },
   {
    "name": "SPEC.md#4 core lenient",
-   "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": 1,\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"version\": \"1.0.0\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": 1,\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
    }
   },
   {
    "name": "SPEC.md#4 core strict",
-   "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": 1,\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"version\": \"1.0.0\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": 1,\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
    }
   },
   {
    "name": "SPEC.md#4 syntax lenient",
-   "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": null,
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": \"1\",\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"version\": \"1.0.0\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": \"1\",\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
    }
   },
   {
    "name": "SPEC.md#4 syntax strict",
-   "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": null,
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": \"1\",\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"version\": \"1.0.0\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": \"1\",\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
    }
   },
   {
    "name": "SPEC.md#5 core lenient",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -29435,13 +29485,13 @@
       "got": "page-header"
      }
     ],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"header\",\n        \"props\": {\n          \"fragment\": \"page-header\",\n          \"title\": \"Your cart\"\n        },\n        \"on\": {\n          \"back\": \"nav.back\"\n        },\n        \"slots\": {\n          \"actions\": [\n            {\n              \"kind\": \"button\",\n              \"id\": \"clear\",\n              \"on\": {\n                \"press\": \"cart.clear\"\n              },\n              \"children\": [\n                \"Clear\"\n              ]\n            }\n          ]\n        }\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"header\",\n        \"props\": {\n          \"fragment\": \"page-header\",\n          \"title\": \"Your cart\"\n        },\n        \"on\": {\n          \"back\": \"nav.back\"\n        },\n        \"slots\": {\n          \"actions\": [\n            {\n              \"kind\": \"button\",\n              \"id\": \"clear\",\n              \"on\": {\n                \"press\": \"cart.clear\"\n              },\n              \"children\": [\n                \"Clear\"\n              ]\n            }\n          ]\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n"
    }
   },
   {
    "name": "SPEC.md#5 core strict",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -29459,34 +29509,34 @@
       "got": "page-header"
      }
     ],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"header\",\n        \"props\": {\n          \"fragment\": \"page-header\",\n          \"title\": \"Your cart\"\n        },\n        \"on\": {\n          \"back\": \"nav.back\"\n        },\n        \"slots\": {\n          \"actions\": [\n            {\n              \"kind\": \"button\",\n              \"id\": \"clear\",\n              \"on\": {\n                \"press\": \"cart.clear\"\n              },\n              \"children\": [\n                \"Clear\"\n              ]\n            }\n          ]\n        }\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"header\",\n        \"props\": {\n          \"fragment\": \"page-header\",\n          \"title\": \"Your cart\"\n        },\n        \"on\": {\n          \"back\": \"nav.back\"\n        },\n        \"slots\": {\n          \"actions\": [\n            {\n              \"kind\": \"button\",\n              \"id\": \"clear\",\n              \"on\": {\n                \"press\": \"cart.clear\"\n              },\n              \"children\": [\n                \"Clear\"\n              ]\n            }\n          ]\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n"
    }
   },
   {
    "name": "SPEC.md#5 syntax lenient",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": null,
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"header\",\n        \"props\": {\n          \"fragment\": \"page-header\",\n          \"title\": \"Your cart\"\n        },\n        \"on\": {\n          \"back\": \"nav.back\"\n        },\n        \"slots\": {\n          \"actions\": [\n            {\n              \"kind\": \"button\",\n              \"id\": \"clear\",\n              \"on\": {\n                \"press\": \"cart.clear\"\n              },\n              \"children\": [\n                \"Clear\"\n              ]\n            }\n          ]\n        }\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"header\",\n        \"props\": {\n          \"fragment\": \"page-header\",\n          \"title\": \"Your cart\"\n        },\n        \"on\": {\n          \"back\": \"nav.back\"\n        },\n        \"slots\": {\n          \"actions\": [\n            {\n              \"kind\": \"button\",\n              \"id\": \"clear\",\n              \"on\": {\n                \"press\": \"cart.clear\"\n              },\n              \"children\": [\n                \"Clear\"\n              ]\n            }\n          ]\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n"
    }
   },
   {
    "name": "SPEC.md#5 syntax strict",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": null,
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"header\",\n        \"props\": {\n          \"fragment\": \"page-header\",\n          \"title\": \"Your cart\"\n        },\n        \"on\": {\n          \"back\": \"nav.back\"\n        },\n        \"slots\": {\n          \"actions\": [\n            {\n              \"kind\": \"button\",\n              \"id\": \"clear\",\n              \"on\": {\n                \"press\": \"cart.clear\"\n              },\n              \"children\": [\n                \"Clear\"\n              ]\n            }\n          ]\n        }\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"header\",\n        \"props\": {\n          \"fragment\": \"page-header\",\n          \"title\": \"Your cart\"\n        },\n        \"on\": {\n          \"back\": \"nav.back\"\n        },\n        \"slots\": {\n          \"actions\": [\n            {\n              \"kind\": \"button\",\n              \"id\": \"clear\",\n              \"on\": {\n                \"press\": \"cart.clear\"\n              },\n              \"children\": [\n                \"Clear\"\n              ]\n            }\n          ]\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n"
    }
   },
   {
@@ -30813,7 +30863,7 @@
   },
   {
    "name": "compat/unknown-attribute.weft core lenient",
-   "markup": "<!-- An unknown attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -30823,12 +30873,12 @@
      {
       "code": "W403",
       "severity": "warning",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W402",
@@ -30841,13 +30891,13 @@
       "got": "glow"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"go\",\n            \"props\": {\n              \"glow\": \"strong\",\n              \"variant\": \"primary\"\n            },\n            \"children\": [\n              \"Go\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"go\",\n            \"props\": {\n              \"glow\": \"strong\",\n              \"variant\": \"primary\"\n            },\n            \"children\": [\n              \"Go\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-attribute.weft core strict",
-   "markup": "<!-- An unknown attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -30857,12 +30907,12 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W402",
@@ -30875,39 +30925,39 @@
       "got": "glow"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"go\",\n            \"props\": {\n              \"glow\": \"strong\",\n              \"variant\": \"primary\"\n            },\n            \"children\": [\n              \"Go\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"go\",\n            \"props\": {\n              \"glow\": \"strong\",\n              \"variant\": \"primary\"\n            },\n            \"children\": [\n              \"Go\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-attribute.weft syntax lenient",
-   "markup": "<!-- An unknown attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
    "catalog": null,
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"go\",\n            \"props\": {\n              \"glow\": \"strong\",\n              \"variant\": \"primary\"\n            },\n            \"children\": [\n              \"Go\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"go\",\n            \"props\": {\n              \"glow\": \"strong\",\n              \"variant\": \"primary\"\n            },\n            \"children\": [\n              \"Go\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-attribute.weft syntax strict",
-   "markup": "<!-- An unknown attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
    "catalog": null,
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"go\",\n            \"props\": {\n              \"glow\": \"strong\",\n              \"variant\": \"primary\"\n            },\n            \"children\": [\n              \"Go\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"go\",\n            \"props\": {\n              \"glow\": \"strong\",\n              \"variant\": \"primary\"\n            },\n            \"children\": [\n              \"Go\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-element.weft core lenient",
-   "markup": "<!-- A 0.3 document with an element this 0.2 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
+   "markup": "<!-- A 0.4 document with an element this 0.3 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -30917,12 +30967,12 @@
      {
       "code": "W403",
       "severity": "warning",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -30936,13 +30986,13 @@
       "hint": "use a catalog component, or an extension named x-<vendor>-hologram"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"text\",\n            \"id\": \"before\",\n            \"children\": [\n              \"Before\"\n            ]\n          },\n          {\n            \"kind\": \"hologram\",\n            \"id\": \"holo\",\n            \"props\": {\n              \"intensity\": \"3\"\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"after\",\n            \"children\": [\n              \"After\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"text\",\n            \"id\": \"before\",\n            \"children\": [\n              \"Before\"\n            ]\n          },\n          {\n            \"kind\": \"hologram\",\n            \"id\": \"holo\",\n            \"props\": {\n              \"intensity\": \"3\"\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"after\",\n            \"children\": [\n              \"After\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-element.weft core strict",
-   "markup": "<!-- A 0.3 document with an element this 0.2 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
+   "markup": "<!-- A 0.4 document with an element this 0.3 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -30952,12 +31002,12 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -30971,39 +31021,39 @@
       "hint": "use a catalog component, or an extension named x-<vendor>-hologram"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"text\",\n            \"id\": \"before\",\n            \"children\": [\n              \"Before\"\n            ]\n          },\n          {\n            \"kind\": \"hologram\",\n            \"id\": \"holo\",\n            \"props\": {\n              \"intensity\": \"3\"\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"after\",\n            \"children\": [\n              \"After\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"text\",\n            \"id\": \"before\",\n            \"children\": [\n              \"Before\"\n            ]\n          },\n          {\n            \"kind\": \"hologram\",\n            \"id\": \"holo\",\n            \"props\": {\n              \"intensity\": \"3\"\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"after\",\n            \"children\": [\n              \"After\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-element.weft syntax lenient",
-   "markup": "<!-- A 0.3 document with an element this 0.2 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
+   "markup": "<!-- A 0.4 document with an element this 0.3 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
    "catalog": null,
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"text\",\n            \"id\": \"before\",\n            \"children\": [\n              \"Before\"\n            ]\n          },\n          {\n            \"kind\": \"hologram\",\n            \"id\": \"holo\",\n            \"props\": {\n              \"intensity\": \"3\"\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"after\",\n            \"children\": [\n              \"After\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"text\",\n            \"id\": \"before\",\n            \"children\": [\n              \"Before\"\n            ]\n          },\n          {\n            \"kind\": \"hologram\",\n            \"id\": \"holo\",\n            \"props\": {\n              \"intensity\": \"3\"\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"after\",\n            \"children\": [\n              \"After\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-element.weft syntax strict",
-   "markup": "<!-- A 0.3 document with an element this 0.2 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
+   "markup": "<!-- A 0.4 document with an element this 0.3 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
    "catalog": null,
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"text\",\n            \"id\": \"before\",\n            \"children\": [\n              \"Before\"\n            ]\n          },\n          {\n            \"kind\": \"hologram\",\n            \"id\": \"holo\",\n            \"props\": {\n              \"intensity\": \"3\"\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"after\",\n            \"children\": [\n              \"After\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"text\",\n            \"id\": \"before\",\n            \"children\": [\n              \"Before\"\n            ]\n          },\n          {\n            \"kind\": \"hologram\",\n            \"id\": \"holo\",\n            \"props\": {\n              \"intensity\": \"3\"\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"after\",\n            \"children\": [\n              \"After\"\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-in-restricted-parent.weft core lenient",
-   "markup": "<!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
+   "markup": "<!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -31013,12 +31063,12 @@
      {
       "code": "W403",
       "severity": "warning",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -31032,13 +31082,13 @@
       "hint": "use a catalog component, or an extension named x-<vendor>-badge"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"list\",\n        \"id\": \"l\",\n        \"children\": [\n          {\n            \"kind\": \"item\",\n            \"id\": \"i1\",\n            \"children\": [\n              \"One\"\n            ]\n          },\n          {\n            \"kind\": \"badge\",\n            \"id\": \"b1\",\n            \"props\": {\n              \"label\": \"New\"\n            },\n            \"children\": [\n              {\n                \"kind\": \"item\",\n                \"id\": \"i2\",\n                \"children\": [\n                  \"Two\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"list\",\n        \"id\": \"l\",\n        \"children\": [\n          {\n            \"kind\": \"item\",\n            \"id\": \"i1\",\n            \"children\": [\n              \"One\"\n            ]\n          },\n          {\n            \"kind\": \"badge\",\n            \"id\": \"b1\",\n            \"props\": {\n              \"label\": \"New\"\n            },\n            \"children\": [\n              {\n                \"kind\": \"item\",\n                \"id\": \"i2\",\n                \"children\": [\n                  \"Two\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-in-restricted-parent.weft core strict",
-   "markup": "<!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
+   "markup": "<!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -31048,12 +31098,12 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -31067,39 +31117,39 @@
       "hint": "use a catalog component, or an extension named x-<vendor>-badge"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"list\",\n        \"id\": \"l\",\n        \"children\": [\n          {\n            \"kind\": \"item\",\n            \"id\": \"i1\",\n            \"children\": [\n              \"One\"\n            ]\n          },\n          {\n            \"kind\": \"badge\",\n            \"id\": \"b1\",\n            \"props\": {\n              \"label\": \"New\"\n            },\n            \"children\": [\n              {\n                \"kind\": \"item\",\n                \"id\": \"i2\",\n                \"children\": [\n                  \"Two\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"list\",\n        \"id\": \"l\",\n        \"children\": [\n          {\n            \"kind\": \"item\",\n            \"id\": \"i1\",\n            \"children\": [\n              \"One\"\n            ]\n          },\n          {\n            \"kind\": \"badge\",\n            \"id\": \"b1\",\n            \"props\": {\n              \"label\": \"New\"\n            },\n            \"children\": [\n              {\n                \"kind\": \"item\",\n                \"id\": \"i2\",\n                \"children\": [\n                  \"Two\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-in-restricted-parent.weft syntax lenient",
-   "markup": "<!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
+   "markup": "<!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
    "catalog": null,
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"list\",\n        \"id\": \"l\",\n        \"children\": [\n          {\n            \"kind\": \"item\",\n            \"id\": \"i1\",\n            \"children\": [\n              \"One\"\n            ]\n          },\n          {\n            \"kind\": \"badge\",\n            \"id\": \"b1\",\n            \"props\": {\n              \"label\": \"New\"\n            },\n            \"children\": [\n              {\n                \"kind\": \"item\",\n                \"id\": \"i2\",\n                \"children\": [\n                  \"Two\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"list\",\n        \"id\": \"l\",\n        \"children\": [\n          {\n            \"kind\": \"item\",\n            \"id\": \"i1\",\n            \"children\": [\n              \"One\"\n            ]\n          },\n          {\n            \"kind\": \"badge\",\n            \"id\": \"b1\",\n            \"props\": {\n              \"label\": \"New\"\n            },\n            \"children\": [\n              {\n                \"kind\": \"item\",\n                \"id\": \"i2\",\n                \"children\": [\n                  \"Two\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-in-restricted-parent.weft syntax strict",
-   "markup": "<!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
+   "markup": "<!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
    "catalog": null,
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"list\",\n        \"id\": \"l\",\n        \"children\": [\n          {\n            \"kind\": \"item\",\n            \"id\": \"i1\",\n            \"children\": [\n              \"One\"\n            ]\n          },\n          {\n            \"kind\": \"badge\",\n            \"id\": \"b1\",\n            \"props\": {\n              \"label\": \"New\"\n            },\n            \"children\": [\n              {\n                \"kind\": \"item\",\n                \"id\": \"i2\",\n                \"children\": [\n                  \"Two\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"list\",\n        \"id\": \"l\",\n        \"children\": [\n          {\n            \"kind\": \"item\",\n            \"id\": \"i1\",\n            \"children\": [\n              \"One\"\n            ]\n          },\n          {\n            \"kind\": \"badge\",\n            \"id\": \"b1\",\n            \"props\": {\n              \"label\": \"New\"\n            },\n            \"children\": [\n              {\n                \"kind\": \"item\",\n                \"id\": \"i2\",\n                \"children\": [\n                  \"Two\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-with-children.weft core lenient",
-   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -31109,12 +31159,12 @@
      {
       "code": "W403",
       "severity": "warning",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -31128,13 +31178,13 @@
       "hint": "use a catalog component, or an extension named x-<vendor>-carousel"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-with-children.weft core strict",
-   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -31144,12 +31194,12 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -31163,34 +31213,34 @@
       "hint": "use a catalog component, or an extension named x-<vendor>-carousel"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-with-children.weft syntax lenient",
-   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
    "catalog": null,
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
    }
   },
   {
    "name": "compat/unknown-with-children.weft syntax strict",
-   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
    "catalog": null,
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
    }
   },
   {
@@ -31205,7 +31255,7 @@
      {
       "code": "W404",
       "severity": "error",
-      "message": "Version 1.0 is not readable by a 0.2 reader.",
+      "message": "Version 1.0 is not readable by a 0.3 reader.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
@@ -31229,7 +31279,7 @@
      {
       "code": "W404",
       "severity": "error",
-      "message": "Version 1.0 is not readable by a 0.2 reader.",
+      "message": "Version 1.0 is not readable by a 0.3 reader.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
@@ -33738,7 +33788,7 @@
   },
   {
    "name": "mutation 13 of SPEC.md#4",
-   "markup": "'<text id=\"t\">label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "'<text id=\"t\">label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -35389,7 +35439,7 @@
   },
   {
    "name": "mutation 51 of SPEC.md#4",
-   "markup": "&#x41;<each in=\"{$.xs}\" as=\"x\">\tragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "&#x41;<each in=\"{$.xs}\" as=\"x\">\tragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -35434,7 +35484,7 @@
   },
   {
    "name": "mutation 52 of compat/unknown-with-children.weft",
-   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
+   "markup": "<!-- An unknown element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -35444,12 +35494,12 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
       "line": 2,
       "column": 31,
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -35463,8 +35513,8 @@
       "hint": "use a catalog component, or an extension named x-<vendor>-carousel"
      }
     ],
-    "json": "{\n  \"weft\": \"0.3\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.4\",\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"s\",\n    \"props\": {\n      \"label\": \"Compat\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"stack\",\n        \"id\": \"st\",\n        \"children\": [\n          {\n            \"kind\": \"carousel\",\n            \"id\": \"car\",\n            \"props\": {\n              \"autoplay\": \"true\"\n            },\n            \"slots\": {\n              \"controls\": [\n                {\n                  \"kind\": \"button\",\n                  \"id\": \"prev\",\n                  \"children\": [\n                    \"Previous\"\n                  ]\n                }\n              ]\n            },\n            \"children\": [\n              {\n                \"kind\": \"text\",\n                \"id\": \"intro\",\n                \"children\": [\n                  \"Pick one\"\n                ]\n              },\n              {\n                \"kind\": \"button\",\n                \"id\": \"next\",\n                \"children\": [\n                  \"Next\"\n                ]\n              }\n            ]\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n"
    }
   },
   {
@@ -35573,7 +35623,7 @@
   },
   {
    "name": "mutation 56 of SPEC.md#5",
-   "markup": "reen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "reen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -36076,7 +36126,7 @@
   },
   {
    "name": "mutation 69 of SPEC.md#5",
-   "markup": "en id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "en id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -36392,7 +36442,7 @@
   },
   {
    "name": "mutation 79 of compat/unknown-element.weft",
-   "markup": "'{!$.b}> A 0.3 document with an element this 0.2 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
+   "markup": "'{!$.b}> A 0.4 document with an element this 0.3 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -38932,7 +38982,7 @@
   },
   {
    "name": "mutation 138 of SPEC.md#5",
-   "markup": "screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -39285,7 +39335,7 @@
   },
   {
    "name": "mutation 147 of compat/unknown-element.weft",
-   "markup": " document with an element this 0.2 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
+   "markup": " document with an element this 0.3 reader does not know. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <text id=\"before\">Before</text>\n    <hologram id=\"holo\" intensity=\"3\"/>\n    <text id=\"after\">After</text>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -39926,7 +39976,7 @@
   },
   {
    "name": "mutation 162 of compat/unknown-attribute.weft",
-   "markup": "known attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
+   "markup": "known attribute on a known element is kept in the model and ignored. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <button id=\"go\" glow=\"strong\" variant=\"primary\">Go</button>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -40085,7 +40135,7 @@
   },
   {
    "name": "mutation 166 of SPEC.md#4",
-   "markup": "&#0;<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "&#0;<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -40165,7 +40215,7 @@
   },
   {
    "name": "mutation 168 of SPEC.md#4",
-   "markup": "</text>\u0001<![CDATA[agment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "</text>\u0001<![CDATA[agment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -40470,7 +40520,7 @@
   },
   {
    "name": "mutation 173 of SPEC.md#5",
-   "markup": "'<![CDATA[😀\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "'<![CDATA[😀\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -40839,7 +40889,7 @@
   },
   {
    "name": "mutation 182 of compat/unknown-in-restricted-parent.weft",
-   "markup": "&amp;{$.a} unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
+   "markup": "&amp;{$.a} unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -40988,7 +41038,7 @@
   },
   {
    "name": "mutation 186 of SPEC.md#4",
-   "markup": "gment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "gment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -41363,7 +41413,7 @@
   },
   {
    "name": "mutation 196 of compat/unknown-in-restricted-parent.weft",
-   "markup": "own element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
+   "markup": "own element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -41387,7 +41437,7 @@
   },
   {
    "name": "mutation 197 of SPEC.md#4",
-   "markup": "<text id=\"t\"><fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "<text id=\"t\"><fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -42397,7 +42447,7 @@
   },
   {
    "name": "mutation 223 of SPEC.md#5",
-   "markup": "screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -44522,7 +44572,7 @@
   },
   {
    "name": "mutation 272 of compat/unknown-in-restricted-parent.weft",
-   "markup": "<slot name=\"footer\">&#x41;!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
+   "markup": "<slot name=\"footer\">&#x41;!-- An unknown element inside a parent whose allowedChildren lists only item. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <list id=\"l\">\n    <item id=\"i1\">One</item>\n    <badge id=\"b1\" label=\"New\">\n      <item id=\"i2\">Two</item>\n    </badge>\n  </list>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -44666,7 +44716,7 @@
   },
   {
    "name": "mutation 275 of SPEC.md#5",
-   "markup": "screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "screen id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -44736,7 +44786,7 @@
   },
   {
    "name": "mutation 277 of SPEC.md#5",
-   "markup": "een id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "een id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -44973,7 +45023,7 @@
   },
   {
    "name": "mutation 282 of compat/unknown-with-children.weft",
-   "markup": "\n😀id=\"dup\"known element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.3\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
+   "markup": "\n😀id=\"dup\"known element holding known children and a named slot: both stay readable. -->\n<screen id=\"s\" label=\"Compat\" weft=\"0.4\">\n  <stack id=\"st\">\n    <carousel id=\"car\" autoplay=\"true\">\n      <text id=\"intro\">Pick one</text>\n      <button id=\"next\">Next</button>\n      <slot name=\"controls\">\n        <button id=\"prev\">Previous</button>\n      </slot>\n    </carousel>\n  </stack>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -45102,7 +45152,7 @@
   },
   {
    "name": "mutation 286 of SPEC.md#5",
-   "markup": "\u0001{</each>n id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
+   "markup": "\u0001{</each>n id=\"cart\" label=\"Cart\" weft=\"0.3\">\n  <use id=\"header\" fragment=\"page-header\" title=\"Your cart\" on-back=\"nav.back\">\n    <slot name=\"actions\">\n      <button id=\"clear\" on-press=\"cart.clear\">Clear</button>\n    </slot>\n  </use>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -45634,15 +45684,15 @@
   },
   {
    "name": "mutation 298 of SPEC.md#4",
-   "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
+   "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": 1,\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
-    "markup": "<fragment label=\"Page header\" weft=\"0.2\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
+    "json": "{\n  \"weft\": \"0.3\",\n  \"version\": \"1.0.0\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"props\": {\n      \"label\": \"Page header\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"title\",\n          \"required\": true,\n          \"type\": \"string\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"default\": \"muted\",\n          \"name\": \"tone\",\n          \"type\": \"enum\",\n          \"values\": \"default muted\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"back\",\n          \"type\": \"action\"\n        }\n      },\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"allowed-children\": \"button link\",\n          \"name\": \"actions\",\n          \"type\": \"slot\"\n        }\n      },\n      {\n        \"kind\": \"stack\",\n        \"id\": \"bar\",\n        \"props\": {\n          \"direction\": \"row\"\n        },\n        \"children\": [\n          {\n            \"kind\": \"button\",\n            \"id\": \"back\",\n            \"on\": {\n              \"press\": \"{$back}\"\n            },\n            \"children\": [\n              \"Back\"\n            ]\n          },\n          {\n            \"kind\": \"heading\",\n            \"id\": \"title\",\n            \"props\": {\n              \"level\": 1,\n              \"text\": {\n                \"bind\": \"$title\"\n              }\n            }\n          },\n          {\n            \"kind\": \"text\",\n            \"id\": \"note\",\n            \"props\": {\n              \"tone\": {\n                \"bind\": \"$tone\"\n              }\n            },\n            \"children\": [\n              \"Signed in\"\n            ]\n          },\n          {\n            \"kind\": \"outlet\",\n            \"props\": {\n              \"name\": \"actions\"\n            }\n          }\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<fragment label=\"Page header\" version=\"1.0.0\" weft=\"0.3\">\n  <param name=\"title\" required=\"true\" type=\"string\"/>\n  <param default=\"muted\" name=\"tone\" type=\"enum\" values=\"default muted\"/>\n  <param name=\"back\" type=\"action\"/>\n  <param allowed-children=\"button link\" name=\"actions\" type=\"slot\"/>\n  <stack id=\"bar\" direction=\"row\">\n    <button id=\"back\" on-press=\"{$back}\">Back</button>\n    <heading id=\"title\" level=\"1\" text=\"{$title}\"/>\n    <text id=\"note\" tone=\"{$tone}\">Signed in</text>\n    <outlet name=\"actions\"/>\n  </stack>\n</fragment>\n"
    }
   },
   {
@@ -46104,7 +46154,7 @@
       "severity": "error",
       "message": "The root needs the format version.",
       "path": "/dialog#confirm/@weft",
-      "expected": "weft=\"0.2\""
+      "expected": "weft=\"0.3\""
      },
      {
       "code": "W201",
@@ -46166,7 +46216,7 @@
       "severity": "error",
       "message": "The root needs the format version.",
       "path": "/list#todos/@weft",
-      "expected": "weft=\"0.2\""
+      "expected": "weft=\"0.3\""
      },
      {
       "code": "W201",
@@ -46182,7 +46232,8 @@
   {
    "name": "SPEC.md#4 as JSON",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -46282,7 +46333,7 @@
   {
    "name": "SPEC.md#5 as JSON",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
     "root": {
      "kind": "screen",
      "id": "cart",
@@ -50065,7 +50116,7 @@
   {
    "name": "compat/unknown-attribute.weft as JSON",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -50102,10 +50153,10 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W402",
@@ -50121,7 +50172,7 @@
   {
    "name": "compat/unknown-element.weft as JSON",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -50168,10 +50219,10 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -50188,7 +50239,7 @@
   {
    "name": "compat/unknown-in-restricted-parent.weft as JSON",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -50237,10 +50288,10 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -50257,7 +50308,7 @@
   {
    "name": "compat/unknown-with-children.weft as JSON",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -50317,10 +50368,10 @@
      {
       "code": "W403",
       "severity": "error",
-      "message": "Version 0.3 is newer than 0.2; unknown content is read as extensions.",
+      "message": "Version 0.4 is newer than 0.3; unknown content is read as extensions.",
       "path": "/screen#s/@weft",
-      "expected": "at most 0.2",
-      "got": "0.3"
+      "expected": "at most 0.3",
+      "got": "0.4"
      },
      {
       "code": "W401",
@@ -50370,7 +50421,7 @@
      {
       "code": "W404",
       "severity": "error",
-      "message": "Version 1.0 is not readable by a 0.2 reader.",
+      "message": "Version 1.0 is not readable by a 0.3 reader.",
       "path": "/screen#s/@weft",
       "expected": "0.x",
       "got": "1.0"
@@ -53987,7 +54038,7 @@
   {
    "name": "json mutation 16 of SPEC.md#5",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
     "root": {
      "kind": "screen",
      "id": "cart",
@@ -54421,7 +54472,7 @@
       "severity": "error",
       "message": "The root needs the format version.",
       "path": "/screen#login/@weft",
-      "expected": "weft=\"0.2\""
+      "expected": "weft=\"0.3\""
      }
     ]
    }
@@ -54949,7 +55000,8 @@
   {
    "name": "json mutation 26 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -56279,6 +56331,7 @@
   {
    "name": "json mutation 39 of SPEC.md#4",
    "json": {
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -57223,7 +57276,7 @@
   {
    "name": "json mutation 47 of SPEC.md#5",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
     "root": {
      "kind": "screen",
      "id": "cart",
@@ -57733,7 +57786,8 @@
   {
    "name": "json mutation 54 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -59526,7 +59580,7 @@
   {
    "name": "json mutation 69 of compat/unknown-with-children.weft",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -61506,7 +61560,8 @@
   {
    "name": "json mutation 89 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -61664,7 +61719,8 @@
   {
    "name": "json mutation 91 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -61773,7 +61829,7 @@
   {
    "name": "json mutation 92 of SPEC.md#5",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
     "root": {
      "kind": "screen",
      "id": "cart",
@@ -62534,7 +62590,7 @@
   {
    "name": "json mutation 102 of SPEC.md#5",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
     "root": {
      "kind": "screen",
      "id": "cart",
@@ -62664,7 +62720,8 @@
   {
    "name": "json mutation 104 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "token": "a"
     }
@@ -62763,7 +62820,7 @@
   {
    "name": "json mutation 106 of compat/unknown-element.weft",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -63010,7 +63067,7 @@
   {
    "name": "json mutation 110 of SPEC.md#5",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
     "root": {
      "kind": "screen",
      "id": "cart",
@@ -64733,7 +64790,8 @@
   {
    "name": "json mutation 123 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -64890,7 +64948,7 @@
       "path": "/list#todos/@weft",
       "expected": "major.minor",
       "got": "Tes",
-      "hint": "write weft=\"0.2\""
+      "hint": "write weft=\"0.3\""
      },
      {
       "code": "W201",
@@ -65350,7 +65408,7 @@
   {
    "name": "json mutation 131 of SPEC.md#5",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
     "root": {
      "kind": "screen",
      "id": "cart",
@@ -65820,7 +65878,8 @@
   {
    "name": "json mutation 137 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -70012,7 +70071,7 @@
   {
    "name": "json mutation 182 of compat/unknown-in-restricted-parent.weft",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -71511,7 +71570,7 @@
       "path": "/screen#root/@weft",
       "expected": "major.minor",
       "got": "|OB",
-      "hint": "write weft=\"0.2\""
+      "hint": "write weft=\"0.3\""
      }
     ]
    }
@@ -72072,7 +72131,8 @@
   {
    "name": "json mutation 204 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -72452,7 +72512,7 @@
   {
    "name": "json mutation 207 of compat/unknown-with-children.weft",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -77798,7 +77858,7 @@
   {
    "name": "json mutation 270 of compat/unknown-in-restricted-parent.weft",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -77923,7 +77983,8 @@
   {
    "name": "json mutation 272 of SPEC.md#4",
    "json": {
-    "weft": "0.2",
+    "weft": "0.3",
+    "version": "1.0.0",
     "root": {
      "token": "a"
     }
@@ -78047,6 +78108,7 @@
   {
    "name": "json mutation 274 of SPEC.md#4",
    "json": {
+    "version": "1.0.0",
     "root": {
      "kind": "fragment",
      "props": {
@@ -78396,7 +78458,7 @@
   {
    "name": "json mutation 278 of compat/unknown-element.weft",
    "json": {
-    "weft": "0.3",
+    "weft": "0.4",
     "root": {
      "kind": "screen",
      "id": "s",
@@ -80217,10 +80279,10 @@
      {
       "code": "W501",
       "severity": "error",
-      "message": "Patch 0 is malformed: Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context'.",
+      "message": "Patch 0 is malformed: Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context' | 'set-version'.",
       "path": "#/patches/0/op",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null
@@ -80810,8 +80872,8 @@
       "severity": "error",
       "message": "Patch 0 is malformed: Invalid input: expected object, received null.",
       "path": "#/patches/0",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null
@@ -81057,8 +81119,8 @@
       "severity": "error",
       "message": "Patch 1 is malformed: Invalid input: expected object, received null.",
       "path": "#/patches/1",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null
@@ -81306,10 +81368,10 @@
      {
       "code": "W501",
       "severity": "error",
-      "message": "Patch 0 is malformed: Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context'.",
+      "message": "Patch 0 is malformed: Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context' | 'set-version'.",
       "path": "#/patches/0/op",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null
@@ -81763,10 +81825,10 @@
      {
       "code": "W501",
       "severity": "error",
-      "message": "Patch 0 is malformed: Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context'.",
+      "message": "Patch 0 is malformed: Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context' | 'set-version'.",
       "path": "#/patches/0/op",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null
@@ -84176,8 +84238,8 @@
       "severity": "error",
       "message": "Patch 1 is malformed: Invalid input: expected object, received string.",
       "path": "#/patches/1",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null
@@ -85332,8 +85394,8 @@
       "severity": "error",
       "message": "Patch 0 is malformed: Invalid input: expected object, received string.",
       "path": "#/patches/0",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null
@@ -86441,8 +86503,8 @@
       "severity": "error",
       "message": "Patch 0 is malformed: Invalid input: expected object, received string.",
       "path": "#/patches/0",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null
@@ -88640,10 +88702,10 @@
      {
       "code": "W501",
       "severity": "error",
-      "message": "Patch 0 is malformed: Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context'.",
+      "message": "Patch 0 is malformed: Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context' | 'set-version'.",
       "path": "#/patches/0/op",
-      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\"",
-      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\""
+      "expected": "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\"",
+      "hint": "\"op\" must be one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"set-version\""
      }
     ],
     "markup": null

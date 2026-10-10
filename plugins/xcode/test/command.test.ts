@@ -45,10 +45,10 @@ describe.skipIf(skipReason)("command plugin", () => {
     expect(imported.status, imported.output).toBe(0);
     // The importer reads back exactly what the generator printed (SPEC §9), so the result is the
     // canonical form of the original screen, stamped with the current version (the corpus stays
-    // at 0.1, which a 0.2 reader reads unchanged).
+    // at 0.1, which a 0.3 reader reads unchanged).
     const canonical = run(weftBinary(), ["fmt", join(ws.sample, screen)], ws.sample).output.replace(
       'weft="0.1"',
-      'weft="0.2"',
+      'weft="0.3"',
     );
     expect(readFileSync(join(ws.sample, "Imported/login.weft"), "utf8")).toBe(canonical);
   });

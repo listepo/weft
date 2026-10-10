@@ -20,6 +20,9 @@ const FIXTURE: &str = include_str!("fixtures/differential.json");
 /// Codes of the import layer, produced by the importer package and never by the core.
 const IMPORT: [&str; 2] = ["W601", "W602"];
 
+/// `weft version-check` reports this; validation never does (SPEC §8).
+const VERSION_CHECK: [&str; 1] = ["W810"];
+
 /// Codes of the project file, produced by the weft-catalog loader; its project cases
 /// (packages/catalog/test/project-cases.ts, replayed by crates/weft-catalog) produce each one.
 const PROJECT: [&str; 12] = [
@@ -162,6 +165,10 @@ fn cases() -> Vec<(&'static str, Case)> {
             in_screen(
                 "<context><entry id=\"e\" by=\"agent\" kind=\"intent\" name=\"-m\">x</entry></context>",
             ),
+        ),
+        (
+            "W230",
+            Case::Markup("<screen id=\"s\" label=\"S\" version=\"1.2\" weft=\"0.1\"/>".into()),
         ),
         ("W301", in_screen("<stack id=\"a\"/><stack id=\"a\"/>")),
         (
@@ -398,7 +405,10 @@ fn every_core_code_is_produced_by_some_input() {
     for code in Code::ALL {
         let name = code.as_str();
         assert!(
-            covered.contains(name) || IMPORT.contains(&name) || PROJECT.contains(&name),
+            covered.contains(name)
+                || IMPORT.contains(&name)
+                || PROJECT.contains(&name)
+                || VERSION_CHECK.contains(&name),
             "no case produces {name}"
         );
     }

@@ -12,7 +12,7 @@ use weft_core::{
 
 #[test]
 fn the_format_version_and_the_depth_limit_are_the_ones_of_the_spec() {
-    assert_eq!(WEFT_VERSION, "0.2");
+    assert_eq!(WEFT_VERSION, "0.3");
     assert_eq!(MAX_DEPTH, 256);
 }
 
@@ -62,6 +62,7 @@ fn a_node_serializes_only_its_non_empty_members_in_spec_order() {
 fn a_document_serializes_the_version_before_the_root() {
     let d = Document {
         weft: "0.1".into(),
+        version: None,
         context: Vec::new(),
         root: Node::new("screen"),
     };
@@ -83,6 +84,7 @@ fn nodes_compare_by_content_and_ignore_source_positions() {
     let a = common::document(&common::screen("<stack id=\"a\"/>"));
     let mut b = Document {
         weft: "0.1".into(),
+        version: None,
         context: Vec::new(),
         root: Node::new("screen"),
     };

@@ -25,7 +25,7 @@ fn swift(markup: &str, data: Option<&serde_json::Value>) -> String {
 }
 
 fn screen(body: &str) -> String {
-    format!("<screen id=\"root\" label=\"Test\" weft=\"0.2\">\n  {body}\n</screen>\n")
+    format!("<screen id=\"root\" label=\"Test\" weft=\"0.3\">\n  {body}\n</screen>\n")
 }
 
 #[test]

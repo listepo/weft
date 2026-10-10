@@ -1,4 +1,4 @@
-<screen id="screen-settings" label="Settings" weft="0.2">
+<screen id="screen-settings" label="Settings" weft="0.3">
   <heading id="heading-settings" level="1">Settings</heading>
   <section id="section-notifications" label="Notifications">
     <heading id="heading-notifications" level="2">Notifications</heading>

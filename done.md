@@ -1,5 +1,11 @@
 # Done
 
+### T100. Document versions
+
+Optional `version` on a screen or a fragment, the format move to `weft` 0.3, the `set-version` patch and `weft version-check`. Inline fragments, variants and library fragments stay out.
+
+Built: `version` is an optional literal `MAJOR.MINOR.PATCH` on the root `<screen>` and root `<fragment>` (`W230` otherwise), a member of `Document` beside `weft`, and `{ op: "set-version", value }` sets or removes it. `weft version-check` classifies a fragment from `signature` and `diff_catalogs` (a body change is a patch), a screen by its host contract, and two library catalogs by the kind diff plus their fragment documents. Below `1.0.0` the least version follows Cargo's caret rule. A declared version below that least version is `W810` at `@version` and exit status 1. Writers write `weft="0.3"`; a 0.1 or 0.2 document stays valid.
+
 ### T39.8. Context: readable comments in React and SolidJS
 
 For developers, each element that entries name gets a readable comment above it in generated React and SolidJS code, for example `{/* decision (agent claude-opus-5-5): Disabled until … */}`, escaped like the source comment (`*/`, `@`), and only when the context is kept. The comments are derived: importers ignore them, and regenerating gives them back, so the source check still passes.

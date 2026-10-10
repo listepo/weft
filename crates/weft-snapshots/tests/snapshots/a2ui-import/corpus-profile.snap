@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-profile as a2ui-import
 ---
-<screen id="profile" weft="0.2">
+<screen id="profile" weft="0.3">
   <image id="avatar" label="Profile photo" src="{$.user.avatar}"/>
   <heading id="name" level="1" text="{$.user.name}"/>
   <text id="bio" text="{$.user.bio}"/>

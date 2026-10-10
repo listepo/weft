@@ -57,6 +57,7 @@ pub fn empty_result(diagnostics: Vec<Diagnostic>) -> ImportResult {
     ImportResult {
         document: Document {
             weft: WEFT_VERSION.into(),
+            version: None,
             context: Vec::new(),
             root,
         },

@@ -146,7 +146,8 @@ Limits, because context is the one part of a document written as free prose for 
 
 ```ts
 type Document = {
-  weft: "0.2";                       // the root element's `weft` attribute
+  weft: "0.3";                       // the root element's `weft` attribute
+  version?: string;                  // the root's `version` attribute: MAJOR.MINOR.PATCH
   context?: Entry[];                 // the `<context>` block (§2.3), in written order
   root: Node;
 };
@@ -185,7 +186,7 @@ Canonical form rules, so that equal documents are byte-equal:
 - `context` keeps the order the entries were written in; it is not sorted. Entry text is whitespace-normalized like text children. The JSON shape check reads every entry member as a string, so a wrong value is a validation diagnostic (`W203`, `W227`) rather than `W200`.
 - Text children are whitespace-normalized as in §2, and adjacent text children are joined with one space. `-0` is written `0`.
 - Props whose value equals the catalog default are kept as written (no default elision).
-- The `weft` attribute of the root element is `Document.weft` and never appears in the root's `props`.
+- The `weft` attribute of the root element is `Document.weft` and never appears in the root's `props`. The optional `version` attribute of the root `<screen>` or of the root `<fragment>` of a fragment file is `Document.version` and never appears in the root's `props`. It is a literal `MAJOR.MINOR.PATCH` with no leading zeros, no pre-release and no build metadata, the form a catalog's `version` already has (§5). A binding, a token reference or anything else is `W230`. In markup it sorts with the other attributes, as `weft` does.
 - The JSON text is indented by two spaces and ends with a newline.
 - Markup serialization writes attributes as: `id`, then props sorted (the root's `weft` sorts with them), then `on-*` sorted; two-space indentation; named slots after default-slot children, sorted by name. The root writes the `<context>` block before its children, one entry per line with `id` first and the other attributes sorted, the text as the entry's content; a document without context is written as if the block did not exist. An element with no content is self-closing; an element whose only content is one text child is written on one line; otherwise every child goes on its own line. The text ends with a newline.
 - Escaping: in attribute values `&`, `<`, `"`, tab, LF and CR are written as references; in text `&`, `<` and `>` are. No other references are written.
@@ -198,7 +199,7 @@ A catalog (§5) determines a JSON Schema of the canonical JSON documents it admi
 
 | Catalog construct | Schema |
 | --- | --- |
-| Document | A closed object (`additionalProperties: false`) with `weft` (`enum` of the versions this reader reads without a diagnostic, `0.1` and `0.2`) and `root`, both required. |
+| Document | A closed object (`additionalProperties: false`) with `weft` (`enum` of the versions this reader reads without a diagnostic, `0.1`, `0.2` and `0.3`), optional `version` (a literal `MAJOR.MINOR.PATCH`) and `root`. `weft` and `root` are required. |
 | `root` kind | `root` is a `$ref` to the kind marked `root` (`anyOf` when several are); with none, any kind. That kind is admitted nowhere else, and its `weft` prop is not in its `props` (it is `Document.weft`). |
 | Kind | One `$defs` entry per kind, named after it: a closed object with `kind` (`const`), `id` (the id grammar as `pattern`), `props`, `on`, `slots` and `children`, in that order. `kind` and `id` are required, `props` when a prop or `label` is. `on`, `slots` and `children` are present only when the kind declares events, slots, or a content model other than `none`. |
 | Props | A closed object: the declared props, then the universal `label`, `hidden`, `state` (only when the kind declares `states`) and the tilt attributes (§2.2), sorted as canonical JSON sorts keys. `required` lists the required props, and `label` when `requiresLabel` is set. `role` is not admitted on a catalog component. |
@@ -443,7 +444,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W119 | The same slot name twice under one parent. |
 | W120 | `<context>` misplaced or malformed (§2.3): not a direct child of the root (also inside `<each>`, `<slot>` or `insert` markup), a second one, an attribute on it, or content other than `<entry>` elements. |
 | W121 | `<entry>` misplaced or malformed (§2.3): outside `<context>`, an element inside it, an attribute it does not take, or `kind`, `by` or `name` missing. |
-| W200 | Document does not have the JSON shape of §3 (or nests too deep, or the root's `props` holds `weft`). |
+| W200 | Document does not have the JSON shape of §3 (or nests too deep, or the root's `props` holds `weft` or `version`). |
 | W201 | Root element is not the catalog's `root` kind (`screen`), or a project fragment file's root is not `<fragment>` (§10.7). |
 | W202 | Element or context entry without `id`. |
 | W203 | Value not one of the enum values or declared states, or an entry's `kind`, `by` or `status` not one of its values (§2.3). |
@@ -471,6 +472,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W227 | `status` missing on a context entry of kind `question` or `todo`, or given on another kind (§2.3). |
 | W228 | Context over a limit: more than 100 entries, an entry text over 500 characters, or more than 16,000 characters of entry text in the document (mode, §2.3). |
 | W229 | Context entry text empty, or `name` empty, over 64 characters or holding a character outside its set (§2.3). |
+| W230 | `version` is not a literal `MAJOR.MINOR.PATCH` (no leading zeros, pre-release or build metadata). |
 | W301 | Duplicate id, among elements and context entries alike. |
 | W302 | Child kind not in the parent's (or slot's) `allowedChildren`. |
 | W303 | Parent kind not in the child's `allowedParents`. |
@@ -528,6 +530,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W805 | Fragments use each other in a cycle; the use that closes it expands to nothing (§10.7). |
 | W806 | Expanding the fragments gives more than 10,000 elements or nests deeper than 256 levels (§10.7). |
 | W807 | Parameter read where its type cannot go: an action or slot parameter in a prop, a value parameter in `on-*`, a read with more after the name (§10.7). |
+| W810 | Reported by `weft version-check` only: the new version is lower than the changes require (§8). |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
@@ -555,7 +558,8 @@ type Patch =
   | { op: "add-context"; entry: Entry }                                // appends
   | { op: "set-context"; id: string; field: "text" | "kind" | "for"; value: string | null }
   | { op: "resolve-context"; id: string }
-  | { op: "remove-context"; id: string };
+  | { op: "remove-context"; id: string }
+  | { op: "set-version"; value: string | null };                  // null removes Document.version
 ```
 
 `applyPatches(document, patches, { catalog, mode?, tokens?, actions?, author?, context? })` takes the patch list as untrusted input (any JSON value), never throws and never changes `document`. It returns `{ document?, diagnostics }`.
@@ -570,12 +574,14 @@ type Patch =
 - **Context.** The last four operations edit the context block (§2.3) and never touch elements. `add-context` appends `entry`, typed JSON exactly as in `Document.context`, so its text needs no XML escaping; its id must be new to the document, elements and entries alike (`W510`). `set-context` changes one field: `value` is a string, and `null` is allowed only for `for`, which makes the entry about the screen. Changing `kind` to `question` or `todo` sets `status` to `open` when it is absent; changing it to any other kind drops `status`. `id`, `by` and `name` cannot be changed: to restate someone else's note, add an entry of your own. `resolve-context` sets `status` to `resolved`; resolving a resolved entry does nothing, and resolving a kind without status fails validation (`W227`). There is no reopen: a question that comes back is a new question. `remove-context` deletes the entry. An id that no entry has gives `W511`. Values (`kind`, `for`, the text) are left to validation (`W203`, `W309`, `W228`, `W229`), as `set` leaves them.
 - **Element patches leave context alone.** `move` keeps the id, so `for` still holds. `insert` cannot bring entries (`W120`). `remove` of an element that an entry names, or of an ancestor of one, leaves a dangling `for`, so the list fails with `W309` and its hint names the entry (`remove-context reset-where, or set-context its for`): a `constraint` must not vanish silently with the element it protected.
 - **Host options.** `author: { by, name? }` fixes what `add-context` may claim: an entry whose `by`, or `name` when given, differs is refused (`W512`). `context: "read-only"` refuses every context patch (`W512`); the default is `"read-write"`. Both are set by the host (the MCP server, a plugin), never by the model, so an agent's channel cannot write `by="human"`.
+- **`set-version`.** Sets `Document.version` on the document root, which has no id to address. `value` is a string, stored as given; `null` removes the version. Whether the string is `MAJOR.MINOR.PATCH` is left to validation (`W230`), as `set` leaves its values. A value that is not a string or `null` is `W501`, and the patch is not applied.
 - **Text.** Text is changed with `set` and `prop: "text"`, wherever the element keeps it (§5.1: content or the `text` prop, never both). When a `text` or `mixed` component holds its text as content and nothing else, the patch writes that content: a string replaces it and stays content, any other value replaces it with the `text` prop, and `null` removes it. Otherwise `text` is set like any other prop, so text already in the prop stays there, and a `mixed` component whose content holds elements keeps them and gets `W310` if it is given `text` as well. Text that shares a content list with elements (an `item` holding text beside a button) is not addressable by a patch: `remove` the element that holds it and `insert` it again with the same id.
 
 ## 8. Versioning and extensibility
 
 - `weft` on `<screen>` is `major.minor`. A minor version only adds; a reader of `0.x` MUST accept any `0.y` document under the rules below. A major version may break.
-- The format is `weft` 0.2 since fragments (§10.7), a minor addition: a 0.1 document is a valid 0.2 document and needs no migration, and writers write `weft="0.2"`. There is no per-feature gate: a 0.2 reader accepts a fragment file or a `<use>` marked 0.1. A 0.1 reader warns about the version (`W403`) and reads `<fragment>`, `<param>`, `<outlet>` and `<use>` as unknown elements, which it keeps.
+- The format is `weft` 0.3 since the optional document `version` (§3), a minor addition: a 0.1 or 0.2 document is a valid 0.3 document and needs no migration, and writers write `weft="0.3"`. There is no per-feature gate. A 0.2 reader warns about the version (`W403`) and reads `version` as an unknown attribute, which it keeps. A 0.2 reader of canonical JSON rejects `version` (`W200`), which fails closed. Every 0.2 reader of this repository moves to 0.3 in the same change.
+- The format moved to `weft` 0.2 with fragments (§10.7), a minor addition: a 0.1 document is a valid 0.2 document. There is no per-feature gate: a reader accepts a fragment file or a `<use>` marked 0.1. A 0.1 reader warns about the version (`W403`) and reads `<fragment>`, `<param>`, `<outlet>` and `<use>` as unknown elements, which it keeps.
 - **Extensions** are elements or attributes whose name starts with `x-<vendor>-`. An extension element MUST carry `role` (its ARIA fallback) and follows `content: "mixed"`; it may have any attributes, slots and events, and its literals stay strings. A reader that does not know it renders its children inside a container with that role. Extension attributes are allowed on every element in both modes.
 - **Unknown, non-extension** elements or attributes come from a newer minor version or another catalog. In *lenient* mode (default for readers) they produce a `W4xx` warning; an unknown element is treated as an extension with role `group`, an unknown attribute is kept in the model and ignored. In *strict* mode (default for writers and CI) they are errors. A newer minor `weft` version is reported the same way. Unknown and extension elements are opaque: parent/child rules skip them, but the parent's content model still applies. Undeclared events, slots, states and enum values of a known component are schema errors, not compatibility warnings.
 - A reader MUST NOT drop unknown content when it round-trips a document.
@@ -587,7 +593,12 @@ type Patch =
   - A numeric range narrows when its lower bound rises, its upper bound falls, or a bound appears; the opposite is widening. A prop field the classifier does not know is major when it changes.
   - A change to a `description` only is none.
 - The core catalog of §5.1 is `weft-core` 0.2.0. It moved from 0.1.0 when it gained `stack.justify`, `padding`, `max-width` and `grid.min-column-width`, all minor changes (a new optional prop with a default is not a default that appears); the format stays `weft` 0.1, as it did when the universal attributes of §2.2 grew.
-- The format is `weft` 0.2 since the context block (§2.3), a minor addition: a 0.1 document is a valid 0.2 document and needs no migration, and writers write `weft="0.2"`. There is no per-feature gate: a 0.2 reader accepts context in a document marked 0.1. A 0.1 reader of canonical JSON rejects `context` (`W200`), which fails closed; a 0.1 markup reader warns about the version (`W403`) and reads `<context>` and `<entry>` as unknown elements with role `group` (`W401`), so a 0.1 renderer would show the notes. No syntax avoids both; every 0.1 reader of this repository moved to 0.2 in the same change.
+- The format moved to `weft` 0.2 with the context block (§2.3), a minor addition: a 0.1 document is a valid 0.2 document. There is no per-feature gate: a reader accepts context in a document marked 0.1. A 0.1 reader of canonical JSON rejects `context` (`W200`), which fails closed; a 0.1 markup reader warns about the version (`W403`) and reads `<context>` and `<entry>` as unknown elements with role `group` (`W401`), so a 0.1 renderer would show the notes. No syntax avoids both; every 0.1 reader of this repository moved to 0.2 in the same change.
+- **`weft version-check <old> <new>`** compares two versions of one file and says how far its `version` must be raised. It prints each change with its level and the least version the new file may declare. When the new file declares a lower version it reports `W810` at `@version` and exits with status 1. It reads both files as untrusted input and never throws. It reads no project setting of its own (§10.6).
+  - A **fragment** is classified from its parameter signature (`weft_core::fragment::signature`) by the catalog rules above (`weft_catalog::diff_catalogs`). A use that was valid can become invalid or mean something else is major; only more uses becoming valid is minor; a body change in canonical JSON, including a change of `label` alone, is a patch; identical canonical JSON is none. The comparison ignores `version` and `weft`, so a format stamp or a version edit is not itself a change.
+  - A **screen** is classified by its host contract. It is major when the screen names an action or reads a data path the previous version did not, reads a path at a type the previous did not take, gains a writable binding, or loses an element id. It is minor when it gains element ids and nothing above. Any other canonical JSON change is a patch. Identical canonical JSON, ignoring `version` and `weft`, is none.
+  - Two **library catalogs** are classified together: their kinds by the rules above, and each fragment document they carry by the fragment rule. The library's `version` must be raised as far as its most changed part.
+  - Below `1.0.0` the least version follows Cargo's rule, as `requires` does: an incompatible (major) change raises the minor number and anything else raises the patch number. From `1.0.0` a major change raises the major number, a minor change the minor number and a patch the patch number. When the older file declares no version, a major change requires at least `0.1.0` and any other change at least `0.0.1`; no change requires nothing.
 - A host advertises `{ weft, catalogs: [{ name, version, prefix? }] }`; an agent writes only what the host advertises. A host that also checks design tokens, action names or a data schema (§10) adds `tokens`, `actions` and `data` to the advertisement, so a writer knows which of them are enforced: a category that is absent is not checked. The MCP server (`weft_capabilities`) does this; the catalog list names the core catalog first and then every catalog the project loaded (§10.4), in the order the project lists them, each library with its `prefix`. A kind under a library's prefix (`acme-button`) is an ordinary catalog kind, typed and checked; an `x-acme-button` element stays an opaque extension.
 
 ## 9. Mapping
@@ -869,7 +880,7 @@ A fragment adds elements to the format, not a new model, and it is an addition o
 **A fragment file.**
 
 ```xml
-<fragment label="Page header" weft="0.2">
+<fragment label="Page header" version="1.0.0" weft="0.3">
   <param name="title" required="true" type="string"/>
   <param default="muted" name="tone" type="enum" values="default muted"/>
   <param name="back" type="action"/>
@@ -883,7 +894,7 @@ A fragment adds elements to the format, not a new model, and it is an addition o
 </fragment>
 ```
 
-- The root is `<fragment>`. It takes `weft` and an optional `label`, a description for tools rather than an accessible name. It has no `id`.
+- The root is `<fragment>`. It takes `weft`, an optional `version` (§3, `W230`) and an optional `label`, a description for tools rather than an accessible name. It has no `id`. A change of `label` alone is a patch (§8).
 - The `<param>` elements come first, one per parameter. A parameter has the vocabulary of a catalog prop (§5): `name`, which matches `[a-z][a-z0-9]*` (so that it is both an attribute name and a loop-variable name) and is not `fragment` or `id`; and `type`, which is one of `string`, `number`, `boolean`, `enum`, `token`, `action` or `slot`. As the type allows, it also takes `values` (space-separated, for `enum` only), `token-type` (for `token`), `min`, `max` and `integer` (for `number`), `required`, and `default` (for value types, not together with `required`). A `slot` parameter takes `required`, `allowed-children` (space-separated kinds) and `content`, whose only value is `nodes` because a slot holds elements. `required` and `integer` are booleans, `min` and `max` are numbers, and `default` is a value of the parameter's type: a literal, or a token reference for a `token` parameter.
 - The body comes after the parameters. It holds one or more elements, as they could stand inside a `<screen>`.
 - `<outlet name="…"/>` marks where the content of a `slot` parameter goes. It is structural, like `<slot>` and `<each>`: it has no id, no other attribute and no content.
@@ -894,7 +905,7 @@ In canonical JSON a fragment file is a `Document` whose root has the kind `fragm
 **A use.**
 
 ```xml
-<screen id="cart" label="Cart" weft="0.2">
+<screen id="cart" label="Cart" weft="0.3">
   <use id="header" fragment="page-header" title="Your cart" on-back="nav.back">
     <slot name="actions">
       <button id="clear" on-press="cart.clear">Clear</button>
@@ -964,7 +975,7 @@ In a fragment:
 
 A reader without fragments (no project) reads `<use>` as content it does not know (§8). In lenient mode it warns with `W801` and treats the use as an element with role `group` that holds its slots' content. In strict mode `W801` is an error.
 
-**Patches.** Patches address the screen and never reach into a fragment (§7).
+**Patches.** Patches address the screen and never reach into a fragment (§7). `set-version` sets the fragment file's own `version`, because its root has no id.
 
 - `set` on the id of a `<use>` changes a parameter (`"prop": "title"`), an action parameter (`"prop": "on-back"`), or the fragment itself (`"prop": "fragment"`). The result is validated as every patch result is.
 - `insert` and `move` with `"parent": "header", "slot": "actions"` fill a slot parameter. The slot must be one the fragment declares (`W504`).
