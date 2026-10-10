@@ -1,4 +1,4 @@
-import type { LimitName } from "@weft/catalog";
+import type { CatalogSource, LimitName } from "@weft/catalog";
 import type { Catalog, DataSchema, Mode } from "@weft/core";
 
 /** What every tool needs to judge markup; the host decides, never the model. */
@@ -10,6 +10,8 @@ export type Context = {
   actions?: readonly string[] | undefined;
   /** The data model's schema. Bindings are checked against it only when given (SPEC §10.5). */
   data?: DataSchema | undefined;
+  /** The catalogs the project loaded, so that a library's fragments name their library. */
+  catalogs?: readonly CatalogSource[] | undefined;
 };
 
 export type Limits = Readonly<Record<LimitName, number>>;

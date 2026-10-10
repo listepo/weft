@@ -133,6 +133,8 @@ export const DIAGNOSTIC_CODES = {
     severity: "warning",
     summary: "Catalog requirement is not loaded at a compatible version.",
   },
+  W715: { severity: "error", summary: "Fragment name is claimed outside its owner." },
+  W716: { severity: "error", summary: "Library fragment reaches the host directly." },
   W801: { severity: "mode", summary: "`<use>` names no fragment of the project." },
   W802: { severity: "error", summary: "Attribute, action or slot the fragment does not declare." },
   W803: { severity: "error", summary: "Malformed `<param>` or `<fragment>`." },

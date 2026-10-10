@@ -10,9 +10,14 @@ import { call, connect } from "./connect.ts";
 // file's JSON content (SPEC §10.1).
 const dir = new URL("../../../examples/project/", import.meta.url);
 const file = (name: string): unknown => JSON.parse(readFileSync(new URL(name, dir), "utf8"));
+const markupOf = (name: string) => readFileSync(new URL(name, dir), "utf8");
+const acmeUi = {
+  ...(file("catalogs/acme-ui.catalog.json") as object),
+  fragments: { "acme-promo": markupOf("catalogs/fragments/acme-promo.weft") },
+};
 const PROJECT = {
   tokens: [file("tokens/base.tokens.json"), file("tokens/brand.tokens.json")],
-  catalog: [file("catalogs/acme-ui.catalog.json"), file("catalog.json")],
+  catalog: [acmeUi, file("catalog.json")],
   actions: (file("weft.json") as { actions: string[] }).actions,
   data: file("data.schema.json"),
   fragments: {
@@ -156,6 +161,11 @@ test("a shared fragment is listed, checked and rendered as its expansion", async
   assert.match(
     index.blocks[0] ?? "",
     /\nfragment page-header \| title: string \(required\), back: action(\n|$)/,
+  );
+  // A library's fragment names its library, whose version the project pins, and its own.
+  assert.match(
+    index.blocks[0] ?? "",
+    /\nfragment acme-promo \| title: string \(required\), claim: action \| library acme-ui 1\.0\.0, fragment 1\.0\.0(\n|$)/,
   );
   const markup = await call(client, "weft_catalog", { kind: "page-header", project: PROJECT });
   assert.match(markup.blocks[0] ?? "", /^<fragment label="Page header" weft="0\.2">/);

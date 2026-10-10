@@ -44,7 +44,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T99 | todo | P3 | 1 | 0% | |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
 | T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
-| T103 | todo | P2 | 4 | 0% | |
+| T103.1 | todo | P2 | 2 | 0% | |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -86,11 +86,11 @@ Done when a screen without a project validates and expands an inline fragment, `
 
 Draft pull request #47.
 
-### T103. Library fragments
+### T103.1. Library fragments from packages
 
-A library catalog, one with a `prefix`, lists fragments named `<prefix>-…`. A fragment reaches the host only through its parameters. Committed files first. Resolving a fragment from an npm package waits on T17.3 and uses that lookup rather than a second one.
+A library catalog found as an npm package (T17.3) brings its fragments too: the package lookup reads the catalog file the package names and then the fragment files that catalog lists, relative to the catalog file and inside the package directory, and reads nothing else. It reuses the T17.3 lookup rather than a second one, and the rules, codes and checks T103 built for committed library catalogs (`W715`, `W716`, scoped validation) apply unchanged.
 
-Done when `examples/project` loads a library fragment, a fragment that reads host data or names an action literally is `W716`, and a name outside its owner is `W715`.
+Depends on T17.3. Done when a package entry in `catalog` whose catalog lists fragments loads them as a committed library does, with a test, and `SPEC.md` §10.4 says so.
 
 ### T8. Evaluation
 

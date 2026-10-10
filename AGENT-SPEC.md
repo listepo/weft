@@ -189,6 +189,7 @@ A project can share a block between screens, such as a page header, as a *fragme
 - What a use places must be allowed where the `<use>` stands, as if the body were written there.
 - Ids inside a fragment belong to it. A rendered element is addressed as `header/title`. A patch sets a parameter on the `<use>` (`"prop": "title"`, `"prop": "on-back"`) or fills its slot; it never names an id inside a project fragment (`W502`): edit that fragment instead.
 - In a fragment the `<param>` elements come first, then the body. Read a value parameter whole, `{$title}`, where its type fits; an action parameter as `on-press="{$back}"`; a slot parameter with `<outlet name="actions"/>`.
+- A library catalog may ship fragments named under its prefix (`acme-promo`). Place one with `<use>` like a project fragment; pass its data and actions as parameters, because it never reads `$.…` or names an action itself.
 
 A block that only one screen repeats can be an inline fragment on that screen, with no project. It is a direct child of `<screen>`, after `<context>` if any and before the body. `name` is required; `label` and `version` are optional. It has no `id` and no `weft`. A `<use>` finds the name there first, then in the project. Do not reuse a project fragment's name (`W808`).
 
@@ -431,6 +432,8 @@ What each code asks of you:
 | W712 | Give a shared catalog its own `prefix`: one lowercase segment, not `x`, `weft` or a core kind's first segment. Only the project's own catalog has none. |
 | W713 | A library defines only kinds named `<prefix>-…`; extend core and library kinds in the project's own catalog, and name its new kinds outside the libraries' prefixes. |
 | W714 | A warning: add the required catalog to `catalog`, or load a version compatible with the one `requires` names. |
+| W715 | Name a library's fragment `<prefix>-…` after its catalog's prefix, and a project fragment outside every library's prefix. |
+| W716 | In a library fragment, replace the `$.…` read with a value parameter and the action name with an action parameter (`on-press="{$claim}"`); the screen passes both at the `<use>`. |
 | W801 | Use a fragment the project has (`hint` names the nearest), or write the elements without `<use>`. |
 | W802 | Give the `<use>` only the attributes, `on-*` actions and slots its fragment declares as parameters; `expected` lists them. |
 | W803 | Fix the `<param>`: a name of lowercase letters and digits, a known `type`, only the attributes its type takes, a `default` of that type, every `<param>` before the body, each name once; and give the fragment a body. |
