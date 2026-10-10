@@ -25,7 +25,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T39 | in progress | P1 | 4 | 80% | Claude Code / claude-opus-5-5 |
 | T39.7 | todo | P2 | 3 | 0% | |
-| T39.9 | todo | P2 | 3 | 0% | |
+| T39.9 | in progress | P2 | 3 | 10% | Claude Code / claude-opus-5-5 |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
@@ -159,7 +159,9 @@ The canonical entries in plugin data (`weft.context`) on the root frame, read ba
 
 SwiftUI has no source comment, so it carries context as `// weft:context <entry JSON>` lines above the view struct, read back by `weft import-swiftui`, with readable `//` comments above each named view that the importer ignores. `export.swiftui.context` and `import.swiftui.context` (SPEC §10.6, `settings.rs`, the schema) and the CLI `--context`, as T39.6 gave the web and Slint targets; a round-trip test.
 
-Open question for the creator before this is claimed: `import_swiftui` reads code by convention, with no regeneration check like the web and Slint importers have. A `// weft:context` line therefore cannot be told apart from one forged in foreign Swift, and the design reads context only from code recognized as Weft-generated. Options: add a `weft:source` comment with that check to SwiftUI first, or accept the lines on a lenient read and validate them.
+Decision (creator): `import_swiftui` read code by convention, with no check like the web and Slint importers have, so a `// weft:context` line could not be told apart from one forged in foreign Swift. The creator chose to give SwiftUI a verified `weft:source` comment first, as the web and Slint targets have, and to carry the context in it; the importer trusts the context only when the check passes. The separate `// weft:context <entry JSON>` lines of the design are therefore not written: the context travels in the comment's canonical markup, as in T39.6.
+
+Execution plan: (1) move `crates/weft-web/src/provenance.rs` and the `claimed` parse into `crates/weft-import` so the web and SwiftUI targets share one escape, one comment reader and one note line, with `//` line-comment helpers beside the block-comment ones; (2) `weft swiftui` writes `// weft:source swiftui` and the escaped canonical markup of the screen as written (fragments unexpanded) at the top of the file, plus a readable `// <kind> (<by> <name>): <text>` line above each view an entry names; (3) `import_swiftui` reads the code by convention as before and returns the comment's document, context included, only when the code reads back to that document (expanded, without its context) with no losses; else the convention read, with no context; (4) `export.swiftui.context` and `import.swiftui.context` (SPEC §10.6, `settings.rs`, the schema), the CLI `--context`, `docs/cli.md` and `docs/projects.md`; (5) round-trip tests in `weft-swiftui` and the CLI, regenerated fixtures, snapshots, plugin bundles and SwiftUI screenshot baselines if they move. Check: `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. If it passes 500 lines of code, it splits into T39.9a (the verified comment) and T39.9b (the context).
 
 ### T68. Slint bindings for SwiftUI and WinUI
 
