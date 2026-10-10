@@ -318,6 +318,10 @@ fn cases() -> Vec<(&'static str, Case)> {
                 r#"<text id="t">x</text><fragment name="row"><text id="a">y</text></fragment>"#,
             ),
         ),
+        fragment(
+            "W809",
+            r#"<param name="a" type="string" variant="true"/><text id="t">T</text>"#,
+        ),
     ]
 }
 

@@ -3,26 +3,14 @@
 
 use super::{At, Owner, Validator, diag, node_at, source};
 use crate::diagnostics::{Code, did_you_mean, one_of};
-use crate::fragment::{self, FRAGMENT, PARAM, ParamKind};
+use crate::fragment::{self, FRAGMENT, PARAM, ParamKind, VARIANT};
 use crate::model::{Content, Node, PropDef, PropType, Value};
 use crate::source::path_segment;
 
 impl Validator<'_> {
     pub(super) fn visit_fragment(&mut self, root: &Node, path: &str) {
-        for problem in fragment::problems(root) {
-            let param = problem
-                .param
-                .and_then(|i| Some((i, root.children[i].as_node()?)));
-            let (node, path) = match param {
-                Some((i, node)) => (
-                    node,
-                    format!("{path}/{}", path_segment(PARAM, None, Some(i))),
-                ),
-                None => (root, path.to_owned()),
-            };
-            let at = node_at(node, &path, problem.attr.as_deref());
-            self.report(diag(Code::W803, &at, problem.message, problem.expected));
-        }
+        self.report_declared(root, path, fragment::problems(root), Code::W803);
+        self.report_declared(root, path, fragment::variant_problems(root), Code::W809);
         self.in_fragment = true;
         self.params = fragment::params(root);
         let scope: Vec<String> = self.params.keys().cloned().collect();
@@ -33,7 +21,57 @@ impl Validator<'_> {
             ..Owner::new(Some(FRAGMENT.to_owned()), Content::Nodes)
         };
         let positions = source(root).map(|s| s.children.as_slice());
-        self.visit_list(&root.children, path, &owner, &scope, positions);
+        self.visit_list(&root.children, path, &owner, &scope, positions, true);
+        if !fragment::has_variant_param(root) {
+            return;
+        }
+        // The same id in two variants is one part, so each variant is checked on its own ids.
+        // An outlet may be missing from a variant; that slot's check starts over.
+        let saved_ids = std::mem::take(&mut self.ids);
+        let saved_refs = std::mem::take(&mut self.references);
+        for (index, child) in root.children.iter().enumerate() {
+            let Some(node) = child.as_node() else {
+                continue;
+            };
+            if node.kind != VARIANT {
+                continue;
+            }
+            self.ids.clear();
+            self.references.clear();
+            self.outlets.clear();
+            let vpath = format!("{path}/{}", path_segment(VARIANT, None, Some(index)));
+            let positions = source(node).map(|s| s.children.as_slice());
+            self.visit_list(&node.children, &vpath, &owner, &scope, positions, false);
+            self.finish_references();
+        }
+        self.ids = saved_ids;
+        self.references = saved_refs;
+    }
+
+    fn report_declared(
+        &mut self,
+        root: &Node,
+        path: &str,
+        problems: Vec<fragment::Problem>,
+        code: Code,
+    ) {
+        for problem in problems {
+            let param = problem
+                .param
+                .and_then(|i| Some((i, root.children[i].as_node()?)));
+            let (node, path) = match param {
+                Some((i, node)) => (
+                    node,
+                    format!(
+                        "{path}/{}",
+                        path_segment(&node.kind, node.id.as_deref(), Some(i))
+                    ),
+                ),
+                None => (root, path.to_owned()),
+            };
+            let at = node_at(node, &path, problem.attr.as_deref());
+            self.report(diag(code, &at, problem.message, problem.expected));
+        }
     }
 
     /// A `<param>` or `<outlet>` below the top of a document.
@@ -45,6 +83,13 @@ impl Validator<'_> {
         let (code, message, expected) = if node.kind == PARAM {
             let message = "<param> stands only at the top of a fragment.";
             (Code::W803, message, "<param> before the body")
+        } else if node.kind == VARIANT {
+            let message = if self.in_fragment {
+                "<variant> stands only after the parameters."
+            } else {
+                "<variant> stands only in a fragment."
+            };
+            (Code::W809, message, "<variant when=\"…\">")
         } else if !self.in_fragment {
             let message = "<outlet> stands only in a fragment.";
             (Code::W804, message, "a <slot> of a <use>")

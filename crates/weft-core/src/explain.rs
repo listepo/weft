@@ -12,7 +12,9 @@ use serde::Serialize;
 
 use crate::context::entry_path;
 use crate::context_check::MAX_TEXT;
-use crate::model::{Catalog, Child, Document, Entry, Node, PropDef, PropType, Value};
+use crate::fragment::{self, USE};
+use crate::inline;
+use crate::model::{Catalog, Child, Document, Entry, Map, Node, PropDef, PropType, Value};
 use crate::rules::{EACH, is_id, universal_prop};
 use crate::source::path_segment;
 use crate::values::format_value;
@@ -148,6 +150,7 @@ enum Raw<'a> {
     Action(&'a str),
     Loop(Option<&'a Value>, Option<&'a Value>),
     Entry(&'a Entry),
+    Note(&'a str),
 }
 
 struct Item<'a> {
@@ -166,6 +169,8 @@ struct Scope {
 
 struct Walker<'a> {
     catalog: Option<&'a Catalog>,
+    /// Inline fragments of the screen, so a use of one can name the variant it chose.
+    inline: &'a Map<Node>,
     scopes: Vec<Scope>,
     /// Keyed by element (`#id`, or the path without one) and attribute name; entries by
     /// `context#id`.
@@ -183,6 +188,7 @@ fn collect<'a>(document: &'a Document, catalog: Option<&'a Catalog>) -> IndexMap
     let path = format!("/{}", path_segment(&root.kind, root.id.as_deref(), None));
     let mut walker = Walker {
         catalog,
+        inline: &document.fragments,
         scopes: vec![],
         items: IndexMap::new(),
         entries: &document.context,
@@ -236,6 +242,92 @@ fn entry_sentence(entry: &Entry) -> String {
         "{}{status} by {} {}: {text}",
         entry.kind, entry.by, entry.name
     )
+}
+
+enum NoteRaw<'a> {
+    Value(&'a Value),
+    Name(&'a str),
+}
+
+struct Note<'a> {
+    name: String,
+    sentence: String,
+    raw: NoteRaw<'a>,
+}
+
+/// The fragment a `<use>` names: the screen's inline fragment, unless the project already has it.
+fn fragment_root<'a>(
+    catalog: Option<&'a Catalog>,
+    inline: &'a Map<Node>,
+    node: &Node,
+) -> Option<&'a Node> {
+    let Value::String(name) = node.props.get("fragment")? else {
+        return None;
+    };
+    match catalog {
+        Some(catalog) => inline::resolve(inline, catalog, name),
+        None => inline.get(name).filter(|n| inline::usable(name, n)),
+    }
+}
+
+/// Which variant a `<use>` chose, and a slot the chosen body drops because it has no outlet.
+fn variant_notes<'a>(
+    catalog: Option<&'a Catalog>,
+    inline: &'a Map<Node>,
+    node: &'a Node,
+) -> Vec<Note<'a>> {
+    let Some(root) = fragment_root(catalog, inline, node) else {
+        return vec![];
+    };
+    let Some(choice) = fragment::choice(root, node) else {
+        return vec![];
+    };
+    let fragment_name = match node.props.get("fragment") {
+        Some(Value::String(name)) => name.as_str(),
+        _ => "",
+    };
+    let sentence = match (choice.value, choice.defaulted, choice.raw) {
+        (Some(value), false, _) => format!("uses the \"{value}\" variant of {fragment_name}"),
+        (Some(value), true, _) => {
+            format!("uses the \"{value}\" variant of {fragment_name}, the default")
+        }
+        (None, _, Some(_)) => format!(
+            "no variant of {fragment_name} is chosen, because \"{}\" is not a literal",
+            choice.name
+        ),
+        (None, _, None) => format!(
+            "no variant of {fragment_name} is chosen, because \"{}\" is missing",
+            choice.name
+        ),
+    };
+    let raw = match choice.raw {
+        Some(value) => NoteRaw::Value(value),
+        None => NoteRaw::Name(choice.name),
+    };
+    let mut notes = vec![Note {
+        name: "variant".to_owned(),
+        sentence,
+        raw,
+    }];
+    let Some(value) = choice.value else {
+        return notes;
+    };
+    let Some(body) = fragment::variant_body(root, value) else {
+        return notes;
+    };
+    for (slot, _) in &node.slots {
+        if fragment::has_outlet(body, slot) {
+            continue;
+        }
+        notes.push(Note {
+            name: format!("slot {slot}"),
+            sentence: format!(
+                "drops the \"{slot}\" slot: the \"{value}\" variant has no outlet for it"
+            ),
+            raw: NoteRaw::Name(slot),
+        });
+    }
+    notes
 }
 
 impl<'a> Walker<'a> {
@@ -296,6 +388,15 @@ impl<'a> Walker<'a> {
             let literal = !matches!(value, Value::Bind { .. } | Value::Token(_));
             let sentence = self.value_sentence(value, def);
             add(&mut self.items, name, sentence, Raw::Value(value), literal);
+        }
+        if node.kind == USE {
+            for note in variant_notes(self.catalog, self.inline, node) {
+                let raw = match note.raw {
+                    NoteRaw::Value(value) => Raw::Value(value),
+                    NoteRaw::Name(name) => Raw::Note(name),
+                };
+                add(&mut self.items, &note.name, note.sentence, raw, false);
+            }
         }
         for (event, action) in &node.on {
             let sentence = match self.scopes.last() {

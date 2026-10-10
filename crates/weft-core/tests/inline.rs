@@ -56,6 +56,28 @@ fn an_inline_fragment_works_without_a_project() {
 }
 
 #[test]
+fn an_inline_fragment_picks_a_variant() {
+    let markup = r#"<screen id="cart" label="Cart" weft="0.2"><fragment name="price-row"><param name="label" required="true" type="string"/><param name="amount" required="true" type="string"/><param default="normal" name="emphasis" type="enum" values="normal total" variant="true"/><variant when="normal"><text id="name" text="{$label}"/></variant><variant when="total"><heading id="name" level="3" text="{$label}"/></variant></fragment><use id="sub" fragment="price-row" label="Sub" amount="1"/><use id="tot" fragment="price-row" label="Tot" amount="2" emphasis="total"/></screen>"#;
+    assert_eq!(markup_codes(markup), Vec::<&str>::new());
+    let doc = document(markup);
+    let expanded = serialize(&expand(&doc, &catalog()).document);
+    assert!(expanded.contains(r#"id="sub/name""#), "{expanded}");
+    assert!(expanded.contains("<text "), "{expanded}");
+    assert!(expanded.contains(r#"id="tot/name""#), "{expanded}");
+    assert!(expanded.contains("<heading "), "{expanded}");
+    let lines: Vec<String> = weft_core::explain(&doc, Some(&catalog()))
+        .iter()
+        .map(|line| line.to_string())
+        .collect();
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.contains("uses the \"total\" variant of price-row")),
+        "{lines:?}"
+    );
+}
+
+#[test]
 fn a_use_prefers_the_inline_fragment() {
     let markup = row_screen(r#"<use id="sub" fragment="price-row" label="Sub"/>"#);
     let doc = document(&markup);

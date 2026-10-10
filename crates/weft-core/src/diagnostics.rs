@@ -167,6 +167,7 @@ codes! {
     W806 => Error, "Expanding the fragments exceeds the element or depth limit.";
     W807 => Error, "Parameter read where its type cannot go.";
     W808 => Error, "Inline fragment misplaced or malformed.";
+    W809 => Error, "Variant parameter or `<variant>` is misdeclared.";
 }
 
 impl Code {

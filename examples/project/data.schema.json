@@ -16,6 +16,7 @@
             }
           }
         },
+        "subtotal": { "type": "string" },
         "total": { "type": "string" },
         "empty": { "type": "boolean" }
       }

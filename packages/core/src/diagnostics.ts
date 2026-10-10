@@ -143,6 +143,7 @@ export const DIAGNOSTIC_CODES = {
   },
   W807: { severity: "error", summary: "Parameter read where its type cannot go." },
   W808: { severity: "error", summary: "Inline fragment misplaced or malformed." },
+  W809: { severity: "error", summary: "Variant parameter or `<variant>` is misdeclared." },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;

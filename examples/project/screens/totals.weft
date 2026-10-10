@@ -1,0 +1,4 @@
+<screen id="totals" label="Totals" weft="0.2">
+  <use id="subtotal" amount="{$.cart.subtotal}" fragment="price-row" label="Subtotal"/>
+  <use id="total" amount="{$.cart.total}" emphasis="total" fragment="price-row" label="Total"/>
+</screen>

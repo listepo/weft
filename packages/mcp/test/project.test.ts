@@ -155,7 +155,7 @@ test("a shared fragment is listed, checked and rendered as its expansion", async
   const index = await call(client, "weft_catalog", { project: PROJECT });
   assert.match(
     index.blocks[0] ?? "",
-    /\nfragment page-header \| title: string \(required\), back: action$/,
+    /\nfragment page-header \| title: string \(required\), back: action(\n|$)/,
   );
   const markup = await call(client, "weft_catalog", { kind: "page-header", project: PROJECT });
   assert.match(markup.blocks[0] ?? "", /^<fragment label="Page header" weft="0\.2">/);

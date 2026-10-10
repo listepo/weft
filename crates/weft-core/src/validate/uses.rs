@@ -3,7 +3,7 @@
 
 use super::{At, Owner, Validator, diag, node_at};
 use crate::diagnostics::{Code, did_you_mean, one_of, quote};
-use crate::fragment::{FRAGMENT, OUTLET, PARAM, USE};
+use crate::fragment::{FRAGMENT, OUTLET, PARAM, USE, VARIANT};
 use crate::inline;
 use crate::model::{Catalog, Map, Node, Value};
 use crate::rules::EACH;
@@ -128,11 +128,13 @@ fn placed_nodes<'a>(
         return;
     }
     seen.push(name.clone());
-    let children = root.children.iter();
-    let mut stack: Vec<&'a Node> = children.rev().filter_map(|c| c.as_node()).collect();
+    // The chosen variant's elements answer to where the use stands; the others do not.
+    let top = crate::fragment::placed_children(root, node);
+    let mut stack: Vec<&'a Node> = top.iter().rev().filter_map(|c| c.as_node()).collect();
     while let Some(child) = stack.pop() {
         match child.kind.as_str() {
             PARAM | OUTLET => {}
+            VARIANT => stack.extend(child.children.iter().rev().filter_map(|c| c.as_node())),
             EACH => stack.extend(child.children.iter().rev().filter_map(|c| c.as_node())),
             USE => placed_nodes(catalog, inline, child, seen, out),
             _ => out.push(child),

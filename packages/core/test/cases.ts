@@ -133,4 +133,5 @@ export const cases: Record<DocumentCode, Case> = {
   W808: {
     markup: screen('<text id="t">x</text><fragment name="row"><text id="a">y</text></fragment>'),
   },
+  W809: { markup: fragment('<param name="a" type="string" variant="true"/><text id="t">T</text>') },
 };

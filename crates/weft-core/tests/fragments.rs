@@ -7,7 +7,10 @@ mod common;
 
 use common::{catalog, codes, document, markup_codes, screen};
 use serde_json::json;
-use weft_core::{ApplyOptions, Catalog, Fragment, ParseOptions, Value, apply_patches, parse};
+use weft_core::{
+    ApplyOptions, Catalog, Fragment, ParseOptions, Value, apply_patches, expand, explain, parse,
+    serialize,
+};
 
 fn fragment(body: &str) -> Vec<&'static str> {
     markup_codes(&format!("<fragment weft=\"0.2\">{body}</fragment>"))
@@ -276,6 +279,241 @@ fn patches_set_parameters_and_never_reach_into_a_fragment() {
                 .contains("page-header")
         );
     }
+}
+
+const PRICE_ROW: &str = r#"<fragment label="Price row" weft="0.2">
+  <param name="label" required="true" type="string"/>
+  <param name="amount" required="true" type="string"/>
+  <param default="normal" name="emphasis" type="enum" values="normal total" variant="true"/>
+  <variant when="normal">
+    <stack id="row" direction="row">
+      <text id="name" text="{$label}"/>
+      <text id="value" text="{$amount}"/>
+    </stack>
+  </variant>
+  <variant when="total">
+    <stack id="row" direction="row">
+      <heading id="name" level="3" text="{$label}"/>
+      <heading id="value" level="3" text="{$amount}"/>
+    </stack>
+  </variant>
+</fragment>
+"#;
+
+fn with_fragment(name: &str, markup: &str) -> Catalog {
+    let mut catalog = catalog();
+    let document = document(markup);
+    catalog
+        .fragments
+        .insert(name.to_owned(), Fragment::new(document));
+    catalog
+}
+
+#[test]
+fn a_variant_fragment_is_canonical_and_the_parameter_is_a_literal() {
+    assert_eq!(markup_codes(PRICE_ROW), Vec::<&str>::new());
+    let doc = document(PRICE_ROW);
+    assert_eq!(serialize(&doc), PRICE_ROW);
+    let root = serde_json::to_value(&doc.root).unwrap();
+    assert_eq!(root["children"][2]["props"]["variant"], json!(true));
+    assert_eq!(root["children"][3]["kind"], json!("variant"));
+    assert_eq!(root["children"][3]["props"]["when"], json!("normal"));
+    assert!(root["children"][3].get("id").is_none());
+    let signature = Fragment::new(doc).signature;
+    let emphasis = &signature.props.as_ref().unwrap()["emphasis"];
+    assert_eq!(emphasis.bindable, Some(false));
+    assert!(
+        signature.props.as_ref().unwrap()["label"]
+            .bindable
+            .is_none()
+    );
+}
+
+#[test]
+fn variant_declarations_are_w809_and_ids_are_per_variant() {
+    let cases: &[(&str, &[&str])] = &[
+        (
+            r#"<param name="a" type="string" variant="true"/><text id="t">T</text>"#,
+            &["W809"],
+        ),
+        (
+            r#"<param name="a" type="enum" values="a b" variant="true"/><param name="b" type="enum" values="a b" variant="true"/><variant when="a"><text id="t">T</text></variant><variant when="b"><text id="t">T</text></variant>"#,
+            &["W809"],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a b" variant="true"/><variant when="a"><text id="t">T</text></variant>"#,
+            &["W809"],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a b" variant="true"/><variant when="a"><text id="t">T</text></variant><variant when="a"><text id="u">U</text></variant>"#,
+            &["W809", "W809"],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a b" variant="true"/><variant when="a b"><text id="t">T</text></variant>"#,
+            &[],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a b" variant="true"/><variant when="nope"><text id="t">T</text></variant><variant when="a"><text id="u">U</text></variant>"#,
+            &["W809", "W809"],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a" variant="true"/><stack id="t"/>"#,
+            &["W809", "W809"],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a" variant="true"/><variant id="v" when="a"><text id="t">T</text></variant>"#,
+            &["W809"],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a" variant="true"/><variant when="a"/>"#,
+            &["W809"],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a b" variant="true"/><variant when="a"><text id="t">T</text></variant><variant when="b"><text id="t">U</text></variant>"#,
+            &[],
+        ),
+        (
+            r#"<param default="a" name="a" type="enum" values="a b" variant="true"/><variant when="a"><text id="t">T</text><text id="t">U</text></variant><variant when="b"><text id="u">U</text></variant>"#,
+            &["W301"],
+        ),
+        (
+            r#"<variant when="a"><text id="t">T</text></variant>"#,
+            &["W809"],
+        ),
+    ];
+    for (body, expected) in cases {
+        assert_eq!(fragment(body), *expected, "{body}");
+    }
+    assert_eq!(
+        markup_codes(&screen(
+            r#"<stack id="s"><variant when="a"><text id="t">T</text></variant></stack>"#
+        )),
+        ["W809"]
+    );
+    // A reference resolves inside its own variant. The other variant's ids do not count.
+    assert_eq!(
+        fragment(
+            r#"<param default="a" name="k" type="enum" values="a b" variant="true"/><variant when="a"><tabs id="tabs" selected="one"><tab id="one" label="One"/></tabs></variant><variant when="b"><tabs id="tabs" selected="one"><tab id="two" label="Two"/></tabs></variant>"#,
+        ),
+        ["W309"]
+    );
+}
+
+#[test]
+fn a_use_places_and_explains_only_the_chosen_variant() {
+    let catalog = with_fragment("price-row", PRICE_ROW);
+    let options = ParseOptions {
+        catalog: Some(&catalog),
+        ..ParseOptions::default()
+    };
+    let codes_of = |markup: &str| codes(&parse(&screen(markup), &options).diagnostics);
+    assert_eq!(
+        codes_of(r#"<use id="s" fragment="price-row" label="Subtotal" amount="1"/>"#),
+        Vec::<&str>::new()
+    );
+    assert_eq!(
+        codes_of(r#"<use id="s" fragment="price-row" label="Total" amount="1" emphasis="{$.x}"/>"#),
+        ["W217"]
+    );
+    let required = r#"<fragment weft="0.2"><param name="k" required="true" type="enum" values="a b" variant="true"/><variant when="a"><text id="t">T</text></variant><variant when="b"><text id="t">T</text></variant></fragment>"#;
+    let required_catalog = with_fragment("need", required);
+    let options = ParseOptions {
+        catalog: Some(&required_catalog),
+        ..ParseOptions::default()
+    };
+    assert_eq!(
+        codes(&parse(&screen(r#"<use id="s" fragment="need"/>"#), &options).diagnostics),
+        ["W205"]
+    );
+
+    let placed = with_fragment(
+        "row",
+        r#"<fragment weft="0.2"><param default="row" name="kind" type="enum" values="row item" variant="true"/><variant when="row"><stack id="s"><text id="t">T</text></stack></variant><variant when="item"><item id="i">I</item></variant></fragment>"#,
+    );
+    let options = ParseOptions {
+        catalog: Some(&placed),
+        ..ParseOptions::default()
+    };
+    let placed_codes = |markup: &str| codes(&parse(&screen(markup), &options).diagnostics);
+    assert_eq!(
+        placed_codes(r#"<list id="l"><use id="u" fragment="row" kind="item"/></list>"#),
+        Vec::<&str>::new()
+    );
+    assert_eq!(
+        placed_codes(r#"<stack id="l"><use id="u" fragment="row" kind="item"/></stack>"#),
+        ["W303"]
+    );
+    assert_eq!(
+        placed_codes(r#"<list id="l"><use id="u" fragment="row"/></list>"#),
+        ["W302"]
+    );
+
+    let screen = screen(
+        r#"<use id="subtotal" fragment="price-row" label="Subtotal" amount="1"/><use id="total" fragment="price-row" label="Total" amount="2" emphasis="total"/>"#,
+    );
+    let document = parse(&screen, &options_of(&catalog)).document.unwrap();
+    let result = expand(&document, &catalog);
+    assert_eq!(codes(&result.diagnostics), Vec::<&str>::new());
+    let root = serde_json::to_value(&result.document.root).unwrap();
+    assert_eq!(root["children"][0]["kind"], json!("stack"));
+    assert_eq!(root["children"][0]["id"], json!("subtotal/row"));
+    assert_eq!(root["children"][0]["children"][0]["kind"], json!("text"));
+    assert_eq!(root["children"][1]["children"][0]["kind"], json!("heading"));
+    assert_eq!(
+        root["children"][1]["children"][1]["id"],
+        json!("total/value")
+    );
+    let lines: Vec<String> = explain(&document, Some(&catalog))
+        .iter()
+        .map(|line| line.to_string())
+        .collect();
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.contains("uses the \"normal\" variant of price-row, the default")),
+        "{lines:?}"
+    );
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.contains("uses the \"total\" variant of price-row")),
+        "{lines:?}"
+    );
+}
+
+fn options_of(catalog: &Catalog) -> ParseOptions<'_> {
+    ParseOptions {
+        catalog: Some(catalog),
+        ..ParseOptions::default()
+    }
+}
+
+#[test]
+fn a_variant_without_an_outlet_drops_that_slot() {
+    let markup = r#"<fragment weft="0.2"><param name="note" type="slot"/><param default="normal" name="emphasis" type="enum" values="normal total" variant="true"/><variant when="normal"><stack id="row"><outlet name="note"/></stack></variant><variant when="total"><text id="value" text="{$emphasis}"/></variant></fragment>"#;
+    let catalog = with_fragment("row", markup);
+    let options = options_of(&catalog);
+    let screen = screen(
+        r#"<use id="t" fragment="row" emphasis="total"><slot name="note"><text id="n">N</text></slot></use>"#,
+    );
+    let document = parse(&screen, &options).document.unwrap();
+    assert_eq!(
+        codes(&parse(&screen, &options).diagnostics),
+        Vec::<&str>::new()
+    );
+    let result = expand(&document, &catalog);
+    let root = serde_json::to_value(&result.document.root).unwrap();
+    assert_eq!(root["children"][0]["kind"], json!("text"));
+    assert_eq!(root["children"][0]["props"]["text"], json!("total"));
+    assert_eq!(root["children"].as_array().unwrap().len(), 1);
+    let lines: Vec<String> = explain(&document, Some(&catalog))
+        .iter()
+        .map(|line| line.to_string())
+        .collect();
+    assert!(
+        lines.iter().any(|l| l.contains("drops the \"note\" slot")),
+        "{lines:?}"
+    );
 }
 
 #[test]
