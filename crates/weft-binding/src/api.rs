@@ -101,10 +101,6 @@ pub fn validate_json(
     write(&diagnostics)
 }
 
-fn too_deep_document() -> Document {
-    to_document(&Json::Null)
-}
-
 fn too_deep_diagnostics() -> Vec<Diagnostic> {
     vec![Diagnostic::new(
         Code::W200,
@@ -114,38 +110,44 @@ fn too_deep_diagnostics() -> Vec<Diagnostic> {
     )]
 }
 
+/// The `W200` `apply` already returns. A placeholder document would be a blank screen and no signal.
+fn too_deep_result(err: BindingError) -> Result<String> {
+    match err {
+        BindingError::TooDeep => write(&too_deep_diagnostics()),
+        other => Err(other),
+    }
+}
+
 pub fn serialize_document(document: Option<&str>) -> Result<String> {
     match read_document(document) {
         Ok(d) => Ok(serialize(&d)),
-        Err(BindingError::TooDeep) => Ok(serialize(&too_deep_document())),
-        Err(e) => Err(e),
+        Err(e) => too_deep_result(e),
     }
 }
 
 pub fn stringify_document(document: Option<&str>) -> Result<String> {
     match read_document(document) {
         Ok(d) => Ok(stringify(&d)),
-        Err(BindingError::TooDeep) => Ok(stringify(&too_deep_document())),
-        Err(e) => Err(e),
+        Err(e) => too_deep_result(e),
     }
 }
 
 pub fn canonicalize_document(document: Option<&str>) -> Result<String> {
     match read_document(document) {
         Ok(d) => write(&canonicalize(&d)),
-        Err(BindingError::TooDeep) => write(&canonicalize(&too_deep_document())),
-        Err(e) => Err(e),
+        Err(e) => too_deep_result(e),
     }
 }
 
 /// `expand`: `{document, diagnostics}`, the document with each use of a known fragment expanded
-/// (SPEC §10.7); a document past the depth limit is reported as `validate` reports it.
+/// (SPEC §10.7). A document that cannot be read is `W200` with no document: a placeholder would
+/// be a blank screen.
 pub fn expand_document(document: Option<&str>, catalog: &Catalog) -> Result<String> {
     let document = match read_document(document) {
         Ok(d) => d,
         Err(BindingError::TooDeep) => {
             return write(&Patched {
-                document: Some(&too_deep_document()),
+                document: None,
                 diagnostics: &too_deep_diagnostics(),
             });
         }
@@ -694,5 +696,46 @@ mod tests {
         assert_eq!(out["diagnostics"][0]["path"], "#/project/actions/0");
         assert_eq!(out["data"], Json::Null);
         assert!(load_project("{}", None, r#"{"bogus":1}"#).is_err());
+    }
+
+    /// What `to_document(Null)` writes: the blank screen a caller must not get for input that
+    /// could not be read.
+    fn empty_screen() -> (String, String, String) {
+        let document = to_document(&Json::Null);
+        (
+            serialize(&document),
+            stringify(&document),
+            serde_json::to_string(&canonicalize(&document)).unwrap(),
+        )
+    }
+
+    fn past_the_depth_limit() -> String {
+        let depth = weft_core::JSON_DEPTH_LIMIT + 2;
+        format!("{}0{}", "[".repeat(depth), "]".repeat(depth))
+    }
+
+    #[test]
+    fn a_cyclic_or_too_deep_document_is_w200_not_an_empty_screen() {
+        let (empty_markup, empty_json, empty_canonical) = empty_screen();
+        let fixture: Json =
+            serde_json::from_str(include_str!("../tests/fixtures/deep-documents.json")).unwrap();
+        let deep = past_the_depth_limit();
+        for (label, input) in [("cyclic", None), ("too-deep", Some(deep.as_str()))] {
+            let markup = serialize_document(input).unwrap();
+            let json_text = stringify_document(input).unwrap();
+            let canonical = canonicalize_document(input).unwrap();
+            assert_eq!(json(&markup), fixture["reported"], "{label}");
+            assert_eq!(json(&json_text), fixture["reported"], "{label}");
+            assert_eq!(json(&canonical), fixture["reported"], "{label}");
+            assert_ne!(markup, empty_markup);
+            assert_ne!(json_text, empty_json);
+            assert_ne!(canonical, empty_canonical);
+        }
+        let expanded = json(&expand_document(None, &catalog()).unwrap());
+        let expanded_deep = json(&expand_document(Some(&deep), &catalog()).unwrap());
+        assert!(expanded["document"].is_null());
+        assert_eq!(expanded, fixture["expand"]);
+        assert_eq!(expanded_deep, fixture["expand"]);
+        assert_ne!(expanded["document"], json(&empty_canonical));
     }
 }

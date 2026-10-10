@@ -192,6 +192,7 @@ Canonical form rules, so that equal documents are byte-equal:
 - The JSON text is indented by two spaces and ends with a newline.
 - Markup serialization writes attributes as: `id`, then props sorted (the root's `weft` sorts with them), then `on-*` sorted; two-space indentation; named slots after default-slot children, sorted by name. The root writes the `<context>` block before its children, one entry per line with `id` first and the other attributes sorted, the text as the entry's content; a document without context is written as if the block did not exist. Inline fragments are written next, each as `<fragment name="…">` with `name` sorted among its attributes, then the body. An element with no content is self-closing; an element whose only content is one text child is written on one line; otherwise every child goes on its own line. The text ends with a newline.
 - Escaping: in attribute values `&`, `<`, `"`, tab, LF and CR are written as references; in text `&`, `<` and `>` are. No other references are written.
+- A value that cannot be read as a document — a cycle, or nesting past the depth limit — is not written. `serialize`, `stringify` and `canonicalize` report `W200` (§6.2) and emit no document.
 
 Literal typing needs the catalog: `level="2"` is the number `2` only because `heading.level` is declared a number. For extension elements and unknown attributes, literals stay strings.
 

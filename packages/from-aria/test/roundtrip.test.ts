@@ -137,7 +137,9 @@ function ids(n: Inst, mode: Mode): { id?: string } {
 function skeletonOf(document: Document, data: unknown, mode: Mode): Skel[] {
   // What the renderer draws: each use is its fragment's body (SPEC §10.7), which is all an
   // importer can read back.
-  const root = expandRoot(expand(document, catalog).document.root, catalog, data);
+  const expanded = expand(document, catalog).document;
+  assert.ok(expanded);
+  const root = expandRoot(expanded.root, catalog, data);
   return root ? skeleton(root, mode) : [];
 }
 

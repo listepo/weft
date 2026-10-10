@@ -4,5 +4,6 @@ import type { Document } from "./model.ts";
 import { toJson, wasm } from "./wasm.ts";
 
 export function serialize(document: Document): string {
+  // A cycle or a value past the depth limit is the W200 list (SPEC §3), not markup of an empty screen.
   return wasm.serialize(toJson(document));
 }

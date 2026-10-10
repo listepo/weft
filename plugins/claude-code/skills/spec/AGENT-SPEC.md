@@ -352,7 +352,7 @@ What each code asks of you:
 | W119 | Merge the two slots of the same name. |
 | W120 | Keep one `<context>`, as a direct child of `<screen>`, with no attributes and only `<entry>` elements inside. |
 | W121 | Put the `<entry>` inside `<context>`, with plain text only, the attributes `id`, `kind`, `by`, `name`, `for`, `status`, and `kind`, `by` and `name` all present. |
-| W200 | Give the JSON the shape of SPEC §3: `{ weft, root }`, nodes with `kind`, `id`, `props`, `on`, `slots`, `children` and nothing else. |
+| W200 | Give the JSON the shape of SPEC §3: `{ weft, root }`, nodes with `kind`, `id`, `props`, `on`, `slots`, `children` and nothing else. A cycle or nesting past the depth limit is this code too: nothing is written, and an empty document is not success. |
 | W201 | Make `<screen>` the root; in a project fragment file, `<fragment>`. |
 | W202 | Add a unique `id`. |
 | W203 | Use one of the values in `expected`. |

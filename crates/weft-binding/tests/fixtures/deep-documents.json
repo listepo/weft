@@ -1,0 +1,22 @@
+{
+  "reported": [
+    {
+      "code": "W200",
+      "severity": "error",
+      "message": "The document nests deeper than 256 elements.",
+      "path": "#",
+      "expected": "at most 256 levels"
+    }
+  ],
+  "expand": {
+    "diagnostics": [
+      {
+        "code": "W200",
+        "severity": "error",
+        "message": "The document nests deeper than 256 elements.",
+        "path": "#",
+        "expected": "at most 256 levels"
+      }
+    ]
+  }
+}

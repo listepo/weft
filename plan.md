@@ -38,7 +38,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T17.2 | todo | P2 | 3 | 0% | |
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
-| T96 | todo | P2 | 3 | 0% | |
 | T97 | todo | P2 | 2 | 0% | |
 | T98 | todo | P2 | 2 | 0% | |
 | T99 | todo | P3 | 1 | 0% | |
@@ -51,6 +50,13 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 Found while merging #18. After T79, `serialize`, `stringify` and `canonicalize` (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`) return the output of an empty placeholder document (`to_document(Null)`) for a cyclic or too-deep input instead of failing. Only `applyPatches` reports W200. A caller gets a valid-looking empty screen and no signal.
 
 Done when: these entry points return W200 (or the binding's error type) for a too-deep or cyclic input, in Rust and TypeScript alike, with differential fixtures; no entry point turns such input into an empty document silently.
+
+Execution plan:
+
+1. Reproduce the silent empty document from `serialize`, `stringify` and `canonicalize` on a cyclic value and on a value past the depth limit (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`, and the TypeScript wrappers that call them).
+2. Return W200, the same way `applyPatches` already does, instead of `to_document(Null)`. Cover every entry point that can hide the failure, in Rust and TypeScript.
+3. Add differential fixtures: cyclic and too-deep inputs must not come back as an empty screen.
+4. Verify with `moon run root:changed`. Leave unrelated entry points unchanged.
 
 ### T97. Design-tool plugin data over 100 kB
 
