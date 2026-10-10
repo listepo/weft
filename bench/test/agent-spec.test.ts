@@ -30,6 +30,15 @@ const fragments = Object.fromEntries(
 );
 const options = { catalog: { ...coreCatalog, fragments }, mode: "strict" as const, tokens };
 
+// The guide's examples are separate scenarios, not one project: its inline `price-row` and its
+// project fragment of that label never meet, so a screen is checked without the project
+// fragments it defines inline (which would otherwise be `W808`).
+function optionsFor(src: string): typeof options {
+  const inline = new Set([...src.matchAll(/<fragment\b[^>]*\bname="([^"]+)"/g)].map((m) => m[1]));
+  const project = Object.fromEntries(Object.entries(fragments).filter(([n]) => !inline.has(n)));
+  return { ...options, catalog: { ...coreCatalog, fragments: project } };
+}
+
 test("the guide names every component of the core catalog", () => {
   const missing = Object.keys(coreCatalog.components).filter((k) => !guide.includes(`\`${k}\``));
   assert.deepEqual(missing, []);
@@ -44,7 +53,7 @@ test("every markup example is valid in strict mode and canonical", () => {
   const examples = blocks("xml");
   assert.ok(examples.length > 0);
   for (const src of examples) {
-    const result = parse(src, options);
+    const result = parse(src, optionsFor(src));
     assert.deepEqual(result.diagnostics, []);
     assert.ok(result.document);
     assert.equal(serialize(result.document), src);

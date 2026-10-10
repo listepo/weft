@@ -1,0 +1,98 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-receipt as json
+---
+{
+  "weft": "0.2",
+  "fragments": {
+    "price-row": {
+      "kind": "fragment",
+      "props": {
+        "label": "Price row"
+      },
+      "children": [
+        {
+          "kind": "param",
+          "props": {
+            "name": "label",
+            "required": true,
+            "type": "string"
+          }
+        },
+        {
+          "kind": "param",
+          "props": {
+            "name": "amount",
+            "required": true,
+            "type": "string"
+          }
+        },
+        {
+          "kind": "stack",
+          "id": "row",
+          "props": {
+            "direction": "row",
+            "justify": "space-between"
+          },
+          "children": [
+            {
+              "kind": "text",
+              "id": "name",
+              "props": {
+                "text": {
+                  "bind": "$label"
+                }
+              }
+            },
+            {
+              "kind": "text",
+              "id": "value",
+              "props": {
+                "text": {
+                  "bind": "$amount"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "root": {
+    "kind": "screen",
+    "id": "receipt",
+    "props": {
+      "label": "Receipt"
+    },
+    "children": [
+      {
+        "kind": "stack",
+        "id": "lines",
+        "children": [
+          {
+            "kind": "use",
+            "id": "subtotal",
+            "props": {
+              "amount": {
+                "bind": "$.subtotal"
+              },
+              "fragment": "price-row",
+              "label": "Subtotal"
+            }
+          },
+          {
+            "kind": "use",
+            "id": "total",
+            "props": {
+              "amount": {
+                "bind": "$.total"
+              },
+              "fragment": "price-row",
+              "label": "Total"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

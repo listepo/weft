@@ -9,7 +9,7 @@ import { CORPUS_DIR } from "../src/corpus.ts";
 import { renderPage } from "../src/index.ts";
 
 /** What a cut can explain; the same list as the Rust test of the same name. */
-const TAIL = new Set(["W110", "W114", "W115", "W208", "W309", "W314"]);
+const TAIL = new Set(["W110", "W114", "W115", "W208", "W309", "W314", "W803"]);
 const STEP = 11;
 
 const screens = readdirSync(CORPUS_DIR, { withFileTypes: true })
