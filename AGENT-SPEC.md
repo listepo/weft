@@ -187,8 +187,28 @@ A project can share a block between screens, such as a page header, as a *fragme
 
 - `<use>` takes an `id`, `fragment` (the name), one attribute per value parameter with a value of its type (a literal, binding or token), `on-<name>` per action parameter, and `<slot name="…">` per slot parameter. It takes no `label`, `hidden` or other universal attribute and no default content.
 - What a use places must be allowed where the `<use>` stands, as if the body were written there.
-- Ids inside a fragment belong to it. A rendered element is addressed as `header/title`. A patch sets a parameter on the `<use>` (`"prop": "title"`, `"prop": "on-back"`) or fills its slot; it never names an id inside the fragment (`W502`): edit the fragment instead.
+- Ids inside a fragment belong to it. A rendered element is addressed as `header/title`. A patch sets a parameter on the `<use>` (`"prop": "title"`, `"prop": "on-back"`) or fills its slot; it never names an id inside a project fragment (`W502`): edit that fragment instead.
 - In a fragment the `<param>` elements come first, then the body. Read a value parameter whole, `{$title}`, where its type fits; an action parameter as `on-press="{$back}"`; a slot parameter with `<outlet name="actions"/>`.
+
+A block that only one screen repeats can be an inline fragment on that screen, with no project. It is a direct child of `<screen>`, after `<context>` if any and before the body. `name` is required; `label` and `version` are optional. It has no `id` and no `weft`. A `<use>` finds the name there first, then in the project. Do not reuse a project fragment's name (`W808`).
+
+```xml
+<screen id="cart" label="Cart" weft="0.2">
+  <fragment label="Price row" name="price-row">
+    <param name="label" required="true" type="string"/>
+    <param name="amount" required="true" type="string"/>
+    <stack id="row" direction="row" justify="space-between">
+      <text id="name" text="{$label}"/>
+      <text id="value" text="{$amount}"/>
+    </stack>
+  </fragment>
+  <use id="subtotal" amount="{$.cart.subtotal}" fragment="price-row" label="Subtotal"/>
+  <use id="total" amount="{$.cart.total}" fragment="price-row" label="Total"/>
+</screen>
+```
+
+- A context entry's `for` names a screen id. For a fragment instance that id is the `<use>` id (`subtotal`), not an id inside the fragment.
+- To edit the fragment's body, pass `fragment` on `set`, `insert`, `remove` or `move`. The fragment's own name as `id` addresses the `<fragment>` element (`label`, `version`). `add-fragment` adds one from markup; `remove-fragment` removes one. A name already on the screen is `W513`. Removing a fragment a `<use>` still names fails (`W801`) and applies nothing.
 
 ## 3. Editing a screen
 
@@ -357,6 +377,7 @@ What each code asks of you:
 | W510 | Give the added entry an id that no element or entry has; `hint` suggests one. |
 | W511 | Name an entry's id from the `<context>` block; element ids do not work here. |
 | W512 | The host refused the context patch: write `by` and `name` as the host says, or leave context alone when it is read-only. |
+| W513 | `add-fragment` used a name this screen already has. Pick another name, or `remove-fragment` the old one first. |
 | W601 | The importer could not read its input; nothing to repair in a document. |
 | W602 | The import was cut at a limit; the rest of the input is missing. |
 | W701 | The project file, or the member at `path`, has the wrong shape; fix `weft.json` (or the `project` argument), not the screen. |
@@ -380,6 +401,7 @@ What each code asks of you:
 | W805 | Break the cycle: a fragment may not use itself, directly or through other fragments; write the repeated part out once. |
 | W806 | Use fewer or smaller fragments: a screen expands to at most 10,000 elements and 256 levels. |
 | W807 | Read a value parameter whole (`{$title}`, not `{$title.x}`) in a prop, an action parameter in `on-*`, and a slot parameter with `<outlet>`. |
+| W808 | Put `<fragment name="…">` directly under `<screen>`, after `<context>` and before the body, with only `name`, `label` and `version`. One name, once, and not a name the project already uses. A fragment file cannot hold one. |
 
 ### 4.1 Reading back an edit
 

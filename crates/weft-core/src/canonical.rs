@@ -118,6 +118,14 @@ pub fn canonicalize(document: &Document) -> Document {
     Document {
         weft: document.weft.clone(),
         context: document.context.iter().map(canonical_entry).collect(),
+        // Names sort like every other key (SPEC §3), so markup order never changes the bytes.
+        fragments: sorted(
+            document
+                .fragments
+                .iter()
+                .map(|(name, node)| (name.clone(), canonical_node(node)))
+                .collect(),
+        ),
         root: canonical_node(&document.root),
     }
 }
@@ -170,6 +178,7 @@ mod tests {
         let doc = Document {
             weft: "0.1".into(),
             context: vec![],
+            fragments: Map::new(),
             root,
         };
         assert_eq!(

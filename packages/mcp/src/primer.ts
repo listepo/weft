@@ -11,6 +11,7 @@ export const primer = (
 - Element and attribute names are lowercase with hyphens. Attribute values are always in double quotes. Booleans are true or false. An element without content is self-closing.
 - Only components of the catalog exist. Do not invent elements or attributes; call weft_catalog to see them.
 - A project's fragments, which weft_catalog lists after the components, are placed with <use id="…" fragment="name" title="…" on-back="action">, one attribute per parameter. Use only listed fragments.
+- A screen may also define an inline <fragment name="…"> after <context> and before the body, then place it with <use fragment="name">. It is local to that screen and needs no project. Pass the screen's markup to weft_catalog to list those fragments. Do not reuse a project fragment's name.
 - A value is a literal ("Email"), a binding value="{$.user.email}", a negated binding disabled="{!$.busy}", or a design token gap="{token.space.md}". A literal that starts with "{" is written "{{". Never mix text and a binding in one value.
 - Inside <each in="{$.items}" as="item"> the loop variable is bound as {$item.field}; ids inside it are templates.
 - Events are on-<event>="action.name", for example on-press="auth.submit". Actions take no arguments and no code.
@@ -41,6 +42,7 @@ Patches (addressed by id, applied in order, all-or-nothing):
 - {"op":"add-context","entry":{"id":"why-go","kind":"decision","by":"agent","name":"your-model-id","for":"go","text":"…"}}: appends a context entry with a new id.
 - {"op":"set-context","id":"why-go","field":"text","value":"…"}: field is text, kind or for; null only for for.
 - {"op":"resolve-context","id":"q1"} resolves a question or todo; {"op":"remove-context","id":"why-go"} deletes an entry. Removing an element that an entry names in for fails (W309) until you remove the entry or change its for.
+- {"op":"set","id":"row","fragment":"price-row","prop":"direction","value":"column"} edits inside an inline fragment. {"op":"add-fragment","markup":"<fragment name=\\"row\\"><text id=\\"t\\">x</text></fragment>"} adds one; {"op":"remove-fragment","name":"row"} removes one. A <use> that still names it fails and nothing is applied.
 The root cannot be removed or moved.
 
 Workflow: write or edit, call weft_validate (or let weft_patch validate), and fix every error using its hint before you answer. Limits: markup at most ${limits.markupChars} characters, at most ${limits.patches} patches per call.`;

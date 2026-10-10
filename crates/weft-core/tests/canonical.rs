@@ -20,6 +20,7 @@ fn doc(root: Node) -> Document {
     Document {
         weft: "0.1".into(),
         context: Vec::new(),
+        fragments: Default::default(),
         root,
     }
 }
@@ -251,6 +252,7 @@ fn a_document_without_a_version_writes_no_version_attribute() {
     let d = Document {
         weft: String::new(),
         context: Vec::new(),
+        fragments: Default::default(),
         root: node("screen", "s"),
     };
     assert_eq!(serialize(&d), "<screen id=\"s\"/>\n");

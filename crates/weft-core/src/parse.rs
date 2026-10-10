@@ -10,7 +10,8 @@ use crate::canonical::{Parts, append_text, assemble_node, normalize_text};
 use crate::context::{misplaced_context, misplaced_entry, read_block};
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, has_errors, sort_by_position};
 use crate::fragment;
-use crate::model::{Catalog, Child, Document, Entry, Node, PropType};
+use crate::inline;
+use crate::model::{Catalog, Child, Document, Entry, Map, Node, PropType};
 use crate::rules::{CONTEXT, EACH, ENTRY, SLOT, is_name, universal_prop};
 use crate::source::{ListSource, NodeSource, Source};
 use crate::syntax::{RawChild, RawElement, SyntaxResult, tokenize, tokenize_with};
@@ -66,19 +67,31 @@ fn parse_with(markup: &str, options: &ParseOptions<'_>, partial: bool) -> ParseR
             pending,
         };
     };
-    let (document, mut diagnostics, open) = build_open(&syntax, root, options.catalog);
-    if has_errors(&diagnostics) {
-        sort_by_position(&mut diagnostics);
+    let (document, diagnostics, open) = build_open(&syntax, root, options.catalog);
+    // A bad inline fragment is left out of the document (`W808`). The screen around it still
+    // parses; only a fatal error of something that was kept drops the document.
+    let (mut fatal, mut notes) = (Vec::<Diagnostic>::new(), Vec::new());
+    for d in diagnostics {
+        if d.code == Code::W808 {
+            notes.push(d);
+        } else {
+            fatal.push(d);
+        }
+    }
+    if has_errors(&fatal) {
+        fatal.append(&mut notes);
+        sort_by_position(&mut fatal);
         return ParseResult {
             document: None,
-            diagnostics,
+            diagnostics: fatal,
             pending,
         };
     }
     if options.catalog.is_none() {
+        sort_by_position(&mut notes);
         return ParseResult {
             document: Some(document),
-            diagnostics: vec![],
+            diagnostics: notes,
             pending,
         };
     }
@@ -89,6 +102,8 @@ fn parse_with(markup: &str, options: &ParseOptions<'_>, partial: bool) -> ParseR
         actions: options.actions,
     };
     let mut diagnostics = validate_document(&document, &validate);
+    diagnostics.append(&mut notes);
+    sort_by_position(&mut diagnostics);
     if partial {
         let (wait, rest): (Vec<_>, Vec<_>) = diagnostics
             .into_iter()
@@ -145,6 +160,7 @@ pub fn parse_fragment(markup: &str, catalog: &Catalog) -> (Option<Node>, Vec<Dia
 /// `typing` is the `fragment` attribute of a `<use>`, or the `type` of a `<param>`.
 fn prop_type(
     catalog: Option<&Catalog>,
+    inline: &Map<Node>,
     kind: &str,
     typing: Option<&str>,
     name: &str,
@@ -155,7 +171,14 @@ fn prop_type(
         fragment::PARAM => fragment::param_attr_type(name, typing),
         // A use takes no universal attributes (SPEC §10.7), only its fragment's parameters.
         fragment::USE => {
-            let fragment = catalog?.fragments.get(typing?)?;
+            let typing = typing?;
+            if let Some(node) = inline.get(typing).filter(|n| {
+                inline::usable(typing, n)
+                    && catalog.is_none_or(|c| !c.fragments.contains_key(typing))
+            }) {
+                return fragment::signature(node).prop(name).map(|d| d.kind);
+            }
+            let fragment = catalog?.fragments.get(typing)?;
             fragment.signature.prop(name).map(|d| d.kind)
         }
         _ => catalog?
@@ -174,6 +197,8 @@ struct Builder<'a> {
     weft: String,
     /// The root's `<context>` block, lifted out of its content (SPEC §2.3).
     context: Option<Vec<Entry>>,
+    /// Inline fragments lifted from the root `<screen>` (SPEC §10.7).
+    fragments: Map<Node>,
     /// Paths of the elements the end of a partial input left open.
     open: HashSet<String>,
 }
@@ -228,7 +253,7 @@ impl Builder<'_> {
             } else {
                 match read_value(
                     &attr.value,
-                    prop_type(self.catalog, &kind, typing, &attr.name),
+                    prop_type(self.catalog, &self.fragments, &kind, typing, &attr.name),
                 ) {
                     Ok(value) => props.push((attr.name.clone(), value)),
                     Err(bad) => self.diagnostics.push(
@@ -250,18 +275,48 @@ impl Builder<'_> {
         let mut child_positions = Vec::new();
         let mut slots: Vec<(String, Vec<Child>, ListSource)> = Vec::new();
         let mut seen_slots: HashSet<String> = HashSet::new();
+        // Inline fragments sit after `<context>` and before the first body element. Ones that
+        // arrive before a later `<context>` are held and dropped when that block appears.
+        let screen = lifts_context && raw.name == "screen";
+        let mut seen_body = false;
+        let mut seen_context = false;
+        let mut before_context: Vec<(String, Position, String)> = Vec::new();
         for child in &raw.children {
             let child_index = match child {
                 RawChild::Text { text, pos } => {
                     if append_text(&mut children, normalize_text(text)) {
+                        if screen {
+                            seen_body = true;
+                        }
                         child_positions.push(Some(*pos));
                     }
                     continue;
                 }
                 RawChild::Element(i) => *i,
             };
+            let child_name = syntax.elements[child_index].name.clone();
+            if child_name == fragment::FRAGMENT {
+                if let Some(kept) = self
+                    .take_fragment(child_index, path, screen, seen_body)
+                    .filter(|_| !seen_context)
+                {
+                    before_context.push(kept);
+                }
+                continue;
+            }
             let child_raw = &syntax.elements[child_index];
             if lifts_context && child_raw.name == CONTEXT {
+                if screen {
+                    for (name, pos, fpath) in before_context.drain(..) {
+                        self.fragments.shift_remove(&name);
+                        self.diagnostics.push(inline::diagnostic(
+                            pos,
+                            &fpath,
+                            "An inline <fragment> stands before <context>.",
+                        ));
+                    }
+                    seen_context = true;
+                }
                 let first = self.context.is_none();
                 let entries = self.context.get_or_insert_with(Vec::new);
                 read_block(
@@ -273,6 +328,9 @@ impl Builder<'_> {
                     &mut self.diagnostics,
                 );
                 continue;
+            }
+            if screen {
+                seen_body = true;
             }
             if child_raw.name != SLOT {
                 let child_path = format!("{path}/{}", child_raw.segment());
@@ -300,7 +358,10 @@ impl Builder<'_> {
                     }
                     RawChild::Element(g) => {
                         let g_raw = &syntax.elements[*g];
-                        if g_raw.name == SLOT {
+                        if g_raw.name == fragment::FRAGMENT {
+                            // A fragment inside a slot is not a child of `<screen>`.
+                            self.take_fragment(*g, &slot_path, false, false);
+                        } else if g_raw.name == SLOT {
                             self.misplaced_slot(
                                 g_raw.pos,
                                 &slot_path,
@@ -346,6 +407,104 @@ impl Builder<'_> {
                 .collect(),
         })));
         node
+    }
+
+    /// Lifts one inline `<fragment>` into [`Builder::fragments`], or reports `W808` and leaves
+    /// it out. Returns the name when it was kept and still might precede `<context>`.
+    fn take_fragment(
+        &mut self,
+        index: usize,
+        parent_path: &str,
+        screen: bool,
+        seen_body: bool,
+    ) -> Option<(String, Position, String)> {
+        let (pos, attrs) = {
+            let raw = &self.syntax.elements[index];
+            (
+                raw.pos,
+                raw.attrs
+                    .iter()
+                    .map(|a| (a.name.clone(), a.value.clone()))
+                    .collect::<Vec<_>>(),
+            )
+        };
+        let path_of = |name: &str| {
+            if name.is_empty() {
+                format!("{parent_path}/fragment")
+            } else {
+                format!("{parent_path}/fragment[{name}]")
+            }
+        };
+        let fail = |this: &mut Self, path: &str, message: String| {
+            this.diagnostics
+                .push(inline::diagnostic(pos, path, message));
+        };
+        if !screen {
+            fail(
+                self,
+                &path_of(""),
+                "An inline <fragment> can only be a direct child of <screen>.".into(),
+            );
+            return None;
+        }
+        if seen_body {
+            fail(
+                self,
+                &path_of(""),
+                "An inline <fragment> comes after the body.".into(),
+            );
+            return None;
+        }
+        let mut name = String::new();
+        let mut extra = None;
+        for (attr, value) in &attrs {
+            match attr.as_str() {
+                "name" => name.clone_from(value),
+                "label" | "version" => {}
+                other => extra = Some(other.to_owned()),
+            }
+        }
+        let path = path_of(&name);
+        if let Some(other) = extra {
+            fail(
+                self,
+                &path,
+                format!("An inline <fragment> takes no \"{other}\"."),
+            );
+            return None;
+        }
+        if !crate::rules::is_name(&name) {
+            fail(
+                self,
+                &path,
+                "An inline <fragment> needs a name that matches the name grammar.".into(),
+            );
+            return None;
+        }
+        if self.fragments.contains_key(&name) {
+            fail(
+                self,
+                &path,
+                format!("Inline fragment \"{name}\" is declared twice."),
+            );
+            return None;
+        }
+        if self
+            .catalog
+            .is_some_and(|c| c.fragments.contains_key(&name))
+        {
+            fail(
+                self,
+                &path,
+                format!("\"{name}\" is already a fragment of the project."),
+            );
+            return None;
+        }
+        let mut node = self.element(index, &path, false);
+        node.props.shift_remove("name");
+        node.id = None;
+        self.fragments.insert(name.clone(), node);
+        Some((name, pos, path))
     }
 
     fn misplaced_slot(&mut self, pos: Position, path: &str, message: &str) {
@@ -438,19 +597,27 @@ fn build_open(
         diagnostics: vec![],
         weft: String::new(),
         context: None,
+        fragments: Map::new(),
         open: HashSet::new(),
     };
     let raw_root = &syntax.elements[root];
-    let root = if raw_root.name == SLOT {
+    let mut root = if raw_root.name == SLOT {
         b.misplaced_slot(raw_root.pos, "", "The root element cannot be a <slot>.");
         Node::new(SLOT)
     } else {
         let path = format!("/{}", raw_root.segment());
         b.element(root, &path, true)
     };
+    let mut fragments = b.fragments;
+    let known = fragments.clone();
+    inline::retype(&mut root, &known, b.catalog);
+    for node in fragments.values_mut() {
+        inline::retype(node, &known, b.catalog);
+    }
     let document = Document {
         weft: b.weft,
         context: b.context.unwrap_or_default(),
+        fragments,
         root,
     };
     (document, b.diagnostics, b.open)

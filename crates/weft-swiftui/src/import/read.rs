@@ -321,6 +321,7 @@ pub fn read(
         document: Document {
             weft: WEFT_VERSION.to_owned(),
             context: Vec::new(),
+            fragments: Default::default(),
             root,
         },
         losses: reader.losses.0,

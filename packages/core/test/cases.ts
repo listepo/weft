@@ -130,4 +130,7 @@ export const cases: Record<DocumentCode, Case> = {
     ),
   },
   W807: { markup: fragment('<param name="back" type="action"/><text id="a" text="{$back}"/>') },
+  W808: {
+    markup: screen('<text id="t">x</text><fragment name="row"><text id="a">y</text></fragment>'),
+  },
 };

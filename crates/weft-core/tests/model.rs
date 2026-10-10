@@ -63,6 +63,7 @@ fn a_document_serializes_the_version_before_the_root() {
     let d = Document {
         weft: "0.1".into(),
         context: Vec::new(),
+        fragments: Default::default(),
         root: Node::new("screen"),
     };
     assert_eq!(
@@ -84,6 +85,7 @@ fn nodes_compare_by_content_and_ignore_source_positions() {
     let mut b = Document {
         weft: "0.1".into(),
         context: Vec::new(),
+        fragments: Default::default(),
         root: Node::new("screen"),
     };
     b.root.id = Some("root".into());

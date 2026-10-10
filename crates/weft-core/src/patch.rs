@@ -7,10 +7,13 @@ use serde_json::Value as Json;
 
 use crate::canonical::canonicalize;
 use crate::context_patch::{Author, ContextPatch, apply_context, dangling_hint};
-use crate::diagnostics::{Code, Diagnostic, Mode, did_you_mean, has_errors, one_of, quote};
+use crate::diagnostics::{
+    Code, Diagnostic, Mode, did_you_mean, has_errors, nearest, one_of, quote,
+};
 use crate::fragment::{FRAGMENT, USE};
-use crate::model::{Catalog, Child, Content, Document, Node, Value};
-use crate::parse::parse_fragment;
+use crate::inline;
+use crate::model::{Catalog, Child, Content, Document, Map, Node, Value};
+use crate::parse::{ParseOptions, parse, parse_fragment};
 use crate::rules::{EACH, is_name};
 use crate::shape::{patch_issues, to_entry, value_of};
 use crate::validate::{ValidateOptions, validate_document};
@@ -55,19 +58,19 @@ pub struct PatchResult {
     pub diagnostics: Vec<Diagnostic>,
 }
 
-const FORMS: [(&str, &str); 8] = [
+const FORMS: [(&str, &str); 10] = [
     (
         "set",
-        r#"{"op":"set","id":"…","prop":"…","value":<literal|{bind}|{token}|null>}"#,
+        r#"{"op":"set","id":"…","fragment"?:"…","prop":"…","value":<literal|{bind}|{token}|null>}"#,
     ),
     (
         "insert",
-        r#"{"op":"insert","parent":"…","slot"?:"…","index"?:0,"markup":"<…/>"}"#,
+        r#"{"op":"insert","parent":"…","fragment"?:"…","slot"?:"…","index"?:0,"markup":"<…/>"}"#,
     ),
-    ("remove", r#"{"op":"remove","id":"…"}"#),
+    ("remove", r#"{"op":"remove","id":"…","fragment"?:"…"}"#),
     (
         "move",
-        r#"{"op":"move","id":"…","parent":"…","slot"?:"…","index"?:0}"#,
+        r#"{"op":"move","id":"…","fragment"?:"…","parent":"…","slot"?:"…","index"?:0}"#,
     ),
     (
         "add-context",
@@ -79,6 +82,11 @@ const FORMS: [(&str, &str); 8] = [
     ),
     ("resolve-context", r#"{"op":"resolve-context","id":"…"}"#),
     ("remove-context", r#"{"op":"remove-context","id":"…"}"#),
+    (
+        "add-fragment",
+        r#"{"op":"add-fragment","markup":"<fragment name=\"…\">…</fragment>"}"#,
+    ),
+    ("remove-fragment", r#"{"op":"remove-fragment","name":"…"}"#),
 ];
 
 fn form(op: &str) -> Option<&'static str> {
@@ -88,25 +96,48 @@ fn form(op: &str) -> Option<&'static str> {
 enum Patch {
     Set {
         id: String,
+        fragment: Option<String>,
         prop: String,
         value: Option<Value>,
     },
     Insert {
         parent: String,
+        fragment: Option<String>,
         slot: Option<String>,
         index: Option<u64>,
         markup: String,
     },
     Remove {
         id: String,
+        fragment: Option<String>,
     },
     Move {
         id: String,
+        fragment: Option<String>,
         parent: String,
         slot: Option<String>,
         index: Option<u64>,
     },
+    AddFragment {
+        markup: String,
+    },
+    RemoveFragment {
+        name: String,
+    },
     Context(ContextPatch),
+}
+
+impl Patch {
+    /// The inline fragment this patch addresses, when it has one.
+    fn fragment(&self) -> Option<&str> {
+        match self {
+            Patch::Set { fragment, .. }
+            | Patch::Insert { fragment, .. }
+            | Patch::Remove { fragment, .. }
+            | Patch::Move { fragment, .. } => fragment.as_deref(),
+            _ => None,
+        }
+    }
 }
 
 /// Reads a patch that passed [`patch_issues`].
@@ -124,16 +155,25 @@ fn to_patch(v: &Json) -> Patch {
     match v.get("op").and_then(Json::as_str) {
         Some("set") => Patch::Set {
             id: s("id"),
+            fragment: opt("fragment"),
             prop: s("prop"),
             value: v.get("value").filter(|x| !x.is_null()).map(value_of),
         },
         Some("insert") => Patch::Insert {
             parent: s("parent"),
+            fragment: opt("fragment"),
             slot: opt("slot"),
             index,
             markup: s("markup"),
         },
-        Some("remove") => Patch::Remove { id: s("id") },
+        Some("remove") => Patch::Remove {
+            id: s("id"),
+            fragment: opt("fragment"),
+        },
+        Some("add-fragment") => Patch::AddFragment {
+            markup: s("markup"),
+        },
+        Some("remove-fragment") => Patch::RemoveFragment { name: s("name") },
         Some("add-context") => Patch::Context(ContextPatch::Add(
             v.get("entry").map(to_entry).unwrap_or_default(),
         )),
@@ -146,6 +186,7 @@ fn to_patch(v: &Json) -> Patch {
         Some("remove-context") => Patch::Context(ContextPatch::Remove(s("id"))),
         _ => Patch::Move {
             id: s("id"),
+            fragment: opt("fragment"),
             parent: s("parent"),
             slot: opt("slot"),
             index,
@@ -181,7 +222,34 @@ pub fn apply_patches(
                     i,
                 )
             }
-            _ => apply_one(&mut work.root, patch, i, options),
+            Patch::AddFragment { markup } => add_fragment(&mut work, markup, i, options),
+            Patch::RemoveFragment { name } => remove_fragment(&mut work, name, i),
+            _ => {
+                let fragment = patch.fragment().map(str::to_owned);
+                if let Some(name) = &fragment
+                    && !work.fragments.contains_key(name)
+                {
+                    return PatchResult {
+                        document: None,
+                        diagnostics: unknown_fragment(&work, name, i),
+                    };
+                }
+                let inline = work.fragments.clone();
+                let root = match &fragment {
+                    // The name was checked against the map just above.
+                    Some(name) => match work.fragments.get_mut(name) {
+                        Some(node) => node,
+                        None => {
+                            return PatchResult {
+                                document: None,
+                                diagnostics: vec![],
+                            };
+                        }
+                    },
+                    None => &mut work.root,
+                };
+                apply_one(root, patch, i, options, fragment.as_deref(), &inline)
+            }
         };
         if let Err(failure) = outcome {
             return PatchResult {
@@ -353,8 +421,165 @@ fn free_id(id: &str, taken: &IndexSet<String>) -> String {
     format!("{id}-{n}")
 }
 
+/// Where an id that is not on the screen actually lives, as a repair hint.
+fn held_fragment(top: &Node, id: &str, catalog: &Catalog, inline: &Map<Node>) -> Option<String> {
+    let local = id.rsplit('/').next().unwrap_or(id);
+    if let Some(name) = inline
+        .iter()
+        .find(|(_, node)| all_ids(node).contains(local))
+        .map(|(name, _)| name.clone())
+    {
+        return Some(format!(
+            "{} is inside inline fragment \"{name}\"; address it with fragment \"{name}\"",
+            quote(id)
+        ));
+    }
+    fragment_holding(top, id, catalog).map(|name| {
+        format!(
+            "{} is inside fragment \"{name}\"; edit the fragment, or set a parameter of its <use>",
+            quote(id)
+        )
+    })
+}
+
+fn unknown_fragment(document: &Document, name: &str, i: usize) -> Vec<Diagnostic> {
+    let names: Vec<&str> = document.fragments.keys().map(String::as_str).collect();
+    let hint = nearest(name, names.iter().copied())
+        .map(|n| format!("did you mean {}?", quote(&n)))
+        .unwrap_or_else(|| "an inline fragment of this screen".to_owned());
+    vec![
+        Diagnostic::new(
+            Code::W502,
+            format!("#/patches/{i}/fragment"),
+            format!("No inline fragment is named {}.", quote(name)),
+            "the name of an inline fragment",
+        )
+        .got(name)
+        .hint(hint),
+    ]
+}
+
+fn remove_fragment(document: &mut Document, name: &str, i: usize) -> Outcome {
+    if document.fragments.shift_remove(name).is_none() {
+        let names: Vec<&str> = document.fragments.keys().map(String::as_str).collect();
+        let hint = nearest(name, names.iter().copied())
+            .map(|n| format!("did you mean {}?", quote(&n)))
+            .unwrap_or_else(|| "an inline fragment of this screen".to_owned());
+        return Err(vec![
+            Diagnostic::new(
+                Code::W502,
+                format!("#/patches/{i}/name"),
+                format!("No inline fragment is named {}.", quote(name)),
+                "the name of an inline fragment",
+            )
+            .got(name)
+            .hint(hint),
+        ]);
+    }
+    // A `<use>` that still names it fails validation of the result (`W801`).
+    Ok(())
+}
+
+/// Reads `<fragment name="…">` markup and adds it. A name the screen already has is `W513`;
+/// a name the project has is `W808`, and the fragment is not added.
+fn add_fragment(
+    document: &mut Document,
+    markup: &str,
+    i: usize,
+    options: &ApplyOptions<'_>,
+) -> Outcome {
+    let at = format!("#/patches/{i}/markup");
+    let parsed = parse(markup, &ParseOptions::default());
+    if has_errors(&parsed.diagnostics) || parsed.document.is_none() {
+        let mut diagnostics = parsed.diagnostics;
+        if diagnostics.is_empty() {
+            diagnostics.push(Diagnostic::new(
+                Code::W808,
+                at.clone(),
+                "add-fragment markup must be one <fragment name=\"…\"> element.",
+                "<fragment name=\"…\">…</fragment>",
+            ));
+        }
+        for d in &mut diagnostics {
+            if !d.path.starts_with("#/patches/") {
+                d.path = format!("{at}{}", d.path);
+            }
+        }
+        return Err(diagnostics);
+    }
+    let Some(built) = parsed.document else {
+        return Err(vec![Diagnostic::new(
+            Code::W808,
+            at,
+            "add-fragment markup must be one <fragment name=\"…\"> element.",
+            "<fragment name=\"…\">…</fragment>",
+        )]);
+    };
+    if !built.weft.is_empty() || built.root.kind != FRAGMENT || built.root.id.is_some() {
+        return Err(vec![Diagnostic::new(
+            Code::W808,
+            at,
+            "An inline <fragment> takes name, and optionally label and version.",
+            "<fragment name=\"…\">…</fragment>",
+        )]);
+    }
+    let mut node = built.root;
+    let name = match node.props.shift_remove("name") {
+        Some(Value::String(name)) if is_name(&name) => name,
+        _ => {
+            return Err(vec![Diagnostic::new(
+                Code::W808,
+                at,
+                "An inline <fragment> needs a name that matches the name grammar.",
+                "name=\"…\"",
+            )]);
+        }
+    };
+    if node.props.keys().any(|k| k != "label" && k != "version")
+        || node
+            .props
+            .get("label")
+            .is_some_and(|v| !matches!(v, Value::String(_)))
+        || !node.on.is_empty()
+    {
+        return Err(vec![Diagnostic::new(
+            Code::W808,
+            at,
+            "An inline <fragment> takes only name, label and version.",
+            "<fragment name=\"…\" label=\"…\">",
+        )]);
+    }
+    if document.fragments.contains_key(&name) {
+        return Err(vec![
+            Diagnostic::new(
+                Code::W513,
+                format!("#/patches/{i}/markup"),
+                format!("Inline fragment \"{name}\" is already in this document."),
+                "a name this screen does not use yet",
+            )
+            .got(name),
+        ]);
+    }
+    if options.catalog.fragments.contains_key(&name) {
+        return Err(vec![
+            Diagnostic::new(
+                Code::W808,
+                format!("#/patches/{i}/markup"),
+                format!("\"{name}\" is already a fragment of the project."),
+                "a name the project does not use",
+            )
+            .got(name),
+        ]);
+    }
+    let mut known = document.fragments.clone();
+    known.insert(name.clone(), node.clone());
+    inline::retype(&mut node, &known, Some(options.catalog));
+    document.fragments.insert(name, node);
+    Ok(())
+}
+
 /// The fragment used by the document whose body has `id`, given locally or as an instance path
-/// (SPEC §10.7): patches never reach into a fragment, so the hint names the file to edit.
+/// (SPEC §10.7): patches never reach into a project fragment, so the hint names the file to edit.
 fn fragment_holding(top: &Node, id: &str, catalog: &Catalog) -> Option<String> {
     if catalog.fragments.is_empty() {
         return None;
@@ -385,16 +610,35 @@ fn uses(top: &Node, into: &mut IndexSet<String>) {
 
 type Outcome = Result<(), Vec<Diagnostic>>;
 
-fn apply_one(root: &mut Node, patch: &Patch, i: usize, options: &ApplyOptions<'_>) -> Outcome {
+fn apply_one(
+    root: &mut Node,
+    patch: &Patch,
+    i: usize,
+    options: &ApplyOptions<'_>,
+    fragment: Option<&str>,
+    inline: &Map<Node>,
+) -> Outcome {
     let at = |field: &str| format!("#/patches/{i}/{field}");
+    // Inside an inline fragment the fragment's own name addresses that `<fragment>` element,
+    // which has no id of its own, so `version` and `label` can be set there.
     let find_or_fail = |root: &Node, id: &str, field: &str| -> Result<Loc, Vec<Diagnostic>> {
-        find(root, id).ok_or_else(|| {
-            let hint = fragment_holding(root, id, options.catalog)
-                .map(|name| {
-                    format!("{} is inside fragment \"{name}\"; edit the fragment, or set a parameter of its <use>", quote(id))
-                })
-                .or_else(|| did_you_mean(id, all_ids(root)))
-                .unwrap_or_else(|| "copy an id from the document".to_owned());
+        let found = if fragment == Some(id) {
+            Some(vec![])
+        } else {
+            find(root, id)
+        };
+        found.ok_or_else(|| {
+            let hint = if fragment.is_some() {
+                let mut ids = all_ids(root);
+                if let Some(name) = fragment {
+                    ids.insert(name.to_owned());
+                }
+                did_you_mean(id, &ids).unwrap_or_else(|| "copy an id from the fragment".into())
+            } else {
+                held_fragment(root, id, options.catalog, inline)
+                    .or_else(|| did_you_mean(id, all_ids(root)))
+                    .unwrap_or_else(|| "copy an id from the document".to_owned())
+            };
             vec![
                 Diagnostic::new(
                     Code::W502,
@@ -409,8 +653,12 @@ fn apply_one(root: &mut Node, patch: &Patch, i: usize, options: &ApplyOptions<'_
     };
 
     let (parent_id, slot, index, moved) = match patch {
-        Patch::Context(_) => return Ok(()),
-        Patch::Set { id, prop, value } => {
+        Patch::Context(_) | Patch::AddFragment { .. } | Patch::RemoveFragment { .. } => {
+            return Ok(());
+        }
+        Patch::Set {
+            id, prop, value, ..
+        } => {
             let loc = find_or_fail(root, id, "id")?;
             let is_root = loc.is_empty();
             let Some(node) = node_mut(root, &loc) else {
@@ -425,7 +673,7 @@ fn apply_one(root: &mut Node, patch: &Patch, i: usize, options: &ApplyOptions<'_
                 options.catalog,
             );
         }
-        Patch::Remove { id } => {
+        Patch::Remove { id, .. } => {
             let loc = find_or_fail(root, id, "id")?;
             let Some((last, parent_loc)) = loc.split_last() else {
                 return Err(root_failure("removed", at("id")));
@@ -440,6 +688,7 @@ fn apply_one(root: &mut Node, patch: &Patch, i: usize, options: &ApplyOptions<'_
             parent,
             slot,
             index,
+            ..
         } => {
             find_or_fail(root, parent, "parent")?;
             let loc = find_or_fail(root, id, "id")?;
@@ -472,6 +721,7 @@ fn apply_one(root: &mut Node, patch: &Patch, i: usize, options: &ApplyOptions<'_
             slot,
             index,
             markup,
+            ..
         } => {
             find_or_fail(root, parent, "parent")?;
             let nodes = read_fragment(markup, root, options.catalog, &at("markup"))?;

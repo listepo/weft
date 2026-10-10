@@ -237,7 +237,11 @@ pub fn problems(root: &Node) -> Vec<Problem> {
         ));
     }
     for (name, value) in &root.props {
-        if !name.starts_with("x-") && !(name == "label" && matches!(value, Value::String(_))) {
+        // `version` is stored for T100, which checks the semver (`W230`). Rejecting it here
+        // would make an inline fragment's version unwritable.
+        let version = name == "version";
+        let label = name == "label" && matches!(value, Value::String(_));
+        if !name.starts_with("x-") && !version && !label {
             let message = format!("<fragment> takes no \"{name}\".");
             found.push((Some(name.clone()), message, "label=\"…\" as text".into()));
         }

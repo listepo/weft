@@ -2,7 +2,7 @@
 
 use crate::canonical::{canonicalize, compare_keys};
 use crate::context::entry_markup;
-use crate::model::{Child, Document, Entry, Node};
+use crate::model::{Child, Document, Entry, Map, Node, Value};
 use crate::rules::{CONTEXT, SLOT};
 use crate::values::format_value;
 
@@ -11,7 +11,16 @@ const INDENT: &str = "  ";
 pub fn serialize(document: &Document) -> String {
     let doc = canonicalize(document);
     let mut lines = Vec::new();
-    write_node(&doc.root, "", &mut lines, Some(&doc.weft), &doc.context);
+    write_node(
+        &doc.root,
+        "",
+        &mut lines,
+        Some(&doc.weft),
+        Preface {
+            context: &doc.context,
+            fragments: &doc.fragments,
+        },
+    );
     format!("{}\n", lines.join("\n"))
 }
 
@@ -52,7 +61,7 @@ fn write_node(
     indent: &str,
     lines: &mut Vec<String>,
     weft: Option<&str>,
-    context: &[Entry],
+    preface: Preface<'_>,
 ) {
     let mut attributes: Vec<(String, String)> = Vec::new();
     if let Some(id) = &node.id {
@@ -86,9 +95,33 @@ fn write_node(
         &node.kind,
         &node.children,
         &slots,
-        context,
+        preface,
         indent,
         lines,
+    );
+}
+
+/// What a screen writes before its body: the context block and the inline fragments.
+struct Preface<'a> {
+    context: &'a [Entry],
+    fragments: &'a Map<Node>,
+}
+
+/// An inline fragment is a node whose name is the map key, written back as an attribute.
+fn write_fragment(name: &str, node: &Node, indent: &str, lines: &mut Vec<String>) {
+    let mut copy = node.clone();
+    copy.props
+        .insert("name".into(), Value::String(name.to_owned()));
+    let none = Map::new();
+    write_node(
+        &copy,
+        indent,
+        lines,
+        None,
+        Preface {
+            context: &[],
+            fragments: &none,
+        },
     );
 }
 
@@ -97,11 +130,16 @@ fn write_element(
     kind: &str,
     children: &[Child],
     slots: &[(&String, &Vec<Child>)],
-    context: &[Entry],
+    preface: Preface<'_>,
     indent: &str,
     lines: &mut Vec<String>,
 ) {
-    match (children, slots.is_empty() && context.is_empty()) {
+    let Preface { context, fragments } = preface;
+    let none = Map::new();
+    match (
+        children,
+        slots.is_empty() && context.is_empty() && fragments.is_empty(),
+    ) {
         ([], true) => lines.push(format!("{indent}{head}/>")),
         ([Child::Text(only)], true) => {
             lines.push(format!("{indent}{head}>{}</{kind}>", escape_text(only)));
@@ -117,15 +155,40 @@ fn write_element(
                 }
                 lines.push(format!("{inner}</{CONTEXT}>"));
             }
+            let mut names: Vec<&String> = fragments.keys().collect();
+            names.sort_by(|a, b| compare_keys(a, b));
+            for name in names {
+                write_fragment(name, &fragments[name], &inner, lines);
+            }
             for child in children {
                 match child {
                     Child::Text(t) => lines.push(format!("{inner}{}", escape_text(t))),
-                    Child::Node(n) => write_node(n, &inner, lines, None, &[]),
+                    Child::Node(n) => write_node(
+                        n,
+                        &inner,
+                        lines,
+                        None,
+                        Preface {
+                            context: &[],
+                            fragments: &none,
+                        },
+                    ),
                 }
             }
             for (name, list) in slots {
                 let head = format!("<{SLOT} name=\"{}\"", escape_attribute(name));
-                write_element(&head, SLOT, list, &[], &[], &inner, lines);
+                write_element(
+                    &head,
+                    SLOT,
+                    list,
+                    &[],
+                    Preface {
+                        context: &[],
+                        fragments: &none,
+                    },
+                    &inner,
+                    lines,
+                );
             }
             lines.push(format!("{indent}</{kind}>"));
         }
@@ -154,6 +217,7 @@ mod tests {
         let doc = Document {
             weft: "0.1".into(),
             context: vec![],
+            fragments: Map::new(),
             root,
         };
         assert_eq!(

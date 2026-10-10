@@ -56,6 +56,8 @@ export type Entry = z.infer<typeof EntrySchema>;
 export const DocumentSchema = z.strictObject({
   weft: z.string(),
   context: z.array(EntrySchema).optional(),
+  /** Inline fragments of a screen, by name (SPEC §10.7). Each value is the fragment node. */
+  fragments: z.record(z.string(), NodeSchema).optional(),
   root: NodeSchema,
 });
 export type Document = z.infer<typeof DocumentSchema>;
@@ -126,28 +128,34 @@ export const DiagnosticSchema = z.strictObject({
 });
 export type Diagnostic = z.infer<typeof DiagnosticSchema>;
 
+const fragment = z.string().optional();
 export const PatchSchema = z.discriminatedUnion("op", [
   z.strictObject({
     op: z.literal("set"),
     id: z.string(),
+    fragment,
     prop: z.string(),
     value: ValueSchema.nullable(),
   }),
   z.strictObject({
     op: z.literal("insert"),
     parent: z.string(),
+    fragment,
     slot: z.string().optional(),
     index: z.number().int().nonnegative().optional(),
     markup: z.string(),
   }),
-  z.strictObject({ op: z.literal("remove"), id: z.string() }),
+  z.strictObject({ op: z.literal("remove"), id: z.string(), fragment }),
   z.strictObject({
     op: z.literal("move"),
     id: z.string(),
+    fragment,
     parent: z.string(),
     slot: z.string().optional(),
     index: z.number().int().nonnegative().optional(),
   }),
+  z.strictObject({ op: z.literal("add-fragment"), markup: z.string() }),
+  z.strictObject({ op: z.literal("remove-fragment"), name: z.string() }),
   z.strictObject({ op: z.literal("add-context"), entry: EntrySchema }),
   z.strictObject({
     op: z.literal("set-context"),
