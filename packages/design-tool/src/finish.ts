@@ -8,24 +8,13 @@ import {
   validate,
   type Catalog,
   type Document,
-  type Node,
 } from "@weft/core";
 import { literal, type LossLog } from "@weft/from-aria";
 import type { Layer } from "./layer.ts";
-import { isRawText, readLayers, type ReadOptions, type ReadResult } from "./read.ts";
+import { eachNode, isRawText, readLayers, type ReadOptions, type ReadResult } from "./read.ts";
 
 /** The props a layer shows as text, and so the ones a designer can type a value into. */
 const SHOWN_PROPS = ["text", "label"] as const;
-
-function eachNode(root: Node, visit: (node: Node) => void): void {
-  const stack = [root];
-  for (let node = stack.pop(); node !== undefined; node = stack.pop()) {
-    visit(node);
-    for (const child of node.children ?? []) if (typeof child !== "string") stack.push(child);
-    for (const list of Object.values(node.slots ?? {}))
-      for (const child of list) if (typeof child !== "string") stack.push(child);
-  }
-}
 
 /** The `display` that `buildScreen` needs: every `text` and `label` value in attribute form. */
 export function displayTexts(document: Document): Record<string, string> {

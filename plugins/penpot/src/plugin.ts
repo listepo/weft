@@ -2,10 +2,15 @@
 // global to the handler in @weft/penpot; parsing and serializing happen in the UI (`ui.ts`).
 import type {} from "@penpot/plugin-types";
 import { coreCatalog } from "@weft/catalog";
-import { handleRequest } from "@weft/penpot";
+import { handleRequest, selectionContext } from "@weft/penpot";
 
 // Resolved against the folder of the manifest, where the build puts the page.
 penpot.ui.open("Weft", "ui.html", { width: 400, height: 560 });
+
+// The panel lists the selected shape's context entries; they never become shapes.
+const showContext = () => penpot.ui.sendMessage(selectionContext(penpot.selection));
+penpot.on("selectionchange", showContext);
+showContext();
 
 penpot.ui.onMessage<unknown>(async (message) => {
   const reply = await handleRequest(penpot, penpot.selection, message, { catalog: coreCatalog });
@@ -17,4 +22,5 @@ penpot.ui.onMessage<unknown>(async (message) => {
     }
   }
   penpot.ui.sendMessage(reply);
+  if (reply.type === "built") showContext();
 });

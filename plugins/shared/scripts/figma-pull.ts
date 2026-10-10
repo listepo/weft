@@ -5,7 +5,7 @@
 // The token is read from the environment only, never from a flag, so it stays out of shell
 // history and process lists, and requests go to api.figma.com only. The project above the working
 // directory (SPEC §10.1) supplies the catalog and tokens, and `import.figma` (SPEC §10.6) the
-// output folder.
+// output folder and whether the frame's context is kept.
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { loadTokens } from "@weft/catalog";
@@ -89,6 +89,7 @@ export async function main(
       ...target,
       catalog,
       tokens,
+      context: settings?.context,
       token,
       fetch: host.fetch,
     });

@@ -13,6 +13,10 @@ import { FakeFigma, type FakeNode } from "../../../packages/figma/test/fake-figm
 const [dist = "", markupPath = "", resolverPath] = process.argv.slice(2);
 const print = process.stdout.write.bind(process.stdout);
 
+// The UI's window, before the main thread runs: it posts the selection's context when it starts.
+const window: { onmessage?: (event: { data: unknown }) => void } = {};
+const toUi = (pluginMessage: unknown) => window.onmessage?.({ data: { pluginMessage } });
+
 // The main thread.
 const figma = new FakeFigma();
 const page = figma.currentPage as typeof figma.currentPage & { selection: FakeNode[] };
@@ -26,6 +30,8 @@ const main = createContext({
   figma: Object.assign(figma, {
     ui,
     showUI: () => {},
+    // The harness changes the selection only through the plugin, which sends the context itself.
+    on: () => {},
     viewport: { scrollAndZoomIntoView: () => {} },
     getNodeByIdAsync: async (id: string) =>
       figma.currentPage.children.find((c) => c.id === id) ?? null,
@@ -36,8 +42,6 @@ runInContext(readFileSync(join(dist, "code.js"), "utf8"), main);
 const mainHasWasm = runInContext("typeof WebAssembly", main) !== "undefined";
 
 // The UI.
-const window: { onmessage?: (event: { data: unknown }) => void } = {};
-const toUi = (pluginMessage: unknown) => window.onmessage?.({ data: { pluginMessage } });
 const pending: Promise<void>[] = [];
 const byId = await loadUi(dist, {
   window,
@@ -67,6 +71,7 @@ print(
     mainHasWasm,
     loaded: result.loaded,
     built: { status: result.built, selected },
+    context: result.context,
     exported: result.exported,
     broken: result.broken,
   })}\n`,

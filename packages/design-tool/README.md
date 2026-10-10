@@ -54,6 +54,8 @@ A tool wraps its nodes in `Layer`, and `readLayers(layer, options)` reads them b
 
 `handleRequest(tool, selection, message)` validates a message from the plugin UI with zod, then calls `tool.build` or `tool.read`. `buildRequest`, `exportRequest` and `finishExport` (`src/plugin-ui.ts`) are the UI side.
 
+Context (SPEC §2.3, §9): `buildScreen` keeps the document's entries as JSON in `weft.context` on the root layer, never as layers. `readLayers` reads them back from the layer it starts at, reserves their ids before naming new elements, and drops an entry whose `for` names an element whose layer is gone, as a `context` loss; `ReadOptions.context: "drop"` reads none. `contextReply(selection)` is the `context` reply the plugin sends on every selection change: `layerContext` walks a `ContextLayer` (plugin data and `parent`) up to the root that keeps the context and returns the entries about that layer, or the screen's own on the root. Each tool adapts its nodes (`selectionContext` in `@weft/figma` and `@weft/penpot`), and the UI lists the entries as text.
+
 A build request may carry a resolver `modifier` (SPEC §10.3), at most 64 contexts, whose contexts the tool turns into its modes; `tool.build` gets it and may return `notes` for what it skipped without failing. A tool that keeps modes implements `tool.modes(tokens)`, and an export reply then carries the modes as a resolver document in `resolver`.
 
 ### Token modes (`src/modes.ts`)

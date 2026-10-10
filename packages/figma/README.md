@@ -126,6 +126,8 @@ Both are to be checked on a real file, together with the plugin itself.
 
 Every mark (the layer's source, the library page and board, component kinds, token variables and their collection) is shared plugin data under the namespace `weft` (`NAMESPACE` in `src/data.ts`, the namespace Penpot's plugin uses too). Shared plugin data can be read by any plugin, by the Figma MCP server's `use_figma`, and through the REST API with `plugin_data=shared`; private plugin data (`setPluginData`) can be read only by the plugin id that wrote it.
 
+The document's context (SPEC §2.3) is shared plugin data too: `weft.context` on the frame built from the root, the canonical JSON array of entries, so a pull reads it back like the source. The plugin never draws it. On every `selectionchange`, `plugins/figma/src/code.ts` sends the entries about the selected layer to the panel (`selectionContext`), which lists them read-only. The `figma-pull` script leaves the context out with `import.figma.context: "drop"` (SPEC §10.6).
+
 Only shared plugin data is supported. `dataOf(node)` is the one way the package reaches plugin data, and it reads and writes shared data only; the narrow API (`FPluginData` in `src/api.ts`) has no private calls. A file whose Weft source sits in private plugin data, as the plugin's first versions stored it, reads as foreign layers; rebuild it with the current plugin.
 
 ## Limits of this stage
