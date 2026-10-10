@@ -61,7 +61,7 @@ export async function loadUi(
 
 /**
  * Loads `resolver` when given, builds `markup`, exports the selection, then tries broken markup;
- * returns what the UI shows.
+ * returns what the UI shows, with the context panel as it is after the build.
  */
 export async function runUi(
   byId: (id: string) => FakeElement,
@@ -71,6 +71,7 @@ export async function runUi(
 ): Promise<{
   loaded: string;
   built: string;
+  context: string[];
   exported: {
     status: string;
     markup: string;
@@ -89,6 +90,7 @@ export async function runUi(
   byId("build").click();
   await settle();
   const built = byId("status").textContent;
+  const context = byId("context").items.map((i) => i.textContent);
 
   byId("export").click();
   await settle();
@@ -104,5 +106,5 @@ export async function runUi(
   byId("build").click();
   await settle();
   const broken = { status: byId("status").textContent, notes: byId("notes").items.length };
-  return { loaded, built, exported, broken };
+  return { loaded, built, context, exported, broken };
 }

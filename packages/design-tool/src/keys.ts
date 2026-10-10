@@ -1,7 +1,7 @@
 // What a plugin stores on design-tool layers (plugin data, one string per key) and how it is read
 // back. Stored data is untrusted on the way in: a file can be copied, edited by another version of
 // the plugin or crafted, so every entry is parsed and checked, never assumed.
-import { ValueSchema, type Node, type Value } from "@weft/core";
+import { EntrySchema, ValueSchema, type Entry, type Node, type Value } from "@weft/core";
 import { z } from "zod";
 
 /** Plugin data as both tools offer it: `""` stands for a key that is not set. */
@@ -15,6 +15,11 @@ export const KEY = {
   source: "weft.source",
   /** On the layer built from the root: the document's `weft` version. */
   document: "weft.document",
+  /**
+   * On the layer built from the root: the document's context entries (SPEC §2.3). One place, like
+   * the model, so copying an element's layer cannot duplicate entry ids.
+   */
+  context: "weft.context",
   /** The tool's id the layer had when it was built, to tell the original from a copy. */
   origin: "weft.origin",
   /** On a text layer that holds a text child of its parent. */
@@ -104,6 +109,15 @@ export function writeJson(layer: PluginData, key: string, value: unknown): void 
     throw new Error(`plugin data for ${key} is longer than ${MAX_ENTRY} bytes`);
   }
   layer.setPluginData(key, raw);
+}
+
+/**
+ * The context entries a root layer keeps, or undefined. The core's shape check only: the values
+ * are validated with the rest of the document, and stay notes for a reader whatever they say.
+ */
+export function readContext(layer: PluginData): Entry[] | undefined {
+  const parsed = z.array(EntrySchema).safeParse(readJson(layer, KEY.context));
+  return parsed.success ? parsed.data : undefined;
 }
 
 export function readVersion(layer: PluginData): string | undefined {

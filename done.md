@@ -1,5 +1,11 @@
 # Done
 
+### T39.7. Context: Figma and Penpot
+
+The canonical entries in plugin data (`weft.context`) on the root frame, read back with entries about removed layers dropped as a `context` loss (SPEC §9 loss row), and `import.figma.context`; the plugin panel lists the selected layer's entries read-only.
+
+Built: `packages/design-tool` writes the canonical entries as `weft.context` shared plugin data on the root layer and reads them back from the layer the read starts at, parsed with the core's `EntrySchema` (anything else is ignored), with their ids reserved before a new element is named. An entry whose `for` names an element whose layer is gone is dropped as a `context` loss (a new `LossKind` in `packages/core/src/loss.ts` and `crates/weft-import/src/loss.rs`), and `ReadOptions.context: "drop"` reads none. The plugin panel: `layerContext` walks from the selected layer up to the root that keeps the context and returns the entries about the nearest Weft element (the screen's own on the root); `selectionContext` in `@weft/figma` and `@weft/penpot` adapts each tool's nodes, the plugins send a `context` reply on `selectionchange` and after a build, and `@weft/design-plugin` lists the entries as text. `import.figma.context` (`keep`, `drop`) in SPEC §10.6, `settings.rs` and the schema, read by the `figma-pull` script. No `export.figma` or Penpot key: no tool that reads `weft.json` builds into Figma or reads Penpot. SPEC §9 gains the design-tool context bullet and the `context` loss row; AGENT-SPEC says where design tools keep context. Tests on the SPEC §2.3 example: Figma and Penpot round trips byte-identical, removed layers, crafted plugin data, the panel, REST pull with `drop`, and both plugin bundles end to end.
+
 ### T39.8. Context: readable comments in React and SolidJS
 
 For developers, each element that entries name gets a readable comment above it in generated React and SolidJS code, for example `{/* decision (agent claude-opus-5-5): Disabled until … */}`, escaped like the source comment (`*/`, `@`), and only when the context is kept. The comments are derived: importers ignore them, and regenerating gives them back, so the source check still passes.

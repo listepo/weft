@@ -6,7 +6,7 @@ import { serialize } from "@weft/core";
 import { afterEach, describe, test } from "vitest";
 import { parseTarget, pullScreen, PullError, type PullOptions } from "../src/pull.ts";
 import type { FakeFrame, FakeText } from "./fake-figma.ts";
-import { built, corpusMarkup, corpusNames, tokens } from "./helpers.ts";
+import { built, contextMarkup, corpusMarkup, corpusNames, tokens } from "./helpers.ts";
 import { FILE_KEY, serveFile, TOKEN, type FakeRest } from "./rest-server.ts";
 
 let open: FakeRest | undefined;
@@ -41,6 +41,23 @@ for (const name of corpusNames) {
     });
   });
 }
+
+describe("a screen with context pulled", () => {
+  test("keeps it from the root frame's shared plugin data", async () => {
+    const { options } = await served(contextMarkup);
+    const result = await pullScreen(options);
+    assert.deepEqual(result.losses, []);
+    assert.deepEqual(result.diagnostics, []);
+    assert.equal(serialize(result.document), contextMarkup);
+  });
+
+  test("leaves it out with context drop", async () => {
+    const { options } = await served(contextMarkup);
+    const result = await pullScreen({ ...options, context: "drop" });
+    assert.equal(result.document.context, undefined);
+    assert.deepEqual(result.diagnostics, []);
+  });
+});
 
 describe("the requests", () => {
   test("carry the token in X-Figma-Token and ask for shared plugin data, then the main components", async () => {

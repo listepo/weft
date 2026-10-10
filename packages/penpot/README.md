@@ -52,6 +52,7 @@ A `stack` or `grid` with a `material` token (SPEC §10.3) is a board with a fill
 ## Limits of this stage
 
 - Models: a `model` is drawn as a grey 160 by 120 rectangle named `model`; the paths stay in the plugin data.
+- Context (SPEC §2.3): the entries are shared plugin data `weft.context` on the root board, as in Figma, never shapes. The plugin sends the entries about the selected shape to its panel on `selectionchange` (`selectionContext`). Penpot has no `import.penpot` tool that reads `weft.json`, so it has no `context` setting.
 - Tilts: `rotate-z` is drawn as the shape's `rotation` (taken as clockwise, which the plugin types do not state, so this direction is unverified against a real file); `rotate-x`, `rotate-y` and `perspective` are not drawn and stay in the Weft source, which is what reads back. Turning a shape by hand is a visual edit.
 - Visual edits with no Weft prop (fills, strokes, radius, padding, rotation) are reported as `tokens` losses. Style overrides are excluded until `docs/figma-style-overrides-design.md` is approved.
 - `rem` tokens are converted at 16 px (`REM_PX`).

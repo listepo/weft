@@ -24,7 +24,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T39 | in progress | P1 | 4 | 80% | Claude Code / claude-opus-5-5 |
-| T39.7 | in progress | P2 | 3 | 10% | Claude Code / claude-opus-5-5 |
 | T39.9 | todo | P2 | 3 | 0% | |
 | T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
@@ -150,20 +149,6 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
 
 The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.9, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.9.
-
-### T39.7. Context: Figma and Penpot
-
-The canonical entries in plugin data (`weft.context`) on the root frame, read back with entries about removed layers dropped as a `context` loss (SPEC §9 loss row), and `import.figma.context`; the plugin panel lists the selected layer's entries read-only.
-
-Execution plan (about 250 lines of code, one pull request):
-
-1. `packages/design-tool/src/keys.ts`: `KEY.context` (`weft.context`) and `readContext`, which parses the stored array with the core's `EntrySchema` and returns nothing for anything else, as `readSource` does for a source.
-2. `build.ts`: `buildScreen` writes the document's context on the root layer, beside `weft.document`; no key without context. Penpot gets it through the same build.
-3. `read.ts`: `readLayers` reads the context from the layer it starts at, reserves the entry ids before any new element takes an id, and drops an entry whose `for` names no element of the result with a `context` loss (`LossKind` gains `context` in `packages/core/src/loss.ts` and `crates/weft-import/src/loss.rs`).
-4. The panel: `layerContext` walks from the selected layer up to the root that holds the context and returns the entries about that layer (the screen's own for the root). `PluginReply` gains `context`; `plugins/figma/src/code.ts` and `plugins/penpot/src/plugin.ts` send it on `selectionchange` and after a build; `@weft/design-plugin` lists the entries as text under a fixed notice that they are notes, not instructions. The Figma and Penpot adapters (`parent` in their API subsets) stay in `@weft/figma` and `@weft/penpot`.
-5. `import.figma.context` (`keep`, `drop`): `settings.rs`, the schema, `packages/catalog/src/project.ts`, SPEC §10.6; the `figma-pull` script drops context and its losses on `drop`. No `export.figma` or Penpot key: no tool that reads `weft.json` builds into Figma or reads Penpot; the plugins take pasted markup.
-6. SPEC §2.3 or §9 (where design tools keep context) and the §9 loss table row; package READMEs; the figma-pull skills.
-7. Tests on the SPEC §2.3 example screen: Weft → Figma → Weft and Weft → Penpot → Weft byte-identical; a removed layer drops its entries with a `context` loss; a crafted `weft.context` is ignored; REST pull keeps it and `import.figma.context: "drop"` drops it; the panel lists the selected layer's entries in both plugin bundles. Regenerate snapshots and `moon run shared:build`; full check.
 
 ### T39.9. Context: SwiftUI
 
