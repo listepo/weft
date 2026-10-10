@@ -190,6 +190,41 @@ A project can share a block between screens, such as a page header, as a *fragme
 - Ids inside a fragment belong to it. A rendered element is addressed as `header/title`. A patch sets a parameter on the `<use>` (`"prop": "title"`, `"prop": "on-back"`) or fills its slot; it never names an id inside the fragment (`W502`): edit the fragment instead.
 - In a fragment the `<param>` elements come first, then the body. Read a value parameter whole, `{$title}`, where its type fits; an action parameter as `on-press="{$back}"`; a slot parameter with `<outlet name="actions"/>`.
 
+### 2.11 Variants
+
+A fragment may mark one enum parameter `variant="true"`. After the parameters it holds only `<variant when="…">` elements, and `when` lists values of that enum so each value is covered once. Pass the parameter as a literal on `<use>`: it selects the body, and a binding is `W217`. Omit it to use `default`. The same id may appear in each variant; it is the same part, so `total/value` stays valid when the variant changes. An outlet may be absent from a variant; that use drops the slot. `weft explain` names the variant a use chose.
+
+These elements are format 0.3. The reader version is still 0.2 until document versions raise it, so write `weft="0.2"` until then.
+
+```xml
+<fragment label="Price row" weft="0.2">
+  <param name="label" required="true" type="string"/>
+  <param name="amount" required="true" type="string"/>
+  <param default="normal" name="emphasis" type="enum" values="normal total" variant="true"/>
+  <variant when="normal">
+    <stack id="row" direction="row" justify="space-between">
+      <text id="name" text="{$label}"/>
+      <text id="value" text="{$amount}"/>
+    </stack>
+  </variant>
+  <variant when="total">
+    <stack id="row" direction="row" justify="space-between">
+      <heading id="name" level="3" text="{$label}"/>
+      <heading id="value" level="3" text="{$amount}"/>
+    </stack>
+  </variant>
+</fragment>
+```
+
+```xml
+<screen id="totals" label="Totals" weft="0.2">
+  <use id="subtotal" amount="{$.cart.subtotal}" fragment="price-row" label="Subtotal"/>
+  <use id="total" amount="{$.cart.total}" emphasis="total" fragment="price-row" label="Total"/>
+</screen>
+```
+
+`subtotal` expands the `normal` variant, `total` the `total` variant. Both give the instance paths `subtotal/name` and `total/value`.
+
 ## 3. Editing a screen
 
 Prefer patches to rewriting. A patch list is JSON, addresses elements by id, applies in order and is all-or-nothing: if one patch fails or the result is invalid, nothing changes and the diagnostics explain why.
@@ -380,6 +415,7 @@ What each code asks of you:
 | W805 | Break the cycle: a fragment may not use itself, directly or through other fragments; write the repeated part out once. |
 | W806 | Use fewer or smaller fragments: a screen expands to at most 10,000 elements and 256 levels. |
 | W807 | Read a value parameter whole (`{$title}`, not `{$title.x}`) in a prop, an action parameter in `on-*`, and a slot parameter with `<outlet>`. |
+| W809 | Give the fragment one enum parameter with `variant="true"`, then only `<variant when="…">` elements that cover each of its values once. `<variant>` takes `when` and nothing else, and only stands there. |
 
 ### 4.1 Reading back an edit
 

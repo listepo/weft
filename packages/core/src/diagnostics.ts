@@ -138,6 +138,7 @@ export const DIAGNOSTIC_CODES = {
     summary: "Expanding the fragments exceeds the element or depth limit.",
   },
   W807: { severity: "error", summary: "Parameter read where its type cannot go." },
+  W809: { severity: "error", summary: "Variant parameter or `<variant>` is misdeclared." },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;

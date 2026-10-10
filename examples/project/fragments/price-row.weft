@@ -1,0 +1,17 @@
+<fragment label="Price row" weft="0.2">
+  <param name="label" required="true" type="string"/>
+  <param name="amount" required="true" type="string"/>
+  <param default="normal" name="emphasis" type="enum" values="normal total" variant="true"/>
+  <variant when="normal">
+    <stack id="row" direction="row" justify="space-between">
+      <text id="name" text="{$label}"/>
+      <text id="value" text="{$amount}"/>
+    </stack>
+  </variant>
+  <variant when="total">
+    <stack id="row" direction="row" justify="space-between">
+      <heading id="name" level="3" text="{$label}"/>
+      <heading id="value" level="3" text="{$amount}"/>
+    </stack>
+  </variant>
+</fragment>

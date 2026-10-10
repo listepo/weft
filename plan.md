@@ -44,6 +44,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T97 | todo | P2 | 2 | 0% | |
 | T98 | todo | P2 | 2 | 0% | |
 | T99 | todo | P3 | 1 | 0% | |
+| T102 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -68,6 +69,16 @@ Done when: both CLIs resolve a symlink and write to its target, copy the origina
 Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` makes a single `readSync` call into a buffer of `maxChars*4+1` bytes allocated up front. A short read is unlikely on a regular file but is not handled, and the buffer is sized for the worst case.
 
 Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
+
+### T102. Fragment variants
+
+One enum parameter marked `variant="true"` selects one `<variant when="…">` body (design §6; one axis, not several). Done when a fragment file validates, expands and explains the chosen variant, `W809` covers a bad declaration, and the price-row example is a fragment file plus a screen. Inline fragments are T101; until that lands, variants apply to fragment files. Document versions are T100: these additions are specified as format 0.3 and this change does not bump the reader version or add a second classifier.
+
+Execution plan:
+
+1. `SPEC.md` and `AGENT-SPEC.md`: variant syntax, `W809`, canonical JSON, literal-only use (`bindable: false`, existing `W217`), per-variant ids, expansion and explain. Primer stays consistent. Note the 0.3 bump waits on T100.
+2. Rust: parse `variant` on `<param>`, check `<variant>` (`W809`), validate each body on its own, expand and place the chosen body, `weft explain` names it and a dropped slot.
+3. Fixture: `examples/project` price-row fragment and a screen that uses both variants. `moon run root:changed`.
 
 ### T8. Evaluation
 

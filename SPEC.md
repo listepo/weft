@@ -528,6 +528,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W805 | Fragments use each other in a cycle; the use that closes it expands to nothing (§10.7). |
 | W806 | Expanding the fragments gives more than 10,000 elements or nests deeper than 256 levels (§10.7). |
 | W807 | Parameter read where its type cannot go: an action or slot parameter in a prop, a value parameter in `on-*`, a read with more after the name (§10.7). |
+| W809 | Variant misdeclared: `variant` on a parameter that is not an enum or on a second one, `<variant>` without a variant parameter or outside a fragment, a value covered twice or not at all, a body beside the variants, another attribute (§10.7). |
 
 Diagnostics are written for a model that will repair the document: they name the exact location, the expectation and the nearest valid alternative.
 
@@ -576,6 +577,7 @@ type Patch =
 
 - `weft` on `<screen>` is `major.minor`. A minor version only adds; a reader of `0.x` MUST accept any `0.y` document under the rules below. A major version may break.
 - The format is `weft` 0.2 since fragments (§10.7), a minor addition: a 0.1 document is a valid 0.2 document and needs no migration, and writers write `weft="0.2"`. There is no per-feature gate: a 0.2 reader accepts a fragment file or a `<use>` marked 0.1. A 0.1 reader warns about the version (`W403`) and reads `<fragment>`, `<param>`, `<outlet>` and `<use>` as unknown elements, which it keeps.
+- A variant parameter and `<variant>` (§10.7) are additions of format 0.3. The reader's version stays 0.2 until document versions raise it; this reader accepts the additions, and writers keep `weft="0.2"` until then. `weft="0.3"` is `W403`. A reader from before the addition warns (`W401`) and keeps `<variant>` as an unknown element.
 - **Extensions** are elements or attributes whose name starts with `x-<vendor>-`. An extension element MUST carry `role` (its ARIA fallback) and follows `content: "mixed"`; it may have any attributes, slots and events, and its literals stay strings. A reader that does not know it renders its children inside a container with that role. Extension attributes are allowed on every element in both modes.
 - **Unknown, non-extension** elements or attributes come from a newer minor version or another catalog. In *lenient* mode (default for readers) they produce a `W4xx` warning; an unknown element is treated as an extension with role `group`, an unknown attribute is kept in the model and ignored. In *strict* mode (default for writers and CI) they are errors. A newer minor `weft` version is reported the same way. Unknown and extension elements are opaque: parent/child rules skip them, but the parent's content model still applies. Undeclared events, slots, states and enum values of a known component are schema errors, not compatibility warnings.
 - A reader MUST NOT drop unknown content when it round-trips a document.
@@ -885,11 +887,14 @@ A fragment adds elements to the format, not a new model, and it is an addition o
 
 - The root is `<fragment>`. It takes `weft` and an optional `label`, a description for tools rather than an accessible name. It has no `id`.
 - The `<param>` elements come first, one per parameter. A parameter has the vocabulary of a catalog prop (§5): `name`, which matches `[a-z][a-z0-9]*` (so that it is both an attribute name and a loop-variable name) and is not `fragment` or `id`; and `type`, which is one of `string`, `number`, `boolean`, `enum`, `token`, `action` or `slot`. As the type allows, it also takes `values` (space-separated, for `enum` only), `token-type` (for `token`), `min`, `max` and `integer` (for `number`), `required`, and `default` (for value types, not together with `required`). A `slot` parameter takes `required`, `allowed-children` (space-separated kinds) and `content`, whose only value is `nodes` because a slot holds elements. `required` and `integer` are booleans, `min` and `max` are numbers, and `default` is a value of the parameter's type: a literal, or a token reference for a `token` parameter.
-- The body comes after the parameters. It holds one or more elements, as they could stand inside a `<screen>`.
+- Without a variant parameter, the body comes after the parameters. It holds one or more elements, as they could stand inside a `<screen>`.
 - `<outlet name="…"/>` marks where the content of a `slot` parameter goes. It is structural, like `<slot>` and `<each>`: it has no id, no other attribute and no content.
+- A `<param>` of type `enum` may take `variant="true"`. A fragment has at most one. `variant` is a boolean. A fragment with a variant parameter has, after its parameters, only `<variant when="…">` elements. `when` lists one or more of that parameter's values, separated by spaces. Each value is covered by exactly one `<variant>`. A `<variant>` holds one or more elements, outlets included. It is structural: no id and no attribute but `when`. The same rules apply to an inline fragment when the reader has that form; this reader applies them to a fragment file.
+- `variant="true"` on a parameter that is not an enum or on a second parameter, a `<variant>` without a variant parameter or outside a fragment, a `when` value the enum does not have or that two variants cover, an enum value no variant covers, a body element beside the variants, or another attribute on `<variant>`, is `W809`.
+- Adding a value of the variant parameter widens the enum (minor), removing one narrows it (major), and changing a variant's body is a patch. That classification belongs to the document-version check. This reader does not implement a second classifier.
 - The body reads a value parameter with the loop-variable form of a binding, `{$title}`, in any prop value. It reads a boolean parameter negated as `{!$busy}`. A read names the parameter and nothing after it. An action parameter is read as the whole value of an `on-*` attribute, `on-press="{$back}"`. This is the one place where an `on-*` value is braced. Bindings of `$.…` in the body read the host data model of the screen that uses the fragment.
 
-In canonical JSON a fragment file is a `Document` whose root has the kind `fragment`. `param` and `outlet` are nodes without an id, and their attributes sit in `props`, typed as above. A parameter read is an ordinary binding value, `{ "bind": "$title" }`. An action parameter in `on` is the string `"{$back}"`. The rules of §3 apply unchanged, and the `<param>` elements keep their document order before the body.
+In canonical JSON a fragment file is a `Document` whose root has the kind `fragment`. `param`, `outlet` and `variant` are nodes without an id, and their attributes sit in `props`, typed as above. A variant's `when` is that string. A parameter read is an ordinary binding value, `{ "bind": "$title" }`. An action parameter in `on` is the string `"{$back}"`. The rules of §3 apply unchanged, and the `<param>` elements keep their document order before the variants or the body.
 
 **A use.**
 
@@ -915,16 +920,17 @@ In canonical JSON a fragment file is a `Document` whose root has the kind `fragm
 
 - `<use>` is structural. It takes `id` (required, as on `<each>`), `fragment` (the fragment's name, a literal), one attribute per value parameter, `on-<name>` per action parameter, and one `<slot name="…">` per slot parameter. It has no default content and none of the universal attributes of §2.2: a header that can be hidden declares a `hidden` boolean parameter and passes it on. Extension attributes (`x-…`) are allowed.
 - A value parameter takes every value form of §2.1: a literal typed by the parameter, a binding, a negated binding, or a token reference. A binding is read where the `<use>` stands, so `{$line.name}` works inside an `<each as="line">`.
+- The variant parameter takes a literal. The fragment's signature declares it with `bindable: false`, so a binding is `W217`. Without the attribute the parameter's `default` applies, or the use is `W205` when the parameter is `required`. The body may also read the parameter as a value, `{$emphasis}`.
 - The canonical form keeps a `<use>` as it is written. Expansion (below) is something a renderer or a checker does, never a rewrite of the document.
 
 **Ids.**
 
-- Ids inside a fragment body are local. They are unique within the fragment (`W301` there) and may repeat the ids of any screen.
+- Ids inside a fragment body are local. They are unique within the fragment (`W301` there) and may repeat the ids of any screen. Ids are local to each variant: the same id may appear in several variants and means the same part, so an instance path stays valid when the variant changes. Within one variant they are still unique.
 - The id of a `<use>` is a screen id like any other.
 - An expanded element is addressed by its *instance path*: the id of the `<use>` and the local id, joined by `/`, as in `header/title`. Nested uses join further: `header/crumbs/home`. `/` is outside the id grammar, so an instance path never collides with a document id. Inside `<each>` the index suffix of §4.3 follows the whole instance path: `card/price[2]`.
 - Renderers write the instance path to `data-weft-id`.
 
-**Meaning: expansion.** A use means its fragment's body, placed where the `<use>` stands, with:
+**Meaning: expansion.** A use means its fragment's body, placed where the `<use>` stands. When the fragment has a variant parameter, that body is the `<variant>` whose `when` contains the use's literal, or the parameter's `default` when the attribute is absent. A use that does not resolve to one variant expands to nothing. Expansion then:
 
 1. every parameter read replaced by the use's value. A negated read of a binding toggles its negation, and a negated read of a boolean literal is its opposite. An absent optional parameter takes its `default`; without one, the attribute is left out;
 2. every `<outlet name="x">` replaced by the content of the use's `<slot name="x">`, or by nothing;
@@ -932,13 +938,13 @@ In canonical JSON a fragment file is a `Document` whose root has the kind `fragm
 
 Evaluation is scoped, not textual. The loop variables of the body never capture names from the use site, and the reverse. An implementation that expands by rewriting renames the body's loop variables that would clash.
 
-`<use>` is transparent for structure, as `<each>` is. The top-level elements of the body are checked against the parent's (or slot's) `allowedChildren` and against their own `allowedParents` where the `<use>` stands. `<use>` itself adds no node to the accessibility tree.
+`<use>` is transparent for structure, as `<each>` is. The top-level elements of the chosen body are checked against the parent's (or slot's) `allowedChildren` and against their own `allowedParents` where the `<use>` stands (`W302`, `W303`, `W304`). `<use>` itself adds no node to the accessibility tree.
 
 A fragment file is as untrusted as a screen, so expansion is bounded. A fragment may use other fragments, but a cycle (`a` uses `b`, which uses `a`) is `W805`, and nothing in it expands. A screen whose expansion holds more than 10,000 elements, or nests deeper than the 256 levels of §2 (a `<use>` counts as a level), is `W806`, and its expansion keeps only the root. Both are reported at the outermost `<use>` that leads to them.
 
 **Validation.** A fragment is checked once on its own, and each use is checked against the fragment's parameters. Expanded content is not checked again element by element.
 
-A fragment is checked as a screen body, with the project's catalog, tokens, actions and data schema. Each parameter read counts as a value of the parameter's type. A `string` prop takes `string` and `enum` parameters, a `number` prop takes `number` parameters, a `boolean` prop takes `boolean` parameters, an `enum` prop takes an `enum` parameter whose values it allows (`W203`), and a `token` prop takes a `token` parameter with the same `token-type` (`W307`). Any other pairing is `W204`. A literal-only prop takes no read (`W217`), and a negated read needs a boolean parameter in a boolean prop (`W218`). Reads of `$.…` are checked against the data schema (`W315`, `W316`). A `submit` button in the body may rely on a `form` around the use, so `W313` is not reported there, and `grow` on a top-level element is checked where the fragment is used.
+A fragment is checked as a screen body, with the project's catalog, tokens, actions and data schema. Each variant body is checked on its own, the same way. An outlet may appear in some variants and not in others; a variant without the outlet of a slot parameter drops that slot's content, and `weft explain` says which variant a use chose and when a slot is dropped. Each parameter read counts as a value of the parameter's type. A `string` prop takes `string` and `enum` parameters, a `number` prop takes `number` parameters, a `boolean` prop takes `boolean` parameters, an `enum` prop takes an `enum` parameter whose values it allows (`W203`), and a `token` prop takes a `token` parameter with the same `token-type` (`W307`). Any other pairing is `W204`. A literal-only prop takes no read (`W217`), and a negated read needs a boolean parameter in a boolean prop (`W218`). Reads of `$.…` are checked against the data schema (`W315`, `W316`). A `submit` button in the body may rely on a `form` around the use, so `W313` is not reported there, and `grow` on a top-level element is checked where the fragment is used.
 
 At a use:
 
@@ -961,6 +967,7 @@ In a fragment:
 | A `<param>` after the body or outside a fragment, a duplicate parameter, a bad declaration (a bad name or type, `values` on a `string`, a `default` of the wrong type), or a fragment without a body | `W803` |
 | An `<outlet>` for a name that is no `slot` parameter, twice for one name, with other attributes or content, or outside a fragment | `W804` |
 | A read where its type cannot go: an `action` or `slot` parameter in a prop, a value parameter in `on-*`, a read with more after the name | `W807` |
+| A variant parameter or `<variant>` misdeclared (§ above) | `W809` |
 
 A reader without fragments (no project) reads `<use>` as content it does not know (§8). In lenient mode it warns with `W801` and treats the use as an element with role `group` that holds its slots' content. In strict mode `W801` is an error.
 
@@ -971,4 +978,4 @@ A reader without fragments (no project) reads `<use>` as content it does not kno
 - `remove` and `move` of a `<use>` take the whole instance.
 - An id inside a fragment body (`title`, or the instance path `header/title`) is not a screen id. It is `W502`, and the hint names the fragment to edit. A fragment file is edited with the same patches as a screen, with `<fragment>` as its root.
 
-**Tools.** Renderers and generators expand uses before they draw (as above) and write instance paths to `data-weft-id`; the Slint generator, whose element names cannot hold `/`, names an element by its instance path with `--` for `/`. The accessibility tree of the reference renderer equals that of the expanded document. Importers never produce `<use>`, because they cannot tell a fragment from a copy. The core exports `expand(document, catalog)`, which returns the expanded document and its `W805`/`W806` diagnostics. The CLI, the MCP server and `write-page` load fragments with the rest of the project. `weft_catalog` lists the project's fragments with their parameters after the components.
+**Tools.** Renderers and generators expand uses before they draw (as above) and write instance paths to `data-weft-id`; the Slint generator, whose element names cannot hold `/`, names an element by its instance path with `--` for `/`. The accessibility tree of the reference renderer equals that of the expanded document. Importers never produce `<use>` or `<variant>`, because they cannot tell a fragment from a copy. The core exports `expand(document, catalog)`, which returns the expanded document and its `W805`/`W806` diagnostics. The CLI, the MCP server and `write-page` load fragments with the rest of the project. `weft_catalog` lists the project's fragments with their parameters after the components. `weft explain` names the variant each use chose.
