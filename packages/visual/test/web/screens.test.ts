@@ -76,12 +76,15 @@ for (const screen of screens) {
     same("the static page gives React's accessibility tree", async () => {
       expect(await commands.ariaSnapshot("#html")).toBe(await commands.ariaSnapshot("#react"));
     });
-    same("React, SolidJS, Lit and the reference renderer give the same accessibility tree", async () => {
-      const react = await commands.ariaSnapshot("#react");
-      expect(await commands.ariaSnapshot("#solid")).toBe(react);
-      expect(await commands.ariaSnapshot("#lit")).toBe(react);
-      expect(await commands.ariaSnapshot("#reference")).toBe(react);
-    });
+    same(
+      "React, SolidJS, Lit and the reference renderer give the same accessibility tree",
+      async () => {
+        const react = await commands.ariaSnapshot("#react");
+        expect(await commands.ariaSnapshot("#solid")).toBe(react);
+        expect(await commands.ariaSnapshot("#lit")).toBe(react);
+        expect(await commands.ariaSnapshot("#reference")).toBe(react);
+      },
+    );
 
     same("round trip through the HTML importer looks the same", async () => {
       await expectSameLook("#html", "#html-back", `roundtrip/${name}.html`);
