@@ -67,7 +67,7 @@ The reasoning behind these choices, with sources, is in [research.md](../researc
 
 Weft is a prototype. Know these before you rely on it:
 
-- **The vocabulary is small.** 29 components. Layout is only `stack` and `grid`; there is no free positioning, no animation and no theming beyond tokens. Extensions (`x-<vendor>-…` elements with a fallback role) exist, but there is no registry for sharing them.
+- **The vocabulary is small.** 29 components. Layout is only `stack` and `grid`; there is no free positioning, no animation and no theming beyond tokens. Extensions (`x-<vendor>-…` elements with a fallback role) and library catalogs exist; libraries are shared as npm packages and listed by hand in [Catalogs](catalogs.md), with no registry service.
 - **One screen per file.** Screens do not share anything yet: each one stands alone, and the data model and action names are agreed with your app by convention.
 - **Import is lossy.** A web page has no ids, bindings, actions or tokens, so an import gets generated ids and a list of losses. It is a starting point, not a conversion.
 - **One renderer.** The reference renderer targets React and produces plain, unstyled HTML. It exists to prove the structure and accessibility tree, not to look finished.

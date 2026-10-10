@@ -66,7 +66,7 @@ exit 0
 
 `weft import-cem --prefix acme` makes such a library from a Custom Elements Manifest. [Projects](projects.md#several-catalogs) shows one in use, and [SPEC §10.4](../SPEC.md#104-catalog-extension) has the rules.
 
-An agent that is told which catalogs the host uses (`weft_capabilities` lists them, `weft_catalog` names each component's catalog) writes only what they allow. There is no shared registry of catalogs yet. The MCP server takes the project's catalogs (its `--project`, or a `project` argument); the design plugins use the core catalog.
+An agent that is told which catalogs the host uses (`weft_capabilities` lists them, `weft_catalog` names each component's catalog) writes only what they allow. Libraries are shared as npm packages that a project lists as `{ "package": "@acme/ui" }` ([Publishing a catalog](publishing-catalogs.md)); [Catalogs](catalogs.md) lists the known ones and their prefixes. The MCP server takes the project's catalogs (its `--project`, or a `project` argument); the design plugins use the core catalog.
 
 ### Versioning a catalog
 

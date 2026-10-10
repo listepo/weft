@@ -113,6 +113,8 @@ Two libraries cannot claim one name, prefix or component (`W711`), a library add
 
 `weft import-cem --prefix acme` turns a Custom Elements Manifest into such a library; without `--prefix` it prints a hint when every tag shares a first segment.
 
+A library can also come from an installed npm package: the entry `{ "package": "@acme/ui" }` finds `node_modules/@acme/ui` in the project folder or a folder above it, and reads the catalog its `package.json` names under `weft.catalog`. [Publishing a catalog](publishing-catalogs.md) has the details.
+
 ## Choosing the project
 
 Every tool that reads a screen looks for the first `weft.json` in the screen's folder or above it.

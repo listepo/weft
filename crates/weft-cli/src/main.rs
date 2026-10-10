@@ -27,7 +27,7 @@ use anyhow::{Context, Result, bail};
 use clap::{Args, Parser, Subcommand};
 use weft_catalog::{
     CORE_CATALOG_JSON, PROJECT_FILE, Project, ProjectOptions, core_catalog, load_project_text,
-    merge_catalogs, token_types,
+    merge_catalogs, split_package_read, token_types,
 };
 use weft_core::{
     Catalog, DataCheckOptions, Diagnostic, Document, Mode, ParseOptions, ValidateOptions,
@@ -527,6 +527,31 @@ pub(crate) fn read_project_member(dir: &Path, name: &str) -> Option<String> {
         .flatten()
 }
 
+/// SPEC §10.2 packages: the package is `node_modules/<package>` of the project directory or of the
+/// nearest parent that has it, as Node resolves one, and only files whose resolved path stays
+/// inside that package directory are read. Nothing is run and nothing is fetched.
+fn read_package_file(project_dir: &Path, package: &str, file: &str) -> Option<String> {
+    let start = if project_dir.as_os_str().is_empty() {
+        Path::new(".")
+    } else {
+        project_dir
+    };
+    let package_dir = std::path::absolute(start)
+        .ok()?
+        .ancestors()
+        .map(|dir| dir.join("node_modules").join(package))
+        .find(|dir| dir.join("package.json").is_file())?;
+    read_project_member(&package_dir, file)
+}
+
+/// A file the project names: one of its own, or one of an npm package the loader asks for.
+fn read_member(dir: &Path, name: &str) -> Option<String> {
+    match split_package_read(name) {
+        Some((package, file)) => read_package_file(dir, package, file),
+        None => read_project_member(dir, name),
+    }
+}
+
 /// SPEC §10.1: the first `weft.json` in the document's directory or one above it.
 fn find_project(document: &Path) -> Option<PathBuf> {
     let absolute = std::path::absolute(document).ok()?;
@@ -594,7 +619,7 @@ fn setting<'a>(project: Option<&'a Project>, path: &[&str]) -> Option<&'a serde_
 fn load_project(file: &Path, mode: Mode) -> Result<(Project, Vec<Diagnostic>)> {
     let text = read(file)?;
     let dir = file.parent().unwrap_or(Path::new("."));
-    let read_member = |name: &str| read_project_member(dir, name);
+    let read_member = |name: &str| read_member(dir, name);
     let loaded = load_project_text(
         &text,
         &ProjectOptions {
