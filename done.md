@@ -1,5 +1,31 @@
 # Done
 
+### T16.4. Layout vocabulary: SwiftUI
+
+T16 scope items 3 to 5 for `crates/weft-swiftui`, as the design's tables and decisions 4 and 5 say. Depends on T16.2.
+
+Steps:
+
+1. Generator: `justify` on rows as spacers (`space-between` as `HStack(spacing: 0)` with `Spacer(minLength: <gap>)` between children, also inside `<each>`); `grow` on a row child as `.frame(maxWidth: .infinity)`; `padding` as `.padding(theme.<path>)`; `max-width` as the pair of frames; `min-column-width` as a small generated `Layout` that caps at `columns`. `justify` and `grow` in a column stay inert markers and §9 lists them.
+2. Importer: read those patterns and markers back; a `padding` or `frame` that is not a theme token stays a `layout` loss.
+3. Insta snapshots, and the reviewed SwiftUI baselines in `packages/visual` (`WEFT_SIMULATOR=own` in a worktree). If the generated `Layout` cannot match the web baseline, fall back to `GridItem(.adaptive(minimum:))` and record the difference in §9 (decision 5).
+
+Size: about 350 lines of code, including the generated `Layout` helper.
+
+Done when: the three screens compile, match their reviewed baselines, and read back to the same props with the source comment removed; `moon run root:changed` exits 0.
+
+Execution plan (Claude Code / claude-opus-5-5):
+
+1. `crates/weft-swiftui/src/generate.rs`: the child context learns whether its parent is a row, a column or a reflowing grid. Rows draw literal `justify` `end`/`center` as `Spacer(minLength: 0)` at the ends and `space-between` (two or more children, none growing) as `HStack(spacing: 0)` with a spacer before every child but the first, an `<each>` testing its index; `start`, a bound value and columns stay markers. A row child with `grow="true"` gets `.frame(maxWidth: .infinity)`. Stacks and grids draw `padding` as `.padding(theme.<path>)` and `max-width` as `.frame(maxWidth: .infinity, alignment: …).frame(maxWidth: theme.<path>)`, inside the material. A grid with `min-column-width` becomes `WeftColumns(columns:minWidth:spacing:)`, a generated `Layout` in the helpers (only in files that use it), with each `section` child wrapped in `WeftCell` so its header and content stay one cell.
+2. `crates/weft-swiftui/src/import/read.rs`: the same forms back (the spacer patterns, also inside `ForEach`; the row child's frame; `padding` and the pair of frames with theme tokens; `WeftColumns` and `WeftCell`); a padding or frame that is not a token, and spacers elsewhere, stay `layout` losses.
+3. Tests in `crates/weft-swiftui/tests/` (generated forms, each loss, `space-between` inside `<each>`); the round trip, compile and insta snapshots; `packages/visual` SwiftUI baselines for `dashboard`, `glass` and `layout` with `WEFT_SIMULATOR=own`, reviewed; SPEC §9 and `AGENT-SPEC.md` say what SwiftUI draws; plugin bundles rebuilt.
+4. Verify with `moon run root:changed`.
+
+Result: the SwiftUI generator draws the layout vocabulary and the importer reads it back from the code alone. A row's `justify` is spacers: `end` a `Spacer(minLength: 0)` before the children, `center` one on each side, `space-between` an `HStack(spacing: 0)` with a `Spacer(minLength:)` of the gap between the children, inside an `<each>` behind an index condition so that the row's first item has none. `grow` on a row's child is `.frame(maxWidth: .infinity)`; `padding` is `.padding(theme.<token>)`; `max-width` is a full-width frame aligned as the children followed by `.frame(maxWidth: theme.<token>)`, both inside the material. `min-column-width` is the generated `WeftColumns` layout (`src/columns.swift`, included only when used), which caps the count at `columns` as the web does, so the adaptive `GridItem` fallback was not needed; a `section` in it is wrapped in `WeftCell`, because a custom layout sees a section's header and content as separate views. A column's `justify`, a `justify` with one or a growing child, a bound `justify`, and `grow` outside a row stay markers. Other spacers, paddings, frames and non-token column widths are `layout` losses. `SPEC.md` §9 and `AGENT-SPEC.md` describe the forms; the dashboard, glass and layout snapshots and SwiftUI baselines were retaken and reviewed.
+
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 4 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-swiftui`, `crates/weft-snapshots`, `packages/visual/baselines`
+Check: `cargo nextest run -p weft-swiftui` passes, with 7 new tests in `tests/layout.rs`; the SwiftUI visual suite passes with `WEFT_SIMULATOR=own`; `moon run root:changed` fails only on main's receipt and fragment failures from T101 (corpus receipt id grammar and schema, the Slint receipt baseline, SPEC example 7 in Deno). 503 added lines of code, 215 of tests.
+
 ### T100. Document versions
 
 Optional `version` on a screen or a fragment, the format move to `weft` 0.3, the `set-version` patch and `weft version-check`. Inline fragments, variants and library fragments stay out.
