@@ -1,0 +1,36 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-receipt as a2ui
+---
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "receipt",
+      "catalogId": "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "receipt",
+      "components": [
+        {
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "lines"
+          ],
+          "accessibility": {
+            "label": "Receipt"
+          }
+        },
+        {
+          "id": "lines",
+          "component": "Column",
+          "children": []
+        }
+      ]
+    }
+  }
+]
