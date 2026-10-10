@@ -58,7 +58,7 @@ pub struct PatchResult {
     pub diagnostics: Vec<Diagnostic>,
 }
 
-const FORMS: [(&str, &str); 10] = [
+const FORMS: [(&str, &str); 11] = [
     (
         "set",
         r#"{"op":"set","id":"…","fragment"?:"…","prop":"…","value":<literal|{bind}|{token}|null>}"#,
@@ -87,6 +87,10 @@ const FORMS: [(&str, &str); 10] = [
         r#"{"op":"add-fragment","markup":"<fragment name=\"…\">…</fragment>"}"#,
     ),
     ("remove-fragment", r#"{"op":"remove-fragment","name":"…"}"#),
+    (
+        "set-version",
+        r#"{"op":"set-version","value":"MAJOR.MINOR.PATCH"|null}"#,
+    ),
 ];
 
 fn form(op: &str) -> Option<&'static str> {
@@ -125,6 +129,9 @@ enum Patch {
         name: String,
     },
     Context(ContextPatch),
+    SetVersion {
+        value: Option<String>,
+    },
 }
 
 impl Patch {
@@ -184,6 +191,9 @@ fn to_patch(v: &Json) -> Patch {
         }),
         Some("resolve-context") => Patch::Context(ContextPatch::Resolve(s("id"))),
         Some("remove-context") => Patch::Context(ContextPatch::Remove(s("id"))),
+        Some("set-version") => Patch::SetVersion {
+            value: v.get("value").and_then(Json::as_str).map(str::to_owned),
+        },
         _ => Patch::Move {
             id: s("id"),
             fragment: opt("fragment"),
@@ -224,6 +234,11 @@ pub fn apply_patches(
             }
             Patch::AddFragment { markup } => add_fragment(&mut work, markup, i, options),
             Patch::RemoveFragment { name } => remove_fragment(&mut work, name, i),
+            // The document root has no id, so the version is not an element patch.
+            Patch::SetVersion { value } => {
+                work.version = value.clone();
+                Ok(())
+            }
             _ => {
                 let fragment = patch.fragment().map(str::to_owned);
                 if let Some(name) = &fragment
@@ -653,7 +668,10 @@ fn apply_one(
     };
 
     let (parent_id, slot, index, moved) = match patch {
-        Patch::Context(_) | Patch::AddFragment { .. } | Patch::RemoveFragment { .. } => {
+        Patch::Context(_)
+        | Patch::AddFragment { .. }
+        | Patch::RemoveFragment { .. }
+        | Patch::SetVersion { .. } => {
             return Ok(());
         }
         Patch::Set {

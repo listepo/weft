@@ -2,6 +2,7 @@ export { buildScreen, planeTurn, type BuildHost, type BuildOptions, type Marks }
 export { displayTexts, finishRead, readScreen } from "./finish.ts";
 export {
   KEY,
+  readContext,
   readMark,
   readSource,
   readVersion,
@@ -52,9 +53,12 @@ export {
   type ModifierEntries,
 } from "./modes.ts";
 export {
+  contextReply,
   handleRequest,
+  layerContext,
   MAX_MARKUP,
   MAX_TOKENS,
+  type ContextLayer,
   type PluginReply,
   type PluginRequest,
   type PluginTool,

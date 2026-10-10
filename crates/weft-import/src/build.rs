@@ -1197,6 +1197,7 @@ pub fn build_document(top: &[Sem], options: BuildOptions<'_>) -> Built {
     // definition, the same reason they never emit `<use>`.
     let document = canonicalize(&Document {
         weft: WEFT_VERSION.into(),
+        version: None,
         context: Vec::new(),
         fragments: Default::default(),
         root: node,

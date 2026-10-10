@@ -50,8 +50,8 @@ pub use rules::{ARIA_ROLES, MAX_DEPTH, MODEL_ASSETS, TILT_PROPS, asset_problem};
 /// The grammars of SPEC §2–§4, for importers, generators and project settings that build or check
 /// names, ids and references outside the parser.
 pub use rules::{
-    embedded_reference, has_non_xml_char, is_action, is_binding, is_extension_name, is_id,
-    is_loop_variable, is_name, is_non_xml_char, is_token,
+    embedded_reference, has_non_xml_char, is_action, is_binding, is_document_version,
+    is_extension_name, is_id, is_loop_variable, is_name, is_non_xml_char, is_token,
 };
 /// The catalog-independent props every element takes (`hidden`, `label`, `state`, …).
 pub use rules::{universal_prop, universal_props};

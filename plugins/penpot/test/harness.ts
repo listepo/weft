@@ -16,13 +16,27 @@ import { FakePenpot, type FakeShape } from "../../../packages/penpot/test/fake-p
 const [dist = "", markupPath = "", resolverPath] = process.argv.slice(2);
 const print = process.stdout.write.bind(process.stdout);
 
+// The UI's window, before the sandbox runs: it sends the selection's context when it starts.
+let onMessage: ((message: unknown) => Promise<void>) | undefined;
+const listeners: ((event: { data: unknown; source: unknown }) => void)[] = [];
+const pending: Promise<void>[] = [];
+const parent = {
+  postMessage: (message: unknown) => {
+    pending.push(onMessage?.(structuredClone(message)) ?? Promise.resolve());
+  },
+};
+const toUi = (data: unknown) => {
+  for (const listener of listeners) listener({ data, source: parent });
+};
+
 // The sandbox.
 const fake = new FakePenpot();
-let onMessage: ((message: unknown) => Promise<void>) | undefined;
 let opened: { name: string; url: string } | undefined;
 const penpot = Object.assign(fake, {
   selection: [] as FakeShape[],
   viewport: { zoomIntoView: () => {} },
+  // The harness changes the selection only through the plugin, which sends the context itself.
+  on: () => {},
   ui: {
     open: (name: string, url: string) => {
       opened = { name, url };
@@ -65,16 +79,6 @@ const sandboxHasWasm = runInContext(
 ) as boolean;
 
 // The UI.
-const listeners: ((event: { data: unknown; source: unknown }) => void)[] = [];
-const pending: Promise<void>[] = [];
-const parent = {
-  postMessage: (message: unknown) => {
-    pending.push(onMessage?.(structuredClone(message)) ?? Promise.resolve());
-  },
-};
-const toUi = (data: unknown) => {
-  for (const listener of listeners) listener({ data, source: parent });
-};
 const byId = await loadUi(dist, {
   window: {
     addEventListener: (_type: string, listener: (typeof listeners)[number]) =>
@@ -101,6 +105,7 @@ print(
     opened,
     loaded: result.loaded,
     built: { status: result.built, selected },
+    context: result.context,
     exported: result.exported,
     broken: result.broken,
   })}\n`,

@@ -16,6 +16,7 @@ pub fn serialize(document: &Document) -> String {
         "",
         &mut lines,
         Some(&doc.weft),
+        doc.version.as_deref(),
         Preface {
             context: &doc.context,
             fragments: &doc.fragments,
@@ -61,6 +62,7 @@ fn write_node(
     indent: &str,
     lines: &mut Vec<String>,
     weft: Option<&str>,
+    version: Option<&str>,
     preface: Preface<'_>,
 ) {
     let mut attributes: Vec<(String, String)> = Vec::new();
@@ -73,7 +75,10 @@ fn write_node(
         .filter(|(name, _)| weft.is_none() || name.as_str() != "weft")
         .map(|(name, value)| (name.clone(), format_value(value)))
         .collect();
-    // The root carries the document version as an ordinary attribute, sorted with the props.
+    // The root carries the format version and its own version as ordinary attributes.
+    if let Some(version) = version.filter(|w| !w.is_empty()) {
+        props.push(("version".into(), version.to_owned()));
+    }
     if let Some(weft) = weft.filter(|w| !w.is_empty()) {
         props.push(("weft".into(), weft.to_owned()));
     }
@@ -117,6 +122,7 @@ fn write_fragment(name: &str, node: &Node, indent: &str, lines: &mut Vec<String>
         &copy,
         indent,
         lines,
+        None,
         None,
         Preface {
             context: &[],
@@ -168,6 +174,7 @@ fn write_element(
                         &inner,
                         lines,
                         None,
+                        None,
                         Preface {
                             context: &[],
                             fragments: &none,
@@ -216,6 +223,7 @@ mod tests {
         root.children = vec![Child::Node(Box::new(text))];
         let doc = Document {
             weft: "0.1".into(),
+            version: None,
             context: vec![],
             fragments: Map::new(),
             root,

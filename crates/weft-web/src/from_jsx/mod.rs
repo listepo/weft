@@ -23,7 +23,7 @@ use weft_core::{Code, Diagnostic};
 use weft_import::{ImportResult, Loss, empty_result, js_length, limit_reached};
 
 use crate::dom::{Conventions, read_dom};
-use crate::import::{ImportOptions, claimed};
+use crate::import::ImportOptions;
 use crate::jsx::{Framework, JsxOptions, to_jsx};
 use crate::provenance;
 use crate::tree::DOCUMENT;
@@ -194,7 +194,7 @@ fn provenance_match(
             _ => name = word.strip_prefix("name=").or(name),
         }
     }
-    let (document, diagnostics) = claimed(&markup, options.catalog)?;
+    let (document, diagnostics) = provenance::claimed(&markup, options.catalog)?;
     let json = serde_json::to_value(&document).ok()?;
     let again = to_jsx(
         &json,

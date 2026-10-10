@@ -5,9 +5,7 @@
 
 use indexmap::IndexMap;
 use weft_catalog::Token;
-use weft_core::{
-    Catalog, Diagnostic, Document, Mode, ParseOptions, canonicalize, has_errors, parse,
-};
+use weft_core::{Catalog, Diagnostic};
 use weft_import::{ImportResult, squash};
 
 use crate::dom::{Conventions, bounded, find_body, read_dom};
@@ -21,29 +19,13 @@ pub struct ImportOptions<'a> {
     pub tokens: &'a IndexMap<String, Token>,
 }
 
-/// The document a `weft:source` comment claims, when its markup parses without errors.
-pub(crate) fn claimed(markup: &str, catalog: &Catalog) -> Option<(Document, Vec<Diagnostic>)> {
-    let parsed = parse(
-        markup,
-        &ParseOptions {
-            catalog: Some(catalog),
-            mode: Mode::Lenient,
-            ..Default::default()
-        },
-    );
-    let document = parsed
-        .document
-        .filter(|_| !has_errors(&parsed.diagnostics))?;
-    Some((canonicalize(&document), parsed.diagnostics))
-}
-
 /// Imports an HTML page. Never fails: what cannot be read is reported in the result.
 pub fn import_html(html: &str, options: &ImportOptions<'_>) -> ImportResult {
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
     let html = bounded(html, &mut diagnostics);
     let dom = parse_html(html);
     if let Some((_, markup)) = provenance::find(html, "<!--", "-->")
-        && let Some((document, parse_diagnostics)) = claimed(&markup, options.catalog)
+        && let Some((document, parse_diagnostics)) = provenance::claimed(&markup, options.catalog)
         && let Ok(again) = to_html(
             &document,
             &HtmlOptions {

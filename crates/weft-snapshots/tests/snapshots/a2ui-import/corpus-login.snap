@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-login as a2ui-import
 ---
-<screen id="login" weft="0.2">
+<screen id="login" weft="0.3">
   <stack id="form">
     <heading id="title" level="1">Sign in</heading>
     <stack id="fields">

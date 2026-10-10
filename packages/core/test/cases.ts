@@ -20,9 +20,10 @@ export type Case = {
 // The W5xx patch codes need a patch list, not a document; patch.test.ts has their cases. The
 // W6xx import codes need an importer; packages/from-aria tests them. W315 and W316 need a data
 // schema (data.test.ts), and the W7xx project codes a project (packages/catalog project tests).
+// W810 is reported by `weft version-check` only.
 export type DocumentCode = Exclude<
   DiagnosticCode,
-  `W5${string}` | `W6${string}` | `W7${string}` | "W315" | "W316"
+  `W5${string}` | `W6${string}` | `W7${string}` | "W315" | "W316" | "W810"
 >;
 export const cases: Record<DocumentCode, Case> = {
   W101: { markup: screen('<text id="t" tone="muted"value="x"/>') },
@@ -90,6 +91,7 @@ export const cases: Record<DocumentCode, Case> = {
   W229: {
     markup: screen('<context><entry id="n" by="agent" kind="intent" name="m"> </entry></context>'),
   },
+  W230: { markup: '<screen id="s" label="S" version="1.2" weft="0.3"/>' },
   W301: { markup: screen('<text id="t">a</text><text id="t">b</text>') },
   W302: { markup: screen('<list id="l"><text id="t">x</text></list>') },
   W303: { markup: screen('<item id="i">x</item>') },
@@ -117,7 +119,7 @@ export const cases: Record<DocumentCode, Case> = {
   W318: { markup: screen('<text id="t" grow="true">x</text>') },
   W401: { markup: screen('<fancy id="f"/>') },
   W402: { markup: screen('<text id="t" colour="red">x</text>') },
-  W403: { markup: screen("", "0.3") },
+  W403: { markup: screen("", "0.4") },
   W404: { markup: screen("", "1.0") },
   W801: { markup: screen('<use id="u" fragment="page-headr"/>') },
   W802: { markup: screen('<use id="u" fragment="page-header" title="T" subtitle="S"/>') },
@@ -133,4 +135,5 @@ export const cases: Record<DocumentCode, Case> = {
   W808: {
     markup: screen('<text id="t">x</text><fragment name="row"><text id="a">y</text></fragment>'),
   },
+  W809: { markup: fragment('<param name="a" type="string" variant="true"/><text id="t">T</text>') },
 };

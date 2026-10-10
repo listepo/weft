@@ -1,4 +1,4 @@
-<screen id="screen-users" label="Users" weft="0.2">
+<screen id="screen-users" label="Users" weft="0.3">
   <heading id="heading-users" level="1">Users</heading>
   <table id="table-users" label="Users">
     <column id="column-name" sort="ascending" on-press="users.sort">Name</column>

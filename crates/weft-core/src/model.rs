@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::source::Source;
 
-pub const WEFT_VERSION: &str = "0.2";
+pub const WEFT_VERSION: &str = "0.3";
 
 /// Objects keep their key order, as JavaScript objects do.
 pub type Map<V> = IndexMap<String, V>;
@@ -116,6 +116,10 @@ impl Serialize for Node {
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Document {
     pub weft: String,
+    /// The root's `version` attribute (SPEC §3). Absent when the document declares none.
+    /// Kept beside `weft` so canonical JSON writes the members in that order.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
     /// The `<context>` block (SPEC §2.3), in written order.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub context: Vec<Entry>,

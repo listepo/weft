@@ -16,6 +16,7 @@ mod convert;
 mod schema;
 mod slint;
 mod swiftui;
+mod version_check;
 mod web;
 
 use std::io::Write;
@@ -24,7 +25,9 @@ use std::process::ExitCode;
 
 use anyhow::{Context, Result, bail};
 use clap::{Args, Parser, Subcommand};
-use weft_catalog::{PROJECT_FILE, Project, ProjectOptions, load_project_text, token_types};
+use weft_catalog::{
+    PROJECT_FILE, Project, ProjectOptions, core_catalog, load_project_text, token_types,
+};
 use weft_core::{
     Catalog, DataCheckOptions, Diagnostic, Document, Mode, ParseOptions, ValidateOptions,
     check_data, check_data_json, explain, explain_changes, explain_with_context, has_errors, parse,
@@ -179,6 +182,14 @@ enum Command {
         #[command(flatten)]
         project: ProjectArgs,
     },
+    /// Compare two versions of one screen, fragment or library catalog and say how far its
+    /// version must be raised.
+    VersionCheck {
+        old: PathBuf,
+        new: PathBuf,
+        #[command(flatten)]
+        project: ProjectArgs,
+    },
     /// Generate a SwiftUI view (iOS 17, macOS 14) from a markup document.
     Swiftui {
         file: PathBuf,
@@ -204,6 +215,10 @@ enum Command {
         /// Put the tokens the screen uses in the screen file, so it builds on its own.
         #[arg(long)]
         no_shared_tokens: bool,
+        /// Whether the source comment carries the screen's context (default: the project's
+        /// `export.swiftui.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ExportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -239,6 +254,10 @@ enum Command {
         /// `import.swiftui.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Whether context read back from the source comment enters the document (default: the
+        /// project's `import.swiftui.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ImportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -715,6 +734,14 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 0
             })
         }
+        Command::VersionCheck { old, new, project } => {
+            let (loaded, _) = project_for(&new, project, Mode::Lenient, &mut std::io::stderr())?;
+            let catalog = match loaded {
+                Some(project) => project.catalog,
+                None => core_catalog()?,
+            };
+            version_check::run(&old, &new, &catalog, out)
+        }
         Command::Explain {
             file,
             against,
@@ -771,6 +798,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             data,
             shared_tokens,
             no_shared_tokens,
+            context,
             force,
         } => swiftui::export(
             swiftui::ExportArgs {
@@ -781,6 +809,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 out_dir,
                 data: data.data,
                 shared_tokens: (shared_tokens, no_shared_tokens),
+                context: context.map(|c| c == convert::ExportContext::Keep),
                 force,
             },
             out,
@@ -840,6 +869,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             catalog,
             project,
             out_dir,
+            context,
             force,
         } => swiftui::import(
             swiftui::ImportArgs {
@@ -847,6 +877,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 catalog,
                 project,
                 out_dir,
+                context: context.map(|c| c == convert::ImportContext::Keep),
                 force,
             },
             out,
@@ -1041,7 +1072,7 @@ fn load_markup(
 }
 
 /// One line per diagnostic: `file:line:col code message — hint`; JSON input has a path instead.
-fn print(file: &Path, diagnostics: &[Diagnostic], out: &mut dyn Write) -> Result<()> {
+pub(crate) fn print(file: &Path, diagnostics: &[Diagnostic], out: &mut dyn Write) -> Result<()> {
     let file = file.display();
     for d in diagnostics {
         let place = match d.line {

@@ -73,6 +73,7 @@ pub fn read_slint(source: &str, options: &ImportOptions<'_>) -> ImportResult {
     ImportResult {
         document: Document {
             weft: WEFT_VERSION.into(),
+            version: None,
             context: Vec::new(),
             fragments: Default::default(),
             root,

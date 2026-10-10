@@ -192,7 +192,7 @@ fn a_bound_field_error_comes_back_as_the_fields_error() {
     }
 }
 
-const NOTED: &str = r#"<screen id="s" label="Notes" weft="0.2">
+const NOTED: &str = r#"<screen id="s" label="Notes" weft="0.3">
   <context>
     <entry id="why" by="human" kind="intent" name="Ivan">Sign in quickly. @preserve */ end</entry>
     <entry id="go-why" by="agent" for="go" kind="question" name="m" status="open">Primary?</entry>

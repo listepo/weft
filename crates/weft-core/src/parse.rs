@@ -43,6 +43,8 @@ fn waits_for_more(d: &Diagnostic, open: &HashSet<String>) -> bool {
         Code::W309 => true,
         // The slot or the repeated element may be the next thing written inside it.
         Code::W208 | Code::W314 => open.contains(&d.path),
+        // An inline fragment still open may get its body in the next chunk.
+        Code::W803 => d.message == "The fragment has no body." && open.contains(&d.path),
         _ => false,
     }
 }
@@ -195,6 +197,8 @@ struct Builder<'a> {
     catalog: Option<&'a Catalog>,
     diagnostics: Vec<Diagnostic>,
     weft: String,
+    /// The root's `version` attribute, lifted like `weft` (SPEC §3).
+    version: Option<String>,
     /// The root's `<context>` block, lifted out of its content (SPEC §2.3).
     context: Option<Vec<Entry>>,
     /// Inline fragments lifted from the root `<screen>` (SPEC §10.7).
@@ -250,6 +254,9 @@ impl Builder<'_> {
                 on.push((event.to_owned(), attr.value.clone()));
             } else if is_root && attr.name == "weft" {
                 self.weft = attr.value.clone();
+            } else if is_root && attr.name == "version" {
+                // Kept as text so a binding or any other value reaches validation as W230.
+                self.version = Some(attr.value.clone());
             } else {
                 match read_value(
                     &attr.value,
@@ -501,6 +508,11 @@ impl Builder<'_> {
             return None;
         }
         let mut node = self.element(index, &path, false);
+        if self.syntax.open.contains(&index) {
+            // Validation reports the fragment at its document path, which is where a later
+            // chunk can still write the body.
+            self.open.insert(format!("#/fragments/{name}"));
+        }
         node.props.shift_remove("name");
         node.id = None;
         self.fragments.insert(name.clone(), node);
@@ -596,6 +608,7 @@ fn build_open(
         catalog,
         diagnostics: vec![],
         weft: String::new(),
+        version: None,
         context: None,
         fragments: Map::new(),
         open: HashSet::new(),
@@ -616,6 +629,7 @@ fn build_open(
     }
     let document = Document {
         weft: b.weft,
+        version: b.version,
         context: b.context.unwrap_or_default(),
         fragments,
         root,

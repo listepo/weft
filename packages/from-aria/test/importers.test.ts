@@ -304,7 +304,7 @@ test("property: any snapshot imports to a document that validates without errors
     fc.property(ariaNode, (node) => {
       const r = fromAriaSnapshot(node as AriaNode, { catalog });
       assertValid(r);
-      assert.equal((r.document as Document).weft, "0.2");
+      assert.equal((r.document as Document).weft, "0.3");
     }),
     { numRuns: 300 },
   );

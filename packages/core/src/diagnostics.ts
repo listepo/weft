@@ -67,6 +67,7 @@ export const DIAGNOSTIC_CODES = {
   },
   W228: { severity: "mode", summary: "Context over a limit." },
   W229: { severity: "error", summary: "Context entry text or author name not allowed." },
+  W230: { severity: "error", summary: "`version` is not a literal MAJOR.MINOR.PATCH." },
 
   W301: { severity: "error", summary: "Duplicate id." },
   W302: { severity: "error", summary: "Child kind not allowed here." },
@@ -143,6 +144,11 @@ export const DIAGNOSTIC_CODES = {
   },
   W807: { severity: "error", summary: "Parameter read where its type cannot go." },
   W808: { severity: "error", summary: "Inline fragment misplaced or malformed." },
+  W809: { severity: "error", summary: "Variant parameter or `<variant>` is misdeclared." },
+  W810: {
+    severity: "error",
+    summary: "Declared version is lower than the changes require.",
+  },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;

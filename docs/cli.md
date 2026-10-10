@@ -25,6 +25,7 @@ Commands:
   validate        Check a document: markup, or canonical JSON when the file name ends in `.json`
   fmt             Print the canonical markup of a document
   explain         Read back what each binding, token, event and loop of a markup document means, one per line, so the meaning can be compared with the instruction behind an edit
+  version-check   Compare two versions of one screen, fragment or library catalog and say how far its version must be raised
   swiftui         Generate a SwiftUI view (iOS 17, macOS 14) from a markup document
   swiftui-tokens  Generate `WeftTokens.swift`, the design tokens every SwiftUI screen of a project shares
   import-swiftui  Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses
@@ -185,6 +186,8 @@ The commands use the project's catalog and tokens, or `--catalog` and `--tokens`
 
 With `--data <file>` (or the project's `export.swiftui.data`), the model also gets an initializer and a `sample` built from that JSON, and `#Preview` shows it. The importer ignores both.
 
+The file opens with a `// weft:source swiftui` comment: the screen's markup, one `//` line per line, with its `<context>` block. `weft import-swiftui` gives that screen back, notes included, only when the code still reads as that screen; an edited view is read from its code, without the notes. Each note also appears as a `// <kind> (<by> <name>): <text>` line above the view it is about, which the importer ignores. `--context strip` (or `export.swiftui.context`) leaves the notes out, and `--context drop` (or `import.swiftui.context`) leaves them out of an import.
+
 ## `weft slint` and `weft import-slint`
 
 `weft slint` prints a Slint component for a screen (Slint 1.x, `std-widgets.slint`): one exported `Window`, one property per data path, and a `perform` callback for events. `weft import-slint` reads that file back. What the generator printed comes back unchanged:
@@ -226,7 +229,7 @@ weft-tour/Hello.jsx:/screen#screen-hello/button#button-toggle loss actions: onCl
 
 The source is parsed, never run. `import-react` and `import-solid` read `.tsx` (and `.ts`) files as TypeScript. `--source`/`--no-source`, `--typescript`/`--javascript` and `--out-dir` override the project's `export.<target>` and `import.<target>` settings ([Projects](projects.md)); `--catalog` and `--tokens` replace the project's catalog and tokens. The parsers and the mapping are described in `crates/weft-web/README.md` and SPEC §9.
 
-The source comment carries the screen's `<context>` block (SPEC §2.3), so an import gives the notes back too. `--context strip` leaves them out of the output, and `--context drop` leaves them out of an import. The default is `strip` for `weft html`, since a deployed page shows its comments to anyone who reads its source, and `keep` for everything else. React and SolidJS components also show each note as a readable `{/* … */}` comment above the element it is about; importers ignore these. `weft slint` and `weft import-slint` take the same flag. The project's `export.<target>.context` and `import.<target>.context` set the defaults. Inside the comment, `@` is always followed by `\`, so a note cannot carry `@license` or `@preserve` into a minified bundle.
+The source comment carries the screen's `<context>` block (SPEC §2.3), so an import gives the notes back too. `--context strip` leaves them out of the output, and `--context drop` leaves them out of an import. The default is `strip` for `weft html`, since a deployed page shows its comments to anyone who reads its source, and `keep` for everything else. React and SolidJS components also show each note as a readable `{/* … */}` comment above the element it is about; importers ignore these. `weft slint`, `weft import-slint`, `weft swiftui` and `weft import-swiftui` take the same flag. The project's `export.<target>.context` and `import.<target>.context` set the defaults. Inside the comment, `@` is always followed by `\`, so a note cannot carry `@license` or `@preserve` into a minified bundle.
 
 A component reads its tokens as `var(--weft-…)`. `weft css-tokens` writes them once for the app as `weft-tokens.css`, from the project found in the working directory (or `--project`, `--tokens`). It prints unless `--out-dir` or the project's `export.css.outDir` names a folder. When the project's tokens are a resolver with light and dark themes ([Projects](projects.md#light-and-dark-a-resolver)), the stylesheet and the page from `weft html` follow the system appearance: the light values on `:root`, the ones that differ in the dark under `@media (prefers-color-scheme: dark)`. A typography token is the `font` shorthand plus `--weft-<path>-letter-spacing`.
 

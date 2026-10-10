@@ -23,10 +23,8 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
-| T39 | in progress | P1 | 4 | 80% | Claude Code / claude-opus-5-5 |
-| T39.7 | todo | P2 | 3 | 0% | |
-| T39.9 | todo | P2 | 3 | 0% | |
-| T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
+| T39 | in progress | P1 | 4 | 90% | Claude Code / claude-opus-5-5 |
+| T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
@@ -44,7 +42,9 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T97 | todo | P2 | 2 | 0% | |
 | T98 | todo | P2 | 2 | 0% | |
 | T99 | todo | P3 | 1 | 0% | |
+| T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
 | T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
+| T103 | todo | P2 | 4 | 0% | |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -69,6 +69,28 @@ Done when: both CLIs resolve a symlink and write to its target, copy the origina
 Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` makes a single `readSync` call into a buffer of `maxChars*4+1` bytes allocated up front. A short read is unlikely on a regular file but is not handled, and the buffer is sized for the worst case.
 
 Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
+
+### T100. Document versions
+
+An optional `version` (`MAJOR.MINOR.PATCH`) on `<screen>` and `<fragment>`. A fragment's change level comes from its parameter signature through the catalog classifier; a body-only change is a patch. Below `1.0.0` the level follows Cargo's rule, as `requires` does. A screen's level follows its host contract: a new action, a new data path, a path read at a new type, a new writable binding or a lost element id is major; new ids alone are minor; any other canonical change is a patch. `weft version-check` reports `W810` when the declared version was not raised enough. A screen and a `<use>` never name a version. A project pins a library through the existing `requires`, so that pin is not a separate task. The format moves to `weft` 0.3.
+
+Done when the parser, the canonical form, `set-version` and `W230` match the spec, writers emit `weft="0.3"`, and `weft version-check` exits 1 on a version that is too low.
+
+Draft pull request #49.
+
+### T101. Inline fragments
+
+`<fragment name="…">` is a direct child of `<screen>`, after `<context>` and before the body. It is local to that screen and needs no `weft.json`. A name the project already defines is refused. Patches gain a `fragment` member, plus `add-fragment` and `remove-fragment`.
+
+Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
+
+Draft pull request #47.
+
+### T103. Library fragments
+
+A library catalog, one with a `prefix`, lists fragments named `<prefix>-…`. A fragment reaches the host only through its parameters. Committed files first. Resolving a fragment from an npm package waits on T17.3 and uses that lookup rather than a second one.
+
+Done when `examples/project` loads a library fragment, a fragment that reads host data or names an action literally is `W716`, and a name outside its owner is `W715`.
 
 ### T8. Evaluation
 
@@ -151,16 +173,6 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
 
 The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.9, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.9.
-
-### T39.7. Context: Figma and Penpot
-
-The canonical entries in plugin data (`weft.context`) on the root frame, read back with entries about removed layers dropped as a `context` loss (SPEC §9 loss row), and `import.figma.context`; the plugin panel lists the selected layer's entries read-only.
-
-### T39.9. Context: SwiftUI
-
-SwiftUI has no source comment, so it carries context as `// weft:context <entry JSON>` lines above the view struct, read back by `weft import-swiftui`, with readable `//` comments above each named view that the importer ignores. `export.swiftui.context` and `import.swiftui.context` (SPEC §10.6, `settings.rs`, the schema) and the CLI `--context`, as T39.6 gave the web and Slint targets; a round-trip test.
-
-Open question for the creator before this is claimed: `import_swiftui` reads code by convention, with no regeneration check like the web and Slint importers have. A `// weft:context` line therefore cannot be told apart from one forged in foreign Swift, and the design reads context only from code recognized as Weft-generated. Options: add a `weft:source` comment with that check to SwiftUI first, or accept the lines on a lenient read and validate them.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 

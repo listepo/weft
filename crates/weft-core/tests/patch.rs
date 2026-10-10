@@ -256,7 +256,7 @@ fn the_expected_form_of_a_malformed_patch_names_the_operation() {
     assert_eq!(
         r.diagnostics[0].expected.as_deref(),
         Some(
-            "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"add-fragment\", \"remove-fragment\"",
+            "one of: \"set\", \"insert\", \"remove\", \"move\", \"add-context\", \"set-context\", \"resolve-context\", \"remove-context\", \"add-fragment\", \"remove-fragment\", \"set-version\"",
         )
     );
 }

@@ -3,7 +3,13 @@ import { buildScreen, displayTexts, ensureLibrary, readScreen } from "../src/ind
 import { parseStrict, tokens } from "../../design-tool/test/corpus.ts";
 import { FakeFigma, type FakeFrame } from "./fake-figma.ts";
 
-export { corpusMarkup, corpusNames, parseStrict, tokens } from "../../design-tool/test/corpus.ts";
+export {
+  contextMarkup,
+  corpusMarkup,
+  corpusNames,
+  parseStrict,
+  tokens,
+} from "../../design-tool/test/corpus.ts";
 
 /** A fake file with the library and the screen built in it. */
 export async function built(markup: string): Promise<{ figma: FakeFigma; frame: FakeFrame }> {

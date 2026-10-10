@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FIGMA_API } from "@weft/figma/pull";
 import { afterAll, afterEach, beforeAll, describe, test } from "vitest";
-import { built, corpusMarkup } from "../../../packages/figma/test/helpers.ts";
+import { built, contextMarkup, corpusMarkup } from "../../../packages/figma/test/helpers.ts";
 import {
   FILE_KEY,
   serveFile,
@@ -31,8 +31,8 @@ afterEach(async () => {
 });
 
 /** The login screen in a served fake file; the link that names its frame. */
-async function login(): Promise<{ link: string }> {
-  const { figma, frame } = await built(corpusMarkup("login"));
+async function login(markup = corpusMarkup("login")): Promise<{ link: string }> {
+  const { figma, frame } = await built(markup);
   server = await serveFile(figma);
   return {
     link: `https://www.figma.com/design/${FILE_KEY}/Login?node-id=${frame.id.replace(":", "-")}`,
@@ -95,6 +95,21 @@ describe("import.figma in weft.json", () => {
     const result = await run([link], cwd);
     assert.equal(result.code, 0, result.stderr);
     assert.equal(readFileSync(join(cwd, "screens/login.weft"), "utf8"), corpusMarkup("login"));
+  });
+
+  test("context keeps the frame's context by default, and drop leaves it out", async () => {
+    const { link } = await login(contextMarkup);
+    const kept = work();
+    assert.equal((await run([link, "--no-project"], kept)).code, 0);
+    assert.equal(readFileSync(join(kept, "login.weft"), "utf8"), contextMarkup);
+    const dropped = work();
+    writeFileSync(
+      join(dropped, "weft.json"),
+      JSON.stringify({ import: { figma: { context: "drop" } } }),
+    );
+    const result = await run([link], dropped);
+    assert.equal(result.code, 0, result.stderr);
+    assert.doesNotMatch(readFileSync(join(dropped, "login.weft"), "utf8"), /<context>|<entry/);
   });
 });
 

@@ -104,7 +104,7 @@ type JsxExportSettings = {
   source?: boolean;
   context?: ExportContext;
 };
-/** An importer that reads a generated file's source comment back, context included. */
+/** An importer that reads context back: a generated file's source comment, a frame's plugin data. */
 type SourceImportSettings = { outDir?: string; context?: "keep" | "drop" };
 
 export type Settings = {
@@ -133,7 +133,7 @@ export type Settings = {
     slint?: SourceImportSettings;
     swiftui?: { outDir?: string };
     a2ui?: { outDir?: string };
-    figma?: { outDir?: string };
+    figma?: SourceImportSettings;
   };
   mcp?: { limits?: Partial<Record<LimitName, number>>; context?: "read-write" | "read-only" };
   plugins?: Record<string, Record<string, unknown>>;

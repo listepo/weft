@@ -6,7 +6,7 @@ use serde_json::Value as Json;
 
 use crate::context_check::check_entries;
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, did_you_mean, one_of, quote};
-use crate::fragment::{FRAGMENT, OUTLET, PARAM, ParamKind, USE, signature};
+use crate::fragment::{FRAGMENT, OUTLET, PARAM, ParamKind, USE, VARIANT, signature};
 use crate::inline;
 use crate::json::{JSON_DEPTH_LIMIT, js_number, js_round};
 use crate::model::{
@@ -15,8 +15,8 @@ use crate::model::{
 };
 use crate::rules::{
     ARIA_ROLES, CONTEXT, EACH, ENTRY, MAX_DEPTH, MODEL_ASSETS, SLOT, asset_problem,
-    embedded_reference, has_non_xml_char, is_action, is_binding, is_extension_name, is_id,
-    is_loop_variable, is_name, is_token, universal_prop, version,
+    embedded_reference, has_non_xml_char, is_action, is_binding, is_document_version,
+    is_extension_name, is_id, is_loop_variable, is_name, is_token, universal_prop, version,
 };
 use crate::shape::{document_issues, to_document};
 use crate::source::{NodeSource, path_segment};
@@ -100,6 +100,10 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
     let root_path = format!("/{}", path_segment(&root.kind, root.id.as_deref(), None));
     let version_at = node_at(root, &root_path, Some("weft"));
     v.check_version(&document.weft, &version_at);
+    if let Some(declared) = &document.version {
+        let at = node_at(root, &root_path, Some("version"));
+        v.check_document_version(declared, &at);
+    }
     if root.kind == FRAGMENT {
         v.visit_fragment(root, &root_path);
     } else {
@@ -110,25 +114,7 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
         v.report(d);
     }
 
-    for (value, target, at) in std::mem::take(&mut v.references) {
-        if v.ids.get(&value).map(|(kind, _)| kind.as_str()) != Some(target.as_str()) {
-            let ids: Vec<String> = v
-                .ids
-                .iter()
-                .filter(|(_, (kind, _))| *kind == target)
-                .map(|(id, _)| id.clone())
-                .collect();
-            let d = diag(
-                Code::W309,
-                &at,
-                format!("\"{value}\" is not the id of a <{target}>."),
-                one_of(&ids),
-            )
-            .got(value.clone())
-            .hint_opt(did_you_mean(&value, &ids));
-            v.report(d);
-        }
-    }
+    v.finish_references();
     if !catalog.fragments.is_empty() || !inline.is_empty() {
         // Each use was checked against its fragment above; only the bounds of the whole
         // expansion remain (SPEC §10.7).
@@ -294,6 +280,30 @@ struct Validator<'a> {
 impl<'a> Validator<'a> {
     fn report(&mut self, d: Diagnostic) {
         self.out.push(d.mode(self.options.mode));
+    }
+
+    /// Id references collected so far, against the ids in scope. Variant bodies finish this
+    /// before the next variant's ids replace them.
+    fn finish_references(&mut self) {
+        for (value, target, at) in std::mem::take(&mut self.references) {
+            if self.ids.get(&value).map(|(kind, _)| kind.as_str()) != Some(target.as_str()) {
+                let ids: Vec<String> = self
+                    .ids
+                    .iter()
+                    .filter(|(_, (kind, _))| *kind == target)
+                    .map(|(id, _)| id.clone())
+                    .collect();
+                let d = diag(
+                    Code::W309,
+                    &at,
+                    format!("\"{value}\" is not the id of a <{target}>."),
+                    one_of(&ids),
+                )
+                .got(value.clone())
+                .hint_opt(did_you_mean(&value, &ids));
+                self.report(d);
+            }
+        }
     }
 
     fn component(&self, kind: &str) -> Option<&'a ComponentDef> {
@@ -728,6 +738,7 @@ impl<'a> Validator<'a> {
         owner: &Owner,
         scope: &[String],
         positions: Option<&[Option<Position>]>,
+        surface: bool,
     ) {
         let where_ = if owner.each {
             "<each>".to_owned()
@@ -783,12 +794,8 @@ impl<'a> Validator<'a> {
                 path_segment(&child.kind, child.id.as_deref(), Some(index))
             );
             let at = node_at(child, &child_path, None);
-            if child.kind == PARAM
-                && owner.kind.as_deref() == Some(FRAGMENT)
-                && !owner.slot
-                && !owner.each
-            {
-                // Declarations, checked with the fragment itself.
+            if surface && (child.kind == PARAM || child.kind == VARIANT) {
+                // Declarations, and variant bodies, are checked with the fragment itself.
                 continue;
             }
             let component = self.def_of(child);
@@ -860,7 +867,7 @@ impl<'a> Validator<'a> {
         let at = node_at(node, path, None);
         let props = &node.props;
         let catalog = self.catalog;
-        if owner.is_some() && (kind == OUTLET || kind == PARAM) {
+        if owner.is_some() && (kind == OUTLET || kind == PARAM || kind == VARIANT) {
             return self.visit_structural(node, path);
         }
         let inline_sig = self.inline_sig(node);
@@ -1033,6 +1040,15 @@ impl<'a> Validator<'a> {
                     &attr_at,
                     "The format version lives in Document.weft, not in the root's props.",
                     "Document.weft",
+                ));
+                continue;
+            }
+            if owner.is_none() && name == "version" {
+                self.report(diag(
+                    Code::W200,
+                    &attr_at,
+                    "The document version lives in Document.version, not in the root's props.",
+                    "Document.version",
                 ));
                 continue;
             }
@@ -1385,7 +1401,14 @@ impl<'a> Validator<'a> {
                 each: false,
             };
             let positions = slot_source.map(|s| s.children.as_slice());
-            self.visit_list(list, &slot_path, &slot_owner, &inner_scope, positions);
+            self.visit_list(
+                list,
+                &slot_path,
+                &slot_owner,
+                &inner_scope,
+                positions,
+                false,
+            );
         }
         if let Some(component) = component {
             for (name, def) in component.slots.iter().flatten() {
@@ -1419,7 +1442,14 @@ impl<'a> Validator<'a> {
             },
         };
         let positions = source(node).map(|s| s.children.as_slice());
-        self.visit_list(&node.children, path, &child_owner, &inner_scope, positions);
+        self.visit_list(
+            &node.children,
+            path,
+            &child_owner,
+            &inner_scope,
+            positions,
+            false,
+        );
     }
 
     fn check_version(&mut self, weft: &str, at: &At) {
@@ -1462,6 +1492,22 @@ impl<'a> Validator<'a> {
                 .hint(format!("write {fix}")),
             );
         }
+    }
+
+    fn check_document_version(&mut self, version: &str, at: &At) {
+        if is_document_version(version) {
+            return;
+        }
+        self.report(
+            diag(
+                Code::W230,
+                at,
+                "version must be a literal MAJOR.MINOR.PATCH.",
+                "MAJOR.MINOR.PATCH",
+            )
+            .got(version)
+            .hint("write version=\"1.0.0\", or remove it"),
+        );
     }
 }
 

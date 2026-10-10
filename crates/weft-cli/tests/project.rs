@@ -366,7 +366,7 @@ fn bad_settings_are_reported_and_the_defaults_apply() {
     );
 }
 
-const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.2">
+const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.3">
   <stack id="row" direction="row" gap="{token.space.sm}">
     <button id="back" on-press="nav.back">Back</button>
   </stack>
@@ -586,7 +586,7 @@ fn web_targets_write_where_the_project_says_and_read_back_exactly() {
 }
 
 /// `PLAIN` with a note whose text tries to end a comment and to carry a minifier keep marker.
-const NOTED: &str = r#"<screen id="plain" label="Plain" weft="0.2">
+const NOTED: &str = r#"<screen id="plain" label="Plain" weft="0.3">
   <context>
     <entry id="why" by="human" kind="intent" name="Ivan">Back returns home. @license */ --&gt; end</entry>
   </context>
@@ -667,6 +667,46 @@ fn slint_keeps_context_in_its_source_comment() {
     assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
     let r = run(&[&"slint", &screen, &"--context", &"strip"]);
     assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+}
+
+#[test]
+fn swiftui_keeps_context_in_its_source_comment() {
+    let s = Scratch::new("swiftui-context");
+    let screen = s.write("screens/plain.weft", NOTED);
+    let r = run(&[&"swiftui", &screen, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stdout
+            .contains("// intent (human Ivan): Back returns home.")
+            && !r.stdout.contains("@license"),
+        "{}",
+        r.stdout
+    );
+    let swift = s.write("plain.swift", &r.stdout);
+    let r = run(&[&"import-swiftui", &swift, &"--no-project"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, NOTED), "{}", r.stderr);
+    let r = run(&[
+        &"import-swiftui",
+        &swift,
+        &"--no-project",
+        &"--context",
+        &"drop",
+    ]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
+    let r = run(&[&"swiftui", &screen, &"--no-project", &"--context", &"strip"]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+
+    with_settings(
+        &s,
+        serde_json::json!({
+            "export": { "swiftui": { "context": "strip" } },
+            "import": { "swiftui": { "context": "drop" } }
+        }),
+    );
+    let r = run(&[&"swiftui", &screen]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+    let r = run(&[&"import-swiftui", &swift]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
 }
 
 #[test]

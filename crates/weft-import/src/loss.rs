@@ -20,6 +20,8 @@ pub enum LossKind {
     Kinds,
     Text,
     Structure,
+    /// Context entries about layers a designer removed (design tools).
+    Context,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -57,6 +59,7 @@ pub fn empty_result(diagnostics: Vec<Diagnostic>) -> ImportResult {
     ImportResult {
         document: Document {
             weft: WEFT_VERSION.into(),
+            version: None,
             context: Vec::new(),
             fragments: Default::default(),
             root,
