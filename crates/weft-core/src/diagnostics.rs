@@ -165,6 +165,7 @@ codes! {
     W805 => Error, "Fragments use each other in a cycle.";
     W806 => Error, "Expanding the fragments exceeds the element or depth limit.";
     W807 => Error, "Parameter read where its type cannot go.";
+    W809 => Error, "Variant parameter or `<variant>` is misdeclared.";
 }
 
 impl Code {

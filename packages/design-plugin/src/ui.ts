@@ -3,7 +3,7 @@
 // serializes what the sandbox reads back. Each tool passes how messages travel. Replies are shown
 // as text, never as HTML: layer names and texts in them come from whatever file the plugin runs in.
 import { coreCatalog, loadTokens } from "@weft/catalog";
-import type { Diagnostic } from "@weft/core";
+import type { Diagnostic, Entry } from "@weft/core";
 import {
   buildRequest,
   exportRequest,
@@ -61,8 +61,11 @@ export function startUi(transport: Transport): void {
     element("status").textContent = text;
   };
   const describe = (d: Diagnostic) => `${d.severity} ${d.code}: ${d.message}`;
-  const showNotes = (items: readonly string[], keep = false) => {
-    const list = element("notes");
+  // The form of the readable comments in generated code: kind, status, who claims to have written it.
+  const note = (e: Entry) =>
+    `${e.kind}${e.status === undefined ? "" : ` ${e.status}`} (${e.by} ${e.name}): ${e.text}`;
+  const showList = (id: string, items: readonly string[], keep = false) => {
+    const list = element(id);
     if (!keep) list.replaceChildren();
     for (const text of items) {
       const li = document.createElement("li");
@@ -70,6 +73,7 @@ export function startUi(transport: Transport): void {
       list.append(li);
     }
   };
+  const showNotes = (items: readonly string[], keep = false) => showList("notes", items, keep);
 
   element<HTMLInputElement>("file").addEventListener("change", async (event) => {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -181,6 +185,8 @@ export function startUi(transport: Transport): void {
       const losses = file.losses.map((l) => `${l.kind} at ${l.path}: ${l.note}`);
       setStatus(losses.length === 0 ? "Exported." : `Exported with ${losses.length} losses.`);
       showNotes([...losses, ...file.diagnostics.map(describe)]);
+    } else if (reply.type === "context") {
+      showList("context", reply.entries.map(note));
     } else if (reply.type === "error") {
       setStatus(reply.message);
       showNotes((reply.diagnostics ?? []).map(describe));

@@ -457,6 +457,14 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "drop"
+              ],
+              "description": "Whether the context kept in a frame's plugin data enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,

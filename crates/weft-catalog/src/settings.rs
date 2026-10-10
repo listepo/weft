@@ -70,6 +70,7 @@ const SOURCE: &str = "Keep the canonical screen in a leading comment, so the imp
 const TYPESCRIPT: &str = "Write TSX with typed props instead of JSX.";
 const CONTEXT_EXPORT: &str = "Whether the source comment carries the screen's context (SPEC §2.3): `keep` or `strip`. The CLI's `--context` overrides it.";
 const KEEP_STRIP: Kind = Kind::OneOf(&["keep", "strip"]);
+const KEEP_DROP: Kind = Kind::OneOf(&["keep", "drop"]);
 
 const HTML_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
@@ -109,7 +110,17 @@ const SOURCE_IMPORT: &[Setting] = &[
     with_default(
         "context",
         "Whether context read back from a generated file's source comment enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team. The CLI's `--context` overrides it.",
-        Kind::OneOf(&["keep", "drop"]),
+        KEEP_DROP,
+        "\"keep\"",
+    ),
+];
+/// Frames read back with the context the plugin kept in the root frame's plugin data.
+const FIGMA_IMPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default(
+        "context",
+        "Whether the context kept in a frame's plugin data enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team.",
+        KEEP_DROP,
         "\"keep\"",
     ),
 ];
@@ -215,7 +226,7 @@ const IMPORT: &[Setting] = &[
     setting(
         "figma",
         "Frames of a Figma file, read through the REST API (the plugins' `figma-pull` script).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(FIGMA_IMPORT),
     ),
 ];
 

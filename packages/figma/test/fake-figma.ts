@@ -29,7 +29,8 @@ import type {
 let nextId = 1;
 const newId = () => `1:${nextId++}`;
 
-type Owner = { children: FakeNode[] };
+// What holds a layer: a page or a layer, both with plugin data, as the context panel reads it.
+type Owner = FakeBase & { children: FakeNode[] };
 
 export abstract class FakeBase {
   id = newId();

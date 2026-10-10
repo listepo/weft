@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, test } from "vitest";
 import { resolverDocument } from "../../../packages/design-tool/src/index.ts";
+import { contextMarkup } from "../../../packages/design-tool/test/corpus.ts";
 import { exampleModes } from "../../../packages/design-tool/test/modes.ts";
 import { buildPlugin } from "../build.ts";
 
@@ -61,6 +62,19 @@ describe("the plugin bundles", () => {
     assert.deepEqual(result.exported.notes, []);
     assert.equal(result.broken.status, "The markup has errors; nothing was built.");
     assert.ok(result.broken.notes > 0);
+  });
+
+  test("context survives the split, and the panel lists the built screen's own as text", () => {
+    const file = join(dist, "context.weft");
+    writeFileSync(file, contextMarkup);
+    const output = execFileSync(process.execPath, [harness, dist, file], { encoding: "utf8" });
+    const result = JSON.parse(output.trim().split("\n").at(-1) ?? "{}");
+    assert.equal(result.built.status, "Built.");
+    assert.deepEqual(result.context, [
+      "intent (human Ivan): Returning users sign in with email and password.",
+    ]);
+    assert.equal(result.exported.status, "Exported.");
+    assert.equal(result.exported.markup, contextMarkup);
   });
 
   test("a pasted resolver makes the file's modes, which export returns as a resolver", () => {

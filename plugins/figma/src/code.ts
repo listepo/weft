@@ -2,12 +2,17 @@
 // global to the handler in @weft/figma; parsing and serializing happen in the UI (`ui.ts`).
 import type { PluginAPI, SceneNode } from "@figma/plugin-typings/plugin-api-standalone.js";
 import { coreCatalog } from "@weft/catalog";
-import { handleRequest } from "@weft/figma";
+import { handleRequest, selectionContext } from "@weft/figma";
 
 declare const figma: PluginAPI;
 declare const __html__: string;
 
 figma.showUI(__html__, { width: 400, height: 560, themeColors: true });
+
+// The panel lists the selected layer's context entries; they never become layers.
+const showContext = () => figma.ui.postMessage(selectionContext(figma.currentPage.selection));
+figma.on("selectionchange", showContext);
+showContext();
 
 figma.ui.onmessage = async (message: unknown) => {
   const reply = await handleRequest(figma, figma.currentPage.selection, message, {
@@ -22,4 +27,5 @@ figma.ui.onmessage = async (message: unknown) => {
     }
   }
   figma.ui.postMessage(reply);
+  if (reply.type === "built") showContext();
 };
