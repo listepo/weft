@@ -44,7 +44,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T99 | todo | P3 | 1 | 0% | |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
 | T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
-| T103 | todo | P2 | 4 | 0% | |
+| T103 | in progress | P2 | 4 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -91,6 +91,18 @@ Draft pull request #47.
 A library catalog, one with a `prefix`, lists fragments named `<prefix>-…`. A fragment reaches the host only through its parameters. Committed files first. Resolving a fragment from an npm package waits on T17.3 and uses that lookup rather than a second one.
 
 Done when `examples/project` loads a library fragment, a fragment that reads host data or names an action literally is `W716`, and a name outside its owner is `W715`.
+
+Creator decisions (2026-10-10): build from committed files now; package lookup waits on T17.3 and reuses it. Library token references are checked against the consuming project's tokens (§11 question 4).
+
+Execution plan:
+
+1. `docs/versions-and-reuse-design.md`: record the decisions (status line, §11 questions 4 and 5).
+2. `SPEC.md` §5, §6.2 (`W715`, `W716`), §10.4, §10.7; `AGENT-SPEC.md` codes and one sentence; the MCP primer sentence.
+3. `crates/weft-catalog/src/project.rs`: a library's `fragments` member (at most 256, file names relative to the catalog file); ownership (`W715`) for library and `weft.json` fragments; each library fragment parsed against the core, its own kinds and those of its `requires` as they define them (before the project catalog merges), its own and required libraries' fragments, and the project's tokens; `W716` for `$.…` reads and literal actions. Library fragments join the merged catalog's `fragments` before the project's.
+4. `weft-core`: the codes, and a walk that finds a fragment's direct host reaches.
+5. MCP `weft_catalog`: a library fragment's line names its catalog and version.
+6. Tests: project cases in `packages/catalog/test/project-cases.ts` and the regenerated differential fixture; `examples/project` gets `acme-promo` in `acme-ui` and a screen that uses it.
+7. Verify with `moon run root:changed`.
 
 ### T8. Evaluation
 
