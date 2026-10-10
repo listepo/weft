@@ -76,6 +76,8 @@ test("a prefix makes a library: it says so, requires the core and keeps only its
   assert.deepEqual(Object.keys(result.catalog.requires ?? {}), ["weft-core"]);
   assert.equal(Object.hasOwn(result.catalog.components, "date-picker"), false);
   assert.ok(
-    result.losses.some((l) => l.kind === "kinds" && l.note.includes("outside the catalog's prefix")),
+    result.losses.some(
+      (l) => l.kind === "kinds" && l.note.includes("outside the catalog's prefix"),
+    ),
   );
 });
