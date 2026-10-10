@@ -1,5 +1,13 @@
 # Done
 
+### T103.1. Library fragments from packages
+
+A library catalog found as an npm package (T17.3) brings its fragments too: the package lookup reads the catalog file the package names and then the fragment files that catalog lists, relative to the catalog file and inside the package directory, and reads nothing else. It reuses the T17.3 lookup rather than a second one, and the rules, codes and checks T103 built for committed library catalogs (`W715`, `W716`, scoped validation) apply unchanged.
+
+Depends on T17.3. Done when a package entry in `catalog` whose catalog lists fragments loads them as a committed library does, with a test, and `SPEC.md` §10.4 says so.
+
+Done: a package entry's catalog reads its fragment files inside the package, relative to the catalog file, through the T17.3 package read; the CLI and Node package tests carry the example library's fragment, a fragment path that leaves the package is `W703`, and SPEC §10.4 says so.
+
 ### T103. Library fragments
 
 A library catalog, one with a `prefix`, lists fragments named `<prefix>-…`. A fragment reaches the host only through its parameters. Committed files first. Resolving a fragment from an npm package waits on T17.3 and uses that lookup rather than a second one (T103.1).

@@ -268,6 +268,9 @@ struct Entry {
     components: Object<String, Json>,
     /// A library's `fragments` member, entries not yet read.
     fragments: Object<String, Json>,
+    /// The name the reader was given for the catalog file, which its fragment files are
+    /// relative to: a project file name or a package read.
+    read: Option<String>,
 }
 
 /// A library with fragments, and the catalog they are checked against: the core and the kinds
@@ -277,6 +280,7 @@ struct Library {
     source: CatalogSource,
     requires: Vec<String>,
     fragments: Object<String, Json>,
+    read: Option<String>,
     scope: Catalog,
 }
 
@@ -435,6 +439,7 @@ fn library(
         source: entry.source.clone(),
         requires,
         fragments: entry.fragments.clone(),
+        read: entry.read.clone(),
         scope,
     })
 }
@@ -497,8 +502,13 @@ impl Loader<'_> {
     /// The text of a file the project names: `None` for a name it may not use (`W703`), and
     /// `Some(None)` for a file that cannot be read.
     fn file(&mut self, pointer: &str, name: &str) -> Option<Option<String>> {
+        self.read_file(pointer, name, is_project_file_name(name))
+    }
+
+    /// `file` for a name the caller has already judged.
+    fn read_file(&mut self, pointer: &str, name: &str, valid: bool) -> Option<Option<String>> {
         let read = self.options.read?;
-        if !is_project_file_name(name) {
+        if !valid {
             self.report(
                 Diagnostic::new(
                     Code::W703,
@@ -527,7 +537,7 @@ impl Loader<'_> {
         pointer: &str,
         package: &Json,
         field: &str,
-    ) -> Option<(Json, String)> {
+    ) -> Option<(Json, String, String)> {
         let read = self.options.read?;
         let at = format!("{pointer}/package");
         let Some(name) = package.as_str().filter(|n| is_package_name(n)) else {
@@ -592,7 +602,7 @@ impl Loader<'_> {
             Some(version) => format!("{name}@{version}"),
             None => name.to_owned(),
         };
-        Some((json, source))
+        Some((json, source, format!("{PACKAGE_READ}{name}/{file}")))
     }
 
     /// The project's `fragments` (SPEC §10.7): a name → file map, or name → markup in project
@@ -626,7 +636,7 @@ impl Loader<'_> {
     fn library_fragments(&mut self, libraries: &[Library], project: &Project) -> Map<Fragment> {
         let texts: Vec<_> = (libraries.iter())
             .map(|library| {
-                let dir = (library.source.source.as_deref())
+                let dir = (library.read.as_deref())
                     .and_then(|file| file.rsplit_once('/'))
                     .map_or(String::new(), |(dir, _)| format!("{dir}/"));
                 let pointer = format!("{}/fragments", library.at);
@@ -661,6 +671,19 @@ impl Loader<'_> {
             }
         }
         out
+    }
+
+    /// A fragment file relative to `dir`. A library from a package reads inside that package
+    /// (SPEC §10.2), so a package read is valid only under a directory the loader built from one;
+    /// the name a catalog gives can never start one, since project file names refuse `:`.
+    fn fragment_file(&mut self, pointer: &str, dir: &str, file: &str) -> Option<Option<String>> {
+        let name = format!("{dir}{file}");
+        let valid = if dir.starts_with(PACKAGE_READ) {
+            split_package_read(&name).is_some()
+        } else {
+            is_project_file_name(&name)
+        };
+        self.read_file(pointer, &name, valid)
     }
 
     /// The markup of each entry of a `fragments` member, with the pointer its problems take: a
@@ -702,7 +725,7 @@ impl Loader<'_> {
                     continue;
                 }
                 Some(markup) if self.options.read.is_none() => markup.to_owned(),
-                Some(file) => match self.file(&at, &format!("{dir}{file}")) {
+                Some(file) => match self.fragment_file(&at, dir, file) {
                     Some(Some(text)) => text,
                     Some(None) => {
                         let message = format!("The file {} cannot be read.", quote(file));
@@ -1011,28 +1034,26 @@ impl Loader<'_> {
             // One catalog alone keeps the pointers it always had.
             one => vec![(pointer, "\"catalog\"".to_owned(), one)],
         };
-        let base = self.read_catalog(String::new(), core, None)?;
+        let base = self.read_catalog(String::new(), core, None, None)?;
         let mut entries: Vec<Entry> = Vec::new();
         for (at, what, item) in listed {
             // Project content gives catalogs themselves, so only a project file names packages.
             let package = (self.options.read.is_some())
                 .then(|| item.as_object().filter(|o| o.len() == 1)?.get("package"))
                 .flatten();
-            let (found, source) = if let Some(package) = package {
-                let Some((found, source)) = self.package_file(&at, package, "catalog") else {
+            let (found, source, read) = if let Some(package) = package {
+                let Some((found, source, read)) = self.package_file(&at, package, "catalog") else {
                     continue;
                 };
-                (found, Some(source))
+                (found, Some(source), Some(read))
             } else {
                 let Some(found) = self.content(&at, item, &what) else {
                     continue;
                 };
-                (
-                    found,
-                    self.options.read.and(item.as_str()).map(str::to_owned),
-                )
+                let file = self.options.read.and(item.as_str()).map(str::to_owned);
+                (found, file.clone(), file)
             };
-            if let Some(entry) = self.read_catalog(at, &found, source)
+            if let Some(entry) = self.read_catalog(at, &found, source, read)
                 && self.claims(&entry, &entries, &base)
             {
                 entries.push(entry);
@@ -1090,6 +1111,7 @@ impl Loader<'_> {
         pointer: String,
         extension: &Json,
         source: Option<String>,
+        read: Option<String>,
     ) -> Option<Entry> {
         let text = |key: &str| extension.get(key).and_then(Json::as_str).map(str::to_owned);
         let ext = extension.as_object();
@@ -1164,6 +1186,7 @@ impl Loader<'_> {
             requires: required,
             components: entries.clone(),
             fragments: fragments.flatten().cloned().unwrap_or_default(),
+            read,
         })
     }
 

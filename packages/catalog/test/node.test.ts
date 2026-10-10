@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  cpSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -127,6 +128,8 @@ describe("readProject with a catalog package", () => {
       writeFileSync(join(pkg, "package.json"), '{"weft": {"catalog": "dist/weft.json"}}');
       const acme = readFileSync(join(example, "catalogs/acme-ui.catalog.json"), "utf8");
       writeFileSync(join(pkg, "dist/weft.json"), acme);
+      // The library's fragments travel with it, relative to its catalog file.
+      cpSync(join(example, "catalogs/fragments"), join(pkg, "dist/fragments"), { recursive: true });
       mkdirSync(join(root, "app/deep"), { recursive: true });
       writeFileSync(join(root, "app/deep/weft.json"), '{"catalog": [{"package": "@acme/ui"}]}');
       body(root, pkg);

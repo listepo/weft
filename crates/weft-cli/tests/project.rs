@@ -1284,8 +1284,9 @@ fn a_broken_fragment_file_is_a_diagnostic_of_the_project() {
     assert!(r.stdout.contains("W801"), "{}", r.stdout);
 }
 
-/// The example project in `<root>/app`, with `acme-ui` installed as the npm package `@acme/ui`
-/// in `<root>/node_modules`, above the project directory, as a workspace installs it.
+/// The example project in `<root>/app`, with `acme-ui` and its fragments installed as the npm
+/// package `@acme/ui` in `<root>/node_modules`, above the project directory, as a workspace
+/// installs it.
 struct Installed {
     root: PathBuf,
     app: Scratch,
@@ -1307,6 +1308,12 @@ impl Installed {
         std::fs::rename(
             app.join("catalogs/acme-ui.catalog.json"),
             package.join("dist/weft.json"),
+        )
+        .unwrap();
+        // The library's fragments travel with it, relative to its catalog file.
+        std::fs::rename(
+            app.join("catalogs/fragments"),
+            package.join("dist/fragments"),
         )
         .unwrap();
         let installed = Installed {
@@ -1362,4 +1369,21 @@ fn a_symlinked_package_loads_and_a_file_linked_out_of_it_is_not_read() {
     let r = run(&[&"validate", &p.app.path("screens/order.weft")]);
     assert!(r.stdout.contains("W704"), "{}", r.stdout);
     assert!(r.stdout.contains("#/catalog/0/package"), "{}", r.stdout);
+}
+
+#[test]
+fn a_package_fragment_outside_the_package_is_w703() {
+    let p = Installed::new("escape");
+    let catalog = p.root.join("node_modules/@acme/ui/dist/weft.json");
+    let mut json: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&catalog).unwrap()).unwrap();
+    json["fragments"]["acme-promo"] = serde_json::json!("../../../app/screens/order.weft");
+    std::fs::write(&catalog, json.to_string()).unwrap();
+    let r = run(&[&"validate", &p.app.path("screens/order.weft")]);
+    assert!(r.stdout.contains("W703"), "{}", r.stdout);
+    assert!(
+        r.stdout.contains("#/catalog/0/fragments/acme-promo"),
+        "{}",
+        r.stdout
+    );
 }
