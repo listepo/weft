@@ -61,6 +61,7 @@ pub fn empty_result(diagnostics: Vec<Diagnostic>) -> ImportResult {
             weft: WEFT_VERSION.into(),
             version: None,
             context: Vec::new(),
+            fragments: Default::default(),
             root,
         },
         losses: vec![Loss {

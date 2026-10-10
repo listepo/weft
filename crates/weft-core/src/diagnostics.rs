@@ -143,6 +143,7 @@ codes! {
     W510 => Error, "An added context entry reuses an id of the document.";
     W511 => Error, "A context patch names no context entry.";
     W512 => Error, "The host does not allow this context patch.";
+    W513 => Error, "add-fragment names an inline fragment the document already has.";
     W601 => Error, "Imported input cannot be read.";
     W602 => Warning, "Imported input exceeds an import limit.";
     W701 => Error, "Project file or one of its members has the wrong shape.";
@@ -166,6 +167,7 @@ codes! {
     W805 => Error, "Fragments use each other in a cycle.";
     W806 => Error, "Expanding the fragments exceeds the element or depth limit.";
     W807 => Error, "Parameter read where its type cannot go.";
+    W808 => Error, "Inline fragment misplaced or malformed.";
     W809 => Error, "Variant parameter or `<variant>` is misdeclared.";
     W810 => Error, "Declared version is lower than the changes require.";
 }

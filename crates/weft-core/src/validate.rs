@@ -6,7 +6,8 @@ use serde_json::Value as Json;
 
 use crate::context_check::check_entries;
 use crate::diagnostics::{Code, Diagnostic, Mode, Position, did_you_mean, one_of, quote};
-use crate::fragment::{FRAGMENT, OUTLET, PARAM, ParamKind, USE, VARIANT};
+use crate::fragment::{FRAGMENT, OUTLET, PARAM, ParamKind, USE, VARIANT, signature};
+use crate::inline;
 use crate::json::{JSON_DEPTH_LIMIT, js_number, js_round};
 use crate::model::{
     Catalog, Child, ComponentDef, Content, Document, Map, Node, PropDef, PropType, Value,
@@ -70,9 +71,23 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
     let Some(catalog) = options.catalog else {
         return vec![];
     };
+    let empty = Map::new();
+    // A fragment file does not have inline fragments; a member there is reported and ignored.
+    let inline = if inline::screen_fragments(document) {
+        &document.fragments
+    } else {
+        &empty
+    };
+    let sigs: Map<ComponentDef> = inline
+        .iter()
+        .filter(|(name, node)| inline::usable(name, node) && !catalog.fragments.contains_key(*name))
+        .map(|(name, node)| (name.clone(), signature(node)))
+        .collect();
     let mut v = Validator {
         catalog,
         options,
+        inline,
+        sigs,
         out: vec![],
         ids: IndexMap::new(),
         references: vec![],
@@ -80,6 +95,7 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
         params: Map::new(),
         outlets: vec![],
     };
+    v.report_inline(document);
     let root = &document.root;
     let root_path = format!("/{}", path_segment(&root.kind, root.id.as_deref(), None));
     let version_at = node_at(root, &root_path, Some("weft"));
@@ -99,7 +115,7 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
     }
 
     v.finish_references();
-    if !catalog.fragments.is_empty() {
+    if !catalog.fragments.is_empty() || !inline.is_empty() {
         // Each use was checked against its fragment above; only the bounds of the whole
         // expansion remain (SPEC §10.7).
         v.out
@@ -246,6 +262,10 @@ enum Category {
 struct Validator<'a> {
     catalog: &'a Catalog,
     options: &'a ValidateOptions<'a>,
+    /// Inline fragments of the screen being checked. Empty for a fragment file.
+    inline: &'a Map<Node>,
+    /// Signatures of the inline fragments that are part of the document.
+    sigs: Map<ComponentDef>,
     out: Vec<Diagnostic>,
     ids: IndexMap<String, (String, String)>,
     /// Literal values of props that name an element, with the kind they must name.
@@ -296,12 +316,98 @@ impl<'a> Validator<'a> {
     }
 
     /// What a node answers to: its component, or for a `<use>` its fragment's signature.
+    /// Inline fragments are tried first; a project fragment of the same name is the one kept.
     fn def_of(&self, node: &Node) -> Option<&'a ComponentDef> {
         let catalog: &'a Catalog = self.catalog;
         if node.kind == EACH {
             None
         } else {
             catalog.def_of(node)
+        }
+    }
+
+    /// The inline fragment a `<use>` names, owned so the visit can keep it beside `self`.
+    fn inline_sig(&self, node: &Node) -> Option<ComponentDef> {
+        if node.kind != USE {
+            return None;
+        }
+        let Some(Value::String(name)) = node.props.get("fragment") else {
+            return None;
+        };
+        if self.catalog.fragments.contains_key(name) {
+            return None;
+        }
+        self.sigs.get(name).cloned()
+    }
+
+    /// `W808` for inline fragments that are not part of the document, and a check of each one
+    /// that is, in its own id space so its ids may repeat the screen's.
+    fn report_inline(&mut self, document: &Document) {
+        if document.root.kind == FRAGMENT {
+            for name in document.fragments.keys() {
+                self.report(Diagnostic::new(
+                    Code::W808,
+                    format!("#/fragments/{name}"),
+                    "A fragment file cannot hold an inline fragment.",
+                    "a fragment of the project",
+                ));
+            }
+            return;
+        }
+        for (name, node) in &document.fragments {
+            let path = format!("#/fragments/{name}");
+            if self.catalog.fragments.contains_key(name) {
+                self.report(Diagnostic::new(
+                    Code::W808,
+                    path,
+                    format!("\"{name}\" is already a fragment of the project."),
+                    "a name the project does not use",
+                ));
+                continue;
+            }
+            if !inline::usable(name, node) {
+                self.report(Diagnostic::new(
+                    Code::W808,
+                    path,
+                    format!("Inline fragment \"{name}\" is not a <fragment name=\"…\">."),
+                    "<fragment name=\"…\"> with only label and version",
+                ));
+                continue;
+            }
+            let ids = std::mem::take(&mut self.ids);
+            let from = self.references.len();
+            self.in_fragment = false;
+            self.params.clear();
+            self.outlets.clear();
+            self.visit_fragment(node, &path);
+            let refs = self.references.split_off(from);
+            self.resolve_refs(refs);
+            self.ids = ids;
+            self.in_fragment = false;
+            self.params.clear();
+            self.outlets.clear();
+        }
+    }
+
+    fn resolve_refs(&mut self, refs: Vec<(String, String, At)>) {
+        for (value, target, at) in refs {
+            if self.ids.get(&value).map(|(kind, _)| kind.as_str()) != Some(target.as_str()) {
+                let ids: Vec<String> = self
+                    .ids
+                    .iter()
+                    .filter(|(_, (kind, _))| *kind == target)
+                    .map(|(id, _)| id.clone())
+                    .collect();
+                let d = diag(
+                    Code::W309,
+                    &at,
+                    format!("\"{value}\" is not the id of a <{target}>."),
+                    one_of(&ids),
+                )
+                .got(value.clone())
+                .hint_opt(did_you_mean(&value, &ids));
+                self.report(d);
+            }
         }
     }
 
@@ -764,7 +870,8 @@ impl<'a> Validator<'a> {
         if owner.is_some() && (kind == OUTLET || kind == PARAM || kind == VARIANT) {
             return self.visit_structural(node, path);
         }
-        let component = self.def_of(node);
+        let inline_sig = self.inline_sig(node);
+        let component = inline_sig.as_ref().or(self.def_of(node));
         let category = if kind == EACH {
             Category::Each
         } else if kind == USE {

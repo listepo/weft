@@ -1193,10 +1193,13 @@ pub fn build_document(top: &[Sem], options: BuildOptions<'_>) -> Built {
             "the input has no single main landmark; a screen was added as the root",
         );
     }
+    // Importers never emit an inline fragment: they cannot tell a repeated block from one
+    // definition, the same reason they never emit `<use>`.
     let document = canonicalize(&Document {
         weft: WEFT_VERSION.into(),
         version: None,
         context: Vec::new(),
+        fragments: Default::default(),
         root: node,
     });
     let mut diagnostics = ctx.diagnostics;

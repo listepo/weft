@@ -312,6 +312,19 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W807",
             r#"<param name="back" type="action"/><text id="a" text="{$back}"/>"#,
         ),
+        (
+            "W513",
+            Case::Patch(json!([
+                {"op": "add-fragment", "markup": "<fragment name=\"row\"><text id=\"t\">x</text></fragment>"},
+                {"op": "add-fragment", "markup": "<fragment name=\"row\"><text id=\"u\">y</text></fragment>"}
+            ])),
+        ),
+        (
+            "W808",
+            in_screen(
+                r#"<text id="t">x</text><fragment name="row"><text id="a">y</text></fragment>"#,
+            ),
+        ),
         fragment(
             "W809",
             r#"<param name="a" type="string" variant="true"/><text id="t">T</text>"#,

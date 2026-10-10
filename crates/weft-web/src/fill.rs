@@ -24,6 +24,7 @@ pub(crate) fn fill(document: &Document, catalog: &Catalog, data: &Json) -> Docum
         version: document.version.clone(),
         // The filled document is only ever shown, and end users never see context (SPEC §2.3).
         context: Vec::new(),
+        fragments: Default::default(),
         root: filler.node(&document.root, &scope, 0),
     }
 }

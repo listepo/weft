@@ -43,7 +43,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T98 | todo | P2 | 2 | 0% | |
 | T99 | todo | P3 | 1 | 0% | |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
-| T101 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
+| T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
 | T103 | todo | P2 | 4 | 0% | |
 
 ### T96. Too-deep documents: report, do not hide
@@ -568,3 +568,14 @@ Penpot installs a plugin only from the URL of its `manifest.json`, and plugins a
 3. Runner for the deploy build: GitHub-hosted `ubuntu-latest` or the gate's `xcode-27` runner?
 4. A repository has one Pages site and each deploy replaces it whole: should the deploy assemble a site now (an index page, room for docs or a `render-react` gallery)?
 5. Which icon should the plugin manager show?
+
+### T101. Inline fragments
+
+A screen can define a fragment in place, without a project. Approved design: `docs/versions-and-reuse-design.md` §4, and the inline-fragment rows of §7–§9. T100 owns `version` and the format bump to 0.3; T102 owns `<variant>`. This task is only inline fragments.
+
+**Plan.**
+- SPEC §3, §6.2, §7, §8 and §10.7, and AGENT-SPEC, in the same change. Note that the 0.3 bump belongs to T100; do not add a second bump. Primer stays consistent with AGENT-SPEC.
+- Rust core: `Document.fragments`; parse `<fragment name>` as a direct child of `<screen>` after `<context>` and before the body (`W808` leaves a bad one out); uses resolve inline fragments, then the project's; cycles stay `W805` and limits `W806`.
+- Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
+- `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
+- Verify with `moon run root:changed`.

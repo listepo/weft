@@ -4,7 +4,8 @@
 use super::{At, Owner, Validator, diag, node_at};
 use crate::diagnostics::{Code, did_you_mean, one_of, quote};
 use crate::fragment::{FRAGMENT, OUTLET, PARAM, USE, VARIANT};
-use crate::model::{Catalog, Node, Value};
+use crate::inline;
+use crate::model::{Catalog, Map, Node, Value};
 use crate::rules::EACH;
 
 impl<'a> Validator<'a> {
@@ -12,9 +13,9 @@ impl<'a> Validator<'a> {
         let at = node_at(node, path, Some(FRAGMENT));
         let d = match node.props.get(FRAGMENT) {
             Some(Value::String(name)) => {
-                let names = self.catalog.fragments.keys();
+                let names = inline::candidate_names(self.inline, self.catalog);
                 let message = format!("No fragment \"{name}\" in this project.");
-                let hint = did_you_mean(name, names.clone());
+                let hint = did_you_mean(name, names.iter().copied());
                 diag(Code::W801, &at, message, one_of(names))
                     .got(name.clone())
                     .hint_opt(hint)
@@ -35,7 +36,8 @@ impl<'a> Validator<'a> {
 
     /// An attribute, action or slot of a `<use>` that its fragment does not declare.
     pub(super) fn undeclared(&mut self, node: &Node, at: &At, name: &str, what: &str) {
-        let Some(signature) = self.catalog.def_of(node) else {
+        let owned = self.inline_sig(node);
+        let Some(signature) = owned.as_ref().or(self.def_of(node)) else {
             return;
         };
         let known: Vec<String> = match what {
@@ -64,8 +66,9 @@ impl<'a> Validator<'a> {
     /// The containment rules for what a use places where it stands.
     pub(super) fn check_placed(&mut self, node: &Node, at: &At, owner: &Owner, where_: &str) {
         let catalog: &'a Catalog = self.catalog;
+        let inline = self.inline;
         let mut placed = Vec::new();
-        placed_nodes(catalog, node, &mut vec![], &mut placed);
+        placed_nodes(catalog, inline, node, &mut vec![], &mut placed);
         let mut seen: Vec<&str> = Vec::new();
         for child in placed {
             let kind = child.kind.as_str();
@@ -110,21 +113,21 @@ impl<'a> Validator<'a> {
 /// followed, each fragment once, so that a cycle cannot loop.
 fn placed_nodes<'a>(
     catalog: &'a Catalog,
+    inline: &'a Map<Node>,
     node: &Node,
-    seen: &mut Vec<&'a str>,
+    seen: &mut Vec<String>,
     out: &mut Vec<&'a Node>,
 ) {
     let Some(Value::String(name)) = node.props.get(FRAGMENT) else {
         return;
     };
-    let Some((name, fragment)) = catalog.fragments.get_key_value(name) else {
+    let Some(root) = inline::resolve(inline, catalog, name) else {
         return;
     };
-    if seen.contains(&name.as_str()) {
+    if seen.iter().any(|s| s == name) {
         return;
     }
-    seen.push(name);
-    let root = &fragment.document.root;
+    seen.push(name.clone());
     // The chosen variant's elements answer to where the use stands; the others do not.
     let top = crate::fragment::placed_children(root, node);
     let mut stack: Vec<&'a Node> = top.iter().rev().filter_map(|c| c.as_node()).collect();
@@ -133,7 +136,7 @@ fn placed_nodes<'a>(
             PARAM | OUTLET => {}
             VARIANT => stack.extend(child.children.iter().rev().filter_map(|c| c.as_node())),
             EACH => stack.extend(child.children.iter().rev().filter_map(|c| c.as_node())),
-            USE => placed_nodes(catalog, child, seen, out),
+            USE => placed_nodes(catalog, inline, child, seen, out),
             _ => out.push(child),
         }
     }

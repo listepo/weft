@@ -284,11 +284,18 @@ fn context(v: Option<&Json>, path: Path<'_>, issues: &mut Vec<Issue>) {
     array(v, path, issues, entry);
 }
 
+fn fragments(v: Option<&Json>, path: Path<'_>, issues: &mut Vec<Issue>) {
+    if v.is_some() {
+        record(v, path, issues, node);
+    }
+}
+
 /// Issues of `DocumentSchema`, in zod's order.
 pub fn document_issues(v: &Json) -> Vec<Issue> {
     let mut issues = Vec::new();
     let block = optional(context);
     let doc_version = optional(string);
+    let inline = optional(fragments);
     strict_object(
         Some(v),
         &[],
@@ -296,6 +303,7 @@ pub fn document_issues(v: &Json) -> Vec<Issue> {
             ("weft", &string),
             ("version", &doc_version),
             ("context", &block),
+            ("fragments", &inline),
             ("root", &node),
         ],
         &mut issues,
@@ -303,7 +311,7 @@ pub fn document_issues(v: &Json) -> Vec<Issue> {
     issues
 }
 
-const OPS: [&str; 9] = [
+const OPS: [&str; 11] = [
     "set",
     "insert",
     "remove",
@@ -312,6 +320,8 @@ const OPS: [&str; 9] = [
     "set-context",
     "resolve-context",
     "remove-context",
+    "add-fragment",
+    "remove-fragment",
     "set-version",
 ];
 const FIELDS: [&str; 3] = ["text", "kind", "for"];
@@ -370,28 +380,35 @@ pub fn patch_issues(v: &Json) -> Vec<Issue> {
         }
     };
     let slot = optional(string);
+    let fragment = optional(string);
     let fields: Vec<Field<'_>> = match op {
         "set" => vec![
             ("op", &nothing),
             ("id", &string),
+            ("fragment", &fragment),
             ("prop", &string),
             ("value", &nullable_value),
         ],
         "insert" => vec![
             ("op", &nothing),
             ("parent", &string),
+            ("fragment", &fragment),
             ("slot", &slot),
             ("index", &index),
             ("markup", &string),
         ],
-        "remove" | "resolve-context" | "remove-context" => vec![("op", &nothing), ("id", &string)],
+        "remove" => vec![("op", &nothing), ("id", &string), ("fragment", &fragment)],
+        "resolve-context" | "remove-context" => vec![("op", &nothing), ("id", &string)],
         "move" => vec![
             ("op", &nothing),
             ("id", &string),
+            ("fragment", &fragment),
             ("parent", &string),
             ("slot", &slot),
             ("index", &index),
         ],
+        "add-fragment" => vec![("op", &nothing), ("markup", &string)],
+        "remove-fragment" => vec![("op", &nothing), ("name", &string)],
         "add-context" => vec![("op", &nothing), ("entry", &entry)],
         "set-version" => vec![("op", &nothing), ("value", &nullable_string)],
         _ => vec![
@@ -528,6 +545,11 @@ pub fn to_document(v: &Json) -> Document {
             .and_then(Json::as_array)
             .map(|list| list.iter().map(to_entry).collect())
             .unwrap_or_default(),
+        fragments: v
+            .get("fragments")
+            .and_then(Json::as_object)
+            .map(|m| m.iter().map(|(k, n)| (k.clone(), to_node(n))).collect())
+            .unwrap_or_default(),
         root: v.get("root").map(to_node).unwrap_or_default(),
     }
 }
@@ -607,7 +629,7 @@ mod tests {
             messages(patch_issues(&json!({"op": "explode"}))),
             [(
                 "op".into(),
-                "Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context' | 'set-version'".into()
+                "Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context' | 'add-fragment' | 'remove-fragment' | 'set-version'".into()
             )]
         );
         assert_eq!(

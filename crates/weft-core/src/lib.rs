@@ -12,6 +12,7 @@ mod diagnostics;
 mod expand;
 mod explain;
 pub mod fragment;
+mod inline;
 mod json;
 mod model;
 mod parse;

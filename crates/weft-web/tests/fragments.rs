@@ -46,6 +46,26 @@ fn the_static_page_draws_the_expansion() {
 }
 
 #[test]
+fn an_inline_fragment_is_its_own_component() {
+    let catalog = core_catalog().unwrap();
+    let markup = r#"<screen id="s" weft="0.2"><fragment name="price-row"><param name="label" type="string"/><stack id="row"><text id="name" text="{$label}"/></stack></fragment><use id="sub" fragment="price-row" label="Subtotal"/></screen>"#;
+    let screen = document(markup, &catalog);
+    let json = serde_json::to_value(&screen).unwrap();
+    let options = JsxOptions {
+        catalog: &catalog,
+        component_name: None,
+        framework: Framework::React,
+        typescript: false,
+        source: false,
+    };
+    let jsx = to_jsx(&json, &options).unwrap();
+    assert!(jsx.contains("function PriceRow("), "{jsx}");
+    assert!(jsx.contains("<PriceRow "), "{jsx}");
+    assert!(jsx.contains("Subtotal"), "{jsx}");
+    assert!(jsx.contains("sub/row") || jsx.contains("\"sub\""), "{jsx}");
+}
+
+#[test]
 fn the_components_draw_the_expansion() {
     let (catalog, screen) = setup();
     let json = serde_json::to_value(&screen).unwrap();

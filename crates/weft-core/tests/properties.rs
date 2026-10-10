@@ -596,7 +596,7 @@ proptest! {
         let doc = common::document(&markup);
         let Some(weft_core::Child::Node(first)) = doc.root.children.first() else { return Ok(()); };
         let fragment = {
-            let single = Document { weft: "0.1".into(), version: None, context: Vec::new(), root: {
+            let single = Document { weft: "0.1".into(), version: None, context: Vec::new(), fragments: Default::default(), root: {
                 let mut r = doc.root.clone();
                 r.children = vec![weft_core::Child::Node(first.clone())];
                 r

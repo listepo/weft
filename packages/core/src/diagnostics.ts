@@ -105,6 +105,10 @@ export const DIAGNOSTIC_CODES = {
   W510: { severity: "error", summary: "An added context entry reuses an id of the document." },
   W511: { severity: "error", summary: "A context patch names no context entry." },
   W512: { severity: "error", summary: "The host does not allow this context patch." },
+  W513: {
+    severity: "error",
+    summary: "add-fragment names an inline fragment the document already has.",
+  },
 
   W601: { severity: "error", summary: "Imported input cannot be read." },
   W602: { severity: "warning", summary: "Imported input exceeds an import limit." },
@@ -139,6 +143,7 @@ export const DIAGNOSTIC_CODES = {
     summary: "Expanding the fragments exceeds the element or depth limit.",
   },
   W807: { severity: "error", summary: "Parameter read where its type cannot go." },
+  W808: { severity: "error", summary: "Inline fragment misplaced or malformed." },
   W809: { severity: "error", summary: "Variant parameter or `<variant>` is misdeclared." },
   W810: {
     severity: "error",

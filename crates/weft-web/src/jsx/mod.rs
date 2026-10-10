@@ -105,6 +105,9 @@ pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, JsxEr
         }
     }
     let mut g = Gen::new(options.catalog, options.framework, options.typescript);
+    if let Some(map) = document.get("fragments").and_then(Json::as_object) {
+        g.inline_names = map.keys().cloned().collect();
+    }
     // Lit's templates are strings, where a comment would reach the DOM.
     if options.framework != Framework::Lit {
         g.notes = notes(document);
@@ -136,7 +139,8 @@ pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, JsxEr
         }
         body = g.root_body(c, hidden);
     }
-    let module = g.module(name, &body);
+    let functions = g.inline_functions(document);
+    let module = g.module(name, &body, &functions);
     match options
         .source
         .then(|| source_comment(document, options, name))
@@ -187,7 +191,10 @@ fn expanded(document: &Json, catalog: &weft_core::Catalog) -> Option<Json> {
     if weft_core::has_errors(&weft_core::validate(document, &options)) {
         return None;
     }
-    let result = weft_core::expand(&weft_core::to_document(document), catalog);
+    let mut doc = weft_core::to_document(document);
+    // Inline fragments are components of their own; only project fragments expand here.
+    doc.fragments.clear();
+    let result = weft_core::expand(&doc, catalog);
     serde_json::to_value(&result.document).ok()
 }
 
@@ -373,6 +380,8 @@ struct Var {
 struct Scope {
     vars: HashMap<String, Var>,
     suffix: Str,
+    /// Prepended to every id, so an inline fragment's elements keep the use's instance path.
+    prefix: Str,
     item: Option<Str>,
     loops: usize,
 }
@@ -494,6 +503,10 @@ pub(crate) struct Gen<'a> {
     ts: bool,
     used: HashSet<&'static str>,
     fragment: bool,
+    /// Names of the screen's inline fragments, drawn as components rather than expanded.
+    inline_names: HashSet<String>,
+    /// True while the body of an inline-fragment component is being printed.
+    in_inline: bool,
     /// SolidJS imports, by module.
     solid: BTreeSet<&'static str>,
     solid_web: BTreeSet<&'static str>,
@@ -511,6 +524,8 @@ impl<'a> Gen<'a> {
             ts,
             used: HashSet::new(),
             fragment: false,
+            inline_names: HashSet::new(),
+            in_inline: false,
             solid: BTreeSet::new(),
             solid_web: BTreeSet::new(),
             lit_uses: lit::Uses::default(),
@@ -941,6 +956,7 @@ impl<'a> Gen<'a> {
         let inner = Rc::new(Scope {
             vars,
             suffix,
+            prefix: scope.prefix.clone(),
             item: Some(path),
             loops: scope.loops + 1,
         });
@@ -963,13 +979,11 @@ impl<'a> Gen<'a> {
         depth: usize,
     ) -> N<'a> {
         let doc_id = raw.get("id").and_then(Json::as_str).unwrap_or("");
-        let id = if doc_id.is_empty() {
-            Vec::new()
-        } else {
-            let mut id = vec![s(doc_id)];
-            id.extend(scope.suffix.iter().cloned());
-            id
-        };
+        let mut id = scope.prefix.clone();
+        if !doc_id.is_empty() {
+            id.push(s(doc_id));
+        }
+        id.extend(scope.suffix.iter().cloned());
         N {
             kind,
             def: self.catalog.components.get(kind),
@@ -1294,6 +1308,12 @@ impl<'a> Gen<'a> {
 
     fn fire(&mut self, n: &N<'a>, event: &str) -> Option<String> {
         let action = n.event(event)?;
+        // `{$back}` in a fragment body is the action parameter, not an action name.
+        let action_js = action
+            .strip_prefix("{$")
+            .and_then(|rest| rest.strip_suffix('}'))
+            .and_then(|name| n.scope.vars.get(name).map(|v| v.ident.clone()))
+            .unwrap_or_else(|| quote(action));
         let item = n
             .scope
             .item
@@ -1305,7 +1325,7 @@ impl<'a> Gen<'a> {
             "{act}({}, {{ id: {}, action: {}{item} }})",
             self.actions_ident(),
             str_js(&n.id),
-            quote(action)
+            action_js
         ))
     }
 
@@ -1376,6 +1396,14 @@ impl<'a> Gen<'a> {
 
     #[inline(never)]
     fn render_kind(&mut self, n: &Rc<N<'a>>, ctx: &Ctx<'a>) -> Option<C<'a>> {
+        if let Some(call) = self.inline_use(n, ctx) {
+            return Some(call);
+        }
+        if n.kind == "outlet" {
+            let name = n.raw("name").and_then(Json::as_str).unwrap_or("");
+            let base = if self.solid() { "props.slots" } else { "slots" };
+            return Some(C::Code(Code::lit(format!("{base}?.{name}"))));
+        }
         if n.def.is_none() {
             return Some(self.fallback(n, ctx));
         }
@@ -2742,9 +2770,187 @@ impl<'a> Gen<'a> {
         }
     }
 
-    fn module(&self, name: &str, body: &str) -> String {
+    /// One function per inline fragment, in name order, printed before the screen component.
+    fn inline_functions(&mut self, document: &'a Json) -> String {
+        let Some(map) = document.get("fragments").and_then(Json::as_object) else {
+            return String::new();
+        };
+        let mut names: Vec<&String> = map.keys().collect();
+        names.sort_by(|a, b| compare_utf16(a, b));
+        let mut out = String::new();
+        for name in names {
+            let Some(node) = map.get(name).and_then(Json::as_object) else {
+                continue;
+            };
+            out.push_str(&self.inline_function(name, node));
+            out.push('\n');
+        }
+        out
+    }
+
+    fn inline_function(&mut self, name: &str, node: &'a Map<String, Json>) -> String {
+        let params_base = if self.solid() {
+            "props.params"
+        } else {
+            "params"
+        };
+        let id_base = if self.solid() { "props.id" } else { "id" };
+        let mut vars = HashMap::new();
+        let children = node.get("children").and_then(Json::as_array);
+        let mut body_at = 0;
+        if let Some(items) = children {
+            for child in items {
+                let Some(obj) = child.as_object() else { break };
+                if obj.get("kind").and_then(Json::as_str) != Some("param") {
+                    break;
+                }
+                body_at += 1;
+                let props = obj.get("props");
+                let Some(pname) = props.and_then(|p| p.get("name")).and_then(Json::as_str) else {
+                    continue;
+                };
+                if props.and_then(|p| p.get("type")).and_then(Json::as_str) == Some("slot") {
+                    continue;
+                }
+                vars.insert(
+                    pname.to_owned(),
+                    Var {
+                        ident: format!("{params_base}.{pname}"),
+                        path: Vec::new(),
+                    },
+                );
+            }
+        }
+        let scope = Rc::new(Scope {
+            vars,
+            prefix: vec![js(id_base), s("/")],
+            ..Scope::default()
+        });
+        let items = children.map(|list| &list[body_at..]).unwrap_or(&[]);
+        self.in_inline = true;
+        let pieces = self.pieces_of(items, &scope, 0);
+        let kids = self.kids(&pieces, &Ctx::default(), None);
+        self.in_inline = false;
+        let rendered = match kids.len() {
+            0 => C::Code(Code::lit("null")),
+            1 => kids
+                .into_iter()
+                .next()
+                .unwrap_or_else(|| C::Code(Code::lit("null"))),
+            _ => C::J(el("", vec![], kids)),
+        };
+        let body = self.expr_of(&rendered, "  ");
+        let fname = component_name(name);
+        format!(
+            "function {fname}({}) {{\n  return {body};\n}}\n",
+            self.inline_head()
+        )
+    }
+
+    fn inline_head(&self) -> String {
+        let typed = "WeftProps & { params?: any; slots?: any; id?: string }";
+        if self.solid() {
+            if self.ts {
+                format!("props: {typed}")
+            } else {
+                "props".to_owned()
+            }
+        } else if self.ts {
+            format!("{{ data, actions, onChange, params, slots, id }}: {typed}")
+        } else {
+            "{ data, actions, onChange, params, slots, id }".to_owned()
+        }
+    }
+
+    /// A `<use>` of an inline fragment, as a call of the component `inline_function` prints.
+    fn inline_use(&mut self, n: &Rc<N<'a>>, ctx: &Ctx<'a>) -> Option<C<'a>> {
+        if n.kind != "use" {
+            return None;
+        }
+        let name = n.raw("fragment")?.as_str()?;
+        if !self.inline_names.contains(name) {
+            return None;
+        }
+        let fname = component_name(name);
+        let id = self.use_id_expr(n);
+        let params = self.params_object(n);
+        let slots = self.slots_object(n, ctx);
         if self.lit() {
-            return self.lit_module(name, body);
+            let data = self.data_ident();
+            let actions = self.actions_ident();
+            let on_change = self.on_change_ident();
+            return Some(C::Code(Code::lit(format!(
+                "{fname}({{ data: {data}, actions: {actions}, onChange: {on_change}, id: {id}, params: {params}, slots: {slots} }})"
+            ))));
+        }
+        let attrs = vec![
+            attr_js("data", self.data_ident()),
+            attr_js("actions", self.actions_ident()),
+            attr_js("onChange", self.on_change_ident()),
+            attr_js("id", id),
+            attr_js("params", params),
+            attr_js("slots", slots),
+        ];
+        Some(C::J(el(&fname, attrs, vec![])))
+    }
+
+    fn use_id_expr(&self, n: &N<'a>) -> String {
+        if self.in_inline {
+            let base = if self.solid() { "props.id" } else { "id" };
+            format!("{base} + {}", quote(&format!("/{}", n.doc_id)))
+        } else {
+            quote(n.doc_id)
+        }
+    }
+
+    fn params_object(&mut self, n: &N<'a>) -> String {
+        let mut parts = Vec::new();
+        if let Some(props) = n.props {
+            let mut keys: Vec<&String> =
+                props.keys().filter(|k| k.as_str() != "fragment").collect();
+            keys.sort_by(|a, b| compare_utf16(a, b));
+            for key in keys {
+                let (value, _) = self.resolve(props.get(key), &n.scope);
+                parts.push(format!("{key}: {}", value.js));
+            }
+        }
+        if let Some(on) = n.on {
+            let mut events: Vec<&String> = on.keys().collect();
+            events.sort_by(|a, b| compare_utf16(a, b));
+            for event in events {
+                let action = on.get(event).and_then(Json::as_str).unwrap_or("");
+                parts.push(format!("{event}: {}", quote(action)));
+            }
+        }
+        format!("{{ {} }}", parts.join(", "))
+    }
+
+    fn slots_object(&mut self, n: &N<'a>, ctx: &Ctx<'a>) -> String {
+        let Some(slots) = n.slots else {
+            return "{}".to_owned();
+        };
+        let mut names: Vec<&String> = slots.keys().collect();
+        names.sort_by(|a, b| compare_utf16(a, b));
+        let mut parts = Vec::new();
+        for name in names {
+            let pieces = self.pieces(slots.get(name), &n.scope, n.depth + 1);
+            let kids = self.kids(&pieces, ctx, None);
+            let rendered = match kids.len() {
+                0 => C::Code(Code::lit("null")),
+                1 => kids
+                    .into_iter()
+                    .next()
+                    .unwrap_or_else(|| C::Code(Code::lit("null"))),
+                _ => C::J(el("", vec![], kids)),
+            };
+            parts.push(format!("{name}: {}", self.expr_of(&rendered, "")));
+        }
+        format!("{{ {} }}", parts.join(", "))
+    }
+
+    fn module(&self, name: &str, body: &str, functions: &str) -> String {
+        if self.lit() {
+            return self.lit_module(name, body, functions);
         }
         let mut out = String::new();
         if self.solid() {
@@ -2783,6 +2989,12 @@ impl<'a> Gen<'a> {
             out.push_str(if self.ts { h.ts } else { h.js });
             out.push_str("\n\n");
         }
+        if !functions.is_empty() {
+            out.push_str(functions);
+            if !functions.ends_with('\n') {
+                out.push('\n');
+            }
+        }
         let params = match (self.solid(), self.ts) {
             (true, true) => "props: WeftProps",
             (true, false) => "props",
@@ -2813,6 +3025,27 @@ type WeftKey = {
   preventDefault(): void;
 };
 ";
+
+/// `price-row` → `PriceRow`, a component name the JSX targets accept.
+fn component_name(name: &str) -> String {
+    let mut out = String::new();
+    let mut upper = true;
+    for c in name.chars() {
+        if c == '-' {
+            upper = true;
+        } else if upper {
+            out.extend(c.to_uppercase());
+            upper = false;
+        } else {
+            out.push(c);
+        }
+    }
+    if out.is_empty() {
+        "Fragment".to_owned()
+    } else {
+        out
+    }
+}
 
 /// `(() => { const …; return <…>; })()`, for elements that need values computed once.
 fn block<'a>(lines: Vec<Code<'a>>, result: C<'a>) -> C<'a> {

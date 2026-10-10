@@ -172,7 +172,7 @@ impl<'a> Gen<'a> {
         }
     }
 
-    pub(super) fn lit_module(&self, name: &str, body: &str) -> String {
+    pub(super) fn lit_module(&self, name: &str, body: &str, functions: &str) -> String {
         let uses = &self.lit_uses;
         let mut out = String::new();
         let mut names = vec!["LitElement"];
@@ -196,6 +196,10 @@ impl<'a> Gen<'a> {
         for h in RUNTIME.iter().filter(|h| self.used.contains(h.name)) {
             out.push_str(h.js);
             out.push_str("\n\n");
+        }
+        if !functions.is_empty() {
+            out.push_str(functions);
+            out.push('\n');
         }
         let tag = element_name(name);
         out.push_str(&format!(

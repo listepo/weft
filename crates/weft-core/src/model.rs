@@ -123,6 +123,9 @@ pub struct Document {
     /// The `<context>` block (SPEC §2.3), in written order.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub context: Vec<Entry>,
+    /// Inline fragments of a screen, by name (SPEC §10.7). Empty on a fragment file.
+    #[serde(default, skip_serializing_if = "Map::is_empty")]
+    pub fragments: Map<Node>,
     pub root: Node,
 }
 

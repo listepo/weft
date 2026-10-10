@@ -149,6 +149,7 @@ type Document = {
   weft: "0.3";                       // the root element's `weft` attribute
   version?: string;                  // the root's `version` attribute: MAJOR.MINOR.PATCH
   context?: Entry[];                 // the `<context>` block (§2.3), in written order
+  fragments?: Record<string, Node>; // inline fragments (§10.7), by name
   root: Node;
 };
 
@@ -182,13 +183,14 @@ type Value =
 Canonical form rules, so that equal documents are byte-equal:
 
 - Object keys in the order shown above; `props`, `on` and `slots` keys sorted lexicographically by UTF-16 code unit.
-- Empty `props`, `on`, `slots`, `children` and empty slot lists are omitted, and so are an empty `context` and the absent members of an entry.
+- Empty `props`, `on`, `slots`, `children` and empty slot lists are omitted, and so are an empty `context`, an empty `fragments` and the absent members of an entry.
 - `context` keeps the order the entries were written in; it is not sorted. Entry text is whitespace-normalized like text children. The JSON shape check reads every entry member as a string, so a wrong value is a validation diagnostic (`W203`, `W227`) rather than `W200`.
+- `fragments` is a map from an inline fragment's name to its node (kind `fragment`, `label` and `version` in `props`, parameters and body in `children`). Keys sort like every other object key. Markup writes the fragments after the `<context>` block and before the body, sorted by name.
 - Text children are whitespace-normalized as in §2, and adjacent text children are joined with one space. `-0` is written `0`.
 - Props whose value equals the catalog default are kept as written (no default elision).
 - The `weft` attribute of the root element is `Document.weft` and never appears in the root's `props`. The optional `version` attribute of the root `<screen>` or of the root `<fragment>` of a fragment file is `Document.version` and never appears in the root's `props`. It is a literal `MAJOR.MINOR.PATCH` with no leading zeros, no pre-release and no build metadata, the form a catalog's `version` already has (§5). A binding, a token reference or anything else is `W230`. In markup it sorts with the other attributes, as `weft` does.
 - The JSON text is indented by two spaces and ends with a newline.
-- Markup serialization writes attributes as: `id`, then props sorted (the root's `weft` sorts with them), then `on-*` sorted; two-space indentation; named slots after default-slot children, sorted by name. The root writes the `<context>` block before its children, one entry per line with `id` first and the other attributes sorted, the text as the entry's content; a document without context is written as if the block did not exist. An element with no content is self-closing; an element whose only content is one text child is written on one line; otherwise every child goes on its own line. The text ends with a newline.
+- Markup serialization writes attributes as: `id`, then props sorted (the root's `weft` sorts with them), then `on-*` sorted; two-space indentation; named slots after default-slot children, sorted by name. The root writes the `<context>` block before its children, one entry per line with `id` first and the other attributes sorted, the text as the entry's content; a document without context is written as if the block did not exist. Inline fragments are written next, each as `<fragment name="…">` with `name` sorted among its attributes, then the body. An element with no content is self-closing; an element whose only content is one text child is written on one line; otherwise every child goes on its own line. The text ends with a newline.
 - Escaping: in attribute values `&`, `<`, `"`, tab, LF and CR are written as references; in text `&`, `<` and `>` are. No other references are written.
 
 Literal typing needs the catalog: `level="2"` is the number `2` only because `heading.level` is declared a number. For extension elements and unknown attributes, literals stay strings.
@@ -216,7 +218,7 @@ Helper entries (`Id`, `Binding`, `NegatableBinding`, `Token`, `Action`, `Node`) 
 
 The schema leaves out what it cannot express, and the validator still checks it: unique ids (`W301`), loop variables in scope and not shadowed (`W305`, `W311`), `references` (`W309`), text given both as content and as `text` (`W310`), a submit button outside a `form` (`W313`), the asset paths of a `model` (`W317`), a reference inside a literal (`W213`) and characters XML cannot carry (`W221`), whose patterns would need look-around or ranges beyond the Basic Multilingual Plane that structured-output modes do not reliably support. It describes the catalog only, so the project's tokens, actions and data schema (`W306`–`W308`, `W315`, `W316`) are not narrowed into it.
 
-It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with four exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for; it admits no `state` on a kind that declares no states, where validation lets a bound one through; it admits no `context` (§2.3), which describes no part of the screen a writer builds; and it admits no `<use>` (§10.7), whose parameters belong to the project's fragments rather than to the catalog. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
+It never rejects a canonical document that strict validation (§8) accepts against the same catalog, with five exceptions: it admits no extension (`x-`) elements or attributes, which a constrained writer has no use for; it admits no `state` on a kind that declares no states, where validation lets a bound one through; it admits no `context` (§2.3), which describes no part of the screen a writer builds; it admits no `<use>` (§10.7), whose parameters belong to the project's fragments rather than to the catalog; and it admits no inline `fragments`, for the same reason. Equal catalogs give byte-equal schemas: `$defs` are sorted by name, the members of `props`, `on` and `slots` as canonical JSON sorts keys, and node members follow canonical order, so a decoder that writes members in schema order writes canonical key order.
 
 `weft schema` prints the schema of the project's catalog (or of `--catalog`) indented, or writes it as `document.schema.json` (§10.6); `documentSchema` of `@weft/core/document-schema` and the MCP tool `weft_schema` return the same schema as compact JSON text, byte for byte what the generator writes. The schema of §3 that `documentJsonSchema()` of `@weft/core` returns is a different one: it knows no catalog and admits any kind and any prop.
 
@@ -507,6 +509,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W510 | `add-context` uses an id that an element or entry already has. The hint suggests a free one. |
 | W511 | `set-context`, `resolve-context` or `remove-context` names an id that no entry has. The hint names the nearest entry id, or says that the id is an element's. |
 | W512 | A context patch the host does not allow: `add-context` whose `by` or `name` differs from the host's `author`, or any context patch when the host made context read-only. |
+| W513 | `add-fragment` names an inline fragment the document already has (§10.7). |
 | W601 | Imported input cannot be read: a snapshot that is neither Playwright aria snapshot YAML nor an accessibility tree, HTML that is not a string, or a catalog the importer cannot map with. |
 | W602 | Imported input exceeds an import limit (length, element count or nesting depth); the rest is not imported. |
 | W701 | Project file is not JSON or not an object, or a member or setting has the wrong type (§10.2, §10.6). |
@@ -530,6 +533,7 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W805 | Fragments use each other in a cycle; the use that closes it expands to nothing (§10.7). |
 | W806 | Expanding the fragments gives more than 10,000 elements or nests deeper than 256 levels (§10.7). |
 | W807 | Parameter read where its type cannot go: an action or slot parameter in a prop, a value parameter in `on-*`, a read with more after the name (§10.7). |
+| W808 | Inline `<fragment>` misplaced or malformed: not a direct child of `<screen>`, after the body, no valid `name`, another attribute (`weft` included), a duplicate name, a name a project fragment already has, or inside a fragment file. That fragment is left out (§10.7). |
 | W809 | Variant misdeclared: `variant` on a parameter that is not an enum or on a second one, `<variant>` without a variant parameter or outside a fragment, a value covered twice or not at all, a body beside the variants, another attribute (§10.7). |
 | W810 | Reported by `weft version-check` only: the new version is lower than the changes require (§8). |
 
@@ -541,7 +545,7 @@ A model writes markup front to back, so a reader can show a screen while it is s
 
 - **Kept.** Every element whose start tag is complete, with its attributes, and the text read so far. An element still open at the end stays in the tree; its children so far are its content. A document appears as soon as the root start tag is complete; before that there is none.
 - **Dropped.** What the cut interrupts and cannot yet mean anything: a start tag without its `>`, an end tag without its `>`, a reference without its `;` (`&am`), and a comment without its `-->`. A start tag is dropped whole, because attributes cut short would build a wrong element.
-- **`pending`.** The result has `diagnostics` and `pending`. `pending` holds the diagnostics a later chunk can still fix: `W110` for each element, tag or comment not finished, `W114` while there is no root, `W115` for an unfinished comment, `W208` and `W314` on an element that is still open (its slot or repeated element may be the next thing written), and `W309` on any reference (its target may come later). Everything else is reported in `diagnostics` exactly as for a complete document, so an error in the finished part (a mismatched closing tag, an unknown attribute value) still blocks the document. A document that stops cleanly after its closing tag has an empty `pending`.
+- **`pending`.** The result has `diagnostics` and `pending`. `pending` holds the diagnostics a later chunk can still fix: `W110` for each element, tag or comment not finished, `W114` while there is no root, `W115` for an unfinished comment, `W208` and `W314` on an element that is still open (its slot or repeated element may be the next thing written), `W803` when an inline `<fragment>` is still open and has no body yet, and `W309` on any reference (its target may come later). Everything else is reported in `diagnostics` exactly as for a complete document, so an error in the finished part (a mismatched closing tag, an unknown attribute value) still blocks the document. A document that stops cleanly after its closing tag has an empty `pending`.
 - **Monotone.** Appending text never removes an element from the prefix; it only adds elements and text. The text of the last open element grows in place.
 
 A reader keeps the text received so far and parses it again after each chunk; the result of the last chunk equals the result of `parse` on the whole text. No state is carried between calls, so any engine, runtime and catalog works the same way. A renderer shows `document` as it is and may mark the paths in `pending` as still being written.
@@ -552,10 +556,12 @@ Agents edit documents with patches addressed by `id`:
 
 ```ts
 type Patch =
-  | { op: "set"; id: string; prop: string; value: Value | null }     // null removes the prop
-  | { op: "insert"; parent: string; slot?: string; index?: number; markup: string }
-  | { op: "remove"; id: string }
-  | { op: "move"; id: string; parent: string; slot?: string; index?: number }
+  | { op: "set"; id: string; fragment?: string; prop: string; value: Value | null }     // null removes the prop
+  | { op: "insert"; parent: string; fragment?: string; slot?: string; index?: number; markup: string }
+  | { op: "remove"; id: string; fragment?: string }
+  | { op: "move"; id: string; fragment?: string; parent: string; slot?: string; index?: number }
+  | { op: "add-fragment"; markup: string }
+  | { op: "remove-fragment"; name: string }
   | { op: "add-context"; entry: Entry }                                // appends
   | { op: "set-context"; id: string; field: "text" | "kind" | "for"; value: string | null }
   | { op: "resolve-context"; id: string }
@@ -567,7 +573,7 @@ type Patch =
 
 - **Atomic.** The patches apply in order to a copy, so a later patch sees the effects of earlier ones. The result is canonicalized and validated as in §6 with the given options. If any patch fails or the result has errors, nothing is applied: `document` is absent and `diagnostics` explain the first failing patch (or the validation errors). Otherwise `document` is the result and `diagnostics` holds its warnings. A patch list does not repair a document that was already invalid: its errors are reported.
 - **Shape.** A patch has exactly the members shown and nothing else; `index` is a non-negative integer. A list that is not an array, or a patch that breaks the shape, gives `W501`, one diagnostic per problem, each pointing at `#/patches/<n>/…`. An empty list is valid and changes nothing.
-- **Addressing.** `id`, `parent` name elements by id, including `<each>`. A name that no element has gives `W502` with the nearest id as the hint. `<slot>` has no id: it is addressed by `parent` and `slot`.
+- **Addressing.** `id`, `parent` name elements by id, including `<each>`. A name that no element has gives `W502` with the nearest id as the hint. `<slot>` has no id: it is addressed by `parent` and `slot`. Optional `fragment` on `set`, `insert`, `remove` and `move` names an inline fragment (§10.7); with it, `id` and `parent` address that fragment, its root included (the fragment's own name addresses the `<fragment>` element). A name that no inline fragment has is `W502`, with the nearest inline name as the hint. Without `fragment`, addressing is the screen, as before, and never reaches into a project fragment.
 - **`set`.** `value` is a Value of §3 and is stored as given, so it is typed JSON, not markup text: `7`, `true`, `{ "bind": "$.name" }`, `{ "token": "space.md" }`. Strings are always literals, so a string that starts with `{` needs no escape. `null` removes the prop; removing an absent prop does nothing. The one exception to storing as given is `text` on an element that holds its text as content (**Text** below). A prop name starting with `on-` binds or unbinds the event after it: the value is an action name, or `null` to remove the binding. `id` cannot be set (ids are stable; to rename, remove the element and insert it again), nor the root's `weft`. The prop name must follow the name grammar (§2). Whether the prop, event or value is allowed is left to validation (`W203`, `W204`, `W206`, …).
 - **`insert`.** `markup` is one or more sibling elements, parsed like a document (§2) but without a `<screen>` root; literals are typed by the catalog. It must hold elements only (`W508`), with ids that no element of the document has (`W509`; syntax errors keep their `W1xx` codes and point into `#/patches/<n>/markup`). They go into the default slot of `parent`, or into the slot named by `slot` (a name the parent's component declares, `W504`; `<each>` declares none, extension and unknown elements accept any name). `index` counts the entries of that list, text included, and defaults to the end; it must not exceed the length (`W505`).
 - **`remove`.** Deletes the element and everything inside it. The root cannot be removed (`W507`).
@@ -575,13 +581,14 @@ type Patch =
 - **Context.** The last four operations edit the context block (§2.3) and never touch elements. `add-context` appends `entry`, typed JSON exactly as in `Document.context`, so its text needs no XML escaping; its id must be new to the document, elements and entries alike (`W510`). `set-context` changes one field: `value` is a string, and `null` is allowed only for `for`, which makes the entry about the screen. Changing `kind` to `question` or `todo` sets `status` to `open` when it is absent; changing it to any other kind drops `status`. `id`, `by` and `name` cannot be changed: to restate someone else's note, add an entry of your own. `resolve-context` sets `status` to `resolved`; resolving a resolved entry does nothing, and resolving a kind without status fails validation (`W227`). There is no reopen: a question that comes back is a new question. `remove-context` deletes the entry. An id that no entry has gives `W511`. Values (`kind`, `for`, the text) are left to validation (`W203`, `W309`, `W228`, `W229`), as `set` leaves them.
 - **Element patches leave context alone.** `move` keeps the id, so `for` still holds. `insert` cannot bring entries (`W120`). `remove` of an element that an entry names, or of an ancestor of one, leaves a dangling `for`, so the list fails with `W309` and its hint names the entry (`remove-context reset-where, or set-context its for`): a `constraint` must not vanish silently with the element it protected.
 - **Host options.** `author: { by, name? }` fixes what `add-context` may claim: an entry whose `by`, or `name` when given, differs is refused (`W512`). `context: "read-only"` refuses every context patch (`W512`); the default is `"read-write"`. Both are set by the host (the MCP server, a plugin), never by the model, so an agent's channel cannot write `by="human"`.
+- **Inline fragments.** `add-fragment` adds one, given as `<fragment name="…">` markup. A name the screen already has is `W513`. A name the project already has is `W808` and the fragment is not added. `remove-fragment` removes one by `name`; a name that no inline fragment has is `W502`. A `<use>` that still names a removed fragment fails the result's validation (`W801`), so the list is not applied.
 - **`set-version`.** Sets `Document.version` on the document root, which has no id to address. `value` is a string, stored as given; `null` removes the version. Whether the string is `MAJOR.MINOR.PATCH` is left to validation (`W230`), as `set` leaves its values. A value that is not a string or `null` is `W501`, and the patch is not applied.
 - **Text.** Text is changed with `set` and `prop: "text"`, wherever the element keeps it (§5.1: content or the `text` prop, never both). When a `text` or `mixed` component holds its text as content and nothing else, the patch writes that content: a string replaces it and stays content, any other value replaces it with the `text` prop, and `null` removes it. Otherwise `text` is set like any other prop, so text already in the prop stays there, and a `mixed` component whose content holds elements keeps them and gets `W310` if it is given `text` as well. Text that shares a content list with elements (an `item` holding text beside a button) is not addressable by a patch: `remove` the element that holds it and `insert` it again with the same id.
 
 ## 8. Versioning and extensibility
 
 - `weft` on `<screen>` is `major.minor`. A minor version only adds; a reader of `0.x` MUST accept any `0.y` document under the rules below. A major version may break.
-- The format is `weft` 0.3 since the optional document `version` (§3) and fragment variants (§10.7), minor additions: a 0.1 or 0.2 document is a valid 0.3 document and needs no migration, and writers write `weft="0.3"`. There is no per-feature gate. A 0.2 reader warns about the version (`W403`) and reads `version` as an unknown attribute and `<variant>` as an unknown element, which it keeps. A 0.2 reader of canonical JSON rejects `version` (`W200`), which fails closed. Every 0.2 reader of this repository moves to 0.3 in the same change.
+- The format is `weft` 0.3 since the optional document `version` (§3), fragment variants and inline fragments (§10.7), minor additions: a 0.1 or 0.2 document is a valid 0.3 document and needs no migration, and writers write `weft="0.3"`. There is no per-feature gate. A 0.2 reader warns about the version (`W403`) and reads `version` as an unknown attribute and `<variant>` and an inline `<fragment>` as unknown elements, which it keeps. A 0.2 reader of canonical JSON rejects `version` and `fragments` (`W200`), which fails closed. Every 0.2 reader of this repository moves to 0.3 in the same change.
 - The format moved to `weft` 0.2 with fragments (§10.7), a minor addition: a 0.1 document is a valid 0.2 document. There is no per-feature gate: a reader accepts a fragment file or a `<use>` marked 0.1. A 0.1 reader warns about the version (`W403`) and reads `<fragment>`, `<param>`, `<outlet>` and `<use>` as unknown elements, which it keeps.
 - **Extensions** are elements or attributes whose name starts with `x-<vendor>-`. An extension element MUST carry `role` (its ARIA fallback) and follows `content: "mixed"`; it may have any attributes, slots and events, and its literals stay strings. A reader that does not know it renders its children inside a container with that role. Extension attributes are allowed on every element in both modes.
 - **Unknown, non-extension** elements or attributes come from a newer minor version or another catalog. In *lenient* mode (default for readers) they produce a `W4xx` warning; an unknown element is treated as an extension with role `group`, an unknown attribute is kept in the model and ignored. In *strict* mode (default for writers and CI) they are errors. A newer minor `weft` version is reported the same way. Unknown and extension elements are opaque: parent/child rules skip them, but the parent's content model still applies. Undeclared events, slots, states and enum values of a known component are schema errors, not compatibility warnings.
@@ -879,7 +886,7 @@ A fragment adds elements to the format, not a new model, and it is an addition o
 - A key is the fragment's name and follows the name grammar of §2. The name lives only here. A value is a file name under the rules of §10.2. In project content (§10.1) a value is the fragment's markup as a string.
 - A `fragments` member that is not an object, a key that breaks the name grammar, or a value that is not a string is `W701`. A bad file name is `W703`, and a file that cannot be read is `W704`. A file whose root is not `<fragment>` is `W201`. In each of these cases the fragment is left out.
 - Each fragment is parsed against the merged catalog, with the project's tokens and actions and with the other fragments. Its markup problems keep their codes and their positions in its file. Their path starts at `#/fragments/<name>`, as in `#/fragments/page-header/fragment/stack#bar`.
-- The project's merged catalog (§10.4) carries the fragments in a `fragments` member, which maps each name to its fragment document in canonical JSON. So every tool that is given the project's catalog knows the fragments. A catalog file that has `fragments` is `W706`. Without a project there are no fragments.
+- The project's merged catalog (§10.4) carries the fragments in a `fragments` member, which maps each name to its fragment document in canonical JSON. So every tool that is given the project's catalog knows the fragments. A catalog file that has `fragments` is `W706`. A screen's own inline fragments (below) do not need a project.
 
 **A fragment file.**
 
@@ -963,7 +970,7 @@ At a use:
 
 | Situation | Code |
 | --- | --- |
-| `fragment` names no fragment of the project | `W801` (mode severity; the hint is the nearest name) |
+| `fragment` names no inline fragment of the screen and no fragment of the project | `W801` (mode severity; the hint is the nearest name) |
 | An attribute, `on-*` or slot that the fragment does not declare | `W802` |
 | A required parameter or slot is missing | `W205`, `W208` |
 | A value is not of the parameter's type, enum values or range | `W204`, `W203`, `W224` |
@@ -982,13 +989,37 @@ In a fragment:
 | A read where its type cannot go: an `action` or `slot` parameter in a prop, a value parameter in `on-*`, a read with more after the name | `W807` |
 | A variant parameter or `<variant>` misdeclared (§ above) | `W809` |
 
-A reader without fragments (no project) reads `<use>` as content it does not know (§8). In lenient mode it warns with `W801` and treats the use as an element with role `group` that holds its slots' content. In strict mode `W801` is an error.
+A reader without fragments (no project and no inline fragment) reads `<use>` as content it does not know (§8). In lenient mode it warns with `W801` and treats the use as an element with role `group` that holds its slots' content. In strict mode `W801` is an error.
 
-**Patches.** Patches address the screen and never reach into a fragment (§7). `set-version` sets the fragment file's own `version`, because its root has no id.
+**Inline fragments.** A screen may define a fragment in place, for a block that screen repeats and no other screen uses. It needs no project.
+
+```xml
+<screen id="cart" label="Cart" weft="0.3">
+  <fragment label="Price row" name="price-row">
+    <param name="label" required="true" type="string"/>
+    <param name="amount" required="true" type="string"/>
+    <stack id="row" direction="row" justify="space-between">
+      <text id="name" text="{$label}"/>
+      <text id="value" text="{$amount}"/>
+    </stack>
+  </fragment>
+  <use id="subtotal" amount="{$.cart.subtotal}" fragment="price-row" label="Subtotal"/>
+  <use id="total" amount="{$.cart.total}" fragment="price-row" label="Total"/>
+</screen>
+```
+
+- `<fragment name="…">` is a direct child of `<screen>`, after the `<context>` block when there is one and before the first body element. `name` is required and follows the name grammar of §2. `label` and `version` are optional. It has no `id` and no `weft`: it is written in the screen's format version. `version`, when present, is a literal `MAJOR.MINOR.PATCH` (`W230`), the same rule as on a fragment file.
+- Its content is that of a fragment file: `<param>` elements, then a body. In canonical JSON the inline fragments are `Document.fragments`, the name mapping to the node. Canonical markup writes them after the context block, sorted by name, with `name` among the attributes.
+- An inline fragment anywhere else (deeper in the tree, inside `<each>`, a `<slot>`, another fragment or `insert` markup), with no valid `name`, with `weft` or another attribute, after a body element, with a name another inline fragment already has, with a name a project fragment already has, or inside a fragment file, is `W808`. That fragment is left out.
+- An inline fragment is known only in its screen. A screen's `<use>` finds the name among the screen's inline fragments, then among the project's. An inline fragment may use the project's fragments and the screen's other inline fragments. Cycles are `W805` and expansion limits are `W806`, unchanged. Helpers shared by fragment files are fragments of the project, not inline fragments.
+- Everything else in this section applies unchanged. Ids inside an inline fragment are local and may repeat the screen's ids. A context entry's `for` names a screen id, which for a fragment instance is the id of its `<use>`.
+
+**Patches.** Patches address the screen and, with `fragment`, one of its inline fragments (§7). They never reach into a project fragment. `set-version` sets the document root's `version`, and on a fragment file that is the fragment's own version, because its root has no id.
 
 - `set` on the id of a `<use>` changes a parameter (`"prop": "title"`), an action parameter (`"prop": "on-back"`), or the fragment itself (`"prop": "fragment"`). The result is validated as every patch result is.
 - `insert` and `move` with `"parent": "header", "slot": "actions"` fill a slot parameter. The slot must be one the fragment declares (`W504`).
 - `remove` and `move` of a `<use>` take the whole instance.
-- An id inside a fragment body (`title`, or the instance path `header/title`) is not a screen id. It is `W502`, and the hint names the fragment to edit. A fragment file is edited with the same patches as a screen, with `<fragment>` as its root.
+- An id inside a project fragment body (`title`, or the instance path `header/title`) is not a screen id. It is `W502`, and the hint names the fragment to edit. A fragment file is edited with the same patches as a screen, with `<fragment>` as its root.
+- An id inside an inline fragment is addressed with `fragment` set to that fragment's name (§7). The fragment's own name, as `id`, addresses the `<fragment>` element, so `label` and `version` are set there. `add-fragment` and `remove-fragment` add and remove inline fragments. Removing one that a `<use>` still names fails as `W801` and applies nothing.
 
-**Tools.** Renderers and generators expand uses before they draw (as above) and write instance paths to `data-weft-id`; the Slint generator, whose element names cannot hold `/`, names an element by its instance path with `--` for `/`. The accessibility tree of the reference renderer equals that of the expanded document. Importers never produce `<use>` or `<variant>`, because they cannot tell a fragment from a copy. The core exports `expand(document, catalog)`, which returns the expanded document and its `W805`/`W806` diagnostics. The CLI, the MCP server and `write-page` load fragments with the rest of the project. `weft_catalog` lists the project's fragments with their parameters after the components. `weft explain` names the variant each use chose.
+**Tools.** Renderers and generators expand uses before they draw (as above) and write instance paths to `data-weft-id`; the Slint generator, whose element names cannot hold `/`, names an element by its instance path with `--` for `/`. `to-jsx`, which emits a component per fragment, emits one function per inline fragment and a call at each `<use>`. The accessibility tree of the reference renderer equals that of the expanded document. Importers never produce `<use>`, an inline `<fragment>` or `<variant>`, because they cannot tell a fragment from a copy. The core exports `expand(document, catalog)`, which returns the expanded document and its `W805`/`W806` diagnostics. The CLI, the MCP server and `write-page` load fragments with the rest of the project. `weft_catalog` lists the project's fragments with their parameters after the components, and, when given a screen's markup, that screen's inline fragments too. `weft explain` names the variant each use chose.
