@@ -10,7 +10,7 @@ export const primer = (
 - One root <screen id="…" weft="0.3" label="…">. Every element has an id, unique in the document: a letter, then letters, digits, "_" or "-". Optional version="MAJOR.MINOR.PATCH" on the root <screen> or <fragment> is that document's own version, a literal (W230).
 - Element and attribute names are lowercase with hyphens. Attribute values are always in double quotes. Booleans are true or false. An element without content is self-closing.
 - Only components of the catalog exist. Do not invent elements or attributes; call weft_catalog to see them.
-- A project's fragments, which weft_catalog lists after the components, are placed with <use id="…" fragment="name" title="…" on-back="action">, one attribute per parameter. Use only listed fragments.
+- A project's fragments, which weft_catalog lists after the components, are placed with <use id="…" fragment="name" title="…" on-back="action">, one attribute per parameter. Use only listed fragments. A fragment may mark one enum parameter variant="true" and give each value a <variant when="…"> body; pass that parameter as a literal.
 - A value is a literal ("Email"), a binding value="{$.user.email}", a negated binding disabled="{!$.busy}", or a design token gap="{token.space.md}". A literal that starts with "{" is written "{{". Never mix text and a binding in one value.
 - Inside <each in="{$.items}" as="item"> the loop variable is bound as {$item.field}; ids inside it are templates.
 - Events are on-<event>="action.name", for example on-press="auth.submit". Actions take no arguments and no code.

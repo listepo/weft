@@ -2,9 +2,15 @@
 // @weft/design-tool with Figma's build and read. The UI half is `buildRequest`, `exportRequest`
 // and `finishExport` of the same package.
 import type { Catalog } from "@weft/core";
-import { handleRequest as handleShared, type PluginReply } from "@weft/design-tool";
-import type { FigmaApi, FNode } from "./api.ts";
+import {
+  contextReply,
+  handleRequest as handleShared,
+  type ContextLayer,
+  type PluginReply,
+} from "@weft/design-tool";
+import type { FigmaApi, FNode, FPluginData } from "./api.ts";
 import { buildScreen } from "./build.ts";
+import { dataOf } from "./data.ts";
 import { ensureLibrary } from "./library.ts";
 import { readModes } from "./modes.ts";
 import { readLayers } from "./read.ts";
@@ -32,3 +38,19 @@ export function handleRequest(
     message,
   );
 }
+
+/** A node and the nodes above it, as far as the context panel reads them. */
+export type FContextNode = FPluginData & { readonly parent: FContextNode | null | undefined };
+
+const contextLayer = (node: FContextNode): ContextLayer => ({
+  ...dataOf(node),
+  get parent(): ContextLayer | undefined {
+    return node.parent === null || node.parent === undefined
+      ? undefined
+      : contextLayer(node.parent);
+  },
+});
+
+/** The `context` reply for the current selection: what the panel lists for the designer. */
+export const selectionContext = (selection: readonly FContextNode[]): PluginReply =>
+  contextReply(selection.map(contextLayer));

@@ -12,6 +12,7 @@ use serde::Serialize;
 
 use crate::context::entry_path;
 use crate::context_check::MAX_TEXT;
+use crate::fragment::{self, USE};
 use crate::model::{Catalog, Child, Document, Entry, Node, PropDef, PropType, Value};
 use crate::rules::{EACH, is_id, universal_prop};
 use crate::source::path_segment;
@@ -148,6 +149,7 @@ enum Raw<'a> {
     Action(&'a str),
     Loop(Option<&'a Value>, Option<&'a Value>),
     Entry(&'a Entry),
+    Note(&'a str),
 }
 
 struct Item<'a> {
@@ -238,6 +240,74 @@ fn entry_sentence(entry: &Entry) -> String {
     )
 }
 
+enum NoteRaw<'a> {
+    Value(&'a Value),
+    Name(&'a str),
+}
+
+struct Note<'a> {
+    name: String,
+    sentence: String,
+    raw: NoteRaw<'a>,
+}
+
+/// Which variant a `<use>` chose, and a slot the chosen body drops because it has no outlet.
+fn variant_notes<'a>(catalog: Option<&'a Catalog>, node: &'a Node) -> Vec<Note<'a>> {
+    let Some(fragment) = catalog.and_then(|c| c.fragment_of(node)) else {
+        return vec![];
+    };
+    let root = &fragment.document.root;
+    let Some(choice) = fragment::choice(root, node) else {
+        return vec![];
+    };
+    let fragment_name = match node.props.get("fragment") {
+        Some(Value::String(name)) => name.as_str(),
+        _ => "",
+    };
+    let sentence = match (choice.value, choice.defaulted, choice.raw) {
+        (Some(value), false, _) => format!("uses the \"{value}\" variant of {fragment_name}"),
+        (Some(value), true, _) => {
+            format!("uses the \"{value}\" variant of {fragment_name}, the default")
+        }
+        (None, _, Some(_)) => format!(
+            "no variant of {fragment_name} is chosen, because \"{}\" is not a literal",
+            choice.name
+        ),
+        (None, _, None) => format!(
+            "no variant of {fragment_name} is chosen, because \"{}\" is missing",
+            choice.name
+        ),
+    };
+    let raw = match choice.raw {
+        Some(value) => NoteRaw::Value(value),
+        None => NoteRaw::Name(choice.name),
+    };
+    let mut notes = vec![Note {
+        name: "variant".to_owned(),
+        sentence,
+        raw,
+    }];
+    let Some(value) = choice.value else {
+        return notes;
+    };
+    let Some(body) = fragment::variant_body(root, value) else {
+        return notes;
+    };
+    for (slot, _) in &node.slots {
+        if fragment::has_outlet(body, slot) {
+            continue;
+        }
+        notes.push(Note {
+            name: format!("slot {slot}"),
+            sentence: format!(
+                "drops the \"{slot}\" slot: the \"{value}\" variant has no outlet for it"
+            ),
+            raw: NoteRaw::Name(slot),
+        });
+    }
+    notes
+}
+
 impl<'a> Walker<'a> {
     fn node(&mut self, node: &'a Node, path: String) {
         let is_root = std::mem::take(&mut self.at_root);
@@ -296,6 +366,15 @@ impl<'a> Walker<'a> {
             let literal = !matches!(value, Value::Bind { .. } | Value::Token(_));
             let sentence = self.value_sentence(value, def);
             add(&mut self.items, name, sentence, Raw::Value(value), literal);
+        }
+        if node.kind == USE {
+            for note in variant_notes(self.catalog, node) {
+                let raw = match note.raw {
+                    NoteRaw::Value(value) => Raw::Value(value),
+                    NoteRaw::Name(name) => Raw::Note(name),
+                };
+                add(&mut self.items, &note.name, note.sentence, raw, false);
+            }
         }
         for (event, action) in &node.on {
             let sentence = match self.scopes.last() {

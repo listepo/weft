@@ -2,8 +2,13 @@
 // @weft/design-tool with Penpot's build and read. The UI half is `buildRequest`, `exportRequest`
 // and `finishExport` of the same package.
 import type { Catalog } from "@weft/core";
-import { handleRequest as handleShared, type PluginReply } from "@weft/design-tool";
-import type { PenpotApi, PShape } from "./api.ts";
+import {
+  contextReply,
+  handleRequest as handleShared,
+  type ContextLayer,
+  type PluginReply,
+} from "@weft/design-tool";
+import type { PenpotApi, PShape, PSharedData } from "./api.ts";
 import { buildScreen } from "./build.ts";
 import { ensureLibrary } from "./library.ts";
 import { dataOf } from "./layer.ts";
@@ -39,3 +44,19 @@ export function handleRequest(
     message,
   );
 }
+
+/** A shape and the shapes above it, as far as the context panel reads them. */
+export type PContextShape = PSharedData & { readonly parent: PContextShape | null | undefined };
+
+const contextLayer = (shape: PContextShape): ContextLayer => ({
+  ...dataOf(shape),
+  get parent(): ContextLayer | undefined {
+    return shape.parent === null || shape.parent === undefined
+      ? undefined
+      : contextLayer(shape.parent);
+  },
+});
+
+/** The `context` reply for the current selection: what the panel lists for the designer. */
+export const selectionContext = (selection: readonly PContextShape[]): PluginReply =>
+  contextReply(selection.map(contextLayer));

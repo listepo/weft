@@ -1,8 +1,6 @@
 - T8. Evaluation
 - T14. Figma round trip and plugin
 - T39. Context in the document
-- T39.7. Context: Figma and Penpot
-- T39.9. Context: SwiftUI
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
@@ -21,3 +19,6 @@
 - T97. Design-tool plugin data over 100 kB
 - T98. `fmt --write` keeps symlinks and permissions
 - T99. Node capped read handles a short read
+- T100. Document versions
+- T101. Inline fragments
+- T103. Library fragments

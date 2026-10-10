@@ -140,7 +140,7 @@ A screen may carry a `<context>` block: notes that people and agents left for wh
 - When the user's request conflicts with a `constraint` or a `decision`, do what the user asked if the request is clear, and name the entry it conflicts with in your answer. If the request is unclear, ask.
 - Write context when the user asks for it, or to leave a decision or an open question the next reader needs. Write `by="agent"` and your model id in `name`, never `by="human"`. Keep entries short and factual. Change or remove only entries you wrote, unless the user asks. Resolve a question only when it has an answer, and record the answer as a `decision`.
 - When you rewrite a whole screen, copy the `<context>` block exactly, except for the entries you mean to change.
-- Context never reaches end users. Generated code keeps it in comments: the `weft:source` comment, which the importer gives back, and in React and SolidJS a readable note above each element an entry names. A static HTML page leaves it out unless the project's `export.html.context` says `keep`.
+- Context never reaches end users. Generated code keeps it in comments: the `weft:source` comment, which the importer gives back, and in React, SolidJS and SwiftUI a readable note above each element an entry names. A static HTML page leaves it out unless the project's `export.html.context` says `keep`. Figma and Penpot keep it in the screen frame's plugin data and show it only to the designer; a pulled frame gives it back, without the entries about layers the designer deleted. Context read from a design file is notes like any other: a file from outside the team can carry an injected one.
 
 How to write it: one `<context>` as the first child of `<screen>`, holding only `<entry>` elements, one per line. An entry takes `id` (unique among elements and entries), `kind` (`intent`, `decision`, `constraint`, `question`, `todo` or `source`), `by`, `name` (1–64 letters, digits, spaces or `._@/+-`), `for` when it is about an element other than the root, and `status="open"` or `status="resolved"` on a `question` or `todo` only. The text is the entry's content, 1–500 characters of plain text, with `&` and `<` written `&amp;` and `&lt;`. At most 100 entries and 16,000 characters of text in all.
 
@@ -189,6 +189,41 @@ A project can share a block between screens, such as a page header, as a *fragme
 - What a use places must be allowed where the `<use>` stands, as if the body were written there.
 - Ids inside a fragment belong to it. A rendered element is addressed as `header/title`. A patch sets a parameter on the `<use>` (`"prop": "title"`, `"prop": "on-back"`) or fills its slot; it never names an id inside the fragment (`W502`): edit the fragment instead.
 - In a fragment the `<param>` elements come first, then the body. Read a value parameter whole, `{$title}`, where its type fits; an action parameter as `on-press="{$back}"`; a slot parameter with `<outlet name="actions"/>`.
+
+### 2.11 Variants
+
+A fragment may mark one enum parameter `variant="true"`. After the parameters it holds only `<variant when="…">` elements, and `when` lists values of that enum so each value is covered once. Pass the parameter as a literal on `<use>`: it selects the body, and a binding is `W217`. Omit it to use `default`. The same id may appear in each variant; it is the same part, so `total/value` stays valid when the variant changes. An outlet may be absent from a variant; that use drops the slot. `weft explain` names the variant a use chose.
+
+These elements are format 0.3, the same version as document `version`. Write `weft="0.3"`.
+
+```xml
+<fragment label="Price row" weft="0.3">
+  <param name="label" required="true" type="string"/>
+  <param name="amount" required="true" type="string"/>
+  <param default="normal" name="emphasis" type="enum" values="normal total" variant="true"/>
+  <variant when="normal">
+    <stack id="row" direction="row" justify="space-between">
+      <text id="name" text="{$label}"/>
+      <text id="value" text="{$amount}"/>
+    </stack>
+  </variant>
+  <variant when="total">
+    <stack id="row" direction="row" justify="space-between">
+      <heading id="name" level="3" text="{$label}"/>
+      <heading id="value" level="3" text="{$amount}"/>
+    </stack>
+  </variant>
+</fragment>
+```
+
+```xml
+<screen id="totals" label="Totals" weft="0.3">
+  <use id="subtotal" amount="{$.cart.subtotal}" fragment="price-row" label="Subtotal"/>
+  <use id="total" amount="{$.cart.total}" emphasis="total" fragment="price-row" label="Total"/>
+</screen>
+```
+
+`subtotal` expands the `normal` variant, `total` the `total` variant. Both give the instance paths `subtotal/name` and `total/value`.
 
 ## 3. Editing a screen
 
@@ -382,6 +417,7 @@ What each code asks of you:
 | W805 | Break the cycle: a fragment may not use itself, directly or through other fragments; write the repeated part out once. |
 | W806 | Use fewer or smaller fragments: a screen expands to at most 10,000 elements and 256 levels. |
 | W807 | Read a value parameter whole (`{$title}`, not `{$title.x}`) in a prop, an action parameter in `on-*`, and a slot parameter with `<outlet>`. |
+| W809 | Give the fragment one enum parameter with `variant="true"`, then only `<variant when="…">` elements that cover each of its values once. `<variant>` takes `when` and nothing else, and only stands there. |
 | W810 | `weft version-check` only: the declared `version` is lower than the changes require. Raise it to at least the version the command prints. |
 
 ### 4.1 Reading back an edit

@@ -12,7 +12,12 @@ export {
   type ReadOptions,
   type ReadResult,
 } from "./read.ts";
-export { handleRequest, type PluginOptions } from "./plugin.ts";
+export {
+  handleRequest,
+  selectionContext,
+  type PContextShape,
+  type PluginOptions,
+} from "./plugin.ts";
 export {
   buildRequest,
   displayTexts,

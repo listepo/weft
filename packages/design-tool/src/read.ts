@@ -11,6 +11,7 @@ import {
   type ComponentDef,
   type Diagnostic,
   type Document,
+  type Entry,
   type Node,
   type Value,
 } from "@weft/core";
@@ -25,7 +26,7 @@ import {
   type LossKind,
 } from "@weft/from-aria";
 import { convertForeign } from "./foreign.ts";
-import { KEY, readMark, readSource, readVersion, type Source } from "./keys.ts";
+import { KEY, readContext, readMark, readSource, readVersion, type Source } from "./keys.ts";
 import { findText, isContainer, type Layer } from "./layer.ts";
 import { matchToken, tokenGroup, tokenPx } from "./tokens.ts";
 import {
@@ -43,6 +44,8 @@ import {
 export type ReadOptions = {
   catalog: Catalog;
   tokens?: ReadonlyMap<string, Token> | undefined;
+  /** `drop` leaves the root's context unread, as `import.figma.context` asks (SPEC §10.6). */
+  context?: "keep" | "drop" | undefined;
 };
 
 export type ReadResult = { document: Document; losses: Loss[]; diagnostics: Diagnostic[] };
@@ -116,6 +119,9 @@ export async function readLayers(layer: Layer, options: ReadOptions): Promise<Re
     nodes: 0,
     truncated: false,
   };
+  const context = options.context === "drop" ? [] : (readContext(layer) ?? []);
+  // Reserved first, so an element the designer added cannot take an entry's id.
+  for (const entry of context) if (entry.id !== undefined) ctx.used.add(entry.id);
   survey(ctx, layer);
   const top: Parent = { kind: "", def: undefined, path: "", mode: "column" };
   const converted = await convertLayer(ctx, layer, top, 0);
@@ -131,8 +137,40 @@ export async function readLayers(layer: Layer, options: ReadOptions): Promise<Re
       "the selection is not a Weft screen; a screen was added as the root",
     );
   }
-  const document = { weft: readVersion(layer) ?? WEFT_VERSION, root };
+  const document: Document = { weft: readVersion(layer) ?? WEFT_VERSION, root };
+  const kept = keptContext(ctx, context, root);
+  if (kept.length > 0) document.context = kept;
   return { document, losses: ctx.losses, diagnostics: ctx.diagnostics };
+}
+
+/** Visits every element of the tree: children and slot content, `<each>` included. */
+export function eachNode(root: Node, visit: (node: Node) => void): void {
+  const stack = [root];
+  for (let node = stack.pop(); node !== undefined; node = stack.pop()) {
+    visit(node);
+    for (const child of node.children ?? []) if (typeof child !== "string") stack.push(child);
+    for (const list of Object.values(node.slots ?? {}))
+      for (const child of list) if (typeof child !== "string") stack.push(child);
+  }
+}
+
+/**
+ * The entries still about something in the file. The designer deleted the layer an entry names,
+ * so the entry goes with it, as a `context` loss, rather than failing the read with `W309`.
+ */
+function keptContext(ctx: ReadCtx, context: readonly Entry[], root: Node): Entry[] {
+  if (context.length === 0) return [];
+  const ids = new Set<string>();
+  eachNode(root, (node) => {
+    if (node.id !== undefined) ids.add(node.id);
+  });
+  const at = `/${root.kind}${root.id === undefined ? "" : `#${root.id}`}/context`;
+  return context.filter((entry, index) => {
+    if (entry.for === undefined || ids.has(entry.for)) return true;
+    const name = entry.id === undefined ? `entry[${index}]` : `entry#${entry.id}`;
+    lose(ctx, "context", `${at}/${name}`, "the layer this entry is about was removed");
+    return false;
+  });
 }
 
 /** First pass: reserve every stored id, choose which layer keeps a copied id, count gap groups. */

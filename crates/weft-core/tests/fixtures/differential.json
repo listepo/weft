@@ -29126,6 +29126,52 @@
    }
   },
   {
+   "name": "W809 lenient",
+   "markup": "<fragment weft=\"0.2\"><param name=\"a\" type=\"string\" variant=\"true\"/><text id=\"t\">T</text></fragment>",
+   "mode": "lenient",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W809",
+      "severity": "error",
+      "message": "variant=\"true\" belongs on one enum parameter.",
+      "path": "/fragment/param[0]/@variant",
+      "line": 1,
+      "column": 52,
+      "expected": "type=\"enum\" variant=\"true\""
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"a\",\n          \"type\": \"string\",\n          \"variant\": true\n        }\n      },\n      {\n        \"kind\": \"text\",\n        \"id\": \"t\",\n        \"children\": [\n          \"T\"\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<fragment weft=\"0.2\">\n  <param name=\"a\" type=\"string\" variant=\"true\"/>\n  <text id=\"t\">T</text>\n</fragment>\n"
+   }
+  },
+  {
+   "name": "W809 strict",
+   "markup": "<fragment weft=\"0.2\"><param name=\"a\" type=\"string\" variant=\"true\"/><text id=\"t\">T</text></fragment>",
+   "mode": "strict",
+   "catalog": "test",
+   "tokens": false,
+   "actions": null,
+   "expect": {
+    "diagnostics": [
+     {
+      "code": "W809",
+      "severity": "error",
+      "message": "variant=\"true\" belongs on one enum parameter.",
+      "path": "/fragment/param[0]/@variant",
+      "line": 1,
+      "column": 52,
+      "expected": "type=\"enum\" variant=\"true\""
+     }
+    ],
+    "json": "{\n  \"weft\": \"0.2\",\n  \"root\": {\n    \"kind\": \"fragment\",\n    \"children\": [\n      {\n        \"kind\": \"param\",\n        \"props\": {\n          \"name\": \"a\",\n          \"type\": \"string\",\n          \"variant\": true\n        }\n      },\n      {\n        \"kind\": \"text\",\n        \"id\": \"t\",\n        \"children\": [\n          \"T\"\n        ]\n      }\n    ]\n  }\n}\n",
+    "markup": "<fragment weft=\"0.2\">\n  <param name=\"a\" type=\"string\" variant=\"true\"/>\n  <text id=\"t\">T</text>\n</fragment>\n"
+   }
+  },
+  {
    "name": "SPEC.md#0 core lenient",
    "markup": "<screen id=\"login\" label=\"Sign in\" weft=\"0.2\">\n  <form id=\"f1\" state=\"idle\" on-submit=\"auth.submit\">\n    <field id=\"email\" label=\"Email\" required=\"true\" type=\"email\" value=\"{$.email}\"/>\n    <button id=\"go\" disabled=\"{!$.email}\" submit=\"true\" variant=\"primary\">Sign in</button>\n    <slot name=\"footer\">\n      <link id=\"reset\" on-press=\"nav.reset\">Forgot password?</link>\n    </slot>\n  </form>\n</screen>\n",
    "catalog": "core",

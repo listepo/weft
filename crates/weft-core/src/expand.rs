@@ -290,16 +290,17 @@ impl Expander<'_> {
             open: self.stack.len(),
         };
         let id = node.id.clone().unwrap_or_default();
+        let placed = crate::fragment::placed_children(root, node);
         let body = Context {
             prefix: format!("{}{id}/", cx.prefix),
             args: Some(&args),
             scope: cx.scope.clone(),
             renames: Map::new(),
-            local_ids: ids(&root.children),
+            local_ids: ids(placed),
         };
         self.stack.push(name);
         // A use counts as a level, so a chain of uses is bounded like nesting.
-        let out = self.list(&root.children[params_len(root)..], &body, None, depth + 1);
+        let out = self.list(placed, &body, None, depth + 1);
         self.stack.pop();
         self.site = previous;
         out
@@ -350,11 +351,6 @@ fn string(value: Option<&Value>) -> String {
         Some(Value::String(s)) => s.clone(),
         _ => String::new(),
     }
-}
-
-fn params_len(root: &Node) -> usize {
-    let is_param = |c: &Child| c.as_node().is_some_and(|n| n.kind == PARAM);
-    root.children.iter().take_while(|c| is_param(c)).count()
 }
 
 /// The ids written in a fragment's body, which references to them follow into instance paths.

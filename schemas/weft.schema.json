@@ -251,6 +251,14 @@
               "type": "boolean",
               "description": "Screens read the tokens from one shared `WeftTokens.swift` (`weft swiftui-tokens`) instead of each carrying the tokens it uses.",
               "default": true
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "strip"
+              ],
+              "description": "Whether the source comment carries the screen's context (SPEC §2.3): `keep` or `strip`. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,
@@ -378,6 +386,14 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "drop"
+              ],
+              "description": "Whether context read back from a generated file's source comment enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team. The CLI's `--context` overrides it.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,
@@ -441,6 +457,14 @@
             "outDir": {
               "$ref": "#/$defs/fileName",
               "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "drop"
+              ],
+              "description": "Whether the context kept in a frame's plugin data enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team.",
+              "default": "keep"
             }
           },
           "additionalProperties": false,

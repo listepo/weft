@@ -312,6 +312,10 @@ fn cases() -> Vec<(&'static str, Case)> {
             "W807",
             r#"<param name="back" type="action"/><text id="a" text="{$back}"/>"#,
         ),
+        fragment(
+            "W809",
+            r#"<param name="a" type="string" variant="true"/><text id="t">T</text>"#,
+        ),
     ]
 }
 

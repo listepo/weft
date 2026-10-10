@@ -77,6 +77,9 @@ export async function buildScreen<L, C>(
   const ctx: Ctx<L, C> = { ...options, host };
   const root = await buildNode(ctx, document.root, "column");
   writeJson(host.marks(root), KEY.document, { weft: document.weft });
+  // Plugin data, never a layer: the designer's panel lists it, the canvas never shows it.
+  if (document.context !== undefined && document.context.length > 0)
+    writeJson(host.marks(root), KEY.context, document.context);
   host.place(root, document.root.kind === "screen");
   return root;
 }

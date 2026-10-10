@@ -670,6 +670,46 @@ fn slint_keeps_context_in_its_source_comment() {
 }
 
 #[test]
+fn swiftui_keeps_context_in_its_source_comment() {
+    let s = Scratch::new("swiftui-context");
+    let screen = s.write("screens/plain.weft", NOTED);
+    let r = run(&[&"swiftui", &screen, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stdout
+            .contains("// intent (human Ivan): Back returns home.")
+            && !r.stdout.contains("@license"),
+        "{}",
+        r.stdout
+    );
+    let swift = s.write("plain.swift", &r.stdout);
+    let r = run(&[&"import-swiftui", &swift, &"--no-project"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, NOTED), "{}", r.stderr);
+    let r = run(&[
+        &"import-swiftui",
+        &swift,
+        &"--no-project",
+        &"--context",
+        &"drop",
+    ]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
+    let r = run(&[&"swiftui", &screen, &"--no-project", &"--context", &"strip"]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+
+    with_settings(
+        &s,
+        serde_json::json!({
+            "export": { "swiftui": { "context": "strip" } },
+            "import": { "swiftui": { "context": "drop" } }
+        }),
+    );
+    let r = run(&[&"swiftui", &screen]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+    let r = run(&[&"import-swiftui", &swift]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
+}
+
+#[test]
 fn web_arguments_override_the_project() {
     let s = web_project("web-args");
     let screen = s.write("screens/plain.weft", PLAIN);

@@ -14,6 +14,7 @@ export type LossKind =
   | "names"
   | "kinds"
   | "text"
-  | "structure";
+  | "structure"
+  | "context";
 
 export type Loss = { kind: LossKind; path: string; note: string };

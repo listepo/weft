@@ -4,10 +4,11 @@
 // serializes (`plugin-ui.ts`), and the sandbox only builds and reads layers (this file). Messages
 // cross a boundary the sandbox does not control, so each one is validated.
 import type { Diagnostic } from "@weft/core";
-import { DocumentSchema, type Document } from "@weft/core";
+import { DocumentSchema, type Document, type Entry } from "@weft/core";
 import type { Token, TokenModifier } from "@weft/catalog";
-import type { Loss } from "@weft/from-aria";
+import { MAX_DEPTH, type Loss } from "@weft/from-aria";
 import { z } from "zod";
+import { readContext, readSource, type PluginData, type Source } from "./keys.ts";
 import { MAX_CONTEXTS, modifierOf } from "./modes.ts";
 import type { ReadResult } from "./read.ts";
 import type { Display } from "./view.ts";
@@ -62,7 +63,44 @@ export type PluginReply =
       /** The file's token modes as a DTCG resolver document, when it has more than one mode. */
       resolver?: Record<string, unknown> | undefined;
     }
-  | { type: "error"; message: string; diagnostics?: Diagnostic[] | undefined };
+  | { type: "error"; message: string; diagnostics?: Diagnostic[] | undefined }
+  | {
+      /** The context entries about the selected layer, sent whenever the selection changes. */
+      type: "context";
+      entries: Entry[];
+    };
+
+/** A layer as the context panel walks it: its plugin data and the layer that holds it. */
+export type ContextLayer = PluginData & { readonly parent: ContextLayer | undefined };
+
+/**
+ * The entries about one selected layer, read-only, for the designer's panel: the screen's own on
+ * the root, else those whose `for` is the nearest Weft element at or above the layer. The walk
+ * stops at the root that keeps the context; a layer outside any built screen has none.
+ */
+export function layerContext(layer: ContextLayer): Entry[] {
+  let element: Source | undefined;
+  let at: ContextLayer | undefined = layer;
+  for (let depth = 0; at !== undefined && depth <= MAX_DEPTH; depth++, at = at.parent) {
+    const context = readContext(at);
+    if (context !== undefined) {
+      if (element === undefined) return context.filter((e) => e.for === undefined);
+      const { id } = element;
+      return id === undefined ? [] : context.filter((e) => e.for === id);
+    }
+    element ??= readSource(at);
+  }
+  return [];
+}
+
+/** The `context` reply for a selection: entries only when exactly one layer is selected. */
+export function contextReply(selection: readonly ContextLayer[]): PluginReply {
+  const [layer, ...rest] = selection;
+  return {
+    type: "context",
+    entries: layer === undefined || rest.length > 0 ? [] : layerContext(layer),
+  };
+}
 
 /**
  * The tool's side of a request: build into the file, or read the one selected layer and, when
