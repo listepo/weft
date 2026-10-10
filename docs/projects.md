@@ -12,6 +12,8 @@ The specification is [SPEC §10](../SPEC.md#10-projects); this page shows it in 
 examples/project/
 ├── weft.json
 ├── catalog.json          a component of its own, <rating>, and a ghost button
+├── catalogs/
+│   └── acme-ui.catalog.json a library of <acme-…> components, imported from a manifest
 ├── data.schema.json      the shape of the app's data
 ├── sample.data.json      data to preview the screens with
 ├── tokens/
@@ -28,7 +30,7 @@ examples/project/
 {
   "$schema": "../../schemas/weft.schema.json",
   "tokens": "tokens/theme.resolver.json",
-  "catalog": "catalog.json",
+  "catalog": ["catalogs/acme-ui.catalog.json", "catalog.json"],
   "actions": ["cart.checkout", "cart.remove", "nav.back"],
   "data": "data.schema.json",
   "validate": { "mode": "strict" },
@@ -41,7 +43,7 @@ The first five members are the shared resources:
 | Member | What it is |
 | --- | --- |
 | `tokens` | DTCG token files, in layer order: a later file overrides an earlier one, and aliases are resolved after the merge. Or one DTCG resolver file, for tokens with modes such as light and dark ([below](#light-and-dark-a-resolver)). |
-| `catalog` | An extension of the core catalog: new components, and new values or props on core ones. It may widen the core catalog, never narrow it. |
+| `catalog` | The catalogs merged over the core catalog, in order ([below](#several-catalogs)). Libraries such as `acme-ui` come first; the project's own catalog, last, adds new components and new values or props on core and library ones. It may widen them, never narrow them. |
 | `actions` | The action names the app handles. An `on-*` value outside the list is an error. |
 | `data` | A JSON Schema (a 2020-12 subset) of the app's data. Bindings are checked against it, names and types. |
 | `$schema` | Ignored by the tools. Editors use it to complete and check the file. |
@@ -103,13 +105,23 @@ Tokens that differ by mode (light and dark, compact and roomy, two brands) live 
 - In Figma the contexts of a modifier become variable modes, and in Penpot token themes, when the plugin is given that modifier; exporting from the file gives the modes back as a resolver document (`@weft/figma`, `@weft/penpot`).
 - React and SolidJS components read their tokens from CSS custom properties: `weft css-tokens` writes them as `weft-tokens.css`, light values first and the dark ones under `prefers-color-scheme: dark`. Link it once in the app, with `weft css-base`'s `weft-base.css` after it ([the base stylesheet](cli.md#the-base-stylesheet)).
 
+## Several catalogs
+
+A shared catalog is a library. It names a `prefix`, and every component it adds starts with it: `acme-ui` has the prefix `acme` and adds `<acme-button>`, `<acme-rating>`, `<acme-card>` and `<acme-badge>`. It may say which core catalog it was written for, with `requires: { "weft-core": "0.2.0" }`. The project's own catalog has no prefix and comes last, so it can add its own components and widen core and library ones, as `catalog.json` adds the `ghost` variant to `<acme-button>`.
+
+Two libraries cannot claim one name, prefix or component (`W711`), a library adds only components under its prefix (`W713`), and a missing or incompatible required catalog is a warning (`W714`). The tools list where every component comes from: `weft_capabilities` names each catalog with its prefix and file, and `weft_catalog` names each component's catalog and the catalogs that extend it.
+
+`weft import-cem --prefix acme` turns a Custom Elements Manifest into such a library; without `--prefix` it prints a hint when every tag shares a first segment.
+
+A library can also come from an installed npm package: the entry `{ "package": "@acme/ui" }` finds `node_modules/@acme/ui` in the project folder or a folder above it, and reads the catalog its `package.json` names under `weft.catalog`. [Publishing a catalog](publishing-catalogs.md) has the details.
+
 ## Choosing the project
 
 Every tool that reads a screen looks for the first `weft.json` in the screen's folder or above it.
 
 - `--project <file>` uses another project file.
 - `--no-project` uses none.
-- `--catalog <file>` (the `weft` command) replaces the project's catalog and keeps the rest.
+- `--catalog <file>` (the `weft` command) replaces the project's catalogs and keeps the rest. Repeat it to give several, in order: `--catalog catalogs/acme-ui.catalog.json --catalog catalog.json`. A file whose catalog is named `weft-core` replaces the core catalog itself.
 
 The MCP server has no screen to look from, so it never looks: its host names the file with `--project` (see [The MCP server](mcp.md)), and a tool call can pass a whole project as its `project` argument.
 
@@ -148,6 +160,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `export.schema.outDir` | standard output | Where `weft schema` writes `document.schema.json`, the JSON Schema of the documents the project's catalog admits (`--out-dir` overrides it). |
 | `import.cem.outDir` | standard output | Where `weft import-cem` writes `<file>.catalog.json`, the catalog imported from a Custom Elements Manifest (`--out-dir` overrides it). |
 | `import.cem.name`, `import.cem.version` | the manifest's file stem; `0.0.0` | The name and version of that catalog (`--name` and `--version` override them). |
+| `import.cem.prefix` | none | The prefix of that catalog, which makes it a library that loads beside the project's own catalog (`--prefix` overrides it). |
 | `import.figma.outDir` | the working directory | Where the plugins' `figma-pull` script writes `<screen id>.weft`, a Figma frame read through the REST API (an output path argument overrides it). |
 | `mcp.limits.*` | see `packages/mcp/README.md` | The MCP server's bounds on one call: `markupChars`, `dataChars`, `patches`, `patchesChars`, `projectChars`, `diagnostics`, `inputElements`. |
 | `mcp.context` | `"read-write"` | `"read-only"` makes `weft_patch` refuse every context patch (`W512`); `weft_context` still reads the context. |

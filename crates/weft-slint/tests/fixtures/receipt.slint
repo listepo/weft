@@ -1,0 +1,46 @@
+// weft:source slint
+// <screen id="receipt" label="Receipt" weft="0.2">
+//   <fragment label="Price row" name="price-row">
+//     <param name="label" required="true" type="string"/>
+//     <param name="amount" required="true" type="string"/>
+//     <stack id="row" direction="row" justify="space-between">
+//       <text id="name" text="{$label}"/>
+//       <text id="value" text="{$amount}"/>
+//     </stack>
+//   </fragment>
+//   <stack id="lines">
+//     <use id="subtotal" amount="{$.subtotal}" fragment="price-row" label="Subtotal"/>
+//     <use id="total" amount="{$.total}" fragment="price-row" label="Total"/>
+//   </stack>
+// </screen>
+
+import { VerticalBox } from "std-widgets.slint";
+
+export component ReceiptScreen inherits Window {
+    title: "Receipt";
+    in-out property <string> subtotal;
+    in-out property <string> total;
+    callback perform(string, string);
+
+    receipt := VerticalBox {
+        alignment: LayoutAlignment.start;
+        lines := VerticalLayout {
+            subtotal--row := HorizontalLayout {
+                subtotal--name := Text {
+                    text: "Subtotal";
+                }
+                subtotal--value := Text {
+                    text: root.subtotal;
+                }
+            }
+            total--row := HorizontalLayout {
+                total--name := Text {
+                    text: "Total";
+                }
+                total--value := Text {
+                    text: root.total;
+                }
+            }
+        }
+    }
+}

@@ -20,6 +20,7 @@ import type {
   FPaint,
   FRectangle,
   FRGBA,
+  FSection,
   FSolid,
   FText,
   FVariable,
@@ -159,8 +160,8 @@ export class FakeRectangle extends FakeBase implements FRectangle {
 export class FakeOther extends FakeBase {
   children: FakeNode[] | undefined;
   fills: readonly FPaint[] = [];
-  readonly type: "GROUP" | "VECTOR" | "ELLIPSE";
-  constructor(type: "GROUP" | "VECTOR" | "ELLIPSE", children?: FNode[]) {
+  readonly type: "GROUP" | "VECTOR" | "ELLIPSE" | "SECTION";
+  constructor(type: "GROUP" | "VECTOR" | "ELLIPSE" | "SECTION", children?: FNode[]) {
     super();
     this.type = type;
     if (children !== undefined) {
@@ -175,6 +176,24 @@ export class FakeOther extends FakeBase {
     );
     this.copyBase(c);
     return c;
+  }
+}
+
+export class FakeSection extends FakeOther implements FSection {
+  declare readonly type: "SECTION";
+  declare children: FakeNode[];
+  constructor() {
+    super("SECTION", []);
+  }
+  appendChild(child: FNode): void {
+    attach(this as Owner, child);
+  }
+  insertChild(index: number, child: FNode): void {
+    attach(this as Owner, child, index);
+  }
+  resizeWithoutConstraints(width: number, height: number): void {
+    this.width = width;
+    this.height = height;
   }
 }
 
@@ -487,6 +506,11 @@ export class FakeFigma implements FigmaApi {
     const f = new FakeFrame(this);
     this.currentPage.appendChild(f);
     return f;
+  }
+  createSection(): FakeSection {
+    const s = new FakeSection();
+    this.currentPage.appendChild(s);
+    return s;
   }
   createComponent(): FakeComponent {
     const c = new FakeComponent(this);

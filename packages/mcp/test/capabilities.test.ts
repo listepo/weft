@@ -1,14 +1,24 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { test } from "vitest";
+import { readProject } from "@weft/catalog/node";
+import { hostOptions } from "../src/project.ts";
 import { LISTED } from "../src/tools/capabilities.ts";
 import { call, connect } from "./connect.ts";
 
 const dir = new URL("../../../examples/project/", import.meta.url);
 const file = (name: string): unknown => JSON.parse(readFileSync(new URL(name, dir), "utf8"));
+// Project content holds a library's fragments as markup, not file names (SPEC §10.4).
+const acmeUi = {
+  ...(file("catalogs/acme-ui.catalog.json") as object),
+  fragments: {
+    "acme-promo": readFileSync(new URL("catalogs/fragments/acme-promo.weft", dir), "utf8"),
+  },
+};
 const PROJECT = {
   tokens: [file("tokens/base.tokens.json"), file("tokens/brand.tokens.json")],
-  catalog: [file("catalogs/acme-ui.catalog.json"), file("catalog.json")],
+  catalog: [acmeUi, file("catalog.json")],
   actions: (file("weft.json") as { actions: string[] }).actions,
   data: file("data.schema.json"),
 };
@@ -56,10 +66,12 @@ test("a long list is cut and says so", async () => {
 test("a project argument is advertised in place of the host's configuration", async () => {
   const { isError, json } = await capabilities({ actions: ["host.only"] }, { project: PROJECT });
   assert.equal(isError, false);
-  assert.deepEqual(
-    json.catalogs.map((c: { name: string }) => c.name),
-    ["weft-core", "shop"],
-  );
+  // The three catalogs of examples/project, the core first and the library with its prefix.
+  assert.deepEqual(json.catalogs.slice(1), [
+    { name: "acme-ui", version: "1.0.0", prefix: "acme" },
+    { name: "shop", version: "1.1.0" },
+  ]);
+  assert.equal(json.catalogs[0].name, "weft-core");
   assert.equal(json.data, true);
   assert.deepEqual(json.actions.names, [...PROJECT.actions].toSorted());
   assert.ok(json.tokens.names.length > 0);
@@ -69,4 +81,17 @@ test("a broken project is reported, not advertised", async () => {
   const { isError, blocks } = await capabilities({}, { project: { ...PROJECT, actions: "x" } });
   assert.equal(isError, true);
   assert.match(blocks[0] ?? "", /W701/);
+});
+
+test("a host started with a project lists its catalogs with the files they came from", async () => {
+  const loaded = readProject(fileURLToPath(new URL("weft.json", dir)));
+  const { json } = await capabilities(hostOptions(loaded.project).context);
+  assert.deepEqual(
+    json.catalogs.map((c: { name: string; source?: string }) => [c.name, c.source]),
+    [
+      ["weft-core", undefined],
+      ["acme-ui", "catalogs/acme-ui.catalog.json"],
+      ["shop", "catalog.json"],
+    ],
+  );
 });

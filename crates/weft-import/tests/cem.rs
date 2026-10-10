@@ -12,6 +12,10 @@ use weft_import::{CemImport, CemOptions, LossKind, MAX_KINDS, MAX_MANIFEST_LENGT
 const FIXTURE: &str = include_str!("fixtures/cem/acme-ui.json");
 
 fn import(text: &str) -> CemImport {
+    import_with_prefix(text, None)
+}
+
+fn import_with_prefix(text: &str, prefix: Option<&str>) -> CemImport {
     let base = core_catalog().unwrap();
     import_cem(
         text,
@@ -19,8 +23,59 @@ fn import(text: &str) -> CemImport {
             name: "acme-ui",
             version: "1.0.0",
             base: &base,
+            prefix,
+            core_version: &base.version,
         },
     )
+}
+
+#[test]
+fn a_prefix_makes_a_library_that_loads_beside_a_project_catalog() {
+    let result = import_with_prefix(FIXTURE, Some("acme"));
+    assert_eq!(result.catalog.prefix.as_deref(), Some("acme"));
+    let core = core_catalog().unwrap();
+    assert_eq!(
+        result.catalog.requires.get("weft-core"),
+        Some(&core.version)
+    );
+    assert!(
+        result
+            .catalog
+            .components
+            .keys()
+            .all(|k| k.starts_with("acme-"))
+    );
+    let member = serde_json::to_value(&result.catalog).unwrap();
+    let project = json!({ "name": "shop", "version": "1.0.0", "weft": "0.1", "components": {} });
+    let load = load_project(
+        &json!({ "catalog": [member, project] }),
+        &ProjectOptions::default(),
+    )
+    .unwrap();
+    assert!(load.diagnostics.is_empty(), "{:?}", load.diagnostics);
+    assert!(load.project.catalog.components.contains_key("acme-button"));
+}
+
+#[test]
+fn a_tag_outside_the_prefix_is_a_kinds_loss() {
+    let result = import_with_prefix(FIXTURE, Some("shop"));
+    assert!(result.catalog.components.is_empty());
+    let notes = loss_notes(&result, LossKind::Kinds, "#");
+    assert!(
+        notes
+            .iter()
+            .any(|n| n.contains("\"acme-button\" is outside the catalog's prefix \"shop\"")),
+        "{notes:?}"
+    );
+}
+
+#[test]
+fn without_a_prefix_the_catalog_requires_nothing() {
+    let catalog = import(FIXTURE).catalog;
+    assert_eq!(catalog.prefix, None);
+    assert!(catalog.requires.is_empty());
+    let json = serde_json::to_value(&catalog).unwrap();
+    assert!(json.get("prefix").is_none() && json.get("requires").is_none());
 }
 
 /// The catalog as a project's `catalog` member loads it (SPEC §10.4).

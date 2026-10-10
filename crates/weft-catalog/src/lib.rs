@@ -15,7 +15,8 @@ pub use diff::{CatalogChange, CatalogDiff, ChangeLevel, diff_catalogs};
 pub use document_schema::{DocumentSchemaOptions, document_schema};
 pub use project::{
     CatalogSource, KindSource, MAX_CATALOGS, MAX_TOKEN_FILES, PROJECT_FILE, Project, ProjectLoad,
-    ProjectOptions, ReadFile, is_project_file_name, load_project, load_project_text,
+    ProjectOptions, ReadFile, is_package_name, is_project_file_name, load_project,
+    load_project_text, merge_catalogs, split_package_read,
 };
 pub use resolver::{
     Appearance, MAX_CONTEXTS, RESOLVER_VERSION, TokenModifier, appearance, is_resolver,

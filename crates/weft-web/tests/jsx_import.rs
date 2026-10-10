@@ -126,6 +126,11 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
         "layout",
         "`justify` and `grow` are neither drawn nor carried until the web layout tasks (T16.3, T16.8)",
     ),
+    (
+        "receipt",
+        "an inline fragment is a component of its own, which the importer drops as a `kinds` loss \
+         with its call sites: an importer never produces a `<use>` (SPEC §10.7)",
+    ),
 ];
 
 #[test]

@@ -1,0 +1,11 @@
+<fragment label="Promotion" version="1.0.0" weft="0.3">
+  <param name="title" required="true" type="string"/>
+  <param name="claim" type="action"/>
+  <acme-card id="card" elevated="true">
+    <heading id="title" level="2" text="{$title}"/>
+    <stack id="row" direction="row" gap="{token.space.sm}">
+      <acme-badge id="badge" pill="true">New</acme-badge>
+      <acme-button id="cta" variant="primary" on-acme-click="{$claim}">Claim offer</acme-button>
+    </stack>
+  </acme-card>
+</fragment>

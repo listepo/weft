@@ -172,6 +172,8 @@ export interface PRectangle extends PShapeBase {
 export interface PLibraryComponent {
   readonly id: string;
   name: string;
+  /** The group the assets panel shows the component in, such as `acme-ui`. */
+  path: string;
   instance(): PShape;
   mainInstance(): PShape;
   isVariant(): this is PVariantComponent;
