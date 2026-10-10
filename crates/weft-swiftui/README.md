@@ -39,11 +39,12 @@ A file for a screen whose id is `login` contains these parts, in order:
 
 | Part | Swift |
 | --- | --- |
+| Source comment | `// weft:source swiftui` and the screen's canonical markup with its `<context>`, escaped, one line per comment line (SPEC §9, Provenance). |
 | Data model | `@Observable final class LoginModel`: one property per root data path the bindings read. Each type is inferred from the props that read it: `String`, `Bool`, `Int`, `Double`, a nested struct, or an array of one. |
 | Actions | `enum LoginAction: String, CaseIterable`: one case per action, with the Weft action name as the raw value. |
 | Events | `struct LoginEvent { action, id, item }`: what the handler receives. Inside `<each>`, `item` is the data path of the list item (`$.todos.2`). |
 | Theme | Only without shared tokens: `struct LoginTheme`, the tokens the screen references, nested by group ([Tokens](#tokens)). |
-| View | `struct LoginScreen: View` with `@Bindable var model`, `var theme` (`WeftTokens()` or `LoginTheme()`), and `var perform: (LoginEvent) -> Void`. |
+| View | `struct LoginScreen: View` with `@Bindable var model`, `var theme` (`WeftTokens()` or `LoginTheme()`), and `var perform: (LoginEvent) -> Void`. Each context entry is a `// <kind> (<by> <name>): <text>` line above the view it names, or first in `body` for the screen. |
 | Sample | With sample data only: a memberwise `init` on the model (every argument defaults to the declared value) and `extension LoginModel { static var sample }` built from the data. The importer ignores both. |
 | Preview | `#Preview` with an empty model, or with `.sample` when there is sample data. |
 | Helpers | `fileprivate` helpers named `weft…`. They carry what SwiftUI has no form for, so the importer can read it back. |
@@ -151,7 +152,7 @@ The importer reads the call back as the kind, through the same catalog. A writab
 
 ## Import
 
-The importer reads the first view that no other view in the file uses, and inlines the views it uses from the same file. Source the generator printed comes back unchanged. Other source imports with these rules:
+The importer reads the first view that no other view in the file uses, and inlines the views it uses from the same file. Source the generator printed comes back unchanged. With its source comment it comes back as the comment holds it, context included, but only when the code reads as that screen with no loss: an edited view is read from its code, without the context. Other source imports with these rules:
 
 - **Containers.** `VStack`, `HStack` and `LazyHStack` become `stack`. `LazyVGrid` and `LazyHGrid` become `grid`. `List` becomes `list`, `Form` becomes `form`, and `TabView` becomes `tabs`.
 - **Controls.** `TextField`, `SecureField` and `TextEditor` become `field`. `Toggle` becomes `switch`, or `checkbox` with a checkbox style. `Picker` becomes `select`, `radio-group` when its style is inline or radio-group, or `segmented-control` when it is segmented. `Slider`, `Stepper`, `DatePicker` and `ColorPicker` become `slider`, `stepper`, `date-picker` and `color-picker`; the generated `weftRange`, `weftBounds`, `weftStep`, `weftDate`, `weftDates` and `weftColor` calls read back as the props they were written from, with a `nil` argument for a prop the document left out. An `HStack` marked `.weftCombobox()` becomes a `combobox`.

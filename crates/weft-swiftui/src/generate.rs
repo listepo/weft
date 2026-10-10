@@ -2,8 +2,13 @@
 //! chosen so that `import_swiftui` can read it back: a prop that SwiftUI cannot express, or whose
 //! native form would read the same as its absence, travels in a `.weftProp(name, value)` marker.
 //!
-//! The document is untrusted. Its strings reach the output only as escaped Swift string literals,
-//! and identifiers come from this module or from names that are checked against Swift's grammar.
+//! The file opens with the `weft:source` comment (SPEC §9, Provenance): the screen's canonical
+//! markup, context included, as escaped line comments, and each view that context entries name
+//! gets a readable note above it.
+//!
+//! The document is untrusted. Its strings reach the output only as escaped Swift string literals
+//! or escaped line comments split at every line break, and identifiers come from this module or
+//! from names that are checked against Swift's grammar.
 
 use std::collections::{HashMap, HashSet};
 
@@ -13,8 +18,9 @@ use weft_catalog::{Appearance, Token, token_types};
 use weft_core::controls::{self, DateType};
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, Mode, Node, PropType,
-    ValidateOptions, Value, has_errors, validate_document,
+    ValidateOptions, Value, has_errors, serialize, validate_document,
 };
+use weft_import::provenance;
 
 use crate::Unsupported;
 use crate::data::{Leaf, Shapes, Ty, prop_leaf};
@@ -83,6 +89,9 @@ pub fn generate(
     if has_errors(&diagnostics) {
         return Err(GenerateError::Invalid(diagnostics));
     }
+    // The screen as written, uses included: the importer expands it again to check the code.
+    let source = provenance::line_comment("//", SOURCE_OPTIONS, &serialize(document));
+    let notes = notes(document);
     // A use means its fragment's body (SPEC §10.7); validation reported any cycle or excess.
     let expanded = weft_core::expand(document, options.catalog).document;
     let document = &expanded;
@@ -106,12 +115,29 @@ pub fn generate(
     g.shared_tokens = options.shared_tokens;
     g.data = options.data;
     g.appearance = options.appearance;
+    g.notes = notes;
     let text = g.file(&document.root, options.tokens);
     if g.problems.is_empty() {
-        Ok(text)
+        Ok(format!("{source}\n{text}"))
     } else {
         Err(GenerateError::Unsupported(g.problems))
     }
+}
+
+/// The options word of the `weft:source` comment; `import_swiftui` looks for it.
+pub(crate) const SOURCE_OPTIONS: &str = "swiftui";
+
+/// Readable notes for developers, one line comment per context entry (SPEC §2.3), keyed by the id
+/// its `for` names and by `""` for the entries about the screen (`provenance::note`).
+fn notes(document: &Document) -> HashMap<String, Vec<String>> {
+    let mut out: HashMap<String, Vec<String>> = HashMap::new();
+    for e in &document.context {
+        let note = provenance::note(&e.kind, e.status.as_deref(), &e.by, &e.name, &e.text);
+        out.entry(e.target.clone().unwrap_or_default())
+            .or_default()
+            .push(format!("// {note}"));
+    }
+    out
 }
 
 fn element_path(parent: &str, node: &Node) -> String {
@@ -292,6 +318,8 @@ struct Gen<'a> {
     problems: Vec<Unsupported>,
     data: Option<&'a Json>,
     appearance: Option<Appearance<'a>>,
+    /// Readable context notes by element id, taken as their views are printed.
+    notes: HashMap<String, Vec<String>>,
 }
 
 impl<'a> Gen<'a> {
@@ -312,6 +340,7 @@ impl<'a> Gen<'a> {
             problems: vec![],
             data: None,
             appearance: None,
+            notes: HashMap::new(),
         };
         g.survey(root);
         g
@@ -583,7 +612,9 @@ impl<'a> Gen<'a> {
             out.push("    @Environment(\\.openURL) private var openURL".to_owned());
         }
         out.push(String::new());
-        let body = self.node(root, &mut vec![], Ctx { form: None }, "");
+        // Notes about the screen come first, above the root's own.
+        let mut body = self.notes.remove("").unwrap_or_default();
+        body.extend(self.node(root, &mut vec![], Ctx { form: None }, ""));
         out.extend(indent(block("var body: some View", body)));
         out.push(String::new());
         out.push(format!(
@@ -798,7 +829,24 @@ impl<'a> Gen<'a> {
         Some(self.children(list, loops, ctx, &here))
     }
 
+    /// An element's view, below the notes about it. A note is printed once, at the first copy of
+    /// the element.
     fn node(
+        &mut self,
+        node: &Node,
+        loops: &mut Vec<Loop>,
+        ctx: Ctx<'_>,
+        parent: &str,
+    ) -> Vec<String> {
+        let mut out = match &node.id {
+            Some(id) => self.notes.remove(id).unwrap_or_default(),
+            None => vec![],
+        };
+        out.extend(self.element(node, loops, ctx, parent));
+        out
+    }
+
+    fn element(
         &mut self,
         node: &Node,
         loops: &mut Vec<Loop>,
