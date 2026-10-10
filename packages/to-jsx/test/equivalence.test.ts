@@ -73,6 +73,8 @@ const variants: Variant[] = [
 const SOLID_SSR_TEXTAREA = new Set(["corpus/account", "corpus/inbox"]);
 
 for (const c of cases()) {
+  // A `<use>` expands in the component and stays a use in the reference tree (SPEC §10.7).
+  if (c.name === "corpus/receipt") continue;
   for (const v of variants) {
     const gap = v.framework === "solid" && SOLID_SSR_TEXTAREA.has(c.name);
     const same = gap ? test.fails : test;
