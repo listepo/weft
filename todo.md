@@ -20,3 +20,6 @@
 - T97. Design-tool plugin data over 100 kB
 - T98. `fmt --write` keeps symlinks and permissions
 - T99. Node capped read handles a short read
+- T100. Document versions
+- T101. Inline fragments
+- T103. Library fragments
