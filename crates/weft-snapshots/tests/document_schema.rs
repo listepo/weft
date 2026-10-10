@@ -52,6 +52,11 @@ fn assert_all_pass(schema: &Json, screens: &[(String, Json)]) {
     }
 }
 
+/// `<use>` and inline `<fragment>` are outside the document schema (SPEC §3.1, §10.7).
+fn uses_a_fragment(markup: &str) -> bool {
+    markup.contains("<use ") || markup.contains("<fragment ")
+}
+
 fn project_screens() -> Vec<common::Screen> {
     let dir = common::root().join("examples/project/screens");
     let mut paths: Vec<_> = std::fs::read_dir(&dir)
@@ -86,9 +91,11 @@ fn the_schemas_are_valid_2020_12() {
 #[test]
 fn every_screen_passes_the_core_schema() {
     let catalog = common::catalog();
+    // SPEC §3.1 admits no `<use>` and no inline fragment.
     let screens = canonical(
         common::corpus()
             .into_iter()
+            .filter(|screen| !uses_a_fragment(&screen.markup))
             .chain(common::examples())
             .collect(),
         &catalog,
@@ -108,6 +115,7 @@ fn every_screen_passes_the_project_schema() {
     let screens = canonical(
         common::corpus()
             .into_iter()
+            .filter(|screen| !uses_a_fragment(&screen.markup))
             .chain(common::examples())
             .chain(plain)
             .collect(),

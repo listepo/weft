@@ -29862,54 +29862,54 @@
   },
   {
    "name": "SPEC.md#6 core lenient",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"fragments\": {\n    \"price-row\": {\n      \"kind\": \"fragment\",\n      \"props\": {\n        \"label\": \"Price row\"\n      },\n      \"children\": [\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"label\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"amount\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"stack\",\n          \"id\": \"row\",\n          \"props\": {\n            \"direction\": \"row\",\n            \"justify\": \"space-between\"\n          },\n          \"children\": [\n            {\n              \"kind\": \"text\",\n              \"id\": \"name\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$label\"\n                }\n              }\n            },\n            {\n              \"kind\": \"text\",\n              \"id\": \"value\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$amount\"\n                }\n              }\n            }\n          ]\n        }\n      ]\n    }\n  },\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"subtotal\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.subtotal\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Subtotal\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"total\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.total\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Total\"\n        }\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.2\",\n  \"fragments\": {\n    \"price-row\": {\n      \"kind\": \"fragment\",\n      \"props\": {\n        \"label\": \"Price row\"\n      },\n      \"children\": [\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"label\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"amount\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"stack\",\n          \"id\": \"row\",\n          \"props\": {\n            \"direction\": \"row\"\n          },\n          \"children\": [\n            {\n              \"kind\": \"text\",\n              \"id\": \"name\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$label\"\n                }\n              }\n            },\n            {\n              \"kind\": \"text\",\n              \"id\": \"value\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$amount\"\n                }\n              }\n            }\n          ]\n        }\n      ]\n    }\n  },\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"subtotal\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.subtotal\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Subtotal\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"total\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.total\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Total\"\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n"
    }
   },
   {
    "name": "SPEC.md#6 core strict",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"fragments\": {\n    \"price-row\": {\n      \"kind\": \"fragment\",\n      \"props\": {\n        \"label\": \"Price row\"\n      },\n      \"children\": [\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"label\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"amount\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"stack\",\n          \"id\": \"row\",\n          \"props\": {\n            \"direction\": \"row\",\n            \"justify\": \"space-between\"\n          },\n          \"children\": [\n            {\n              \"kind\": \"text\",\n              \"id\": \"name\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$label\"\n                }\n              }\n            },\n            {\n              \"kind\": \"text\",\n              \"id\": \"value\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$amount\"\n                }\n              }\n            }\n          ]\n        }\n      ]\n    }\n  },\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"subtotal\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.subtotal\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Subtotal\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"total\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.total\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Total\"\n        }\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.2\",\n  \"fragments\": {\n    \"price-row\": {\n      \"kind\": \"fragment\",\n      \"props\": {\n        \"label\": \"Price row\"\n      },\n      \"children\": [\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"label\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"amount\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"stack\",\n          \"id\": \"row\",\n          \"props\": {\n            \"direction\": \"row\"\n          },\n          \"children\": [\n            {\n              \"kind\": \"text\",\n              \"id\": \"name\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$label\"\n                }\n              }\n            },\n            {\n              \"kind\": \"text\",\n              \"id\": \"value\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$amount\"\n                }\n              }\n            }\n          ]\n        }\n      ]\n    }\n  },\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"subtotal\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.subtotal\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Subtotal\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"total\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.total\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Total\"\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n"
    }
   },
   {
    "name": "SPEC.md#6 syntax lenient",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": null,
    "mode": "lenient",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"fragments\": {\n    \"price-row\": {\n      \"kind\": \"fragment\",\n      \"props\": {\n        \"label\": \"Price row\"\n      },\n      \"children\": [\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"label\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"amount\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"stack\",\n          \"id\": \"row\",\n          \"props\": {\n            \"direction\": \"row\",\n            \"justify\": \"space-between\"\n          },\n          \"children\": [\n            {\n              \"kind\": \"text\",\n              \"id\": \"name\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$label\"\n                }\n              }\n            },\n            {\n              \"kind\": \"text\",\n              \"id\": \"value\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$amount\"\n                }\n              }\n            }\n          ]\n        }\n      ]\n    }\n  },\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"subtotal\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.subtotal\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Subtotal\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"total\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.total\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Total\"\n        }\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.2\",\n  \"fragments\": {\n    \"price-row\": {\n      \"kind\": \"fragment\",\n      \"props\": {\n        \"label\": \"Price row\"\n      },\n      \"children\": [\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"label\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"amount\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"stack\",\n          \"id\": \"row\",\n          \"props\": {\n            \"direction\": \"row\"\n          },\n          \"children\": [\n            {\n              \"kind\": \"text\",\n              \"id\": \"name\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$label\"\n                }\n              }\n            },\n            {\n              \"kind\": \"text\",\n              \"id\": \"value\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$amount\"\n                }\n              }\n            }\n          ]\n        }\n      ]\n    }\n  },\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"subtotal\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.subtotal\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Subtotal\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"total\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.total\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Total\"\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n"
    }
   },
   {
    "name": "SPEC.md#6 syntax strict",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": null,
    "mode": "strict",
    "tokens": false,
    "actions": null,
    "expect": {
     "diagnostics": [],
-    "json": "{\n  \"weft\": \"0.2\",\n  \"fragments\": {\n    \"price-row\": {\n      \"kind\": \"fragment\",\n      \"props\": {\n        \"label\": \"Price row\"\n      },\n      \"children\": [\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"label\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"amount\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"stack\",\n          \"id\": \"row\",\n          \"props\": {\n            \"direction\": \"row\",\n            \"justify\": \"space-between\"\n          },\n          \"children\": [\n            {\n              \"kind\": \"text\",\n              \"id\": \"name\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$label\"\n                }\n              }\n            },\n            {\n              \"kind\": \"text\",\n              \"id\": \"value\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$amount\"\n                }\n              }\n            }\n          ]\n        }\n      ]\n    }\n  },\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"subtotal\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.subtotal\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Subtotal\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"total\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.total\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Total\"\n        }\n      }\n    ]\n  }\n}\n",
-    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n"
+    "json": "{\n  \"weft\": \"0.2\",\n  \"fragments\": {\n    \"price-row\": {\n      \"kind\": \"fragment\",\n      \"props\": {\n        \"label\": \"Price row\"\n      },\n      \"children\": [\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"label\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"param\",\n          \"props\": {\n            \"name\": \"amount\",\n            \"required\": true,\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"kind\": \"stack\",\n          \"id\": \"row\",\n          \"props\": {\n            \"direction\": \"row\"\n          },\n          \"children\": [\n            {\n              \"kind\": \"text\",\n              \"id\": \"name\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$label\"\n                }\n              }\n            },\n            {\n              \"kind\": \"text\",\n              \"id\": \"value\",\n              \"props\": {\n                \"text\": {\n                  \"bind\": \"$amount\"\n                }\n              }\n            }\n          ]\n        }\n      ]\n    }\n  },\n  \"root\": {\n    \"kind\": \"screen\",\n    \"id\": \"cart\",\n    \"props\": {\n      \"label\": \"Cart\"\n    },\n    \"children\": [\n      {\n        \"kind\": \"use\",\n        \"id\": \"subtotal\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.subtotal\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Subtotal\"\n        }\n      },\n      {\n        \"kind\": \"use\",\n        \"id\": \"total\",\n        \"props\": {\n          \"amount\": {\n            \"bind\": \"$.cart.total\"\n          },\n          \"fragment\": \"price-row\",\n          \"label\": \"Total\"\n        }\n      }\n    ]\n  }\n}\n",
+    "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n"
    }
   },
   {
@@ -34301,7 +34301,7 @@
   },
   {
    "name": "mutation 15 of SPEC.md#6",
-   "markup": "</id=\"dup\"<!--id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "</id=\"dup\"<!--id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -36656,7 +36656,7 @@
   },
   {
    "name": "mutation 71 of SPEC.md#6",
-   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen></slot>{token.space.md}\n",
+   "markup": "<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen></slot>{token.space.md}\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -36991,7 +36991,7 @@
   },
   {
    "name": "mutation 81 of SPEC.md#6",
-   "markup": "&bogus;{!$.b}een id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "&bogus;{!$.b}een id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -37317,7 +37317,7 @@
   },
   {
    "name": "mutation 88 of SPEC.md#6",
-   "markup": "{{creen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "{{creen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -39806,7 +39806,7 @@
   },
   {
    "name": "mutation 148 of SPEC.md#6",
-   "markup": "&bogus;&bogus;reen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "&bogus;&bogus;reen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "strict",
    "tokens": false,
@@ -42611,7 +42611,7 @@
   },
   {
    "name": "mutation 209 of SPEC.md#6",
-   "markup": "<</slot>creen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "<</slot>creen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -43094,7 +43094,7 @@
   },
   {
    "name": "mutation 221 of SPEC.md#6",
-   "markup": "<each in=\"{$.xs}\" as=\"x\">&amp;screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "<each in=\"{$.xs}\" as=\"x\">&amp;screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -43729,7 +43729,7 @@
   },
   {
    "name": "mutation 237 of SPEC.md#6",
-   "markup": "<!--screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "<!--screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -44403,7 +44403,7 @@
   },
   {
    "name": "mutation 250 of SPEC.md#6",
-   "markup": "=&bogus;<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\" justify=\"space-between\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
+   "markup": "=&bogus;<screen id=\"cart\" label=\"Cart\" weft=\"0.2\">\n  <fragment label=\"Price row\" name=\"price-row\">\n    <param name=\"label\" required=\"true\" type=\"string\"/>\n    <param name=\"amount\" required=\"true\" type=\"string\"/>\n    <stack id=\"row\" direction=\"row\">\n      <text id=\"name\" text=\"{$label}\"/>\n      <text id=\"value\" text=\"{$amount}\"/>\n    </stack>\n  </fragment>\n  <use id=\"subtotal\" amount=\"{$.cart.subtotal}\" fragment=\"price-row\" label=\"Subtotal\"/>\n  <use id=\"total\" amount=\"{$.cart.total}\" fragment=\"price-row\" label=\"Total\"/>\n</screen>\n",
    "catalog": "core",
    "mode": "lenient",
    "tokens": false,
@@ -47269,8 +47269,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -53556,8 +53555,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -54687,8 +54685,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -56356,8 +56353,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -58736,8 +58732,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -64290,8 +64285,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -65904,8 +65898,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -66687,8 +66680,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -68341,8 +68333,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -75198,8 +75189,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {
@@ -78821,8 +78811,7 @@
         "kind": "stack",
         "id": "row",
         "props": {
-         "direction": "row",
-         "justify": "space-between"
+         "direction": "row"
         },
         "children": [
          {

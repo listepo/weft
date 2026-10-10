@@ -44,7 +44,12 @@ fn generated_slint_matches_the_golden_files() {
     let (catalog, tokens) = setup();
     let update = std::env::var_os("WEFT_UPDATE_FIXTURES").is_some();
     for (name, path) in screens() {
-        let doc = document(&std::fs::read_to_string(&path).unwrap(), &catalog, &tokens);
+        let markup = std::fs::read_to_string(&path).unwrap();
+        // Import never rebuilds a `<use>` or an inline fragment (SPEC §10.7).
+        if markup.contains("<use ") || markup.contains("<fragment ") {
+            continue;
+        }
+        let doc = document(&markup, &catalog, &tokens);
         let options = GenerateOptions {
             catalog: &catalog,
             tokens: &tokens,
@@ -80,6 +85,10 @@ fn generated_slint_reads_back_to_the_canonical_document() {
     let (catalog, tokens) = setup();
     for (name, path) in screens() {
         let markup = std::fs::read_to_string(&path).unwrap();
+        // Import never rebuilds a `<use>` or an inline fragment (SPEC §10.7).
+        if markup.contains("<use ") || markup.contains("<fragment ") {
+            continue;
+        }
         let doc = document(&markup, &catalog, &tokens);
         let gen_options = GenerateOptions {
             catalog: &catalog,
