@@ -1,11 +1,12 @@
 //! Fragments (SPEC §10.7): one reading of `<fragment>` and `<param>` declarations, so that the
 //! parser types their literals and the validator checks fragments and their reads alike.
 
-use crate::diagnostics::{Code, one_of};
+use crate::diagnostics::{Code, Diagnostic, one_of};
 use crate::model::{
     Child, ComponentDef, Content, Map, Node, PropDef, PropDefault, PropType, SlotDef, Value,
 };
 use crate::rules::is_name;
+use crate::source::path_segment;
 
 pub const FRAGMENT: &str = "fragment";
 pub const PARAM: &str = "param";
@@ -651,4 +652,72 @@ pub fn signature(root: &Node) -> ComponentDef {
         states: None,
         events: (!events.is_empty()).then_some(events),
     }
+}
+
+/// Where a fragment's body reaches the host without a parameter: a read of the host data model
+/// or an action named literally, as `W716` (SPEC §10.7). A library fragment is used by projects
+/// whose data and actions its author does not know, so both must come in through parameters.
+/// Paths start at `#/fragment`, as the validator's do.
+pub fn host_reaches(root: &Node) -> Vec<Diagnostic> {
+    let mut out = Vec::new();
+    let mut stack = vec![(root, format!("/{}", path_segment(&root.kind, None, None)))];
+    while let Some((node, path)) = stack.pop() {
+        let source = node.source.0.as_deref();
+        let at = |attr: &str| {
+            let pos = source.and_then(|s| s.attrs.get(attr).or(Some(&s.pos)).copied());
+            (format!("#{path}/@{attr}"), pos)
+        };
+        for (attr, value) in &node.props {
+            if let Value::Bind { bind, .. } = value
+                && bind.starts_with("$.")
+            {
+                let (path, pos) = at(attr);
+                let message =
+                    format!("The library fragment reads {bind} from the host data model.");
+                let d = Diagnostic::new(
+                    Code::W716,
+                    path,
+                    message,
+                    "a value parameter, read as {$name}",
+                );
+                out.push(
+                    d.pos(pos).got(bind.clone()).hint(
+                        "declare a value <param> and let the screen pass the data at the <use>",
+                    ),
+                );
+            }
+        }
+        for (event, action) in &node.on {
+            if action.starts_with("{$") && action.ends_with('}') {
+                continue;
+            }
+            let (path, pos) = at(&format!("on-{event}"));
+            let message = format!("The library fragment names the action \"{action}\" literally.");
+            let d = Diagnostic::new(
+                Code::W716,
+                path,
+                message,
+                "an action parameter, read as {$name}",
+            );
+            out.push(
+                d.pos(pos).got(action.clone()).hint(
+                    "declare an action <param> and let the screen name the action at the <use>",
+                ),
+            );
+        }
+        let lists = std::iter::once((path.clone(), &node.children))
+            .chain((node.slots.iter()).map(|(name, list)| (format!("{path}/slot[{name}]"), list)));
+        let mut next = Vec::new();
+        for (list_path, list) in lists {
+            for (index, child) in list.iter().enumerate() {
+                if let Child::Node(child) = child {
+                    let segment = path_segment(&child.kind, child.id.as_deref(), Some(index));
+                    next.push((child.as_ref(), format!("{list_path}/{segment}")));
+                }
+            }
+        }
+        // Reversed onto the stack, so that diagnostics come in document order.
+        stack.extend(next.into_iter().rev());
+    }
+    out
 }

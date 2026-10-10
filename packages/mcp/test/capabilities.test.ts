@@ -9,9 +9,16 @@ import { call, connect } from "./connect.ts";
 
 const dir = new URL("../../../examples/project/", import.meta.url);
 const file = (name: string): unknown => JSON.parse(readFileSync(new URL(name, dir), "utf8"));
+// Project content holds a library's fragments as markup, not file names (SPEC §10.4).
+const acmeUi = {
+  ...(file("catalogs/acme-ui.catalog.json") as object),
+  fragments: {
+    "acme-promo": readFileSync(new URL("catalogs/fragments/acme-promo.weft", dir), "utf8"),
+  },
+};
 const PROJECT = {
   tokens: [file("tokens/base.tokens.json"), file("tokens/brand.tokens.json")],
-  catalog: [file("catalogs/acme-ui.catalog.json"), file("catalog.json")],
+  catalog: [acmeUi, file("catalog.json")],
   actions: (file("weft.json") as { actions: string[] }).actions,
   data: file("data.schema.json"),
 };
