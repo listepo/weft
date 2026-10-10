@@ -1,5 +1,11 @@
 # Done
 
+### T102. Fragment variants
+
+One enum parameter marked `variant="true"` selects one `<variant when="…">` body. A use passes a literal; a binding is the existing `W217`. Ids are local to each variant, so an instance path stays valid when the variant changes. `W809` covers a bad declaration. `weft explain` names the chosen variant and a slot the variant drops.
+
+Built: the parameter, `<variant>` and expansion live in `crates/weft-core`. The price-row fragment and the totals screen are the fixture. The format bump to `weft` 0.3 stays with T100, so writers still emit `weft="0.2"`. Merged in #48.
+
 ### T39.8. Context: readable comments in React and SolidJS
 
 For developers, each element that entries name gets a readable comment above it in generated React and SolidJS code, for example `{/* decision (agent claude-opus-5-5): Disabled until … */}`, escaped like the source comment (`*/`, `@`), and only when the context is kept. The comments are derived: importers ignore them, and regenerating gives them back, so the source check still passes.

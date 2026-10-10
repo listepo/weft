@@ -26,7 +26,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T39 | in progress | P1 | 4 | 80% | Claude Code / claude-opus-5-5 |
 | T39.7 | todo | P2 | 3 | 0% | |
 | T39.9 | todo | P2 | 3 | 0% | |
-| T68 | in progress | P2 | 4 | 0% | Grok Bot / grok |
+| T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
@@ -44,7 +44,9 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T97 | todo | P2 | 2 | 0% | |
 | T98 | todo | P2 | 2 | 0% | |
 | T99 | todo | P3 | 1 | 0% | |
-| T102 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
+| T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
+| T101 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
+| T103 | todo | P2 | 4 | 0% | |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -70,15 +72,27 @@ Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` m
 
 Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
 
-### T102. Fragment variants
+### T100. Document versions
 
-One enum parameter marked `variant="true"` selects one `<variant when="…">` body (design §6; one axis, not several). Done when a fragment file validates, expands and explains the chosen variant, `W809` covers a bad declaration, and the price-row example is a fragment file plus a screen. Inline fragments are T101; until that lands, variants apply to fragment files. Document versions are T100: these additions are specified as format 0.3 and this change does not bump the reader version or add a second classifier.
+An optional `version` (`MAJOR.MINOR.PATCH`) on `<screen>` and `<fragment>`. A fragment's change level comes from its parameter signature through the catalog classifier; a body-only change is a patch. Below `1.0.0` the level follows Cargo's rule, as `requires` does. A screen's level follows its host contract: a new action, a new data path, a path read at a new type, a new writable binding or a lost element id is major; new ids alone are minor; any other canonical change is a patch. `weft version-check` reports `W810` when the declared version was not raised enough. A screen and a `<use>` never name a version. A project pins a library through the existing `requires`, so that pin is not a separate task. The format moves to `weft` 0.3.
 
-Execution plan:
+Done when the parser, the canonical form, `set-version` and `W230` match the spec, writers emit `weft="0.3"`, and `weft version-check` exits 1 on a version that is too low.
 
-1. `SPEC.md` and `AGENT-SPEC.md`: variant syntax, `W809`, canonical JSON, literal-only use (`bindable: false`, existing `W217`), per-variant ids, expansion and explain. Primer stays consistent. Note the 0.3 bump waits on T100.
-2. Rust: parse `variant` on `<param>`, check `<variant>` (`W809`), validate each body on its own, expand and place the chosen body, `weft explain` names it and a dropped slot.
-3. Fixture: `examples/project` price-row fragment and a screen that uses both variants. `moon run root:changed`.
+Draft pull request #49.
+
+### T101. Inline fragments
+
+`<fragment name="…">` is a direct child of `<screen>`, after `<context>` and before the body. It is local to that screen and needs no `weft.json`. A name the project already defines is refused. Patches gain a `fragment` member, plus `add-fragment` and `remove-fragment`.
+
+Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
+
+Draft pull request #47.
+
+### T103. Library fragments
+
+A library catalog, one with a `prefix`, lists fragments named `<prefix>-…`. A fragment reaches the host only through its parameters. Committed files first. Resolving a fragment from an npm package waits on T17.3 and uses that lookup rather than a second one.
+
+Done when `examples/project` loads a library fragment, a fragment that reads host data or names an action literally is `W716`, and a name outside its owner is `W715`.
 
 ### T8. Evaluation
 
