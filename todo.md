@@ -8,7 +8,6 @@
 - T16. Layout vocabulary
 - T16.3. Layout vocabulary: web generators and the reference renderer
 - T16.8. Layout vocabulary: web importers
-- T16.4. Layout vocabulary: SwiftUI
 - T16.5. Layout vocabulary: Slint
 - T16.7. Layout vocabulary: Figma and Penpot
 - T41. Hosted Penpot plugin

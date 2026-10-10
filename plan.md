@@ -31,7 +31,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16 | todo | P2 | 5 | 30% | |
 | T16.3 | todo | P2 | 3 | 0% | |
 | T16.8 | todo | P2 | 3 | 0% | |
-| T16.4 | todo | P2 | 4 | 0% | |
 | T16.5 | todo | P2 | 3 | 0% | |
 | T16.7 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
@@ -397,7 +396,7 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 
 **Dependencies.** T55 and T52 (done) are the precedents. T39 is independent: this ships within `weft` 0.1 (decision 9). T14's style overrides add no `style-padding` for `stack` and `grid` (decision 6). T67.4 and T67.5, which edit the same Slint `read.rs`, are done. T69's "resize within the layout rules" builds on this.
 
-**Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render (done). T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
+**Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer (done). T16.5: Slint generator and reader. T16.6: A2UI and json-render (done). T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
 
 ### T16.3. Layout vocabulary: web generators and the reference renderer
 
@@ -427,20 +426,6 @@ Steps:
 Size: about 250 lines of code.
 
 Done when: the generated HTML and JSX of `dashboard`, `glass` and `layout`, with the source comment removed, read back to the same props; a test covers each listed loss; `moon run root:changed` exits 0.
-
-### T16.4. Layout vocabulary: SwiftUI
-
-T16 scope items 3 to 5 for `crates/weft-swiftui`, as the design's tables and decisions 4 and 5 say. Depends on T16.2.
-
-Steps:
-
-1. Generator: `justify` on rows as spacers (`space-between` as `HStack(spacing: 0)` with `Spacer(minLength: <gap>)` between children, also inside `<each>`); `grow` on a row child as `.frame(maxWidth: .infinity)`; `padding` as `.padding(theme.<path>)`; `max-width` as the pair of frames; `min-column-width` as a small generated `Layout` that caps at `columns`. `justify` and `grow` in a column stay inert markers and §9 lists them.
-2. Importer: read those patterns and markers back; a `padding` or `frame` that is not a theme token stays a `layout` loss.
-3. Insta snapshots, and the reviewed SwiftUI baselines in `packages/visual` (`WEFT_SIMULATOR=own` in a worktree). If the generated `Layout` cannot match the web baseline, fall back to `GridItem(.adaptive(minimum:))` and record the difference in §9 (decision 5).
-
-Size: about 350 lines of code, including the generated `Layout` helper.
-
-Done when: the three screens compile, match their reviewed baselines, and read back to the same props with the source comment removed; `moon run root:changed` exits 0.
 
 ### T16.5. Layout vocabulary: Slint
 

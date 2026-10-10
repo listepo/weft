@@ -75,22 +75,22 @@ struct ReceiptScreen: View {
     var body: some View {
         VStack(alignment: .leading) {
             VStack {
-                HStack {
+                HStack(spacing: 0) {
                     Text(verbatim: "Subtotal")
                         .accessibilityIdentifier("subtotal/name")
+                    Spacer()
                     Text(model.subtotal)
                         .accessibilityIdentifier("subtotal/value")
                 }
-                .weftProp("justify", "space-between")
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("subtotal/row")
-                HStack {
+                HStack(spacing: 0) {
                     Text(verbatim: "Total")
                         .accessibilityIdentifier("total/name")
+                    Spacer()
                     Text(model.total)
                         .accessibilityIdentifier("total/value")
                 }
-                .weftProp("justify", "space-between")
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("total/row")
             }
