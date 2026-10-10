@@ -1695,11 +1695,14 @@ impl<'a> Reader<'a> {
     /// `HStack(spacing: 0)`, one spacer between every two children and before the items of a
     /// `ForEach`, the first item's behind an `if` (`space-between`), its `minLength` the gap. Any
     /// other spacer stays in the body, where it is a `layout` loss.
-    fn justify(&self, body: &mut Vec<Stmt>, unspaced: bool) -> Option<(&'static str, Option<String>)> {
+    fn justify(
+        &self,
+        body: &mut Vec<Stmt>,
+        unspaced: bool,
+    ) -> Option<(&'static str, Option<String>)> {
         let is_spacer = |s: &Stmt| spacer(s).is_some();
-        let edge = |s: Option<&Stmt>| {
-            matches!(s.and_then(spacer), Some(Some(Expr::Num(n))) if *n == 0.0)
-        };
+        let edge =
+            |s: Option<&Stmt>| matches!(s.and_then(spacer), Some(Some(Expr::Num(n))) if *n == 0.0);
         let count = body.iter().filter(|s| is_spacer(s)).count();
         if !unspaced {
             if count == 2 && edge(body.first()) && edge(body.last()) {
@@ -1715,7 +1718,9 @@ impl<'a> Reader<'a> {
         }
         if body.first().is_some_and(is_spacer)
             || body.last().is_some_and(is_spacer)
-            || body.windows(2).any(|w| is_spacer(&w[0]) && is_spacer(&w[1]))
+            || body
+                .windows(2)
+                .any(|w| is_spacer(&w[0]) && is_spacer(&w[1]))
         {
             return None;
         }

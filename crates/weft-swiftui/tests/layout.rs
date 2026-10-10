@@ -67,9 +67,17 @@ fn a_rows_justify_is_drawn_with_spacers() {
             "<stack id=\"row\" direction=\"row\" gap=\"{{token.space.sm}}\" justify=\"{justify}\">{PAIR}</stack>"
         )
     };
-    let end = round_trip(&row("end"), &["Spacer(minLength: 0)"], &["weftProp(\"justify\""]);
+    let end = round_trip(
+        &row("end"),
+        &["Spacer(minLength: 0)"],
+        &["weftProp(\"justify\""],
+    );
     assert_eq!(end.matches("Spacer(").count(), 1, "{end}");
-    let center = round_trip(&row("center"), &["Spacer(minLength: 0)"], &["weftProp(\"justify\""]);
+    let center = round_trip(
+        &row("center"),
+        &["Spacer(minLength: 0)"],
+        &["weftProp(\"justify\""],
+    );
     assert_eq!(center.matches("Spacer(").count(), 2, "{center}");
     round_trip(
         &row("space-between"),
@@ -108,7 +116,11 @@ fn space_between_puts_a_spacer_between_the_items_of_a_list() {
         &["if itemIndex > 0 {"],
         &[],
     );
-    assert_eq!(first.matches("Spacer(minLength: theme.space.sm)").count(), 2, "{first}");
+    assert_eq!(
+        first.matches("Spacer(minLength: theme.space.sm)").count(),
+        2,
+        "{first}"
+    );
     // After another child, every item has one.
     let after = round_trip(
         "<stack id=\"row\" direction=\"row\" justify=\"space-between\"><text id=\"start\">Start</text><each id=\"items\" as=\"item\" in=\"{$.items}\"><text id=\"t\" text=\"{$item.name}\"/><text id=\"u\" text=\"{$item.note}\"/></each></stack>",
@@ -156,10 +168,17 @@ fn padding_and_max_width_are_modifiers_inside_the_material() {
         &["weftProp(\"padding\"", "weftProp(\"max-width\""],
     );
     let at = |n: &str| out.find(n).unwrap();
-    assert!(at(".padding(") < at(".frame(maxWidth: .infinity") && at(".frame(maxWidth: theme") < at(".modifier(theme.material"));
+    assert!(
+        at(".padding(") < at(".frame(maxWidth: .infinity")
+            && at(".frame(maxWidth: theme") < at(".modifier(theme.material")
+    );
     round_trip(
         "<grid id=\"g\" columns=\"2\" max-width=\"{token.size.lg}\" padding=\"{token.space.sm}\"><text id=\"t\">T</text></grid>",
-        &["LazyVGrid", ".padding(theme.space.sm)", ".frame(maxWidth: theme.size.lg)"],
+        &[
+            "LazyVGrid",
+            ".padding(theme.space.sm)",
+            ".frame(maxWidth: theme.size.lg)",
+        ],
         &["WeftColumns"],
     );
 }
@@ -192,24 +211,59 @@ fn other_spacers_paddings_and_frames_are_layout_losses() {
         assert_ne!(edited, out, "{from}");
         let losses = layout_losses(&edited);
         assert!(
-            losses.iter().any(|l| l.starts_with("Layout") && l.contains(note)),
+            losses
+                .iter()
+                .any(|l| l.starts_with("Layout") && l.contains(note)),
             "{note}: {losses:?}\n{edited}"
         );
     };
     let card = "<stack id=\"card\" max-width=\"{token.size.md}\" padding=\"{token.space.lg}\"><text id=\"t\">T</text></stack>";
-    lost(card, ".padding(theme.space.lg)", ".padding(16)", "`.padding`");
-    lost(card, ".frame(maxWidth: theme.size.md)", ".frame(maxWidth: 480)", "`.frame`");
+    lost(
+        card,
+        ".padding(theme.space.lg)",
+        ".padding(16)",
+        "`.padding`",
+    );
+    lost(
+        card,
+        ".frame(maxWidth: theme.size.md)",
+        ".frame(maxWidth: 480)",
+        "`.frame`",
+    );
     let row = format!("<stack id=\"row\" direction=\"row\" justify=\"end\">{PAIR}</stack>");
-    lost(&row, "Spacer(minLength: 0)", "Spacer(minLength: 12)", "`Spacer`");
+    lost(
+        &row,
+        "Spacer(minLength: 0)",
+        "Spacer(minLength: 12)",
+        "`Spacer`",
+    );
     let between = format!(
         "<stack id=\"row\" direction=\"row\" gap=\"{{token.space.sm}}\" justify=\"space-between\">{PAIR}<text id=\"c\">C</text></stack>"
     );
     // Spacers of two lengths are not the generator's.
     let (out, _) = swift(&between);
-    let edited = out.replacen("Spacer(minLength: theme.space.sm)", "Spacer(minLength: theme.space.md)", 1);
-    assert!(layout_losses(&edited).iter().any(|l| l.contains("`Spacer`")));
+    let edited = out.replacen(
+        "Spacer(minLength: theme.space.sm)",
+        "Spacer(minLength: theme.space.md)",
+        1,
+    );
+    assert!(
+        layout_losses(&edited)
+            .iter()
+            .any(|l| l.contains("`Spacer`"))
+    );
     let column = "<stack id=\"col\"><text id=\"t\" grow=\"true\">T</text></stack>";
-    lost(column, ".weftProp(\"grow\", true)", ".frame(maxWidth: .infinity)", "`.frame`");
+    lost(
+        column,
+        ".weftProp(\"grow\", true)",
+        ".frame(maxWidth: .infinity)",
+        "`.frame`",
+    );
     let grid = "<grid id=\"g\" columns=\"2\" min-column-width=\"{token.size.sm}\"><text id=\"t\">T</text></grid>";
-    lost(grid, "minWidth: theme.size.sm", "minWidth: 200", "column width");
+    lost(
+        grid,
+        "minWidth: theme.size.sm",
+        "minWidth: 200",
+        "column width",
+    );
 }
