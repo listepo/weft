@@ -35,7 +35,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16.5 | todo | P2 | 3 | 0% | |
 | T16.7 | todo | P2 | 3 | 0% | |
 | T17 | todo | P2 | 4 | 50% | |
-| T17.3 | todo | P2 | 3 | 0% | |
+| T17.3 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
 | T41 | todo | P2 | 2 | 0% | |
 | T96 | todo | P2 | 3 | 0% | |
 | T97 | todo | P2 | 2 | 0% | |
@@ -521,6 +521,15 @@ T17's sharing, by decisions 7–9. Depends on T17.1 (and T17.2 for `source` in `
 - A test package in a temporary `node_modules` (nested above the project directory too) that resolves with no network access.
 - Docs: `docs/publishing-catalogs.md` (prefix, `requires`, the `package.json` fields `weft.catalog`, `files` and the keyword `weft-catalog`), `docs/catalogs.md` as the curated list of catalogs and taken prefixes, kept by the creator; `docs/what-is-weft.md` and `docs/catalog-and-tokens.md` stop saying there is no registry; the `research.md` §9 row marked built.
 - Done when T17's fourth done criterion holds and the full check exits 0.
+
+**Execution plan.**
+1. `crates/weft-catalog/src/project.rs`: a `{ "package": "<npm name>" }` entry of `catalog` (only when the loader has a reader; project content keeps catalog objects). The loader checks the npm name (`W703`), asks the host for `package.json` and then for the file its `weft.catalog` names (§10.2 rules relative to the package directory, `W703`), and reports a missing package, field or file as `W704`; `source` is `<package>/<file>`. One loader function reads any `weft.<field>` of a package, so T103 can reuse it for fragments.
+2. The loader asks through the existing `ReadFile` with names `package:<npm name>/<file>`, which no project file name can be (`:` is refused), so the WebAssembly two-pass reader in `@weft/catalog` needs no change. `split_package_name` (Rust) and the Node reader turn such a name into a lookup.
+3. Hosts: the `weft` command (`crates/weft-cli`) and `readProject` (`packages/catalog/src/node.ts`) find `node_modules/<name>/package.json` in the project directory, then each parent, and read only files whose resolved path stays inside that package directory. Nothing runs, nothing is fetched.
+4. `schemas/weft.schema.json`: `catalog` entries may be `{ "package": … }`.
+5. Tests: Rust loader cases (bad name, missing package, missing field, bad path, a package catalog loading with `source`); a CLI test and a Node test with a temporary `node_modules` above the project directory, and a symbolic link out of the package refused.
+6. Docs: SPEC §10.2 (the exception), `docs/publishing-catalogs.md`, `docs/catalogs.md`, `docs/what-is-weft.md`, `docs/catalog-and-tokens.md`, `research.md` §9 row.
+Verify with `moon run root:changed`.
 
 ### T41. Hosted Penpot plugin
 
