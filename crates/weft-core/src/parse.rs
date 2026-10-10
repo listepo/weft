@@ -172,6 +172,8 @@ struct Builder<'a> {
     catalog: Option<&'a Catalog>,
     diagnostics: Vec<Diagnostic>,
     weft: String,
+    /// The root's `version` attribute, lifted like `weft` (SPEC §3).
+    version: Option<String>,
     /// The root's `<context>` block, lifted out of its content (SPEC §2.3).
     context: Option<Vec<Entry>>,
     /// Paths of the elements the end of a partial input left open.
@@ -225,6 +227,9 @@ impl Builder<'_> {
                 on.push((event.to_owned(), attr.value.clone()));
             } else if is_root && attr.name == "weft" {
                 self.weft = attr.value.clone();
+            } else if is_root && attr.name == "version" {
+                // Kept as text so a binding or any other value reaches validation as W230.
+                self.version = Some(attr.value.clone());
             } else {
                 match read_value(
                     &attr.value,
@@ -437,6 +442,7 @@ fn build_open(
         catalog,
         diagnostics: vec![],
         weft: String::new(),
+        version: None,
         context: None,
         open: HashSet::new(),
     };
@@ -450,6 +456,7 @@ fn build_open(
     };
     let document = Document {
         weft: b.weft,
+        version: b.version,
         context: b.context.unwrap_or_default(),
         root,
     };

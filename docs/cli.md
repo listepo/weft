@@ -25,6 +25,7 @@ Commands:
   validate        Check a document: markup, or canonical JSON when the file name ends in `.json`
   fmt             Print the canonical markup of a document
   explain         Read back what each binding, token, event and loop of a markup document means, one per line, so the meaning can be compared with the instruction behind an edit
+  version-check   Compare two versions of one screen, fragment or library catalog and say how far its version must be raised
   swiftui         Generate a SwiftUI view (iOS 17, macOS 14) from a markup document
   swiftui-tokens  Generate `WeftTokens.swift`, the design tokens every SwiftUI screen of a project shares
   import-swiftui  Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses

@@ -43,9 +43,13 @@ describe.skipIf(skipReason)("command plugin", () => {
 
     const imported = swiftPackage(["import", "Generated/login.swift", "--out-dir", "Imported"]);
     expect(imported.status, imported.output).toBe(0);
-    // The importer gives back the screen the file's `weft:source` comment holds (SPEC §9), so the
-    // result is the canonical form of the original screen, version included.
-    const canonical = run(weftBinary(), ["fmt", join(ws.sample, screen)], ws.sample).output;
+    // The importer gives back the screen the file's `weft:source` comment holds (SPEC §9). The
+    // generator stamps the current version (the corpus stays at 0.1, which a 0.3 reader reads
+    // unchanged).
+    const canonical = run(weftBinary(), ["fmt", join(ws.sample, screen)], ws.sample).output.replace(
+      'weft="0.1"',
+      'weft="0.3"',
+    );
     expect(readFileSync(join(ws.sample, "Imported/login.weft"), "utf8")).toBe(canonical);
   });
 

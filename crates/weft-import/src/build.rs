@@ -1195,6 +1195,7 @@ pub fn build_document(top: &[Sem], options: BuildOptions<'_>) -> Built {
     }
     let document = canonicalize(&Document {
         weft: WEFT_VERSION.into(),
+        version: None,
         context: Vec::new(),
         root: node,
     });

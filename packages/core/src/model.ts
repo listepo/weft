@@ -2,7 +2,7 @@
 // change them only together with the specification.
 import { z } from "zod";
 
-export const WEFT_VERSION = "0.2";
+export const WEFT_VERSION = "0.3";
 
 export const BindingSchema = z.strictObject({ bind: z.string(), not: z.literal(true).optional() });
 export const TokenRefSchema = z.strictObject({ token: z.string() });
@@ -55,6 +55,8 @@ export type Entry = z.infer<typeof EntrySchema>;
 
 export const DocumentSchema = z.strictObject({
   weft: z.string(),
+  // The root's `version` attribute (SPEC §3). Absent when the document declares none.
+  version: z.string().optional(),
   context: z.array(EntrySchema).optional(),
   root: NodeSchema,
 });
@@ -157,5 +159,6 @@ export const PatchSchema = z.discriminatedUnion("op", [
   }),
   z.strictObject({ op: z.literal("resolve-context"), id: z.string() }),
   z.strictObject({ op: z.literal("remove-context"), id: z.string() }),
+  z.strictObject({ op: z.literal("set-version"), value: z.string().nullable() }),
 ]);
 export type Patch = z.infer<typeof PatchSchema>;

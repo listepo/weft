@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-signup as a2ui-import
 ---
-<screen id="signup" weft="0.2">
+<screen id="signup" weft="0.3">
   <stack id="form">
     <heading id="title" level="1">Create your account</heading>
     <stack id="fields">

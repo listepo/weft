@@ -14,8 +14,8 @@ use crate::model::{
 };
 use crate::rules::{
     ARIA_ROLES, CONTEXT, EACH, ENTRY, MAX_DEPTH, MODEL_ASSETS, SLOT, asset_problem,
-    embedded_reference, has_non_xml_char, is_action, is_binding, is_extension_name, is_id,
-    is_loop_variable, is_name, is_token, universal_prop, version,
+    embedded_reference, has_non_xml_char, is_action, is_binding, is_document_version,
+    is_extension_name, is_id, is_loop_variable, is_name, is_token, universal_prop, version,
 };
 use crate::shape::{document_issues, to_document};
 use crate::source::{NodeSource, path_segment};
@@ -84,6 +84,10 @@ pub fn validate_document(document: &Document, options: &ValidateOptions<'_>) -> 
     let root_path = format!("/{}", path_segment(&root.kind, root.id.as_deref(), None));
     let version_at = node_at(root, &root_path, Some("weft"));
     v.check_version(&document.weft, &version_at);
+    if let Some(declared) = &document.version {
+        let at = node_at(root, &root_path, Some("version"));
+        v.check_document_version(declared, &at);
+    }
     if root.kind == FRAGMENT {
         v.visit_fragment(root, &root_path);
     } else {
@@ -932,6 +936,15 @@ impl<'a> Validator<'a> {
                 ));
                 continue;
             }
+            if owner.is_none() && name == "version" {
+                self.report(diag(
+                    Code::W200,
+                    &attr_at,
+                    "The document version lives in Document.version, not in the root's props.",
+                    "Document.version",
+                ));
+                continue;
+            }
             if let Some(component) = component.filter(|_| category == Category::Use) {
                 let def = component.prop(name);
                 if def.is_none() && !name.starts_with("x-") {
@@ -1372,6 +1385,22 @@ impl<'a> Validator<'a> {
                 .hint(format!("write {fix}")),
             );
         }
+    }
+
+    fn check_document_version(&mut self, version: &str, at: &At) {
+        if is_document_version(version) {
+            return;
+        }
+        self.report(
+            diag(
+                Code::W230,
+                at,
+                "version must be a literal MAJOR.MINOR.PATCH.",
+                "MAJOR.MINOR.PATCH",
+            )
+            .got(version)
+            .hint("write version=\"1.0.0\", or remove it"),
+        );
     }
 }
 

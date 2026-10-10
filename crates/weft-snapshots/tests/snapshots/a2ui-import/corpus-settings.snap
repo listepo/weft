@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-settings as a2ui-import
 ---
-<screen id="settings" weft="0.2">
+<screen id="settings" weft="0.3">
   <heading id="title" level="1">Settings</heading>
   <section id="notifications" label="Notifications">
     <stack id="notifications-body">

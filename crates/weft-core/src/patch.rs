@@ -55,7 +55,7 @@ pub struct PatchResult {
     pub diagnostics: Vec<Diagnostic>,
 }
 
-const FORMS: [(&str, &str); 8] = [
+const FORMS: [(&str, &str); 9] = [
     (
         "set",
         r#"{"op":"set","id":"…","prop":"…","value":<literal|{bind}|{token}|null>}"#,
@@ -79,6 +79,10 @@ const FORMS: [(&str, &str); 8] = [
     ),
     ("resolve-context", r#"{"op":"resolve-context","id":"…"}"#),
     ("remove-context", r#"{"op":"remove-context","id":"…"}"#),
+    (
+        "set-version",
+        r#"{"op":"set-version","value":"MAJOR.MINOR.PATCH"|null}"#,
+    ),
 ];
 
 fn form(op: &str) -> Option<&'static str> {
@@ -107,6 +111,9 @@ enum Patch {
         index: Option<u64>,
     },
     Context(ContextPatch),
+    SetVersion {
+        value: Option<String>,
+    },
 }
 
 /// Reads a patch that passed [`patch_issues`].
@@ -144,6 +151,9 @@ fn to_patch(v: &Json) -> Patch {
         }),
         Some("resolve-context") => Patch::Context(ContextPatch::Resolve(s("id"))),
         Some("remove-context") => Patch::Context(ContextPatch::Remove(s("id"))),
+        Some("set-version") => Patch::SetVersion {
+            value: v.get("value").and_then(Json::as_str).map(str::to_owned),
+        },
         _ => Patch::Move {
             id: s("id"),
             parent: s("parent"),
@@ -180,6 +190,11 @@ pub fn apply_patches(
                     options.read_only_context,
                     i,
                 )
+            }
+            // The document root has no id, so the version is not an element patch.
+            Patch::SetVersion { value } => {
+                work.version = value.clone();
+                Ok(())
             }
             _ => apply_one(&mut work.root, patch, i, options),
         };
@@ -409,7 +424,7 @@ fn apply_one(root: &mut Node, patch: &Patch, i: usize, options: &ApplyOptions<'_
     };
 
     let (parent_id, slot, index, moved) = match patch {
-        Patch::Context(_) => return Ok(()),
+        Patch::Context(_) | Patch::SetVersion { .. } => return Ok(()),
         Patch::Set { id, prop, value } => {
             let loc = find_or_fail(root, id, "id")?;
             let is_root = loc.is_empty();

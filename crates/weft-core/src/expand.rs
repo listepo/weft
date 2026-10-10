@@ -46,6 +46,7 @@ pub fn expand(document: &Document, catalog: &Catalog) -> Expanded {
     Expanded {
         document: Document {
             weft: document.weft.clone(),
+            version: document.version.clone(),
             context: document.context.clone(),
             root,
         },

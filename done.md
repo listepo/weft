@@ -1,5 +1,11 @@
 # Done
 
+### T100. Document versions
+
+Optional `version` on a screen or a fragment, the format move to `weft` 0.3, the `set-version` patch and `weft version-check`. Inline fragments, variants and library fragments stay out.
+
+Built: `version` is an optional literal `MAJOR.MINOR.PATCH` on the root `<screen>` and root `<fragment>` (`W230` otherwise), a member of `Document` beside `weft`, and `{ op: "set-version", value }` sets or removes it. `weft version-check` classifies a fragment from `signature` and `diff_catalogs` (a body change is a patch), a screen by its host contract, and two library catalogs by the kind diff plus their fragment documents. Below `1.0.0` the least version follows Cargo's caret rule. A declared version below that least version is `W810` at `@version` and exit status 1. Writers write `weft="0.3"`; a 0.1 or 0.2 document stays valid.
+
 ### T39.9. Context: SwiftUI
 
 SwiftUI has no source comment, so it carries context as `// weft:context <entry JSON>` lines above the view struct, read back by `weft import-swiftui`, with readable `//` comments above each named view that the importer ignores. `export.swiftui.context` and `import.swiftui.context` (SPEC §10.6, `settings.rs`, the schema) and the CLI `--context`, as T39.6 gave the web and Slint targets; a round-trip test.
@@ -19,7 +25,6 @@ Built: `packages/design-tool` writes the canonical entries as `weft.context` sha
 One enum parameter marked `variant="true"` selects one `<variant when="…">` body. A use passes a literal; a binding is the existing `W217`. Ids are local to each variant, so an instance path stays valid when the variant changes. `W809` covers a bad declaration. `weft explain` names the chosen variant and a slot the variant drops.
 
 Built: the parameter, `<variant>` and expansion live in `crates/weft-core`. The price-row fragment and the totals screen are the fixture. The format bump to `weft` 0.3 stays with T100, so writers still emit `weft="0.2"`. Merged in #48.
-
 
 ### T39.8. Context: readable comments in React and SolidJS
 

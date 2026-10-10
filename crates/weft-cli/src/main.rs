@@ -16,6 +16,7 @@ mod convert;
 mod schema;
 mod slint;
 mod swiftui;
+mod version_check;
 mod web;
 
 use std::io::Write;
@@ -24,7 +25,9 @@ use std::process::ExitCode;
 
 use anyhow::{Context, Result, bail};
 use clap::{Args, Parser, Subcommand};
-use weft_catalog::{PROJECT_FILE, Project, ProjectOptions, load_project_text, token_types};
+use weft_catalog::{
+    PROJECT_FILE, Project, ProjectOptions, core_catalog, load_project_text, token_types,
+};
 use weft_core::{
     Catalog, DataCheckOptions, Diagnostic, Document, Mode, ParseOptions, ValidateOptions,
     check_data, check_data_json, explain, explain_changes, explain_with_context, has_errors, parse,
@@ -176,6 +179,14 @@ enum Command {
         /// `explain.context`, else off). `--against` always lists context changes.
         #[arg(long)]
         context: bool,
+        #[command(flatten)]
+        project: ProjectArgs,
+    },
+    /// Compare two versions of one screen, fragment or library catalog and say how far its
+    /// version must be raised.
+    VersionCheck {
+        old: PathBuf,
+        new: PathBuf,
         #[command(flatten)]
         project: ProjectArgs,
     },
@@ -723,6 +734,14 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 0
             })
         }
+        Command::VersionCheck { old, new, project } => {
+            let (loaded, _) = project_for(&new, project, Mode::Lenient, &mut std::io::stderr())?;
+            let catalog = match loaded {
+                Some(project) => project.catalog,
+                None => core_catalog()?,
+            };
+            version_check::run(&old, &new, &catalog, out)
+        }
         Command::Explain {
             file,
             against,
@@ -1053,7 +1072,7 @@ fn load_markup(
 }
 
 /// One line per diagnostic: `file:line:col code message — hint`; JSON input has a path instead.
-fn print(file: &Path, diagnostics: &[Diagnostic], out: &mut dyn Write) -> Result<()> {
+pub(crate) fn print(file: &Path, diagnostics: &[Diagnostic], out: &mut dyn Write) -> Result<()> {
     let file = file.display();
     for d in diagnostics {
         let place = match d.line {

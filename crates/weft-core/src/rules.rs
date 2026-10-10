@@ -105,6 +105,16 @@ pub fn version(s: &str) -> Option<(&str, &str)> {
     (is_natural(major) && is_natural(minor)).then_some((major, minor))
 }
 
+/// `MAJOR.MINOR.PATCH` with no leading zeros, pre-release or build metadata (SPEC §3).
+pub fn is_document_version(s: &str) -> bool {
+    let mut parts = s.split('.');
+    matches!(
+        (parts.next(), parts.next(), parts.next(), parts.next()),
+        (Some(major), Some(minor), Some(patch), None)
+            if is_natural(major) && is_natural(minor) && is_natural(patch)
+    )
+}
+
 /// The JSON number grammar.
 pub fn is_json_number(s: &str) -> bool {
     let s = s.strip_prefix('-').unwrap_or(s);
@@ -384,6 +394,26 @@ mod tests {
         assert_eq!(version("01.1"), None);
         assert_eq!(version("1"), None);
         assert_eq!(version("1.2.3"), None);
+    }
+
+    #[test]
+    fn document_versions_are_three_numbers_without_a_suffix() {
+        assert!(is_document_version("0.0.0"));
+        assert!(is_document_version("1.2.3"));
+        assert!(is_document_version("10.0.1"));
+        for bad in [
+            "1.2",
+            "01.2.3",
+            "1.02.3",
+            "1.2.03",
+            "1.2.3-alpha",
+            "1.2.3+build",
+            "1.2.3.4",
+            "{$.x}",
+            "",
+        ] {
+            assert!(!is_document_version(bad), "{bad}");
+        }
     }
 
     #[test]

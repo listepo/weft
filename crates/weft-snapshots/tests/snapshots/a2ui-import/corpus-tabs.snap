@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-tabs as a2ui-import
 ---
-<screen id="account" weft="0.2">
+<screen id="account" weft="0.3">
   <heading id="title" level="1">Account</heading>
   <tabs id="tabs" label="Account sections">
     <tab id="tab-overview-2" label="Overview">

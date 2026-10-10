@@ -366,7 +366,7 @@ fn bad_settings_are_reported_and_the_defaults_apply() {
     );
 }
 
-const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.2">
+const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.3">
   <stack id="row" direction="row" gap="{token.space.sm}">
     <button id="back" on-press="nav.back">Back</button>
   </stack>
@@ -586,7 +586,7 @@ fn web_targets_write_where_the_project_says_and_read_back_exactly() {
 }
 
 /// `PLAIN` with a note whose text tries to end a comment and to carry a minifier keep marker.
-const NOTED: &str = r#"<screen id="plain" label="Plain" weft="0.2">
+const NOTED: &str = r#"<screen id="plain" label="Plain" weft="0.3">
   <context>
     <entry id="why" by="human" kind="intent" name="Ivan">Back returns home. @license */ --&gt; end</entry>
   </context>

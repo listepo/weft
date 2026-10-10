@@ -288,16 +288,22 @@ fn context(v: Option<&Json>, path: Path<'_>, issues: &mut Vec<Issue>) {
 pub fn document_issues(v: &Json) -> Vec<Issue> {
     let mut issues = Vec::new();
     let block = optional(context);
+    let doc_version = optional(string);
     strict_object(
         Some(v),
         &[],
-        &[("weft", &string), ("context", &block), ("root", &node)],
+        &[
+            ("weft", &string),
+            ("version", &doc_version),
+            ("context", &block),
+            ("root", &node),
+        ],
         &mut issues,
     );
     issues
 }
 
-const OPS: [&str; 8] = [
+const OPS: [&str; 9] = [
     "set",
     "insert",
     "remove",
@@ -306,6 +312,7 @@ const OPS: [&str; 8] = [
     "set-context",
     "resolve-context",
     "remove-context",
+    "set-version",
 ];
 const FIELDS: [&str; 3] = ["text", "kind", "for"];
 /// `Number.MAX_SAFE_INTEGER`: zod's `int()` admits safe integers only.
@@ -386,6 +393,7 @@ pub fn patch_issues(v: &Json) -> Vec<Issue> {
             ("index", &index),
         ],
         "add-context" => vec![("op", &nothing), ("entry", &entry)],
+        "set-version" => vec![("op", &nothing), ("value", &nullable_string)],
         _ => vec![
             ("op", &nothing),
             ("id", &string),
@@ -514,6 +522,7 @@ pub fn to_document(v: &Json) -> Document {
             .and_then(Json::as_str)
             .unwrap_or_default()
             .to_owned(),
+        version: v.get("version").and_then(Json::as_str).map(str::to_owned),
         context: v
             .get("context")
             .and_then(Json::as_array)
@@ -598,7 +607,7 @@ mod tests {
             messages(patch_issues(&json!({"op": "explode"}))),
             [(
                 "op".into(),
-                "Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context'".into()
+                "Invalid discriminator value. Expected 'set' | 'insert' | 'remove' | 'move' | 'add-context' | 'set-context' | 'resolve-context' | 'remove-context' | 'set-version'".into()
             )]
         );
         assert_eq!(

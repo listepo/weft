@@ -1,4 +1,4 @@
-<screen id="profile" label="Profile" weft="0.2">
+<screen id="profile" label="Profile" weft="0.3">
   <heading id="heading-name" level="1" text="{$.user.name}"/>
   <image id="image-avatar" label="Avatar" src="{$.user.avatar}"/>
   <text id="text-member-since-2020">Member since 2020</text>

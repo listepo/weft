@@ -1,6 +1,16 @@
 # Design: versions and reusable fragments
 
-Status: proposal for the creator. Nothing here is built. Once approved, each part lands in `SPEC.md`, `AGENT-SPEC.md`, the Rust core (which `@weft/core` runs through WebAssembly and the native addon), the MCP primer and the fixtures together, one part per task.
+Status: approved for versions (§3 and the version parts of §7, §8 and §9). Inline fragments, variants and library fragments in this proposal are not built yet. Once each remaining part is approved, it lands in `SPEC.md`, `AGENT-SPEC.md`, the Rust core (which `@weft/core` runs through WebAssembly and the native addon), the MCP primer and the fixtures together, one part per task.
+
+## Decisions
+
+The creator accepted the recommended answer to every open question in §11:
+
+1. Optional `version` on fragments and screens, classified as in §3.
+2. A screen's version is classified by its host contract (§3.3), not a free label.
+3. One variant parameter per fragment.
+4. Library token references are checked against the consuming project.
+5. Build order: versions, then inline fragments, then variants. Library fragments wait.
 
 ## 1. Problem
 
