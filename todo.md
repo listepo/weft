@@ -11,8 +11,6 @@
 - T16.4. Layout vocabulary: SwiftUI
 - T16.5. Layout vocabulary: Slint
 - T16.7. Layout vocabulary: Figma and Penpot
-- T17. Extension catalogs
-- T17.3. Extension catalogs: distribution and registry
 - T41. Hosted Penpot plugin
 - T96. Too-deep documents: report, do not hide
 - T97. Design-tool plugin data over 100 kB
