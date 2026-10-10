@@ -66,11 +66,13 @@ export function registerCatalog(
           ].join("\n"),
         );
       }
-      const inlineNode = inline[kind];
+      // Own keys only: `kind` is the model's, and "constructor" must not find Object.prototype's.
+      const inlineNode = Object.hasOwn(inline, kind) ? inline[kind] : undefined;
       if (inlineNode !== undefined && !Object.hasOwn(catalog.components, kind)) {
         return text(inlineMarkup(kind, inlineNode));
       }
-      const fragment = catalog.fragments?.[kind];
+      const fragments = catalog.fragments ?? {};
+      const fragment = Object.hasOwn(fragments, kind) ? fragments[kind] : undefined;
       if (fragment !== undefined && !Object.hasOwn(catalog.components, kind)) {
         return text(serialize(fragment));
       }

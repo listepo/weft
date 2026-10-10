@@ -83,12 +83,17 @@ const cases = [
     .map((f) => ({ name: `examples/${f}`, document: read(new URL(f, examples)), data: {} })),
 ];
 
+// `price-row` → `PriceRow`: the function the generator emits for an inline fragment (SPEC §10.7).
+const fragmentFunction = (name: string) =>
+  name.replace(/(?:^|-)([a-z0-9])/g, (_, c: string) => c.toUpperCase());
+
 // What a generated module may hold at the top level: the imports of `lit`, the runtime helpers,
-// the element and its registration. Anything else would be code a document smuggled in.
-function assertShape(source: string, name = "WeftScreen"): void {
+// one function per inline fragment, the element and its registration. Anything else would be code
+// a document smuggled in.
+function assertShape(source: string, name = "WeftScreen", fragments: string[] = []): void {
   const { program, errors } = parseSync("screen.js", source);
   assert.deepEqual(errors, [], source);
-  const helpers = new Set(Object.keys(RUNTIME));
+  const helpers = new Set([...Object.keys(RUNTIME), ...fragments.map(fragmentFunction)]);
   for (const s of program.body) {
     if (s.type === "ImportDeclaration") assert.ok(STUBBED.has(String(s.source.value)));
     else if (s.type === "FunctionDeclaration")
@@ -103,7 +108,7 @@ describe("every corpus screen and catalog example", () => {
   for (const c of cases) {
     test(`${c.name} renders templates with no whitespace between elements`, async () => {
       const source = lit(c.document);
-      assertShape(source);
+      assertShape(source, undefined, Object.keys(c.document.fragments ?? {}));
       const markup = statics(render(await load(source), c.data)).join("");
       assert.doesNotMatch(markup, />\s+</);
     });

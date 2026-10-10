@@ -247,4 +247,10 @@ fn a_fragment_use_is_generated_as_its_expansion() {
     );
     let (errors, built) = compile(&source, exported_component(&source));
     assert!(built, "{errors:?}");
+    // The source comment keeps the use, so the file reads back to the screen as written.
+    let import = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    assert_eq!(import_slint(&source, &import).unwrap(), doc);
 }
