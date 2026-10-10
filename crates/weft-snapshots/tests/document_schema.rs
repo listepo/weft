@@ -52,6 +52,21 @@ fn assert_all_pass(schema: &Json, screens: &[(String, Json)]) {
     }
 }
 
+fn assert_none_pass(schema: &Json, screens: &[(String, Json)]) {
+    let validator = jsonschema::validator_for(schema).unwrap();
+    for (name, document) in screens {
+        assert!(!validator.is_valid(document), "{name}");
+    }
+}
+
+/// The screens with a `<use>` (and so their inline fragments), apart from the rest: the schema
+/// admits neither (SPEC §3.1), since fragment parameters are not the catalog's.
+fn split_uses(
+    screens: impl Iterator<Item = common::Screen>,
+) -> (Vec<common::Screen>, Vec<common::Screen>) {
+    screens.partition(|screen| screen.markup.contains("<use "))
+}
+
 fn project_screens() -> Vec<common::Screen> {
     let dir = common::root().join("examples/project/screens");
     let mut paths: Vec<_> = std::fs::read_dir(&dir)
@@ -86,43 +101,33 @@ fn the_schemas_are_valid_2020_12() {
 #[test]
 fn every_screen_passes_the_core_schema() {
     let catalog = common::catalog();
-    let screens = canonical(
-        common::corpus()
-            .into_iter()
-            .chain(common::examples())
-            .collect(),
-        &catalog,
-        &common::tokens(),
-    );
+    let tokens = common::tokens();
+    let (uses, plain) = split_uses(common::corpus().into_iter().chain(common::examples()));
+    let screens = canonical(plain, &catalog, &tokens);
     assert!(screens.len() > 40, "found only {} screens", screens.len());
-    assert_all_pass(&schema(&catalog), &screens);
+    let schema = schema(&catalog);
+    assert_all_pass(&schema, &screens);
+    let uses = canonical(uses, &catalog, &tokens);
+    assert!(!uses.is_empty());
+    assert_none_pass(&schema, &uses);
 }
 
 #[test]
 fn every_screen_passes_the_project_schema() {
     let project = common::project("examples/project");
-    // The schema admits no `<use>` (SPEC §3.1): fragment parameters are not the catalog's.
-    let (uses, plain): (Vec<_>, Vec<_>) = project_screens()
-        .into_iter()
-        .partition(|screen| screen.markup.contains("<use "));
-    let screens = canonical(
+    let (uses, plain) = split_uses(
         common::corpus()
             .into_iter()
             .chain(common::examples())
-            .chain(plain)
-            .collect(),
-        &project.catalog,
-        &project.tokens,
+            .chain(project_screens()),
     );
+    let screens = canonical(plain, &project.catalog, &project.tokens);
     assert!(screens.iter().any(|(name, _)| name == "project-review"));
     let schema = schema(&project.catalog);
     assert_all_pass(&schema, &screens);
-    let validator = jsonschema::validator_for(&schema).unwrap();
     let uses = canonical(uses, &project.catalog, &project.tokens);
-    assert!(!uses.is_empty());
-    for (name, document) in &uses {
-        assert!(!validator.is_valid(document), "{name}");
-    }
+    assert!(uses.iter().any(|(name, _)| name.starts_with("project-")));
+    assert_none_pass(&schema, &uses);
 }
 
 fn base() -> Json {

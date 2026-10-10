@@ -3432,6 +3432,50 @@
   "sems": [
    {
     "role": "main",
+    "name": "Receipt",
+    "states": {},
+    "props": {},
+    "children": [
+     {
+      "role": "text",
+      "name": "Subtotal 12.00 Total 14.40",
+      "states": {},
+      "props": {},
+      "children": []
+     }
+    ]
+   }
+  ],
+  "reserved": [],
+  "result": {
+   "document": {
+    "weft": "0.3",
+    "root": {
+     "kind": "screen",
+     "id": "screen-receipt",
+     "props": {
+      "label": "Receipt"
+     },
+     "children": [
+      {
+       "kind": "text",
+       "id": "text-subtotal-12-00-total-14-40",
+       "children": [
+        "Subtotal 12.00 Total 14.40"
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [],
+   "diagnostics": [],
+   "rootPath": "/screen#screen-receipt"
+  }
+ },
+ {
+  "sems": [
+   {
+    "role": "main",
     "name": "Search",
     "states": {},
     "props": {},

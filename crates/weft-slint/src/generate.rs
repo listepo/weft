@@ -61,6 +61,9 @@ pub fn generate(
     if has_errors(&diagnostics) {
         return Err(GenerateError::Invalid(diagnostics));
     }
+    // The source comment keeps the screen as written (SPEC §9, Provenance): instance-path ids
+    // break the id grammar, so an expanded comment would not read back.
+    let source = serialize(document);
     // A use means its fragment's body (SPEC §10.7); validation reported any cycle or excess.
     let expanded = weft_core::expand(document, options.catalog).document;
     let document = &expanded;
@@ -92,7 +95,7 @@ pub fn generate(
         Some(n) => format!("{MARKER} name={n}\n"),
         None => format!("{MARKER}\n"),
     };
-    for line in serialize(document).lines() {
+    for line in source.lines() {
         head.push_str(&format!("// {line}\n"));
     }
     if !g.imports.is_empty() {

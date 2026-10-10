@@ -107,6 +107,11 @@ const HTML_CONVENTION_GAPS: &[(&str, &str)] = &[
         "the tabs selected binding and on-change are lost; a bound tab label comes back empty; \
          dialog modal=\"false\" is dropped",
     ),
+    (
+        "receipt",
+        "the uses come back expanded, with new ids for their instance paths: an importer cannot \
+         tell a fragment from a copy (SPEC §10.7)",
+    ),
 ];
 
 #[test]

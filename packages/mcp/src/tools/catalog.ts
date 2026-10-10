@@ -73,7 +73,7 @@ export function registerCatalog(
           ].join("\n"),
         );
       }
-      // Plain objects: a kind such as "constructor" must not reach their prototype.
+      // Own keys only: `kind` is the model's, and "constructor" must not find Object.prototype's.
       const inlineNode = Object.hasOwn(inline, kind) ? inline[kind] : undefined;
       if (inlineNode !== undefined && !Object.hasOwn(catalog.components, kind)) {
         return text(inlineMarkup(kind, inlineNode));

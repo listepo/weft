@@ -3236,6 +3236,59 @@
   }
  },
  {
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"receipt\" aria-label=\"Receipt\"><div data-weft-id=\"lines\" style=\"display:flex;flex-direction:column\"><div data-weft-id=\"subtotal/row\" style=\"display:flex;flex-direction:row;align-items:center\"><div data-weft-id=\"subtotal/name\">Subtotal</div><div data-weft-id=\"subtotal/value\">12.00</div></div><div data-weft-id=\"total/row\" style=\"display:flex;flex-direction:row;align-items:center\"><div data-weft-id=\"total/name\">Total</div><div data-weft-id=\"total/value\">14.40</div></div></div></main></body></html>\n",
+  "result": {
+   "document": {
+    "weft": "0.3",
+    "root": {
+     "kind": "screen",
+     "id": "receipt",
+     "props": {
+      "label": "Receipt"
+     },
+     "children": [
+      {
+       "kind": "stack",
+       "id": "lines",
+       "children": [
+        {
+         "kind": "text",
+         "id": "text-subtotal-12-00-total-14-40",
+         "children": [
+          "Subtotal 12.00 Total 14.40"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "losses": [
+    {
+     "kind": "bindings",
+     "path": "/screen#receipt",
+     "note": "values are the resolved values the page shows, not bindings"
+    },
+    {
+     "kind": "actions",
+     "path": "/screen#receipt",
+     "note": "event handlers and their action names are not in the HTML"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#receipt",
+     "note": "design token references are rendered as CSS and cannot be mapped back"
+    },
+    {
+     "kind": "hidden",
+     "path": "/screen#receipt",
+     "note": "elements a renderer leaves out (hidden, closed dialogs) are not in the HTML"
+    }
+   ],
+   "diagnostics": []
+  }
+ },
+ {
   "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"search\" aria-label=\"Search\"><form data-weft-id=\"form\"><div data-weft-id=\"bar\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Search</span><input data-weft-id=\"query\" aria-label=\"Search\" type=\"search\" value=\"weft\"/></label></div><button data-weft-id=\"go\" type=\"submit\" data-variant=\"primary\">Search</button></div></form><ul data-weft-id=\"results\"><li data-weft-id=\"result[0]\"><h3 data-weft-id=\"result-title[0]\">Weft specification</h3><div data-weft-id=\"result-snippet[0]\">An open format for describing UI.</div><a data-weft-id=\"result-open[0]\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Open</a></li><li data-weft-id=\"result[1]\"><h3 data-weft-id=\"result-title[1]\">Weft benchmark</h3><div data-weft-id=\"result-snippet[1]\">Token counts and edit success.</div><a data-weft-id=\"result-open[1]\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Open</a></li></ul></main></body></html>\n",
   "result": {
    "document": {
