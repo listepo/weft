@@ -101,7 +101,7 @@ fn codes_are_their_own_name_in_text_and_json() {
     assert_eq!(Code::W101.as_str(), "W101");
     assert_eq!(serde_json::to_value(Code::W509).unwrap(), json!("W509"));
     assert_eq!(Code::ALL.first(), Some(&Code::W101));
-    assert_eq!(Code::ALL.last(), Some(&Code::W807));
+    assert_eq!(Code::ALL.last(), Some(&Code::W809));
 }
 
 #[test]

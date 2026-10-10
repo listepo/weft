@@ -3,13 +3,14 @@
 
 use crate::diagnostics::{Code, one_of};
 use crate::model::{
-    ComponentDef, Content, Map, Node, PropDef, PropDefault, PropType, SlotDef, Value,
+    Child, ComponentDef, Content, Map, Node, PropDef, PropDefault, PropType, SlotDef, Value,
 };
 use crate::rules::is_name;
 
 pub const FRAGMENT: &str = "fragment";
 pub const PARAM: &str = "param";
 pub const OUTLET: &str = "outlet";
+pub const VARIANT: &str = "variant";
 
 pub enum ParamKind {
     Value(PropDef),
@@ -47,7 +48,7 @@ fn value_type(t: &str) -> Option<PropType> {
 pub fn param_attr_type(attr: &str, ty: Option<&str>) -> Option<PropType> {
     match attr {
         "min" | "max" => Some(PropType::Number),
-        "integer" | "required" => Some(PropType::Boolean),
+        "integer" | "required" | "variant" => Some(PropType::Boolean),
         "default" => value_type(ty?),
         _ => None,
     }
@@ -135,6 +136,10 @@ fn read_param(node: &Node, found: &mut Found) -> Option<(String, ParamKind)> {
     }
     let allowed = allowed_attrs(ty);
     for (attr, value) in props.iter().filter(|(a, _)| !a.starts_with("x-")) {
+        // `variant` is not a prop of the parameter's type. W809 owns it.
+        if attr == "variant" {
+            continue;
+        }
         if !allowed.contains(&attr.as_str()) {
             let message = format!("A {ty} parameter takes no \"{attr}\".");
             problem(Some(attr), message, &one_of(allowed));
@@ -284,6 +289,299 @@ pub fn problems(root: &Node) -> Vec<Problem> {
     root_problems.chain(out).collect()
 }
 
+/// The one enum parameter marked `variant="true"`, when its name is usable.
+struct Axis<'a> {
+    index: usize,
+    name: &'a str,
+    values: Vec<String>,
+    param: &'a Node,
+}
+
+fn each_param(root: &Node) -> impl Iterator<Item = (usize, &Node)> {
+    root.children
+        .iter()
+        .enumerate()
+        .filter_map(|(index, child)| {
+            let node = child.as_node()?;
+            (node.kind == PARAM).then_some((index, node))
+        })
+}
+
+fn axis(root: &Node) -> Option<Axis<'_>> {
+    each_param(root).find_map(|(index, param)| {
+        if param.props.get("variant") != Some(&Value::Bool(true)) {
+            return None;
+        }
+        let enum_ = matches!(param.props.get("type"), Some(Value::String(t)) if t == "enum");
+        let Value::String(name) = param.props.get("name")? else {
+            return None;
+        };
+        (enum_ && is_param_name(name)).then(|| Axis {
+            index,
+            name,
+            values: words(param.props.get("values")).unwrap_or_default(),
+            param,
+        })
+    })
+}
+
+fn declaration_len(root: &Node) -> usize {
+    root.children
+        .iter()
+        .take_while(|c| c.as_node().is_some_and(|n| n.kind == PARAM))
+        .count()
+}
+
+fn problem(param: Option<usize>, attr: Option<&str>, message: &str, expected: &str) -> Problem {
+    Problem {
+        param,
+        attr: attr.map(str::to_owned),
+        message: message.to_owned(),
+        expected: expected.to_owned(),
+    }
+}
+
+/// Whether this fragment selects its body with a variant parameter.
+pub fn has_variant_param(root: &Node) -> bool {
+    axis(root).is_some()
+}
+
+/// `W809` for a variant parameter or `<variant>` that does not match §10.7.
+pub fn variant_problems(root: &Node) -> Vec<Problem> {
+    let mut out = Vec::new();
+    let mut count = 0usize;
+    for (index, param) in each_param(root) {
+        if !param.props.contains_key("variant") {
+            continue;
+        }
+        let marked = param.props.get("variant") == Some(&Value::Bool(true));
+        let enum_ = matches!(param.props.get("type"), Some(Value::String(t)) if t == "enum");
+        if !marked || !enum_ {
+            out.push(problem(
+                Some(index),
+                Some("variant"),
+                "variant=\"true\" belongs on one enum parameter.",
+                "type=\"enum\" variant=\"true\"",
+            ));
+            continue;
+        }
+        let Some(Value::String(name)) = param.props.get("name") else {
+            continue;
+        };
+        if !is_param_name(name) {
+            continue;
+        }
+        count += 1;
+        if count > 1 {
+            out.push(problem(
+                Some(index),
+                Some("variant"),
+                "A fragment has at most one variant parameter.",
+                "one variant=\"true\"",
+            ));
+        }
+    }
+    let Some(axis) = axis(root) else {
+        for (index, child) in root.children.iter().enumerate() {
+            if child.as_node().is_some_and(|n| n.kind == VARIANT) {
+                out.push(problem(
+                    Some(index),
+                    None,
+                    "<variant> needs a variant parameter.",
+                    "<param type=\"enum\" variant=\"true\">",
+                ));
+            }
+        }
+        return out;
+    };
+    let mut covered: Vec<String> = Vec::new();
+    for (index, child) in root.children.iter().enumerate() {
+        let Some(node) = child.as_node() else {
+            out.push(problem(
+                Some(index),
+                None,
+                "A fragment with a variant parameter contains only <variant> after <param>.",
+                "<variant when=\"…\">",
+            ));
+            continue;
+        };
+        if node.kind == PARAM {
+            continue;
+        }
+        if node.kind != VARIANT {
+            out.push(problem(
+                Some(index),
+                None,
+                "A fragment with a variant parameter contains only <variant> after <param>.",
+                "<variant when=\"…\">",
+            ));
+            continue;
+        }
+        check_variant(node, index, &axis.values, &mut covered, &mut out);
+    }
+    for value in &axis.values {
+        if !covered.iter().any(|c| c == value) {
+            out.push(problem(
+                Some(axis.index),
+                Some("values"),
+                &format!("Value \"{value}\" is covered by no <variant>."),
+                &format!("when=\"{value}\""),
+            ));
+        }
+    }
+    out
+}
+
+fn check_variant(
+    node: &Node,
+    index: usize,
+    values: &[String],
+    covered: &mut Vec<String>,
+    out: &mut Vec<Problem>,
+) {
+    if node.id.is_some() || !node.on.is_empty() || !node.slots.is_empty() {
+        out.push(problem(
+            Some(index),
+            None,
+            "<variant> takes only when.",
+            "<variant when=\"…\">",
+        ));
+    }
+    for attr in node.props.keys() {
+        if attr != "when" {
+            out.push(problem(
+                Some(index),
+                Some(attr),
+                "<variant> takes only when.",
+                "when=\"…\"",
+            ));
+        }
+    }
+    let Some(Value::String(when)) = node.props.get("when") else {
+        out.push(problem(
+            Some(index),
+            Some("when"),
+            "<variant> needs when listing values of the variant parameter.",
+            "when=\"…\"",
+        ));
+        return;
+    };
+    let words: Vec<&str> = when.split_whitespace().collect();
+    if words.is_empty() {
+        out.push(problem(
+            Some(index),
+            Some("when"),
+            "<variant> needs when listing values of the variant parameter.",
+            "when=\"…\"",
+        ));
+    }
+    for word in words {
+        if !values.is_empty() && !values.iter().any(|v| v == word) {
+            out.push(problem(
+                Some(index),
+                Some("when"),
+                &format!("when lists \"{word}\", which the variant parameter does not have."),
+                "a value of the variant parameter",
+            ));
+            continue;
+        }
+        if covered.iter().any(|c| c == word) {
+            out.push(problem(
+                Some(index),
+                Some("when"),
+                &format!("Value \"{word}\" is covered by two <variant> elements."),
+                "each value in one when",
+            ));
+            continue;
+        }
+        covered.push(word.to_owned());
+    }
+    if !node.children.iter().any(|c| c.as_node().is_some()) {
+        out.push(problem(
+            Some(index),
+            None,
+            "<variant> holds one or more elements.",
+            "one or more elements",
+        ));
+    }
+}
+
+/// How a `<use>` resolves the variant parameter. `None` when the fragment has no such parameter.
+pub struct Choice<'a> {
+    pub name: &'a str,
+    /// The literal: the attribute, or the default when the attribute is absent.
+    pub value: Option<&'a str>,
+    pub defaulted: bool,
+    /// The stored value the choice was read from, for readback.
+    pub raw: Option<&'a Value>,
+}
+
+pub fn choice<'a>(root: &'a Node, use_node: &'a Node) -> Option<Choice<'a>> {
+    let axis = axis(root)?;
+    let (value, defaulted, raw) = match use_node.props.get(axis.name) {
+        Some(raw @ Value::String(value)) => (Some(value.as_str()), false, Some(raw)),
+        Some(raw) => (None, false, Some(raw)),
+        None => match axis.param.props.get("default") {
+            Some(raw @ Value::String(value)) => (Some(value.as_str()), true, Some(raw)),
+            _ => (None, false, None),
+        },
+    };
+    Some(Choice {
+        name: axis.name,
+        value,
+        defaulted,
+        raw,
+    })
+}
+
+/// Children of the `<variant>` whose `when` lists `value`.
+pub fn variant_body<'a>(root: &'a Node, value: &str) -> Option<&'a [Child]> {
+    root.children
+        .iter()
+        .filter_map(Child::as_node)
+        .find_map(|node| {
+            if node.kind != VARIANT {
+                return None;
+            }
+            let Value::String(when) = node.props.get("when")? else {
+                return None;
+            };
+            when.split_whitespace()
+                .any(|word| word == value)
+                .then_some(node.children.as_slice())
+        })
+}
+
+/// What a `<use>` places: the chosen variant's body, or the fragment body when it has no
+/// variant parameter. An unresolved variant places nothing, because the body is not known.
+pub fn placed_children<'a>(root: &'a Node, use_node: &Node) -> &'a [Child] {
+    let Some(chosen) = choice(root, use_node) else {
+        return &root.children[declaration_len(root)..];
+    };
+    chosen
+        .value
+        .and_then(|value| variant_body(root, value))
+        .unwrap_or(&[])
+}
+
+/// Whether `list` holds an `<outlet>` of `name`. A variant without one drops that slot.
+pub fn has_outlet(list: &[Child], name: &str) -> bool {
+    let mut stack: Vec<&Node> = list.iter().filter_map(Child::as_node).collect();
+    while let Some(node) = stack.pop() {
+        if node.kind == OUTLET
+            && matches!(node.props.get("name"), Some(Value::String(n)) if n == name)
+        {
+            return true;
+        }
+        if node.kind == VARIANT {
+            continue;
+        }
+        let lists = node.slots.values().chain(std::iter::once(&node.children));
+        stack.extend(lists.flatten().filter_map(Child::as_node));
+    }
+    false
+}
+
 /// Why a parameter so declared cannot be read where `def` is expected, if it cannot.
 pub fn mismatch(name: &str, param: &PropDef, def: &PropDef) -> Option<(Code, String, String)> {
     let (want, have) = (def.kind.as_str(), param.kind.as_str());
@@ -316,9 +614,14 @@ pub fn signature(root: &Node) -> ComponentDef {
     fragment.bindable = Some(false);
     let mut props = Map::from_iter([(FRAGMENT.to_owned(), fragment)]);
     let (mut slots, mut events) = (Map::new(), Vec::new());
+    // Which body a use has is structure, so the variant parameter is a literal (W217).
+    let variant_name = axis(root).map(|a| a.name.to_owned());
     for (name, kind) in params(root) {
         match kind {
-            ParamKind::Value(def) => {
+            ParamKind::Value(mut def) => {
+                if variant_name.as_deref() == Some(name.as_str()) {
+                    def.bindable = Some(false);
+                }
                 props.insert(name, def);
             }
             ParamKind::Action => events.push(name),
