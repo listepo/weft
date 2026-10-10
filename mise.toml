@@ -21,3 +21,9 @@ bun = "1.4.2"
 uv = "0.12.23"
 # Translate Toolkit: localization file converters and checks (po2json, pofilter, pocount). Not in the mise registry.
 "pipx:translate-toolkit" = "3.20.0"
+# Lints the workflows: the pre-push hook (hk.pkl) and `mise x -- jactionlint`. The local mise registry lacks the short name.
+"github:jdx/jactionlint" = "2.0.2"
+# Runs jactionlint as a pre-push hook (hk.pkl); install it once per clone with `mise x -- hk install --mise`.
+hk = "2.5.0"
+# jactionlint checks `run:` scripts with it; without a pin the global mise shim has no version and the lint errors out.
+shellcheck = "0.11.0"

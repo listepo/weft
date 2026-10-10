@@ -43,6 +43,14 @@ moon run root:fmt  # format
 moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes
 ```
 
+**Workflow lint.** jactionlint, hk and shellcheck are pinned in `mise.toml`. `.github/jactionlint.yaml` applies the default profile and the baseline `.github/jactionlint-baseline.json`; `hk.pkl` runs jactionlint as a pre-push hook:
+
+```bash
+mise x -- jactionlint                  # lint workflows, composite actions, dependabot.yml
+mise x -- jactionlint --baseline-write # refresh the baseline after fixing findings
+mise x -- hk install --mise            # install the pre-push hook once per clone
+```
+
 **SwiftUI screenshots and the simulator.** `packages/visual/test/swiftui.test.ts` drives one iOS Simulator app id, so concurrent runs must not share a device. `WEFT_SIMULATOR=shared` (default) serialises runs on one device with a lock in `~/Library/Caches/weft-visual/`; `WEFT_SIMULATOR=own` gives your worktree a device named `weft-visual-<worktree folder>`. When you work in a worktree while other agents may run the suite, use `own`, and delete the device with `xcrun simctl delete weft-visual-<folder>` when you remove the worktree (list them with `xcrun simctl list devices | grep weft-visual-`). Details in `packages/visual/README.md`.
 
 Tasks live in `moon.yml` (root checks) and `.moon/tasks/all.yml` (the `test` task every package inherits). A task's `inputs` must list every file it reads, or moon serves a stale cached result. The converse also holds: a folder that a run writes into must be excluded from the globs that cover it (`!**/node_modules/**`, `!/packages/core/native/**` and `!/packages/visual/diffs/**` are in the inherited `test` task), or the run changes its own hash and is never served from the cache. Check a new task with two runs in a row. `root:wasm` and `root:native` list the crates they are built from (the file groups in the root `moon.yml`), not `crates/**/*`; `tooling/test/inputs.test.ts` compares the lists with `cargo metadata` and with the `include_str!` paths in the sources, so a new dependency or include fails the test until the groups are updated.
