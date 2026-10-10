@@ -86,6 +86,26 @@ test("weft_catalog lists the project's catalog", async () => {
   await close();
 });
 
+test("weft_catalog groups kinds by catalog and names each kind's catalog", async () => {
+  const { client, close } = await connect();
+  const index = (await call(client, "weft_catalog", { project: PROJECT })).blocks[0] ?? "";
+  const headings = index.split("\n").filter((l) => l.startsWith("kinds of "));
+  assert.deepEqual(
+    headings.map((h) => h.replace(/ \d+\.\d+\.\d+/, "")),
+    ["kinds of weft-core", "kinds of acme-ui, prefix acme", "kinds of shop"],
+  );
+  assert.ok(index.indexOf("\nacme-card |") > index.indexOf("kinds of acme-ui"));
+  assert.ok(index.indexOf("\nrating |") > index.indexOf("kinds of shop"));
+  const kind = async (name: string) =>
+    JSON.parse((await call(client, "weft_catalog", { kind: name, project: PROJECT })).blocks[0] ?? "");
+  const widened = await kind("acme-button");
+  assert.deepEqual([widened.catalog, widened.extendedBy], ["acme-ui", ["shop"]]);
+  assert.ok(widened.props.variant.values.includes("ghost"));
+  const own = await kind("rating");
+  assert.deepEqual([own.catalog, own.extendedBy], ["shop", undefined]);
+  await close();
+});
+
 test("weft_schema gives the schema of the project's merged catalog", async () => {
   const { client, close } = await connect();
   const result = await call(client, "weft_schema", { project: PROJECT });
