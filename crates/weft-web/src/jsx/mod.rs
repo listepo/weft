@@ -147,13 +147,8 @@ pub fn to_jsx(document: &Json, options: &JsxOptions<'_>) -> Result<String, JsxEr
     }
 }
 
-/// Text a readable note keeps: the format's limit (SPEC §2.3), for input that was not validated.
-const MAX_NOTE: usize = 500;
-
 /// Readable notes for developers, one line per context entry (SPEC §2.3), keyed by the id its
-/// `for` names and by `""` for the entries about the screen. They are derived from the context the
-/// source comment carries, so importers ignore them, and they are escaped like that comment: entry
-/// text is untrusted and must not end the comment or carry a minifier's keep marker.
+/// `for` names and by `""` for the entries about the screen (`provenance::note`).
 fn notes(document: &Json) -> HashMap<String, Vec<String>> {
     let mut out: HashMap<String, Vec<String>> = HashMap::new();
     let entries = document.get("context").and_then(Json::as_array);
@@ -164,12 +159,15 @@ fn notes(document: &Json) -> HashMap<String, Vec<String>> {
         else {
             continue;
         };
-        let status = field("status").map(|s| format!(" {s}")).unwrap_or_default();
-        let text: String = text.chars().take(MAX_NOTE).collect();
-        let line = format!("{kind}{status} ({by} {name}): {text}");
         out.entry(field("for").unwrap_or_default().to_owned())
             .or_default()
-            .push(crate::provenance::escape(&line));
+            .push(crate::provenance::note(
+                kind,
+                field("status"),
+                by,
+                name,
+                text,
+            ));
     }
     out
 }
