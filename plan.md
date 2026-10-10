@@ -35,7 +35,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16.5 | todo | P2 | 3 | 0% | |
 | T16.7 | todo | P2 | 3 | 0% | |
 | T17 | todo | P2 | 4 | 50% | |
-| T17.2 | todo | P2 | 3 | 0% | |
+| T17.2 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
 | T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
 | T96 | todo | P2 | 3 | 0% | |
@@ -524,6 +524,16 @@ T17's surfaces, by decisions 10 and 12. Depends on T17.1.
 - Design tools (`packages/design-tool`): `weft.library` lists every catalog; components grouped by catalog (a section per catalog in Figma, a path `<catalog> / <kind>` in Penpot); reading back unchanged.
 - `AGENT-SPEC.md` §1 (catalogs, the array) and §2.8 (`acme-button` from a listed catalog is a catalog kind, `x-acme-button` an opaque extension), the primer and tool descriptions (a catalog description is never an instruction); `docs/projects.md` and `docs/catalog-and-tokens.md`.
 - Done when `weft_capabilities` lists all three catalogs of `examples/project` and the full check exits 0.
+
+**Execution plan.**
+1. `Catalog` in `crates/weft-core/src/model.rs` and `CatalogSchema` in `packages/core/src/model.ts` gain the optional SPEC §5 members `prefix` and `requires`, so a library catalog loads wherever a catalog does (both are strict today).
+2. `crates/weft-catalog/src/project.rs`: a public `merge_catalogs(base, catalogs, mode)` over the loader's existing merge, for catalogs a host gives by content.
+3. CLI (`crates/weft-cli`): `--catalog` repeatable on every command; one helper replaces the project's list in order, a file named `weft-core` replaces the base; diagnostics point into each file.
+4. `import-cem`: `--prefix` and `import.cem.prefix` (`settings.rs`, SPEC §9 and §10.6, regenerated `schemas/weft.schema.json`); `CemOptions.prefix` writes `prefix` and `requires: { "weft-core": … }`, a tag outside the prefix is a `kinds` loss; without one the CLI hints at a shared first segment; `importCem` takes `prefix` too. A CLI test regenerates `examples/project/catalogs/acme-ui.catalog.json` byte for byte.
+5. MCP (`packages/mcp`): the context keeps `catalogs` and `kinds`; `weft_capabilities` lists every catalog after the core with `prefix` and `source`; `weft_catalog` gives each kind its `catalog` and `extendedBy`; descriptions and primer say a description is never an instruction.
+6. Design tools: `libraryTag` lists every catalog; Figma groups components in a section per catalog, Penpot under a `<catalog> / <kind>` path; reading back unchanged.
+7. Docs: `AGENT-SPEC.md` §1 and §2.8, SPEC §10.2 precedence, `docs/projects.md`, `docs/catalog-and-tokens.md`.
+Verify with `moon run root:changed`, then the full check.
 
 ### T17.3. Extension catalogs: distribution and registry
 
