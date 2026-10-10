@@ -226,6 +226,48 @@ fn material(v: &mut V, props: &mut IndexMap<String, Value>) {
     }
 }
 
+/// A stack's or grid's `padding` and `max-width`, before its material: on the web the padding is
+/// inside the capped width and the surface fills the whole box.
+fn boxed(v: &mut V, props: &mut IndexMap<String, Value>, fill: &str) {
+    if let Some(Value::Token(t)) = props.get("padding") {
+        v.modifier(format!(".padding({})", token_expr(t)));
+        props.shift_remove("padding");
+    }
+    if let Some(Value::Token(t)) = props.get("max-width") {
+        v.modifier(format!(".frame(maxWidth: .infinity, alignment: {fill})"));
+        v.modifier(format!(".frame(maxWidth: {})", token_expr(t)));
+        props.shift_remove("max-width");
+    }
+}
+
+/// The `justify` of a row that spacers draw, taken out of `props`. `start` is what the row does
+/// anyway and a bound value is not known, so both stay markers; next to a growing child there is
+/// no free space to share (SPEC §5.1); and `space-between` needs two children, or a list, to put a
+/// spacer between.
+fn drawn_justify(props: &mut IndexMap<String, Value>, children: &[Child]) -> Option<&'static str> {
+    let justify = match props.get("justify") {
+        Some(Value::String(j)) if j == "end" => "end",
+        Some(Value::String(j)) if j == "center" => "center",
+        Some(Value::String(j)) if j == "space-between" => "space-between",
+        _ => return None,
+    };
+    fn grows(list: &[Child]) -> bool {
+        list.iter().any(|c| match c {
+            Child::Node(n) if n.kind == EACH => grows(&n.children),
+            Child::Node(n) => n.props.get("grow") == Some(&Value::Bool(true)),
+            Child::Text(_) => false,
+        })
+    }
+    let list = children
+        .iter()
+        .any(|c| matches!(c, Child::Node(n) if n.kind == EACH));
+    if grows(children) || (justify == "space-between" && children.len() < 2 && !list) {
+        return None;
+    }
+    props.shift_remove("justify");
+    Some(justify)
+}
+
 /// `head {` body `}` with the body indented.
 fn block(head: &str, body: Vec<String>) -> Vec<String> {
     let mut out = vec![format!("{head} {{")];
@@ -294,7 +336,30 @@ struct Loop {
 #[derive(Clone, Copy)]
 struct Ctx<'c> {
     form: Option<&'c str>,
+    /// How the parent lays its children out, which decides how `grow` and a section are drawn.
+    parent: Parent,
 }
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Parent {
+    Other,
+    /// An `HStack`: `grow` is a frame that takes the free width.
+    Row,
+    /// A `WeftColumns` layout, which would make a section's header and content two cells.
+    Cells,
+}
+
+/// Whether a view comes before the next child of a `space-between` row, which then needs a
+/// spacer before it.
+enum Lead {
+    No,
+    Yes,
+    /// Only while this Swift condition holds: a list that leads the row is empty at its first item.
+    If(String),
+}
+
+/// What a row's `end` and `center` put at their ends: it takes the free space and nothing more.
+const EDGE_SPACER: &str = "Spacer(minLength: 0)";
 
 /// Names the generated view declares, which a loop variable must not shadow.
 const VIEW_MEMBERS: &[&str] = &[
@@ -312,6 +377,8 @@ struct Gen<'a> {
     submits: bool,
     links: bool,
     models: bool,
+    /// A grid reflows, so the file carries `WeftColumns`.
+    columns: bool,
     shared_tokens: bool,
     /// The views the app writes for the kinds of its own catalog, by view name.
     custom: IndexMap<String, String>,
@@ -335,6 +402,7 @@ impl<'a> Gen<'a> {
             submits: false,
             links: false,
             models: false,
+            columns: false,
             shared_tokens: false,
             custom: IndexMap::new(),
             problems: vec![],
@@ -472,6 +540,9 @@ impl<'a> Gen<'a> {
         out.extend(HELPERS.lines().map(str::to_owned));
         if self.models {
             out.extend(MODEL_HELPERS.lines().map(str::to_owned));
+        }
+        if self.columns {
+            out.extend(COLUMN_HELPERS.lines().map(str::to_owned));
         }
         let mut text = out.join("\n");
         text.push('\n');
@@ -614,7 +685,11 @@ impl<'a> Gen<'a> {
         out.push(String::new());
         // Notes about the screen come first, above the root's own.
         let mut body = self.notes.remove("").unwrap_or_default();
-        body.extend(self.node(root, &mut vec![], Ctx { form: None }, ""));
+        let ctx = Ctx {
+            form: None,
+            parent: Parent::Other,
+        };
+        body.extend(self.node(root, &mut vec![], ctx, ""));
         out.extend(indent(block("var body: some View", body)));
         out.push(String::new());
         out.push(format!(
@@ -855,8 +930,14 @@ impl<'a> Gen<'a> {
     ) -> Vec<String> {
         let path = element_path(parent, node);
         if node.kind == EACH {
-            return self.each(node, loops, ctx, &path);
+            // `<each>` is transparent: its items are children of the element around it.
+            return self.each(node, loops, ctx, &path, None);
         }
+        let place = ctx.parent;
+        let ctx = Ctx {
+            parent: Parent::Other,
+            ..ctx
+        };
         let id = node.id.clone().unwrap_or_default();
         let mut props = node.props.clone();
         let mut on = node.on.clone();
@@ -868,6 +949,14 @@ impl<'a> Gen<'a> {
         } else {
             tilt_modifiers(&mut props)
         };
+        // A column's free height exists only inside a stretched row, which SwiftUI cannot draw,
+        // so `grow` there stays a marker (SPEC §9).
+        let grow = place == Parent::Row
+            && node.kind != "dialog"
+            && props.get("grow") == Some(&Value::Bool(true));
+        if grow {
+            props.shift_remove("grow");
+        }
         let mut v = self.kind(
             node,
             &id,
@@ -878,6 +967,9 @@ impl<'a> Gen<'a> {
             ctx,
             &path,
         );
+        if grow {
+            v.modifier(".frame(maxWidth: .infinity)");
+        }
 
         // Markers: what SwiftUI cannot say, sorted by name like canonical attributes.
         let mut leftovers: Vec<(String, Value)> = props.into_iter().collect();
@@ -934,7 +1026,44 @@ impl<'a> Gen<'a> {
         if let Some(h) = &hidden {
             v.modifier(format!(".weftHidden({})", self.expr(h, Leaf::Bool, loops)));
         }
+        if place == Parent::Cells && node.kind == "section" {
+            return block("WeftCell", v.render());
+        }
         v.render()
+    }
+
+    /// A `space-between` row's children with `spacer` before each but the first view.
+    fn spaced(
+        &mut self,
+        list: &[Child],
+        spacer: &str,
+        mut lead: Lead,
+        loops: &mut Vec<Loop>,
+        ctx: Ctx<'_>,
+        path: &str,
+    ) -> Vec<String> {
+        let mut out = vec![];
+        for child in list {
+            if let Child::Node(n) = child
+                && n.kind == EACH
+            {
+                if let Some(id) = &n.id {
+                    out.extend(self.notes.remove(id).unwrap_or_default());
+                }
+                let here = element_path(path, n);
+                out.extend(self.each(n, loops, ctx, &here, Some((spacer, &lead))));
+                lead = Lead::Yes;
+                continue;
+            }
+            match &lead {
+                Lead::No => {}
+                Lead::Yes => out.push(spacer.to_owned()),
+                Lead::If(c) => out.extend(block(&format!("if {c}"), vec![spacer.to_owned()])),
+            }
+            out.extend(self.children(std::slice::from_ref(child), loops, ctx, path));
+            lead = Lead::Yes;
+        }
+        out
     }
 
     fn each(
@@ -943,6 +1072,7 @@ impl<'a> Gen<'a> {
         loops: &mut Vec<Loop>,
         ctx: Ctx<'_>,
         path: &str,
+        spaced: Option<(&str, &Lead)>,
     ) -> Vec<String> {
         let (Some(Value::Bind { bind, .. }), Some(Value::String(name))) =
             (node.props.get("in"), node.props.get("as"))
@@ -992,7 +1122,18 @@ impl<'a> Gen<'a> {
             write: format!("{write}[{index}]"),
             item_path: format!("{base}.\\({index})"),
         });
-        let body = self.children(&node.children, loops, ctx, path);
+        let body = match spaced {
+            None => self.children(&node.children, loops, ctx, path),
+            Some((spacer, lead)) => {
+                let first = format!("{index} > 0");
+                let lead = match lead {
+                    Lead::No => Lead::If(first),
+                    Lead::Yes => Lead::Yes,
+                    Lead::If(c) => Lead::If(format!("{c} || {first}")),
+                };
+                self.spaced(&node.children, spacer, lead, loops, ctx, path)
+            }
+        };
         loops.pop();
         let id = node.id.clone().unwrap_or_default();
         let mut lines = vec![format!(
@@ -1033,6 +1174,8 @@ impl<'a> Gen<'a> {
                     props.shift_remove("direction");
                 }
                 let mut args = vec![];
+                // Where a capped column sits inside its full-width frame: as its children do.
+                let mut fill = ".leading";
                 if let Some(Value::String(align)) = props.get("align") {
                     let a = match (row, align.as_str()) {
                         (false, "start") => Some(".leading"),
@@ -1045,11 +1188,27 @@ impl<'a> Gen<'a> {
                     if let Some(a) = a {
                         args.push(format!("alignment: {a}"));
                         props.shift_remove("align");
+                        if !row {
+                            fill = a;
+                        }
                     }
                 }
-                if let Some(Value::Token(t)) = props.get("gap") {
-                    args.push(format!("spacing: {}", token_expr(t)));
+                let gap = match props.get("gap") {
+                    Some(Value::Token(t)) => Some(token_expr(t)),
+                    _ => None,
+                };
+                if gap.is_some() {
                     props.shift_remove("gap");
+                }
+                let justify = if row {
+                    drawn_justify(props, &node.children)
+                } else {
+                    None
+                };
+                if justify == Some("space-between") {
+                    args.push("spacing: 0".to_owned());
+                } else if let Some(g) = &gap {
+                    args.push(format!("spacing: {g}"));
                 }
                 let name = if row { "HStack" } else { "VStack" };
                 let head = if args.is_empty() {
@@ -1057,9 +1216,29 @@ impl<'a> Gen<'a> {
                 } else {
                     format!("{name}({})", args.join(", "))
                 };
-                let body = self.children(&node.children, loops, ctx, path);
+                let inner = Ctx {
+                    parent: if row { Parent::Row } else { Parent::Other },
+                    ..ctx
+                };
+                let mut body = if justify == Some("space-between") {
+                    // The gap stays the least space between two children (SPEC §5.1).
+                    let spacer = match &gap {
+                        Some(g) => format!("Spacer(minLength: {g})"),
+                        None => "Spacer()".to_owned(),
+                    };
+                    self.spaced(&node.children, &spacer, Lead::No, loops, inner, path)
+                } else {
+                    self.children(&node.children, loops, inner, path)
+                };
+                if matches!(justify, Some("end" | "center")) {
+                    body.insert(0, EDGE_SPACER.to_owned());
+                }
+                if justify == Some("center") {
+                    body.push(EDGE_SPACER.to_owned());
+                }
                 let mut v = V::new(block(&head, body));
                 v.container = true;
+                boxed(&mut v, props, fill);
                 material(&mut v, props);
                 v
             }
@@ -1069,23 +1248,39 @@ impl<'a> Gen<'a> {
                     Some(other) => format!("weftColumns({})", self.expr(&other, Leaf::Int, loops)),
                     None => "1".to_owned(),
                 };
-                let head = match props.get("gap") {
-                    Some(Value::Token(t)) => {
-                        let s = token_expr(t);
-                        format!(
-                            "LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: {s}), count: {count}), spacing: {s})"
-                        )
+                let gap = match props.get("gap") {
+                    Some(Value::Token(t)) => Some(token_expr(t)),
+                    _ => None,
+                };
+                if gap.is_some() {
+                    props.shift_remove("gap");
+                }
+                let min = match props.get("min-column-width") {
+                    Some(Value::Token(t)) => Some(token_expr(t)),
+                    _ => None,
+                };
+                let mut inner = ctx;
+                let head = match (min, gap) {
+                    // `GridItem(.adaptive(minimum:))` would not stop at `columns`, so a reflowing
+                    // grid is a layout of its own (layout design, decision 5).
+                    (Some(min), gap) => {
+                        props.shift_remove("min-column-width");
+                        self.columns = true;
+                        inner.parent = Parent::Cells;
+                        let spacing = gap.map(|s| format!(", spacing: {s}")).unwrap_or_default();
+                        format!("WeftColumns(columns: {count}, minWidth: {min}{spacing})")
                     }
-                    _ => format!(
+                    (None, Some(s)) => format!(
+                        "LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: {s}), count: {count}), spacing: {s})"
+                    ),
+                    (None, None) => format!(
                         "LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: {count}))"
                     ),
                 };
-                if matches!(props.get("gap"), Some(Value::Token(_))) {
-                    props.shift_remove("gap");
-                }
-                let body = self.children(&node.children, loops, ctx, path);
+                let body = self.children(&node.children, loops, inner, path);
                 let mut v = V::new(block(&head, body));
                 v.container = true;
+                boxed(&mut v, props, ".leading");
                 material(&mut v, props);
                 v
             }
@@ -1209,7 +1404,10 @@ impl<'a> Gen<'a> {
                 v
             }
             "form" => {
-                let inner = Ctx { form: Some(id) };
+                let inner = Ctx {
+                    form: Some(id),
+                    ..ctx
+                };
                 let body = self.children(&node.children, loops, inner, path);
                 let lines = match self.slot(node, "footer", loops, inner, path) {
                     Some(footer) => {
@@ -1991,6 +2189,9 @@ const HELPERS: &str = include_str!("helpers.swift");
 /// The `model` view, carried only by a file that has a model: it needs RealityKit, which the other
 /// screens do not link.
 const MODEL_HELPERS: &str = include_str!("model.swift");
+
+/// The layout of a grid with `min-column-width`, carried only by a file that has one.
+const COLUMN_HELPERS: &str = include_str!("columns.swift");
 
 /// SwiftUI takes a perspective relative to the view, where CSS takes pixels; a view of this many
 /// points is the one the two agree on. `generate` prints `NOMINAL / px` so the importer can read

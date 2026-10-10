@@ -120,9 +120,9 @@ struct GlassScreen: View {
                 .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("close")
             }
+            .padding(theme.space.lg)
             .modifier(theme.material.glass)
             .weftProp("direction", "column")
-            .weftProp("padding", theme.space.lg)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("card")
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: theme.space.sm), count: 2), spacing: theme.space.sm) {
@@ -131,9 +131,10 @@ struct GlassScreen: View {
                 Text("Dark")
                     .accessibilityIdentifier("tile-dark")
             }
+            .padding(theme.space.xl)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: theme.size.md)
             .modifier(theme.material.glass)
-            .weftProp("max-width", theme.size.md)
-            .weftProp("padding", theme.space.xl)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("tiles")
         }
