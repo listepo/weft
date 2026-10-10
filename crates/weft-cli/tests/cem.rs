@@ -190,8 +190,10 @@ fn a_prefix_regenerates_the_example_library_unchanged() {
     ]);
     assert_eq!(r.code, 0, "{}", r.stderr);
     assert!(!r.stderr.contains("--prefix"), "{}", r.stderr);
-    // The committed file is the same JSON, laid out by the repository's formatter.
-    let committed = catalog(&Path::new(EXAMPLE).join("catalogs/acme-ui.catalog.json"));
+    // The committed file is the same JSON, laid out by the repository's formatter, plus the
+    // fragments its author wrote by hand, which no manifest describes.
+    let mut committed = catalog(&Path::new(EXAMPLE).join("catalogs/acme-ui.catalog.json"));
+    committed.as_object_mut().unwrap().remove("fragments");
     assert_eq!(catalog_text(&r.stdout), committed);
 }
 

@@ -1,5 +1,13 @@
 # Done
 
+### T103. Library fragments
+
+A library catalog, one with a `prefix`, lists fragments named `<prefix>-…`. A fragment reaches the host only through its parameters. Committed files first. Resolving a fragment from an npm package waits on T17.3 and uses that lookup rather than a second one (T103.1).
+
+Decisions (creator, 2026-10-10, recorded in `docs/versions-and-reuse-design.md`): build from committed files now; package lookup waits on T17.3 and reuses it; a library fragment's token references are checked against the consuming project's tokens (§11 question 4).
+
+Built: a library catalog takes an optional `fragments` member, at most 256 names mapped to fragment files relative to the catalog file (markup in project content); on the project catalog, not an object, or too many is `W706` and the catalog is ignored. `crates/weft-catalog/src/project.rs` reads them after the catalogs merge: a library fragment not named `<prefix>-…`, and a `weft.json` fragment under a loaded library's prefix, is `W715` and left out. Each library fragment is parsed against a scope built before the project catalog merges (the core, the library's kinds and those of its `requires`, unwidened), its own and its required libraries' fragments, and the project's tokens, with no host actions; `weft_core::fragment::host_reaches` reports `$.…` reads and literal `on-*` actions as `W716`, with paths into the catalog (`#/catalog/0/fragments/acme-promo/…`). Library fragments join the merged catalog before the project's fragments, so screens and project fragments place them with `<use>`. The project-fragment reader was split into `fragment_texts` and `parse_fragments` and is reused for both. MCP `weft_catalog` names a library fragment's library, its version and the fragment's own version; the MCP context carries the loaded catalogs. `SPEC.md` §5, §6.2 and §10.4, `AGENT-SPEC.md` (codes and one sentence) and the primer sentence. `examples/project` gains `catalogs/fragments/acme-promo.weft` in `acme-ui` and a use in `screens/order.weft`. Eight project cases, replayed by the Rust differential test. Choices where the design was silent: an inline fragment named like a library fragment is the existing `W808` (the core reader does not know library prefixes); entries of a library's `fragments` with the wrong shape are `W706`. Also fixed two failures already on `main`: `weft_catalog` with `kind: "constructor"` reached the prototype of the inline-fragment map, and the SPEC §10.7 inline example used `justify`, which the test catalog lacks.
+
 ### T100. Document versions
 
 Optional `version` on a screen or a fragment, the format move to `weft` 0.3, the `set-version` patch and `weft version-check`. Inline fragments, variants and library fragments stay out.

@@ -25,8 +25,9 @@ const VERSION_CHECK: [&str; 1] = ["W810"];
 
 /// Codes of the project file, produced by the weft-catalog loader; its project cases
 /// (packages/catalog/test/project-cases.ts, replayed by crates/weft-catalog) produce each one.
-const PROJECT: [&str; 12] = [
+const PROJECT: [&str; 14] = [
     "W701", "W702", "W703", "W704", "W705", "W706", "W707", "W708", "W711", "W712", "W713", "W714",
+    "W715", "W716",
 ];
 
 enum Case {

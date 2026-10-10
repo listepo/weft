@@ -160,6 +160,8 @@ codes! {
     W712 => Error, "Catalog prefix is malformed or reserved, or a second catalog lacks one.";
     W713 => Error, "Catalog defines or extends a kind it does not own.";
     W714 => Warning, "Catalog requirement is not loaded at a compatible version.";
+    W715 => Error, "Fragment name is claimed outside its owner.";
+    W716 => Error, "Library fragment reaches the host directly.";
     W801 => Mode, "`<use>` names no fragment of the project.";
     W802 => Error, "Attribute, action or slot the fragment does not declare.";
     W803 => Error, "Malformed `<param>` or `<fragment>`.";

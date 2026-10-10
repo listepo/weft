@@ -1,6 +1,6 @@
 # Design: versions and reusable fragments
 
-Status: approved for versions (§3 and the version parts of §7, §8 and §9). Inline fragments, variants and library fragments in this proposal are not built yet. Once each remaining part is approved, it lands in `SPEC.md`, `AGENT-SPEC.md`, the Rust core (which `@weft/core` runs through WebAssembly and the native addon), the MCP primer and the fixtures together, one part per task.
+Status: approved and built: versions (T100), inline fragments (T101), variants (T102) and library fragments from committed files (T103). Resolving a library fragment from an npm package waits on the package lookup of T17.3 and reuses it. Each part landed in `SPEC.md`, `AGENT-SPEC.md`, the Rust core (which `@weft/core` runs through WebAssembly and the native addon), the MCP primer and the fixtures together, one part per task.
 
 ## Decisions
 
@@ -9,8 +9,8 @@ The creator accepted the recommended answer to every open question in §11:
 1. Optional `version` on fragments and screens, classified as in §3.
 2. A screen's version is classified by its host contract (§3.3), not a free label.
 3. One variant parameter per fragment.
-4. Library token references are checked against the consuming project.
-5. Build order: versions, then inline fragments, then variants. Library fragments wait.
+4. Library token references are checked against the consuming project (confirmed by the creator on 2026-10-10: nothing new to ship).
+5. Build order: versions, then inline fragments, then variants, then library fragments. On 2026-10-10 the creator approved library fragments from committed files; resolving one from an npm package waits on T17.3 and uses its lookup, not a second one.
 
 ## 1. Problem
 
@@ -206,6 +206,7 @@ Moving an inline fragment into the project (`weft fragment extract`) and folding
 - A library catalog (§10.4: a catalog with a `prefix`) gains an optional `fragments` member: an object of name → file name, at most 256 entries. File names follow §10.2 relative to the directory of the catalog file, and stay inside the project directory, or inside the package directory for a package entry (T17.3). In project content (§10.1) a value is the fragment's markup, as in `weft.json`.
 - The project catalog still has no `fragments` (`W706`): a project's own fragments live in `weft.json`, the one way to say it.
 - A library's fragment name starts with `<prefix>-`. A project fragment (in `weft.json` or inline) does not start with the prefix of a loaded library. A library fragment named outside its prefix, a project fragment under a library's prefix, and a fragment name defined by two catalogs are `W715`; the later claim is left out.
+- As built (T103): only libraries list fragments and two libraries never share a prefix, so the prefix rule alone keeps one owner per name. `W715` covers the fragments of `weft.json`; an inline fragment is local to its screen, and one named like a library fragment is `W808`, as for any fragment of the project, because the core reader does not know library prefixes.
 - Package lookup (T17.3) reads the catalog file the package names and then the fragment files that catalog names, under the same path rules. It still reads nothing else and runs nothing.
 
 ### 5.2 What a library fragment may use
@@ -215,7 +216,7 @@ A library fragment is written by one party and used by many projects it does not
 - **Kinds:** the core catalog, the library's own kinds, and the kinds of the catalogs in its `requires`, as they define them. A project catalog's widening of a library kind does not count, because another project does not have it.
 - **Fragments:** the library's own fragments and those of the libraries in its `requires`.
 - **The host:** only through parameters. A read of the host data model (`$.…`) or an action named literally in an `on-*` attribute is `W716`. Data comes in through value parameters and actions through action parameters, so the project decides both at the use.
-- **Tokens:** references are checked against the consuming project's tokens when the project loads (`W306`, with a path into the library, `#/catalog/0/fragments/acme-promo/…`). Whether libraries should also ship default tokens is open question 4.
+- **Tokens:** references are checked against the consuming project's tokens when the project loads (`W306`, with a path into the library, `#/catalog/0/fragments/acme-promo/…`). Libraries ship no default tokens (question 4, decided).
 
 ### 5.3 Versions
 
@@ -301,8 +302,8 @@ Existing codes reused with their published meaning: `W205`, `W217`, `W302`–`W3
 1. **Version on documents.** Keep the optional `version` on fragments and screens with the classification of §3 (recommended), or version only libraries?
 2. **Screen version rule.** Classify a screen's changes by its host contract (§3.3, recommended), or keep a screen's `version` as a label with no rule?
 3. **Variant axes.** One variant parameter per fragment (recommended), or several with one body per combination?
-4. **Library tokens.** Check a library fragment's token references against the consuming project's tokens (recommended, nothing new to ship), or let a library ship default tokens that a project may override?
-5. **Order of work.** Build in the order of §12 (recommended: versions, inline fragments, variants, then library fragments after T17.3), or another order?
+4. **Library tokens.** Check a library fragment's token references against the consuming project's tokens (recommended, nothing new to ship), or let a library ship default tokens that a project may override? **Decided (2026-10-10):** checked against the consuming project's tokens.
+5. **Order of work.** Build in the order of §12 (recommended: versions, inline fragments, variants, then library fragments after T17.3), or another order? **Decided (2026-10-10):** library fragments are built now from committed files (T103); package lookup follows T17.3 and reuses it.
 
 ## 12. Implementation outline
 

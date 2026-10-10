@@ -106,5 +106,8 @@
         }
       }
     }
+  },
+  "fragments": {
+    "acme-promo": "fragments/acme-promo.weft"
   }
 }

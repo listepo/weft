@@ -1,0 +1,49 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-receipt as lit-js
+---
+import { LitElement, html, nothing } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
+
+function _text(v) {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v) {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function PriceRow({ data, actions, onChange, params, slots, id }) {
+  return html`<div data-weft-id=${(id + "/row") ?? nothing} style=${styleMap({ display: "flex", flexDirection: "row", alignItems: "center" })}
+      ><div data-weft-id=${(id + "/name") ?? nothing}>${!(_text(params.label).trim() === "") ? _squash(_text(params.label)) : ""}</div
+      ><div data-weft-id=${(id + "/value") ?? nothing}>${!(_text(params.amount).trim() === "") ? _squash(_text(params.amount)) : ""}</div
+    ></div>`;
+}
+
+
+class WeftScreen extends LitElement {
+  static properties = {
+    data: { attribute: false },
+    actions: { attribute: false },
+    onChange: { attribute: false },
+  };
+
+  // The light DOM, so the page's stylesheet and the ids that labels refer to reach the controls.
+  createRenderRoot() {
+    return this;
+  }
+
+  render() {
+    const { data, actions, onChange } = this;
+    return html`<main data-weft-id="receipt" aria-label="Receipt"
+      ><div data-weft-id="lines" style=${styleMap({ display: "flex", flexDirection: "column" })}>${PriceRow({ data: data, actions: actions, onChange: onChange, id: "subtotal", params: { amount: data?.subtotal, label: "Subtotal" }, slots: {} })}${PriceRow({ data: data, actions: actions, onChange: onChange, id: "total", params: { amount: data?.total, label: "Total" }, slots: {} })}</div
+    ></main>`;
+  }
+}
+
+if (!customElements.get("weft-screen")) customElements.define("weft-screen", WeftScreen);
+
+export default WeftScreen;

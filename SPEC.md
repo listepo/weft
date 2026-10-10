@@ -274,7 +274,7 @@ type Catalog = {
   prefix?: string;                         // owns the kinds named `<prefix>-…`; absent = a project catalog
   requires?: Record<string, string>;       // catalog name → the version it was written against
   components: Record<string, ComponentDef>;
-  fragments?: Record<string, Document>;    // a project's fragments by name (§10.7); never in a catalog file
+  fragments?: Record<string, Document | string>; // merged: every fragment by name (§10.7); a library file: name → file (§10.4)
 };
 
 type ComponentDef = {
@@ -311,6 +311,7 @@ type SlotDef = { description: string; allowedChildren?: string[]; required?: boo
 
 - `name` identifies the catalog in diagnostics, in the advertisement (§8) and in `requires`. Two catalogs of one project never share a name (§10.4). A catalog published as a package uses the package name.
 - `prefix` makes the catalog a *library* that owns every kind named `<prefix>-…` (`acme` owns `acme-button`). It is one name segment, `[a-z][a-z0-9]*`, and is not `x` (opaque extensions, §8), `weft` (catalogs of this specification), a core kind or the first segment of one (`button`, `date`, `menu`, …). The core catalog has no prefix and never adds a kind whose first segment is a known library prefix. A catalog without `prefix` is a project's own catalog (§10.4).
+- `fragments` in a library file lists the library's fragments (§10.4), each name mapped to a fragment file. A project's merged catalog maps every fragment it knows, the libraries' and the project's, to its document (§10.7). A project catalog file has none.
 - `requires` lists the catalogs, `weft-core` included, and the versions the catalog was written against. A version is `MAJOR.MINOR.PATCH` (semver) and is read by Cargo's compatibility rule: `"1.2.0"` admits `>=1.2.0, <2.0.0`, and `"0.1.0"` admits `>=0.1.0, <0.2.0`; the left-most non-zero component must match. There is no range syntax.
 
 ### 5.1 Core catalog `weft-core` 0.2
@@ -526,6 +527,8 @@ Code ranges: `W1xx` syntax, `W2xx` schema, `W3xx` semantics, `W4xx` compatibilit
 | W712 | Catalog prefix is malformed or reserved, or a second catalog has no prefix; the catalog is ignored (§5, §10.4). |
 | W713 | Catalog defines or extends a kind it does not own: a library's kind outside its prefix, or a project catalog's new kind under a library's prefix (§10.4). |
 | W714 | Catalog requirement names a catalog that is not loaded, or is loaded at an incompatible version (§5, §10.4). |
+| W715 | Fragment name claimed outside its owner: a library's fragment not named `<prefix>-…`, or a fragment in `weft.json` named under a loaded library's prefix. That fragment is left out (§10.4). |
+| W716 | Library fragment reaches the host directly: a binding reads `$.…`, or an `on-*` value names an action instead of reading an action parameter (§10.4). |
 | W801 | `<use>` names no fragment of the project (mode, §10.7). |
 | W802 | `<use>` gives an attribute, `on-*` or slot that its fragment does not declare (§10.7). |
 | W803 | Malformed `<param>` or `<fragment>`: a bad declaration, a duplicate or misplaced `<param>`, a fragment without a body (§10.7). |
@@ -799,7 +802,7 @@ Screens that belong together share their resources through a project file named 
 
 ### 10.4 Catalog extension
 
-Each `catalog` file is a catalog (§5): `weft`, `name`, `version` and `components`, and optionally `prefix` and `requires`. A catalog with a `prefix` is a *library*; the one catalog without a prefix is the *project catalog*. Screens never say which catalog a kind comes from: the kind's name is enough.
+Each `catalog` file is a catalog (§5): `weft`, `name`, `version` and `components`, and optionally `prefix`, `requires` and, for a library, `fragments`. A catalog with a `prefix` is a *library*; the one catalog without a prefix is the *project catalog*. Screens never say which catalog a kind comes from: the kind's name is enough.
 
 - **Claims.** In list order, a catalog whose `name` is the core's or an earlier catalog's, or whose `prefix` an earlier library declares, is `W711` and is ignored. A `prefix` that breaks the rules of §5 is `W712`, and so is a second catalog without a prefix; that catalog is ignored.
 - **Requirements.** A `requires` entry that names no loaded catalog, or one loaded at a version its rule does not admit, is `W714`, a warning; the catalog still loads.
@@ -811,6 +814,10 @@ Each `catalog` file is a catalog (§5): `weft`, `name`, `version` and `component
 - An extension may only widen. The merged definition is compared with the definition it extends (the core's, or the library's) by the rules of §8: a kind whose merged definition makes a change those rules call major (a changed role or type, a new required prop, a narrowed content model, …) is `W707`, and that kind keeps the definition it had.
 - A catalog that is not a catalog, including a `prefix` that is not a string or a `requires` that is not an object of versions, is `W706` and is ignored; an entry that is not a valid definition, or names a kind that breaks the rules above, is `W706` and only that entry is ignored.
 - `null` is not a value in a catalog: a member written `null` makes its entry invalid.
+- **Library fragments.** A library's `fragments` maps at most 256 fragment names to fragment files (§10.7), each relative to the directory of the catalog file under the rules of §10.2. In project content (§10.1) a value is the fragment's markup. A `fragments` member on the project catalog, one that is not an object or one with more entries is `W706`, and the catalog is ignored. An entry with a name that breaks the name grammar or a value that is not a string is `W706`, a bad file name `W703`, a file that cannot be read `W704`; that fragment is left out.
+- **Fragment ownership.** A library's fragments are named `<prefix>-…`, and a fragment in `weft.json` is named under no loaded library's prefix. Any other name is `W715`, and that fragment is left out. So one fragment name has one owner.
+- **What a library fragment may use.** It is written once for projects its author does not know, so it is checked against what the library declares: the core kinds, the library's own kinds and the kinds of the catalogs in its `requires`, as they define them (the project catalog's widenings do not count); its own fragments and those of the libraries in its `requires`. Token references are checked against the consuming project's tokens (`W306`). It reaches the host only through its parameters: a binding that reads `$.…`, or an `on-*` value that names an action instead of reading an action parameter, is `W716`. Its problems point into the catalog: `#/catalog/0/fragments/acme-promo/fragment/stack#row/@gap`.
+- The libraries' fragments join the merged catalog's `fragments` before the project's own, so screens and the project's fragments place them with `<use>` like any other. A library's `version` covers its fragments (§8).
 - A loader records, for each kind of the merged catalog, the catalog that defined it and the catalogs that extended it, and the list of loaded catalogs with their `name`, `version`, `prefix` and source file.
 
 ### 10.5 Data schema
@@ -888,7 +895,7 @@ A fragment adds elements to the format, not a new model, and it is an addition o
 - A key is the fragment's name and follows the name grammar of §2. The name lives only here. A value is a file name under the rules of §10.2. In project content (§10.1) a value is the fragment's markup as a string.
 - A `fragments` member that is not an object, a key that breaks the name grammar, or a value that is not a string is `W701`. A bad file name is `W703`, and a file that cannot be read is `W704`. A file whose root is not `<fragment>` is `W201`. In each of these cases the fragment is left out.
 - Each fragment is parsed against the merged catalog, with the project's tokens and actions and with the other fragments. Its markup problems keep their codes and their positions in its file. Their path starts at `#/fragments/<name>`, as in `#/fragments/page-header/fragment/stack#bar`.
-- The project's merged catalog (§10.4) carries the fragments in a `fragments` member, which maps each name to its fragment document in canonical JSON. So every tool that is given the project's catalog knows the fragments. A catalog file that has `fragments` is `W706`. A screen's own inline fragments (below) do not need a project.
+- The project's merged catalog (§10.4) carries the fragments in a `fragments` member, which maps each name to its fragment document in canonical JSON. So every tool that is given the project's catalog knows the fragments. A library may ship fragments too (§10.4); a project catalog file that has `fragments` is `W706`. A screen's own inline fragments (below) do not need a project.
 
 **A fragment file.**
 
@@ -1000,7 +1007,7 @@ A reader without fragments (no project and no inline fragment) reads `<use>` as 
   <fragment label="Price row" name="price-row">
     <param name="label" required="true" type="string"/>
     <param name="amount" required="true" type="string"/>
-    <stack id="row" direction="row" justify="space-between">
+    <stack id="row" direction="row">
       <text id="name" text="{$label}"/>
       <text id="value" text="{$amount}"/>
     </stack>
