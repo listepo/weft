@@ -91,7 +91,7 @@ test("weft_catalog: compact index, one full component, unknown kind", async () =
   assert.equal(bad.isError, true);
   assert.match(bad.blocks[0] ?? "", /did you mean "button"\?/);
   const proto = await call(client, "weft_catalog", { kind: "constructor" });
-  assert.equal(proto.isError, true, proto.blocks[0]);
+  assert.equal(proto.isError, true);
   await close();
 });
 

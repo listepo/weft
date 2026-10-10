@@ -97,7 +97,9 @@ test("weft_catalog groups kinds by catalog and names each kind's catalog", async
   assert.ok(index.indexOf("\nacme-card |") > index.indexOf("kinds of acme-ui"));
   assert.ok(index.indexOf("\nrating |") > index.indexOf("kinds of shop"));
   const kind = async (name: string) =>
-    JSON.parse((await call(client, "weft_catalog", { kind: name, project: PROJECT })).blocks[0] ?? "");
+    JSON.parse(
+      (await call(client, "weft_catalog", { kind: name, project: PROJECT })).blocks[0] ?? "",
+    );
   const widened = await kind("acme-button");
   assert.deepEqual([widened.catalog, widened.extendedBy], ["acme-ui", ["shop"]]);
   assert.ok(widened.props.variant.values.includes("ghost"));

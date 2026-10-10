@@ -6,6 +6,7 @@ import {
   contextReply,
   handleRequest as handleShared,
   type ContextLayer,
+  type LibrarySources,
   type PluginReply,
 } from "@weft/design-tool";
 import type { FigmaApi, FNode, FPluginData } from "./api.ts";
@@ -15,7 +16,8 @@ import { ensureLibrary } from "./library.ts";
 import { readModes } from "./modes.ts";
 import { readLayers } from "./read.ts";
 
-export type PluginOptions = { catalog: Catalog };
+/** `sources` names the catalogs merged into `catalog`, so the library groups its kinds by catalog. */
+export type PluginOptions = { catalog: Catalog; sources?: LibrarySources | undefined };
 
 export function handleRequest(
   api: FigmaApi,
@@ -23,11 +25,11 @@ export function handleRequest(
   message: unknown,
   options: PluginOptions,
 ): Promise<PluginReply> {
-  const { catalog } = options;
+  const { catalog, sources } = options;
   return handleShared(
     {
       async build(document, display, tokens, modifier) {
-        const library = await ensureLibrary(api, catalog, tokens, modifier);
+        const library = await ensureLibrary(api, catalog, tokens, modifier, sources);
         const root = await buildScreen(api, document, { catalog, library, tokens, display });
         return { id: root.id, notes: library.notes };
       },

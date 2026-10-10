@@ -162,6 +162,12 @@ export interface FOther extends FScene {
 
 export type FNode = FFrame | FComponent | FComponentSet | FInstance | FText | FRectangle | FOther;
 
+/** A section holds layers without auto layout, so the library sizes it to its board. */
+export interface FSection extends FScene, FParent {
+  readonly type: "SECTION";
+  resizeWithoutConstraints(width: number, height: number): void;
+}
+
 export interface FPage extends FBase, FParent {
   readonly type: "PAGE";
   loadAsync(): Promise<void>;
@@ -202,6 +208,7 @@ export interface FigmaApi {
   readonly variables: FVariables;
   createPage(): FPage;
   createFrame(): FFrame;
+  createSection(): FSection;
   createComponent(): FComponent;
   createText(): FText;
   createRectangle(): FRectangle;
