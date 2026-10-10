@@ -1,7 +1,6 @@
 - T8. Evaluation
 - T14. Figma round trip and plugin
 - T39. Context in the document
-- T39.9. Context: SwiftUI
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton

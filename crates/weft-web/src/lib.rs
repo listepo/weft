@@ -8,7 +8,7 @@ pub mod html;
 mod import;
 mod js;
 pub mod jsx;
-pub mod provenance;
+pub use weft_import::provenance;
 mod tilt;
 pub mod tree;
 

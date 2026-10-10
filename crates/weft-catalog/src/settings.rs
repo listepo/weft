@@ -91,6 +91,7 @@ const SWIFTUI_EXPORT: &[Setting] = &[
         Kind::File,
     ),
     with_default("sharedTokens", SHARED_TOKENS, Kind::Bool, "true"),
+    with_default("context", CONTEXT_EXPORT, KEEP_STRIP, "\"keep\""),
 ];
 const JSX_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
@@ -205,7 +206,7 @@ const IMPORT: &[Setting] = &[
     setting(
         "swiftui",
         "SwiftUI source files (`weft import-swiftui`).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SOURCE_IMPORT),
     ),
     setting(
         "a2ui",

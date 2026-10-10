@@ -2,7 +2,9 @@
 //! tokens come from the arguments, else the project, else the core catalog and the default
 //! tokens; the output directory from `--out-dir`, else the project's `export.swiftui.outDir` or
 //! `import.swiftui.outDir`, else standard output.
-//! Sample data comes from `--data`, else `export.swiftui.data`, else none.
+//! Sample data comes from `--data`, else `export.swiftui.data`, else none. `--context`, else
+//! `export.swiftui.context` or `import.swiftui.context`, else `keep`, decides whether the screen's
+//! context goes into the source comment and comes back from it.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -15,7 +17,8 @@ use weft_swiftui::{
 };
 
 use crate::convert::{
-    catalog, emit, finish_import, out_dir, project, sample_data, strict_document, switch_or, tokens,
+    catalog, emit, finish_import, keeps_context, out_dir, project, sample_data, strict_document,
+    switch_or, tokens,
 };
 use crate::{DIAGNOSTICS, ProjectArgs, print, read};
 
@@ -30,6 +33,8 @@ pub struct ExportArgs {
     /// `--shared-tokens` and `--no-shared-tokens`.
     pub shared_tokens: (bool, bool),
     pub data: Option<PathBuf>,
+    /// `--context`: `Some(true)` keeps, `Some(false)` strips.
+    pub context: Option<bool>,
 }
 
 pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
@@ -42,9 +47,12 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
         project_dir.as_deref(),
         "swiftui",
     )?;
-    let Some(document) = strict_document(&args.file, &catalog)? else {
+    let Some(mut document) = strict_document(&args.file, &catalog)? else {
         return Ok(DIAGNOSTICS);
     };
+    if !keeps_context(args.context, project.as_ref(), "export", "swiftui", true) {
+        document.context.clear();
+    }
     // A project's screens share one tokens file; a lone screen stays self-contained.
     let (on, off) = args.shared_tokens;
     let shared_tokens = switch_or(
@@ -132,13 +140,18 @@ pub struct ImportArgs {
     pub catalog: Option<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
+    /// `--context`: `Some(true)` keeps, `Some(false)` drops.
+    pub context: Option<bool>,
 }
 
 pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(&args.file, args.project)?;
     let catalog = catalog(args.catalog.as_deref(), project.as_ref())?;
     let text = read(&args.file)?;
-    let result = import_swiftui(&text, &ImportOptions { catalog: &catalog });
+    let mut result = import_swiftui(&text, &ImportOptions { catalog: &catalog });
+    if !keeps_context(args.context, project.as_ref(), "import", "swiftui", true) {
+        result.document.context.clear();
+    }
     let dir = out_dir(
         args.out_dir,
         project.as_ref(),

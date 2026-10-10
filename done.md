@@ -1,18 +1,25 @@
 # Done
 
-<<<<<<< HEAD
+### T39.9. Context: SwiftUI
+
+SwiftUI has no source comment, so it carries context as `// weft:context <entry JSON>` lines above the view struct, read back by `weft import-swiftui`, with readable `//` comments above each named view that the importer ignores. `export.swiftui.context` and `import.swiftui.context` (SPEC §10.6, `settings.rs`, the schema) and the CLI `--context`, as T39.6 gave the web and Slint targets; a round-trip test.
+
+Decision (creator): `import_swiftui` read code by convention, with no check like the web and Slint importers have, so a `// weft:context` line could not be told apart from one forged in foreign Swift. The creator chose to give SwiftUI a verified `weft:source` comment first, as the web and Slint targets have, and to carry the context in it; the importer trusts the context only when the check passes. The separate `// weft:context <entry JSON>` lines of the design are therefore not written: the context travels in the comment's canonical markup, as in T39.6.
+
+Built: `provenance.rs` moved from `crates/weft-web` to `crates/weft-import`, which the SwiftUI generator now depends on (pure Rust; only tree-sitter stays behind the `import` feature). It also took the `claimed` parse, line-comment helpers and the readable note line, so the web and SwiftUI targets escape alike. `weft swiftui` opens the file with `// weft:source swiftui` and the screen's canonical markup as written, uses unexpanded. The markup is split at every `\n` and `\r`, so no text can end a comment line early. A `// <kind> (<by> <name>): <text>` line sits above each view an entry names, and the screen's entries come first in `body`. `import_swiftui` reads the code as before. It returns the comment's document, context included, only when that read has no loss and no diagnostic and equals the comment's screen, expanded and without its context. The check compares documents, not regenerated code: the Swift also depends on tokens, appearance and sample data that the importer is not given, and the reader already reads generated code exactly (SPEC §9). A screen that places a fragment fails the check, because the reader invents ids for the expanded instances. It reads back by convention as before, without its context (recorded in `ideas.md`). The CLI takes `--context` on `swiftui` and `import-swiftui`, with `export.swiftui.context` and `import.swiftui.context` in `settings.rs` and the regenerated schema. The 84 SwiftUI insta snapshots gained the comment. The design's separate `// weft:context` lines were not needed.
+
 ### T39.7. Context: Figma and Penpot
 
 The canonical entries in plugin data (`weft.context`) on the root frame, read back with entries about removed layers dropped as a `context` loss (SPEC §9 loss row), and `import.figma.context`; the plugin panel lists the selected layer's entries read-only.
 
 Built: `packages/design-tool` writes the canonical entries as `weft.context` shared plugin data on the root layer and reads them back from the layer the read starts at, parsed with the core's `EntrySchema` (anything else is ignored), with their ids reserved before a new element is named. An entry whose `for` names an element whose layer is gone is dropped as a `context` loss (a new `LossKind` in `packages/core/src/loss.ts` and `crates/weft-import/src/loss.rs`), and `ReadOptions.context: "drop"` reads none. The plugin panel: `layerContext` walks from the selected layer up to the root that keeps the context and returns the entries about the nearest Weft element (the screen's own on the root); `selectionContext` in `@weft/figma` and `@weft/penpot` adapts each tool's nodes, the plugins send a `context` reply on `selectionchange` and after a build, and `@weft/design-plugin` lists the entries as text. `import.figma.context` (`keep`, `drop`) in SPEC §10.6, `settings.rs` and the schema, read by the `figma-pull` script. No `export.figma` or Penpot key: no tool that reads `weft.json` builds into Figma or reads Penpot. SPEC §9 gains the design-tool context bullet and the `context` loss row; AGENT-SPEC says where design tools keep context. Tests on the SPEC §2.3 example: Figma and Penpot round trips byte-identical, removed layers, crafted plugin data, the panel, REST pull with `drop`, and both plugin bundles end to end.
-=======
+
 ### T102. Fragment variants
 
 One enum parameter marked `variant="true"` selects one `<variant when="…">` body. A use passes a literal; a binding is the existing `W217`. Ids are local to each variant, so an instance path stays valid when the variant changes. `W809` covers a bad declaration. `weft explain` names the chosen variant and a slot the variant drops.
 
 Built: the parameter, `<variant>` and expansion live in `crates/weft-core`. The price-row fragment and the totals screen are the fixture. The format bump to `weft` 0.3 stays with T100, so writers still emit `weft="0.2"`. Merged in #48.
->>>>>>> origin/main
+
 
 ### T39.8. Context: readable comments in React and SolidJS
 

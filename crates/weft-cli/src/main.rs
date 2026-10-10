@@ -204,6 +204,10 @@ enum Command {
         /// Put the tokens the screen uses in the screen file, so it builds on its own.
         #[arg(long)]
         no_shared_tokens: bool,
+        /// Whether the source comment carries the screen's context (default: the project's
+        /// `export.swiftui.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ExportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -239,6 +243,10 @@ enum Command {
         /// `import.swiftui.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Whether context read back from the source comment enters the document (default: the
+        /// project's `import.swiftui.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ImportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -771,6 +779,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             data,
             shared_tokens,
             no_shared_tokens,
+            context,
             force,
         } => swiftui::export(
             swiftui::ExportArgs {
@@ -781,6 +790,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 out_dir,
                 data: data.data,
                 shared_tokens: (shared_tokens, no_shared_tokens),
+                context: context.map(|c| c == convert::ExportContext::Keep),
                 force,
             },
             out,
@@ -840,6 +850,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             catalog,
             project,
             out_dir,
+            context,
             force,
         } => swiftui::import(
             swiftui::ImportArgs {
@@ -847,6 +858,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 catalog,
                 project,
                 out_dir,
+                context: context.map(|c| c == convert::ImportContext::Keep),
                 force,
             },
             out,
