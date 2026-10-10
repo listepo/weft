@@ -43,6 +43,11 @@ fn waits_for_more(d: &Diagnostic, open: &HashSet<String>) -> bool {
         Code::W309 => true,
         // The slot or the repeated element may be the next thing written inside it.
         Code::W208 | Code::W314 => open.contains(&d.path),
+        // A fragment still being written has no body yet, and its variant coverage can
+        // still arrive. Once the element is closed these are real errors.
+        Code::W803 | Code::W809 => {
+            open.contains(&d.path) || open.iter().any(|p| d.path.starts_with(&format!("{p}/")))
+        }
         _ => false,
     }
 }
@@ -501,6 +506,10 @@ impl Builder<'_> {
             return None;
         }
         let mut node = self.element(index, &path, false);
+        // Validation addresses the lifted fragment, not the place it stood in the screen.
+        if self.syntax.open.contains(&index) {
+            self.open.insert(format!("#/fragments/{name}"));
+        }
         node.props.shift_remove("name");
         node.id = None;
         self.fragments.insert(name.clone(), node);

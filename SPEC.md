@@ -985,7 +985,7 @@ A reader without fragments (no project and no inline fragment) reads `<use>` as 
   <fragment label="Price row" name="price-row">
     <param name="label" required="true" type="string"/>
     <param name="amount" required="true" type="string"/>
-    <stack id="row" direction="row" justify="space-between">
+    <stack id="row" direction="row">
       <text id="name" text="{$label}"/>
       <text id="value" text="{$amount}"/>
     </stack>
