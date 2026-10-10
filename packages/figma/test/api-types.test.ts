@@ -9,6 +9,7 @@ import type {
   PageNode,
   PluginAPI,
   RectangleNode,
+  SectionNode,
   SceneNode,
   TextNode,
   Variable,
@@ -25,6 +26,7 @@ import type {
   FNode,
   FPage,
   FRectangle,
+  FSection,
   FText,
   FVariable,
 } from "../src/api.ts";
@@ -40,6 +42,7 @@ export type Checks = [
   Assignable<FInstance, InstanceNode>,
   Assignable<FText, TextNode>,
   Assignable<FRectangle, RectangleNode>,
+  Assignable<FSection, SectionNode>,
   Assignable<FPage, PageNode>,
   Assignable<FVariable, Variable>,
   Assignable<FCollection, VariableCollection>,

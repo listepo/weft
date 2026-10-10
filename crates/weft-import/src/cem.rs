@@ -36,6 +36,12 @@ pub struct CemOptions<'a> {
     /// The catalog the result extends (SPEC §10.4); an element whose tag it already has is left out,
     /// because an extension may only widen a kind.
     pub base: &'a Catalog,
+    /// The kinds the catalog owns, `<prefix>-…` (SPEC §5). With one, the catalog is a library that
+    /// can sit beside a project catalog: it says so and `requires` the core, and a tag outside the
+    /// prefix is a `kinds` loss.
+    pub prefix: Option<&'a str>,
+    /// The version of the core catalog (`weft-core`), which a library `requires`.
+    pub core_version: &'a str,
 }
 
 #[derive(Clone, Debug, PartialEq, serde::Serialize)]
@@ -49,12 +55,17 @@ pub struct CemImport {
 /// and a `W601`, input over a limit is cut with a `W602`.
 pub fn import_cem(text: &str, options: &CemOptions<'_>) -> CemImport {
     let mut run = Run::default();
-    let components = run.read(text, options.base).unwrap_or_default();
+    let components = run.read(text, options).unwrap_or_default();
+    let requires = options
+        .prefix
+        .map(|_| ("weft-core".to_owned(), options.core_version.to_owned()));
     CemImport {
         catalog: Catalog {
             weft: WEFT_VERSION.to_owned(),
             name: options.name.to_owned(),
             version: options.version.to_owned(),
+            prefix: options.prefix.map(str::to_owned),
+            requires: requires.into_iter().collect(),
             components,
             fragments: Default::default(),
         },
@@ -296,7 +307,7 @@ impl Run {
             .push(Diagnostic::new(code, path, message, expected));
     }
 
-    fn read(&mut self, text: &str, base: &Catalog) -> Option<Map<ComponentDef>> {
+    fn read(&mut self, text: &str, options: &CemOptions<'_>) -> Option<Map<ComponentDef>> {
         if text.len() > MAX_MANIFEST_LENGTH {
             self.limit("#", &format!("is longer than {MAX_MANIFEST_LENGTH} bytes"));
             return None;
@@ -361,7 +372,7 @@ impl Run {
                 } else {
                     let class = str_of(decl, "name").unwrap_or_default();
                     let tag = str_of(decl, "tagName").or_else(|| tags.get(&(path, class)).copied());
-                    if let Some((tag, def)) = self.element(decl, &at, tag, base, &kinds) {
+                    if let Some((tag, def)) = self.element(decl, &at, tag, options, &kinds) {
                         kinds.insert(tag, def);
                     }
                 }
@@ -385,7 +396,7 @@ impl Run {
         decl: &Json,
         at: &str,
         tag: Option<&str>,
-        base: &Catalog,
+        options: &CemOptions<'_>,
         kinds: &Map<ComponentDef>,
     ) -> Option<(String, ComponentDef)> {
         let tag = tag.unwrap_or_default();
@@ -396,7 +407,12 @@ impl Run {
             format!("the tag {tag:?} is not a Weft name (lowercase letters, digits and hyphens)")
         } else if tag.starts_with("x-") {
             format!("the tag {tag:?} starts with `x-`, which every catalog treats as opaque")
-        } else if base.components.contains_key(tag) {
+        } else if let Some(prefix) = options.prefix.filter(|p| {
+            !tag.strip_prefix(p)
+                .is_some_and(|rest| rest.starts_with('-'))
+        }) {
+            format!("the tag {tag:?} is outside the catalog's prefix {prefix:?}")
+        } else if options.base.components.contains_key(tag) {
             format!("the tag {tag:?} is already a kind of the catalog it extends")
         } else if kinds.contains_key(tag) {
             format!("the tag {tag:?} is defined twice; the first definition is kept")

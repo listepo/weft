@@ -16,8 +16,38 @@ export const LIBRARY_PAGE = "Weft library";
 export const LIBRARY_BOARD = "Weft components";
 export const TOKEN_COLLECTION = "Weft tokens";
 
-/** What the library was built from; stored on the library page and board. */
-export const libraryTag = (catalog: Catalog): string => `${catalog.name}@${catalog.version}`;
+/**
+ * The catalogs a library is built from (SPEC §10.4): the core first, then each catalog merged over
+ * it, and the catalog that defined each kind. Without it the library is the one catalog it is given.
+ */
+export type LibrarySources = {
+  catalogs: readonly { name: string; version: string }[];
+  kinds: Readonly<Record<string, { catalog: string }>>;
+};
+
+/** What the library was built from (`weft-core@0.2.0 acme-ui@1.0.0`); stored on the library page and board. */
+export const libraryTag = (catalog: Catalog, sources?: LibrarySources): string =>
+  (sources?.catalogs ?? [catalog]).map(({ name, version }) => `${name}@${version}`).join(" ");
+
+export type CatalogGroup = { name: string; version: string; kinds: string[] };
+
+/**
+ * The kinds of each catalog, in catalog order, so each tool can group the library by catalog; one
+ * group when the library has one catalog. A kind no listed catalog claims goes with the first.
+ */
+export function catalogGroups(catalog: Catalog, sources?: LibrarySources): CatalogGroup[] {
+  const groups = (sources?.catalogs ?? [catalog]).map(({ name, version }) => ({
+    name,
+    version,
+    kinds: [] as string[],
+  }));
+  for (const kind of Object.keys(catalog.components)) {
+    const owner =
+      sources !== undefined && Object.hasOwn(sources.kinds, kind) ? sources.kinds[kind] : undefined;
+    (groups.find((g) => g.name === owner?.catalog) ?? groups[0])?.kinds.push(kind);
+  }
+  return groups.filter((g) => g.kinds.length > 0);
+}
 
 export const INK: RGB = { r: 0.1, g: 0.11, b: 0.13 };
 export const WHITE: RGB = { r: 1, g: 1, b: 1 };

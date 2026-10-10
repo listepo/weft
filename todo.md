@@ -12,7 +12,6 @@
 - T16.5. Layout vocabulary: Slint
 - T16.7. Layout vocabulary: Figma and Penpot
 - T17. Extension catalogs
-- T17.2. Extension catalogs: tools and docs
 - T17.3. Extension catalogs: distribution and registry
 - T41. Hosted Penpot plugin
 - T96. Too-deep documents: report, do not hide

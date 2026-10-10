@@ -286,6 +286,13 @@ pub struct Catalog {
     pub weft: String,
     pub name: String,
     pub version: String,
+    /// The kinds a library catalog owns, `<prefix>-…` (SPEC §5); absent for a project catalog.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prefix: Option<String>,
+    /// Catalog name → the version this catalog was written against (SPEC §5); checked when a
+    /// project loads it, not here.
+    #[serde(default, skip_serializing_if = "IndexMap::is_empty")]
+    pub requires: Map<String>,
     pub components: Map<ComponentDef>,
     /// A project's fragments (SPEC §10.7). Only the merged catalog of a project has them, so
     /// every tool that is handed that catalog knows them; a catalog file never does.

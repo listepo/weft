@@ -6,6 +6,7 @@ import {
   contextReply,
   handleRequest as handleShared,
   type ContextLayer,
+  type LibrarySources,
   type PluginReply,
 } from "@weft/design-tool";
 import type { PenpotApi, PShape, PSharedData } from "./api.ts";
@@ -21,7 +22,8 @@ import { readLayers } from "./read.ts";
  * (`crates/weft-catalog/src/settings.rs`) stay empty. A new option is added there and here in the
  * same change.
  */
-export type PluginOptions = { catalog: Catalog };
+/** `sources` names the catalogs merged into `catalog`, so the library groups its kinds by catalog. */
+export type PluginOptions = { catalog: Catalog; sources?: LibrarySources | undefined };
 
 export function handleRequest(
   api: PenpotApi,
@@ -29,11 +31,11 @@ export function handleRequest(
   message: unknown,
   options: PluginOptions,
 ): Promise<PluginReply> {
-  const { catalog } = options;
+  const { catalog, sources } = options;
   return handleShared(
     {
       async build(document, display, tokens, modifier) {
-        const library = await ensureLibrary(api, catalog, tokens, modifier);
+        const library = await ensureLibrary(api, catalog, tokens, modifier, sources);
         return buildScreen(api, document, { catalog, library, tokens, display });
       },
       read: (shape, tokens) => readLayers(shape, { catalog, tokens }),

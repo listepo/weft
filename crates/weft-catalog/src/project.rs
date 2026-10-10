@@ -383,6 +383,9 @@ fn library(
         weft: entry.weft.clone(),
         name: entry.source.name.clone(),
         version: entry.source.version.clone(),
+        prefix: entry.source.prefix.clone(),
+        // The scope only checks fragments; the library's requirements were checked at load.
+        requires: Map::new(),
         // Every entry was checked on its own, so this only fails if that check is wrong.
         components: serde_json::from_value(Json::Object(scoped)).ok()?,
         fragments: Map::new(),
@@ -1301,6 +1304,39 @@ fn empty_project() -> Result<Project, CatalogError> {
         data: None,
         data_source: None,
         settings: Object::new(),
+    })
+}
+
+/// Catalogs a host gives by content in place of a project's `catalog` member, such as the CLI's
+/// repeated `--catalog` (SPEC §10.2): merged over `base` by the rules of §10.4, with diagnostics at
+/// `#/catalog/<i>`. `base` is the core catalog unless a whole catalog named `weft-core` replaces it.
+/// Only the catalog members of the result are set.
+pub fn merge_catalogs(
+    base: &Json,
+    catalogs: &[Json],
+    mode: Mode,
+) -> Result<ProjectLoad, CatalogError> {
+    let options = ProjectOptions {
+        mode,
+        ..Default::default()
+    };
+    let mut project = empty_project()?;
+    let mut loader = Loader {
+        options: &options,
+        diagnostics: Vec::new(),
+    };
+    // Catalogs given by content come with no reader for their fragment files, so library
+    // fragments load only through a project file.
+    if let Some((catalog, catalogs, kinds, _)) =
+        loader.catalogs(&Json::Array(catalogs.to_vec()), base)
+    {
+        project.catalog = catalog;
+        project.catalogs = catalogs;
+        project.kinds = kinds;
+    }
+    Ok(ProjectLoad {
+        project,
+        diagnostics: loader.diagnostics,
     })
 }
 

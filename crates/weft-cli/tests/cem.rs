@@ -80,7 +80,7 @@ fn an_imported_catalog_is_one_validate_accepts() {
 
     let card = s.write(
         "card.weft",
-        "<acme-card id=\"card\" elevated=\"true\" weft=\"0.1\">\n  <acme-button id=\"buy\" variant=\"primary\" on-acme-click=\"cart.add\">Buy</acme-button>\n  <acme-rating id=\"stars\" value=\"4\"/>\n</acme-card>\n",
+        "<screen id=\"s\" weft=\"0.1\">\n  <acme-card id=\"card\" elevated=\"true\">\n    <acme-button id=\"buy\" variant=\"primary\" on-acme-click=\"cart.add\">Buy</acme-button>\n    <acme-rating id=\"stars\" value=\"4\"/>\n  </acme-card>\n</screen>\n",
     );
     let r = run(&[
         &"validate",
@@ -94,7 +94,7 @@ fn an_imported_catalog_is_one_validate_accepts() {
 
     let misuse = s.write(
         "misuse.weft",
-        "<acme-card id=\"card\" weft=\"0.1\"><acme-button id=\"buy\" variant=\"primay\">Buy</acme-button></acme-card>",
+        "<screen id=\"s\" weft=\"0.1\"><acme-card id=\"card\"><acme-button id=\"buy\" variant=\"primay\">Buy</acme-button></acme-card></screen>",
     );
     let r = run(&[
         &"validate",
@@ -169,4 +169,120 @@ fn a_manifest_that_is_not_json_is_w601() {
         catalog(&s.write("out.json", &r.stdout))["components"],
         serde_json::json!({})
     );
+}
+
+const EXAMPLE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../examples/project");
+
+#[test]
+fn a_prefix_regenerates_the_example_library_unchanged() {
+    let s = Scratch::new("prefix");
+    let manifest = s.write("acme-ui.json", MANIFEST);
+    let r = run(&[
+        &"import-cem",
+        &manifest,
+        &"--no-project",
+        &"--name",
+        &"acme-ui",
+        &"--version",
+        &"1.0.0",
+        &"--prefix",
+        &"acme",
+    ]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(!r.stderr.contains("--prefix"), "{}", r.stderr);
+    // The committed file is the same JSON, laid out by the repository's formatter, plus the
+    // fragments its author wrote by hand, which no manifest describes.
+    let mut committed = catalog(&Path::new(EXAMPLE).join("catalogs/acme-ui.catalog.json"));
+    committed.as_object_mut().unwrap().remove("fragments");
+    assert_eq!(catalog_text(&r.stdout), committed);
+}
+
+#[test]
+fn without_a_prefix_a_shared_first_segment_gets_a_hint() {
+    let s = Scratch::new("hint");
+    let manifest = s.write("acme-ui.json", MANIFEST);
+    let r = run(&[&"import-cem", &manifest, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stderr.contains("--prefix acme"), "{}", r.stderr);
+    assert!(catalog_text(&r.stdout).get("prefix").is_none());
+}
+
+#[test]
+fn the_prefix_setting_stands_in_and_a_bad_prefix_is_refused() {
+    let s = Scratch::new("prefix-setting");
+    s.write(
+        "weft.json",
+        r#"{ "import": { "cem": { "prefix": "acme" } } }"#,
+    );
+    let manifest = s.write("acme-ui.json", MANIFEST);
+    let r = run(&[&"import-cem", &manifest]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert_eq!(catalog_text(&r.stdout)["prefix"], "acme");
+    // Outside the prefix, every tag is a `kinds` loss.
+    let r = run(&[&"import-cem", &manifest, &"--prefix", &"shop"]);
+    assert!(
+        r.stderr.contains("outside the catalog's prefix"),
+        "{}",
+        r.stderr
+    );
+    let r = run(&[&"import-cem", &manifest, &"--prefix", &"acme-ui"]);
+    assert_eq!(r.code, 2);
+    assert!(
+        r.stderr.contains("one lowercase name segment"),
+        "{}",
+        r.stderr
+    );
+}
+
+#[test]
+fn a_repeated_catalog_replaces_the_projects_list_in_order() {
+    let s = Scratch::new("repeated");
+    let library = Path::new(EXAMPLE).join("catalogs/acme-ui.catalog.json");
+    let project = Path::new(EXAMPLE).join("catalog.json");
+    // A kind of each catalog, and `ghost`, which the project catalog adds to `acme-button`.
+    let screen = s.write(
+        "order.weft",
+        "<screen id=\"s\" weft=\"0.1\">\n  <acme-card id=\"c\">\n    <rating id=\"r\" label=\"Score\" value=\"4\"/>\n  </acme-card>\n  <acme-button id=\"b\" variant=\"ghost\">Buy</acme-button>\n</screen>\n",
+    );
+    let r = run(&[
+        &"validate",
+        &screen,
+        &"--no-project",
+        &"--strict",
+        &"--catalog",
+        &library,
+        &"--catalog",
+        &project,
+    ]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, ""), "{}", r.stderr);
+    // Alone, the project catalog extends a kind no catalog defines; problems point into its file.
+    let r = run(&[
+        &"validate",
+        &screen,
+        &"--no-project",
+        &"--catalog",
+        &project,
+    ]);
+    assert_eq!(r.code, 2);
+    for code in ["#/requires/acme-ui W714 ", "#/components/acme-button W706 "] {
+        let shown = format!("{}:{code}", project.display());
+        assert!(r.stderr.contains(&shown), "{}", r.stderr);
+    }
+    // A library given twice is a claim on a taken name, reported in the second file.
+    let r = run(&[
+        &"validate",
+        &screen,
+        &"--no-project",
+        &"--catalog",
+        &library,
+        &"--catalog",
+        &library,
+    ]);
+    assert_eq!(r.code, 2);
+    let shown = format!("{}:#/name W711 ", library.display());
+    assert!(r.stderr.contains(&shown), "{}", r.stderr);
+}
+
+fn catalog_text(text: &str) -> serde_json::Value {
+    serde_json::from_str(text).unwrap()
 }
