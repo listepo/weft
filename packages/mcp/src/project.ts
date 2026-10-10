@@ -15,8 +15,8 @@ export const projectSchema = (limits: Limits = LIMITS) =>
 
 /** What a loaded project gives a tool to judge markup with. */
 export function contextOf(project: Project): Context {
-  const { catalog, tokens, actions, data } = project;
-  return { catalog, tokens: tokens && tokenTypes(tokens), actions, data };
+  const { catalog, tokens, actions, data, catalogs } = project;
+  return { catalog, tokens: tokens && tokenTypes(tokens), actions, data, catalogs };
 }
 
 /**

@@ -17,7 +17,7 @@ export function registerCatalog(
     {
       title: "Weft catalog",
       description:
-        "Lists the components you may use in Weft markup. Without arguments it returns a compact index (kind, ARIA role, content model, one-line description) of every component; with `kind` it returns the full definition of that one component: props with types, defaults and allowed values, slots, states, events, and parent/child rules. Prefer the index first, then look up only the kinds you need. Pass project to list the project's catalog: the core components with its extension merged in, then the project's fragments, placed with <use id fragment>, with their parameters; pass a fragment's name as kind for its markup. Pass markup to also list that screen's inline fragments.",
+        "Lists the components you may use in Weft markup. Without arguments it returns a compact index (kind, ARIA role, content model, one-line description) of every component; with `kind` it returns the full definition of that one component: props with types, defaults and allowed values, slots, states, events, and parent/child rules. Prefer the index first, then look up only the kinds you need. Pass project to list the project's catalog: the core components with its extension merged in, then the project's and its libraries' fragments, placed with <use id fragment>, with their parameters and, for a library's, the library and its version; pass a fragment's name as kind for its markup. Pass markup to also list that screen's inline fragments.",
       inputSchema: {
         kind: z
           .string()
@@ -34,7 +34,7 @@ export function registerCatalog(
       if ("tooLong" in scoped) return failure(scoped.tooLong);
       if (scoped.context === undefined)
         return failure(diagnosticsText(scoped.diagnostics, limits.diagnostics));
-      const { catalog } = scoped.context;
+      const { catalog, catalogs } = scoped.context;
       const inline =
         markup === undefined
           ? {}
@@ -43,10 +43,17 @@ export function registerCatalog(
         const lines = Object.entries(catalog.components).map(
           ([name, def]) => `${name} | ${def.role} | ${def.content} | ${def.description}`,
         );
-        const fragments = Object.entries(catalog.fragments ?? {}).map(
-          ([name, fragment]) =>
-            `fragment ${name} | ${fragmentParams(fragment.root.children).join(", ")}`,
-        );
+        const fragments = Object.entries(catalog.fragments ?? {}).map(([name, fragment]) => {
+          const line = `fragment ${name} | ${fragmentParams(fragment.root.children).join(", ")}`;
+          // A library owns the fragments under its prefix (SPEC §10.4); the project pins the
+          // library's version, and the fragment's own is shown beside it.
+          const library = catalogs?.find(
+            (c) => c.prefix !== undefined && name.startsWith(`${c.prefix}-`),
+          );
+          if (library === undefined) return line;
+          const own = fragment.version === undefined ? "" : `, fragment ${fragment.version}`;
+          return `${line} | library ${library.name} ${library.version}${own}`;
+        });
         const inlineLines = Object.entries(inline).map(
           ([name, node]) => `inline ${name} | ${fragmentParams(node.children).join(", ")}`,
         );
@@ -55,7 +62,7 @@ export function registerCatalog(
             `catalog ${catalog.name} ${catalog.version} (weft ${catalog.weft}); kind | role | content | description`,
             ...lines,
             ...(fragments.length > 0
-              ? ["fragments; <use> one as fragment | parameters", ...fragments]
+              ? ["fragments; <use> one as fragment | parameters | library, if any", ...fragments]
               : []),
             ...(inlineLines.length > 0
               ? [
@@ -66,11 +73,13 @@ export function registerCatalog(
           ].join("\n"),
         );
       }
-      const inlineNode = inline[kind];
+      // Plain objects: a kind such as "constructor" must not reach their prototype.
+      const inlineNode = Object.hasOwn(inline, kind) ? inline[kind] : undefined;
       if (inlineNode !== undefined && !Object.hasOwn(catalog.components, kind)) {
         return text(inlineMarkup(kind, inlineNode));
       }
-      const fragment = catalog.fragments?.[kind];
+      const fragments = catalog.fragments ?? {};
+      const fragment = Object.hasOwn(fragments, kind) ? fragments[kind] : undefined;
       if (fragment !== undefined && !Object.hasOwn(catalog.components, kind)) {
         return text(serialize(fragment));
       }
