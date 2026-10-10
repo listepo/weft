@@ -66,11 +66,15 @@ export function registerCatalog(
           ].join("\n"),
         );
       }
-      const inlineNode = inline[kind];
+      // `constructor` is on Object.prototype; a missing name must not read it.
+      const inlineNode = Object.hasOwn(inline, kind) ? inline[kind] : undefined;
       if (inlineNode !== undefined && !Object.hasOwn(catalog.components, kind)) {
         return text(inlineMarkup(kind, inlineNode));
       }
-      const fragment = catalog.fragments?.[kind];
+      const fragment =
+        catalog.fragments !== undefined && Object.hasOwn(catalog.fragments, kind)
+          ? catalog.fragments[kind]
+          : undefined;
       if (fragment !== undefined && !Object.hasOwn(catalog.components, kind)) {
         return text(serialize(fragment));
       }

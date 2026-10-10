@@ -123,6 +123,10 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
         "the row selected binding is lost; a table empty slot comes back wrapped in a cell",
     ),
     (
+        "receipt",
+        "an inline fragment and its uses are not reconstructed",
+    ),
+    (
         "layout",
         "`justify` and `grow` are neither drawn nor carried until the web layout tasks (T16.3, T16.8)",
     ),
