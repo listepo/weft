@@ -1033,6 +1033,15 @@ impl<'a> Lower<'a> {
                 let Some(key) = key_name(&p.key) else {
                     continue;
                 };
+                // A media or container query in a style object has no prop (SPEC §9).
+                if key.starts_with("@media") || key.starts_with("@container") {
+                    let note = format!(
+                        "media or container queries have no prop: {}",
+                        js_prefix(&key, 60)
+                    );
+                    self.note(node, LossKind::Layout, note);
+                    continue;
+                }
                 let property = if key.starts_with("--") {
                     key
                 } else {

@@ -264,6 +264,11 @@ ul > li {
 [data-align="center"] { align-items: center; }
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
+[data-justify="center"] { justify-content: center; }
+[data-justify="end"] { justify-content: flex-end; }
+[data-justify="space-between"] { justify-content: space-between; }
+.weft-row > [data-grow] { flex: 1 1 0%; min-width: 0; }
+.weft-stack > [data-grow] { flex: 1 1 0%; min-height: 0; }
 [data-wrap] { flex-wrap: wrap; }
 a { display: inline-block; }
 [hidden] { display: none !important; }
@@ -272,15 +277,15 @@ a { display: inline-block; }
 <body>
 <main data-weft-id="layout" aria-label="Layout">
   <div data-weft-id="toolbar" data-prop-justify="start" class="weft-row" style="gap: var(--weft-space-sm)">
-    <div data-weft-field>
+    <div data-grow data-weft-field>
       <label><span aria-hidden="true">Search</span><input data-weft-id="search" data-prop-grow="true" aria-label="Search" type="search" data-bind="value:$.query"></label>
     </div>
     <button data-weft-id="filter" type="button" data-action="press:list.filter">Filter</button>
   </div>
-  <div data-weft-id="pager" data-prop-justify="center" class="weft-row" style="gap: var(--weft-space-sm)">
+  <div data-weft-id="pager" data-prop-justify="center" class="weft-row" data-justify="center" style="gap: var(--weft-space-sm)">
     <a data-weft-id="previous" role="link" tabindex="0" data-action="press:list.previous">Previous</a><a data-weft-id="next" role="link" tabindex="0" data-action="press:list.next">Next</a>
   </div>
-  <div data-weft-id="actions" data-prop-justify="end" class="weft-row" style="gap: var(--weft-space-sm)">
+  <div data-weft-id="actions" data-prop-justify="end" class="weft-row" data-justify="end" style="gap: var(--weft-space-sm)">
     <button data-weft-id="cancel" type="button" data-action="press:list.cancel">Cancel</button><button data-weft-id="save" type="button" data-variant="primary" data-action="press:list.save">Save</button>
   </div>
 </main>
