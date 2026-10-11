@@ -7,6 +7,7 @@ import {
   buildScreen as buildShared,
   findBelow,
   type BuildHost,
+  type Built as BuiltRoot,
   type Display,
   type Marks,
 } from "@weft/design-tool";
@@ -117,14 +118,14 @@ export async function buildScreen(
   api: FigmaApi,
   document: Document,
   options: BuildOptions,
-): Promise<FFrame | FInstance> {
+): Promise<BuiltRoot<FFrame | FInstance>> {
   const { library, ...rest } = options;
-  const root = await buildShared(figmaHost(api, library), document, {
+  const built = await buildShared(figmaHost(api, library), document, {
     ...rest,
     kinds: library.kinds,
   });
-  if (root.type === "TEXT") throw new Error("a document root cannot be a text layer");
-  return root;
+  if (built.root.type === "TEXT") throw new Error("a document root cannot be a text layer");
+  return built as BuiltRoot<FFrame | FInstance>;
 }
 
 /** The first text layer with this name, searched breadth-first below a layer. */

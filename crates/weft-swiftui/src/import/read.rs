@@ -155,6 +155,79 @@ fn unwind(expr: &Expr) -> (&Expr, Vec<Mod>) {
     (e, mods)
 }
 
+/// `Spacer()` or `Spacer(minLength: e)` with no modifier: `Some(None)` or `Some(Some(e))`.
+fn spacer(s: &Stmt) -> Option<Option<&Expr>> {
+    let Stmt::Expr(Expr::Call(c)) = s else {
+        return None;
+    };
+    if ident(&c.callee) != Some("Spacer") || !c.closures.is_empty() {
+        return None;
+    }
+    match c.args.as_slice() {
+        [] => Some(None),
+        [a] if a.label.as_deref() == Some("minLength") => Some(Some(&a.value)),
+        _ => None,
+    }
+}
+
+/// Removes the spacers of a `space-between` row, also from the bodies of its `ForEach`es, where
+/// the first item's spacer is behind an `if`, collecting their `minLength`s.
+fn strip_spacers(stmts: &mut Vec<Stmt>, in_each: bool, found: &mut Vec<Option<Expr>>) {
+    stmts.retain(|s| {
+        let m = match s {
+            Stmt::If {
+                condition: Expr::Binary { .. },
+                then,
+                otherwise,
+            } if in_each && otherwise.is_empty() => match then.as_slice() {
+                [inner] => spacer(inner),
+                _ => None,
+            },
+            other => spacer(other),
+        };
+        match m {
+            Some(m) => {
+                found.push(m.cloned());
+                false
+            }
+            None => true,
+        }
+    });
+    for s in stmts.iter_mut() {
+        if let Stmt::Expr(e) = s
+            && let Some(each) = for_each_mut(e)
+            && let Some(c) = each.closures.first_mut()
+        {
+            strip_spacers(&mut c.body, true, found);
+        }
+    }
+}
+
+/// The `ForEach` call under a chain of modifiers.
+fn for_each_mut(e: &mut Expr) -> Option<&mut Call> {
+    let Expr::Call(c) = e else {
+        return None;
+    };
+    if ident(&c.callee) == Some("ForEach") {
+        return Some(c);
+    }
+    match c.callee.as_mut() {
+        Expr::Member { base, .. } => for_each_mut(base),
+        _ => None,
+    }
+}
+
+/// Takes `.frame(maxWidth: .infinity)` alone, which `generate` gives a growing row child.
+fn take_grow(mods: &mut Mods) -> bool {
+    let i = mods.0.iter().position(|m| {
+        m.name == "frame"
+            && matches!(m.args.as_slice(), [a]
+                if a.label.as_deref() == Some("maxWidth")
+                    && implicit(Some(&a.value)) == Some("infinity"))
+    });
+    i.map(|i| mods.0.remove(i)).is_some()
+}
+
 /// What a closure does, read as Weft: the action it fires, a form it submits, a link it opens.
 #[derive(Default)]
 struct Handler {
@@ -207,6 +280,8 @@ struct Reader<'a> {
     elements: usize,
     depth: usize,
     truncated: bool,
+    /// The view being read is a child of an `HStack`, where a full-width frame is `grow`.
+    row_child: bool,
 }
 
 /// The reserved names of the generated view; a loop variable that took a `_` to avoid one
@@ -292,6 +367,7 @@ pub fn read(
         elements: 0,
         depth: 0,
         truncated: false,
+        row_child: false,
     };
     for t in &source.types {
         for (case, raw) in &t.cases {
@@ -1026,11 +1102,21 @@ impl<'a> Reader<'a> {
             .flat_map(|n| mods.take_all(n))
             .collect();
         let anchor = name == "Color.clear" && !sheets.is_empty();
+        // A `ForEach` repeats children of the view around it; anything else starts its own.
+        let row_child = self.row_child;
+        if name != "ForEach" {
+            self.row_child = false;
+        }
+        let grow = row_child && name != "ForEach" && !anchor && take_grow(&mut mods);
         let mut out = if anchor {
             vec![]
         } else {
             self.base_view(&name, call, &mut mods, place, path)
         };
+        self.row_child = row_child;
+        if grow && let Some(Child::Node(n)) = out.first_mut() {
+            n.props.insert("grow".to_owned(), Value::Bool(true));
+        }
         let anchor_hidden = if anchor {
             mods.take("weftHidden").or_else(|| mods.take("hidden"))
         } else {
@@ -1070,11 +1156,12 @@ impl<'a> Reader<'a> {
         match (name, place) {
             ("ForEach", _) => self.each(call, mods, place, path),
             (
-                "Group" | "NavigationStack" | "NavigationView" | "ScrollView" | "LazyVStack"
-                | "ZStack",
+                "Group" | "WeftCell" | "NavigationStack" | "NavigationView" | "ScrollView"
+                | "LazyVStack" | "ZStack",
                 _,
             ) => {
-                if name != "Group" {
+                // `WeftCell` only keeps a grid cell whole (`generate`).
+                if !matches!(name, "Group" | "WeftCell") {
                     self.lose(
                         LossKind::Layout,
                         path,
@@ -1115,7 +1202,7 @@ impl<'a> Reader<'a> {
         match name {
             "HStack" if mods.has("weftCombobox") => self.combobox(call, mods, path),
             "VStack" | "HStack" | "LazyHStack" => self.stack(name, call, mods, path),
-            "LazyVGrid" | "LazyHGrid" => self.grid(call, mods, path),
+            "LazyVGrid" | "LazyHGrid" | "WeftColumns" => self.grid(name, call, mods, path),
             "Grid" => self.container("table", call, mods, Place::Table, path),
             "Section" => self.section(call, mods, path),
             "GroupBox"
@@ -1541,8 +1628,27 @@ impl<'a> Reader<'a> {
             node.props
                 .insert("direction".to_owned(), Value::String("row".to_owned()));
         }
+        let mut body = closure(&call.closures, None)
+            .map(|c| c.body.clone())
+            .unwrap_or_default();
+        let unspaced = matches!(arg(&call.args, "spacing"), Some(Expr::Num(n)) if *n == 0.0);
+        let justify = if row {
+            self.justify(&mut body, unspaced)
+        } else {
+            None
+        };
+        let between = matches!(justify, Some(("space-between", _)));
+        if let Some((j, gap)) = justify {
+            node.props
+                .insert("justify".to_owned(), Value::String(j.to_owned()));
+            if let Some(g) = gap {
+                node.props.insert("gap".to_owned(), Value::Token(g));
+            }
+        }
         for a in &call.args {
             match (a.label.as_deref(), &a.value) {
+                // The gap of a `space-between` row is its spacers' `minLength`.
+                (Some("spacing"), _) if between => {}
                 (Some("alignment"), Expr::Implicit(v)) => {
                     let align = match (row, v.as_str()) {
                         (false, "leading") | (true, "top") => Some("start"),
@@ -1575,21 +1681,124 @@ impl<'a> Reader<'a> {
                 _ => self.lose(LossKind::Layout, &here, "a stack argument is not kept"),
             }
         }
-        let body = closure(&call.closures, None)
-            .map(|c| c.body.clone())
-            .unwrap_or_default();
+        let outer = std::mem::replace(&mut self.row_child, row);
         let children = self.nested(|r| r.views(&body, Place::Nodes, &here));
+        self.row_child = outer;
         node.children = self.elements_only(children, &here);
+        self.boxed(&mut node, &mut mods);
         self.material(&mut node, &mut mods);
         self.finish(node, mods, &here)
     }
 
-    fn grid(&mut self, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
+    /// The spacers `generate` draws a row's `justify` with, taken out of its body:
+    /// `Spacer(minLength: 0)` first (`end`) or at both ends (`center`); or, in an
+    /// `HStack(spacing: 0)`, one spacer between every two children and before the items of a
+    /// `ForEach`, the first item's behind an `if` (`space-between`), its `minLength` the gap. Any
+    /// other spacer stays in the body, where it is a `layout` loss.
+    fn justify(
+        &self,
+        body: &mut Vec<Stmt>,
+        unspaced: bool,
+    ) -> Option<(&'static str, Option<String>)> {
+        let is_spacer = |s: &Stmt| spacer(s).is_some();
+        let edge =
+            |s: Option<&Stmt>| matches!(s.and_then(spacer), Some(Some(Expr::Num(n))) if *n == 0.0);
+        let count = body.iter().filter(|s| is_spacer(s)).count();
+        if !unspaced {
+            if count == 2 && edge(body.first()) && edge(body.last()) {
+                body.pop();
+                body.remove(0);
+                return Some(("center", None));
+            }
+            if count == 1 && edge(body.first()) {
+                body.remove(0);
+                return Some(("end", None));
+            }
+            return None;
+        }
+        if body.first().is_some_and(is_spacer)
+            || body.last().is_some_and(is_spacer)
+            || body
+                .windows(2)
+                .any(|w| is_spacer(&w[0]) && is_spacer(&w[1]))
+        {
+            return None;
+        }
+        let mut stripped = body.clone();
+        let mut found = vec![];
+        strip_spacers(&mut stripped, false, &mut found);
+        let first = found.first()?.clone();
+        if found.iter().any(|f| *f != first) {
+            return None;
+        }
+        let gap = match &first {
+            Some(e) => Some(self.token(e)?),
+            None => None,
+        };
+        *body = stripped;
+        Some(("space-between", gap))
+    }
+
+    /// A stack's or grid's `.padding(theme.<path>)`, and the pair of frames of its `max-width`
+    /// (`.frame(maxWidth: .infinity, alignment: …)` inside `.frame(maxWidth: theme.<path>)`). Any
+    /// other padding or frame stays for `ignored` to report.
+    fn boxed(&self, node: &mut Node, mods: &mut Mods) {
+        let token = |m: &Mod, name: &str, label: Option<&str>| match m.args.as_slice() {
+            [a] if m.name == name && a.label.as_deref() == label => self.token(&a.value),
+            _ => None,
+        };
+        let padding = mods
+            .0
+            .iter()
+            .enumerate()
+            .find_map(|(i, m)| Some((i, token(m, "padding", None)?)));
+        if let Some((i, t)) = padding {
+            mods.0.remove(i);
+            node.props.insert("padding".to_owned(), Value::Token(t));
+        }
+        let fill = mods.0.iter().position(|m| {
+            m.name == "frame"
+                && matches!(m.args.as_slice(), [w, a]
+                    if w.label.as_deref() == Some("maxWidth")
+                        && implicit(Some(&w.value)) == Some("infinity")
+                        && a.label.as_deref() == Some("alignment")
+                        && matches!(a.value, Expr::Implicit(_)))
+        });
+        let cap = mods
+            .0
+            .iter()
+            .enumerate()
+            .find_map(|(i, m)| Some((i, token(m, "frame", Some("maxWidth"))?)));
+        if let (Some(f), Some((c, t))) = (fill, cap)
+            && f < c
+        {
+            mods.0.remove(c);
+            mods.0.remove(f);
+            node.props.insert("max-width".to_owned(), Value::Token(t));
+        }
+    }
+
+    fn grid(&mut self, name: &str, call: &Call, mut mods: Mods, path: &str) -> Vec<Child> {
         let Some((mut node, here)) = self.element("grid", &mut mods, "", path) else {
             return vec![];
         };
         let columns = arg(&call.args, "columns").or_else(|| arg(&call.args, "rows"));
         let count = match columns {
+            // `WeftColumns(columns: n, minWidth: w, spacing: s)`, the grid that reflows.
+            Some(n) if name == "WeftColumns" => {
+                match arg(&call.args, "minWidth").and_then(|e| self.token(e)) {
+                    Some(t) => {
+                        node.props
+                            .insert("min-column-width".to_owned(), Value::Token(t));
+                    }
+                    None => self.lose(
+                        LossKind::Layout,
+                        &here,
+                        "a column width that is not a theme token is not kept",
+                    ),
+                }
+                self.value(n, Leaf::Int, &here)
+            }
             // `Array(repeating: GridItem(…, spacing: s), count: n)`
             Some(Expr::Call(c)) if ident(&c.callee) == Some("Array") => {
                 if let Some(Expr::Call(item)) = arg(&c.args, "repeating")
@@ -1623,6 +1832,7 @@ impl<'a> Reader<'a> {
             .unwrap_or_default();
         let children = self.nested(|r| r.views(&body, Place::Nodes, &here));
         node.children = self.elements_only(children, &here);
+        self.boxed(&mut node, &mut mods);
         self.material(&mut node, &mut mods);
         self.finish(node, mods, &here)
     }

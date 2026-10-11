@@ -260,6 +260,8 @@ pub fn import_jsx(
 struct CemWire {
     name: String,
     version: String,
+    #[serde(default)]
+    prefix: Option<String>,
 }
 
 /// `importCem`: `{catalog, losses, diagnostics}` of a Custom Elements Manifest, the catalog an
@@ -269,12 +271,16 @@ pub fn import_cem(manifest: &str, options: &str, base: &Catalog) -> Result<Strin
         what: "manifest import options",
         source,
     })?;
+    let core = weft_catalog::core_catalog()
+        .map_err(|weft_catalog::CatalogError::Embedded(e)| BindingError::Catalog(e))?;
     write(&weft_import::import_cem(
         manifest,
         &CemOptions {
             name: &wire.name,
             version: &wire.version,
             base,
+            prefix: wire.prefix.as_deref(),
+            core_version: &core.version,
         },
     ))
 }

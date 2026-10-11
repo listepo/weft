@@ -16,7 +16,7 @@ pub struct Args {
     pub force: bool,
 
     pub file: PathBuf,
-    pub catalog: Option<PathBuf>,
+    pub catalog: Vec<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
 }
@@ -24,7 +24,7 @@ pub struct Args {
 pub fn export(args: Args, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(&args.file, args.project)?;
     let project = project.as_ref();
-    let catalog = catalog(args.catalog.as_deref(), project)?;
+    let catalog = catalog(&args.catalog, project)?;
     let Some(document) = strict_document(&args.file, &catalog)? else {
         return Ok(crate::DIAGNOSTICS);
     };
@@ -47,7 +47,7 @@ pub fn export(args: Args, out: &mut dyn Write) -> Result<u8> {
 pub fn import(args: Args, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(&args.file, args.project)?;
     let project = project.as_ref();
-    let catalog = catalog(args.catalog.as_deref(), project)?;
+    let catalog = catalog(&args.catalog, project)?;
     let result = from_a2ui(&read(&args.file)?, &catalog);
     let dir = out_dir(
         args.out_dir,

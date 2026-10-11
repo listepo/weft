@@ -18,7 +18,7 @@ use crate::convert::{catalog, emit, out_dir, project};
 const STEM: &str = "document";
 
 pub struct Args {
-    pub catalog: Option<PathBuf>,
+    pub catalog: Vec<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
     pub force: bool,
@@ -26,7 +26,7 @@ pub struct Args {
 
 pub fn export(args: Args, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(Path::new(PROJECT_FILE), args.project)?;
-    let catalog = catalog(args.catalog.as_deref(), project.as_ref())?;
+    let catalog = catalog(&args.catalog, project.as_ref())?;
     let schema = document_schema(&catalog, &DocumentSchemaOptions::default());
     let mut json = serde_json::to_string_pretty(&schema)?;
     json.push('\n');

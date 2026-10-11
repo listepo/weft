@@ -99,7 +99,7 @@ pub struct ExportArgs {
 
     pub target: Target,
     pub file: PathBuf,
-    pub catalog: Option<PathBuf>,
+    pub catalog: Vec<PathBuf>,
     pub tokens: Option<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
@@ -117,7 +117,7 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     let target = args.target.name();
     let (project, project_dir) = project(&args.file, args.project)?;
     let project = project.as_ref();
-    let catalog = catalog(args.catalog.as_deref(), project)?;
+    let catalog = catalog(&args.catalog, project)?;
     let Some(mut document) = strict_document(&args.file, &catalog)? else {
         return Ok(DIAGNOSTICS);
     };
@@ -203,7 +203,7 @@ pub struct ImportArgs {
 
     pub target: Target,
     pub file: PathBuf,
-    pub catalog: Option<PathBuf>,
+    pub catalog: Vec<PathBuf>,
     pub tokens: Option<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
@@ -224,7 +224,7 @@ fn is_typescript(file: &Path) -> bool {
 pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
     let (project, project_dir) = project(&args.file, args.project)?;
     let project = project.as_ref();
-    let catalog = catalog(args.catalog.as_deref(), project)?;
+    let catalog = catalog(&args.catalog, project)?;
     let tokens = tokens(args.tokens.as_deref(), project)?;
     let text = read(&args.file)?;
     let options = ImportOptions {

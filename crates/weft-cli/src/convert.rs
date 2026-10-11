@@ -15,7 +15,7 @@ use weft_core::{Catalog, Document, Mode, ParseOptions, has_errors, parse, parse_
 use weft_import::{ImportResult, Loss};
 
 use crate::load_project as load_project_file;
-use crate::{DIAGNOSTICS, ProjectArgs, load_catalog, print, project_file, read};
+use crate::{DIAGNOSTICS, ProjectArgs, load_catalogs, print, project_file, read};
 
 /// The project for `file`, with the directory its file names are relative to. Its diagnostics go
 /// to stderr: stdout carries the output.
@@ -31,9 +31,10 @@ pub fn project(file: &Path, args: ProjectArgs) -> Result<(Option<Project>, Optio
     Ok((Some(project), Some(dir)))
 }
 
-pub fn catalog(explicit: Option<&Path>, project: Option<&Project>) -> Result<Catalog> {
-    match (explicit, project) {
-        (Some(file), _) => load_catalog(file),
+/// The catalogs of `--catalog`, else the project's, else the core one.
+pub fn catalog(explicit: &[PathBuf], project: Option<&Project>) -> Result<Catalog> {
+    match (load_catalogs(explicit)?, project) {
+        (Some(catalog), _) => Ok(catalog),
         (None, Some(project)) => Ok(project.catalog.clone()),
         (None, None) => core_catalog().context("the embedded core catalog is broken"),
     }

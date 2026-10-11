@@ -18989,6 +18989,328 @@
    }
   },
   {
+   "name": "a library from an npm package and the project catalog",
+   "project": "{\"catalog\":[{\"package\":\"@acme/ui\"},\"shop.json\"]}",
+   "files": {
+    "fragments/header.weft": "<fragment label=\"Page header\" weft=\"0.2\"><param name=\"title\" type=\"string\" required=\"true\"/><param name=\"back\" type=\"action\"/><stack id=\"bar\" direction=\"row\"><button id=\"back\" on-press=\"{$back}\">Back</button><heading id=\"title\" level=\"1\" text=\"{$title}\"/></stack></fragment>",
+    "fragments/page.weft": "<fragment weft=\"0.2\"><use id=\"top\" fragment=\"page-header\" title=\"Shop\"/><text id=\"t\">Hi</text></fragment>",
+    "fragments/loop.weft": "<fragment weft=\"0.2\"><stack id=\"s\"><use id=\"again\" fragment=\"loop\"/></stack></fragment>",
+    "fragments/broken.weft": "<fragment weft=\"0.2\"><stack id=\"a\"><outlet name=\"nope\"/></stack></fragment>",
+    "fragments/screen.weft": "<screen id=\"s\" weft=\"0.2\"><text id=\"t\">x</text></screen>",
+    "fragments/bad.weft": "<fragment><",
+    "fragments/uses-promo.weft": "<fragment weft=\"0.3\"><use id=\"promo\" fragment=\"acme-promo\" title=\"Sale\"/></fragment>",
+    "lib/fragments/acme-promo.weft": "<fragment weft=\"0.3\"><param name=\"title\" type=\"string\" required=\"true\"/><param name=\"go\" type=\"action\"/><stack id=\"row\" direction=\"row\" gap=\"{token.space.s}\"><acme-badge id=\"badge\">New</acme-badge><heading id=\"title\" level=\"2\" text=\"{$title}\"/><button id=\"go\" on-press=\"{$go}\">Go</button></stack></fragment>",
+    "lib/fragments/acme-reach.weft": "<fragment weft=\"0.3\"><stack id=\"s\" gap=\"{token.space.nope}\"><text id=\"t\" text=\"{$.user.name}\"/><button id=\"b\" on-press=\"cart.add\">Add</button></stack></fragment>",
+    "lib/fragments/acme-wide.weft": "<fragment weft=\"0.3\"><stack id=\"s\"><rating id=\"r\" label=\"Score\" value=\"3\"/></stack></fragment>",
+    "lib/fragments/beta-page.weft": "<fragment weft=\"0.3\"><use id=\"promo\" fragment=\"acme-promo\" title=\"Sale\"/></fragment>",
+    "lib/acme-kit.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}},\"fragments\":{\"acme-promo\":\"fragments/acme-promo.weft\"}}",
+    "lib/beta-ui.json": "{\"weft\":\"0.1\",\"name\":\"beta-ui\",\"version\":\"1.0.0\",\"prefix\":\"beta\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{},\"fragments\":{\"beta-page\":\"fragments/beta-page.weft\"}}",
+    "tokens/base.tokens.json": "{\"color\":{\"$type\":\"color\",\"brand\":{\"$value\":\"#000000\"},\"text\":{\"$value\":\"{color.brand}\"}},\"space\":{\"$type\":\"dimension\",\"s\":{\"$value\":{\"value\":4,\"unit\":\"px\"}}}}",
+    "tokens/brand.tokens.json": "{\"color\":{\"brand\":{\"$value\":\"#ff0000\"},\"accent\":{\"$value\":\"#00ff00\"}}}",
+    "tokens/list.tokens.json": "[1, 2]",
+    "tokens/broken.tokens.json": "{\"color\":{\"$type\":\"color\",\"x\":{\"$value\":\"{color.nope}\"}}}",
+    "broken.json": "{",
+    "deep.json": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+    "huge.json": "{\"a\": 1e400}",
+    "surrogate.json": "{\"a\": \"\\ud800\"}",
+    "proto.tokens.json": "{\"__proto__\": {\"$type\": \"color\", \"x\": {\"$value\": \"#fff\"}}}",
+    "data.schema.json": "{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"}}}}}",
+    "data-anyof.schema.json": "{\"type\":\"object\",\"properties\":{\"a\":{\"anyOf\":[]}}}",
+    "data-bad.schema.json": "{\"type\":\"thing\"}",
+    "lib/acme-ui.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}",
+    "shop.json": "{\"weft\":\"0.1\",\"name\":\"shop\",\"version\":\"1.1.0\",\"requires\":{\"weft-core\":\"0.2.0\",\"acme-ui\":\"1.0.0\"},\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"events\":[\"press\",\"longpress\"]},\"acme-button\":{\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\",\"ghost\"]}}}}}",
+    "catalog.json": "{\"weft\":\"0.1\",\"name\":\"acme\",\"version\":\"1.2.0\",\"components\":{\"rating\":{\"description\":\"Shows a score as stars.\",\"role\":\"img\",\"content\":\"none\",\"requiresLabel\":true,\"props\":{\"value\":{\"description\":\"The score.\",\"type\":\"number\",\"min\":0,\"max\":5}}},\"button\":{\"props\":{\"variant\":{\"description\":\"Visual emphasis.\",\"type\":\"enum\",\"values\":[\"primary\",\"secondary\",\"danger\",\"ghost\"],\"default\":\"secondary\"}},\"events\":[\"press\",\"longpress\"],\"states\":[\"idle\"]},\"text\":{\"content\":\"mixed\"}}}",
+    "package:@acme/ui/package.json": "{\"name\":\"@acme/ui\",\"version\":\"1.0.0\",\"weft\":{\"catalog\":\"dist/weft.json\"}}",
+    "package:@acme/ui/dist/weft.json": "{\"weft\":\"0.1\",\"name\":\"acme-ui\",\"version\":\"1.0.0\",\"prefix\":\"acme\",\"requires\":{\"weft-core\":\"0.2.0\"},\"components\":{\"acme-badge\":{\"description\":\"A short status label.\",\"role\":\"status\",\"content\":\"text\",\"props\":{\"tone\":{\"description\":\"Colour.\",\"type\":\"enum\",\"values\":[\"info\",\"warn\"]}}},\"acme-button\":{\"description\":\"A short status label.\",\"role\":\"button\",\"content\":\"text\",\"props\":{\"variant\":{\"description\":\"Emphasis.\",\"type\":\"enum\",\"values\":[\"default\",\"danger\"]}}}}}"
+   },
+   "codes": [],
+   "expect": {
+    "catalog": {
+     "name": "shop",
+     "version": "1.1.0",
+     "changed": [
+      [
+       "button",
+       {
+        "description": "Triggers an action when pressed; use it for submitting, confirming and other commands.",
+        "role": "button",
+        "content": "text",
+        "props": {
+         "variant": {
+          "description": "Visual emphasis: primary for the main action, danger for destructive ones.",
+          "type": "enum",
+          "values": [
+           "primary",
+           "secondary",
+           "danger"
+          ],
+          "default": "secondary"
+         },
+         "disabled": {
+          "description": "Set to true to make the button non-interactive.",
+          "type": "boolean"
+         },
+         "submit": {
+          "description": "Set to true to make the button submit its enclosing form, firing the form's `submit` event; such a button needs no `on-press`.",
+          "type": "boolean",
+          "default": false,
+          "bindable": false
+         },
+         "text": {
+          "description": "The text to show, given as a value instead of content; bind it when the text comes from data. Never give both.",
+          "type": "string"
+         }
+        },
+        "states": [
+         "idle",
+         "busy"
+        ],
+        "events": [
+         "press",
+         "longpress"
+        ]
+       }
+      ],
+      [
+       "acme-badge",
+       {
+        "description": "A short status label.",
+        "role": "status",
+        "content": "text",
+        "props": {
+         "tone": {
+          "description": "Colour.",
+          "type": "enum",
+          "values": [
+           "info",
+           "warn"
+          ]
+         }
+        }
+       }
+      ],
+      [
+       "acme-button",
+       {
+        "description": "A short status label.",
+        "role": "button",
+        "content": "text",
+        "props": {
+         "variant": {
+          "description": "Emphasis.",
+          "type": "enum",
+          "values": [
+           "default",
+           "danger",
+           "ghost"
+          ]
+         }
+        }
+       }
+      ],
+      [
+       "rating",
+       {
+        "description": "Shows a score as stars.",
+        "role": "img",
+        "content": "none",
+        "requiresLabel": true,
+        "props": {
+         "value": {
+          "description": "The score.",
+          "type": "number",
+          "min": 0,
+          "max": 5
+         }
+        }
+       }
+      ]
+     ],
+     "fragments": {}
+    },
+    "catalogs": [
+     {
+      "name": "acme-ui",
+      "version": "1.0.0",
+      "prefix": "acme",
+      "source": "@acme/ui@1.0.0"
+     },
+     {
+      "name": "shop",
+      "version": "1.1.0",
+      "source": "shop.json"
+     }
+    ],
+    "kinds": [
+     [
+      "button",
+      {
+       "catalog": "weft-core",
+       "extendedBy": [
+        "shop"
+       ]
+      }
+     ],
+     [
+      "acme-badge",
+      {
+       "catalog": "acme-ui"
+      }
+     ],
+     [
+      "acme-button",
+      {
+       "catalog": "acme-ui",
+       "extendedBy": [
+        "shop"
+       ]
+      }
+     ],
+     [
+      "rating",
+      {
+       "catalog": "shop"
+      }
+     ]
+    ],
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {},
+    "diagnostics": []
+   }
+  },
+  {
+   "name": "package entries that cannot be used",
+   "project": "{\"catalog\":[{\"package\":\"../acme\"},{\"package\":\"Acme\"},{\"package\":5},{\"package\":\"missing\"},{\"package\":\"no-field\"},{\"package\":\"escapes\"},{\"package\":\"broken\"},{\"package\":\"acme-ui\",\"extra\":1}]}",
+   "files": {
+    "package:no-field/package.json": "{\"name\":\"no-field\"}",
+    "package:escapes/package.json": "{\"weft\":{\"catalog\":\"../shop.json\"}}",
+    "package:broken/package.json": "{\"weft\":{\"catalog\":\"c.json\"}}",
+    "package:broken/c.json": "{"
+   },
+   "codes": [
+    "W703",
+    "W703",
+    "W703",
+    "W704",
+    "W704",
+    "W703",
+    "W704",
+    "W701"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.2.0",
+     "changed": [],
+     "fragments": {}
+    },
+    "catalogs": [],
+    "kinds": [],
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {},
+    "diagnostics": [
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The package name is not an npm package name.",
+      "path": "#/catalog/0/package",
+      "expected": "an npm package name such as \"acme-ui\" or \"@acme/ui\"",
+      "got": "\"../acme\""
+     },
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The package name is not an npm package name.",
+      "path": "#/catalog/1/package",
+      "expected": "an npm package name such as \"acme-ui\" or \"@acme/ui\"",
+      "got": "\"Acme\""
+     },
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The package name is not an npm package name.",
+      "path": "#/catalog/2/package",
+      "expected": "an npm package name such as \"acme-ui\" or \"@acme/ui\"",
+      "got": "5"
+     },
+     {
+      "code": "W704",
+      "severity": "error",
+      "message": "The package \"missing\" is not in node_modules of the project directory or a parent, or its package.json cannot be read.",
+      "path": "#/catalog/3/package",
+      "expected": "an installed package with a readable JSON file",
+      "got": "missing"
+     },
+     {
+      "code": "W704",
+      "severity": "error",
+      "message": "The package \"no-field\" names no \"weft.catalog\" in its package.json.",
+      "path": "#/catalog/4/package",
+      "expected": "an installed package with a readable JSON file",
+      "got": "no-field"
+     },
+     {
+      "code": "W703",
+      "severity": "error",
+      "message": "The package \"escapes\" names \"../shop.json\" as \"weft.catalog\", which is absolute, leaves the package directory or is malformed.",
+      "path": "#/catalog/5/package",
+      "expected": "a relative path inside the package directory, separated by \"/\"",
+      "got": "../shop.json"
+     },
+     {
+      "code": "W704",
+      "severity": "error",
+      "message": "The file \"c.json\" of the package \"broken\" cannot be read or is not JSON.",
+      "path": "#/catalog/6/package",
+      "expected": "an installed package with a readable JSON file",
+      "got": "broken"
+     },
+     {
+      "code": "W701",
+      "severity": "error",
+      "message": "Entry 7 of \"catalog\" must be a file name.",
+      "path": "#/catalog/7",
+      "expected": "a file name relative to the project"
+     }
+    ]
+   }
+  },
+  {
+   "name": "a package entry in project content is a catalog object",
+   "project": "{\"catalog\":[{\"package\":\"@acme/ui\"}]}",
+   "content": true,
+   "codes": [
+    "W706"
+   ],
+   "expect": {
+    "catalog": {
+     "name": "weft-core",
+     "version": "0.2.0",
+     "changed": [],
+     "fragments": {}
+    },
+    "catalogs": [],
+    "kinds": [],
+    "tokens": null,
+    "actions": null,
+    "data": false,
+    "settings": {},
+    "diagnostics": [
+     {
+      "code": "W706",
+      "severity": "error",
+      "message": "The catalog extension is not a catalog.",
+      "path": "#/project/catalog/0",
+      "expected": "an object with \"weft\", \"name\", \"version\" and \"components\", and optionally \"prefix\" and \"requires\" (SPEC §5)"
+     }
+    ]
+   }
+  },
+  {
    "name": "a catalog named after the core",
    "project": "{\"catalog\":[\"core.json\"]}",
    "files": {

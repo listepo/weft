@@ -10,13 +10,13 @@ export const projectSchema = (limits: Limits = LIMITS) =>
     .unknown()
     .optional()
     .describe(
-      `The project's weft.json with each file name replaced by that file's JSON content: {"tokens":[DTCG token trees, later layers win] or one DTCG resolver document with inline sources,"catalog":{catalog extension},"actions":["name",…],"data":{JSON Schema of the data model},"fragments":{"name":"<fragment …> markup"}}, every member optional. It replaces the server's catalog, tokens, actions and data schema for this call; its tool settings are ignored. At most ${limits.projectChars} characters of JSON.`,
+      `The project's weft.json with each file name replaced by that file's JSON content: {"tokens":[DTCG token trees, later layers win] or one DTCG resolver document with inline sources,"catalog":{catalog} or [{catalog},…], libraries with a "prefix" and at most one project catalog without,"actions":["name",…],"data":{JSON Schema of the data model},"fragments":{"name":"<fragment …> markup"}}, every member optional. It replaces the server's catalogs, tokens, actions and data schema for this call; its tool settings are ignored. At most ${limits.projectChars} characters of JSON.`,
     );
 
 /** What a loaded project gives a tool to judge markup with. */
 export function contextOf(project: Project): Context {
-  const { catalog, tokens, actions, data, catalogs } = project;
-  return { catalog, tokens: tokens && tokenTypes(tokens), actions, data, catalogs };
+  const { catalog, catalogs, kinds, tokens, actions, data } = project;
+  return { catalog, catalogs, kinds, tokens: tokens && tokenTypes(tokens), actions, data };
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   BACKDROP,
   expectBaseline,
   expectSameLook,
+  refit,
   showMarkup,
   showPage,
   showLit,
@@ -22,6 +23,10 @@ type Props = { data?: unknown };
 // import drops it with its call sites as a `kinds` loss, since an importer never produces a `<use>`
 // (SPEC §10.7). Pinned with `test.fails` so a fix shows up as a failure here.
 const JSX_FRAGMENT_GAP = new Set(["receipt"]);
+
+// Drawn by the web generators. The HTML and JSX importers read the forms back in T16.8, so a
+// round trip through either drops justify, grow, padding, max-width and min-column-width.
+const LAYOUT_IMPORT_GAP = new Set(["dashboard", "glass", "layout", "receipt"]);
 
 for (const screen of screens) {
   const { name, data } = screen;
@@ -86,10 +91,12 @@ for (const screen of screens) {
       expect(await commands.ariaSnapshot("#reference")).toBe(react);
     });
 
-    test("round trip through the HTML importer looks the same", async () => {
+    const htmlRoundTrip = LAYOUT_IMPORT_GAP.has(name) ? test.fails : test;
+    htmlRoundTrip("round trip through the HTML importer looks the same", async () => {
       await expectSameLook("#html", "#html-back", `roundtrip/${name}.html`);
     });
-    const jsxRoundTrip = JSX_FRAGMENT_GAP.has(name) ? test.fails : test;
+    const jsxRoundTrip =
+      JSX_FRAGMENT_GAP.has(name) || LAYOUT_IMPORT_GAP.has(name) ? test.fails : test;
     jsxRoundTrip("round trip through the React importer looks the same", async () => {
       await expectSameLook("#react", "#react-back", `roundtrip/${name}.react`);
     });
@@ -102,5 +109,40 @@ for (const screen of screens) {
     test("round trip through Penpot looks the same", async () => {
       await expectSameLook("#reference", "#penpot-back", `roundtrip/${name}.penpot`);
     });
+
+    if (name === "dashboard") {
+      // size.sm is 240px and the stats gap is space.lg (24px), so a 400px frame fits one
+      // column and a 1000px frame fits the cap of three.
+      test("the stats grid is one column when narrow and three when wide", async () => {
+        const ids = ["#react", "#solid", "#lit", "#reference", "#html"];
+        await atWidth(ids, 400);
+        for (const id of ids) expect(columnCount(id), id).toBe(1);
+        await atWidth(ids, 1000);
+        for (const id of ids) expect(columnCount(id), id).toBe(3);
+        await atWidth(ids, 480);
+      });
+    }
   });
+}
+
+/** How many columns the stats grid resolved to inside an iframe. */
+function columnCount(selector: string): number {
+  const frame = document.querySelector(selector);
+  if (!(frame instanceof HTMLIFrameElement) || frame.contentDocument === null) {
+    throw new Error(`no iframe ${selector}`);
+  }
+  const grid = frame.contentDocument.querySelector('[data-weft-id="stats"]');
+  if (!(grid instanceof HTMLElement)) throw new Error(`${selector} has no stats grid`);
+  const tracks = getComputedStyle(grid).gridTemplateColumns;
+  return tracks.split(/\s+/).filter((part) => part !== "" && part !== "none").length;
+}
+
+/** Sets each iframe's width and waits until its height matches the reflowed content. */
+async function atWidth(selectors: string[], px: number): Promise<void> {
+  for (const selector of selectors) {
+    const frame = document.querySelector(selector);
+    if (!(frame instanceof HTMLIFrameElement)) throw new Error(`no iframe ${selector}`);
+    frame.style.width = `${px}px`;
+  }
+  for (const selector of selectors) await refit(selector.slice(1));
 }

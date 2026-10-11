@@ -111,6 +111,10 @@ export const CatalogSchema = z.strictObject({
   weft: z.string(),
   name: z.string(),
   version: z.string(),
+  /** The kinds a library catalog owns, `<prefix>-…` (SPEC §5); absent for a project catalog. */
+  prefix: z.string().optional(),
+  /** Catalog name → the version this catalog was written against, checked when a project loads it. */
+  requires: z.record(z.string(), z.string()).optional(),
   components: z.record(z.string(), ComponentDefSchema),
   /** A project's fragments by name (SPEC §10.7), each a document whose root is `fragment`. */
   fragments: z.record(z.string(), DocumentSchema).optional(),

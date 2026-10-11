@@ -100,8 +100,18 @@ const HTML_CONVENTION_GAPS: &[(&str, &str)] = &[
         "appearance",
         "explicit type=\"date\" is dropped; a segment's bound text also comes back as a bound label",
     ),
-    ("dashboard", "an explicit direction=\"column\" is dropped"),
-    ("glass", "an explicit direction=\"column\" is dropped"),
+    (
+        "dashboard",
+        "an explicit direction=\"column\" is dropped; justify, max-width and min-column-width are drawn and read back by T16.8",
+    ),
+    (
+        "glass",
+        "an explicit direction=\"column\" is dropped; padding and max-width are drawn and read back by T16.8",
+    ),
+    (
+        "layout",
+        "justify, grow, and an explicit justify=\"start\" are drawn; the importer reads them back in T16.8",
+    ),
     (
         "inbox",
         "the tabs selected binding and on-change are lost; a bound tab label comes back empty; \
@@ -183,6 +193,42 @@ fn a_tilt_is_a_transform_next_to_the_layout_style() {
     let back = import_html(&html, &import_options(&catalog, &tokens));
     assert!(back.losses.is_empty(), "{:?}", back.losses);
     assert_eq!(serialize(&back.document), serialize(&tilted()));
+}
+
+#[test]
+fn layout_props_are_drawn_through_custom_properties() {
+    let markup = r#"<screen id="s" weft="0.3">
+      <stack id="row" direction="row" gap="{token.space.lg}" justify="space-between" padding="{token.space.md}" max-width="{token.size.lg}">
+        <button id="go" grow="true">Go</button>
+      </stack>
+      <stack id="start" direction="row" justify="start"><text id="t">T</text></stack>
+      <grid id="g" columns="3" gap="{token.space.lg}" min-column-width="{token.size.sm}"/>
+    </screen>"#;
+    let html = page(&shown(markup));
+    assert!(
+        html.contains("[data-justify=\"space-between\"] { justify-content: space-between; }"),
+        "{html}"
+    );
+    assert!(
+        html.contains(".weft-row > [data-grow] { flex: 1 1 0%; min-width: 0; }"),
+        "{html}"
+    );
+    assert!(html.contains("data-justify=\"space-between\""), "{html}");
+    assert!(
+        html.contains("padding: var(--weft-space-md); width: 100%; max-width: var(--weft-size-lg); box-sizing: border-box"),
+        "{html}"
+    );
+    assert!(
+        html.contains("data-weft-id=\"go\"") && html.contains("data-grow"),
+        "{html}"
+    );
+    assert!(!html.contains("data-justify=\"start\""), "{html}");
+    assert!(
+        html.contains(
+            "grid-template-columns: repeat(auto-fill, minmax(max(var(--weft-size-sm), calc((100% - 2 * var(--weft-space-lg)) / 3)), 1fr))"
+        ),
+        "{html}"
+    );
 }
 
 #[test]

@@ -331,9 +331,10 @@ impl Gen<'_> {
         }
     }
 
-    fn spacing(&mut self, node: &Node) -> Option<String> {
-        let Value::Token(path) = node.props.get("gap")? else {
-            self.unsupported(node, "a gap that is not a token");
+    /// The px value of a `dimension` token, or a note that it has none.
+    fn dimension_px(&mut self, node: &Node, prop: &str) -> Option<f64> {
+        let Value::Token(path) = node.props.get(prop)? else {
+            self.unsupported(node, &format!("a `{prop}` that is not a token"));
             return None;
         };
         let token = self.tokens.get(path);
@@ -348,7 +349,55 @@ impl Gen<'_> {
         if value.is_none() {
             self.unsupported(node, &format!("token {path} has no px value"));
         }
-        value.map(|px| format!("spacing: {}px;", js_number(px)))
+        value
+    }
+
+    fn spacing(&mut self, node: &Node) -> Option<String> {
+        self.dimension_px(node, "gap")
+            .map(|px| format!("spacing: {}px;", js_number(px)))
+    }
+
+    /// `alignment` from `justify` (default `start`), and `padding`/`max-width` in px.
+    /// GridLayout has no `alignment`, so `justify` is not written there.
+    fn layout_lines(&mut self, depth: usize, node: &Node, with_alignment: bool) {
+        if with_alignment {
+            let alignment = match node.props.get("justify") {
+                None => "LayoutAlignment.start",
+                Some(Value::String(s)) if s == "start" => "LayoutAlignment.start",
+                Some(Value::String(s)) if s == "center" => "LayoutAlignment.center",
+                Some(Value::String(s)) if s == "end" => "LayoutAlignment.end",
+                Some(Value::String(s)) if s == "space-between" => "LayoutAlignment.space-between",
+                Some(_) => {
+                    self.unsupported(node, "a bound `justify`");
+                    "LayoutAlignment.start"
+                }
+            };
+            self.line(depth, &format!("alignment: {alignment};"));
+        }
+        if let Some(s) = self.spacing(node) {
+            self.line(depth, &s);
+        }
+        if node.props.contains_key("padding")
+            && let Some(px) = self.dimension_px(node, "padding")
+        {
+            self.line(depth, &format!("padding: {}px;", js_number(px)));
+        }
+        if node.props.contains_key("max-width")
+            && let Some(px) = self.dimension_px(node, "max-width")
+        {
+            self.line(depth, &format!("max-width: {}px;", js_number(px)));
+        }
+    }
+
+    /// The place of a stack child: its stretch along the stack's direction (`grow`).
+    fn stretch_place(child: &Node, row: bool) -> Vec<String> {
+        let key = if row {
+            "horizontal-stretch"
+        } else {
+            "vertical-stretch"
+        };
+        let grows = matches!(child.props.get("grow"), Some(Value::Bool(true)));
+        vec![format!("{key}: {};", if grows { 1 } else { 0 })]
     }
 
     fn node(&mut self, node: &Node, depth: usize, place: &[String]) {
@@ -363,11 +412,14 @@ impl Gen<'_> {
                     "VerticalLayout"
                 };
                 self.open(depth, node, layout, place);
-                if let Some(s) = self.spacing(node) {
-                    self.line(d, &s);
-                }
+                self.layout_lines(d, node, true);
                 self.common(d, node, false);
-                self.children(node.children.iter(), d);
+                for child in node.children.iter() {
+                    if let Child::Node(n) = child {
+                        let at = Self::stretch_place(n, row);
+                        self.node(n, d, &at);
+                    }
+                }
             }
             "grid" => {
                 let columns = match node.props.get("columns") {
@@ -378,10 +430,10 @@ impl Gen<'_> {
                     }
                 };
                 self.open(depth, node, "GridLayout", place);
-                if let Some(s) = self.spacing(node) {
-                    self.line(d, &s);
-                }
+                self.layout_lines(d, node, false);
                 self.common(d, node, false);
+                // `min-column-width` has no GridLayout form: it stays in the source comment and
+                // the grid is drawn with `columns` columns (the design's Slint row).
                 let cells: Vec<&Node> = element_children(node).collect();
                 for (i, cell) in cells.into_iter().enumerate() {
                     let at = [

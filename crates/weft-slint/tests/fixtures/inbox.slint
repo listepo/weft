@@ -98,11 +98,14 @@ export component InboxScreen inherits Window {
                 VerticalLayout {
                     drafts := VerticalLayout {
                         drafts-empty := VerticalLayout {
+                            alignment: LayoutAlignment.start;
                             spacing: 8px;
                             no-drafts := Text {
+                                vertical-stretch: 0;
                                 text: "No drafts.";
                             }
                             no-drafts-hint := Text {
+                                vertical-stretch: 0;
                                 text: "Messages you start appear here.";
                             }
                         }

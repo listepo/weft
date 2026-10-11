@@ -433,11 +433,22 @@ enum Leaf<'p, 'a> {
     Node(&'p Rc<N<'a>>),
 }
 
-/// `group` is the enclosing radio-group, `form` the nearest enclosing form.
+/// Which way a parent `stack` lays its children out, so a child with `grow` can take that axis.
+#[derive(Clone)]
+enum Grow {
+    Row,
+    Column,
+    /// A bound direction: a JS expression that equals `"row"` when the stack is a row.
+    Bound(String),
+}
+
+/// `group` is the enclosing radio-group, `form` the nearest enclosing form. `grow` is set only
+/// for the default children of a `stack` (a named slot is not that stack's child, SPEC §2.2).
 #[derive(Clone, Default)]
 struct Ctx<'a> {
     group: Option<Rc<N<'a>>>,
     form: Option<Rc<N<'a>>>,
+    grow: Option<Grow>,
 }
 
 fn is_binding_raw(raw: Option<&Json>) -> bool {
@@ -1007,6 +1018,15 @@ impl<'a> Gen<'a> {
     /// declared `empty` slot is left to the kind that shows it.
     #[inline(never)]
     fn content(&mut self, n: &N<'a>, ctx: &Ctx<'a>) -> Vec<C<'a>> {
+        let body_ctx = Ctx {
+            grow: (n.kind == "stack").then(|| self.grow_axis(n)),
+            ..ctx.clone()
+        };
+        // A slot's content is not a child of the stack (SPEC §2.2), so it does not grow.
+        let slot_ctx = Ctx {
+            grow: None,
+            ..ctx.clone()
+        };
         let mut before = Vec::new();
         let mut after = Vec::new();
         let mut names: Vec<&'a String> = n.slots.map(|s| s.keys().collect()).unwrap_or_default();
@@ -1016,7 +1036,7 @@ impl<'a> Gen<'a> {
                 continue;
             }
             let pieces = self.pieces(n.slot(name), &n.scope, n.depth + 1);
-            let kids = self.kids(&pieces, ctx, None);
+            let kids = self.kids(&pieces, &slot_ctx, None);
             let slot = C::J(el(
                 "div",
                 vec![attr_s("data-weft-slot", name.as_str())],
@@ -1033,7 +1053,7 @@ impl<'a> Gen<'a> {
             _ => Vec::new(),
         };
         let pieces = self.pieces(n.children, &n.scope, n.depth + 1);
-        let body = self.kids(&pieces, ctx, None);
+        let body = self.kids(&pieces, &body_ctx, None);
         before.extend(own);
         before.extend(body);
         before.extend(after);
@@ -1367,7 +1387,7 @@ impl<'a> Gen<'a> {
     #[inline(never)]
     fn render(&mut self, n: &Rc<N<'a>>, ctx: &Ctx<'a>) -> Option<C<'a>> {
         let out = self.render_kind(n, ctx)?;
-        Some(Self::tilted(n, out))
+        Some(self.grown(n, ctx, Self::tilted(n, out)))
     }
 
     /// SPEC §2.2: the tilt is a `transform` on the element the node draws (a dialog, drawn into
@@ -1378,20 +1398,67 @@ impl<'a> Gen<'a> {
             return out;
         }
         let transform = tilt::css(|name| n.raw(name).and_then(Json::as_f64));
-        if let (Some(transform), C::J(j)) = (transform, &mut out) {
-            let entry = format!("transform: {}", quote(&transform));
-            match j.attrs.iter_mut().find(|a| a.name == "style") {
-                Some(Attr {
-                    value: AttrV::Js(code),
-                    ..
-                }) => match code.strip_suffix(" }") {
-                    Some(open) => *code = format!("{open}, {entry} }}"),
-                    None => *code = format!("{{ ...{code}, {entry} }}"),
-                },
-                _ => j.attrs.push(attr_js("style", format!("{{ {entry} }}"))),
-            }
+        if let Some(transform) = transform {
+            Self::push_style(&mut out, &[format!("transform: {}", quote(&transform))]);
         }
         out
+    }
+
+    /// `grow` on the element the node draws, the same flex declarations the static page's
+    /// `data-grow` rule applies. A dialog is drawn into the top layer, as for the tilt.
+    fn grown(&self, n: &N<'a>, ctx: &Ctx<'a>, mut out: C<'a>) -> C<'a> {
+        let Some(axis) = &ctx.grow else {
+            return out;
+        };
+        if n.kind == "dialog" || !grows(n) {
+            return out;
+        }
+        let flex = self.css("flex", "flex");
+        let min_w = self.css("minWidth", "min-width");
+        let min_h = self.css("minHeight", "min-height");
+        // A string zero, so the declaration is `min-width: 0` (a number would become `0px`).
+        let entries = match axis {
+            Grow::Row => vec![format!("{flex}: \"1 1 0%\""), format!("{min_w}: \"0\"")],
+            Grow::Column => vec![format!("{flex}: \"1 1 0%\""), format!("{min_h}: \"0\"")],
+            Grow::Bound(js) => vec![
+                format!("{flex}: \"1 1 0%\""),
+                format!("{min_w}: {js} === \"row\" ? \"0\" : undefined"),
+                format!("{min_h}: {js} === \"row\" ? undefined : \"0\""),
+            ],
+        };
+        Self::push_style(&mut out, &entries);
+        out
+    }
+
+    fn grow_axis(&mut self, n: &N<'a>) -> Grow {
+        let direction = self.text_of(n, "direction");
+        match &direction.lit {
+            Some(v) if *v == str_v("row") => Grow::Row,
+            Some(_) => Grow::Column,
+            None => Grow::Bound(direction.js.clone()),
+        }
+    }
+
+    /// Appends declarations to the outermost element's style. A block's result is that element
+    /// (a link computes its href before the tag), so the declarations land on the tag.
+    fn push_style(out: &mut C<'_>, entries: &[String]) {
+        if entries.is_empty() {
+            return;
+        }
+        let entry = entries.join(", ");
+        let Some(j) = outermost(out) else {
+            return;
+        };
+        match j.attrs.iter_mut().find(|a| a.name == "style") {
+            Some(Attr {
+                value: AttrV::Js(code),
+                ..
+            }) => match code.strip_suffix(" }") {
+                Some(open) => *code = format!("{open}, {entry} }}"),
+                None => *code = format!("{{ ...{code}, {entry} }}"),
+            },
+            _ => j.attrs.push(attr_js("style", format!("{{ {entry} }}"))),
+        }
     }
 
     #[inline(never)]
@@ -1664,19 +1731,37 @@ impl<'a> Gen<'a> {
                 entries.push(format!("\"--_weft-material-{prop}\": {}", quote(&value)));
             }
         }
+        self.box_style(n, &mut entries);
         if n.kind == "grid" {
             entries.push("display: \"grid\"".to_owned());
             let columns = self.prop(n, "columns").0;
             let key = self.css("gridTemplateColumns", "grid-template-columns");
+            let min = css_var(n, "min-column-width");
+            let gap = css_var(n, "gap");
             match &columns.lit {
                 Some(V::Num(c)) if is_integer(*c) && (1.0..=64.0).contains(c) => {
-                    let value = format!("repeat({}, minmax(0, 1fr))", js_number(*c));
+                    let value = match &min {
+                        Some(min) => crate::html::capped_columns(*c as u32, min, gap.as_deref()),
+                        None => format!("repeat({}, minmax(0, 1fr))", js_number(*c)),
+                    };
                     entries.push(format!("{key}: {}", quote(&value)));
                 }
                 Some(_) => {}
                 None => {
-                    let cols = self.use_("_cols");
-                    entries.push(format!("{key}: {cols}({})", columns.js));
+                    if let Some(min) = min {
+                        let fill = self.use_("_fill");
+                        let gap = gap
+                            .map(|g| quote(&g))
+                            .unwrap_or_else(|| "undefined".to_owned());
+                        entries.push(format!(
+                            "{key}: {fill}({}, {}, {gap})",
+                            columns.js,
+                            quote(&min)
+                        ));
+                    } else {
+                        let cols = self.use_("_cols");
+                        entries.push(format!("{key}: {cols}({})", columns.js));
+                    }
                 }
             }
             return format!("{{ {} }}", entries.join(", "));
@@ -1727,7 +1812,42 @@ impl<'a> Gen<'a> {
             Some(v) if *v == TRUE => entries.push(format!("{key}: \"wrap\"")),
             Some(_) => {}
         }
+        self.justify_style(n, &mut entries);
         format!("{{ {} }}", entries.join(", "))
+    }
+
+    /// `padding` and `max-width`, the same inline declarations the static page writes.
+    fn box_style(&self, n: &N<'a>, entries: &mut Vec<String>) {
+        if let Some(value) = css_var(n, "padding") {
+            let key = self.css("padding", "padding");
+            entries.push(format!("{key}: {}", quote(&value)));
+        }
+        if let Some(value) = css_var(n, "max-width") {
+            let width = self.css("width", "width");
+            let max = self.css("maxWidth", "max-width");
+            let box_ = self.css("boxSizing", "box-sizing");
+            entries.push(format!("{width}: \"100%\""));
+            entries.push(format!("{max}: {}", quote(&value)));
+            // The cap is the border box, so padding stays inside it.
+            entries.push(format!("{box_}: \"border-box\""));
+        }
+    }
+
+    /// `start` is the initial value, so it is not written (SPEC §5.1).
+    fn justify_style(&mut self, n: &N<'a>, entries: &mut Vec<String>) {
+        let justify = self.text_of(n, "justify");
+        let key = self.css("justifyContent", "justify-content");
+        match &justify.lit {
+            Some(v) => {
+                if let Some(css) = justify_css(&v.string()) {
+                    entries.push(format!("{key}: {}", quote(css)));
+                }
+            }
+            None => {
+                let f = self.use_("_justify");
+                entries.push(format!("{key}: {f}({})", justify.js));
+            }
+        }
     }
 
     /// An element whose tag is chosen at run time; `cast` is the tag TSX checks its attributes
@@ -3044,6 +3164,42 @@ fn component_name(name: &str) -> String {
         "Fragment".to_owned()
     } else {
         out
+    }
+}
+
+fn grows(n: &N<'_>) -> bool {
+    matches!(n.raw("grow"), Some(Json::Bool(true)))
+        || matches!(n.raw("grow"), Some(Json::String(s)) if s == "true")
+}
+
+/// A dimension token as `var(--weft-…)`, or nothing when the prop is not a token.
+fn css_var(n: &N<'_>, name: &str) -> Option<String> {
+    n.raw(name)
+        .and_then(Json::as_object)
+        .and_then(|g| g.get("token"))
+        .and_then(Json::as_str)
+        .filter(|t| is_token(t))
+        .and_then(crate::html::token_var)
+        .map(|var| format!("var({var})"))
+}
+
+fn justify_css(value: &str) -> Option<&'static str> {
+    match value {
+        "center" => Some("center"),
+        "end" => Some("flex-end"),
+        "space-between" => Some("space-between"),
+        _ => None,
+    }
+}
+
+fn outermost<'a, 'b>(out: &'b mut C<'a>) -> Option<&'b mut J<'a>> {
+    match out {
+        C::J(j) => Some(j),
+        C::Code(code) => code.0.iter_mut().find_map(|seg| match seg {
+            Seg::Block(_, result) => outermost(result),
+            _ => None,
+        }),
+        C::Text(_) => None,
     }
 }
 
