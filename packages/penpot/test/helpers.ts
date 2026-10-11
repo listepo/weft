@@ -16,13 +16,13 @@ export async function built(markup: string): Promise<{ penpot: FakePenpot; root:
   const penpot = new FakePenpot();
   const library = await ensureLibrary(penpot, coreCatalog, tokens);
   const document = parseStrict(markup);
-  const root = await buildScreen(penpot, document, {
+  const built = await buildScreen(penpot, document, {
     catalog: coreCatalog,
     library,
     tokens,
     display: displayTexts(document),
   });
-  return { penpot, root: root as FakeBoard };
+  return { penpot, root: built.root as FakeBoard };
 }
 
 export const read = (root: FakeBoard) => readScreen(root, { catalog: coreCatalog, tokens });

@@ -15,7 +15,14 @@ import {
   FakeFigma,
   type FakeText,
 } from "./fake-figma.ts";
-import { buildScreen, dataOf, ensureLibrary, isRawText, readLayers } from "../src/index.ts";
+import {
+  buildScreen,
+  dataOf,
+  displayTexts,
+  ensureLibrary,
+  isRawText,
+  readLayers,
+} from "../src/index.ts";
 import { built, corpusMarkup, parseStrict, read, tokens } from "./helpers.ts";
 
 const login = corpusMarkup("login");
@@ -356,5 +363,29 @@ describe("a build without the display texts", () => {
     const library = await ensureLibrary(figma, coreCatalog, tokens);
     const options = { catalog: coreCatalog, library, tokens, display: {} };
     await assert.rejects(buildScreen(figma, parseStrict(login), options), /no display text/);
+  });
+});
+
+describe("plugin data over the entry cap", () => {
+  test("notes it, draws the layer, and stores no source for a foreign pull", async () => {
+    const figma = new FakeFigma();
+    const library = await ensureLibrary(figma, coreCatalog, tokens);
+    // 40_000 euro signs are 120_000 UTF-8 bytes, well over the 100 kB entry cap.
+    const markup = `<screen id="cap" weft="0.1">\n  <text id="big" text="${"€".repeat(40_000)}"/>\n</screen>\n`;
+    const document = parseStrict(markup);
+    const { root, notes } = await buildScreen(figma, document, {
+      catalog: coreCatalog,
+      library,
+      tokens,
+      display: displayTexts(document),
+    });
+    assert.equal(root.type, "FRAME");
+    assert.ok(notes.some((n) => /longer than 100000 bytes/.test(n)));
+    const frame = root as FakeFrame;
+    const big = figma.find(frame, "text#big");
+    assert.ok(big !== undefined);
+    assert.equal(dataOf(big).getPluginData("weft.source"), "");
+    const read = await readLayers(figma, frame, { catalog: coreCatalog, tokens });
+    assert.equal(read.document.root.children?.length, 1);
   });
 });
