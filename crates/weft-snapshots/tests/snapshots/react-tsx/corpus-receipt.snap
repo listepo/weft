@@ -1,0 +1,46 @@
+---
+source: crates/weft-snapshots/tests/snapshots.rs
+description: corpus-receipt as react-tsx
+---
+export type WeftEvent = { id: string; action: string; item?: string };
+
+export type WeftProps = {
+  data?: any;
+  actions?: Record<string, (event: WeftEvent) => void>;
+  onChange?: (path: string, value: unknown) => void;
+};
+
+function _text(v: unknown): string {
+  if (typeof v === "string") return v;
+  if (typeof v === "number") return Number.isFinite(v) ? String(v) : "";
+  if (typeof v === "boolean") return String(v);
+  return "";
+}
+
+function _squash(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
+
+function PriceRow({ data, actions, onChange, params, slots, id }: WeftProps & { params?: any; slots?: any; id?: string }) {
+  return (
+    <div data-weft-id={id + "/row"} style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+      <div data-weft-id={id + "/name"}>
+        {!(_text(params.label).trim() === "") ? _squash(_text(params.label)) : ""}
+      </div>
+      <div data-weft-id={id + "/value"}>
+        {!(_text(params.amount).trim() === "") ? _squash(_text(params.amount)) : ""}
+      </div>
+    </div>
+  );
+}
+
+export default function WeftScreen({ data, actions, onChange }: WeftProps) {
+  return (
+    <main data-weft-id="receipt" aria-label="Receipt">
+      <div data-weft-id="lines" style={{ display: "flex", flexDirection: "column" }}>
+        <PriceRow data={data} actions={actions} onChange={onChange} id={"subtotal"} params={{ amount: data?.subtotal, label: "Subtotal" }} slots={{}} />
+        <PriceRow data={data} actions={actions} onChange={onChange} id={"total"} params={{ amount: data?.total, label: "Total" }} slots={{}} />
+      </div>
+    </main>
+  );
+}

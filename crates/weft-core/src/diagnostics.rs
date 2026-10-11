@@ -108,6 +108,7 @@ codes! {
     W227 => Error, "Context entry status missing or not allowed for its kind.";
     W228 => Mode, "Context over a limit.";
     W229 => Error, "Context entry text or author name not allowed.";
+    W230 => Error, "`version` is not a literal MAJOR.MINOR.PATCH.";
     W301 => Error, "Duplicate id.";
     W302 => Error, "Child kind not allowed here.";
     W303 => Error, "Parent kind not allowed for this component.";
@@ -142,6 +143,7 @@ codes! {
     W510 => Error, "An added context entry reuses an id of the document.";
     W511 => Error, "A context patch names no context entry.";
     W512 => Error, "The host does not allow this context patch.";
+    W513 => Error, "add-fragment names an inline fragment the document already has.";
     W601 => Error, "Imported input cannot be read.";
     W602 => Warning, "Imported input exceeds an import limit.";
     W701 => Error, "Project file or one of its members has the wrong shape.";
@@ -158,6 +160,8 @@ codes! {
     W712 => Error, "Catalog prefix is malformed or reserved, or a second catalog lacks one.";
     W713 => Error, "Catalog defines or extends a kind it does not own.";
     W714 => Warning, "Catalog requirement is not loaded at a compatible version.";
+    W715 => Error, "Fragment name is claimed outside its owner.";
+    W716 => Error, "Library fragment reaches the host directly.";
     W801 => Mode, "`<use>` names no fragment of the project.";
     W802 => Error, "Attribute, action or slot the fragment does not declare.";
     W803 => Error, "Malformed `<param>` or `<fragment>`.";
@@ -165,7 +169,9 @@ codes! {
     W805 => Error, "Fragments use each other in a cycle.";
     W806 => Error, "Expanding the fragments exceeds the element or depth limit.";
     W807 => Error, "Parameter read where its type cannot go.";
+    W808 => Error, "Inline fragment misplaced or malformed.";
     W809 => Error, "Variant parameter or `<variant>` is misdeclared.";
+    W810 => Error, "Declared version is lower than the changes require.";
 }
 
 impl Code {

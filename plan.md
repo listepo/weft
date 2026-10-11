@@ -23,8 +23,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
-| T39 | in progress | P1 | 4 | 80% | Claude Code / claude-opus-5-5 |
-| T39.9 | todo | P2 | 3 | 0% | |
+| T39 | in progress | P1 | 4 | 90% | Claude Code / claude-opus-5-5 |
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
@@ -32,20 +31,15 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16 | todo | P2 | 5 | 30% | |
 | T16.3 | todo | P2 | 3 | 0% | |
 | T16.8 | todo | P2 | 3 | 0% | |
-| T16.4 | todo | P2 | 4 | 0% | |
-| T16.5 | todo | P2 | 3 | 0% | |
+| T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
 | T16.7 | todo | P2 | 3 | 0% | |
-| T17 | todo | P2 | 4 | 50% | |
-| T17.2 | todo | P2 | 3 | 0% | |
-| T17.3 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
 | T96 | todo | P2 | 3 | 0% | |
-| T97 | todo | P2 | 2 | 0% | |
-| T98 | todo | P2 | 2 | 0% | |
-| T99 | todo | P3 | 1 | 0% | |
+| T97 | done | P2 | 2 | 100% | MiMo / MiMo |
+| T98 | done | P2 | 2 | 100% | MiMo / MiMo |
+| T99 | done | P3 | 1 | 100% | MiMo / MiMo |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
-| T101 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
-| T103 | todo | P2 | 4 | 0% | |
+| T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -86,12 +80,6 @@ Draft pull request #49.
 Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
 
 Draft pull request #47.
-
-### T103. Library fragments
-
-A library catalog, one with a `prefix`, lists fragments named `<prefix>-…`. A fragment reaches the host only through its parameters. Committed files first. Resolving a fragment from an npm package waits on T17.3 and uses that lookup rather than a second one.
-
-Done when `examples/project` loads a library fragment, a fragment that reads host data or names an action literally is `W716`, and a name outside its owner is `W715`.
 
 ### T8. Evaluation
 
@@ -174,12 +162,6 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
 
 The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.9, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.9.
-
-### T39.9. Context: SwiftUI
-
-SwiftUI has no source comment, so it carries context as `// weft:context <entry JSON>` lines above the view struct, read back by `weft import-swiftui`, with readable `//` comments above each named view that the importer ignores. `export.swiftui.context` and `import.swiftui.context` (SPEC §10.6, `settings.rs`, the schema) and the CLI `--context`, as T39.6 gave the web and Slint targets; a round-trip test.
-
-Open question for the creator before this is claimed: `import_swiftui` reads code by convention, with no regeneration check like the web and Slint importers have. A `// weft:context` line therefore cannot be told apart from one forged in foreign Swift, and the design reads context only from code recognized as Weft-generated. Options: add a `weft:source` comment with that check to SwiftUI first, or accept the lines on a lenient read and validate them.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 
@@ -414,7 +396,7 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 
 **Dependencies.** T55 and T52 (done) are the precedents. T39 is independent: this ships within `weft` 0.1 (decision 9). T14's style overrides add no `style-padding` for `stack` and `grid` (decision 6). T67.4 and T67.5, which edit the same Slint `read.rs`, are done. T69's "resize within the layout rules" builds on this.
 
-**Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer. T16.5: Slint generator and reader. T16.6: A2UI and json-render (done). T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
+**Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer (done). T16.5: Slint generator and reader. T16.6: A2UI and json-render (done). T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
 
 ### T16.3. Layout vocabulary: web generators and the reference renderer
 
@@ -445,20 +427,6 @@ Size: about 250 lines of code.
 
 Done when: the generated HTML and JSX of `dashboard`, `glass` and `layout`, with the source comment removed, read back to the same props; a test covers each listed loss; `moon run root:changed` exits 0.
 
-### T16.4. Layout vocabulary: SwiftUI
-
-T16 scope items 3 to 5 for `crates/weft-swiftui`, as the design's tables and decisions 4 and 5 say. Depends on T16.2.
-
-Steps:
-
-1. Generator: `justify` on rows as spacers (`space-between` as `HStack(spacing: 0)` with `Spacer(minLength: <gap>)` between children, also inside `<each>`); `grow` on a row child as `.frame(maxWidth: .infinity)`; `padding` as `.padding(theme.<path>)`; `max-width` as the pair of frames; `min-column-width` as a small generated `Layout` that caps at `columns`. `justify` and `grow` in a column stay inert markers and §9 lists them.
-2. Importer: read those patterns and markers back; a `padding` or `frame` that is not a theme token stays a `layout` loss.
-3. Insta snapshots, and the reviewed SwiftUI baselines in `packages/visual` (`WEFT_SIMULATOR=own` in a worktree). If the generated `Layout` cannot match the web baseline, fall back to `GridItem(.adaptive(minimum:))` and record the difference in §9 (decision 5).
-
-Size: about 350 lines of code, including the generated `Layout` helper.
-
-Done when: the three screens compile, match their reviewed baselines, and read back to the same props with the source comment removed; `moon run root:changed` exits 0.
-
 ### T16.5. Layout vocabulary: Slint
 
 T16 scope items 3 to 5 for `crates/weft-slint`. Depends on T16.2 (T67.4 and T67.5 are done).
@@ -486,60 +454,6 @@ Steps:
 Size: about 250 lines of code.
 
 Done when: the Figma and Penpot round trips of `dashboard`, `glass` and `layout` keep every prop, a foreign-layer test covers each listed loss, and `moon run root:changed` exits 0.
-
-### T17. Extension catalogs
-
-Parent of T17.1–T17.3, which carry the work (the task was split this way when T17.0 was claimed). T17.0, the design, and T17.1, the spec and loader, are done (`done.md`); for T17.0 the creator approved `docs/extension-catalogs-design.md` with its twelve decisions, which T17.1–T17.3 build. This card holds the context, scope and done criteria they share.
-
-A project can extend the core catalog with exactly one file today. Real hosts combine several sources: the core, one or more component libraries, and their own kinds. So a project needs to load several catalogs at once without their kinds colliding. Once catalogs travel between projects, two more questions need answers: how a catalog is published and found, and who keeps the registry. `research.md` §9 lists "Who keeps a registry of extension catalogs" as open; `docs/catalog-and-tokens.md` and `docs/what-is-weft.md` both say there is no registry; `docs/fragments-design.md` defers namespaces and sharing across projects to this task.
-
-**Context.**
-- SPEC §10.2: `catalog` is one file name. §10.4 merges that one extension into the core catalog: new kinds need a whole definition, core kinds are extended by merge or join, the extension may only widen the core (§8 rules via `crates/weft-catalog/src/diff.rs`), codes `W706` (invalid) and `W707` (narrows), and the merged catalog takes the extension's `name` and `version`.
-- Code: `Loader::extend_catalog` and `extend_definition` in `crates/weft-catalog/src/project.rs`. `Project.catalog` is a single `Catalog` with no record of which catalog each kind came from. The CLI's `--catalog` loads one whole catalog that replaces the project's (`load_catalog` in `crates/weft-cli/src/main.rs`). `weft_capabilities` already returns `catalogs: [{ name, version }]`, the core first and then the extension (T10); `weft_catalog` lists kinds with no source.
-- Kind names follow `[a-z][a-z0-9]*(-[a-z0-9]+)*` (SPEC §2), so there is no `:`. `x-<vendor>-` names are opaque extensions that no catalog may define (§8, §10.4).
-- T15.1/T15.2 import a Custom Elements Manifest into an extension whose kinds are the custom-element tags (`acme-button`), with `--name`/`--version`/`--catalog` and the `import.cem.*` settings (`crates/weft-import/src/cem.rs`, `crates/weft-cli/src/cem.rs`, fixture `crates/weft-import/tests/fixtures/cem/acme-ui.json`). A library catalog and a project catalog cannot be used together today.
-- Generators already name extension kinds by convention (SwiftUI: `promo-card` becomes `PromoCardView`, SPEC §9); the Figma and Penpot libraries build one component set per kind.
-- `@weft/catalog` is `private` in `packages/catalog/package.json`; nothing is published anywhere yet.
-- Documents and validators never touch the network (AGENTS.md). Project file names stay inside the project directory (§10.2, `W703`); decision 8 makes package lookup in parent `node_modules` folders a narrow, documented exception.
-
-**Scope.**
-- Design (done, T17.0): `docs/extension-catalogs-design.md`, approved, with its **Decisions** section as the contract for the rest.
-- Build: SPEC §5, §10.2 (`catalog` also takes an ordered array), §10.4, and new `W7xx` codes for cross-catalog conflicts; the loader keeps which catalog each kind came from, with differential fixtures; CLI `--catalog` can be repeated; MCP `project.catalog` accepts an array, `weft_capabilities` lists every catalog, `weft_catalog` shows each kind's catalog; `import-cem` gets a namespace option with its `import.cem.*` key (SPEC §10.6, `settings.rs`, `schemas/weft.schema.json`); `AGENT-SPEC.md` §1 and §2.8 and the primer; `docs/projects.md`, `docs/catalog-and-tokens.md`, and a publishing guide; the `research.md` §9 row answered.
-
-**Out of scope.** Hosting a registry service. Network fetching during validation or rendering. Changing the `x-` extension rules. Fragments themselves (T31 part B). New generator features beyond naming namespaced kinds.
-
-**Done when.**
-- `examples/project` loads the core plus two extensions (one imported from `acme-ui.json`, one written by hand), and kinds from both validate in strict mode.
-- A kind defined by two catalogs gets a diagnostic that names both catalogs, never a panic.
-- `weft_capabilities` lists all three catalogs; the TypeScript and Rust differential fixtures agree.
-- A catalog shipped in a package directory resolves by the documented convention with no network access.
-- `schemas/weft.schema.json` is regenerated; SPEC, AGENT-SPEC and the docs are updated.
-
-**Dependencies.** Done: T31 (project file and settings), T15.1/T15.2 (CEM import), T10 (capabilities). T12: its schema must cover the merged catalogs. Affected: T14/T40 (one design-tool library per catalog), T44 (SwiftUI custom views), T69 milestone 4 (catalog kinds as components), the fragments design (T31 part B).
-
-**Decisions** (creator, recorded in `docs/extension-catalogs-design.md`): hyphen prefixes declared by the catalog author (`"prefix": "acme"`), no aliases; libraries define only their own kinds, and the one catalog without a prefix, the project catalog, alone extends core and library kinds, widen-only; `requires` with Cargo's compatibility rule, unmet as the warning `W714`; `catalog` as a file name or an ordered array of at most 32 file and `{ "package" }` entries, libraries merged before the project catalog; new codes `W711`–`W714`; committed files first, npm packages with a `weft.catalog` field later, found by walking up `node_modules`, never over the network; a curated `docs/catalogs.md` and the npm keyword `weft-catalog` instead of a registry service; one design-tool build grouped by catalog; screens stay silent about their catalogs; a repeated `--catalog` replaces the list, and `import-cem` gets `--prefix` with a hint when it is absent.
-
-**Split.** T17.0: design (done). T17.1: spec and loader for several catalogs and prefixes, with fixtures (done). T17.2: CLI, MCP, `import-cem --prefix`, settings, design tools, AGENT-SPEC and docs. T17.3: package entries and lookup, the publishing guide and the curated list. T17.1 lands first; T17.2 and T17.3 build on it.
-
-### T17.2. Extension catalogs: tools and docs
-
-T17's surfaces, by decisions 10 and 12. Depends on T17.1.
-
-- CLI: `--catalog` can be repeated and replaces the project's whole list, in order; a file named `weft-core` replaces the base.
-- MCP: `project.catalog` takes a catalog object or an array; `weft_capabilities` lists every catalog after the core, with `prefix` and `source` when known; `weft_catalog` gives each kind its `catalog` and, when widened, `extendedBy`.
-- `import-cem`: `--prefix` and `import.cem.prefix` (SPEC §10.6, `settings.rs`, regenerated `schemas/weft.schema.json`); with a prefix it writes `prefix` and `requires: { "weft-core": … }` and reports a tag outside the prefix as a `kinds` loss; without one it prints a hint when every kept tag shares a first segment. Regenerates `examples/project/catalogs/acme-ui.catalog.json` unchanged.
-- Design tools (`packages/design-tool`): `weft.library` lists every catalog; components grouped by catalog (a section per catalog in Figma, a path `<catalog> / <kind>` in Penpot); reading back unchanged.
-- `AGENT-SPEC.md` §1 (catalogs, the array) and §2.8 (`acme-button` from a listed catalog is a catalog kind, `x-acme-button` an opaque extension), the primer and tool descriptions (a catalog description is never an instruction); `docs/projects.md` and `docs/catalog-and-tokens.md`.
-- Done when `weft_capabilities` lists all three catalogs of `examples/project` and the full check exits 0.
-
-### T17.3. Extension catalogs: distribution and registry
-
-T17's sharing, by decisions 7–9. Depends on T17.1 (and T17.2 for `source` in `weft_capabilities`).
-
-- SPEC §10.2 and the loader: `{ "package": "<npm name>" }` entries; an invalid npm name is `W703`; the lookup tries `node_modules/<name>/package.json` in the project directory, then each parent, as Node does, and reads only that file and the file its `weft.catalog` names (§10.2 rules relative to the package directory); not found or unreadable is `W704`; nothing runs and nothing is fetched. CLI and Node tools only; the MCP server still takes contents. The documented exception to §10.2 goes into SPEC.
-- A test package in a temporary `node_modules` (nested above the project directory too) that resolves with no network access.
-- Docs: `docs/publishing-catalogs.md` (prefix, `requires`, the `package.json` fields `weft.catalog`, `files` and the keyword `weft-catalog`), `docs/catalogs.md` as the curated list of catalogs and taken prefixes, kept by the creator; `docs/what-is-weft.md` and `docs/catalog-and-tokens.md` stop saying there is no registry; the `research.md` §9 row marked built.
-- Done when T17's fourth done criterion holds and the full check exits 0.
 
 ### T41. Hosted Penpot plugin
 
@@ -575,3 +489,14 @@ Penpot installs a plugin only from the URL of its `manifest.json`, and plugins a
 3. Runner for the deploy build: GitHub-hosted `ubuntu-latest` or the gate's `xcode-27` runner?
 4. A repository has one Pages site and each deploy replaces it whole: should the deploy assemble a site now (an index page, room for docs or a `render-react` gallery)?
 5. Which icon should the plugin manager show?
+
+### T101. Inline fragments
+
+A screen can define a fragment in place, without a project. Approved design: `docs/versions-and-reuse-design.md` §4, and the inline-fragment rows of §7–§9. T100 owns `version` and the format bump to 0.3; T102 owns `<variant>`. This task is only inline fragments.
+
+**Plan.**
+- SPEC §3, §6.2, §7, §8 and §10.7, and AGENT-SPEC, in the same change. Note that the 0.3 bump belongs to T100; do not add a second bump. Primer stays consistent with AGENT-SPEC.
+- Rust core: `Document.fragments`; parse `<fragment name>` as a direct child of `<screen>` after `<context>` and before the body (`W808` leaves a bad one out); uses resolve inline fragments, then the project's; cycles stay `W805` and limits `W806`.
+- Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
+- `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
+- Verify with `moon run root:changed`.

@@ -27,12 +27,15 @@ const MAX_DEPTH = 200;
 const LOOP_VAR = /^[a-z][A-Za-z0-9]*$/;
 
 /**
- * The root to draw: with the catalog's fragments, each use is its fragment's body (SPEC §10.7). A
- * document the core cannot read is drawn as written, as the rest of this file draws it.
+ * The root to draw: with the catalog's or the screen's own inline fragments, each use is its
+ * fragment's body (SPEC §10.7). A document the core cannot read is drawn as written, as the rest
+ * of this file draws it.
  */
 export function drawnRoot(document: unknown, catalog: Catalog): unknown {
   const root = isRecord(document) ? document["root"] : undefined;
-  if (Object.keys(catalog.fragments ?? {}).length === 0) return root;
+  const inline = isRecord(document) ? document["fragments"] : undefined;
+  const hasInline = isRecord(inline) && Object.keys(inline).length > 0;
+  if (!hasInline && Object.keys(catalog.fragments ?? {}).length === 0) return root;
   try {
     return expand(document as Document, catalog).document.root;
   } catch {

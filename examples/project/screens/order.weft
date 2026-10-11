@@ -1,5 +1,6 @@
 <screen id="order" label="Order" weft="0.2">
   <use id="header" fragment="page-header" title="Your order" on-back="nav.back"/>
+  <use id="promo" fragment="acme-promo" title="Free shipping today" on-claim="cart.checkout"/>
   <each id="lines" as="line" in="{$.cart.items}">
     <acme-card id="line" elevated="true">
       <text id="line-name" text="{$line.name}"/>

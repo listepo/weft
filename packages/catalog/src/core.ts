@@ -65,7 +65,7 @@ const components: Record<string, ComponentDef> = {
     root: true,
     props: {
       weft: str(
-        'The Weft format version of the document: "0.2", or "0.1" for a document written before 0.2.',
+        'The Weft format version of the document: "0.3". A document written as "0.1" or "0.2" stays valid.',
         {
           required: true,
           bindable: false,
@@ -559,7 +559,7 @@ for (const def of Object.values(components)) {
 }
 
 export const coreCatalog: Catalog = {
-  weft: "0.2",
+  weft: "0.3",
   name: "weft-core",
   version: "0.2.0",
   components,

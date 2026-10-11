@@ -67,6 +67,7 @@ export const DIAGNOSTIC_CODES = {
   },
   W228: { severity: "mode", summary: "Context over a limit." },
   W229: { severity: "error", summary: "Context entry text or author name not allowed." },
+  W230: { severity: "error", summary: "`version` is not a literal MAJOR.MINOR.PATCH." },
 
   W301: { severity: "error", summary: "Duplicate id." },
   W302: { severity: "error", summary: "Child kind not allowed here." },
@@ -104,6 +105,10 @@ export const DIAGNOSTIC_CODES = {
   W510: { severity: "error", summary: "An added context entry reuses an id of the document." },
   W511: { severity: "error", summary: "A context patch names no context entry." },
   W512: { severity: "error", summary: "The host does not allow this context patch." },
+  W513: {
+    severity: "error",
+    summary: "add-fragment names an inline fragment the document already has.",
+  },
 
   W601: { severity: "error", summary: "Imported input cannot be read." },
   W602: { severity: "warning", summary: "Imported input exceeds an import limit." },
@@ -128,6 +133,8 @@ export const DIAGNOSTIC_CODES = {
     severity: "warning",
     summary: "Catalog requirement is not loaded at a compatible version.",
   },
+  W715: { severity: "error", summary: "Fragment name is claimed outside its owner." },
+  W716: { severity: "error", summary: "Library fragment reaches the host directly." },
   W801: { severity: "mode", summary: "`<use>` names no fragment of the project." },
   W802: { severity: "error", summary: "Attribute, action or slot the fragment does not declare." },
   W803: { severity: "error", summary: "Malformed `<param>` or `<fragment>`." },
@@ -138,7 +145,12 @@ export const DIAGNOSTIC_CODES = {
     summary: "Expanding the fragments exceeds the element or depth limit.",
   },
   W807: { severity: "error", summary: "Parameter read where its type cannot go." },
+  W808: { severity: "error", summary: "Inline fragment misplaced or malformed." },
   W809: { severity: "error", summary: "Variant parameter or `<variant>` is misdeclared." },
+  W810: {
+    severity: "error",
+    summary: "Declared version is lower than the changes require.",
+  },
 } as const satisfies Record<string, CodeInfo>;
 
 export type DiagnosticCode = keyof typeof DIAGNOSTIC_CODES;

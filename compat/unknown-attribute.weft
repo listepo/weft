@@ -1,5 +1,5 @@
 <!-- An unknown attribute on a known element is kept in the model and ignored. -->
-<screen id="s" label="Compat" weft="0.3">
+<screen id="s" label="Compat" weft="0.4">
   <stack id="st">
     <button id="go" glow="strong" variant="primary">Go</button>
   </stack>

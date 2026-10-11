@@ -1,5 +1,5 @@
 <!-- An unknown element holding known children and a named slot: both stay readable. -->
-<screen id="s" label="Compat" weft="0.3">
+<screen id="s" label="Compat" weft="0.4">
   <stack id="st">
     <carousel id="car" autoplay="true">
       <text id="intro">Pick one</text>

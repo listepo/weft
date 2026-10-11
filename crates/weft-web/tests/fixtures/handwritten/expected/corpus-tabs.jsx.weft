@@ -1,4 +1,4 @@
-<screen id="screen-account" label="Account" weft="0.2">
+<screen id="screen-account" label="Account" weft="0.3">
   <heading id="heading-account" level="1">Account</heading>
   <tabs id="tabs-account-sections" label="Account sections">
     <tab id="tab-1" label="Overview">

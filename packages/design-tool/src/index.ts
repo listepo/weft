@@ -1,4 +1,11 @@
-export { buildScreen, planeTurn, type BuildHost, type BuildOptions, type Marks } from "./build.ts";
+export {
+  buildScreen,
+  planeTurn,
+  type BuildHost,
+  type BuildOptions,
+  type Built,
+  type Marks,
+} from "./build.ts";
 export { displayTexts, finishRead, readScreen } from "./finish.ts";
 export {
   KEY,
@@ -28,6 +35,9 @@ export {
   LIBRARY_BOARD,
   LIBRARY_PAGE,
   libraryTag,
+  catalogGroups,
+  type CatalogGroup,
+  type LibrarySources,
   TEXT_STYLE,
   textDrawing,
   TOKEN_COLLECTION,

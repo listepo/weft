@@ -2363,6 +2363,103 @@
  },
  {
   "document": {
+   "weft": "0.2",
+   "fragments": {
+    "price-row": {
+     "kind": "fragment",
+     "props": {
+      "label": "Price row"
+     },
+     "children": [
+      {
+       "kind": "param",
+       "props": {
+        "name": "label",
+        "required": true,
+        "type": "string"
+       }
+      },
+      {
+       "kind": "param",
+       "props": {
+        "name": "amount",
+        "required": true,
+        "type": "string"
+       }
+      },
+      {
+       "kind": "stack",
+       "id": "row",
+       "props": {
+        "direction": "row",
+        "justify": "space-between"
+       },
+       "children": [
+        {
+         "kind": "text",
+         "id": "name",
+         "props": {
+          "text": {
+           "bind": "$label"
+          }
+         }
+        },
+        {
+         "kind": "text",
+         "id": "value",
+         "props": {
+          "text": {
+           "bind": "$amount"
+          }
+         }
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "root": {
+    "kind": "screen",
+    "id": "receipt",
+    "props": {
+     "label": "Receipt"
+    },
+    "children": [
+     {
+      "kind": "stack",
+      "id": "lines",
+      "children": [
+       {
+        "kind": "use",
+        "id": "subtotal",
+        "props": {
+         "amount": {
+          "bind": "$.subtotal"
+         },
+         "fragment": "price-row",
+         "label": "Subtotal"
+        }
+       },
+       {
+        "kind": "use",
+        "id": "total",
+        "props": {
+         "amount": {
+          "bind": "$.total"
+         },
+         "fragment": "price-row",
+         "label": "Total"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "output": "function _text(v) {\n  if (typeof v === \"string\") return v;\n  if (typeof v === \"number\") return Number.isFinite(v) ? String(v) : \"\";\n  if (typeof v === \"boolean\") return String(v);\n  return \"\";\n}\n\nfunction _squash(v) {\n  return v.trim().replace(/\\s+/g, \" \");\n}\n\nfunction PriceRow({ data, actions, onChange, params, slots, id }) {\n  return (\n    <div data-weft-id={id + \"/row\"} style={{ display: \"flex\", flexDirection: \"row\", alignItems: \"center\" }}>\n      <div data-weft-id={id + \"/name\"}>\n        {!(_text(params.label).trim() === \"\") ? _squash(_text(params.label)) : \"\"}\n      </div>\n      <div data-weft-id={id + \"/value\"}>\n        {!(_text(params.amount).trim() === \"\") ? _squash(_text(params.amount)) : \"\"}\n      </div>\n    </div>\n  );\n}\n\nexport default function WeftScreen({ data, actions, onChange }) {\n  return (\n    <main data-weft-id=\"receipt\" aria-label=\"Receipt\">\n      <div data-weft-id=\"lines\" style={{ display: \"flex\", flexDirection: \"column\" }}>\n        <PriceRow data={data} actions={actions} onChange={onChange} id={\"subtotal\"} params={{ amount: data?.subtotal, label: \"Subtotal\" }} slots={{}} />\n        <PriceRow data={data} actions={actions} onChange={onChange} id={\"total\"} params={{ amount: data?.total, label: \"Total\" }} slots={{}} />\n      </div>\n    </main>\n  );\n}\n"
+ },
+ {
+  "document": {
    "weft": "0.1",
    "root": {
     "kind": "screen",

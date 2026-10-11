@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-confirm-dialog as a2ui-import
 ---
-<screen id="files" weft="0.2">
+<screen id="files" weft="0.3">
   <heading id="title" level="1">Quarterly report</heading>
   <button id="delete-file" on-press="dialog.open">Delete file</button>
   <dialog id="dialog-delete-file" label="Delete file?" modal="true">

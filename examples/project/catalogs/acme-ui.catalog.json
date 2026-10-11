@@ -1,5 +1,5 @@
 {
-  "weft": "0.1",
+  "weft": "0.3",
   "name": "acme-ui",
   "version": "1.0.0",
   "prefix": "acme",
@@ -106,5 +106,8 @@
         }
       }
     }
+  },
+  "fragments": {
+    "acme-promo": "fragments/acme-promo.weft"
   }
 }

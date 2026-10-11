@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-wizard-step as a2ui-import
 ---
-<screen id="wizard" weft="0.2">
+<screen id="wizard" weft="0.3">
   <heading id="title" level="1">Choose a plan</heading>
   <text id="progress" text="{$.progress}"/>
   <radio-group id="plan" label="Plan" value="{$.plan}">

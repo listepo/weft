@@ -10,9 +10,14 @@ import { call, connect } from "./connect.ts";
 // file's JSON content (SPEC §10.1).
 const dir = new URL("../../../examples/project/", import.meta.url);
 const file = (name: string): unknown => JSON.parse(readFileSync(new URL(name, dir), "utf8"));
+const markupOf = (name: string) => readFileSync(new URL(name, dir), "utf8");
+const acmeUi = {
+  ...(file("catalogs/acme-ui.catalog.json") as object),
+  fragments: { "acme-promo": markupOf("catalogs/fragments/acme-promo.weft") },
+};
 const PROJECT = {
   tokens: [file("tokens/base.tokens.json"), file("tokens/brand.tokens.json")],
-  catalog: [file("catalogs/acme-ui.catalog.json"), file("catalog.json")],
+  catalog: [acmeUi, file("catalog.json")],
   actions: (file("weft.json") as { actions: string[] }).actions,
   data: file("data.schema.json"),
   fragments: {
@@ -86,6 +91,28 @@ test("weft_catalog lists the project's catalog", async () => {
   await close();
 });
 
+test("weft_catalog groups kinds by catalog and names each kind's catalog", async () => {
+  const { client, close } = await connect();
+  const index = (await call(client, "weft_catalog", { project: PROJECT })).blocks[0] ?? "";
+  const headings = index.split("\n").filter((l) => l.startsWith("kinds of "));
+  assert.deepEqual(
+    headings.map((h) => h.replace(/ \d+\.\d+\.\d+/, "")),
+    ["kinds of weft-core", "kinds of acme-ui, prefix acme", "kinds of shop"],
+  );
+  assert.ok(index.indexOf("\nacme-card |") > index.indexOf("kinds of acme-ui"));
+  assert.ok(index.indexOf("\nrating |") > index.indexOf("kinds of shop"));
+  const kind = async (name: string) =>
+    JSON.parse(
+      (await call(client, "weft_catalog", { kind: name, project: PROJECT })).blocks[0] ?? "",
+    );
+  const widened = await kind("acme-button");
+  assert.deepEqual([widened.catalog, widened.extendedBy], ["acme-ui", ["shop"]]);
+  assert.ok(widened.props.variant.values.includes("ghost"));
+  const own = await kind("rating");
+  assert.deepEqual([own.catalog, own.extendedBy], ["shop", undefined]);
+  await close();
+});
+
 test("weft_schema gives the schema of the project's merged catalog", async () => {
   const { client, close } = await connect();
   const result = await call(client, "weft_schema", { project: PROJECT });
@@ -156,6 +183,11 @@ test("a shared fragment is listed, checked and rendered as its expansion", async
   assert.match(
     index.blocks[0] ?? "",
     /\nfragment page-header \| title: string \(required\), back: action(\n|$)/,
+  );
+  // A library's fragment names its library, whose version the project pins, and its own.
+  assert.match(
+    index.blocks[0] ?? "",
+    /\nfragment acme-promo \| title: string \(required\), claim: action \| library acme-ui 1\.0\.0, fragment 1\.0\.0(\n|$)/,
   );
   const markup = await call(client, "weft_catalog", { kind: "page-header", project: PROJECT });
   assert.match(markup.blocks[0] ?? "", /^<fragment label="Page header" weft="0\.2">/);

@@ -82,17 +82,21 @@ export component ControlsScreen inherits Window {
             }
         }
         row := HorizontalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 16px;
             agree := CheckBox {
+                horizontal-stretch: 0;
                 text: "Agree";
                 checked <=> root.agree;
                 toggled => { root.perform("form.agree", "agree"); }
             }
             note := Text {
+                horizontal-stretch: 0;
                 text: root.note;
                 visible: root.agree;
             }
             secret := Text {
+                horizontal-stretch: 0;
                 text: "Hidden";
                 visible: false;
             }

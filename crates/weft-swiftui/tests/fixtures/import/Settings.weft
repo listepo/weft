@@ -1,4 +1,4 @@
-<screen id="screen-1" weft="0.2">
+<screen id="screen-1" weft="0.3">
   <form id="form-1">
     <section id="section-profile" label="Profile">
       <field id="name" label="Name" value="{$.name}"/>

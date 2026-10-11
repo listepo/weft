@@ -1,5 +1,5 @@
 {
-  "weft": "0.2",
+  "weft": "0.3",
   "name": "weft-core",
   "version": "0.2.0",
   "components": {
@@ -10,7 +10,7 @@
       "root": true,
       "props": {
         "weft": {
-          "description": "The Weft format version of the document: \"0.2\", or \"0.1\" for a document written before 0.2.",
+          "description": "The Weft format version of the document: \"0.3\". A document written as \"0.1\" or \"0.2\" stays valid.",
           "type": "string",
           "required": true,
           "bindable": false

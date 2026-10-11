@@ -1,6 +1,8 @@
 //! Swift source → Weft, with a loss table (SPEC §9, "From SwiftUI"). Source that `generate`
 //! printed reads back to the same document with no losses; any other SwiftUI is mapped view by
-//! view, and whatever Weft cannot hold is listed as a loss instead of failing.
+//! view, and whatever Weft cannot hold is listed as a loss instead of failing. The `weft:source`
+//! comment `generate` leaves, with the screen's context, is believed only when the code reads back
+//! to the document it claims.
 //!
 //! The source is untrusted: it is parsed, never compiled or run, its size, element count and
 //! nesting are bounded (`W602`), and the result always validates in lenient mode.
@@ -9,9 +11,11 @@ mod read;
 mod repair;
 mod syntax;
 
-use weft_core::{Catalog, Code, Diagnostic};
+use weft_core::{Catalog, Code, Diagnostic, serialize};
 pub use weft_import::{ImportResult, Loss, LossKind, MAX_DEPTH, MAX_NODES};
-use weft_import::{empty_result, limit_reached};
+use weft_import::{empty_result, limit_reached, provenance};
+
+use crate::generate::SOURCE_OPTIONS;
 
 /// Longest source read, in bytes; the rest is not imported.
 pub const MAX_SOURCE_LENGTH: usize = 2_000_000;
@@ -85,5 +89,31 @@ pub fn import_swiftui(source: &str, options: &ImportOptions<'_>) -> ImportResult
     }
     repair::repair(&mut result, options.catalog);
     result.diagnostics.splice(0..0, diagnostics);
-    result
+    verified(text, &result, options.catalog).unwrap_or(result)
+}
+
+/// The document the `weft:source` comment claims, context included, when the code reads back to
+/// it with no loss and no diagnostic. Unlike the web and Slint importers, this compares documents
+/// rather than regenerated code: the Swift also depends on tokens, appearance and sample data that
+/// the importer is not given, and the reader already gives back exactly what `generate` printed
+/// (SPEC §9). Context has no other form in the code, so a forged comment on foreign Swift brings
+/// context back only when that Swift reads as the claimed screen, as the regenerated code would.
+fn verified(source: &str, read: &ImportResult, catalog: &Catalog) -> Option<ImportResult> {
+    if !read.losses.is_empty() || !read.diagnostics.is_empty() {
+        return None;
+    }
+    let (options, markup) = provenance::find_lines(source, "//")?;
+    if options.split_whitespace().next() != Some(SOURCE_OPTIONS) {
+        return None;
+    }
+    let (document, diagnostics) = provenance::claimed(&markup, catalog)?;
+    // The code draws each use expanded (SPEC §10.7) and has no form for context.
+    let mut expected = weft_core::expand(&document, catalog).document;
+    expected.context.clear();
+    expected.weft.clone_from(&read.document.weft);
+    (serialize(&expected) == serialize(&read.document)).then(|| ImportResult {
+        document,
+        losses: Vec::new(),
+        diagnostics,
+    })
 }

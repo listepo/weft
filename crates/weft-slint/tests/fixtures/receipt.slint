@@ -1,0 +1,55 @@
+// weft:source slint
+// <screen id="receipt" label="Receipt" weft="0.2">
+//   <fragment label="Price row" name="price-row">
+//     <param name="label" required="true" type="string"/>
+//     <param name="amount" required="true" type="string"/>
+//     <stack id="row" direction="row" justify="space-between">
+//       <text id="name" text="{$label}"/>
+//       <text id="value" text="{$amount}"/>
+//     </stack>
+//   </fragment>
+//   <stack id="lines">
+//     <use id="subtotal" amount="{$.subtotal}" fragment="price-row" label="Subtotal"/>
+//     <use id="total" amount="{$.total}" fragment="price-row" label="Total"/>
+//   </stack>
+// </screen>
+
+import { VerticalBox } from "std-widgets.slint";
+
+export component ReceiptScreen inherits Window {
+    title: "Receipt";
+    in-out property <string> subtotal;
+    in-out property <string> total;
+    callback perform(string, string);
+
+    receipt := VerticalBox {
+        alignment: LayoutAlignment.start;
+        lines := VerticalLayout {
+            alignment: LayoutAlignment.start;
+            subtotal--row := HorizontalLayout {
+                vertical-stretch: 0;
+                alignment: LayoutAlignment.space-between;
+                subtotal--name := Text {
+                    horizontal-stretch: 0;
+                    text: "Subtotal";
+                }
+                subtotal--value := Text {
+                    horizontal-stretch: 0;
+                    text: root.subtotal;
+                }
+            }
+            total--row := HorizontalLayout {
+                vertical-stretch: 0;
+                alignment: LayoutAlignment.space-between;
+                total--name := Text {
+                    horizontal-stretch: 0;
+                    text: "Total";
+                }
+                total--value := Text {
+                    horizontal-stretch: 0;
+                    text: root.total;
+                }
+            }
+        }
+    }
+}

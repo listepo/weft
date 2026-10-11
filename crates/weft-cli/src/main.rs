@@ -16,6 +16,7 @@ mod convert;
 mod schema;
 mod slint;
 mod swiftui;
+mod version_check;
 mod web;
 
 use std::io::Write;
@@ -24,7 +25,10 @@ use std::process::ExitCode;
 
 use anyhow::{Context, Result, bail};
 use clap::{Args, Parser, Subcommand};
-use weft_catalog::{PROJECT_FILE, Project, ProjectOptions, load_project_text, token_types};
+use weft_catalog::{
+    CORE_CATALOG_JSON, PROJECT_FILE, Project, ProjectOptions, core_catalog, load_project_text,
+    merge_catalogs, split_package_read, token_types,
+};
 use weft_core::{
     Catalog, DataCheckOptions, Diagnostic, Document, Mode, ParseOptions, ValidateOptions,
     check_data, check_data_json, explain, explain_changes, explain_with_context, has_errors, parse,
@@ -57,9 +61,10 @@ struct ProjectArgs {
 #[derive(Args)]
 struct WebExport {
     file: PathBuf,
-    /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+    /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+    /// core catalog).
     #[arg(long)]
-    catalog: Option<PathBuf>,
+    catalog: Vec<PathBuf>,
     #[command(flatten)]
     project: ProjectArgs,
     /// Write `<file stem>.<extension>` here instead of printing (default: the project's
@@ -108,9 +113,10 @@ struct JsxExport {
 #[derive(Args)]
 struct WebImport {
     file: PathBuf,
-    /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+    /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+    /// core catalog).
     #[arg(long)]
-    catalog: Option<PathBuf>,
+    catalog: Vec<PathBuf>,
     /// Token JSON or a DTCG resolver the page's custom properties are matched against; replaces the project's tokens
     /// (default: the default tokens).
     #[arg(long)]
@@ -135,9 +141,9 @@ enum Command {
     /// Check a document: markup, or canonical JSON when the file name ends in `.json`.
     Validate {
         file: PathBuf,
-        /// Catalog JSON; replaces the project's catalog.
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order.
         #[arg(long)]
-        catalog: Option<PathBuf>,
+        catalog: Vec<PathBuf>,
         #[command(flatten)]
         project: ProjectArgs,
         /// Report unknown content as errors instead of warnings (default: the project's
@@ -168,10 +174,10 @@ enum Command {
         /// An older version of the document: print only what was added, removed or changed.
         #[arg(long)]
         against: Option<PathBuf>,
-        /// Catalog JSON; replaces the project's catalog. Without either, boolean and writable
-        /// props read as plain reads.
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order. Without
+        /// either, boolean and writable props read as plain reads.
         #[arg(long)]
-        catalog: Option<PathBuf>,
+        catalog: Vec<PathBuf>,
         /// Also list each element's context entries after its readbacks (default: the project's
         /// `explain.context`, else off). `--against` always lists context changes.
         #[arg(long)]
@@ -179,12 +185,21 @@ enum Command {
         #[command(flatten)]
         project: ProjectArgs,
     },
+    /// Compare two versions of one screen, fragment or library catalog and say how far its
+    /// version must be raised.
+    VersionCheck {
+        old: PathBuf,
+        new: PathBuf,
+        #[command(flatten)]
+        project: ProjectArgs,
+    },
     /// Generate a SwiftUI view (iOS 17, macOS 14) from a markup document.
     Swiftui {
         file: PathBuf,
-        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+        /// core catalog).
         #[arg(long)]
-        catalog: Option<PathBuf>,
+        catalog: Vec<PathBuf>,
         /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
@@ -204,6 +219,10 @@ enum Command {
         /// Put the tokens the screen uses in the screen file, so it builds on its own.
         #[arg(long)]
         no_shared_tokens: bool,
+        /// Whether the source comment carries the screen's context (default: the project's
+        /// `export.swiftui.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ExportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -230,15 +249,20 @@ enum Command {
     /// Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses.
     ImportSwiftui {
         file: PathBuf,
-        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+        /// core catalog).
         #[arg(long)]
-        catalog: Option<PathBuf>,
+        catalog: Vec<PathBuf>,
         #[command(flatten)]
         project: ProjectArgs,
         /// Write `<file stem>.weft` here instead of printing (default: the project's
         /// `import.swiftui.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
+        /// Whether context read back from the source comment enters the document (default: the
+        /// project's `import.swiftui.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ImportContext>,
         /// Overwrite the output file when it already exists.
         #[arg(long)]
         force: bool,
@@ -246,9 +270,10 @@ enum Command {
     /// Generate a Slint component (Slint 1.x, `std-widgets.slint`) from a markup document.
     Slint {
         file: PathBuf,
-        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+        /// core catalog).
         #[arg(long)]
-        catalog: Option<PathBuf>,
+        catalog: Vec<PathBuf>,
         /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
@@ -272,9 +297,10 @@ enum Command {
     /// Read a generated Slint component back into markup.
     ImportSlint {
         file: PathBuf,
-        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+        /// core catalog).
         #[arg(long)]
-        catalog: Option<PathBuf>,
+        catalog: Vec<PathBuf>,
         #[command(flatten)]
         project: ProjectArgs,
         /// Write `<file stem>.weft` here instead of printing (default: the project's
@@ -372,10 +398,14 @@ enum Command {
         /// The catalog's version (default: the project's `import.cem.version`, else 0.0.0).
         #[arg(long)]
         version: Option<String>,
-        /// Catalog JSON the result extends; replaces the project's catalog (default: the core
-        /// catalog). Its kinds are left out of the result.
+        /// The kinds the catalog owns, `<prefix>-…`, so it can sit beside a project catalog
+        /// (default: the project's `import.cem.prefix`, else none).
         #[arg(long)]
-        catalog: Option<PathBuf>,
+        prefix: Option<String>,
+        /// Catalog JSON the result extends, repeatable; the files replace the project's catalogs,
+        /// in order (default: the core catalog). Their kinds are left out of the result.
+        #[arg(long)]
+        catalog: Vec<PathBuf>,
         #[command(flatten)]
         project: ProjectArgs,
         /// Write `<file stem>.catalog.json` here instead of printing (default: the project's
@@ -389,9 +419,10 @@ enum Command {
     /// Print the JSON Schema (2020-12) of the canonical JSON documents the project's catalog
     /// admits, for a model whose decoder takes a schema (SPEC §3.1).
     Schema {
-        /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+        /// core catalog).
         #[arg(long)]
-        catalog: Option<PathBuf>,
+        catalog: Vec<PathBuf>,
         /// Project file; without it, the nearest `weft.json` in or above the working directory.
         #[arg(long, conflicts_with = "no_project")]
         project: Option<PathBuf>,
@@ -412,9 +443,10 @@ enum Command {
 #[derive(Args)]
 struct A2uiArgs {
     file: PathBuf,
-    /// Catalog JSON; replaces the project's catalog (default: the core catalog).
+    /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+    /// core catalog).
     #[arg(long)]
-    catalog: Option<PathBuf>,
+    catalog: Vec<PathBuf>,
     #[command(flatten)]
     project: ProjectArgs,
     /// Write `<file stem>.a2ui.json` (or `.weft` when importing) here instead of printing
@@ -439,6 +471,8 @@ impl From<A2uiArgs> for a2ui::Args {
 }
 
 const USAGE_ERROR: u8 = 2;
+/// The core catalog's name; a `--catalog` file with it replaces the core (SPEC §10.2).
+const CORE: &str = "weft-core";
 const DIAGNOSTICS: u8 = 1;
 
 fn main() -> ExitCode {
@@ -462,18 +496,33 @@ fn read(file: &Path) -> Result<String> {
     std::fs::read_to_string(file).with_context(|| format!("cannot read {}", file.display()))
 }
 
-/// Writes `contents` by renaming a sibling temp file into `path`, so a crash cannot leave a
-/// half-written target (SPEC §10 tools that rewrite a file).
+/// Writes `contents` by renaming a sibling temp file into the file `path` names, so a crash cannot
+/// leave a half-written target (SPEC §10 tools that rewrite a file). A symbolic link is followed
+/// to its target and left in place; the target's permissions are kept.
 fn write_atomic(path: &Path, contents: &str) -> Result<()> {
-    let name = path.file_name().unwrap_or_default();
-    let tmp = path.with_file_name(format!(
+    let target = if path
+        .symlink_metadata()
+        .map(|m| m.file_type().is_symlink())
+        .unwrap_or(false)
+    {
+        std::fs::canonicalize(path)
+            .with_context(|| format!("cannot resolve {}", path.display()))?
+    } else {
+        path.to_path_buf()
+    };
+    let permissions = std::fs::metadata(&target)
+        .with_context(|| format!("cannot stat {}", target.display()))?
+        .permissions();
+    let name = target.file_name().unwrap_or_default();
+    let tmp = target.with_file_name(format!(
         ".{}.tmp-{}",
         name.to_string_lossy(),
         std::process::id()
     ));
     let written = (|| {
         std::fs::write(&tmp, contents)?;
-        std::fs::rename(&tmp, path)
+        std::fs::set_permissions(&tmp, permissions)?;
+        std::fs::rename(&tmp, &target)
     })();
     if written.is_err() {
         let _ = std::fs::remove_file(&tmp);
@@ -491,6 +540,31 @@ pub(crate) fn read_project_member(dir: &Path, name: &str) -> Option<String> {
         .any(|p| p == root)
         .then(|| std::fs::read_to_string(resolved).ok())
         .flatten()
+}
+
+/// SPEC §10.2 packages: the package is `node_modules/<package>` of the project directory or of the
+/// nearest parent that has it, as Node resolves one, and only files whose resolved path stays
+/// inside that package directory are read. Nothing is run and nothing is fetched.
+fn read_package_file(project_dir: &Path, package: &str, file: &str) -> Option<String> {
+    let start = if project_dir.as_os_str().is_empty() {
+        Path::new(".")
+    } else {
+        project_dir
+    };
+    let package_dir = std::path::absolute(start)
+        .ok()?
+        .ancestors()
+        .map(|dir| dir.join("node_modules").join(package))
+        .find(|dir| dir.join("package.json").is_file())?;
+    read_project_member(&package_dir, file)
+}
+
+/// A file the project names: one of its own, or one of an npm package the loader asks for.
+fn read_member(dir: &Path, name: &str) -> Option<String> {
+    match split_package_read(name) {
+        Some((package, file)) => read_package_file(dir, package, file),
+        None => read_project_member(dir, name),
+    }
 }
 
 /// SPEC §10.1: the first `weft.json` in the document's directory or one above it.
@@ -560,7 +634,7 @@ fn setting<'a>(project: Option<&'a Project>, path: &[&str]) -> Option<&'a serde_
 fn load_project(file: &Path, mode: Mode) -> Result<(Project, Vec<Diagnostic>)> {
     let text = read(file)?;
     let dir = file.parent().unwrap_or(Path::new("."));
-    let read_member = |name: &str| read_project_member(dir, name);
+    let read_member = |name: &str| read_member(dir, name);
     let loaded = load_project_text(
         &text,
         &ProjectOptions {
@@ -573,12 +647,55 @@ fn load_project(file: &Path, mode: Mode) -> Result<(Project, Vec<Diagnostic>)> {
     Ok((loaded.project, loaded.diagnostics))
 }
 
-fn load_catalog(file: &Path) -> Result<Catalog> {
-    let text = read(file)?;
-    let json =
-        parse_json(&text).with_context(|| format!("catalog {} is not JSON", file.display()))?;
-    serde_json::from_value(json)
-        .with_context(|| format!("catalog {} is not a Weft catalog", file.display()))
+/// The catalogs of a repeated `--catalog` (SPEC §10.2), or `None` without one: they replace the
+/// project's whole list, in order, each merged over the core, and a file named `weft-core`
+/// replaces the core as the base, so a whole catalog still loads alone. Their problems go to
+/// stderr, each in its own file; an error stops the command, as an unreadable file does.
+fn load_catalogs(files: &[PathBuf]) -> Result<Option<Catalog>> {
+    if files.is_empty() {
+        return Ok(None);
+    }
+    let mut base = None;
+    let mut listed: Vec<(&Path, serde_json::Value)> = Vec::new();
+    for file in files {
+        let text = read(file)?;
+        let json =
+            parse_json(&text).with_context(|| format!("catalog {} is not JSON", file.display()))?;
+        if json.get("name").and_then(serde_json::Value::as_str) == Some(CORE) {
+            let whole = serde_json::from_value::<Catalog>(json.clone())
+                .with_context(|| format!("catalog {} is not a Weft catalog", file.display()))?;
+            base = Some((whole, json));
+        } else {
+            listed.push((file, json));
+        }
+    }
+    let base = match base {
+        // Alone, a whole catalog is used as it is, as `--catalog` always did.
+        Some((whole, _)) if listed.is_empty() => return Ok(Some(whole)),
+        Some((_, json)) => json,
+        None => parse_json(CORE_CATALOG_JSON).context("the embedded core catalog is broken")?,
+    };
+    let contents: Vec<serde_json::Value> = listed.iter().map(|(_, json)| json.clone()).collect();
+    let loaded = merge_catalogs(&base, &contents, Mode::Lenient)
+        .context("the embedded core catalog is broken")?;
+    for d in &loaded.diagnostics {
+        // `#/catalog/<i>/…` points into the i-th listed file, as `#/…`.
+        let rest = d.path.strip_prefix("#/catalog/").unwrap_or_default();
+        let (index, inner) = rest.split_once('/').unwrap_or((rest, ""));
+        let mut shown = d.clone();
+        let file = match index.parse::<usize>().ok().and_then(|i| listed.get(i)) {
+            Some((file, _)) => {
+                shown.path = format!("#/{inner}").trim_end_matches('/').to_owned();
+                *file
+            }
+            None => files[0].as_path(),
+        };
+        print(file, &[shown], &mut std::io::stderr())?;
+    }
+    if has_errors(&loaded.diagnostics) {
+        bail!("the catalogs given with --catalog have errors");
+    }
+    Ok(Some(loaded.project.catalog))
 }
 
 /// I/O and usage failures are errors; documents with diagnostics are an exit code.
@@ -636,7 +753,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                     _ => Mode::Lenient,
                 },
             );
-            let explicit = catalog.as_deref().map(load_catalog).transpose()?;
+            let explicit = load_catalogs(&catalog)?;
             let catalog = explicit.or_else(|| project.as_ref().map(|p| p.catalog.clone()));
             if catalog.is_none() {
                 eprintln!(
@@ -715,6 +832,14 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 0
             })
         }
+        Command::VersionCheck { old, new, project } => {
+            let (loaded, _) = project_for(&new, project, Mode::Lenient, &mut std::io::stderr())?;
+            let catalog = match loaded {
+                Some(project) => project.catalog,
+                None => core_catalog()?,
+            };
+            version_check::run(&old, &new, &catalog, out)
+        }
         Command::Explain {
             file,
             against,
@@ -728,7 +853,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 || setting(project.as_ref(), &["explain", "context"])
                     .and_then(serde_json::Value::as_bool)
                     .unwrap_or(false);
-            let explicit = catalog.as_deref().map(load_catalog).transpose()?;
+            let explicit = load_catalogs(&catalog)?;
             let catalog = explicit.or_else(|| project.map(|p| p.catalog));
             if catalog.is_none() {
                 eprintln!(
@@ -771,6 +896,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             data,
             shared_tokens,
             no_shared_tokens,
+            context,
             force,
         } => swiftui::export(
             swiftui::ExportArgs {
@@ -781,6 +907,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 out_dir,
                 data: data.data,
                 shared_tokens: (shared_tokens, no_shared_tokens),
+                context: context.map(|c| c == convert::ExportContext::Keep),
                 force,
             },
             out,
@@ -840,6 +967,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             catalog,
             project,
             out_dir,
+            context,
             force,
         } => swiftui::import(
             swiftui::ImportArgs {
@@ -847,6 +975,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 catalog,
                 project,
                 out_dir,
+                context: context.map(|c| c == convert::ImportContext::Keep),
                 force,
             },
             out,
@@ -928,6 +1057,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             file,
             name,
             version,
+            prefix,
             catalog,
             project,
             out_dir,
@@ -937,6 +1067,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 file,
                 name,
                 version,
+                prefix,
                 catalog,
                 project,
                 out_dir,
@@ -1041,7 +1172,7 @@ fn load_markup(
 }
 
 /// One line per diagnostic: `file:line:col code message — hint`; JSON input has a path instead.
-fn print(file: &Path, diagnostics: &[Diagnostic], out: &mut dyn Write) -> Result<()> {
+pub(crate) fn print(file: &Path, diagnostics: &[Diagnostic], out: &mut dyn Write) -> Result<()> {
     let file = file.display();
     for d in diagnostics {
         let place = match d.line {

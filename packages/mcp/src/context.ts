@@ -1,9 +1,13 @@
-import type { LimitName } from "@weft/catalog";
+import type { CatalogSource, KindSource, LimitName } from "@weft/catalog";
 import type { Catalog, DataSchema, Mode } from "@weft/core";
 
 /** What every tool needs to judge markup; the host decides, never the model. */
 export type Context = {
   catalog: Catalog;
+  /** The catalogs merged over the core, in load order (SPEC §10.4); absent when the host gives one catalog. */
+  catalogs?: readonly CatalogSource[] | undefined;
+  /** For every kind of `catalog`, the catalog that defined it and those that widened it. */
+  kinds?: Readonly<Record<string, KindSource>> | undefined;
   /** Token path → DTCG `$type`. Token references are checked only when given (SPEC §6). */
   tokens?: ReadonlyMap<string, string> | undefined;
   /** Known host actions. Action names are checked only when given. */

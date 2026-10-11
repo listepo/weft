@@ -366,7 +366,7 @@ fn bad_settings_are_reported_and_the_defaults_apply() {
     );
 }
 
-const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.2">
+const PLAIN: &str = r#"<screen id="plain" label="Plain" weft="0.3">
   <stack id="row" direction="row" gap="{token.space.sm}">
     <button id="back" on-press="nav.back">Back</button>
   </stack>
@@ -586,7 +586,7 @@ fn web_targets_write_where_the_project_says_and_read_back_exactly() {
 }
 
 /// `PLAIN` with a note whose text tries to end a comment and to carry a minifier keep marker.
-const NOTED: &str = r#"<screen id="plain" label="Plain" weft="0.2">
+const NOTED: &str = r#"<screen id="plain" label="Plain" weft="0.3">
   <context>
     <entry id="why" by="human" kind="intent" name="Ivan">Back returns home. @license */ --&gt; end</entry>
   </context>
@@ -667,6 +667,46 @@ fn slint_keeps_context_in_its_source_comment() {
     assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
     let r = run(&[&"slint", &screen, &"--context", &"strip"]);
     assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+}
+
+#[test]
+fn swiftui_keeps_context_in_its_source_comment() {
+    let s = Scratch::new("swiftui-context");
+    let screen = s.write("screens/plain.weft", NOTED);
+    let r = run(&[&"swiftui", &screen, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stdout
+            .contains("// intent (human Ivan): Back returns home.")
+            && !r.stdout.contains("@license"),
+        "{}",
+        r.stdout
+    );
+    let swift = s.write("plain.swift", &r.stdout);
+    let r = run(&[&"import-swiftui", &swift, &"--no-project"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, NOTED), "{}", r.stderr);
+    let r = run(&[
+        &"import-swiftui",
+        &swift,
+        &"--no-project",
+        &"--context",
+        &"drop",
+    ]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
+    let r = run(&[&"swiftui", &screen, &"--no-project", &"--context", &"strip"]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+
+    with_settings(
+        &s,
+        serde_json::json!({
+            "export": { "swiftui": { "context": "strip" } },
+            "import": { "swiftui": { "context": "drop" } }
+        }),
+    );
+    let r = run(&[&"swiftui", &screen]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+    let r = run(&[&"import-swiftui", &swift]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
 }
 
 #[test]
@@ -1242,4 +1282,108 @@ fn a_broken_fragment_file_is_a_diagnostic_of_the_project() {
         r.stdout
     );
     assert!(r.stdout.contains("W801"), "{}", r.stdout);
+}
+
+/// The example project in `<root>/app`, with `acme-ui` and its fragments installed as the npm
+/// package `@acme/ui` in `<root>/node_modules`, above the project directory, as a workspace
+/// installs it.
+struct Installed {
+    root: PathBuf,
+    app: Scratch,
+}
+
+impl Installed {
+    fn new(name: &str) -> Installed {
+        let root = std::env::temp_dir().join(format!("weft-package-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let app = root.join("app");
+        copy(Path::new(EXAMPLE), &app);
+        let package = root.join("node_modules/@acme/ui");
+        std::fs::create_dir_all(package.join("dist")).unwrap();
+        std::fs::write(
+            package.join("package.json"),
+            r#"{"name":"@acme/ui","weft":{"catalog":"dist/weft.json"}}"#,
+        )
+        .unwrap();
+        std::fs::rename(
+            app.join("catalogs/acme-ui.catalog.json"),
+            package.join("dist/weft.json"),
+        )
+        .unwrap();
+        // The library's fragments travel with it, relative to its catalog file.
+        std::fs::rename(
+            app.join("catalogs/fragments"),
+            package.join("dist/fragments"),
+        )
+        .unwrap();
+        let installed = Installed {
+            root,
+            app: Scratch(app),
+        };
+        let project = installed.app.path("weft.json");
+        let mut json: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&project).unwrap()).unwrap();
+        json["catalog"] = serde_json::json!([{ "package": "@acme/ui" }, "catalog.json"]);
+        std::fs::write(&project, json.to_string()).unwrap();
+        installed
+    }
+}
+
+impl Drop for Installed {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.root);
+    }
+}
+
+#[test]
+fn a_catalog_package_in_node_modules_above_the_project_loads() {
+    let p = Installed::new("above");
+    let r = run(&[&"validate", &"--strict", &p.app.path("screens/order.weft")]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, ""), "{}", r.stderr);
+}
+
+#[test]
+fn a_catalog_package_that_is_not_installed_is_w704() {
+    let p = Installed::new("missing");
+    std::fs::remove_dir_all(p.root.join("node_modules")).unwrap();
+    let r = run(&[&"validate", &p.app.path("screens/order.weft")]);
+    assert!(r.stdout.contains("W704"), "{}", r.stdout);
+    assert!(r.stdout.contains("#/catalog/0/package"), "{}", r.stdout);
+}
+
+#[cfg(unix)]
+#[test]
+fn a_symlinked_package_loads_and_a_file_linked_out_of_it_is_not_read() {
+    let p = Installed::new("linked");
+    // pnpm links each package from its store, so the package directory itself may be a link.
+    let store = p.root.join("store/ui");
+    std::fs::create_dir_all(p.root.join("store")).unwrap();
+    std::fs::rename(p.root.join("node_modules/@acme/ui"), &store).unwrap();
+    std::os::unix::fs::symlink(&store, p.root.join("node_modules/@acme/ui")).unwrap();
+    let r = run(&[&"validate", &"--strict", &p.app.path("screens/order.weft")]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, ""), "{}", r.stderr);
+
+    let outside = p.root.join("outside.json");
+    std::fs::rename(store.join("dist/weft.json"), &outside).unwrap();
+    std::os::unix::fs::symlink(&outside, store.join("dist/weft.json")).unwrap();
+    let r = run(&[&"validate", &p.app.path("screens/order.weft")]);
+    assert!(r.stdout.contains("W704"), "{}", r.stdout);
+    assert!(r.stdout.contains("#/catalog/0/package"), "{}", r.stdout);
+}
+
+#[test]
+fn a_package_fragment_outside_the_package_is_w703() {
+    let p = Installed::new("escape");
+    let catalog = p.root.join("node_modules/@acme/ui/dist/weft.json");
+    let mut json: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&catalog).unwrap()).unwrap();
+    json["fragments"]["acme-promo"] = serde_json::json!("../../../app/screens/order.weft");
+    std::fs::write(&catalog, json.to_string()).unwrap();
+    let r = run(&[&"validate", &p.app.path("screens/order.weft")]);
+    assert!(r.stdout.contains("W703"), "{}", r.stdout);
+    assert!(
+        r.stdout.contains("#/catalog/0/fragments/acme-promo"),
+        "{}",
+        r.stdout
+    );
 }

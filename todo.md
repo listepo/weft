@@ -1,7 +1,6 @@
 - T8. Evaluation
 - T14. Figma round trip and plugin
 - T39. Context in the document
-- T39.9. Context: SwiftUI
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
@@ -9,12 +8,8 @@
 - T16. Layout vocabulary
 - T16.3. Layout vocabulary: web generators and the reference renderer
 - T16.8. Layout vocabulary: web importers
-- T16.4. Layout vocabulary: SwiftUI
 - T16.5. Layout vocabulary: Slint
 - T16.7. Layout vocabulary: Figma and Penpot
-- T17. Extension catalogs
-- T17.2. Extension catalogs: tools and docs
-- T17.3. Extension catalogs: distribution and registry
 - T41. Hosted Penpot plugin
 - T96. Too-deep documents: report, do not hide
 - T97. Design-tool plugin data over 100 kB
@@ -22,4 +17,3 @@
 - T99. Node capped read handles a short read
 - T100. Document versions
 - T101. Inline fragments
-- T103. Library fragments

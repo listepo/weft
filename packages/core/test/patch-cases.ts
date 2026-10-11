@@ -61,4 +61,16 @@ export const failures: Record<string, [unknown, (Document | undefined)?, HostOpt
   W510: [[{ op: "add-context", entry: { ...ENTRY, id: "why" } }]],
   W511: [[{ op: "resolve-context", id: "reset-were" }]],
   W512: [[{ op: "add-context", entry: { ...ENTRY, by: "human" } }], undefined, { author: AGENT }],
+  W513: [
+    [
+      {
+        op: "add-fragment",
+        markup: '<fragment name="row"><text id="t">x</text></fragment>',
+      },
+      {
+        op: "add-fragment",
+        markup: '<fragment name="row"><text id="u">y</text></fragment>',
+      },
+    ],
+  ],
 };

@@ -8,6 +8,7 @@ use std::collections::HashSet;
 
 use crate::diagnostics::{Code, Diagnostic, Position};
 use crate::fragment::{OUTLET, PARAM, ParamKind, USE};
+use crate::inline;
 use crate::model::{Catalog, Child, Document, Map, Node, Value};
 use crate::rules::{EACH, MAX_DEPTH};
 use crate::source::path_segment;
@@ -24,8 +25,16 @@ pub struct Expanded {
 /// `document` with every use of a known fragment expanded. A use of an unknown fragment is kept
 /// as written, and a use that closes a cycle expands to nothing.
 pub fn expand(document: &Document, catalog: &Catalog) -> Expanded {
+    let empty = Map::new();
+    // A fragment file's `fragments` member is not inline fragments of a screen (`W808`).
+    let inline = if inline::screen_fragments(document) {
+        &document.fragments
+    } else {
+        &empty
+    };
     let mut x = Expander {
         catalog,
+        inline,
         count: 0,
         stack: vec![],
         site: None,
@@ -46,7 +55,10 @@ pub fn expand(document: &Document, catalog: &Catalog) -> Expanded {
     Expanded {
         document: Document {
             weft: document.weft.clone(),
+            version: document.version.clone(),
             context: document.context.clone(),
+            // The expansion is the screen a renderer draws; the definitions stay on the source.
+            fragments: Map::new(),
             root,
         },
         diagnostics: x.diagnostics,
@@ -79,6 +91,7 @@ struct Args<'a> {
 
 struct Expander<'a> {
     catalog: &'a Catalog,
+    inline: &'a Map<Node>,
     count: usize,
     /// The fragments being expanded, outermost first.
     stack: Vec<String>,
@@ -129,7 +142,7 @@ impl Expander<'_> {
                     out.extend(self.list(content, args.outer, path.as_deref(), depth));
                     self.stack.extend(inner);
                 }
-            } else if node.kind == USE && self.catalog.fragment_of(node).is_some() {
+            } else if node.kind == USE && self.fragment_named(node).is_some() {
                 out.extend(self.use_site(node, cx, path.as_deref(), depth));
             } else {
                 let expanded = self.node(node, cx, path.as_deref(), depth + 1);
@@ -228,10 +241,11 @@ impl Expander<'_> {
         path: Option<&str>,
         depth: usize,
     ) -> Vec<Child> {
-        let Some(fragment) = self.catalog.fragment_of(node) else {
+        let name = string(node.props.get("fragment"));
+        // Owned so the body can be read while expansion mutates the expander.
+        let Some(root) = self.fragment_named(node).cloned() else {
             return vec![];
         };
-        let name = string(node.props.get("fragment"));
         let previous = self.site.clone();
         if let Some(path) = path {
             // A use written in the document, perhaps in another use's slot.
@@ -249,7 +263,6 @@ impl Expander<'_> {
             self.site = previous;
             return vec![];
         }
-        let root = &fragment.document.root;
         let mut values = Map::new();
         for param in root.children.iter().filter_map(Child::as_node) {
             if param.kind != PARAM {
@@ -280,7 +293,7 @@ impl Expander<'_> {
             }
         }
         let args = Args {
-            params: crate::fragment::params(root),
+            params: crate::fragment::params(&root),
             values,
             on,
             slots: &node.slots,
@@ -289,7 +302,7 @@ impl Expander<'_> {
             open: self.stack.len(),
         };
         let id = node.id.clone().unwrap_or_default();
-        let placed = crate::fragment::placed_children(root, node);
+        let placed = crate::fragment::placed_children(&root, node);
         let body = Context {
             prefix: format!("{}{id}/", cx.prefix),
             args: Some(&args),
@@ -303,6 +316,13 @@ impl Expander<'_> {
         self.stack.pop();
         self.site = previous;
         out
+    }
+
+    fn fragment_named(&self, node: &Node) -> Option<&Node> {
+        let Some(Value::String(name)) = node.props.get("fragment") else {
+            return None;
+        };
+        inline::resolve(self.inline, self.catalog, name)
     }
 
     fn stop(&mut self) {

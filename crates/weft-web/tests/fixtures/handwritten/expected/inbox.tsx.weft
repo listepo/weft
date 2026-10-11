@@ -1,4 +1,4 @@
-<screen id="screen-inbox" label="Inbox" weft="0.2">
+<screen id="screen-inbox" label="Inbox" weft="0.3">
   <heading id="heading-inbox" level="1">Inbox</heading>
   <field id="field-filter" label="Filter" type="search" value="{$.filter}"/>
   <list id="list-1">

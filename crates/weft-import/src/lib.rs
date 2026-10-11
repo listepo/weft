@@ -1,8 +1,9 @@
 //! What every Weft importer shares (SPEC §9, "From a running UI" and "From source code"): the loss
 //! table, the import limits, generated ids, literal text, stand-ins for required props, the
 //! Trust URL allowlist, and the role tree (`Sem`) that HTML, accessibility snapshots and other
-//! sources are reduced to before the catalog is consulted. Kept apart from any parser so that
-//! importers of other platforms reuse it without pulling in a web parser.
+//! sources are reduced to before the catalog is consulted, and the `weft:source` comment that
+//! generators leave for their importers (`provenance`). Kept apart from any parser so that
+//! importers and generators of other platforms reuse it without pulling in a web parser.
 
 mod build;
 mod cem;
@@ -11,6 +12,7 @@ mod kinds;
 mod limits;
 mod loss;
 mod props;
+pub mod provenance;
 mod sem;
 mod text;
 mod url;

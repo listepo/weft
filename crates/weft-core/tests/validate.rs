@@ -234,8 +234,9 @@ fn version_checks_follow_major_dot_minor() {
     for (version, expect) in [
         ("0.1", vec![]),
         ("0.2", vec![]),
+        ("0.3", vec![]),
         ("0.0", vec![]),
-        ("0.3", vec!["W403"]),
+        ("0.4", vec!["W403"]),
         ("0.10", vec!["W403"]),
         ("1.0", vec!["W404"]),
         ("2.1", vec!["W404"]),

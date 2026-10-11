@@ -614,6 +614,7 @@ export class FakeVariants {
 
 export class FakeComponent {
   readonly id = nextId("component");
+  path = "";
   container: FakeVariants | undefined;
   props: Record<string, string> = {};
   readonly penpot: FakePenpot;

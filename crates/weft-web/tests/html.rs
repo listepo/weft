@@ -107,6 +107,11 @@ const HTML_CONVENTION_GAPS: &[(&str, &str)] = &[
         "the tabs selected binding and on-change are lost; a bound tab label comes back empty; \
          dialog modal=\"false\" is dropped",
     ),
+    (
+        "receipt",
+        "the uses come back expanded, with new ids for their instance paths: an importer cannot \
+         tell a fragment from a copy (SPEC §10.7)",
+    ),
 ];
 
 #[test]
@@ -143,7 +148,7 @@ fn generated_pages_without_their_source_come_back_by_convention() {
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
 
-const TILTED: &str = r#"<screen id="s" weft="0.2"><stack id="a" gap="{token.space.md}" perspective="800" rotate-y="30"><button id="b" rotate-z="-5.5">Go</button></stack></screen>"#;
+const TILTED: &str = r#"<screen id="s" weft="0.3"><stack id="a" gap="{token.space.md}" perspective="800" rotate-y="30"><button id="b" rotate-z="-5.5">Go</button></stack></screen>"#;
 
 fn tilted() -> Document {
     let catalog = core_catalog().unwrap();
@@ -195,7 +200,7 @@ fn a_transform_that_is_not_a_tilt_is_a_loss() {
     );
 }
 
-const SHOWN: &str = r#"<screen id="s" weft="0.2"><model id="m" fallback="assets/gem.png" label="A gem" src="assets/gem.glb" usdz="assets/gem.usdz"/></screen>"#;
+const SHOWN: &str = r#"<screen id="s" weft="0.3"><model id="m" fallback="assets/gem.png" label="A gem" src="assets/gem.glb" usdz="assets/gem.usdz"/></screen>"#;
 
 fn shown(markup: &str) -> Document {
     let catalog = core_catalog().unwrap();

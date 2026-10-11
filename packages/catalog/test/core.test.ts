@@ -224,7 +224,7 @@ const sorted = (a: readonly string[] | undefined) => [...(a ?? [])].sort();
 test("catalog parses under CatalogSchema", () => {
   assert.deepEqual(CatalogSchema.safeParse(coreCatalog).error, undefined);
   assert.equal(coreCatalog.name, "weft-core");
-  assert.equal(coreCatalog.weft, "0.2");
+  assert.equal(coreCatalog.weft, "0.3");
 });
 
 test("catalog has exactly the SPEC §5.1 kinds", () => {

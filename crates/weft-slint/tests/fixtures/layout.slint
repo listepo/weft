@@ -24,36 +24,45 @@ export component LayoutScreen inherits Window {
     layout := VerticalBox {
         alignment: LayoutAlignment.start;
         toolbar := HorizontalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 8px;
             VerticalLayout {
+                horizontal-stretch: 1;
                 Text { text: "Search"; }
                 search := LineEdit {
                     text <=> root.query;
                 }
             }
             filter := Button {
+                horizontal-stretch: 0;
                 text: "Filter";
                 clicked => { root.perform("list.filter", "filter"); }
             }
         }
         pager := HorizontalLayout {
+            alignment: LayoutAlignment.center;
             spacing: 8px;
             previous := TouchArea {
+                horizontal-stretch: 0;
                 clicked => { root.perform("list.previous", "previous"); }
                 Text { text: "Previous"; color: Palette.accent-background; }
             }
             next := TouchArea {
+                horizontal-stretch: 0;
                 clicked => { root.perform("list.next", "next"); }
                 Text { text: "Next"; color: Palette.accent-background; }
             }
         }
         actions := HorizontalLayout {
+            alignment: LayoutAlignment.end;
             spacing: 8px;
             cancel := Button {
+                horizontal-stretch: 0;
                 text: "Cancel";
                 clicked => { root.perform("list.cancel", "cancel"); }
             }
             save := Button {
+                horizontal-stretch: 0;
                 text: "Save";
                 primary: true;
                 clicked => { root.perform("list.save", "save"); }

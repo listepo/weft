@@ -11,13 +11,14 @@ use weft_core::{Code, Mode, ParseOptions, parse, parse_json, parse_partial, stri
 
 /// What a cut can explain: an element, comment or document that is not finished, a reference or
 /// slot that a later chunk can still supply.
-const TAIL: [Code; 6] = [
+const TAIL: [Code; 7] = [
     Code::W110,
     Code::W114,
     Code::W115,
     Code::W208,
     Code::W309,
     Code::W314,
+    Code::W803,
 ];
 
 fn screens() -> Vec<(String, String)> {

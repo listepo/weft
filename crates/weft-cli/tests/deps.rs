@@ -163,18 +163,15 @@ fn the_swiftui_generator_builds_without_the_importers_c_parser() {
         ]
     );
     // tree-sitter is C, which does not build for wasm32-unknown-unknown: only the `import`
-    // feature may pull it in, so the generator stays a pure crate. The shared importer kit
-    // comes with the importer.
+    // feature may pull it in, so the generator stays a pure crate. The shared importer kit is
+    // pure Rust, and the generator writes its source comment with it.
     let mut optional: Vec<String> = entries("weft-swiftui")
         .iter()
         .filter(|d| d["optional"] == true)
         .map(|d| d["name"].as_str().unwrap().to_owned())
         .collect();
     optional.sort();
-    assert_eq!(
-        optional,
-        ["tree-sitter", "tree-sitter-swift", "weft-import"]
-    );
+    assert_eq!(optional, ["tree-sitter", "tree-sitter-swift"]);
 }
 
 #[test]

@@ -1,4 +1,4 @@
-<screen id="screen-tasks" label="Tasks" weft="0.2">
+<screen id="screen-tasks" label="Tasks" weft="0.3">
   <heading id="heading-tasks" level="1">Tasks</heading>
   <form id="form-1" on-submit="todo.add">
     <stack id="stack-1" direction="row" gap="{token.space.sm}">

@@ -81,6 +81,19 @@ const header =
   '<button id="back" on-press="{$back}">Back</button>' +
   '<heading id="title" level="1" text="{$title}"/></stack></fragment>';
 
+/** Library fragments (SPEC §10.4): files relative to the catalog file, which is in `lib/`. */
+const promo =
+  '<fragment weft="0.3"><param name="title" type="string" required="true"/>' +
+  '<param name="go" type="action"/><stack id="row" direction="row" gap="{token.space.s}">' +
+  '<acme-badge id="badge">New</acme-badge><heading id="title" level="2" text="{$title}"/>' +
+  '<button id="go" on-press="{$go}">Go</button></stack></fragment>';
+const withFragments = (fragments: Record<string, unknown>) => ({ ...acmeUi, fragments });
+const beta = (fragments: Record<string, unknown>, requires: Record<string, string>) => ({
+  ...library("beta-ui", "beta", {}),
+  requires,
+  fragments,
+});
+
 export const sharedFiles: Record<string, string> = {
   "fragments/header.weft": header,
   "fragments/page.weft":
@@ -91,6 +104,20 @@ export const sharedFiles: Record<string, string> = {
     '<fragment weft="0.2"><stack id="a"><outlet name="nope"/></stack></fragment>',
   "fragments/screen.weft": '<screen id="s" weft="0.2"><text id="t">x</text></screen>',
   "fragments/bad.weft": "<fragment><",
+  "fragments/uses-promo.weft":
+    '<fragment weft="0.3"><use id="promo" fragment="acme-promo" title="Sale"/></fragment>',
+  "lib/fragments/acme-promo.weft": promo,
+  "lib/fragments/acme-reach.weft":
+    '<fragment weft="0.3"><stack id="s" gap="{token.space.nope}">' +
+    '<text id="t" text="{$.user.name}"/><button id="b" on-press="cart.add">Add</button></stack></fragment>',
+  "lib/fragments/acme-wide.weft":
+    '<fragment weft="0.3"><stack id="s"><rating id="r" label="Score" value="3"/></stack></fragment>',
+  "lib/fragments/beta-page.weft":
+    '<fragment weft="0.3"><use id="promo" fragment="acme-promo" title="Sale"/></fragment>',
+  "lib/acme-kit.json": text(withFragments({ "acme-promo": "fragments/acme-promo.weft" })),
+  "lib/beta-ui.json": text(
+    beta({ "beta-page": "fragments/beta-page.weft" }, { "weft-core": "0.2.0", "acme-ui": "1.0.0" }),
+  ),
   "tokens/base.tokens.json": text(base),
   "tokens/brand.tokens.json": text(brand),
   "tokens/list.tokens.json": "[1, 2]",
@@ -326,6 +353,45 @@ export const projectCases: Record<string, ProjectCase> = {
     project: project({ catalog: ["lib/acme-ui.json", 5, "../x.json", "missing.json"] }),
     codes: ["W701", "W703", "W704"],
   },
+  "a library from an npm package and the project catalog": {
+    project: project({ catalog: [{ package: "@acme/ui" }, "shop.json"] }),
+    files: {
+      ...sharedFiles,
+      "package:@acme/ui/package.json": text({
+        name: "@acme/ui",
+        version: "1.0.0",
+        weft: { catalog: "dist/weft.json" },
+      }),
+      "package:@acme/ui/dist/weft.json": text(acmeUi),
+    },
+    codes: [],
+  },
+  "package entries that cannot be used": {
+    project: project({
+      catalog: [
+        { package: "../acme" },
+        { package: "Acme" },
+        { package: 5 },
+        { package: "missing" },
+        { package: "no-field" },
+        { package: "escapes" },
+        { package: "broken" },
+        { package: "acme-ui", extra: 1 },
+      ],
+    }),
+    files: {
+      "package:no-field/package.json": text({ name: "no-field" }),
+      "package:escapes/package.json": text({ weft: { catalog: "../shop.json" } }),
+      "package:broken/package.json": text({ weft: { catalog: "c.json" } }),
+      "package:broken/c.json": "{",
+    },
+    codes: ["W703", "W703", "W703", "W704", "W704", "W703", "W704", "W701"],
+  },
+  "a package entry in project content is a catalog object": {
+    project: project({ catalog: [{ package: "@acme/ui" }] }),
+    content: true,
+    codes: ["W706"],
+  },
   "a catalog named after the core": {
     project: project({ catalog: ["core.json"] }),
     files: { "core.json": text({ ...shop([]), name: "weft-core", requires: undefined }) },
@@ -511,6 +577,82 @@ export const projectCases: Record<string, ProjectCase> = {
       "bad.json": text({ weft: "0.1", name: "a", version: "1.0.0", components: {}, fragments: {} }),
     },
     codes: ["W706"],
+  },
+  "a library fragment, used by a project fragment, with the project's tokens": {
+    project: project({
+      tokens: ["tokens/base.tokens.json"],
+      catalog: ["lib/acme-kit.json"],
+      fragments: { page: "fragments/uses-promo.weft" },
+    }),
+    codes: [],
+  },
+  "a library fragment that reaches the host, and a token the project lacks": {
+    project: project({
+      tokens: ["tokens/base.tokens.json"],
+      catalog: ["lib/acme.json"],
+      actions: ["cart.add"],
+    }),
+    files: {
+      ...sharedFiles,
+      "lib/acme.json": text(withFragments({ "acme-reach": "fragments/acme-reach.weft" })),
+    },
+    codes: ["W306", "W716", "W716"],
+  },
+  "a library fragment sees the library's scope, not the project catalog's kinds": {
+    project: project({ catalog: ["lib/acme.json", "catalog.json"] }),
+    files: {
+      ...sharedFiles,
+      "lib/acme.json": text(withFragments({ "acme-wide": "fragments/acme-wide.weft" })),
+    },
+    codes: ["W401"],
+  },
+  "fragment names outside their owner": {
+    project: project({
+      catalog: ["lib/acme.json"],
+      fragments: { "acme-page": "fragments/page.weft" },
+    }),
+    files: {
+      ...sharedFiles,
+      "lib/acme.json": text(
+        withFragments({
+          promo: "fragments/acme-promo.weft",
+          "beta-x": "fragments/acme-promo.weft",
+        }),
+      ),
+    },
+    codes: ["W715", "W715", "W715"],
+  },
+  "a library uses the fragments of a library it requires": {
+    project: project({ catalog: ["lib/beta-ui.json", "lib/acme-kit.json"] }),
+    codes: [],
+  },
+  "a library does not see the fragments of a library it does not require": {
+    project: project({ catalog: ["lib/beta.json", "lib/acme-kit.json"] }),
+    files: {
+      ...sharedFiles,
+      "lib/beta.json": text(
+        beta({ "beta-page": "fragments/beta-page.weft" }, { "weft-core": "0.2.0" }),
+      ),
+    },
+    codes: ["W801"],
+  },
+  "library fragment entries of the wrong shape": {
+    project: project({ catalog: ["lib/a.json", "lib/b.json"] }),
+    files: {
+      "lib/a.json": text(withFragments({ "acme-x": 1, Bad: "x.weft", "acme-y": "../x.weft" })),
+      "lib/b.json": text({ ...beta({}, {}), fragments: [] }),
+    },
+    codes: ["W706", "W706", "W706", "W703"],
+  },
+  "content: a library with fragments as markup": {
+    project: project({
+      catalog: [withFragments({ "acme-promo": promo })],
+      fragments: {
+        page: '<fragment weft="0.3"><use id="p" fragment="acme-promo" title="x"/></fragment>',
+      },
+    }),
+    content: true,
+    codes: [],
   },
   "content: fragments as markup": {
     project: project({ fragments: { "page-header": header } }),

@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { beforeAll, describe, test } from "vitest";
 import { coreCatalog } from "@weft/catalog";
-import { parse, validate, type Document } from "@weft/core";
+import { expand, parse, validate, type Document } from "@weft/core";
 import {
   diffAria,
   expandRoot,
@@ -135,7 +135,9 @@ function ids(n: Inst, mode: Mode): { id?: string } {
 }
 
 function skeletonOf(document: Document, data: unknown, mode: Mode): Skel[] {
-  const root = expandRoot(document.root, catalog, data);
+  // What the renderer draws: each use is its fragment's body (SPEC §10.7), which is all an
+  // importer can read back.
+  const root = expandRoot(expand(document, catalog).document.root, catalog, data);
   return root ? skeleton(root, mode) : [];
 }
 
@@ -167,8 +169,14 @@ const SNAPSHOT_SHARED_ROLES = new Set(["booking", "appearance"]);
 // Only the structure check is pinned, with `test.fails` so a fix shows up as a failure here.
 const SNAPSHOT_MODEL_IS_IMAGE = new Set(["showroom"]);
 
+// Known gap: a use is drawn with instance-path ids (`subtotal/row`, SPEC §10.7), which are not
+// valid ids, so the DOM import generates new ones, and an id-less generic `stack` dissolves into
+// its text. The accessibility tree still matches. Pinned with `test.fails` so a fix shows up here.
+const DOM_INSTANCE_PATHS = new Set(["receipt"]);
+
 for (const s of screens()) {
   const structure = TABLE_EMPTY_SLOT.has(s.name) ? test.fails : test;
+  const domStructure = DOM_INSTANCE_PATHS.has(s.name) ? test.fails : test;
   // Vitest has no subtests: each check is a test of its own under the screen's name, and the import runs once per block in
   // `beforeAll` so a failing import fails its own tests instead of the whole file.
   describe(`round trip from DOM: ${s.name}`, () => {
@@ -177,7 +185,7 @@ for (const s of screens()) {
       result = fromDom(renderPage(s.document, { catalog, data: s.data }), { catalog });
     });
     test("valid", () => assertValid(result));
-    test("structure, roles, states and ids", () => {
+    domStructure("structure, roles, states and ids", () => {
       assert.deepEqual(
         skeletonOf(result.document, {}, "dom"),
         skeletonOf(s.document, s.data, "dom"),

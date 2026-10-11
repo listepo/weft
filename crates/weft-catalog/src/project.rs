@@ -8,11 +8,11 @@ use indexmap::IndexMap;
 use semver::{Comparator, Op, Version, VersionReq};
 use serde::Serialize;
 use serde_json::{Map as Object, Value as Json};
-use weft_core::fragment::FRAGMENT;
+use weft_core::fragment::{FRAGMENT, host_reaches};
 use weft_core::{
     Catalog, Code, ComponentDef, DataSchema, Diagnostic, Fragment, Map, Mode, ParseOptions,
-    ParseResult, compile_data_schema, data_schema_diagnostics, did_you_mean, is_action, is_name,
-    one_of, order_keys, parse, parse_json,
+    compile_data_schema, data_schema_diagnostics, did_you_mean, is_action, is_name, one_of,
+    order_keys, parse, parse_json,
 };
 
 use crate::core::{CORE_CATALOG_JSON, CatalogError, core_catalog};
@@ -24,6 +24,7 @@ use crate::tokens::{Token, TokenCode, TokenProblem, load_tokens, token_types};
 pub const PROJECT_FILE: &str = "weft.json";
 pub const MAX_TOKEN_FILES: usize = 64;
 pub const MAX_CATALOGS: usize = 32;
+pub const MAX_LIBRARY_FRAGMENTS: usize = 256;
 
 /// The shared resources; the tool sections follow them (`settings::SECTIONS`).
 const RESOURCES: [&str; 6] = [
@@ -42,13 +43,14 @@ const MERGED: [&str; 2] = ["props", "slots"];
 const STRUCTURAL: [&str; 8] = [
     "context", "each", "entry", "slot", "use", "fragment", "param", "outlet",
 ];
-const CATALOG_MEMBERS: [&str; 6] = [
+const CATALOG_MEMBERS: [&str; 7] = [
     "weft",
     "name",
     "version",
     "prefix",
     "requires",
     "components",
+    "fragments",
 ];
 
 #[derive(Clone, Debug, PartialEq)]
@@ -150,6 +152,46 @@ pub fn is_project_file_name(name: &str) -> bool {
         && name.split('/').all(|s| !s.is_empty() && s != "..")
 }
 
+/// How the loader asks its reader for a file of an npm package (SPEC §10.2):
+/// `package:<npm name>/<file>`. A project file name never holds `:`, so a reader cannot mistake
+/// one for the other.
+const PACKAGE_READ: &str = "package:";
+
+/// An npm package name, plain or scoped (`acme-ui`, `@acme/ui`), as npm accepts new ones: at most
+/// 214 characters, lowercase, URL-safe, not starting with `.` or `_`. So it never names `..`, an
+/// absolute path or another directory level than a scope.
+pub fn is_package_name(name: &str) -> bool {
+    let part = |p: &str| {
+        !p.is_empty()
+            && !p.starts_with(['.', '_'])
+            && p.bytes().all(|b| {
+                b.is_ascii_lowercase()
+                    || b.is_ascii_digit()
+                    || matches!(b, b'-' | b'.' | b'_' | b'~')
+            })
+    };
+    name.len() <= 214
+        && match name.strip_prefix('@').map(|scoped| scoped.split_once('/')) {
+            Some(Some((scope, rest))) => part(scope) && part(rest),
+            Some(None) => false,
+            None => part(name),
+        }
+}
+
+/// The package and the file inside it that a reader is asked for, when `name` is a package read
+/// (`package:@acme/ui/weft.catalog.json` → `("@acme/ui", "weft.catalog.json")`); both parts are
+/// checked again, so a reader can trust them.
+pub fn split_package_read(name: &str) -> Option<(&str, &str)> {
+    let rest = name.strip_prefix(PACKAGE_READ)?;
+    let cut = if rest.starts_with('@') {
+        rest.match_indices('/').nth(1)?.0
+    } else {
+        rest.find('/')?
+    };
+    let (package, file) = (&rest[..cut], &rest[cut + 1..]);
+    (is_package_name(package) && is_project_file_name(file)).then_some((package, file))
+}
+
 pub(crate) fn escape_pointer(name: &str) -> String {
     name.replace('~', "~0").replace('/', "~1")
 }
@@ -224,6 +266,22 @@ struct Entry {
     source: CatalogSource,
     requires: Vec<(String, Version)>,
     components: Object<String, Json>,
+    /// A library's `fragments` member, entries not yet read.
+    fragments: Object<String, Json>,
+    /// The name the reader was given for the catalog file, which its fragment files are
+    /// relative to: a project file name or a package read.
+    read: Option<String>,
+}
+
+/// A library with fragments, and the catalog they are checked against: the core and the kinds
+/// of the library and of the catalogs it requires, as those define them (SPEC §10.4).
+struct Library {
+    at: String,
+    source: CatalogSource,
+    requires: Vec<String>,
+    fragments: Object<String, Json>,
+    read: Option<String>,
+    scope: Catalog,
 }
 
 /// Cargo's rule: `1.2.0` admits `>=1.2.0, <2.0.0`, and `0.1.0` admits `>=0.1.0, <0.2.0`.
@@ -296,6 +354,40 @@ fn trespass(
     ))
 }
 
+/// Why a fragment name may not be claimed where it is (SPEC §10.4): a library's fragments are
+/// named under its prefix, and the project's under no loaded library's.
+fn fragment_trespass(
+    name: &str,
+    own: Option<&CatalogSource>,
+    catalogs: &[CatalogSource],
+) -> Option<(String, String)> {
+    if let Some(library) = own {
+        let prefix = library.prefix.as_deref().unwrap_or_default();
+        return (!owns(prefix, name)).then(|| {
+            (
+                format!(
+                    "{} owns the fragments named \"{prefix}-…\", so its fragment {} is ignored.",
+                    quote(&library.name),
+                    quote(name)
+                ),
+                format!("a fragment named \"{prefix}-…\""),
+            )
+        });
+    }
+    let library = catalogs
+        .iter()
+        .find(|c| c.prefix.as_deref().is_some_and(|p| owns(p, name)))?;
+    let prefix = library.prefix.as_deref().unwrap_or_default();
+    Some((
+        format!(
+            "Fragments named \"{prefix}-…\" belong to {}, so the project may not define {}; the entry is ignored.",
+            quote(&library.name),
+            quote(name)
+        ),
+        format!("a fragment name outside the prefix \"{prefix}\""),
+    ))
+}
+
 fn token_expected(code: TokenCode) -> &'static str {
     match code {
         TokenCode::T001 => "a JSON object of DTCG groups and tokens",
@@ -308,7 +400,56 @@ fn token_expected(code: TokenCode) -> &'static str {
     }
 }
 
-type Merged = (Catalog, Vec<CatalogSource>, IndexMap<String, KindSource>);
+/// A library's fragments with their scope, built from the kinds merged so far.
+fn library(
+    entry: &Entry,
+    core: &Entry,
+    components: &Object<String, Json>,
+    kinds: &IndexMap<String, KindSource>,
+) -> Option<Library> {
+    let requires: Vec<String> = entry
+        .requires
+        .iter()
+        .map(|(name, _)| name.clone())
+        .collect();
+    let visible = |kind: &str| {
+        kinds.get(kind).is_some_and(|k| {
+            k.catalog == core.source.name
+                || k.catalog == entry.source.name
+                || requires.contains(&k.catalog)
+        })
+    };
+    let scoped: Object<String, Json> = (components.iter())
+        .filter(|(kind, _)| visible(kind))
+        .map(|(kind, def)| (kind.clone(), def.clone()))
+        .collect();
+    let scope = Catalog {
+        weft: entry.weft.clone(),
+        name: entry.source.name.clone(),
+        version: entry.source.version.clone(),
+        prefix: entry.source.prefix.clone(),
+        // The scope only checks fragments; the library's requirements were checked at load.
+        requires: Map::new(),
+        // Every entry was checked on its own, so this only fails if that check is wrong.
+        components: serde_json::from_value(Json::Object(scoped)).ok()?,
+        fragments: Map::new(),
+    };
+    Some(Library {
+        at: entry.at.clone(),
+        source: entry.source.clone(),
+        requires,
+        fragments: entry.fragments.clone(),
+        read: entry.read.clone(),
+        scope,
+    })
+}
+
+type Merged = (
+    Catalog,
+    Vec<CatalogSource>,
+    IndexMap<String, KindSource>,
+    Vec<Library>,
+);
 
 struct Loader<'a> {
     options: &'a ProjectOptions<'a>,
@@ -361,8 +502,13 @@ impl Loader<'_> {
     /// The text of a file the project names: `None` for a name it may not use (`W703`), and
     /// `Some(None)` for a file that cannot be read.
     fn file(&mut self, pointer: &str, name: &str) -> Option<Option<String>> {
+        self.read_file(pointer, name, is_project_file_name(name))
+    }
+
+    /// `file` for a name the caller has already judged.
+    fn read_file(&mut self, pointer: &str, name: &str, valid: bool) -> Option<Option<String>> {
         let read = self.options.read?;
-        if !is_project_file_name(name) {
+        if !valid {
             self.report(
                 Diagnostic::new(
                     Code::W703,
@@ -380,9 +526,89 @@ impl Loader<'_> {
         Some(read(name))
     }
 
+    /// The file an npm package names under `weft.<field>` in its `package.json` (SPEC §10.2), as
+    /// JSON, with its source: the package and the version its `package.json` gives
+    /// (`@acme/ui@1.0.0`). The reader finds the package; the loader asks it
+    /// only for `package.json` and that file, and the file name follows the rules of a project
+    /// file name, relative to the package directory. A bad name is `W703`; a package, field or
+    /// file that cannot be found or read is `W704`.
+    fn package_file(
+        &mut self,
+        pointer: &str,
+        package: &Json,
+        field: &str,
+    ) -> Option<(Json, String, String)> {
+        let read = self.options.read?;
+        let at = format!("{pointer}/package");
+        let Some(name) = package.as_str().filter(|n| is_package_name(n)) else {
+            let message = "The package name is not an npm package name.".to_owned();
+            let expected = "an npm package name such as \"acme-ui\" or \"@acme/ui\"";
+            self.report(
+                Diagnostic::new(Code::W703, at, message, expected).got(package.to_string()),
+            );
+            return None;
+        };
+        let ask = |file: &str| read(&format!("{PACKAGE_READ}{name}/{file}"));
+        let unreadable = |message: String| {
+            Diagnostic::new(
+                Code::W704,
+                &at,
+                message,
+                "an installed package with a readable JSON file",
+            )
+            .got(name)
+        };
+        let manifest = ask("package.json").and_then(|text| parse_json(&text).ok());
+        let Some(manifest) = manifest else {
+            let message = format!(
+                "The package {} is not in node_modules of the project directory or a parent, or its package.json cannot be read.",
+                quote(name)
+            );
+            self.report(unreadable(message));
+            return None;
+        };
+        let Some(file) = manifest
+            .get("weft")
+            .and_then(|w| w.get(field))
+            .and_then(Json::as_str)
+        else {
+            let message = format!(
+                "The package {} names no \"weft.{field}\" in its package.json.",
+                quote(name)
+            );
+            self.report(unreadable(message));
+            return None;
+        };
+        if !is_project_file_name(file) {
+            let message = format!(
+                "The package {} names {} as \"weft.{field}\", which is absolute, leaves the package directory or is malformed.",
+                quote(name),
+                quote(file)
+            );
+            let expected = "a relative path inside the package directory, separated by \"/\"";
+            self.report(Diagnostic::new(Code::W703, at, message, expected).got(file));
+            return None;
+        }
+        let Some(Ok(json)) = ask(file).as_deref().map(parse_json) else {
+            let message = format!(
+                "The file {} of the package {} cannot be read or is not JSON.",
+                quote(file),
+                quote(name)
+            );
+            self.report(unreadable(message));
+            return None;
+        };
+        let source = match manifest.get("version").and_then(Json::as_str) {
+            Some(version) => format!("{name}@{version}"),
+            None => name.to_owned(),
+        };
+        Some((json, source, format!("{PACKAGE_READ}{name}/{file}")))
+    }
+
     /// The project's `fragments` (SPEC §10.7): a name → file map, or name → markup in project
-    /// content. Each is parsed against the merged catalog with the project's tokens and actions,
-    /// and its problems point at `#/fragments/<name>`.
+    /// content. Each is parsed against the merged catalog, which already holds the libraries'
+    /// fragments, with the project's tokens and actions, and its problems point at
+    /// `#/fragments/<name>`.
     fn fragments(&mut self, member: &Json, project: &Project) -> Map<Fragment> {
         let pointer = self.at("/fragments");
         let Some(entries) = member.as_object() else {
@@ -391,22 +617,115 @@ impl Loader<'_> {
             self.wrong_type(pointer, message, expected);
             return Map::new();
         };
+        let texts = self.fragment_texts(entries, &pointer, "", None, &project.catalogs);
+        let types = project.tokens.as_ref().map(token_types);
+        let actions = project.actions.as_deref();
+        let mut catalog = project.catalog.clone();
+        let signatures = self.parse_fragments(&texts, &catalog, types.as_ref(), actions, false);
+        catalog.fragments.extend(signatures);
+        let loaded = self.parse_fragments(&texts, &catalog, types.as_ref(), actions, true);
+        let mut out = project.catalog.fragments.clone();
+        out.extend(loaded);
+        out
+    }
+
+    /// The fragments every library lists (SPEC §10.4), parsed against what the library declares:
+    /// its scope of kinds, its own fragments and those of the libraries it requires, with the
+    /// consuming project's tokens and no host actions. Their problems point at
+    /// `#/catalog/<i>/fragments/<name>`; a direct reach into the host is `W716`.
+    fn library_fragments(&mut self, libraries: &[Library], project: &Project) -> Map<Fragment> {
+        let texts: Vec<_> = (libraries.iter())
+            .map(|library| {
+                let dir = (library.read.as_deref())
+                    .and_then(|file| file.rsplit_once('/'))
+                    .map_or(String::new(), |(dir, _)| format!("{dir}/"));
+                let pointer = format!("{}/fragments", library.at);
+                let own = Some(&library.source);
+                self.fragment_texts(&library.fragments, &pointer, &dir, own, &project.catalogs)
+            })
+            .collect();
+        let types = project.tokens.as_ref().map(token_types);
+        // Every library's parameters first, so that uses across libraries are typed below.
+        let signatures: Vec<_> = (libraries.iter().zip(&texts))
+            .map(|(library, texts)| {
+                self.parse_fragments(texts, &library.scope, types.as_ref(), None, false)
+            })
+            .collect();
+        let mut out = Map::new();
+        for (library, texts) in libraries.iter().zip(&texts) {
+            let mut scope = library.scope.clone();
+            for (other, found) in libraries.iter().zip(&signatures) {
+                let name = &other.source.name;
+                if *name == library.source.name || library.requires.contains(name) {
+                    scope.fragments.extend(found.clone());
+                }
+            }
+            let loaded = self.parse_fragments(texts, &scope, types.as_ref(), None, true);
+            for (name, fragment) in loaded {
+                let at = format!("{}/fragments/{}", library.at, escape_pointer(&name));
+                for mut d in host_reaches(&fragment.document.root) {
+                    d.path = format!("{at}{}", d.path.trim_start_matches('#'));
+                    self.report(d);
+                }
+                out.insert(name, fragment);
+            }
+        }
+        out
+    }
+
+    /// A fragment file relative to `dir`. A library from a package reads inside that package
+    /// (SPEC §10.2), so a package read is valid only under a directory the loader built from one;
+    /// the name a catalog gives can never start one, since project file names refuse `:`.
+    fn fragment_file(&mut self, pointer: &str, dir: &str, file: &str) -> Option<Option<String>> {
+        let name = format!("{dir}{file}");
+        let valid = if dir.starts_with(PACKAGE_READ) {
+            split_package_read(&name).is_some()
+        } else {
+            is_project_file_name(&name)
+        };
+        self.read_file(pointer, &name, valid)
+    }
+
+    /// The markup of each entry of a `fragments` member, with the pointer its problems take: a
+    /// file name relative to `dir`, or the markup itself in project content. `own` is the library
+    /// that lists the entries; without one they are the project's. A name outside its owner is
+    /// `W715` and is left out.
+    fn fragment_texts(
+        &mut self,
+        entries: &Object<String, Json>,
+        pointer: &str,
+        dir: &str,
+        own: Option<&CatalogSource>,
+        catalogs: &[CatalogSource],
+    ) -> Vec<(String, String, String)> {
+        // An entry of a catalog file is a catalog problem, one of the project file a project one.
+        let (shape, relative) = match own {
+            Some(_) => (Code::W706, "a file name relative to the catalog file"),
+            None => (Code::W701, "a file name relative to the project"),
+        };
         let mut texts = Vec::new();
         for (name, value) in entries {
             let at = format!("{pointer}/{}", escape_pointer(name));
+            if is_name(name)
+                && let Some((message, expected)) = fragment_trespass(name, own, catalogs)
+            {
+                self.report(Diagnostic::new(Code::W715, at, message, expected).got(name));
+                continue;
+            }
             let text = match value.as_str() {
                 _ if !is_name(name) => {
                     let message = format!("{} is not a fragment name.", quote(name));
-                    self.wrong_type(at, message, "a name such as \"page-header\"");
+                    let expected = "a name such as \"page-header\"";
+                    self.report(Diagnostic::new(shape, at, message, expected));
                     continue;
                 }
                 None => {
                     let message = format!("Fragment {} must be a file name.", quote(name));
-                    self.wrong_type(at, message, "a file name relative to the project");
+                    self.report(Diagnostic::new(shape, at, message, relative));
                     continue;
                 }
                 Some(markup) if self.options.read.is_none() => markup.to_owned(),
-                Some(file) => match self.file(&at, file) {
+                Some(file) => match self.fragment_file(&at, dir, file) {
                     Some(Some(text)) => text,
                     Some(None) => {
                         let message = format!("The file {} cannot be read.", quote(file));
@@ -419,43 +738,43 @@ impl Loader<'_> {
             };
             texts.push((name.clone(), at, text));
         }
-        let types = project.tokens.as_ref().map(token_types);
-        let parse_in = |catalog: &Catalog, text: &str| -> ParseResult {
-            let options = ParseOptions {
-                catalog: Some(catalog),
-                mode: self.options.mode,
-                tokens: types.as_ref(),
-                actions: project.actions.as_deref(),
-            };
-            parse(text, &options)
+        texts
+    }
+
+    /// The fragments among `texts` parsed against `catalog`. Only the pass with `report` says
+    /// what is wrong; the pass without it reads the parameters that the other fragments' uses
+    /// are typed by.
+    fn parse_fragments(
+        &mut self,
+        texts: &[(String, String, String)],
+        catalog: &Catalog,
+        tokens: Option<&IndexMap<String, String>>,
+        actions: Option<&[String]>,
+        report: bool,
+    ) -> Map<Fragment> {
+        let options = ParseOptions {
+            catalog: Some(catalog),
+            mode: self.options.mode,
+            tokens,
+            actions,
         };
-        // The parameters come first, so that uses between fragments are typed in the second pass.
-        let mut catalog = project.catalog.clone();
-        for (name, _, text) in &texts {
-            let document = parse_in(&project.catalog, text).document;
-            if let Some(document) = document.filter(|d| d.root.kind == FRAGMENT) {
-                catalog
-                    .fragments
-                    .insert(name.clone(), Fragment::new(document));
-            }
-        }
         let mut out = Map::new();
         for (name, at, text) in texts {
-            let parsed = parse_in(&catalog, &text);
-            for mut d in parsed.diagnostics {
+            let parsed = parse(text, &options);
+            for mut d in parsed.diagnostics.into_iter().filter(|_| report) {
                 d.path = format!("{at}{}", d.path.trim_start_matches('#'));
                 self.report(d);
             }
             match parsed.document {
                 Some(document) if document.root.kind == FRAGMENT => {
-                    out.insert(name, Fragment::new(document));
+                    out.insert(name.clone(), Fragment::new(document));
                 }
-                Some(_) => {
-                    let message = format!("Fragment {} is not a <fragment> file.", quote(&name));
+                Some(_) if report => {
+                    let message = format!("Fragment {} is not a <fragment> file.", quote(name));
                     let d = Diagnostic::new(Code::W201, at, message, "<fragment> as the root");
                     self.report(d);
                 }
-                None => {}
+                _ => {}
             }
         }
         out
@@ -715,14 +1034,26 @@ impl Loader<'_> {
             // One catalog alone keeps the pointers it always had.
             one => vec![(pointer, "\"catalog\"".to_owned(), one)],
         };
-        let base = self.read_catalog(String::new(), core, None)?;
+        let base = self.read_catalog(String::new(), core, None, None)?;
         let mut entries: Vec<Entry> = Vec::new();
         for (at, what, item) in listed {
-            let Some(found) = self.content(&at, item, &what) else {
-                continue;
+            // Project content gives catalogs themselves, so only a project file names packages.
+            let package = (self.options.read.is_some())
+                .then(|| item.as_object().filter(|o| o.len() == 1)?.get("package"))
+                .flatten();
+            let (found, source, read) = if let Some(package) = package {
+                let Some((found, source, read)) = self.package_file(&at, package, "catalog") else {
+                    continue;
+                };
+                (found, Some(source), Some(read))
+            } else {
+                let Some(found) = self.content(&at, item, &what) else {
+                    continue;
+                };
+                let file = self.options.read.and(item.as_str()).map(str::to_owned);
+                (found, file.clone(), file)
             };
-            let source = self.options.read.and(item.as_str()).map(str::to_owned);
-            if let Some(entry) = self.read_catalog(at, &found, source)
+            if let Some(entry) = self.read_catalog(at, &found, source, read)
                 && self.claims(&entry, &entries, &base)
             {
                 entries.push(entry);
@@ -737,14 +1068,18 @@ impl Loader<'_> {
             .collect();
         let (libraries, project): (Vec<&Entry>, Vec<&Entry>) =
             entries.iter().partition(|e| e.source.prefix.is_some());
-        for entry in libraries.iter().chain(&project) {
-            self.merge_catalog(
-                entry,
-                &libraries,
-                &base.source.name,
-                &mut components,
-                &mut kinds,
-            );
+        let core = &base.source.name;
+        for entry in &libraries {
+            self.merge_catalog(entry, &libraries, core, &mut components, &mut kinds);
+        }
+        // Before the project catalog widens anything: a library's fragments may use only what
+        // every other project that loads the library also has.
+        let shelves = (libraries.iter())
+            .filter(|l| !l.fragments.is_empty())
+            .filter_map(|l| library(l, &base, &components, &kinds))
+            .collect();
+        for entry in &project {
+            self.merge_catalog(entry, &libraries, core, &mut components, &mut kinds);
         }
         // The project catalog names the result, else the last library, so that callers reading
         // one name see the catalog they wrote.
@@ -766,6 +1101,7 @@ impl Loader<'_> {
             catalog,
             entries.into_iter().map(|e| e.source).collect(),
             kinds,
+            shelves,
         ))
     }
 
@@ -775,6 +1111,7 @@ impl Loader<'_> {
         pointer: String,
         extension: &Json,
         source: Option<String>,
+        read: Option<String>,
     ) -> Option<Entry> {
         let text = |key: &str| extension.get(key).and_then(Json::as_str).map(str::to_owned);
         let ext = extension.as_object();
@@ -790,12 +1127,36 @@ impl Loader<'_> {
         };
         let prefix = ext.get("prefix");
         let requires = ext.get("requires").map(Json::as_object);
+        let fragments = ext.get("fragments").map(Json::as_object);
         if ext.keys().any(|k| !CATALOG_MEMBERS.contains(&k.as_str()))
             || prefix.is_some_and(|p| !p.is_string())
             || requires.is_some_and(|r| r.is_none())
         {
             self.report_not_catalog(pointer);
             return None;
+        }
+        if let Some(fragments) = fragments {
+            let problem = if prefix.is_none() {
+                Some("The project catalog lists no fragments; the project file's \"fragments\" does, so the catalog is ignored.".to_owned())
+            } else if fragments.is_none_or(|f| f.len() > MAX_LIBRARY_FRAGMENTS) {
+                Some(format!(
+                    "\"fragments\" must map at most {MAX_LIBRARY_FRAGMENTS} fragment names to files, so the catalog is ignored."
+                ))
+            } else {
+                None
+            };
+            if let Some(message) = problem {
+                let expected = format!(
+                    "on a library only, an object of at most {MAX_LIBRARY_FRAGMENTS} fragment names and file names"
+                );
+                self.report(Diagnostic::new(
+                    Code::W706,
+                    format!("{pointer}/fragments"),
+                    message,
+                    expected,
+                ));
+                return None;
+            }
         }
         let mut required = Vec::new();
         for (catalog, value) in requires.flatten().into_iter().flatten() {
@@ -824,6 +1185,8 @@ impl Loader<'_> {
             },
             requires: required,
             components: entries.clone(),
+            fragments: fragments.flatten().cloned().unwrap_or_default(),
+            read,
         })
     }
 
@@ -1100,6 +1463,39 @@ fn empty_project() -> Result<Project, CatalogError> {
     })
 }
 
+/// Catalogs a host gives by content in place of a project's `catalog` member, such as the CLI's
+/// repeated `--catalog` (SPEC §10.2): merged over `base` by the rules of §10.4, with diagnostics at
+/// `#/catalog/<i>`. `base` is the core catalog unless a whole catalog named `weft-core` replaces it.
+/// Only the catalog members of the result are set.
+pub fn merge_catalogs(
+    base: &Json,
+    catalogs: &[Json],
+    mode: Mode,
+) -> Result<ProjectLoad, CatalogError> {
+    let options = ProjectOptions {
+        mode,
+        ..Default::default()
+    };
+    let mut project = empty_project()?;
+    let mut loader = Loader {
+        options: &options,
+        diagnostics: Vec::new(),
+    };
+    // Catalogs given by content come with no reader for their fragment files, so library
+    // fragments load only through a project file.
+    if let Some((catalog, catalogs, kinds, _)) =
+        loader.catalogs(&Json::Array(catalogs.to_vec()), base)
+    {
+        project.catalog = catalog;
+        project.catalogs = catalogs;
+        project.kinds = kinds;
+    }
+    Ok(ProjectLoad {
+        project,
+        diagnostics: loader.diagnostics,
+    })
+}
+
 /// Loads a project from its parsed project file, or from project content without a reader.
 pub fn load_project(
     json: &Json,
@@ -1153,10 +1549,11 @@ pub fn load_project(
     }
     if let Some(member) = members.get("catalog") {
         let core: Json = serde_json::from_str(CORE_CATALOG_JSON)?;
-        if let Some((catalog, catalogs, kinds)) = loader.catalogs(member, &core) {
+        if let Some((catalog, catalogs, kinds, libraries)) = loader.catalogs(member, &core) {
             project.catalog = catalog;
             project.catalogs = catalogs;
             project.kinds = kinds;
+            project.catalog.fragments = loader.library_fragments(&libraries, &project);
         }
     }
     if let Some(member) = members.get("actions") {

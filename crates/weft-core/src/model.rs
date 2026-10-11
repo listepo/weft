@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::source::Source;
 
-pub const WEFT_VERSION: &str = "0.2";
+pub const WEFT_VERSION: &str = "0.3";
 
 /// Objects keep their key order, as JavaScript objects do.
 pub type Map<V> = IndexMap<String, V>;
@@ -116,9 +116,16 @@ impl Serialize for Node {
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Document {
     pub weft: String,
+    /// The root's `version` attribute (SPEC §3). Absent when the document declares none.
+    /// Kept beside `weft` so canonical JSON writes the members in that order.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<String>,
     /// The `<context>` block (SPEC §2.3), in written order.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub context: Vec<Entry>,
+    /// Inline fragments of a screen, by name (SPEC §10.7). Empty on a fragment file.
+    #[serde(default, skip_serializing_if = "Map::is_empty")]
+    pub fragments: Map<Node>,
     pub root: Node,
 }
 
@@ -279,6 +286,13 @@ pub struct Catalog {
     pub weft: String,
     pub name: String,
     pub version: String,
+    /// The kinds a library catalog owns, `<prefix>-…` (SPEC §5); absent for a project catalog.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prefix: Option<String>,
+    /// Catalog name → the version this catalog was written against (SPEC §5); checked when a
+    /// project loads it, not here.
+    #[serde(default, skip_serializing_if = "IndexMap::is_empty")]
+    pub requires: Map<String>,
     pub components: Map<ComponentDef>,
     /// A project's fragments (SPEC §10.7). Only the merged catalog of a project has them, so
     /// every tool that is handed that catalog knows them; a catalog file never does.

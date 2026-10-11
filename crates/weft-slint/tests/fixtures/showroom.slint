@@ -35,8 +35,10 @@ export component ShowroomScreen inherits Window {
             font-weight: 700;
         }
         shelf := VerticalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 24px;
             gem-section := GroupBox {
+                vertical-stretch: 0;
                 title: "Gem";
                 VerticalBox {
                     gem-title := Text {
@@ -58,6 +60,7 @@ export component ShowroomScreen inherits Window {
                 }
             }
             turned-section := GroupBox {
+                vertical-stretch: 0;
                 title: "Turned gem";
                 VerticalBox {
                     turned-title := Text {

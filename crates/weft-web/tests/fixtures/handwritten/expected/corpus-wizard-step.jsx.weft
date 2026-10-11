@@ -1,4 +1,4 @@
-<screen id="screen-setup-wizard" label="Setup wizard" weft="0.2">
+<screen id="screen-setup-wizard" label="Setup wizard" weft="0.3">
   <heading id="heading-choose-a-plan" level="1">Choose a plan</heading>
   <text id="text-1" text="{$.progress}"/>
   <radio-group id="radio-group-plan" label="Plan" value="{$.plan}">

@@ -48,12 +48,15 @@ export component WizardScreen inherits Window {
             selected(picked) => { root.plan = picked == "Free" ? "free" : picked == "Pro" ? "pro" : "team"; }
         }
         nav := HorizontalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 8px;
             back := Button {
+                horizontal-stretch: 0;
                 text: "Back";
                 clicked => { root.perform("wizard.back", "back"); }
             }
             next := Button {
+                horizontal-stretch: 0;
                 text: "Next";
                 primary: true;
                 enabled: root.plan != "";

@@ -91,6 +91,7 @@ const SWIFTUI_EXPORT: &[Setting] = &[
         Kind::File,
     ),
     with_default("sharedTokens", SHARED_TOKENS, Kind::Bool, "true"),
+    with_default("context", CONTEXT_EXPORT, KEEP_STRIP, "\"keep\""),
 ];
 const JSX_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
@@ -135,6 +136,11 @@ const CEM_IMPORT: &[Setting] = &[
         "The version of the imported catalog.",
         Kind::Text,
         "\"0.0.0\"",
+    ),
+    setting(
+        "prefix",
+        "The prefix of the imported catalog: it owns the kinds named `<prefix>-…` and requires the core, so it loads beside a project catalog (SPEC §10.4). Default: none, which makes it the project catalog.",
+        Kind::Text,
     ),
 ];
 
@@ -205,7 +211,7 @@ const IMPORT: &[Setting] = &[
     setting(
         "swiftui",
         "SwiftUI source files (`weft import-swiftui`).",
-        Kind::Section(OUT_ONLY),
+        Kind::Section(SOURCE_IMPORT),
     ),
     setting(
         "a2ui",
@@ -637,11 +643,28 @@ pub fn project_file_schema() -> Json {
             {
                 "type": "array",
                 "maxItems": MAX_CATALOGS,
-                "items": { "$ref": "#/$defs/fileName" },
+                "items": {
+                    "oneOf": [
+                        { "$ref": "#/$defs/fileName" },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "package": {
+                                    "type": "string",
+                                    "maxLength": 214,
+                                    "pattern": "^(@[a-z0-9~-][a-z0-9._~-]*/)?[a-z0-9~-][a-z0-9._~-]*$",
+                                    "description": "An npm package in node_modules of the project directory or a parent; its package.json names the catalog file in \"weft\": { \"catalog\": … } (SPEC §10.2).",
+                                },
+                            },
+                            "required": ["package"],
+                            "additionalProperties": false,
+                        },
+                    ],
+                },
             },
             { "$ref": "#/$defs/fileName" },
         ],
-        "description": "Catalogs merged over the core catalog: libraries, each owning the kinds under its prefix, and at most one project catalog without a prefix that adds the project's kinds, props and variants (SPEC §10.4).",
+        "description": "Catalogs merged over the core catalog: libraries, each owning the kinds under its prefix, and at most one project catalog without a prefix that adds the project's kinds, props and variants (SPEC §10.4). A library may come from an npm package.",
     }));
     properties.insert(
         "actions".to_owned(),

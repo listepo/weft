@@ -17,7 +17,7 @@ use crate::{DIAGNOSTICS, ProjectArgs, print, read};
 
 pub struct ExportArgs {
     pub file: PathBuf,
-    pub catalog: Option<PathBuf>,
+    pub catalog: Vec<PathBuf>,
     pub tokens: Option<PathBuf>,
     pub name: Option<String>,
     pub project: ProjectArgs,
@@ -30,7 +30,7 @@ pub struct ExportArgs {
 pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     let (loaded, project_dir) = project(&args.file, args.project)?;
     let loaded = loaded.as_ref();
-    let catalog = catalog(args.catalog.as_deref(), loaded)?;
+    let catalog = catalog(&args.catalog, loaded)?;
     let tokens = tokens(args.tokens.as_deref(), loaded)?;
     let Some(mut document) = strict_document(&args.file, &catalog)? else {
         return Ok(DIAGNOSTICS);
@@ -72,7 +72,7 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
 
 pub struct ImportArgs {
     pub file: PathBuf,
-    pub catalog: Option<PathBuf>,
+    pub catalog: Vec<PathBuf>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
     /// `--context`: `Some(true)` keeps, `Some(false)` drops.
@@ -83,7 +83,7 @@ pub struct ImportArgs {
 pub fn import(args: ImportArgs, out: &mut dyn Write) -> Result<u8> {
     let (loaded, project_dir) = project(&args.file, args.project)?;
     let loaded = loaded.as_ref();
-    let catalog = catalog(args.catalog.as_deref(), loaded)?;
+    let catalog = catalog(&args.catalog, loaded)?;
     // Regeneration is how the importer decides the file is still the one it printed, so the
     // tokens have to be the ones generation used. There is no `--tokens` on import: the project,
     // or the default tokens, are that set.

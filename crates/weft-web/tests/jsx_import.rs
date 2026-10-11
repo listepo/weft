@@ -126,6 +126,11 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
         "layout",
         "`justify` and `grow` are neither drawn nor carried until the web layout tasks (T16.3, T16.8)",
     ),
+    (
+        "receipt",
+        "an inline fragment is a component of its own, which the importer drops as a `kinds` loss \
+         with its call sites: an importer never produces a `<use>` (SPEC §10.7)",
+    ),
 ];
 
 #[test]
@@ -192,7 +197,7 @@ fn a_bound_field_error_comes_back_as_the_fields_error() {
     }
 }
 
-const NOTED: &str = r#"<screen id="s" label="Notes" weft="0.2">
+const NOTED: &str = r#"<screen id="s" label="Notes" weft="0.3">
   <context>
     <entry id="why" by="human" kind="intent" name="Ivan">Sign in quickly. @preserve */ end</entry>
     <entry id="go-why" by="agent" for="go" kind="question" name="m" status="open">Primary?</entry>

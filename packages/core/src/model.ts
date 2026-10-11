@@ -2,7 +2,7 @@
 // change them only together with the specification.
 import { z } from "zod";
 
-export const WEFT_VERSION = "0.2";
+export const WEFT_VERSION = "0.3";
 
 export const BindingSchema = z.strictObject({ bind: z.string(), not: z.literal(true).optional() });
 export const TokenRefSchema = z.strictObject({ token: z.string() });
@@ -55,7 +55,11 @@ export type Entry = z.infer<typeof EntrySchema>;
 
 export const DocumentSchema = z.strictObject({
   weft: z.string(),
+  // The root's `version` attribute (SPEC §3). Absent when the document declares none.
+  version: z.string().optional(),
   context: z.array(EntrySchema).optional(),
+  /** Inline fragments of a screen, by name (SPEC §10.7). Each value is the fragment node. */
+  fragments: z.record(z.string(), NodeSchema).optional(),
   root: NodeSchema,
 });
 export type Document = z.infer<typeof DocumentSchema>;
@@ -107,6 +111,10 @@ export const CatalogSchema = z.strictObject({
   weft: z.string(),
   name: z.string(),
   version: z.string(),
+  /** The kinds a library catalog owns, `<prefix>-…` (SPEC §5); absent for a project catalog. */
+  prefix: z.string().optional(),
+  /** Catalog name → the version this catalog was written against, checked when a project loads it. */
+  requires: z.record(z.string(), z.string()).optional(),
   components: z.record(z.string(), ComponentDefSchema),
   /** A project's fragments by name (SPEC §10.7), each a document whose root is `fragment`. */
   fragments: z.record(z.string(), DocumentSchema).optional(),
@@ -126,28 +134,34 @@ export const DiagnosticSchema = z.strictObject({
 });
 export type Diagnostic = z.infer<typeof DiagnosticSchema>;
 
+const fragment = z.string().optional();
 export const PatchSchema = z.discriminatedUnion("op", [
   z.strictObject({
     op: z.literal("set"),
     id: z.string(),
+    fragment,
     prop: z.string(),
     value: ValueSchema.nullable(),
   }),
   z.strictObject({
     op: z.literal("insert"),
     parent: z.string(),
+    fragment,
     slot: z.string().optional(),
     index: z.number().int().nonnegative().optional(),
     markup: z.string(),
   }),
-  z.strictObject({ op: z.literal("remove"), id: z.string() }),
+  z.strictObject({ op: z.literal("remove"), id: z.string(), fragment }),
   z.strictObject({
     op: z.literal("move"),
     id: z.string(),
+    fragment,
     parent: z.string(),
     slot: z.string().optional(),
     index: z.number().int().nonnegative().optional(),
   }),
+  z.strictObject({ op: z.literal("add-fragment"), markup: z.string() }),
+  z.strictObject({ op: z.literal("remove-fragment"), name: z.string() }),
   z.strictObject({ op: z.literal("add-context"), entry: EntrySchema }),
   z.strictObject({
     op: z.literal("set-context"),
@@ -157,5 +171,6 @@ export const PatchSchema = z.discriminatedUnion("op", [
   }),
   z.strictObject({ op: z.literal("resolve-context"), id: z.string() }),
   z.strictObject({ op: z.literal("remove-context"), id: z.string() }),
+  z.strictObject({ op: z.literal("set-version"), value: z.string().nullable() }),
 ]);
 export type Patch = z.infer<typeof PatchSchema>;

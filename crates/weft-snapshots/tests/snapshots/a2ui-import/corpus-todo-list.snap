@@ -2,7 +2,7 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: corpus-todo-list as a2ui-import
 ---
-<screen id="todos" weft="0.2">
+<screen id="todos" weft="0.3">
   <heading id="title" level="1">Tasks</heading>
   <stack id="add-form">
     <stack id="add-row" direction="row">

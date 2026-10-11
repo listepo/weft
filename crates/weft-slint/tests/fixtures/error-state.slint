@@ -30,13 +30,16 @@ export component LoadErrorScreen inherits Window {
             }
         }
         actions := HorizontalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 8px;
             retry := Button {
+                horizontal-stretch: 0;
                 text: "Retry";
                 primary: true;
                 clicked => { root.perform("load.retry", "retry"); }
             }
             support := TouchArea {
+                horizontal-stretch: 0;
                 clicked => { root.perform("nav.support", "support"); }
                 Text { text: "Contact support"; color: Palette.accent-background; }
             }
