@@ -2,7 +2,16 @@
 // `weft validate` and `weft fmt`, reduced to what the package's own tests drive. This is NOT
 // the `weft` command: the Rust CLI (docs/cli.md) is, and shipping this under the same name in
 // bin made installs resolve usage errors for flags the real CLI accepts.
-import { readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  lstatSync,
+  readFileSync,
+  realpathSync,
+  renameSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { parseArgs } from "node:util";
 import { hasErrors } from "./diagnostics.ts";
 import { CatalogSchema, type Catalog, type Diagnostic } from "./model.ts";
@@ -111,11 +120,18 @@ function loadCatalog(file: string, io: Io): Catalog | undefined {
   return result.data;
 }
 
+/**
+ * Writes `contents` by renaming a sibling temp file into the file `file` names. A symbolic link is
+ * followed to its target and left in place; the target's permissions are kept.
+ */
 function writeAtomic(file: string, contents: string): void {
-  const tmp = `${file}.${process.pid}.tmp`;
+  const target = lstatSync(file).isSymbolicLink() ? realpathSync(file) : file;
+  const mode = statSync(target).mode;
+  const tmp = `${target}.${process.pid}.tmp`;
   try {
     writeFileSync(tmp, contents);
-    renameSync(tmp, file);
+    chmodSync(tmp, mode);
+    renameSync(tmp, target);
   } catch (error) {
     try {
       unlinkSync(tmp);

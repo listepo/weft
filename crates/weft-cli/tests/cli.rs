@@ -136,6 +136,31 @@ fn fmt_prints_canonical_markup_and_write_rewrites_the_file() {
 }
 
 #[test]
+fn fmt_write_follows_a_symlink_and_leaves_the_link() {
+    use std::os::unix::fs::symlink;
+    let s = Scratch::new("fmt-link");
+    let target = s.file("real.weft", MESSY);
+    let link = s.0.join("link.weft");
+    symlink(&target, &link).unwrap();
+    assert_eq!(run(&[&"fmt", &link, &"--write"]).code, 0);
+    assert!(link.symlink_metadata().unwrap().file_type().is_symlink());
+    assert_eq!(std::fs::read_to_string(&target).unwrap(), CANONICAL);
+    assert_eq!(std::fs::read_to_string(&link).unwrap(), CANONICAL);
+}
+
+#[test]
+fn fmt_write_keeps_the_files_permissions() {
+    use std::os::unix::fs::PermissionsExt;
+    let s = Scratch::new("fmt-mode");
+    let path = s.file("messy.weft", MESSY);
+    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o640)).unwrap();
+    assert_eq!(run(&[&"fmt", &path, &"--write"]).code, 0);
+    let mode = std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
+    assert_eq!(mode, 0o640);
+    assert_eq!(std::fs::read_to_string(&path).unwrap(), CANONICAL);
+}
+
+#[test]
 fn fmt_refuses_markup_with_syntax_errors() {
     let s = Scratch::new("broken");
     let path = s.file("broken.weft", "<screen id=s>");
