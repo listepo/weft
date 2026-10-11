@@ -9,7 +9,6 @@ New bugs, dead code and moves from a read-only Cursor cloud review of `main` at 
 | ID | Priority | Kind | Status | Where | Fix |
 | --- | --- | --- | --- | --- | --- |
 | T78 | P2 | bug | confirmed (same run) | `crates/weft-swiftui/tests/swift.rs:201-208` | The Swift typecheck tests ran 9+ minutes and were killed when the gate failed. Give nextest a timeout and a Swift module cache, or keep them out of the batch with flaky runtimes. |
-| T87 | P2 | bug | suspected | `crates/weft-web/src/from_jsx/mod.rs:37-66` | JSX import runs on a 64 MiB stack thread only off `wasm32`. Use the same budget or iterative lowering on WASM, or document the limit. |
 | T88 | P2 | bug | suspected | `crates/weft-catalog/src/resolver.rs:52-54` vs `:102-103` | The resolver's `tree()` matches context keys case-sensitively; `appearance()` does not. Make `tree()` case-insensitive. |
 | T90 | P2 | dead code | confirmed gap (orphans not listed) | `toolchain.md:18`; about 750 insta snapshots | Nothing checks for unreferenced snapshots. Run `cargo insta test --unreferenced=reject` in CI, or once and delete the orphans. |
 | T92 | P2 | move | suspected | `tooling/changed.ts`, `tooling/select.ts` → the org's `scoped-check` | A fourth copy of the affected-test planner. The other copies were not checked from this repo. |
