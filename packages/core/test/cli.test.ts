@@ -1,5 +1,14 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  lstatSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, test } from "vitest";
@@ -75,6 +84,24 @@ test("fmt prints canonical markup and --write rewrites the file", () => {
   assert.equal(printed.code, 0);
   assert.equal(printed.stdout, canonical);
   assert.equal(run("fmt", path, "--write").code, 0);
+  assert.equal(readFileSync(path, "utf8"), canonical);
+});
+
+test("fmt --write follows a symlink and leaves the link", () => {
+  const target = file("real.weft", messy);
+  const link = join(dir, "link.weft");
+  symlinkSync(target, link);
+  assert.equal(run("fmt", link, "--write").code, 0);
+  assert.ok(lstatSync(link).isSymbolicLink());
+  assert.equal(readFileSync(target, "utf8"), canonical);
+  assert.equal(readFileSync(link, "utf8"), canonical);
+});
+
+test("fmt --write keeps the file's permissions", () => {
+  const path = file("mode.weft", messy);
+  chmodSync(path, 0o640);
+  assert.equal(run("fmt", path, "--write").code, 0);
+  assert.equal(statSync(path).mode & 0o777, 0o640);
   assert.equal(readFileSync(path, "utf8"), canonical);
 });
 

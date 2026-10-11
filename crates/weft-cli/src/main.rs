@@ -496,18 +496,33 @@ fn read(file: &Path) -> Result<String> {
     std::fs::read_to_string(file).with_context(|| format!("cannot read {}", file.display()))
 }
 
-/// Writes `contents` by renaming a sibling temp file into `path`, so a crash cannot leave a
-/// half-written target (SPEC §10 tools that rewrite a file).
+/// Writes `contents` by renaming a sibling temp file into the file `path` names, so a crash cannot
+/// leave a half-written target (SPEC §10 tools that rewrite a file). A symbolic link is followed
+/// to its target and left in place; the target's permissions are kept.
 fn write_atomic(path: &Path, contents: &str) -> Result<()> {
-    let name = path.file_name().unwrap_or_default();
-    let tmp = path.with_file_name(format!(
+    let target = if path
+        .symlink_metadata()
+        .map(|m| m.file_type().is_symlink())
+        .unwrap_or(false)
+    {
+        std::fs::canonicalize(path)
+            .with_context(|| format!("cannot resolve {}", path.display()))?
+    } else {
+        path.to_path_buf()
+    };
+    let permissions = std::fs::metadata(&target)
+        .with_context(|| format!("cannot stat {}", target.display()))?
+        .permissions();
+    let name = target.file_name().unwrap_or_default();
+    let tmp = target.with_file_name(format!(
         ".{}.tmp-{}",
         name.to_string_lossy(),
         std::process::id()
     ));
     let written = (|| {
         std::fs::write(&tmp, contents)?;
-        std::fs::rename(&tmp, path)
+        std::fs::set_permissions(&tmp, permissions)?;
+        std::fs::rename(&tmp, &target)
     })();
     if written.is_err() {
         let _ = std::fs::remove_file(&tmp);
