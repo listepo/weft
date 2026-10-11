@@ -221,7 +221,8 @@ function layoutStyle(n: Inst, ctx: Ctx): CSSProperties {
   if (Object.hasOwn(ALIGN, align)) style.alignItems = ALIGN[align];
   else if (row) style.alignItems = "center";
   if (flag(n, "wrap")) style.flexWrap = "wrap";
-  if (Object.hasOwn(JUSTIFY, text(n, "justify"))) style.justifyContent = JUSTIFY[text(n, "justify")];
+  if (Object.hasOwn(JUSTIFY, text(n, "justify")))
+    style.justifyContent = JUSTIFY[text(n, "justify")];
   return style;
 }
 
