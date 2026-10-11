@@ -5,11 +5,14 @@ import { describe, test } from "vitest";
 import type { FakeBoard } from "./fake-penpot.ts";
 import { built, corpusMarkup, corpusNames, read } from "./helpers.ts";
 
+/** Known gap: no fragment definition travels with the build, so a `<use>` reads back as `W801`. */
+const FRAGMENT_GAPS = new Set(["receipt"]);
+
 for (const name of corpusNames) {
   // A `<use>` and an inline fragment are not reconstructed (SPEC §10.7).
   if (name === "receipt") continue;
   describe(`corpus screen ${name}`, () => {
-    test("comes back byte-identical", async () => {
+    test.skipIf(FRAGMENT_GAPS.has(name))("comes back byte-identical", async () => {
       const markup = corpusMarkup(name);
       const { root } = await built(markup);
       const result = await read(root);
