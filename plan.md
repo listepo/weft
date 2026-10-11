@@ -35,9 +35,9 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16.7 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
 | T96 | todo | P2 | 3 | 0% | |
-| T97 | todo | P2 | 2 | 0% | |
+| T97 | done | P2 | 2 | 100% | MiMo / MiMo |
 | T98 | done | P2 | 2 | 100% | MiMo / MiMo |
-| T99 | todo | P3 | 1 | 0% | |
+| T99 | done | P3 | 1 | 100% | MiMo / MiMo |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
 | T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
 

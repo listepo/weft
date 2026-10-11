@@ -16,13 +16,13 @@ export async function built(markup: string): Promise<{ figma: FakeFigma; frame: 
   const figma = new FakeFigma();
   const library = await ensureLibrary(figma, coreCatalog, tokens);
   const document = parseStrict(markup);
-  const frame = (await buildScreen(figma, document, {
+  const { root: frame } = await buildScreen(figma, document, {
     catalog: coreCatalog,
     library,
     tokens,
     display: displayTexts(document),
-  })) as FakeFrame;
-  return { figma, frame };
+  });
+  return { figma, frame: frame as FakeFrame };
 }
 
 export const read = (figma: FakeFigma, frame: FakeFrame) =>

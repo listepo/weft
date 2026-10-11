@@ -61,7 +61,10 @@ export type BuildOptions<C> = {
   display: Display;
 };
 
-type Ctx<L, C> = BuildOptions<C> & { host: BuildHost<L, C> };
+type Ctx<L, C> = BuildOptions<C> & { host: BuildHost<L, C>; notes: string[] };
+
+/** A finished build: the root layer and what it skipped without failing (oversized plugin data). */
+export type Built<L> = { root: L; notes: string[] };
 
 /**
  * Builds the document on the current page and returns its root layer. The document must be
@@ -72,16 +75,20 @@ export async function buildScreen<L, C>(
   host: BuildHost<L, C>,
   document: Document,
   options: BuildOptions<C>,
-): Promise<L> {
+): Promise<Built<L>> {
   await host.prepare();
-  const ctx: Ctx<L, C> = { ...options, host };
+  const ctx: Ctx<L, C> = { ...options, host, notes: [] };
   const root = await buildNode(ctx, document.root, "column");
-  writeJson(host.marks(root), KEY.document, { weft: document.weft });
+  const rootMarks = host.marks(root);
+  const documentNote = writeJson(rootMarks, KEY.document, { weft: document.weft });
+  if (documentNote !== undefined) ctx.notes.push(documentNote);
   // Plugin data, never a layer: the designer's panel lists it, the canvas never shows it.
-  if (document.context !== undefined && document.context.length > 0)
-    writeJson(host.marks(root), KEY.context, document.context);
+  if (document.context !== undefined && document.context.length > 0) {
+    const contextNote = writeJson(rootMarks, KEY.context, document.context);
+    if (contextNote !== undefined) ctx.notes.push(contextNote);
+  }
   host.place(root, document.root.kind === "screen");
-  return root;
+  return { root, notes: ctx.notes };
 }
 
 /** `rotate-z` as a clockwise turn in (-180, 180]; the other tilts have no drawing. */
@@ -91,10 +98,17 @@ export function planeTurn(props: Node["props"]): number {
   return 180 - ((((180 - z) % 360) + 360) % 360);
 }
 
-function mark(marks: Marks, node: Node, leaf: boolean, shown: Shown): void {
+function mark(
+  ctx: { notes: string[] },
+  marks: Marks,
+  node: Node,
+  leaf: boolean,
+  shown: Shown,
+): void {
   marks.name = node.id === undefined ? node.kind : `${node.kind}#${node.id}`;
-  writeJson(marks, KEY.source, sourceOf(node, leaf, shown));
-  marks.setPluginData(KEY.origin, marks.id);
+  const note = writeJson(marks, KEY.source, sourceOf(node, leaf, shown));
+  if (note === undefined) marks.setPluginData(KEY.origin, marks.id);
+  else ctx.notes.push(`${marks.name}: ${note}`);
   if (node.props?.["hidden"] === true) marks.visible = false;
 }
 
@@ -116,7 +130,7 @@ async function buildNode<L, C>(ctx: Ctx<L, C>, node: Node, parentMode: Mode): Pr
       shown.label = labelDisplay(node.props, ctx.display);
       await host.setText(instance, "label", shown.label);
     }
-    mark(host.marks(instance), node, true, shown);
+    mark(ctx, host.marks(instance), node, true, shown);
     turn(host, instance, node);
     return instance;
   }
@@ -142,7 +156,7 @@ async function buildNode<L, C>(ctx: Ctx<L, C>, node: Node, parentMode: Mode): Pr
     host.append(frame, slot);
   }
   const marks = host.marks(frame);
-  mark(marks, node, false, shown);
+  mark(ctx, marks, node, false, shown);
   turn(host, frame, node);
   marks.setPluginData(KEY.style, host.style(frame, !LAYOUT_KINDS.has(node.kind)));
   return frame;
