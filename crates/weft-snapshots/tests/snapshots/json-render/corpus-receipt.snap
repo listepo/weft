@@ -1,0 +1,48 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-receipt as json-render
+---
+{
+  "root": "receipt",
+  "elements": {
+    "receipt": {
+      "type": "screen",
+      "props": {
+        "label": "Receipt"
+      },
+      "children": [
+        "lines"
+      ]
+    },
+    "lines": {
+      "type": "stack",
+      "props": {},
+      "children": [
+        "subtotal",
+        "total"
+      ]
+    },
+    "subtotal": {
+      "type": "use",
+      "props": {
+        "amount": {
+          "$state": "/subtotal"
+        },
+        "fragment": "price-row",
+        "label": "Subtotal"
+      },
+      "children": []
+    },
+    "total": {
+      "type": "use",
+      "props": {
+        "amount": {
+          "$state": "/total"
+        },
+        "fragment": "price-row",
+        "label": "Total"
+      },
+      "children": []
+    }
+  }
+}

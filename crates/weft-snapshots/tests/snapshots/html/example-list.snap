@@ -264,6 +264,11 @@ ul > li {
 [data-align="center"] { align-items: center; }
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
+[data-justify="center"] { justify-content: center; }
+[data-justify="end"] { justify-content: flex-end; }
+[data-justify="space-between"] { justify-content: space-between; }
+.weft-row > [data-grow] { flex: 1 1 0%; min-width: 0; }
+.weft-stack > [data-grow] { flex: 1 1 0%; min-height: 0; }
 [data-wrap] { flex-wrap: wrap; }
 a { display: inline-block; }
 [hidden] { display: none !important; }

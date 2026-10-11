@@ -8,6 +8,7 @@ use std::path::Path;
 
 use weft_catalog::{DEFAULT_TOKENS_JSON, core_catalog, load_tokens};
 use weft_core::{Document, ParseOptions, WEFT_VERSION, has_errors, parse, parse_json, serialize};
+use weft_import::LossKind;
 use weft_web::{HNode, HtmlOptions, ImportOptions, import_html, parse_html, to_html};
 
 fn corpus() -> Vec<(String, Document)> {
@@ -100,18 +101,8 @@ const HTML_CONVENTION_GAPS: &[(&str, &str)] = &[
         "appearance",
         "explicit type=\"date\" is dropped; a segment's bound text also comes back as a bound label",
     ),
-    (
-        "dashboard",
-        "an explicit direction=\"column\" is dropped; justify, max-width and min-column-width are drawn and read back by T16.8",
-    ),
-    (
-        "glass",
-        "an explicit direction=\"column\" is dropped; padding and max-width are drawn and read back by T16.8",
-    ),
-    (
-        "layout",
-        "justify, grow, and an explicit justify=\"start\" are drawn; the importer reads them back in T16.8",
-    ),
+    ("dashboard", "an explicit direction=\"column\" is dropped"),
+    ("glass", "an explicit direction=\"column\" is dropped"),
     (
         "inbox",
         "the tabs selected binding and on-change are lost; a bound tab label comes back empty; \
@@ -307,4 +298,109 @@ fn an_unsafe_model_path_is_refused_with_w317() {
     };
     let codes: Vec<_> = invalid.0.iter().map(|d| d.code.as_str()).collect();
     assert_eq!(codes, ["W317", "W317"]);
+}
+
+/// Foreign markup that draws layout in ways Weft cannot hold: each listed form is a `layout` loss
+/// (SPEC §9, "From HTML"). The four `justify-content` values and any positive `flex-grow` map.
+#[test]
+fn foreign_layout_forms_weft_cannot_hold_are_layout_losses() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let page = |inner: &str| {
+        format!(
+            r#"<main data-weft-id="s" aria-label="S"><div data-weft-id="a" style="display:flex">{inner}</div></main>"#
+        )
+    };
+    let notes = |html: &str| {
+        let back = import_html(html, &import_options(&catalog, &tokens));
+        back.losses
+            .iter()
+            .filter(|l| l.kind == LossKind::Layout)
+            .map(|l| l.note.clone())
+            .collect::<Vec<_>>()
+    };
+
+    // `justify-content` among the four values maps; the rest are losses.
+    let mapped = notes(
+        &page(r#"<button data-weft-id="b" type="button">Go</button>"#).replace(
+            r#"style="display:flex""#,
+            r#"style="display:flex;justify-content:space-between""#,
+        ),
+    );
+    assert!(mapped.is_empty(), "{mapped:?}");
+    for value in ["space-around", "space-evenly", "stretch"] {
+        let html = page(r#"<button data-weft-id="b" type="button">Go</button>"#).replace(
+            r#"style="display:flex""#,
+            &format!(r#"style="display:flex;justify-content:{value}""#),
+        );
+        let lost = notes(&html);
+        assert!(
+            lost.iter()
+                .any(|n| n.contains("justify-content") && n.contains(value)),
+            "{value}: {lost:?}"
+        );
+    }
+
+    // Any positive `flex-grow` is `grow`; unequal ratios are a loss.
+    let equal = r#"<div data-weft-id="a" style="display:flex"><button data-weft-id="b" type="button" style="flex-grow:1">B</button><button data-weft-id="c" type="button" style="flex-grow:1">C</button></div>"#;
+    let back = import_html(
+        &format!(r#"<main data-weft-id="s" aria-label="S">{equal}</main>"#),
+        &import_options(&catalog, &tokens),
+    );
+    assert!(
+        serialize(&back.document).contains("grow=\"true\""),
+        "{:?}",
+        back.document
+    );
+    assert!(
+        !back.losses.iter().any(|l| l.note.contains("unequal flex")),
+        "{:?}",
+        back.losses
+    );
+    let unequal = r#"<div data-weft-id="a" style="display:flex"><button data-weft-id="b" type="button" style="flex-grow:2">B</button><button data-weft-id="c" type="button" style="flex-grow:1">C</button></div>"#;
+    let lost = notes(&format!(
+        r#"<main data-weft-id="s" aria-label="S">{unequal}</main>"#
+    ));
+    assert!(
+        lost.iter().any(|n| n.contains("unequal flex ratios")),
+        "{lost:?}"
+    );
+
+    // A raw length is a loss; a `--weft-` property is not.
+    let raw = page(r#"<button data-weft-id="b" type="button">Go</button>"#).replace(
+        r#"style="display:flex""#,
+        r#"style="display:flex;padding:16px""#,
+    );
+    let lost = notes(&raw);
+    assert!(
+        lost.iter()
+            .any(|n| n.contains("padding") && n.contains("16px")),
+        "{lost:?}"
+    );
+    let token = page(r#"<button data-weft-id="b" type="button">Go</button>"#).replace(
+        r#"style="display:flex""#,
+        r#"style="display:flex;padding:var(--weft-space-lg)""#,
+    );
+    let back = import_html(&token, &import_options(&catalog, &tokens));
+    assert!(
+        serialize(&back.document).contains("padding=\"{token.space.lg}\""),
+        "{:?}",
+        back.document
+    );
+
+    // A media or container query has no prop.
+    let sheet = r#"<main data-weft-id="s" aria-label="S"><style>@container (min-width: 20em) { .a { display: grid } }</style><div data-weft-id="a"></div></main>"#;
+    let lost = notes(sheet);
+    assert!(
+        lost.iter()
+            .any(|n| n.contains("container") || n.contains("@container")),
+        "{lost:?}"
+    );
+    let media = r#"<main data-weft-id="s" aria-label="S"><style>@media (min-width: 40em) { .a { display: grid } }</style><div data-weft-id="a"></div></main>"#;
+    let lost = notes(media);
+    assert!(lost.iter().any(|n| n.contains("@media")), "{lost:?}");
+    // The appearance sheet is not a layout loss.
+    let dark = r#"<main data-weft-id="s" aria-label="S"><style>@media (prefers-color-scheme: dark) { :root { --weft-ink: #fff } }</style><div data-weft-id="a"></div></main>"#;
+    let lost = notes(dark);
+    assert!(!lost.iter().any(|n| n.contains("@media")), "{lost:?}");
 }

@@ -26,7 +26,7 @@ class WeftScreen extends LitElement {
   render() {
     const { data, actions, onChange } = this;
     return html`<main data-weft-id="root" aria-label="Actions"
-      ><div data-weft-id="actions" style=${styleMap({ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "flex-end" })}
+      ><div data-weft-id="actions" style=${styleMap({ gap: "var(--weft-space-md)", padding: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" })}
         ><button data-weft-id="save" type="button" data-variant="primary" @click=${(_e) => _act(actions, { id: "save", action: "doc.save" })}>Save</button
         ><button data-weft-id="discard" type="button" @click=${(_e) => _act(actions, { id: "discard", action: "doc.discard" })}>Discard</button
       ></div
