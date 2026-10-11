@@ -37,7 +37,10 @@ export function drawnRoot(document: unknown, catalog: Catalog): unknown {
   const hasInline = isRecord(inline) && Object.keys(inline).length > 0;
   if (!hasInline && Object.keys(catalog.fragments ?? {}).length === 0) return root;
   try {
-    return expand(document as Document, catalog).document.root;
+    const expanded = expand(document as Document, catalog).document;
+    // Unreadable input is W200 with no document; draw the tree that was passed in.
+    if (expanded === undefined) return root;
+    return expanded.root;
   } catch {
     return root;
   }
