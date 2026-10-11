@@ -30,8 +30,13 @@ export function handleRequest(
     {
       async build(document, display, tokens, modifier) {
         const library = await ensureLibrary(api, catalog, tokens, modifier, sources);
-        const root = await buildScreen(api, document, { catalog, library, tokens, display });
-        return { id: root.id, notes: library.notes };
+        const { root, notes } = await buildScreen(api, document, {
+          catalog,
+          library,
+          tokens,
+          display,
+        });
+        return { id: root.id, notes: [...library.notes, ...notes] };
       },
       read: (layer, tokens) => readLayers(api, layer, { catalog, tokens }),
       modes: (tokens) => readModes(api, tokens),

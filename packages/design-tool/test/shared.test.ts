@@ -205,17 +205,38 @@ describe("the flat part of a tilt", () => {
 });
 
 describe("plugin data size", () => {
-  test("writeJson refuses an entry over 100 kB", () => {
+  function layer(): PluginData & { stored: Map<string, string> } {
     const stored = new Map<string, string>();
-    const layer: PluginData = {
+    return {
+      stored,
       getPluginData: (key) => stored.get(key) ?? "",
       setPluginData: (key, value) => {
         stored.set(key, value);
       },
     };
-    writeJson(layer, KEY.source, { kind: "button" });
-    assert.equal(stored.get(KEY.source), JSON.stringify({ kind: "button" }));
-    assert.throws(() => writeJson(layer, KEY.source, "x".repeat(100_000)), /longer than 100000/);
-    assert.equal(stored.get(KEY.source), JSON.stringify({ kind: "button" }));
+  }
+
+  test("writeJson stores an entry under the UTF-8 cap and reports one over it", () => {
+    const l = layer();
+    assert.equal(writeJson(l, KEY.source, { kind: "button" }), undefined);
+    assert.equal(l.stored.get(KEY.source), JSON.stringify({ kind: "button" }));
+    const note = writeJson(l, KEY.source, "x".repeat(100_000));
+    assert.match(note ?? "", /longer than 100000 bytes/);
+    assert.equal(l.stored.get(KEY.source), JSON.stringify({ kind: "button" }));
+  });
+
+  test("the cap counts UTF-8 bytes, not UTF-16 code units", () => {
+    const l = layer();
+    // "€" is 3 UTF-8 bytes and 1 UTF-16 code unit: 40_000 of them are 40_000 units but 120_000 bytes.
+    const many = "€".repeat(40_000);
+    const note = writeJson(l, KEY.source, many);
+    assert.match(note ?? "", /longer than 100000 bytes/);
+    assert.equal(l.stored.get(KEY.source), undefined);
+    // Just under the byte cap: 33_333 * 3 = 99_999 bytes plus the JSON quotes and escapes.
+    // The JSON form of a string of euro signs is longer than the raw string, so use ASCII that
+    // is exactly at the boundary once stringified, then a multi-byte source near it.
+    const almost = JSON.stringify("€".repeat(33_000)); // 99_000 content bytes + quotes
+    assert.equal(writeJson(l, KEY.source, "€".repeat(33_000)), undefined);
+    assert.equal(l.stored.get(KEY.source), almost);
   });
 });

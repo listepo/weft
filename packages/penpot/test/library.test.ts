@@ -43,7 +43,7 @@ describe("a library of several catalogs", () => {
       '<screen weft="0.3">\n  <acme-button variant="ghost">Buy</acme-button>\n</screen>\n';
     const { document } = parse(markup, { catalog, mode: "strict" });
     assert.ok(document !== undefined);
-    const root = await buildScreen(penpot, document, {
+    const { root } = await buildScreen(penpot, document, {
       catalog,
       library,
       tokens,
