@@ -6,7 +6,7 @@ FRAME "screen#receipt" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxis
   FRAME "stack#lines" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
     | weft.origin = layer(stack#lines)
     | weft.source = {"kind":"stack","id":"lines"}
-    | weft.style = [[],[],0,null,null]
+    | weft.style = [[],[],0,[0,0,0,0],null]
     FRAME "use#subtotal" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
       | weft.origin = layer(use#subtotal)
       | weft.source = {"kind":"use","id":"subtotal","props":{"amount":{"bind":"$.subtotal"},"fragment":"price-row","label":"Subtotal"}}

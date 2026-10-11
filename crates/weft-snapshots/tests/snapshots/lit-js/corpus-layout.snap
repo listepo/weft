@@ -44,7 +44,7 @@ class WeftScreen extends LitElement {
     const { data, actions, onChange } = this;
     return html`<main data-weft-id="layout" aria-label="Layout"
       ><div data-weft-id="toolbar" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" })}
-        ><div data-weft-field=""
+        ><div data-weft-field="" style=${styleMap({ flex: "1 1 0%", minWidth: "0" })}
           ><label
             ><span aria-hidden="true">Search</span
             ><input data-weft-id="search" aria-label="Search" type="search" .value=${_text(data?.query)} @input=${(_e) => onChange?.("$.query", _e.currentTarget.value)}
@@ -52,14 +52,14 @@ class WeftScreen extends LitElement {
         ></div
         ><button data-weft-id="filter" type="button" @click=${(_e) => _act(actions, { id: "filter", action: "list.filter" })}>Filter</button
       ></div
-      ><div data-weft-id="pager" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" })}>${(() => {
+      ><div data-weft-id="pager" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" })}>${(() => {
           const _href = _url("");
           return html`<a data-weft-id="previous" href=${(_href) ?? nothing} role=${(_href === undefined ? "link" : undefined) ?? nothing} tabindex=${(_href === undefined ? 0 : undefined) ?? nothing} @keydown=${_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "previous", action: "list.previous" }); } : undefined} @click=${() => _act(actions, { id: "previous", action: "list.previous" })} style=${styleMap({ display: "inline-block" })}>Previous</a>`;
         })()}${(() => {
           const _href = _url("");
           return html`<a data-weft-id="next" href=${(_href) ?? nothing} role=${(_href === undefined ? "link" : undefined) ?? nothing} tabindex=${(_href === undefined ? 0 : undefined) ?? nothing} @keydown=${_href === undefined ? (_e) => { if (_e.key !== "Enter" || _e.target !== _e.currentTarget) return; _e.preventDefault(); _act(actions, { id: "next", action: "list.next" }); } : undefined} @click=${() => _act(actions, { id: "next", action: "list.next" })} style=${styleMap({ display: "inline-block" })}>Next</a>`;
         })()}</div
-      ><div data-weft-id="actions" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" })}
+      ><div data-weft-id="actions" style=${styleMap({ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-end" })}
         ><button data-weft-id="cancel" type="button" @click=${(_e) => _act(actions, { id: "cancel", action: "list.cancel" })}>Cancel</button
         ><button data-weft-id="save" type="button" data-variant="primary" @click=${(_e) => _act(actions, { id: "save", action: "list.save" })}>Save</button
       ></div

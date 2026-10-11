@@ -124,7 +124,7 @@ const JSX_CONVENTION_GAPS: &[(&str, &str)] = &[
     ),
     (
         "layout",
-        "`justify` and `grow` are neither drawn nor carried until the web layout tasks (T16.3, T16.8)",
+        "an explicit justify=\"start\" is not written (the default, so the generator omits it)",
     ),
     (
         "receipt",
@@ -249,4 +249,40 @@ fn context_notes_are_readable_comments_that_importers_ignore() {
     }
     let lit = generate(&document, Framework::Lit, false, false);
     assert!(!lit.contains("Primary?"), "{lit}");
+}
+
+/// A media or container query in a style object has no prop (SPEC §9, "From source code").
+#[test]
+fn a_media_or_container_query_in_a_style_object_is_a_layout_loss() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    let source = r#"export default function S({ data }) {
+  return (
+    <main data-weft-id="s" aria-label="S">
+      <div
+        data-weft-id="a"
+        style={{
+          display: "flex",
+          ["@media (min-width: 40em)"]: { display: "grid" },
+          ["@container (min-width: 20em)"]: { display: "grid" },
+        }}
+      >
+        <button data-weft-id="b" type="button">Go</button>
+      </div>
+    </main>
+  );
+}"#;
+    let back = import_jsx(source, false, &options);
+    let lost: Vec<_> = back
+        .losses
+        .iter()
+        .filter(|l| l.kind == LossKind::Layout)
+        .map(|l| l.note.clone())
+        .collect();
+    assert!(lost.iter().any(|n| n.contains("@media")), "{lost:?}");
+    assert!(lost.iter().any(|n| n.contains("@container")), "{lost:?}");
 }

@@ -7,7 +7,9 @@
 //! overflowed: about 1.5 KB per parenthesis, 1.75 KB per object, 2.6 KB per nested function).
 //! Operators that chain without brackets (`? :`, `=>`, `=`, prefix `!`, `new` …) cost less and
 //! are charged to the enclosing bracket until a `,` or `;` ends the expression. The estimate is a
-//! heuristic: it errs towards refusing, and the budget leaves more than half of a 1 MiB stack free.
+//! heuristic: it errs towards refusing, and the budget leaves more than half of a 1 MiB stack
+//! free — which is the whole stack the WebAssembly module gets (the `wasm32` link-time default,
+//! no host can raise it per call), so this estimate is the reader's budget on every target.
 
 /// Estimated stack bytes the parser may use.
 const BUDGET: u32 = 400_000;

@@ -66,7 +66,7 @@
 | i-slint-core | local (dev) | https://github.com/slint-ui/slint | Sets that testing backend and pins its color scheme to light before a screenshot |
 | png | local (dev) | https://github.com/image-rs/image-png | Encodes and decodes the Slint screenshot PNGs; not the full `image` stack |
 | i-slint-compiler | local | https://github.com/slint-ui/slint | Syntax tree for the weft-slint importer (`import` feature); 1.18.1, no renderer or backend |
-| insta | local (dev) | https://github.com/mitsuhiko/insta | Reviewed snapshots of every generator output per corpus screen and catalog example (weft-snapshots) |
+| insta | local (dev) | https://github.com/mitsuhiko/insta | Reviewed snapshots of every generator output per corpus screen and catalog example (weft-snapshots); `weft-snapshots::unreferenced` fails on a snapshot no test writes |
 | jsonschema | local (dev) | https://github.com/Stranger6667/jsonschema | Checks every exported A2UI message against the vendored A2UI v0.9 JSON Schemas (weft-snapshots); no network or TLS features |
 | tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
 | tree-sitter-swift | local | https://github.com/alex-pinkus/tree-sitter-swift | The Swift grammar for that parser |
@@ -116,3 +116,12 @@
 | @figma/plugin-typings | local | https://github.com/figma/plugin-typings | Official Figma Plugin API types; the conversion is typed against them |
 | @penpot/plugin-types | local | https://github.com/penpot/penpot | Official Penpot plugin API types (MPL-2.0); `@weft/penpot` and the Penpot plugin are typed against them. Pinned to 1.5.0 from the `next` tag, approved by the creator: `latest` (1.4.2) has no design tokens API |
 | ses | local | https://github.com/endojs/endo | The SES library Penpot runs plugins in; the Penpot plugin's bundle test evaluates the plugin in an SES compartment |
+
+## Rust tests
+
+`cargo nextest` runs the Rust tests (`root:rust-test`). `.config/nextest.toml` gives the Swift typecheck tests of `weft-swiftui` (`generated_swift_typechecks_*`) a timeout of 15 minutes (`slow-timeout`, terminate after 15 periods of 60 s), so a hang fails as a timed-out test instead of being killed with the gate. A cold typecheck of every generated screen takes about five minutes per SDK and more under load.
+
+Those tests also cache their work under `~/Library/Caches/weft-swiftui/` (falling back to `CARGO_TARGET_TMPDIR/weft-swiftui-cache/` when home is not writable), as `@weft/visual` caches its simulator lock:
+
+- `modules/` is the `swiftc -module-cache-path`, filled by the compiler from the SDK modules.
+- `typecheck-<sdk>.stamp` holds the key of the last successful typecheck: the `swiftc` version, the target and every source it saw. A warm run of the same toolchain and sources skips `swiftc` and finishes in about a second. Delete the stamp (or the folder) to typecheck again after a cache is suspect; a new toolchain or any source change writes a new key and typechecks once.

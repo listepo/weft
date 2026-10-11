@@ -142,8 +142,10 @@ fn context_comes_back_only_through_a_verified_source_comment() {
 
     let result = import_swiftui(&swift, &ImportOptions { catalog: &catalog });
     assert!(result.losses.is_empty() && result.diagnostics.is_empty());
-    let expected = serialize(&common::parse_screen(NOTED, &catalog, &common::tokens()));
-    assert_eq!(serialize(&result.document), expected);
+    // The comment holds the screen as written; the importer stamps the current version.
+    let mut noted = common::parse_screen(NOTED, &catalog, &common::tokens());
+    noted.weft = WEFT_VERSION.into();
+    assert_eq!(serialize(&result.document), serialize(&noted));
 
     // An edit the comment does not describe: the code is read, without the context.
     let edited = swift.replace("Text(\"Back\")", "Text(\"Home\")");

@@ -34,7 +34,7 @@ function _url(value: string): string | undefined {
 export default function WeftScreen({ data, actions, onChange }: WeftProps) {
   return (
     <main data-weft-id="dashboard" data-state="ready" aria-label="Team dashboard">
-      <div data-weft-id="header" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "center", flexWrap: "wrap" }}>
+      <div data-weft-id="header" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "center", flexWrap: "wrap", justifyContent: "space-between" }}>
         <h1 data-weft-id="title">
           {!(_text(data?.team?.name).trim() === "") ? _squash(_text(data?.team?.name)) : ""}
         </h1>
@@ -42,7 +42,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
           {!(_text(data?.updatedAt).trim() === "") ? _squash(_text(data?.updatedAt)) : ""}
         </div>
       </div>
-      <div data-weft-id="stats" style={{ gap: "var(--weft-space-lg)", display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+      <div data-weft-id="stats" style={{ gap: "var(--weft-space-lg)", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(max(var(--weft-size-sm), calc((100% - 2 * var(--weft-space-lg)) / 3)), 1fr))" }}>
         <section data-weft-id="velocity" aria-label="Velocity">
           <div data-weft-slot="header">
             <h2 data-weft-id="velocity-title">Velocity</h2>
@@ -68,7 +68,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
           </div>
         </section>
       </div>
-      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "column" }}>
+      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", width: "100%", maxWidth: "var(--weft-size-lg)", boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
         <div data-weft-id="release" role="alert" data-tone="info">Release 2.4 ships on Friday.</div>
         <div data-weft-id="backup" role="alert" data-tone="success">
           {!(_text(data?.backupStatus).trim() === "") ? _text(data?.backupStatus) : null}
@@ -83,7 +83,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
           })()}
         </div>
       </div>
-      <div data-weft-id="footer" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "flex-end", flexWrap: "wrap" }}>
+      <div data-weft-id="footer" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "flex-end", flexWrap: "wrap", justifyContent: "space-between" }}>
         <div data-weft-id="owner" data-tone="default">Owned by the platform team</div>
         <div data-weft-id="footer-links" style={{ gap: "var(--weft-space-md)", display: "flex", flexDirection: "row", alignItems: "flex-start" }}>
           {(() => {

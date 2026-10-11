@@ -5,6 +5,7 @@
 use std::collections::HashSet;
 
 use serde_json::{Map, Value as Json, json};
+use weft_core::fragment::USE;
 use weft_core::{Catalog, Child, Content, Document, Node, Value};
 use weft_import::{Loss, LossKind, Losses, safe_url};
 
@@ -109,8 +110,27 @@ impl Ex<'_> {
     fn list(&mut self, list: &[Child], path: &str) -> Json {
         let mut keys = Vec::new();
         for c in list {
-            keys.push(match c {
-                Child::Node(n) => self.element(n, path),
+            match c {
+                // A `<use>` has no json-render form (SPEC §9): it is left out and its content is
+                // kept in its place, as a2ui does for a kind it has no component for.
+                Child::Node(n) if n.kind == USE => {
+                    let key = n.id.clone().unwrap_or_else(|| fresh_id(&mut self.ids, USE));
+                    let at = format!("{path}/{USE}#{key}");
+                    self.losses.push(
+                        LossKind::Kinds,
+                        &at,
+                        "use has no json-render form; its content is kept",
+                    );
+                    for kept in n.slots.values().chain(std::iter::once(&n.children)) {
+                        if let Json::Array(kids) = self.list(kept, &at) {
+                            keys.extend(
+                                kids.into_iter()
+                                    .filter_map(|k| k.as_str().map(str::to_owned)),
+                            );
+                        }
+                    }
+                }
+                Child::Node(n) => keys.push(self.element(n, path)),
                 Child::Text(t) => {
                     // json-render children are element keys only, so the run needs an element.
                     self.losses.push(
@@ -121,9 +141,9 @@ impl Ex<'_> {
                     let key = fresh_id(&mut self.ids, "text");
                     let run = json!({ "type": "text", "props": { "text": t }, "children": [] });
                     self.elements.insert(key.clone(), run);
-                    key
+                    keys.push(key);
                 }
-            });
+            }
         }
         keys.into()
     }

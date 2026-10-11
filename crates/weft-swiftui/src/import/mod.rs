@@ -106,14 +106,18 @@ fn verified(source: &str, read: &ImportResult, catalog: &Catalog) -> Option<Impo
     if options.split_whitespace().next() != Some(SOURCE_OPTIONS) {
         return None;
     }
-    let (document, diagnostics) = provenance::claimed(&markup, catalog)?;
+    let (mut document, diagnostics) = provenance::claimed(&markup, catalog)?;
     // The code draws each use expanded (SPEC §10.7) and has no form for context.
     let mut expected = weft_core::expand(&document, catalog).document;
     expected.context.clear();
     expected.weft.clone_from(&read.document.weft);
-    (serialize(&expected) == serialize(&read.document)).then(|| ImportResult {
-        document,
-        losses: Vec::new(),
-        diagnostics,
+    (serialize(&expected) == serialize(&read.document)).then(|| {
+        // The comment holds the screen as written; the importer stamps the current version.
+        document.weft.clone_from(&read.document.weft);
+        ImportResult {
+            document,
+            losses: Vec::new(),
+            diagnostics,
+        }
     })
 }

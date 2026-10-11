@@ -249,7 +249,11 @@ Confirmed P1/P2 bugs and the shared Trust URL move from the 2026-10-08 cloud rev
 
 T89 is closed without a change: the creator keeps the `uv` and Translate Toolkit pins in `mise.toml` and `toolchain.md` on purpose.
 
-Left for later: T78 Swift typecheck CI cost, T87 WASM JSX stack, T88 resolver `tree()` case, T90 unreferenced insta snapshots, T92/T93 large splits.
+Left for later: T78 Swift typecheck CI cost, T88 resolver `tree()` case, T90 unreferenced insta snapshots, T92/T93 large splits.
+
+### T87. WASM JSX stack budget
+
+The JSX reader gives itself a 64 MiB thread off `wasm32` (`crates/weft-web/src/from_jsx/mod.rs`); on `wasm32` there is no thread to give and no host that can raise a stack per call, so the reader runs on the module's link-time stack — 1 MiB, the `wasm32-unknown-unknown` default. The scanner's nesting estimate is the budget that fits that stack (it leaves more than half of the 1 MiB free, measured in a release build), so the same refusal holds on every target: a source deeper than the estimate is `W602` before any parsing, never a stack trap. The limit is now stated in the `from_jsx` and `scan` module docs, and `packages/core/test/jsx-import.test.ts` pins it on both engines: the built module's `__stack_pointer` initial value is 1 MiB, and for the element and arrow nesting shapes the first depth the estimate refuses (found by binary search on the refusal itself) reads cleanly one level within it and returns `W602` one past — under `WEFT_ENGINE=wasm` those calls run on that 1 MiB stack, where a trap would fail the test instead of returning a diagnostic. Raising the wasm stack to 64 MiB with `-z stack-size` was measured and rejected: the stack lives in linear memory, so every module instance would reserve 64 MiB, and the flag changes the module bytes the plugin bundles commit for no gain — the estimate is cut for 1 MiB already.
 
 ### T74. Slint snapshots and screenshots
 

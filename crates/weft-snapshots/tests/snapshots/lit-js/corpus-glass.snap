@@ -37,12 +37,12 @@ class WeftScreen extends LitElement {
   render() {
     const { data, actions, onChange } = this;
     return html`<main data-weft-id="glass" aria-label="Glass"
-      ><div data-weft-id="card" style=${styleMap({ gap: "var(--weft-space-md)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "flex", flexDirection: "column" })} data-weft-material=""
+      ><div data-weft-id="card" style=${styleMap({ gap: "var(--weft-space-md)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", padding: "var(--weft-space-lg)", display: "flex", flexDirection: "column" })} data-weft-material=""
         ><h2 data-weft-id="title">${!(_text(data?.title).trim() === "") ? _squash(_text(data?.title)) : ""}</h2
         ><div data-weft-id="body">The panel blurs what is behind it.</div
         ><button data-weft-id="close" type="button" data-variant="primary" @click=${(_e) => _act(actions, { id: "close", action: "glass.close" })}>Got it</button
       ></div
-      ><div data-weft-id="tiles" style=${styleMap({ gap: "var(--weft-space-sm)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" })} data-weft-material=""
+      ><div data-weft-id="tiles" style=${styleMap({ gap: "var(--weft-space-sm)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", padding: "var(--weft-space-xl)", width: "100%", maxWidth: "var(--weft-size-md)", boxSizing: "border-box", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" })} data-weft-material=""
         ><div data-weft-id="tile-light">Light</div
         ><div data-weft-id="tile-dark">Dark</div
       ></div
