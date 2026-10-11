@@ -11,7 +11,9 @@ mod common;
 use std::collections::HashSet;
 
 use serde_json::{Value as Json, json};
-use weft_core::{Catalog, Document, Mode, ValidateOptions, has_errors, validate_document};
+use weft_core::{
+    Catalog, Child, Document, Mode, Node, ValidateOptions, has_errors, validate_document,
+};
 use weft_interop::ImportResult;
 use weft_interop::a2ui::{from_a2ui, to_a2ui};
 use weft_interop::json_render::{MAX_SOURCE_LENGTH, from_json_render, to_json_render};
@@ -27,6 +29,22 @@ fn screens() -> Vec<(String, Document)> {
     }
     assert!(out.len() > 40, "found only {} screens", out.len());
     out
+}
+
+/// A `<use>` or an inline fragment does not survive an export (SPEC §10.7).
+fn drops_on_export(document: &Document) -> bool {
+    !document.fragments.is_empty() || has_use(&document.root)
+}
+
+fn has_use(node: &Node) -> bool {
+    node.kind == "use"
+        || node.children.iter().filter_map(Child::as_node).any(has_use)
+        || node
+            .slots
+            .values()
+            .flatten()
+            .filter_map(Child::as_node)
+            .any(has_use)
 }
 
 fn snapshot(target: &str, name: &str, output: &str) {
@@ -344,6 +362,9 @@ fn json_render_export_validates() {
     let catalog = common::catalog();
     let corpus = common::corpus();
     for (name, document) in screens() {
+        if drops_on_export(&document) {
+            continue;
+        }
         let path = corpus.iter().find(|s| s.name == name).map(|s| &s.path);
         let state = path.and_then(|p| sample(p));
         let spec = to_json_render(&document, &catalog, state.as_ref()).spec;
@@ -367,7 +388,7 @@ fn json_render_round_trip() {
         let (lost, back) = trip(&document);
         assert_lenient_valid(&name, &back, &catalog);
         let markup = weft_core::serialize(&back.document);
-        if lost.is_empty() {
+        if lost.is_empty() && !drops_on_export(&document) {
             assert_eq!(
                 common::as_imported(&weft_core::serialize(&document)),
                 markup,

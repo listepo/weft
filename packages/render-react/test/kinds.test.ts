@@ -86,6 +86,45 @@ test("stack and grid are plain layout containers styled from tokens", () => {
   );
 });
 
+test("layout props are justify, grow, padding, a capped width and a capped grid", () => {
+  const d = doc(
+    el(
+      "stack",
+      "row",
+      {
+        direction: "row",
+        justify: "space-between",
+        padding: { token: "space.lg" },
+        "max-width": { token: "size.lg" },
+      },
+      [el("button", "go", { grow: true }, ["Go"])],
+    ),
+    el("stack", "down", { justify: "end" }, [el("button", "fill", { grow: true }, ["Fill"])]),
+    el("stack", "start", { direction: "row", justify: "start" }),
+    el("grid", "g", {
+      columns: 3,
+      gap: { token: "space.lg" },
+      "min-column-width": { token: "size.sm" },
+    }),
+  );
+  const v = dom(d);
+  const row = v.byId("row").attribs["style"] ?? "";
+  assert.match(row, /padding:var\(--weft-space-lg\)/);
+  assert.match(row, /width:100%/);
+  assert.match(row, /max-width:var\(--weft-size-lg\)/);
+  assert.match(row, /box-sizing:border-box/);
+  assert.match(row, /justify-content:space-between/);
+  assert.match(v.byId("go").attribs["style"] ?? "", /flex:1 1 0%/);
+  assert.match(v.byId("go").attribs["style"] ?? "", /min-width:0/);
+  assert.match(v.byId("down").attribs["style"] ?? "", /justify-content:flex-end/);
+  assert.match(v.byId("fill").attribs["style"] ?? "", /min-height:0/);
+  assert.equal((v.byId("start").attribs["style"] ?? "").includes("justify"), false);
+  assert.equal(
+    v.byId("g").attribs["style"],
+    "gap:var(--weft-space-lg);display:grid;grid-template-columns:repeat(auto-fill, minmax(max(var(--weft-size-sm), calc((100% - 2 * var(--weft-space-lg)) / 3)), 1fr))",
+  );
+});
+
 test("a row without align centres its children, a column and an explicit align do not change", () => {
   const d = doc(
     el("stack", "row", { direction: "row" }),

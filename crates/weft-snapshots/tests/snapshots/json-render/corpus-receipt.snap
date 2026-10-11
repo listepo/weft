@@ -17,6 +17,31 @@ description: corpus-receipt as json-render
     "lines": {
       "type": "stack",
       "props": {},
+      "children": [
+        "subtotal",
+        "total"
+      ]
+    },
+    "subtotal": {
+      "type": "use",
+      "props": {
+        "amount": {
+          "$state": "/subtotal"
+        },
+        "fragment": "price-row",
+        "label": "Subtotal"
+      },
+      "children": []
+    },
+    "total": {
+      "type": "use",
+      "props": {
+        "amount": {
+          "$state": "/total"
+        },
+        "fragment": "price-row",
+        "label": "Total"
+      },
       "children": []
     }
   }

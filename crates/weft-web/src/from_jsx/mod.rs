@@ -5,6 +5,13 @@
 //!
 //! The source is untrusted: it is parsed by oxc, never run. Its length is bounded, nesting is
 //! estimated before parsing (`scan`), and evaluation and output are bounded in steps and nodes.
+//!
+//! Nesting is also the stack budget. Native targets give the reader a 64 MiB thread; `wasm32`
+//! has no thread to give and no host that can raise a stack per call, so the reader runs on the
+//! module's own link-time stack — 1 MiB, the `wasm32-unknown-unknown` default. The scan's
+//! estimate keeps a parse inside half of that 1 MiB, so the same refusal holds on every target:
+//! a source deeper than the estimate is `W602` before any parsing, never a stack trap.
+//! `packages/core/test/jsx-import.test.ts` pins the linked stack and the boundary.
 
 mod eval;
 mod lower;
@@ -33,7 +40,9 @@ use eval::{Env, Eval, Sv, bind_pattern};
 pub const MAX_JSX_LENGTH: usize = 2_000_000;
 
 /// The stack the parser and the reader get on native targets. The nesting estimate keeps a
-/// parse within 1 MiB in a release build; debug builds and deep evaluation need more.
+/// parse within 1 MiB in a release build; debug builds and deep evaluation need more. On
+/// `wasm32` there is no thread to stack-size: the reader runs on the module's link-time 1 MiB
+/// stack, and that same estimate is the whole budget.
 #[cfg(not(target_arch = "wasm32"))]
 const STACK: usize = 64 << 20;
 

@@ -30,14 +30,14 @@ function _act(actions: WeftProps["actions"], event: WeftEvent): void {
 export default function WeftScreen(props: WeftProps) {
   return (
     <main data-weft-id="glass" aria-label="Glass">
-      <div data-weft-id="card" style={{ gap: "var(--weft-space-md)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "flex", "flex-direction": "column" }} data-weft-material="">
+      <div data-weft-id="card" style={{ gap: "var(--weft-space-md)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", padding: "var(--weft-space-lg)", display: "flex", "flex-direction": "column" }} data-weft-material="">
         <h2 data-weft-id="title">
           {!(_text(props.data?.title).trim() === "") ? _squash(_text(props.data?.title)) : ""}
         </h2>
         <div data-weft-id="body">The panel blurs what is behind it.</div>
         <button data-weft-id="close" type="button" data-variant="primary" onClick={(_e) => _act(props.actions, { id: "close", action: "glass.close" })}>Got it</button>
       </div>
-      <div data-weft-id="tiles" style={{ gap: "var(--weft-space-sm)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", display: "grid", "grid-template-columns": "repeat(2, minmax(0, 1fr))" }} data-weft-material="">
+      <div data-weft-id="tiles" style={{ gap: "var(--weft-space-sm)", "--_weft-material-tint": "var(--weft-material-glass-tint)", "--_weft-material-solid": "var(--weft-material-glass-solid)", "--_weft-material-blur": "var(--weft-material-glass-blur)", padding: "var(--weft-space-xl)", width: "100%", "max-width": "var(--weft-size-md)", "box-sizing": "border-box", display: "grid", "grid-template-columns": "repeat(2, minmax(0, 1fr))" }} data-weft-material="">
         <div data-weft-id="tile-light">Light</div>
         <div data-weft-id="tile-dark">Dark</div>
       </div>

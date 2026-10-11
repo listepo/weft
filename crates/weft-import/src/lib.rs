@@ -21,7 +21,7 @@ pub use build::{BuildOptions, Built, build_document};
 pub use cem::{CemImport, CemOptions, MAX_KINDS, MAX_MANIFEST_LENGTH, MAX_MEMBERS, import_cem};
 pub use ids::IdState;
 pub use kinds::{
-    DISSOLVED_ROLES, KindIndex, ROLE_DEFAULTS, ROLE_REFINEMENTS, Refinement, Resolved,
+    DISSOLVED_ROLES, KindIndex, ROLE_DEFAULTS, ROLE_REFINEMENTS, Refinement, Resolved, dissolved,
 };
 pub use limits::{MAX_DEPTH, MAX_NODES, limit_reached};
 pub use loss::{ImportResult, Loss, LossKind, Losses, empty_result};

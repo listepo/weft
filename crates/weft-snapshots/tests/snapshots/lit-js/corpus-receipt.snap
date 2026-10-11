@@ -17,7 +17,7 @@ function _squash(v) {
 }
 
 function PriceRow({ data, actions, onChange, params, slots, id }) {
-  return html`<div data-weft-id=${(id + "/row") ?? nothing} style=${styleMap({ display: "flex", flexDirection: "row", alignItems: "center" })}
+  return html`<div data-weft-id=${(id + "/row") ?? nothing} style=${styleMap({ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" })}
       ><div data-weft-id=${(id + "/name") ?? nothing}>${!(_text(params.label).trim() === "") ? _squash(_text(params.label)) : ""}</div
       ><div data-weft-id=${(id + "/value") ?? nothing}>${!(_text(params.amount).trim() === "") ? _squash(_text(params.amount)) : ""}</div
     ></div>`;

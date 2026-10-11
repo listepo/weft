@@ -13,7 +13,7 @@ export type WeftProps = {
 export default function WeftScreen({ data, actions, onChange }: WeftProps) {
   return (
     <main data-weft-id="root" aria-label="Gallery">
-      <div data-weft-id="cards" style={{ gap: "var(--weft-space-lg)", display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+      <div data-weft-id="cards" style={{ gap: "var(--weft-space-lg)", width: "100%", maxWidth: "var(--weft-size-xl)", boxSizing: "border-box", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(max(var(--weft-size-sm), calc((100% - 2 * var(--weft-space-lg)) / 3)), 1fr))" }}>
         <div data-weft-id="card-a">Revenue</div>
         <div data-weft-id="card-b">Orders</div>
         <div data-weft-id="card-c">Visitors</div>

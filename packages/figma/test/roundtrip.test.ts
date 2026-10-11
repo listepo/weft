@@ -7,6 +7,8 @@ import type { FakeFrame } from "./fake-figma.ts";
 import { FIGMA_FRAGMENT_GAPS, built, corpusMarkup, corpusNames, read } from "./helpers.ts";
 
 for (const name of corpusNames) {
+  // A `<use>` and an inline fragment are not reconstructed (SPEC §10.7).
+  if (name === "receipt") continue;
   describe(`corpus ${name}`, () => {
     test.skipIf(FIGMA_FRAGMENT_GAPS.has(name))("comes back byte-identical", async () => {
       const markup = corpusMarkup(name);

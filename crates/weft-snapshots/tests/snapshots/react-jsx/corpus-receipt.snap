@@ -15,7 +15,7 @@ function _squash(v) {
 
 function PriceRow({ data, actions, onChange, params, slots, id }) {
   return (
-    <div data-weft-id={id + "/row"} style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+    <div data-weft-id={id + "/row"} style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
       <div data-weft-id={id + "/name"}>
         {!(_text(params.label).trim() === "") ? _squash(_text(params.label)) : ""}
       </div>
