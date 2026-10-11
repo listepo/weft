@@ -679,6 +679,8 @@ mod tests {
             weft: "0.1".into(),
             name: "t".into(),
             version: "1".into(),
+            prefix: None,
+            requires: Default::default(),
             components: Default::default(),
             fragments: Default::default(),
         };

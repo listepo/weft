@@ -134,13 +134,20 @@ pub(crate) fn current_index(expr: &SyntaxNode, props: &Props) -> Option<Index> {
 
 /// A px length that equals exactly one dimension token. Two tokens of the same px cannot be
 /// told apart, so the spacing stays a loss.
-pub(crate) fn spacing_token(expr: &SyntaxNode, tokens: &IndexMap<String, Token>) -> Option<String> {
+/// The dimension token whose px value is `expr`, preferring names under `prefer` (`"space."` for
+/// a gap or padding, `"size."` for a width) when several match. None when none or still ambiguous.
+pub(crate) fn spacing_token(
+    expr: &SyntaxNode,
+    tokens: &IndexMap<String, Token>,
+    prefer: &str,
+) -> Option<String> {
     let text = lone_number(expr)?;
     let digits = text.strip_suffix("px")?;
     let px = digits.parse::<f64>().ok()?;
     if !px.is_finite() {
         return None;
     }
+    let mut preferred = None;
     let mut found = None;
     for (name, token) in tokens {
         if token.kind != "dimension" {
@@ -149,14 +156,21 @@ pub(crate) fn spacing_token(expr: &SyntaxNode, tokens: &IndexMap<String, Token>)
         let Some(value) = token_px(token) else {
             continue;
         };
-        if value == px {
-            if found.is_some() {
+        if value != px {
+            continue;
+        }
+        if name.starts_with(prefer) {
+            if preferred.is_some() {
                 return None;
             }
+            preferred = Some(name.clone());
+        } else if found.is_some() {
+            return None;
+        } else {
             found = Some(name.clone());
         }
     }
-    found
+    preferred.or(found)
 }
 
 pub(crate) fn heading_level(size: &SyntaxNode, weight: &SyntaxNode) -> Option<u32> {

@@ -14,7 +14,7 @@ use weft_catalog::token_types;
 use weft_core::{Mode, ValidateOptions, serialize, validate_document};
 use weft_slint::{
     GenerateError, GenerateOptions, ImportError, ImportOptions, MAX_SOURCE_LENGTH, generate,
-    import_slint,
+    import_slint, read_slint,
 };
 
 use common::{document, exported_component, here, screens, setup};
@@ -253,4 +253,51 @@ fn a_fragment_use_is_generated_as_its_expansion() {
         tokens: &tokens,
     };
     assert_eq!(import_slint(&source, &import).unwrap(), doc);
+}
+
+#[test]
+fn layout_props_read_back_without_the_source_comment() {
+    let (catalog, tokens) = setup();
+    let markup = r#"<screen id="lay" weft="0.1">
+  <stack id="row" direction="row" gap="{token.space.sm}" justify="space-between" padding="{token.space.md}" max-width="{token.size.sm}">
+    <text id="a">A</text>
+    <button id="b" grow="true">B</button>
+    <text id="c">C</text>
+  </stack>
+</screen>
+"#;
+    let doc = document(markup, &catalog, &tokens);
+    let options = GenerateOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+        name: None,
+    };
+    let slint = generate(&doc, &options).unwrap();
+    assert!(slint.contains("alignment: LayoutAlignment.space-between;"));
+    assert!(slint.contains("horizontal-stretch: 1;"));
+    assert!(slint.contains("padding:"));
+    assert!(slint.contains("max-width:"));
+    // Drop the source comment: the properties alone must give the layout props back.
+    let bare: String = slint
+        .lines()
+        .filter(|l| !l.starts_with("//"))
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n";
+    let import = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    let back = read_slint(&bare, &import).document;
+    let row = &back.root.children[0];
+    let weft_core::Child::Node(row) = row else {
+        panic!("expected a node");
+    };
+    assert_eq!(row.props.get("justify"), Some(&weft_core::Value::String("space-between".into())));
+    assert_eq!(row.props.get("padding"), Some(&weft_core::Value::Token("space.md".into())));
+    assert_eq!(row.props.get("max-width"), Some(&weft_core::Value::Token("size.sm".into())));
+    let weft_core::Child::Node(button) = &row.children[1] else {
+        panic!("expected a node");
+    };
+    assert_eq!(button.props.get("grow"), Some(&weft_core::Value::Bool(true)));
 }

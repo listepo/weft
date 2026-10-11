@@ -6,6 +6,7 @@
 import type { Token, TokenModifier } from "@weft/catalog";
 import type { Catalog, ComponentDef } from "@weft/core";
 import {
+  catalogGroups,
   combinations,
   drawing,
   hexOf,
@@ -21,6 +22,7 @@ import {
   type Drawing,
   type KindEntry as SharedKindEntry,
   type Length,
+  type LibrarySources,
   type Paint,
   type RGBA,
   type TextDrawing,
@@ -70,12 +72,13 @@ export async function ensureLibrary(
   catalog: Catalog,
   tokens: ReadonlyMap<string, Token>,
   modifier?: TokenModifier,
+  sources?: LibrarySources,
 ): Promise<Library> {
   // With natural ordering, a flex board lists and appends children in the order the layout shows
   // them, which is the order Weft children have.
   api.flags.naturalChildOrdering = true;
   const original = api.currentPage;
-  const tag = libraryTag(catalog);
+  const tag = libraryTag(catalog, sources);
   let page = api.currentFile?.pages.find((p) => readMark(dataOf(p), KEY.library) !== undefined);
   if (page === undefined) {
     page = api.createPage();
@@ -97,9 +100,15 @@ export async function ensureLibrary(
       const entry = existingKind(child, variantAxes(catalog.components[kind] as ComponentDef));
       if (entry !== undefined) library.kinds.set(kind, entry);
     }
-    for (const [kind, def] of Object.entries(catalog.components)) {
-      if (!library.kinds.has(kind))
-        library.kinds.set(kind, await createKind(api, library, kind, def, board));
+    const groups = catalogGroups(catalog, sources);
+    for (const group of groups) {
+      // One catalog keeps the components ungrouped, as a library of the core alone always was.
+      const path = groups.length > 1 ? group.name : undefined;
+      for (const kind of group.kinds) {
+        if (library.kinds.has(kind)) continue;
+        const def = catalog.components[kind] as ComponentDef;
+        library.kinds.set(kind, await createKind(api, library, kind, def, board, path));
+      }
     }
     return library;
   } finally {
@@ -329,6 +338,7 @@ async function createKind(
   kind: string,
   def: ComponentDef,
   board: PBoard,
+  path: string | undefined,
 ): Promise<KindEntry> {
   const axes = variantAxes(def);
   const made = combinations(axes).map((values) => {
@@ -336,6 +346,7 @@ async function createKind(
     root.name = axes.length === 0 ? kind : variantName(values, axes);
     board.appendChild(root);
     const component = api.library.local.createComponent([root]);
+    if (path !== undefined) component.path = path;
     dataOf(component.mainInstance()).setPluginData(KEY.kind, kind);
     return { values, component };
   });

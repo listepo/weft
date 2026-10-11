@@ -68,7 +68,7 @@ struct LayoutScreen: View {
             HStack(spacing: theme.space.sm) {
                 TextField("Search", text: $model.query)
                     .weftFieldType("search")
-                    .weftProp("grow", true)
+                    .frame(maxWidth: .infinity)
                     .accessibilityIdentifier("search")
                 Button {
                     send(.listFilter, "filter")
@@ -81,6 +81,7 @@ struct LayoutScreen: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("toolbar")
             HStack(spacing: theme.space.sm) {
+                Spacer(minLength: 0)
                 Button {
                     send(.listPrevious, "previous")
                 } label: {
@@ -99,11 +100,12 @@ struct LayoutScreen: View {
                 .accessibilityRemoveTraits(.isButton)
                 .accessibilityAddTraits(.isLink)
                 .accessibilityIdentifier("next")
+                Spacer(minLength: 0)
             }
-            .weftProp("justify", "center")
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("pager")
             HStack(spacing: theme.space.sm) {
+                Spacer(minLength: 0)
                 Button {
                     send(.listCancel, "cancel")
                 } label: {
@@ -118,7 +120,6 @@ struct LayoutScreen: View {
                 .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("save")
             }
-            .weftProp("justify", "end")
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("actions")
         }

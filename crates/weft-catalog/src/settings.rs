@@ -137,6 +137,11 @@ const CEM_IMPORT: &[Setting] = &[
         Kind::Text,
         "\"0.0.0\"",
     ),
+    setting(
+        "prefix",
+        "The prefix of the imported catalog: it owns the kinds named `<prefix>-…` and requires the core, so it loads beside a project catalog (SPEC §10.4). Default: none, which makes it the project catalog.",
+        Kind::Text,
+    ),
 ];
 
 /// One section per target (SPEC §10.6 lists the names reserved for targets in progress).
@@ -638,11 +643,28 @@ pub fn project_file_schema() -> Json {
             {
                 "type": "array",
                 "maxItems": MAX_CATALOGS,
-                "items": { "$ref": "#/$defs/fileName" },
+                "items": {
+                    "oneOf": [
+                        { "$ref": "#/$defs/fileName" },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "package": {
+                                    "type": "string",
+                                    "maxLength": 214,
+                                    "pattern": "^(@[a-z0-9~-][a-z0-9._~-]*/)?[a-z0-9~-][a-z0-9._~-]*$",
+                                    "description": "An npm package in node_modules of the project directory or a parent; its package.json names the catalog file in \"weft\": { \"catalog\": … } (SPEC §10.2).",
+                                },
+                            },
+                            "required": ["package"],
+                            "additionalProperties": false,
+                        },
+                    ],
+                },
             },
             { "$ref": "#/$defs/fileName" },
         ],
-        "description": "Catalogs merged over the core catalog: libraries, each owning the kinds under its prefix, and at most one project catalog without a prefix that adds the project's kinds, props and variants (SPEC §10.4).",
+        "description": "Catalogs merged over the core catalog: libraries, each owning the kinds under its prefix, and at most one project catalog without a prefix that adds the project's kinds, props and variants (SPEC §10.4). A library may come from an npm package.",
     }));
     properties.insert(
         "actions".to_owned(),

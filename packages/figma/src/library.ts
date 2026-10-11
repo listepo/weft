@@ -6,6 +6,7 @@
 import type { Token, TokenModifier } from "@weft/catalog";
 import type { Catalog, ComponentDef } from "@weft/core";
 import {
+  catalogGroups,
   combinations,
   drawing,
   KEY,
@@ -18,8 +19,10 @@ import {
   variantName,
   type BoxDrawing,
   type Drawing,
+  type CatalogGroup,
   type KindEntry as SharedKindEntry,
   type Length,
+  type LibrarySources,
   type Paint,
   type TextDrawing,
 } from "@weft/design-tool";
@@ -33,6 +36,7 @@ import type {
   FLayout,
   FNode,
   FPage,
+  FSection,
   FSolid,
   FText,
   FVariable,
@@ -65,9 +69,10 @@ export async function ensureLibrary(
   catalog: Catalog,
   tokens: ReadonlyMap<string, Token>,
   modifier?: TokenModifier,
+  sources?: LibrarySources,
 ): Promise<Library> {
   await loadFonts(api);
-  const tag = libraryTag(catalog);
+  const tag = libraryTag(catalog, sources);
   let page = api.root.children.find((p) => readMark(dataOf(p), KEY.library) !== undefined);
   if (page === undefined) {
     page = api.createPage();
@@ -83,19 +88,7 @@ export async function ensureLibrary(
     notes,
   };
 
-  let board = page.children.find(
-    (n): n is FFrame => n.type === "FRAME" && readMark(dataOf(n), KEY.library) !== undefined,
-  );
-  if (board === undefined) {
-    board = api.createFrame();
-    board.name = LIBRARY_BOARD;
-    dataOf(board).setPluginData(KEY.library, tag);
-    autoLayout(board, "HORIZONTAL", 32, 32);
-    board.layoutWrap = "WRAP";
-    board.fills = [];
-    page.appendChild(board);
-  }
-  for (const child of board.children) {
+  for (const child of libraryBoards(page).flatMap((b) => b.children)) {
     const kind = readMark(dataOf(child), KEY.kind);
     const def = kind === undefined ? undefined : catalog.components[kind];
     if (kind === undefined || def === undefined || !Object.hasOwn(catalog.components, kind))
@@ -112,11 +105,76 @@ export async function ensureLibrary(
       library.kinds.set(kind, { axes, variants, fallback: child.defaultVariant });
     }
   }
-  for (const [kind, def] of Object.entries(catalog.components)) {
-    if (!library.kinds.has(kind))
+  const groups = catalogGroups(catalog, sources);
+  for (const group of groups) {
+    const missing = group.kinds.filter((kind) => !library.kinds.has(kind));
+    if (missing.length === 0) continue;
+    const section = groups.length > 1 ? catalogSection(api, page, group) : undefined;
+    const board = libraryBoard(api, section ?? page, section === undefined ? tag : group.name);
+    for (const kind of missing) {
+      const def = catalog.components[kind] as ComponentDef;
       library.kinds.set(kind, createKind(api, library, kind, def, board));
+    }
+    if (section !== undefined) {
+      board.x = SECTION_PADDING;
+      board.y = SECTION_PADDING;
+      section.resizeWithoutConstraints(
+        board.width + 2 * SECTION_PADDING,
+        board.height + 2 * SECTION_PADDING,
+      );
+    }
   }
   return library;
+}
+
+const SECTION_PADDING = 64;
+
+/** The boards that hold the components: one on the page, or one in each catalog's section. */
+function libraryBoards(page: FPage): FFrame[] {
+  const boards: FFrame[] = [];
+  const add = (nodes: readonly FNode[]) => {
+    for (const n of nodes) {
+      if (n.type === "FRAME" && readMark(dataOf(n), KEY.library) !== undefined) boards.push(n);
+    }
+  };
+  add(page.children);
+  for (const n of page.children) {
+    if (n.type === "SECTION" && readMark(dataOf(n), KEY.library) !== undefined)
+      add(n.children ?? []);
+  }
+  return boards;
+}
+
+function libraryBoard(api: FigmaApi, parent: FPage | FSection, mark: string): FFrame {
+  const found = parent.children.find(
+    (n): n is FFrame => n.type === "FRAME" && readMark(dataOf(n), KEY.library) !== undefined,
+  );
+  if (found !== undefined) return found;
+  const board = api.createFrame();
+  board.name = LIBRARY_BOARD;
+  dataOf(board).setPluginData(KEY.library, mark);
+  autoLayout(board, "HORIZONTAL", 32, 32);
+  board.layoutWrap = "WRAP";
+  board.fills = [];
+  parent.appendChild(board);
+  return board;
+}
+
+/** The section of one catalog, found by its name; a new one goes below everything on the page. */
+function catalogSection(api: FigmaApi, page: FPage, group: CatalogGroup): FSection {
+  const found = page.children.find(
+    (n): n is FNode & FSection =>
+      n.type === "SECTION" && readMark(dataOf(n), KEY.library) === group.name,
+  );
+  if (found !== undefined) return found;
+  const bottom = Math.max(0, ...page.children.map((n) => n.y + n.height + SECTION_PADDING));
+  const section = api.createSection();
+  section.name = `${group.name} ${group.version}`;
+  dataOf(section).setPluginData(KEY.library, group.name);
+  page.appendChild(section);
+  section.x = 0;
+  section.y = bottom;
+  return section;
 }
 
 async function ensureVariables(

@@ -24,6 +24,8 @@ This guide is for people who use Weft: developers who wire it into an app or an 
 | [Catalog and tokens](catalog-and-tokens.md) | Understand and extend the vocabulary and the design values. |
 | [Patches](patches.md) | Change a screen by element id, atomically. |
 | [Projects](projects.md) | Share tokens, components, actions, a data schema and tool settings across screens with `weft.json`. |
+| [Publishing a catalog](publishing-catalogs.md) | Make a library of components with its own prefix and ship it as an npm package. |
+| [Catalogs](catalogs.md) | The known catalogs and the prefixes they take. |
 | [Contributing](contributing.md) | Build, test and change Weft. |
 
 ## How to read the commands

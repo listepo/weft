@@ -15,6 +15,9 @@
 | Cursor | https://cursor.com/download | Hosts the plugin (`plugins/cursor`); no test needs it | https://cursor.com |
 | Open Design | https://open-design.ai | Hosts the plugin (`plugins/open-design`); no test needs it | https://github.com/nexu-io/open-design |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
+| jactionlint | mise (`github:jdx/jactionlint`) | Lints the workflows (CI, the pre-push hook and `mise x -- jactionlint`) | https://github.com/jdx/jactionlint |
+| hk | mise | Runs jactionlint as a pre-push hook (`hk.pkl`) | https://github.com/jdx/hk |
+| shellcheck | mise | Checks `run:` scripts inside jactionlint | https://github.com/koalaman/shellcheck |
 | cargo-insta | `cargo install cargo-insta` (optional) | Reviews changed snapshots (`cargo insta review`); the tests run without it | https://github.com/mitsuhiko/insta |
 | Xcode (`xcrun swiftc`, `xcodebuild`, `swift`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14, and builds the SwiftPM plugins, the sample projects and the Source Editor Extension (`plugins/xcode`); those tests skip without it | https://developer.apple.com/xcode/ |
 | XcodeGen | mise | Generates the `.xcodeproj` of the Xcode sample and of the Source Editor Extension from YAML (`plugins/xcode`), so no project file is committed | https://github.com/yonaskolb/XcodeGen |
@@ -41,6 +44,9 @@
 | aqua:yonaskolb/XcodeGen | global | https://github.com/yonaskolb/XcodeGen | Xcode projects of `plugins/xcode` |
 | uv | global | https://github.com/astral-sh/uv | Backend for the `pipx:` tools |
 | pipx:translate-toolkit | global | https://github.com/translate/translate | Localization converters and checks |
+| github:jdx/jactionlint | global | https://github.com/jdx/jactionlint | Workflow lint |
+| hk | global | https://github.com/jdx/hk | Pre-push hook runner |
+| shellcheck | global | https://github.com/koalaman/shellcheck | Shell checks inside jactionlint |
 
 ## cargo
 

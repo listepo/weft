@@ -54,7 +54,7 @@ struct RootScreen: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            HStack(alignment: .bottom, spacing: theme.space.md) {
+            HStack(alignment: .bottom, spacing: 0) {
                 Button {
                     send(.docSave, "save")
                 } label: {
@@ -62,6 +62,7 @@ struct RootScreen: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("save")
+                Spacer(minLength: theme.space.md)
                 Button {
                     send(.docDiscard, "discard")
                 } label: {
@@ -69,8 +70,7 @@ struct RootScreen: View {
                 }
                 .accessibilityIdentifier("discard")
             }
-            .weftProp("justify", "space-between")
-            .weftProp("padding", theme.space.sm)
+            .padding(theme.space.sm)
             .weftProp("wrap", false)
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("actions")

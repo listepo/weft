@@ -29,14 +29,33 @@
           "type": "array",
           "maxItems": 32,
           "items": {
-            "$ref": "#/$defs/fileName"
+            "oneOf": [
+              {
+                "$ref": "#/$defs/fileName"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "package": {
+                    "type": "string",
+                    "maxLength": 214,
+                    "pattern": "^(@[a-z0-9~-][a-z0-9._~-]*/)?[a-z0-9~-][a-z0-9._~-]*$",
+                    "description": "An npm package in node_modules of the project directory or a parent; its package.json names the catalog file in \"weft\": { \"catalog\": … } (SPEC §10.2)."
+                  }
+                },
+                "required": [
+                  "package"
+                ],
+                "additionalProperties": false
+              }
+            ]
           }
         },
         {
           "$ref": "#/$defs/fileName"
         }
       ],
-      "description": "Catalogs merged over the core catalog: libraries, each owning the kinds under its prefix, and at most one project catalog without a prefix that adds the project's kinds, props and variants (SPEC §10.4)."
+      "description": "Catalogs merged over the core catalog: libraries, each owning the kinds under its prefix, and at most one project catalog without a prefix that adds the project's kinds, props and variants (SPEC §10.4). A library may come from an npm package."
     },
     "actions": {
       "type": "array",
@@ -446,6 +465,11 @@
               "minLength": 1,
               "description": "The version of the imported catalog.",
               "default": "0.0.0"
+            },
+            "prefix": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The prefix of the imported catalog: it owns the kinds named `<prefix>-…` and requires the core, so it loads beside a project catalog (SPEC §10.4). Default: none, which makes it the project catalog."
             }
           },
           "additionalProperties": false,

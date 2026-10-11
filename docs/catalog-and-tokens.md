@@ -55,7 +55,18 @@ $ weft validate weft-tour/login-ghost.weft --catalog weft-tour/acme.catalog.json
 exit 0
 ```
 
-An agent that is told which catalog the host uses (`weft_catalog` reports it) writes only what that catalog allows. There is no shared registry of extension catalogs yet, and the MCP server and the plugin use the core catalog.
+A catalog does not have to be a full copy. Given with `--catalog` (or listed in a project's `catalog`), a catalog not named `weft-core` is merged over the core one, so it holds only what it adds: new components, and new values or props on existing ones.
+
+**A library.** A catalog shared between projects names a `prefix`, and every component it adds starts with it: `acme-ui` (prefix `acme`) adds `<acme-button>` and `<acme-card>`. Libraries load side by side, before the project's own catalog, which widens them like the core. `--catalog` can be repeated, in that order:
+
+```console
+$ weft validate examples/project/screens/review.weft --no-project --catalog examples/project/catalogs/acme-ui.catalog.json --catalog examples/project/catalog.json --strict; echo "exit $?"
+exit 0
+```
+
+`weft import-cem --prefix acme` makes such a library from a Custom Elements Manifest. [Projects](projects.md#several-catalogs) shows one in use, and [SPEC §10.4](../SPEC.md#104-catalog-extension) has the rules.
+
+An agent that is told which catalogs the host uses (`weft_capabilities` lists them, `weft_catalog` names each component's catalog) writes only what they allow. Libraries are shared as npm packages that a project lists as `{ "package": "@acme/ui" }` ([Publishing a catalog](publishing-catalogs.md)); [Catalogs](catalogs.md) lists the known ones and their prefixes. The MCP server takes the project's catalogs (its `--project`, or a `project` argument); the design plugins use the core catalog.
 
 ### Versioning a catalog
 
@@ -154,4 +165,4 @@ A `stack` or `grid` takes it with `material="{token.material.glass}"`. The file 
 
 - The loader reads the DTCG subset Weft needs: groups, `$type`, `$value`, aliases and `$root`. It does not read `$extends`, `$ref` or the resolver module, and it ignores `$description`, `$extensions` and `$deprecated`.
 - There is one set of tokens per run.
-- The catalog format has no inheritance. A custom catalog is a full copy that you keep in step with the core one; `diffCatalogs` tells you what changed.
+- A catalog extends the core and the libraries before it, and only widens them. A full copy of the core catalog, as in the example above, still works, but you keep it in step with the core one; `diffCatalogs` tells you what changed.

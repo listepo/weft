@@ -20,11 +20,11 @@ impl Scratch {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let fixture: serde_json::Value = serde_json::from_str(FIXTURE).unwrap();
-        std::fs::write(
-            dir.join("catalog.json"),
-            fixture["catalogs"]["test"].to_string(),
-        )
-        .unwrap();
+        let mut catalog = fixture["catalogs"]["test"].clone();
+        // A whole catalog replaces the core only under the core's name (SPEC §10.2); any other
+        // `--catalog` file is merged over the core, as the TypeScript CLI does not do.
+        catalog["name"] = "weft-core".into();
+        std::fs::write(dir.join("catalog.json"), catalog.to_string()).unwrap();
         Scratch(dir)
     }
 
@@ -132,6 +132,31 @@ fn fmt_prints_canonical_markup_and_write_rewrites_the_file() {
     assert_eq!(printed.code, 0);
     assert_eq!(printed.stdout, CANONICAL);
     assert_eq!(run(&[&"fmt", &path, &"--write"]).code, 0);
+    assert_eq!(std::fs::read_to_string(&path).unwrap(), CANONICAL);
+}
+
+#[test]
+fn fmt_write_follows_a_symlink_and_leaves_the_link() {
+    use std::os::unix::fs::symlink;
+    let s = Scratch::new("fmt-link");
+    let target = s.file("real.weft", MESSY);
+    let link = s.0.join("link.weft");
+    symlink(&target, &link).unwrap();
+    assert_eq!(run(&[&"fmt", &link, &"--write"]).code, 0);
+    assert!(link.symlink_metadata().unwrap().file_type().is_symlink());
+    assert_eq!(std::fs::read_to_string(&target).unwrap(), CANONICAL);
+    assert_eq!(std::fs::read_to_string(&link).unwrap(), CANONICAL);
+}
+
+#[test]
+fn fmt_write_keeps_the_files_permissions() {
+    use std::os::unix::fs::PermissionsExt;
+    let s = Scratch::new("fmt-mode");
+    let path = s.file("messy.weft", MESSY);
+    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o640)).unwrap();
+    assert_eq!(run(&[&"fmt", &path, &"--write"]).code, 0);
+    let mode = std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
+    assert_eq!(mode, 0o640);
     assert_eq!(std::fs::read_to_string(&path).unwrap(), CANONICAL);
 }
 

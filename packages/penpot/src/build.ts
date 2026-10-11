@@ -8,6 +8,7 @@ import {
   findBelow,
   hexOf,
   type BuildHost,
+  type Built as BuiltRoot,
   type Display,
   type Marks,
 } from "@weft/design-tool";
@@ -156,12 +157,12 @@ export async function buildScreen(
   api: PenpotApi,
   document: Document,
   options: BuildOptions,
-): Promise<PBoard> {
+): Promise<BuiltRoot<PBoard>> {
   const { library, ...rest } = options;
-  const root = await buildShared(penpotHost(api, library), document, {
+  const built = await buildShared(penpotHost(api, library), document, {
     ...rest,
     kinds: library.kinds,
   });
-  if (!isBoard(root)) throw new Error("a document root must be a board");
-  return root;
+  if (!isBoard(built.root)) throw new Error("a document root must be a board");
+  return built as BuiltRoot<PBoard>;
 }

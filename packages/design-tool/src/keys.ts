@@ -56,8 +56,14 @@ export type Source = {
 
 export type Shown = { text?: string | undefined; label?: string | undefined };
 
-// Figma allows 100 kB per entry; a larger value cannot be ours in either tool.
+// Figma allows 100 kB per entry (UTF-8 bytes); a larger value cannot be ours in either tool.
 const MAX_ENTRY = 100_000;
+const utf8 = new TextEncoder();
+
+/** UTF-8 byte length, which is what the entry cap counts (not UTF-16 code units). */
+function utf8Bytes(raw: string): number {
+  return utf8.encode(raw).length;
+}
 
 const SourceSchema = z.strictObject({
   kind: z.string(),
@@ -81,7 +87,7 @@ export function sourceOf(node: Node, leaf: boolean, shown: Shown): Source {
 
 function readJson(layer: PluginData, key: string): unknown {
   const raw = layer.getPluginData(key);
-  if (raw === "" || raw.length > MAX_ENTRY) return undefined;
+  if (raw === "" || utf8Bytes(raw) > MAX_ENTRY) return undefined;
   try {
     return JSON.parse(raw) as unknown;
   } catch {
@@ -103,12 +109,18 @@ export function readSource(layer: PluginData): Source | undefined {
   return source;
 }
 
-export function writeJson(layer: PluginData, key: string, value: unknown): void {
+/**
+ * Stores a plugin-data entry when it fits the UTF-8 cap. An oversized entry is not stored and the
+ * return is the build note to report; the build draws the layer without it, and a pull then reads
+ * that layer as foreign (no `weft.source`).
+ */
+export function writeJson(layer: PluginData, key: string, value: unknown): string | undefined {
   const raw = JSON.stringify(value);
-  if (raw.length > MAX_ENTRY) {
-    throw new Error(`plugin data for ${key} is longer than ${MAX_ENTRY} bytes`);
+  if (utf8Bytes(raw) > MAX_ENTRY) {
+    return `plugin data for ${key} is longer than ${MAX_ENTRY} bytes and was not stored`;
   }
   layer.setPluginData(key, raw);
+  return undefined;
 }
 
 /**
