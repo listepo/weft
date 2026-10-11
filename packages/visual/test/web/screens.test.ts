@@ -19,9 +19,10 @@ import {
 type Props = { data?: unknown };
 
 // Known gap: an inline fragment is a component of its own in generated JSX, and the convention
-// import drops it with its call sites as a `kinds` loss, since an importer never produces a `<use>`
-// (SPEC §10.7). Pinned with `test.fails` so a fix shows up as a failure here.
-const JSX_FRAGMENT_GAP = new Set(["receipt"]);
+// import drops it with its call sites as a `kinds` loss; the design tools draw a use expanded and
+// never reconstruct it, since an importer never produces a `<use>` (SPEC §10.7). Pinned with
+// `test.fails` so a fix shows up as a failure here.
+const FRAGMENT_GAP = new Set(["receipt"]);
 
 for (const screen of screens) {
   const { name, data } = screen;
@@ -89,17 +90,17 @@ for (const screen of screens) {
     test("round trip through the HTML importer looks the same", async () => {
       await expectSameLook("#html", "#html-back", `roundtrip/${name}.html`);
     });
-    const jsxRoundTrip = JSX_FRAGMENT_GAP.has(name) ? test.fails : test;
-    jsxRoundTrip("round trip through the React importer looks the same", async () => {
+    const roundTrip = FRAGMENT_GAP.has(name) ? test.fails : test;
+    roundTrip("round trip through the React importer looks the same", async () => {
       await expectSameLook("#react", "#react-back", `roundtrip/${name}.react`);
     });
-    jsxRoundTrip("round trip through the SolidJS importer looks the same", async () => {
+    roundTrip("round trip through the SolidJS importer looks the same", async () => {
       await expectSameLook("#solid", "#solid-back", `roundtrip/${name}.solid`);
     });
-    test("round trip through Figma looks the same", async () => {
+    roundTrip("round trip through Figma looks the same", async () => {
       await expectSameLook("#reference", "#figma-back", `roundtrip/${name}.figma`);
     });
-    test("round trip through Penpot looks the same", async () => {
+    roundTrip("round trip through Penpot looks the same", async () => {
       await expectSameLook("#reference", "#penpot-back", `roundtrip/${name}.penpot`);
     });
   });

@@ -293,11 +293,23 @@ fn layout_props_read_back_without_the_source_comment() {
     let weft_core::Child::Node(row) = row else {
         panic!("expected a node");
     };
-    assert_eq!(row.props.get("justify"), Some(&weft_core::Value::String("space-between".into())));
-    assert_eq!(row.props.get("padding"), Some(&weft_core::Value::Token("space.md".into())));
-    assert_eq!(row.props.get("max-width"), Some(&weft_core::Value::Token("size.sm".into())));
+    assert_eq!(
+        row.props.get("justify"),
+        Some(&weft_core::Value::String("space-between".into()))
+    );
+    assert_eq!(
+        row.props.get("padding"),
+        Some(&weft_core::Value::Token("space.md".into()))
+    );
+    assert_eq!(
+        row.props.get("max-width"),
+        Some(&weft_core::Value::Token("size.sm".into()))
+    );
     let weft_core::Child::Node(button) = &row.children[1] else {
         panic!("expected a node");
     };
-    assert_eq!(button.props.get("grow"), Some(&weft_core::Value::Bool(true)));
+    assert_eq!(
+        button.props.get("grow"),
+        Some(&weft_core::Value::Bool(true))
+    );
 }

@@ -597,9 +597,11 @@ impl<'a> Reader<'a> {
                     Some(token) => {
                         node.props.insert(key.into(), Value::Token(token));
                     }
-                    None => {
-                        self.lose(LossKind::Layout, path, &format!("{key} is not a dimension token"))
-                    }
+                    None => self.lose(
+                        LossKind::Layout,
+                        path,
+                        &format!("{key} is not a dimension token"),
+                    ),
                 }
             }
         }
@@ -933,13 +935,12 @@ impl<'a> Reader<'a> {
                 hidden,
             },
         );
-        if fs
-            .iter()
-            .any(|fact| {
-                matches!(fact.name.as_str(), "horizontal-stretch" | "vertical-stretch")
-                    && (fact.raw == "1" || fact.raw == "1.0")
-            })
-            && let Some(Child::Node(node)) = kids.first_mut()
+        if fs.iter().any(|fact| {
+            matches!(
+                fact.name.as_str(),
+                "horizontal-stretch" | "vertical-stretch"
+            ) && (fact.raw == "1" || fact.raw == "1.0")
+        }) && let Some(Child::Node(node)) = kids.first_mut()
         {
             node.props.insert("grow".into(), Value::Bool(true));
         }
@@ -1153,7 +1154,9 @@ fn is_placement(name: &str, raw: &str) -> bool {
     match name {
         "row" | "col" | "visible" => true,
         "alignment" => raw == "LayoutAlignment.start",
-        "horizontal-stretch" | "vertical-stretch" => raw == "0" || raw == "0.0" || raw == "1" || raw == "1.0",
+        "horizontal-stretch" | "vertical-stretch" => {
+            raw == "0" || raw == "0.0" || raw == "1" || raw == "1.0"
+        }
         _ => false,
     }
 }
@@ -1377,10 +1380,7 @@ fn only_plain_column(el: &SyntaxNode) -> Option<Vec<SyntaxNode>> {
         return None;
     }
     let fs = facts(&inner);
-    if !fs
-        .iter()
-        .all(|fact| is_placement(&fact.name, &fact.raw))
-    {
+    if !fs.iter().all(|fact| is_placement(&fact.name, &fact.raw)) {
         return None;
     }
     let calls = inner

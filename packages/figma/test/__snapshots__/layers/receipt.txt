@@ -1,0 +1,17 @@
+FRAME "screen#receipt" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" paddingLeft=24 paddingRight=24 paddingTop=24 paddingBottom=24 fills=[{"type":"SOLID","color":"#ffffff","boundVariables":{"color":"var(color/white)"}}]
+  | weft.document = {"weft":"0.2"}
+  | weft.origin = layer(screen#receipt)
+  | weft.source = {"kind":"screen","id":"receipt","props":{"label":"Receipt"}}
+  | weft.style = [[[1,1,1,1,"var(color/white)"]],[],0,[24,24,24,24],8]
+  FRAME "stack#lines" layoutMode="VERTICAL" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO"
+    | weft.origin = layer(stack#lines)
+    | weft.source = {"kind":"stack","id":"lines"}
+    | weft.style = [[],[],0,[0,0,0,0],null]
+    FRAME "use#subtotal" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(use#subtotal)
+      | weft.source = {"kind":"use","id":"subtotal","props":{"amount":{"bind":"$.subtotal"},"fragment":"price-row","label":"Subtotal"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
+    FRAME "use#total" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=8 paddingRight=8 paddingTop=8 paddingBottom=8
+      | weft.origin = layer(use#total)
+      | weft.source = {"kind":"use","id":"total","props":{"amount":{"bind":"$.total"},"fragment":"price-row","label":"Total"}}
+      | weft.style = [[],[],0,[8,8,8,8],8]
