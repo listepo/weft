@@ -1,0 +1,72 @@
+claude-sonnet-5-5 login.q1 weft: ok
+claude-sonnet-5-5 login.q1 html: FAIL
+claude-sonnet-5-5 login.q1 jsx: FAIL
+claude-sonnet-5-5 login.q1 a2ui: FAIL
+claude-sonnet-5-5 login.q2 weft: ok
+claude-sonnet-5-5 login.q2 html: FAIL
+claude-sonnet-5-5 login.q2 jsx: ok
+claude-sonnet-5-5 login.q2 a2ui: ok
+claude-sonnet-5-5 signup.q1 weft: ok
+claude-sonnet-5-5 signup.q1 html: FAIL
+claude-sonnet-5-5 signup.q1 jsx: FAIL
+claude-sonnet-5-5 signup.q1 a2ui: FAIL
+claude-sonnet-5-5 signup.q2 weft: ok
+claude-sonnet-5-5 signup.q2 html: ok
+claude-sonnet-5-5 signup.q2 jsx: ok
+claude-sonnet-5-5 signup.q2 a2ui: ok
+claude-sonnet-5-5 settings.q1 weft: ok
+claude-sonnet-5-5 settings.q1 html: FAIL
+claude-sonnet-5-5 settings.q1 jsx: FAIL
+claude-sonnet-5-5 settings.q1 a2ui: FAIL
+claude-sonnet-5-5 settings.q2 weft: ok
+claude-sonnet-5-5 settings.q2 html: ok
+claude-sonnet-5-5 settings.q2 jsx: ok
+claude-sonnet-5-5 settings.q2 a2ui: FAIL
+claude-sonnet-5-5 data-table.q1 weft: ok
+claude-sonnet-5-5 data-table.q1 html: ok
+claude-sonnet-5-5 data-table.q1 jsx: FAIL
+claude-sonnet-5-5 data-table.q1 a2ui: FAIL
+claude-sonnet-5-5 data-table.q2 weft: ok
+claude-sonnet-5-5 data-table.q2 html: ok
+claude-sonnet-5-5 data-table.q2 jsx: ok
+claude-sonnet-5-5 data-table.q2 a2ui: ok
+claude-sonnet-5-5 tabs.q1 weft: ok
+claude-sonnet-5-5 tabs.q1 html: ok
+claude-sonnet-5-5 tabs.q1 jsx: ok
+claude-sonnet-5-5 tabs.q1 a2ui: ok
+claude-sonnet-5-5 tabs.q2 weft: ok
+claude-sonnet-5-5 tabs.q2 html: FAIL
+claude-sonnet-5-5 tabs.q2 jsx: FAIL
+claude-sonnet-5-5 tabs.q2 a2ui: FAIL
+claude-sonnet-5-5 confirm-dialog.q1 weft: ok
+claude-sonnet-5-5 confirm-dialog.q1 html: FAIL
+claude-sonnet-5-5 confirm-dialog.q1 jsx: FAIL
+claude-sonnet-5-5 confirm-dialog.q1 a2ui: FAIL
+claude-sonnet-5-5 confirm-dialog.q2 weft: ok
+claude-sonnet-5-5 confirm-dialog.q2 html: ok
+claude-sonnet-5-5 confirm-dialog.q2 jsx: FAIL
+claude-sonnet-5-5 confirm-dialog.q2 a2ui: FAIL
+claude-sonnet-5-5 wizard-step.q1 weft: ok
+claude-sonnet-5-5 wizard-step.q1 html: FAIL
+claude-sonnet-5-5 wizard-step.q1 jsx: FAIL
+claude-sonnet-5-5 wizard-step.q1 a2ui: FAIL
+claude-sonnet-5-5 wizard-step.q2 weft: ok
+claude-sonnet-5-5 wizard-step.q2 html: FAIL
+claude-sonnet-5-5 wizard-step.q2 jsx: ok
+claude-sonnet-5-5 wizard-step.q2 a2ui: FAIL
+claude-sonnet-5-5 search-results.q1 weft: FAIL
+claude-sonnet-5-5 search-results.q1 html: FAIL
+claude-sonnet-5-5 search-results.q1 jsx: FAIL
+file:///Users/listepo/GitHub/listepo/_worktrees/weft-t8/bench/src/provider.ts:56
+    throw new Error(`Anthropic API ${res.status}: ${(await res.text()).slice(0, 500)}`);
+          ^
+
+Error: Anthropic API 400: {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"req_011CffvZgDkwP5dGXLXu44EJ"}
+    at post (file:///Users/listepo/GitHub/listepo/_worktrees/weft-t8/bench/src/provider.ts:56:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Object.complete (file:///Users/listepo/GitHub/listepo/_worktrees/weft-t8/bench/src/provider.ts:63:21)
+    at async runTask (file:///Users/listepo/GitHub/listepo/_worktrees/weft-t8/bench/src/run-tasks.ts:104:22)
+    at async tasksCommand (file:///Users/listepo/GitHub/listepo/_worktrees/weft-t8/bench/src/run.ts:75:19)
+    at async file:///Users/listepo/GitHub/listepo/_worktrees/weft-t8/bench/src/run.ts:95:52
+
+Node.js v26.7.0
