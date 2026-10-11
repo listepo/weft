@@ -195,6 +195,8 @@ tasks:
         "!/crates/weft-slint/tests/screenshots/diffs/**",
         "/Cargo.toml",
         "/Cargo.lock",
+        # nextest reads it (the Swift typecheck timeout).
+        "/.config/nextest.toml",
         "/packages/catalog/catalog.json",
         "/packages/catalog/examples/**/*",
         "/packages/catalog/tokens/**/*",

@@ -2,6 +2,11 @@
 //! sample data, with the tokens in the screen file and in the shared `WeftTokens`, and the
 //! generated Swift typechecks with the installed Xcode for iOS 17 and macOS 14. Without `xcrun` (Linux, CI without Xcode) the
 //! typecheck is skipped with a message; generation is still checked.
+//!
+//! `xcrun swiftc` is slow (minutes per SDK), so the typecheck keeps a module cache and a stamp of
+//! the toolchain-and-sources key under `~/Library/Caches/weft-swiftui/` (see `cache_root`): a warm
+//! run of the same sources skips `swiftc` entirely. `.config/nextest.toml` terminates a run that
+//! still overruns.
 
 #![allow(clippy::unwrap_used, clippy::panic)]
 
@@ -144,7 +149,47 @@ fn xcrun_available() -> bool {
         .is_ok_and(|o| o.status.success())
 }
 
+/// Where the Swift typecheck cache lives: the module cache `swiftc` fills, and a stamp of the
+/// last toolchain-and-sources key that typechecked. `~/Library/Caches` (as `@weft/visual` uses)
+/// so `cargo clean` does not drop a warm run; `CARGO_TARGET_TMPDIR` when home is not writable.
+fn cache_root() -> PathBuf {
+    let home =
+        std::env::var_os("HOME").map(|h| PathBuf::from(h).join("Library/Caches/weft-swiftui"));
+    if let Some(dir) = home.filter(|d| std::fs::create_dir_all(d).is_ok()) {
+        return dir;
+    }
+    let dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join("weft-swiftui-cache");
+    std::fs::create_dir_all(&dir).unwrap();
+    dir
+}
+
+/// The key of one typecheck: the toolchain, the target and every source it will see. Two runs
+/// with equal keys answer the same, so a stamp of a previous success can stand in for `swiftc`.
+fn typecheck_key(sdk: &str, target: &str, sources: &[(String, String)]) -> Vec<u8> {
+    fn push(key: &mut Vec<u8>, part: &[u8]) {
+        key.extend_from_slice(&(part.len() as u64).to_le_bytes());
+        key.extend_from_slice(part);
+    }
+    let mut key = Vec::new();
+    push(&mut key, sdk.as_bytes());
+    push(&mut key, target.as_bytes());
+    // The compiler that will read the sources; a new Xcode must typecheck again.
+    let version = Command::new("xcrun")
+        .args(["swiftc", "--version"])
+        .output()
+        .unwrap();
+    push(&mut key, &version.stdout);
+    push(&mut key, &version.stderr);
+    for (name, content) in sources {
+        push(&mut key, name.as_bytes());
+        push(&mut key, content.as_bytes());
+    }
+    key
+}
+
 fn swiftc(sdk: &str, target: &str, dir: &Path, files: &[PathBuf]) {
+    let module_cache = cache_root().join("modules");
+    std::fs::create_dir_all(&module_cache).unwrap();
     let output = Command::new("xcrun")
         .args([
             "--sdk",
@@ -156,6 +201,8 @@ fn swiftc(sdk: &str, target: &str, dir: &Path, files: &[PathBuf]) {
             "-target",
             target,
         ])
+        .arg("-module-cache-path")
+        .arg(&module_cache)
         .args(files)
         .output()
         .unwrap();
@@ -176,26 +223,60 @@ fn typecheck(sdk: &str, target: &str) {
     }
     let fixtures = PathBuf::from(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures"));
     let dir = Path::new(env!("CARGO_TARGET_TMPDIR")).join(format!("swiftui-{sdk}"));
-    let mut files = write(&dir, core_module());
-    // The hand-written sample the import test reads must be real SwiftUI too.
-    files.push(fixtures.join("import/Settings.swift"));
-    swiftc(sdk, target, &dir, &files);
+    // Everything the two kinds of module below will typecheck, collected first so the stamp can
+    // key on it: the core screens in one module, then each project as its own.
+    let core = core_module();
     // Each project is its own module: its `WeftTokens` differ, and the app supplies the views of
     // its own kinds.
-    for (i, project) in common::projects().iter().enumerate() {
-        let dir = dir.join(format!("project-{i}"));
-        let mut files = write(
-            &dir,
+    let project_modules: Vec<_> = common::projects()
+        .iter()
+        .map(|project| {
             module(
                 &project.screens,
                 &project.catalog,
                 &project.tokens,
                 appearance(&project.modifiers),
-            ),
+            )
+        })
+        .collect();
+    let mut sources: Vec<(String, String)> = core
+        .iter()
+        .map(|(name, swift)| (format!("{name}.swift"), swift.clone()))
+        .collect();
+    sources.push((
+        "import/Settings.swift".to_owned(),
+        std::fs::read_to_string(fixtures.join("import/Settings.swift")).unwrap(),
+    ));
+    for (i, project) in project_modules.iter().enumerate() {
+        for (name, swift) in project {
+            sources.push((format!("project-{i}/{name}.swift"), swift.clone()));
+        }
+        sources.push((
+            format!("project-{i}/Views.swift"),
+            std::fs::read_to_string(fixtures.join("project/Views.swift")).unwrap(),
+        ));
+    }
+    let cache = cache_root();
+    let stamp = cache.join(format!("typecheck-{sdk}.stamp"));
+    let key = typecheck_key(sdk, target, &sources);
+    if std::fs::read(&stamp).is_ok_and(|prev| prev == key) {
+        eprintln!(
+            "cached: the generated Swift for {target} already typechecked with this toolchain and these sources ({}); delete that file to typecheck again",
+            stamp.display()
         );
+        return;
+    }
+    let mut files = write(&dir, core);
+    // The hand-written sample the import test reads must be real SwiftUI too.
+    files.push(fixtures.join("import/Settings.swift"));
+    swiftc(sdk, target, &dir, &files);
+    for (i, project) in project_modules.iter().enumerate() {
+        let dir = dir.join(format!("project-{i}"));
+        let mut files = write(&dir, project.clone());
         files.push(fixtures.join("project/Views.swift"));
         swiftc(sdk, target, &dir, &files);
     }
+    std::fs::write(&stamp, &key).unwrap();
 }
 
 #[test]
