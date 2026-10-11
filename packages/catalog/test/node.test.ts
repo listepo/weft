@@ -19,6 +19,7 @@ import {
   chooseProject,
   findProject,
   projectPath,
+  readCapped,
   readProject,
   readResolver,
   readTokenLayers,
@@ -239,6 +240,69 @@ describe("project settings helpers", () => {
     assert.equal(byDefault.tokens?.get("color.star")?.value, "#d97706");
     const plain = readTokenLayers(join(example, "weft.json"), ["tokens/base.tokens.json"], "#");
     assert.deepEqual(withAppearance(plain, "dark"), { tokens: plain.tokens, scheme: undefined });
+  });
+});
+
+describe("readCapped", () => {
+  test("loops a reader that returns fewer bytes than asked", () => {
+    const parts = [Buffer.from("hel"), Buffer.from("lo"), Buffer.from("!")];
+    let i = 0;
+    const text = readCapped(
+      (buf) => {
+        if (i >= parts.length) return 0;
+        const part = parts[i]!;
+        i += 1;
+        const n = Math.min(buf.length, part.length);
+        part.copy(buf, 0, 0, n);
+        return n;
+      },
+      10,
+      "short",
+    );
+    assert.equal(text, "hello!");
+  });
+
+  test("stops at the byte ceiling when a short read would pass it", () => {
+    const chunk = Buffer.alloc(3, 0x61); // "aaa", ASCII so 3 bytes = 3 chars
+    let calls = 0;
+    assert.throws(
+      () =>
+        readCapped(
+          (buf) => {
+            calls += 1;
+            return chunk.copy(buf, 0);
+          },
+          2,
+          "cap",
+        ),
+      /cap is longer than 2 characters/,
+    );
+    assert.ok(calls >= 2);
+  });
+
+  test("refuses a decoded string over the character ceiling", () => {
+    // Three ASCII characters fit under maxChars*4 bytes but not under maxChars.
+    let done = false;
+    assert.throws(
+      () =>
+        readCapped(
+          (buf) => {
+            if (done) return 0;
+            done = true;
+            return buf.write("abc", "utf8");
+          },
+          2,
+          "chars",
+        ),
+      /chars is longer than 2 characters/,
+    );
+  });
+
+  test("returns an empty string when the reader is at EOF", () => {
+    assert.equal(
+      readCapped(() => 0, 10, "empty"),
+      "",
+    );
   });
 });
 
