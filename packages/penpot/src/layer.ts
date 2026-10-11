@@ -56,8 +56,8 @@ const blur = (b: PBlur | undefined): unknown =>
 
 /**
  * The visual properties Weft has no prop for, as one comparable string: fills, strokes, the
- * background blur (a material's), corner radius and padding, plus spacing on boards whose spacing
- * is not a prop. Token bindings are left
+ * background blur (a material's), corner radius and, when `withSpacing`, padding and spacing (on a
+ * board whose spacing and padding are props those are left out). Token bindings are left
  * out: Penpot applies a token after the call returns, so the build could not see its own binding,
  * and a binding without a value change shows nothing on the canvas.
  */
@@ -68,8 +68,8 @@ export function styleKey(shape: PShape, withSpacing: boolean): string {
     fills(shape.fills),
     strokes(shape.strokes),
     shape.borderRadius,
-    layout === undefined
-      ? [0, 0, 0, 0]
+    !withSpacing || layout === undefined
+      ? null
       : [layout.leftPadding, layout.rightPadding, layout.topPadding, layout.bottomPadding],
     withSpacing && isBoard(shape) && layout !== undefined
       ? layout[gapField(shape, shape.grid !== undefined)]
@@ -90,13 +90,48 @@ const NO_LAYOUT: LayerLayout = {
   alignLabel: "start",
   wrap: false,
   columns: 1,
+  justify: "start",
+  justifyLabel: "start",
+  padding: 0,
+  maxWidth: undefined,
+  minWidth: undefined,
+  flexTracks: true,
 };
+
+const JUSTIFY = {
+  start: "start",
+  center: "center",
+  end: "end",
+  "space-between": "space-between",
+  "space-around": undefined,
+  "space-evenly": undefined,
+  stretch: undefined,
+} as const;
+
+const SIZING = { auto: "hug", fix: "fixed", fill: "fill" } as const;
 
 function layoutView(shape: PShape): LayerLayout {
   if (!isBoard(shape)) return NO_LAYOUT;
   const align = (layout: PCommonLayout) => {
     const label = layout.alignItems ?? "start";
     return { align: label === "stretch" ? undefined : label, alignLabel: label };
+  };
+  const just = (layout: PCommonLayout) => {
+    const label = layout.justifyContent ?? "start";
+    return { justify: JUSTIFY[label], justifyLabel: label };
+  };
+  const box = (layout: PCommonLayout) => {
+    const paddings = [
+      layout.leftPadding,
+      layout.rightPadding,
+      layout.topPadding,
+      layout.bottomPadding,
+    ];
+    return {
+      padding: paddings.every((p) => p === paddings[0]) ? paddings[0] : undefined,
+      maxWidth: shape.layoutChild?.maxWidth ?? undefined,
+      minWidth: shape.layoutChild?.minWidth ?? undefined,
+    };
   };
   if (shape.grid !== undefined)
     return {
@@ -105,6 +140,10 @@ function layoutView(shape: PShape): LayerLayout {
       ...align(shape.grid),
       wrap: false,
       columns: shape.grid.columns.length,
+      justify: "start",
+      justifyLabel: "start",
+      flexTracks: shape.grid.columns.every((t) => t.type === "flex" && t.value === 1),
+      ...box(shape.grid),
     };
   const flex = shape.flex;
   if (flex === undefined) return NO_LAYOUT;
@@ -115,6 +154,9 @@ function layoutView(shape: PShape): LayerLayout {
     ...align(flex),
     wrap: flex.wrap === "wrap",
     columns: 1,
+    flexTracks: true,
+    ...just(flex),
+    ...box(flex),
   };
 }
 
@@ -193,6 +235,23 @@ export function penpotLayers(): (shape: PShape) => Layer {
       },
       gapToken: async (grid) =>
         board === undefined ? undefined : board.tokens[gapField(board, grid)],
+      get sizing() {
+        const child = shape.layoutChild;
+        return {
+          horizontal: SIZING[child?.horizontalSizing ?? "auto"],
+          vertical: SIZING[child?.verticalSizing ?? "auto"],
+        };
+      },
+      paddingToken: async () => {
+        if (board === undefined) return undefined;
+        return (
+          board.tokens.paddingTop ??
+          board.tokens.paddingRight ??
+          board.tokens.paddingBottom ??
+          board.tokens.paddingLeft
+        );
+      },
+      maxWidthToken: async () => board?.tokens.maxWidth,
       style: (withSpacing) => (board === undefined ? "" : styleKey(shape, withSpacing)),
       main: async () => {
         if (!instance) return undefined;

@@ -30,6 +30,13 @@ function tree(root: FakeBoard): string {
       backgroundBlur: undefined,
       strokes: [],
       layoutCell: undefined,
+      layoutChild: {
+        horizontalSizing: "auto",
+        verticalSizing: "auto",
+        maxWidth: null,
+        minWidth: null,
+        absolute: false,
+      },
       tokens: {},
       inCopy: false,
       head: false,

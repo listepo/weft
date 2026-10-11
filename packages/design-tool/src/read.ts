@@ -305,6 +305,8 @@ async function fromSource(
     else props["hidden"] = true;
   }
 
+  readGrow(layer, props, parent);
+
   if (
     isLeafKind(def) &&
     !(isContainer(layer) && (layer.children ?? []).some((c) => readSource(c) !== undefined))
@@ -396,6 +398,16 @@ async function readVariants(
   if (main !== undefined && main.style !== layer.style(true)) lose(ctx, "tokens", path, STYLE_NOTE);
 }
 
+/** `grow` fills the parent's main axis; a designer's change to that fill is the edit. */
+function readGrow(layer: Layer, props: Record<string, Value>, parent: Parent): void {
+  if (parent.mode !== "row" && parent.mode !== "column") return;
+  const growing = layer.sizing[parent.mode === "row" ? "horizontal" : "vertical"] === "fill";
+  const wanted = props["grow"] === true;
+  if (growing === wanted) return;
+  if (growing) props["grow"] = true;
+  else delete props["grow"];
+}
+
 async function readLayout(
   ctx: ReadCtx,
   layer: Layer,
@@ -423,7 +435,15 @@ async function readLayout(
     if (layout.wrap) props["wrap"] = true;
     else delete props["wrap"];
   }
+  if (!grid && layout.justify !== view.justify) {
+    if (layout.justify === undefined)
+      lose(ctx, "layout", path, `main-axis alignment ${layout.justifyLabel} has no Weft value`);
+    else if (layout.justify === "start") delete props["justify"];
+    else props["justify"] = layout.justify;
+  }
   await readGap(ctx, layer, view, source, props, path, grid);
+  await readPadding(ctx, layer, view, source, props, path);
+  await readMaxWidth(ctx, layer, view, source, props, path);
   if (layer.getPluginData(KEY.style) !== layer.style(false)) lose(ctx, "tokens", path, STYLE_NOTE);
 }
 
@@ -461,6 +481,91 @@ async function readGap(
   else if (px === 0) delete props["gap"];
   else
     lose(ctx, "tokens", path, `gap ${px}px matches no ${tokenType ?? ""} token; the gap is kept`);
+}
+
+/** The `padding` prop of a `stack` or `grid`: one token on all four sides. */
+async function readPadding(
+  ctx: ReadCtx,
+  layer: Layer,
+  view: LayoutView,
+  source: Source,
+  props: Record<string, Value>,
+  path: string,
+): Promise<void> {
+  const px = layer.layout.padding;
+  if (px === undefined) {
+    lose(ctx, "layout", path, "the paddings differ; Weft has one token on all four sides");
+    return;
+  }
+  let bound = await layer.paddingToken();
+  if (
+    bound !== undefined &&
+    ctx.tokens?.has(bound) === true &&
+    tokenPx(ctx.tokens.get(bound)) !== px
+  )
+    bound = undefined;
+  if (bound !== undefined) {
+    if (bound !== view.paddingToken) props["padding"] = { token: bound };
+    return;
+  }
+  if (px === view.padding) return;
+  const def = component(ctx.catalog, source.kind);
+  const tokenType = def?.props?.["padding"]?.tokenType;
+  const match =
+    ctx.tokens === undefined
+      ? undefined
+      : matchToken(px, ctx.tokens, tokenType, view.paddingToken, ctx.gapGroups);
+  if (match !== undefined) props["padding"] = { token: match };
+  else if (px === 0) delete props["padding"];
+  else
+    lose(
+      ctx,
+      "tokens",
+      path,
+      `padding ${px}px matches no ${tokenType ?? ""} token; the padding is kept`,
+    );
+}
+
+/** The `max-width` prop of a `stack` or `grid`: fill up to one token. */
+async function readMaxWidth(
+  ctx: ReadCtx,
+  layer: Layer,
+  view: LayoutView,
+  source: Source,
+  props: Record<string, Value>,
+  path: string,
+): Promise<void> {
+  const px = layer.layout.maxWidth;
+  if (px === undefined) {
+    if (view.maxWidth !== undefined) delete props["max-width"];
+    return;
+  }
+  let bound = await layer.maxWidthToken();
+  if (
+    bound !== undefined &&
+    ctx.tokens?.has(bound) === true &&
+    tokenPx(ctx.tokens.get(bound)) !== px
+  )
+    bound = undefined;
+  if (bound !== undefined) {
+    if (bound !== view.maxWidth?.token) props["max-width"] = { token: bound };
+    return;
+  }
+  if (px === view.maxWidth?.px) return;
+  const def = component(ctx.catalog, source.kind);
+  const tokenType = def?.props?.["max-width"]?.tokenType;
+  const match =
+    ctx.tokens === undefined
+      ? undefined
+      : matchToken(px, ctx.tokens, tokenType, view.maxWidth?.token, ctx.gapGroups);
+  if (match !== undefined) props["max-width"] = { token: match };
+  else
+    lose(
+      ctx,
+      "tokens",
+      path,
+      `max width ${px}px matches no ${tokenType ?? ""} token; the max width is kept`,
+    );
 }
 
 /** A library instance the designer added: a new element with a generated id. */

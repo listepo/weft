@@ -12,13 +12,20 @@ import { CAPTION_KINDS, isLeafKind } from "./view.ts";
 const NAMED = /^([a-z][a-z0-9]*(?:-[a-z0-9]+)*)(?:#(\S+))?$/;
 
 // A row's `center` is the SwiftUI default and a column's `start` is the host default (SPEC §5.1),
-// so an importer leaves those unset. Anything else a stack can say is written.
+// so an importer leaves those unset. Anything else a stack can say is written. `justify` defaults
+// to `start` in both directions, so that value is left out.
 const ROW_ALIGN: ReadonlySet<string> = new Set(["start", "end", "stretch"]);
 const COLUMN_ALIGN: ReadonlySet<string> = new Set(["center", "end", "stretch"]);
+const WRITTEN_JUSTIFY: ReadonlySet<string> = new Set(["center", "end", "space-between"]);
 
 function stackAlign(mode: "row" | "column", align: LayerLayout["align"]): string | undefined {
   if (align === undefined) return undefined;
   return (mode === "row" ? ROW_ALIGN : COLUMN_ALIGN).has(align) ? align : undefined;
+}
+
+function stackJustify(justify: LayerLayout["justify"]): string | undefined {
+  if (justify === undefined) return undefined;
+  return WRITTEN_JUSTIFY.has(justify) ? justify : undefined;
 }
 
 /**
@@ -90,13 +97,16 @@ export async function convertForeign(
     )
       return [literal(ctx, parent.path, text)];
     const { id, path } = generated(ctx, "text", text, parent);
-    return [{ kind: "text", id, children: [literal(ctx, path, text)] }];
+    const props: Record<string, Value> = {};
+    readForeignGrow(ctx, layer, props, parent, path);
+    return [{ kind: "text", id, props, children: [literal(ctx, path, text)] }];
   }
   const named = await namedKind(ctx, layer, parent, depth);
   if (named !== undefined) return [named];
   if (layer.image) {
     const { id, path } = generated(ctx, "image", layer.name, parent);
     const props: Record<string, Value> = { label: literal(ctx, path, layer.name) };
+    readForeignGrow(ctx, layer, props, parent, path);
     const def = component(ctx.catalog, "image");
     if (def !== undefined) fillRequired(ctx, props, def, parent.def, false, "", path);
     lose(ctx, "values", path, "the image fill has no URL; src is empty");
@@ -131,12 +141,21 @@ async function stackOf(
   const props: Record<string, Value> = {};
   if (mode === "row") props["direction"] = "row";
   if (mode === "grid") props["columns"] = Math.max(1, layer.layout.columns);
-  // `align` and `wrap` only, and only on a stack: a grid has neither prop. Padding, fills and
+  // `align`, `justify` and `wrap` only, and only on a stack: a grid has neither. Fills and
   // fonts stay losses; the painted-loss below is unchanged.
   if (kind === "stack" && (mode === "row" || mode === "column")) {
     if (layer.layout.wrap) props["wrap"] = true;
     const align = stackAlign(mode, layer.layout.align);
     if (align !== undefined) props["align"] = align;
+    const justify = stackJustify(layer.layout.justify);
+    if (justify !== undefined) props["justify"] = justify;
+    else if (layer.layout.justify === undefined)
+      lose(
+        ctx,
+        "layout",
+        path,
+        `main-axis alignment ${layer.layout.justifyLabel} has no Weft value`,
+      );
   }
   let ordered = children;
   if (mode === "none") {
@@ -169,6 +188,23 @@ async function stackOf(
         : matchToken(px, ctx.tokens, "dimension", undefined, ctx.gapGroups));
     if (token !== undefined) props["gap"] = { token };
     else if (px !== 0) lose(ctx, "tokens", path, `gap ${px}px matches no token and was dropped`);
+    await readForeignBox(ctx, layer, props, path);
+  }
+  if (mode === "grid" && !layer.layout.flexTracks)
+    lose(
+      ctx,
+      "layout",
+      path,
+      "grid tracks that are not equal flex tracks were drawn as equal columns",
+    );
+  for (const child of children) {
+    if (child.layoutPositioning === "ABSOLUTE")
+      lose(
+        ctx,
+        "layout",
+        `${path}/${child.name}`,
+        "absolute positioning has no Weft form and was kept in flow",
+      );
   }
   if (layer.painted)
     lose(
@@ -184,8 +220,59 @@ async function stackOf(
     path,
     mode: mode === "row" ? "row" : "column",
   };
+  readForeignGrow(ctx, layer, props, parent, path);
   const inner = await convertChildren(ctx, ordered, owner, depth);
   return { kind, id, props, children: inner.children, slots: Object.fromEntries(inner.slots) };
+}
+
+/** `padding` and `max-width` of a foreign stack or grid: one token each, or a loss. */
+async function readForeignBox(
+  ctx: ReadCtx,
+  layer: Layer,
+  props: Record<string, Value>,
+  path: string,
+): Promise<void> {
+  const px = layer.layout.padding;
+  if (px !== undefined && px !== 0) {
+    const token =
+      (await layer.paddingToken()) ??
+      (ctx.tokens === undefined
+        ? undefined
+        : matchToken(px, ctx.tokens, "dimension", undefined, ["space", ...ctx.gapGroups]));
+    if (token !== undefined) props["padding"] = { token };
+    else lose(ctx, "tokens", path, `padding ${px}px matches no token and was dropped`);
+  } else if (px === undefined)
+    lose(ctx, "layout", path, "the paddings differ; Weft has one token on all four sides");
+  const max = layer.layout.maxWidth;
+  if (max === undefined) return;
+  const token =
+    (await layer.maxWidthToken()) ??
+    (ctx.tokens === undefined
+      ? undefined
+      : matchToken(max, ctx.tokens, "dimension", undefined, ["size", ...ctx.gapGroups]));
+  if (token !== undefined) props["max-width"] = { token };
+  else lose(ctx, "tokens", path, `max width ${max}px matches no token and was dropped`);
+}
+
+/**
+ * `grow` is fill on the parent's main axis (SPEC §2.2). A fixed size and a `minWidth` have no
+ * Weft form and are `layout` losses.
+ */
+function readForeignGrow(
+  ctx: ReadCtx,
+  layer: Layer,
+  props: Record<string, Value>,
+  parent: Parent,
+  path: string,
+): void {
+  if (parent.mode !== "row" && parent.mode !== "column") return;
+  const axis = parent.mode === "row" ? "horizontal" : "vertical";
+  const sizing = layer.sizing[axis];
+  if (sizing === "fill") props["grow"] = true;
+  else if (sizing === "fixed")
+    lose(ctx, "layout", path, "a fixed size has no Weft form and was dropped");
+  if (layer.layout.minWidth !== undefined)
+    lose(ctx, "layout", path, "minWidth has no Weft form and was dropped");
 }
 
 /**
@@ -224,6 +311,7 @@ async function namedKind(
   }
   const props: Record<string, Value> = {};
   const node: Node = { kind, id, props };
+  readForeignGrow(ctx, layer, props, parent, path);
   lose(
     ctx,
     "props",

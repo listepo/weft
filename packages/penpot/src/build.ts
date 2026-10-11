@@ -101,6 +101,8 @@ function penpotHost(api: PenpotApi, library: Library): BuildHost<PShape, PLibrar
         board.backgroundBlur = { value: view.material.blur, hidden: false };
       }
       const token = view.gap.token === undefined ? undefined : library.tokens.get(view.gap.token);
+      const paddingToken =
+        view.paddingToken === undefined ? undefined : library.tokens.get(view.paddingToken);
       if (view.mode === "grid") {
         const grid = board.addGridLayout();
         setColumns(grid, view.columns);
@@ -108,21 +110,36 @@ function penpotHost(api: PenpotApi, library: Library): BuildHost<PShape, PLibrar
         grid.horizontalSizing = "auto";
         grid.verticalSizing = "auto";
         setGap(board, grid, view.gap.px, token);
-        setPadding(grid, ALL_PADDING, view.padding);
+        setPadding(grid, ALL_PADDING, view.padding, board, paddingToken);
       } else {
         const flex = board.addFlexLayout();
         flex.dir = view.mode;
         flex.wrap = view.wrap ? "wrap" : "nowrap";
         flex.alignItems = view.align;
+        flex.justifyContent = view.justify;
         flex.horizontalSizing = "auto";
         flex.verticalSizing = "auto";
         setGap(board, flex, view.gap.px, token);
-        setPadding(flex, ALL_PADDING, view.padding);
+        setPadding(flex, ALL_PADDING, view.padding, board, paddingToken);
+      }
+      // SPEC §5.1: `max-width` fills up to the cap across the parent.
+      if (view.maxWidth !== undefined && board.layoutChild !== undefined) {
+        const maxToken =
+          view.maxWidth.token === undefined ? undefined : library.tokens.get(view.maxWidth.token);
+        board.layoutChild.maxWidth = maxToken?.px ?? view.maxWidth.px;
+        board.layoutChild.horizontalSizing = "fill";
+        if (maxToken !== undefined) board.applyToken(maxToken.token, ["maxWidth"]);
       }
       return board;
     },
     turn(layer, degrees) {
       layer.rotation = degrees;
+    },
+    grow(layer, parentMode) {
+      const child = layer.layoutChild;
+      if (child === undefined) return;
+      if (parentMode === "row") child.horizontalSizing = "fill";
+      else child.verticalSizing = "fill";
     },
     text: (drawing) => drawText(api, library, drawing),
     async setText(layer, name, value) {

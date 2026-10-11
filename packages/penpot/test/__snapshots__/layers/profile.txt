@@ -1,4 +1,4 @@
-board "screen#profile" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#profile>","dir":"column","wrap":"nowrap"}
+board "screen#profile" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#profile>","dir":"column","wrap":"nowrap"}
   | weft/weft.document = {"weft":"0.1"}
   | weft/weft.origin = shape(screen#profile)
   | weft/weft.source = {"kind":"screen","id":"profile","props":{"label":"Profile"}}
@@ -23,10 +23,10 @@ board "screen#profile" width=480 tokens={"fill":"color.white"} fillList=[{"fillC
     | weft/weft.origin = shape(heading#links-title)
     | weft/weft.source = {"kind":"heading","id":"links-title","props":{"level":2},"children":["Links"],"shown":{"text":"Links"}}
     text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Links"
-  board "stack#links" tokens={"rowGap":"space.md","columnGap":"space.md"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#links>","dir":"row","wrap":"nowrap"}
+  board "stack#links" tokens={"rowGap":"space.md","columnGap":"space.md"} flex={"alignItems":"center","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#links>","dir":"row","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#links)
     | weft/weft.source = {"kind":"stack","id":"links","props":{"direction":"row","gap":{"token":"space.md"}}}
-    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    | weft/weft.style = [[],[],0,null,null]
     board "link#website" inCopy=true head=true componentOf="<link>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<link#website>","dir":"column"}
       | weft/weft.kind = link
       | weft/weft.origin = shape(link#website)

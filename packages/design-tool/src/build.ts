@@ -49,6 +49,8 @@ export interface BuildHost<L, C> {
    * 3D transform, so this is all it draws of a tilt (SPEC §2.2).
    */
   turn(layer: L, degrees: number): void;
+  /** Fills the parent's main axis, as `grow` asks (`parentMode` names that axis). */
+  grow(layer: L, parentMode: Mode): void;
   /** Places the finished root on the page; `screen` when the root is a `screen`. */
   place(root: L, screen: boolean): void;
 }
@@ -132,11 +134,13 @@ async function buildNode<L, C>(ctx: Ctx<L, C>, node: Node, parentMode: Mode): Pr
     }
     mark(ctx, host.marks(instance), node, true, shown);
     turn(host, instance, node);
+    grow(host, instance, node, parentMode);
     return instance;
   }
 
   const view = layoutView(node.kind, node.props, ctx.tokens, parentMode);
   const frame = host.frame(view, node.kind === "screen" ? WHITE_PAINT : undefined);
+  grow(host, frame, node, parentMode);
   const shown: Shown = {};
   if (CAPTION_KINDS.has(node.kind)) {
     shown.label = labelDisplay(node.props, ctx.display);
@@ -165,6 +169,12 @@ async function buildNode<L, C>(ctx: Ctx<L, C>, node: Node, parentMode: Mode): Pr
 function turn<L, C>(host: BuildHost<L, C>, layer: L, node: Node): void {
   const degrees = planeTurn(node.props);
   if (degrees !== 0) host.turn(layer, degrees);
+}
+
+/** `grow` fills the parent's main axis; a grid or a non-stack parent draws nothing. */
+function grow<L, C>(host: BuildHost<L, C>, layer: L, node: Node, parentMode: Mode): void {
+  if (node.props?.["grow"] === true && (parentMode === "row" || parentMode === "column"))
+    host.grow(layer, parentMode);
 }
 
 async function appendChildren<L, C>(

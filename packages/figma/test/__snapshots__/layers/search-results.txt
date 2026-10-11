@@ -10,7 +10,7 @@ FRAME "screen#search" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisS
     FRAME "stack#bar" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
       | weft.origin = layer(stack#bar)
       | weft.source = {"kind":"stack","id":"bar","props":{"direction":"row","gap":{"token":"space.sm"}}}
-      | weft.style = [[],[],0,[0,0,0,0],null]
+      | weft.style = [[],[],0,null,null]
       INSTANCE "field#query" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=search, state=(unset)>"
         | weft.origin = layer(field#query)
         | weft.source = {"kind":"field","id":"query","props":{"label":"Search","type":"search","value":{"bind":"$.query"}},"shown":{"text":"","label":"Search"}}

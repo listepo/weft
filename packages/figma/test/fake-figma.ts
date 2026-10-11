@@ -211,6 +211,10 @@ abstract class FakeLayout extends FakeBase {
   paddingRight = 0;
   paddingTop = 0;
   paddingBottom = 0;
+  layoutSizingHorizontal: "FIXED" | "HUG" | "FILL" = "HUG";
+  layoutSizingVertical: "FIXED" | "HUG" | "FILL" = "HUG";
+  maxWidth: number | null = null;
+  minWidth: number | null = null;
   gridColumnCount = 1;
   gridRowGap = 0;
   gridColumnGap = 0;
@@ -250,6 +254,7 @@ abstract class FakeLayout extends FakeBase {
     const value = Object.values(variable.valuesByMode)[0];
     if (typeof value !== "number") throw new Error(`${field} needs a FLOAT variable`);
     if (field.endsWith("Radius")) this.cornerRadius = value;
+    else if (field === "maxWidth") this.maxWidth = value;
     else (this as unknown as Record<string, number>)[field] = value;
   }
   copyLayout(to: FakeLayout): void {
@@ -267,6 +272,10 @@ abstract class FakeLayout extends FakeBase {
       "paddingRight",
       "paddingTop",
       "paddingBottom",
+      "layoutSizingHorizontal",
+      "layoutSizingVertical",
+      "maxWidth",
+      "minWidth",
       "gridColumnCount",
       "gridRowGap",
       "gridColumnGap",

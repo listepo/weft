@@ -36,6 +36,19 @@ abstract class FakeBase {
   backgroundBlur: PBlur | undefined;
   strokes: PStroke[] = [];
   layoutCell: { row?: number; column?: number } | undefined;
+  layoutChild: {
+    horizontalSizing: "auto" | "fill" | "fix";
+    verticalSizing: "auto" | "fill" | "fix";
+    maxWidth: number | null;
+    minWidth: number | null;
+    absolute: boolean;
+  } = {
+    horizontalSizing: "auto",
+    verticalSizing: "auto",
+    maxWidth: null,
+    minWidth: null,
+    absolute: false,
+  };
   parent: Parent | undefined;
   readonly tokens: Record<string, string | undefined> = {};
   /** Set on every shape of a component copy; the head is the copy's root. */
@@ -183,6 +196,7 @@ abstract class FakeBase {
     to.backgroundBlur = this.backgroundBlur === undefined ? undefined : { ...this.backgroundBlur };
     to.fillList = structuredClone(this.fillList);
     to.strokes = structuredClone(this.strokes);
+    to.layoutChild = { ...this.layoutChild };
     Object.assign(to.tokens, this.tokens);
     for (const [k, v] of this.data) to.data.set(k, v);
     to.componentOf = this.componentOf;
@@ -216,6 +230,14 @@ const colorFill = (value: string): PFill => {
 
 class FakeLayout {
   alignItems?: "start" | "end" | "center" | "stretch";
+  justifyContent?:
+    | "start"
+    | "center"
+    | "end"
+    | "space-between"
+    | "space-around"
+    | "space-evenly"
+    | "stretch";
   horizontalSizing: "fix" | "fill" | "auto" = "fix";
   verticalSizing: "fix" | "fill" | "auto" = "fix";
   private values: Record<string, number> = {
@@ -279,6 +301,7 @@ class FakeLayout {
   }
   copyTo(to: FakeLayout): void {
     if (this.alignItems !== undefined) to.alignItems = this.alignItems;
+    if (this.justifyContent !== undefined) to.justifyContent = this.justifyContent;
     to.horizontalSizing = this.horizontalSizing;
     to.verticalSizing = this.verticalSizing;
     to.values = { ...this.values };
@@ -446,6 +469,10 @@ export class FakeBoard extends FakeBase {
   }
 
   protected override setTokenValue(property: string, value: string): void {
+    if (property === "maxWidth") {
+      this.layoutChild.maxWidth = Number(value);
+      return;
+    }
     const field = LAYOUT_TOKEN_FIELD[property];
     const layout = this.flex ?? this.grid;
     if (field !== undefined && layout !== undefined) layout.setFromToken(field, Number(value));

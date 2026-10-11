@@ -26,6 +26,7 @@ export {
   type Layer,
   type LayerKind,
   type LayerLayout,
+  type Sizing,
 } from "./layer.ts";
 export {
   drawing,
@@ -107,6 +108,7 @@ export {
   type Align,
   type Axis,
   type Display,
+  type Justify,
   type LayoutView,
   type Mode,
 } from "./view.ts";
