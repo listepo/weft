@@ -66,6 +66,7 @@ Object.assign(realm, {
     clearInterval,
     console,
     structuredClone,
+    TextEncoder,
     atob,
     btoa,
   },

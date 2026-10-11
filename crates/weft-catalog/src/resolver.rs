@@ -90,7 +90,8 @@ pub(crate) struct Resolver {
 
 impl Resolver {
     /// The flattened token tree for an input of modifier name to context; a modifier the input
-    /// leaves out takes its default.
+    /// leaves out takes its default. Context names compare without case, as `appearance` matches
+    /// them, so a key one accepts is never missed here.
     pub fn tree(&self, input: &HashMap<&str, &str>) -> Json {
         let empty = Json::Object(Object::new());
         let mut tree = empty.clone();
@@ -100,7 +101,11 @@ impl Resolver {
                 Entry::Modifier(i) => {
                     let m = &self.modifiers[*i];
                     let context = input.get(m.name.as_str()).copied().unwrap_or(&m.default);
-                    m.contexts.get(context).unwrap_or(&empty)
+                    m.contexts
+                        .iter()
+                        .find(|(c, _)| c.eq_ignore_ascii_case(context))
+                        .map(|(_, part)| part)
+                        .unwrap_or(&empty)
                 }
             };
             tree = merge_token_trees(tree, part.clone());
@@ -558,4 +563,88 @@ pub(crate) fn read_resolver(doc: &Json, env: &mut Env<'_>) -> Resolver {
         });
     }
     resolver
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use weft_core::order_keys;
+
+    use super::*;
+    use crate::tokens::load_tokens;
+
+    /// A resolver whose context names an input may spell in another case.
+    fn doc() -> Json {
+        json!({
+            "version": "2025.10",
+            "modifiers": {
+                "theme": {
+                    "contexts": {
+                        "Light": [{ "color": { "ink": { "$type": "color", "$value": "#111111" } } }],
+                        "Dark": [{ "color": { "ink": { "$type": "color", "$value": "#eeeeee" } } }]
+                    }
+                }
+            },
+            "resolutionOrder": [{ "$ref": "#/modifiers/theme" }]
+        })
+    }
+
+    fn read() -> Resolver {
+        let mut problems = vec![];
+        let mut report = |d: Diagnostic| problems.push(d);
+        let mut fetch = |_: &str, _: &str| -> Option<Json> { None };
+        let resolver = read_resolver(
+            &doc(),
+            &mut Env {
+                fetch: &mut fetch,
+                report: &mut report,
+                at: "#/tokens".to_owned(),
+                dir: None,
+            },
+        );
+        assert!(problems.is_empty(), "{problems:?}");
+        resolver
+    }
+
+    fn tree_of(resolver: &Resolver, context: &str) -> Json {
+        resolver.tree(&HashMap::from([("theme", context)]))
+    }
+
+    #[test]
+    fn tree_and_appearance_match_context_keys_without_case() {
+        let resolver = read();
+        let light = tree_of(&resolver, "Light");
+        let dark = tree_of(&resolver, "Dark");
+        assert_eq!(light.pointer("/color/ink/$value"), Some(&json!("#111111")));
+        assert_eq!(dark.pointer("/color/ink/$value"), Some(&json!("#eeeeee")));
+        // A key in another case names the same context, as `appearance` accepts it.
+        assert_eq!(tree_of(&resolver, "light"), light);
+        assert_eq!(tree_of(&resolver, "DARK"), dark);
+        let modifiers: Vec<TokenModifier> = resolver
+            .modifiers
+            .iter()
+            .map(|m| {
+                let contexts = m
+                    .contexts
+                    .keys()
+                    .map(|c| {
+                        let input = HashMap::from([(m.name.as_str(), c.as_str())]);
+                        let loaded = load_tokens(&order_keys(resolver.tree(&input)));
+                        (c.clone(), loaded.tokens)
+                    })
+                    .collect();
+                TokenModifier {
+                    name: m.name.clone(),
+                    default: m.default.clone(),
+                    contexts,
+                }
+            })
+            .collect();
+        let pair = appearance(&modifiers).unwrap();
+        assert_eq!(pair.light_context, "Light");
+        assert_eq!(pair.dark_context, "Dark");
+        assert_eq!(pair.light["color.ink"].value, json!("#111111"));
+        assert_eq!(pair.dark["color.ink"].value, json!("#eeeeee"));
+    }
 }

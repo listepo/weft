@@ -103,10 +103,12 @@ for (const screen of screens) {
     jsxRoundTrip("round trip through the SolidJS importer looks the same", async () => {
       await expectSameLook("#solid", "#solid-back", `roundtrip/${name}.solid`);
     });
-    test("round trip through Figma looks the same", async () => {
+    // Design tools draw a use expanded and never reconstruct it (SPEC §10.7).
+    const designRoundTrip = JSX_FRAGMENT_GAP.has(name) ? test.fails : test;
+    designRoundTrip("round trip through Figma looks the same", async () => {
       await expectSameLook("#reference", "#figma-back", `roundtrip/${name}.figma`);
     });
-    test("round trip through Penpot looks the same", async () => {
+    designRoundTrip("round trip through Penpot looks the same", async () => {
       await expectSameLook("#reference", "#penpot-back", `roundtrip/${name}.penpot`);
     });
 
