@@ -25,19 +25,28 @@ export component ReceiptScreen inherits Window {
     receipt := VerticalBox {
         alignment: LayoutAlignment.start;
         lines := VerticalLayout {
+            alignment: LayoutAlignment.start;
             subtotal--row := HorizontalLayout {
+                vertical-stretch: 0;
+                alignment: LayoutAlignment.space-between;
                 subtotal--name := Text {
+                    horizontal-stretch: 0;
                     text: "Subtotal";
                 }
                 subtotal--value := Text {
+                    horizontal-stretch: 0;
                     text: root.subtotal;
                 }
             }
             total--row := HorizontalLayout {
+                vertical-stretch: 0;
+                alignment: LayoutAlignment.space-between;
                 total--name := Text {
+                    horizontal-stretch: 0;
                     text: "Total";
                 }
                 total--value := Text {
+                    horizontal-stretch: 0;
                     text: root.total;
                 }
             }

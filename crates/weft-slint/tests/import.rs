@@ -402,8 +402,8 @@ fn login_without_the_source_comment_keeps_bindings_and_submit() {
         assert!(markup.contains(needle), "{needle} missing in {markup}");
     }
     assert!(
-        !markup.contains("gap="),
-        "16px matches more than one dimension token\n{markup}"
+        markup.contains("gap=\"{token.space.md}\""),
+        "space.md is the unique preferred token for 16px\n{markup}"
     );
 }
 
@@ -430,8 +430,8 @@ fn signup_and_settings_without_the_source_comment_keep_bindings() {
         assert!(signup.contains(needle), "{needle} missing in {signup}");
     }
     assert!(
-        !signup.contains("gap="),
-        "16px matches more than one dimension token\n{signup}"
+        signup.contains("gap=\"{token.space.md}\""),
+        "space.md is the unique preferred token for 16px\n{signup}"
     );
 
     let settings = recovered("tests/fixtures/settings.slint", &catalog, &tokens);

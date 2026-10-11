@@ -36,8 +36,10 @@ export component SignupScreen inherits Window {
                 font-weight: 700;
             }
             fields := VerticalLayout {
+                alignment: LayoutAlignment.start;
                 spacing: 16px;
                 VerticalLayout {
+                    vertical-stretch: 0;
                     Text { text: "Full name"; }
                     name := LineEdit {
                         text <=> root.name;
@@ -45,6 +47,7 @@ export component SignupScreen inherits Window {
                     }
                 }
                 VerticalLayout {
+                    vertical-stretch: 0;
                     Text { text: "Email"; }
                     email := LineEdit {
                         text <=> root.email;
@@ -52,6 +55,7 @@ export component SignupScreen inherits Window {
                     }
                 }
                 VerticalLayout {
+                    vertical-stretch: 0;
                     Text { text: "Password"; }
                     password := LineEdit {
                         input-type: InputType.password;
@@ -60,6 +64,7 @@ export component SignupScreen inherits Window {
                     }
                 }
                 VerticalLayout {
+                    vertical-stretch: 0;
                     Text { text: "Confirm password"; }
                     confirm := LineEdit {
                         input-type: InputType.password;
@@ -68,6 +73,7 @@ export component SignupScreen inherits Window {
                     }
                 }
                 terms := CheckBox {
+                    vertical-stretch: 0;
                     text: "I accept the terms of service";
                     checked <=> root.acceptTerms;
                 }

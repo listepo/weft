@@ -21,16 +21,21 @@ export component GlassScreen inherits Window {
     glass := VerticalBox {
         alignment: LayoutAlignment.start;
         card := VerticalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 16px;
+            padding: 24px;
             title := Text {
+                vertical-stretch: 0;
                 text: root.title-data;
                 font-size: 24px;
                 font-weight: 700;
             }
             body := Text {
+                vertical-stretch: 0;
                 text: "The panel blurs what is behind it.";
             }
             close := Button {
+                vertical-stretch: 0;
                 text: "Got it";
                 primary: true;
                 clicked => { root.perform("glass.close", "close"); }
@@ -38,6 +43,8 @@ export component GlassScreen inherits Window {
         }
         tiles := GridLayout {
             spacing: 8px;
+            padding: 32px;
+            max-width: 480px;
             tile-light := Text {
                 row: 0;
                 col: 0;

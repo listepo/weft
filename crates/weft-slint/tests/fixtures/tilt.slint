@@ -43,8 +43,10 @@ export component TiltScreen inherits Window {
             font-weight: 700;
         }
         deck := VerticalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 24px;
             front := GroupBox {
+                vertical-stretch: 0;
                 title: "Front side";
                 VerticalBox {
                     front-title := Text {
@@ -63,6 +65,7 @@ export component TiltScreen inherits Window {
                 }
             }
             back := GroupBox {
+                vertical-stretch: 0;
                 title: "Back side";
                 VerticalBox {
                     back-title := Text {
@@ -80,6 +83,7 @@ export component TiltScreen inherits Window {
                 }
             }
             lean := GroupBox {
+                vertical-stretch: 0;
                 title: "Leaning card";
                 VerticalBox {
                     lean-title := Text {
