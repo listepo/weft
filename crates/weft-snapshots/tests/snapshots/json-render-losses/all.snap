@@ -2,4 +2,6 @@
 source: crates/weft-snapshots/tests/interop.rs
 description: all as json-render-losses
 ---
-
+corpus-receipt
+Kinds /screen#receipt/stack#lines/use#subtotal: use has no json-render form; its content is kept
+Kinds /screen#receipt/stack#lines/use#total: use has no json-render form; its content is kept

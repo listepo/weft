@@ -311,6 +311,7 @@ fn property_name(
 
 /// The Weft path a generated property name stands for. A `-data` suffix is only the
 /// `Window` property it was kept off (`title-data` is `$.title`), so it is not another segment.
+#[cfg(feature = "import")]
 pub(crate) fn binding_path(name: &str) -> String {
     let key = clash_key(name);
     let stem = if let Some(bare) = key.strip_suffix("-data")

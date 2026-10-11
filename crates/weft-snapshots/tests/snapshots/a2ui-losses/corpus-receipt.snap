@@ -1,0 +1,10 @@
+---
+source: crates/weft-snapshots/tests/interop.rs
+description: corpus-receipt as a2ui-losses
+---
+Kinds /screen#receipt/stack#lines/use#subtotal: use has no A2UI component; its content is kept
+Bindings /screen#receipt/stack#lines/use#subtotal: amount: this binding has no A2UI property
+Props /screen#receipt/stack#lines/use#subtotal: fragment: this prop has no A2UI property
+Kinds /screen#receipt/stack#lines/use#total: use has no A2UI component; its content is kept
+Bindings /screen#receipt/stack#lines/use#total: amount: this binding has no A2UI property
+Props /screen#receipt/stack#lines/use#total: fragment: this prop has no A2UI property

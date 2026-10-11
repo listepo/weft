@@ -26,6 +26,7 @@ const ui: { onmessage?: (message: unknown) => Promise<void>; postMessage: (m: un
 };
 const main = createContext({
   console,
+  TextEncoder,
   __html__: "",
   figma: Object.assign(figma, {
     ui,

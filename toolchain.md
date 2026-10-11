@@ -66,7 +66,7 @@
 | i-slint-core | local (dev) | https://github.com/slint-ui/slint | Sets that testing backend and pins its color scheme to light before a screenshot |
 | png | local (dev) | https://github.com/image-rs/image-png | Encodes and decodes the Slint screenshot PNGs; not the full `image` stack |
 | i-slint-compiler | local | https://github.com/slint-ui/slint | Syntax tree for the weft-slint importer (`import` feature); 1.18.1, no renderer or backend |
-| insta | local (dev) | https://github.com/mitsuhiko/insta | Reviewed snapshots of every generator output per corpus screen and catalog example (weft-snapshots) |
+| insta | local (dev) | https://github.com/mitsuhiko/insta | Reviewed snapshots of every generator output per corpus screen and catalog example (weft-snapshots); `weft-snapshots::unreferenced` fails on a snapshot no test writes |
 | jsonschema | local (dev) | https://github.com/Stranger6667/jsonschema | Checks every exported A2UI message against the vendored A2UI v0.9 JSON Schemas (weft-snapshots); no network or TLS features |
 | tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
 | tree-sitter-swift | local | https://github.com/alex-pinkus/tree-sitter-swift | The Swift grammar for that parser |

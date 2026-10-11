@@ -68,6 +68,8 @@ Object.assign(realm, {
     structuredClone,
     atob,
     btoa,
+    TextEncoder,
+    TextDecoder,
   },
   code: readFileSync(join(dist, "plugin.js"), "utf8"),
 });
