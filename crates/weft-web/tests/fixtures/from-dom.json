@@ -817,7 +817,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"dashboard\" data-state=\"ready\" aria-label=\"Team dashboard\"><div data-weft-id=\"header\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:center;flex-wrap:wrap\"><h1 data-weft-id=\"title\">Platform</h1><div data-weft-id=\"updated\" data-tone=\"muted\">Updated 5 minutes ago</div></div><div data-weft-id=\"stats\" style=\"gap:var(--weft-space-lg);display:grid;grid-template-columns:repeat(3, minmax(0, 1fr))\"><section data-weft-id=\"velocity\" aria-label=\"Velocity\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"velocity-title\">Velocity</h2></div><div data-weft-id=\"velocity-value\" data-tone=\"success\">42</div></section><section data-weft-id=\"bugs\" aria-label=\"Open bugs\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"bugs-title\">Open bugs</h2></div><div data-weft-id=\"bugs-value\" data-tone=\"warning\">7</div></section><section data-weft-id=\"incidents\" aria-label=\"Incidents\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"incidents-title\">Incidents</h2></div><div data-weft-id=\"incidents-value\" data-tone=\"danger\">1</div></section></div><div data-weft-id=\"notices\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:column\"><div data-weft-id=\"release\" role=\"alert\" data-tone=\"info\">Release 2.4 ships on Friday.</div><div data-weft-id=\"backup\" role=\"alert\" data-tone=\"success\">Last backup finished at 03:00.</div><div data-weft-id=\"quota\" role=\"alert\" data-tone=\"warning\"><div data-weft-id=\"quota-text\">Storage is 90% full.</div><a data-weft-id=\"quota-link\" href=\"https://example.com/storage\" style=\"display:inline-block\">Manage storage</a></div></div><div data-weft-id=\"footer\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:flex-end;flex-wrap:wrap\"><div data-weft-id=\"owner\" data-tone=\"default\">Owned by the platform team</div><div data-weft-id=\"footer-links\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:flex-start\"><a data-weft-id=\"docs\" href=\"/docs\" style=\"display:inline-block\">Docs</a><a data-weft-id=\"status\" href=\"https://status.example.com\" style=\"display:inline-block\">Status page</a></div></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"dashboard\" data-state=\"ready\" aria-label=\"Team dashboard\"><div data-weft-id=\"header\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:space-between\"><h1 data-weft-id=\"title\">Platform</h1><div data-weft-id=\"updated\" data-tone=\"muted\">Updated 5 minutes ago</div></div><div data-weft-id=\"stats\" style=\"gap:var(--weft-space-lg);display:grid;grid-template-columns:repeat(auto-fill, minmax(max(var(--weft-size-sm), calc((100% - 2 * var(--weft-space-lg)) / 3)), 1fr))\"><section data-weft-id=\"velocity\" aria-label=\"Velocity\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"velocity-title\">Velocity</h2></div><div data-weft-id=\"velocity-value\" data-tone=\"success\">42</div></section><section data-weft-id=\"bugs\" aria-label=\"Open bugs\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"bugs-title\">Open bugs</h2></div><div data-weft-id=\"bugs-value\" data-tone=\"warning\">7</div></section><section data-weft-id=\"incidents\" aria-label=\"Incidents\"><div data-weft-slot=\"header\"><h2 data-weft-id=\"incidents-title\">Incidents</h2></div><div data-weft-id=\"incidents-value\" data-tone=\"danger\">1</div></section></div><div data-weft-id=\"notices\" style=\"gap:var(--weft-space-sm);width:100%;max-width:var(--weft-size-lg);box-sizing:border-box;display:flex;flex-direction:column\"><div data-weft-id=\"release\" role=\"alert\" data-tone=\"info\">Release 2.4 ships on Friday.</div><div data-weft-id=\"backup\" role=\"alert\" data-tone=\"success\">Last backup finished at 03:00.</div><div data-weft-id=\"quota\" role=\"alert\" data-tone=\"warning\"><div data-weft-id=\"quota-text\">Storage is 90% full.</div><a data-weft-id=\"quota-link\" href=\"https://example.com/storage\" style=\"display:inline-block\">Manage storage</a></div></div><div data-weft-id=\"footer\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:flex-end;flex-wrap:wrap;justify-content:space-between\"><div data-weft-id=\"owner\" data-tone=\"default\">Owned by the platform team</div><div data-weft-id=\"footer-links\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:flex-start\"><a data-weft-id=\"docs\" href=\"/docs\" style=\"display:inline-block\">Docs</a><a data-weft-id=\"status\" href=\"https://status.example.com\" style=\"display:inline-block\">Status page</a></div></div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.3",
@@ -834,6 +834,7 @@
        "id": "header",
        "props": {
         "direction": "row",
+        "justify": "space-between",
         "wrap": true
        },
        "children": [
@@ -1025,6 +1026,7 @@
        "props": {
         "align": "end",
         "direction": "row",
+        "justify": "space-between",
         "wrap": true
        },
        "children": [
@@ -1102,12 +1104,22 @@
     {
      "kind": "tokens",
      "path": "/screen#dashboard/grid#stats",
+     "note": "min-column-width var(--weft-size-sm) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#dashboard/grid#stats",
      "note": "gap var(--weft-space-lg) cannot be mapped back to a design token"
     },
     {
      "kind": "tokens",
      "path": "/screen#dashboard/stack#notices",
      "note": "gap var(--weft-space-sm) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#dashboard/stack#notices",
+     "note": "max-width var(--weft-size-lg) cannot be mapped back to a design token"
     },
     {
      "kind": "tokens",
@@ -1712,7 +1724,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"glass\" aria-label=\"Glass\"><div data-weft-id=\"card\" style=\"gap:var(--weft-space-md);--_weft-material-tint:var(--weft-material-glass-tint);--_weft-material-solid:var(--weft-material-glass-solid);--_weft-material-blur:var(--weft-material-glass-blur);display:flex;flex-direction:column\" data-weft-material=\"\"><h2 data-weft-id=\"title\">Frosted glass</h2><div data-weft-id=\"body\">The panel blurs what is behind it.</div><button data-weft-id=\"close\" type=\"button\" data-variant=\"primary\">Got it</button></div><div data-weft-id=\"tiles\" style=\"gap:var(--weft-space-sm);--_weft-material-tint:var(--weft-material-glass-tint);--_weft-material-solid:var(--weft-material-glass-solid);--_weft-material-blur:var(--weft-material-glass-blur);display:grid;grid-template-columns:repeat(2, minmax(0, 1fr))\" data-weft-material=\"\"><div data-weft-id=\"tile-light\">Light</div><div data-weft-id=\"tile-dark\">Dark</div></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"glass\" aria-label=\"Glass\"><div data-weft-id=\"card\" style=\"gap:var(--weft-space-md);--_weft-material-tint:var(--weft-material-glass-tint);--_weft-material-solid:var(--weft-material-glass-solid);--_weft-material-blur:var(--weft-material-glass-blur);padding:var(--weft-space-lg);display:flex;flex-direction:column\" data-weft-material=\"\"><h2 data-weft-id=\"title\">Frosted glass</h2><div data-weft-id=\"body\">The panel blurs what is behind it.</div><button data-weft-id=\"close\" type=\"button\" data-variant=\"primary\">Got it</button></div><div data-weft-id=\"tiles\" style=\"gap:var(--weft-space-sm);--_weft-material-tint:var(--weft-material-glass-tint);--_weft-material-solid:var(--weft-material-glass-solid);--_weft-material-blur:var(--weft-material-glass-blur);padding:var(--weft-space-xl);width:100%;max-width:var(--weft-size-md);box-sizing:border-box;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr))\" data-weft-material=\"\"><div data-weft-id=\"tile-light\">Light</div><div data-weft-id=\"tile-dark\">Dark</div></div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.3",
@@ -1815,6 +1827,11 @@
     },
     {
      "kind": "tokens",
+     "path": "/screen#glass/stack#card",
+     "note": "padding var(--weft-space-lg) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
      "path": "/screen#glass/grid#tiles",
      "note": "material var(--weft-material-glass-tint) cannot be mapped back to a design token"
     },
@@ -1822,6 +1839,16 @@
      "kind": "tokens",
      "path": "/screen#glass/grid#tiles",
      "note": "gap var(--weft-space-sm) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#glass/grid#tiles",
+     "note": "padding var(--weft-space-xl) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#glass/grid#tiles",
+     "note": "max-width var(--weft-size-md) cannot be mapped back to a design token"
     }
    ],
    "diagnostics": []
@@ -2071,7 +2098,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"layout\" aria-label=\"Layout\"><div data-weft-id=\"toolbar\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><div data-weft-field=\"\"><label><span aria-hidden=\"true\">Search</span><input data-weft-id=\"search\" aria-label=\"Search\" type=\"search\" value=\"invoices\"/></label></div><button data-weft-id=\"filter\" type=\"button\">Filter</button></div><div data-weft-id=\"pager\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><a data-weft-id=\"previous\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Previous</a><a data-weft-id=\"next\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Next</a></div><div data-weft-id=\"actions\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><button data-weft-id=\"cancel\" type=\"button\">Cancel</button><button data-weft-id=\"save\" type=\"button\" data-variant=\"primary\">Save</button></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"layout\" aria-label=\"Layout\"><div data-weft-id=\"toolbar\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center\"><div data-weft-field=\"\" style=\"flex:1 1 0%;min-width:0\"><label><span aria-hidden=\"true\">Search</span><input data-weft-id=\"search\" aria-label=\"Search\" type=\"search\" value=\"invoices\"/></label></div><button data-weft-id=\"filter\" type=\"button\">Filter</button></div><div data-weft-id=\"pager\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center;justify-content:center\"><a data-weft-id=\"previous\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Previous</a><a data-weft-id=\"next\" role=\"link\" tabindex=\"0\" style=\"display:inline-block\">Next</a></div><div data-weft-id=\"actions\" style=\"gap:var(--weft-space-sm);display:flex;flex-direction:row;align-items:center;justify-content:flex-end\"><button data-weft-id=\"cancel\" type=\"button\">Cancel</button><button data-weft-id=\"save\" type=\"button\" data-variant=\"primary\">Save</button></div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.3",
@@ -2093,6 +2120,7 @@
          "kind": "field",
          "id": "search",
          "props": {
+          "grow": true,
           "label": "Search",
           "type": "search",
           "value": "invoices"
@@ -2111,7 +2139,8 @@
        "kind": "stack",
        "id": "pager",
        "props": {
-        "direction": "row"
+        "direction": "row",
+        "justify": "center"
        },
        "children": [
         {
@@ -2134,7 +2163,8 @@
        "kind": "stack",
        "id": "actions",
        "props": {
-        "direction": "row"
+        "direction": "row",
+        "justify": "end"
        },
        "children": [
         {
@@ -3236,7 +3266,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"receipt\" aria-label=\"Receipt\"><div data-weft-id=\"lines\" style=\"display:flex;flex-direction:column\"><div data-weft-id=\"subtotal/row\" style=\"display:flex;flex-direction:row;align-items:center\"><div data-weft-id=\"subtotal/name\">Subtotal</div><div data-weft-id=\"subtotal/value\">12.00</div></div><div data-weft-id=\"total/row\" style=\"display:flex;flex-direction:row;align-items:center\"><div data-weft-id=\"total/name\">Total</div><div data-weft-id=\"total/value\">14.40</div></div></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"receipt\" aria-label=\"Receipt\"><div data-weft-id=\"lines\" style=\"display:flex;flex-direction:column\"><div data-weft-id=\"subtotal/row\" style=\"display:flex;flex-direction:row;align-items:center;justify-content:space-between\"><div data-weft-id=\"subtotal/name\">Subtotal</div><div data-weft-id=\"subtotal/value\">12.00</div></div><div data-weft-id=\"total/row\" style=\"display:flex;flex-direction:row;align-items:center;justify-content:space-between\"><div data-weft-id=\"total/name\">Total</div><div data-weft-id=\"total/value\">14.40</div></div></div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.3",
@@ -5895,7 +5925,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Gallery\"><div data-weft-id=\"cards\" style=\"gap:var(--weft-space-lg);display:grid;grid-template-columns:repeat(3, minmax(0, 1fr))\"><div data-weft-id=\"card-a\">Revenue</div><div data-weft-id=\"card-b\">Orders</div><div data-weft-id=\"card-c\">Visitors</div></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Gallery\"><div data-weft-id=\"cards\" style=\"gap:var(--weft-space-lg);width:100%;max-width:var(--weft-size-xl);box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fill, minmax(max(var(--weft-size-sm), calc((100% - 2 * var(--weft-space-lg)) / 3)), 1fr))\"><div data-weft-id=\"card-a\">Revenue</div><div data-weft-id=\"card-b\">Orders</div><div data-weft-id=\"card-c\">Visitors</div></div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.3",
@@ -5963,7 +5993,17 @@
     {
      "kind": "tokens",
      "path": "/screen#root/grid#cards",
+     "note": "min-column-width var(--weft-size-sm) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root/grid#cards",
      "note": "gap var(--weft-space-lg) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root/grid#cards",
+     "note": "max-width var(--weft-size-xl) cannot be mapped back to a design token"
     }
    ],
    "diagnostics": []
@@ -7088,7 +7128,7 @@
   }
  },
  {
-  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Actions\"><div data-weft-id=\"actions\" style=\"gap:var(--weft-space-md);display:flex;flex-direction:row;align-items:flex-end\"><button data-weft-id=\"save\" type=\"button\" data-variant=\"primary\">Save</button><button data-weft-id=\"discard\" type=\"button\">Discard</button></div></main></body></html>\n",
+  "html": "<!doctype html>\n<html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><title>Weft</title></head><body><main data-weft-id=\"root\" aria-label=\"Actions\"><div data-weft-id=\"actions\" style=\"gap:var(--weft-space-md);padding:var(--weft-space-sm);display:flex;flex-direction:row;align-items:flex-end;justify-content:space-between\"><button data-weft-id=\"save\" type=\"button\" data-variant=\"primary\">Save</button><button data-weft-id=\"discard\" type=\"button\">Discard</button></div></main></body></html>\n",
   "result": {
    "document": {
     "weft": "0.3",
@@ -7104,7 +7144,8 @@
        "id": "actions",
        "props": {
         "align": "end",
-        "direction": "row"
+        "direction": "row",
+        "justify": "space-between"
        },
        "children": [
         {
@@ -7154,6 +7195,11 @@
      "kind": "tokens",
      "path": "/screen#root/stack#actions",
      "note": "gap var(--weft-space-md) cannot be mapped back to a design token"
+    },
+    {
+     "kind": "tokens",
+     "path": "/screen#root/stack#actions",
+     "note": "padding var(--weft-space-sm) cannot be mapped back to a design token"
     }
    ],
    "diagnostics": []

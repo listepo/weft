@@ -156,6 +156,56 @@ pub const RUNTIME: &[Helper] = &[
 }"#,
     },
     Helper {
+        name: "_fill",
+        // The same cap as `html::capped_columns`: at most `v` tracks, fewer when `min` does not fit.
+        js: r#"function _fill(v, min, gap) {
+  if (!(typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= 64) || typeof min !== "string") return undefined;
+  const gaps = v - 1;
+  const floor = typeof gap === "string" && gaps > 0 ? "max(" + min + ", calc((100% - " + gaps + " * " + gap + ") / " + v + "))" : "max(" + min + ", calc(100% / " + v + "))";
+  return "repeat(auto-fill, minmax(" + floor + ", 1fr))";
+}"#,
+        ts: r#"function _fill(v: unknown, min: string, gap?: string): string | undefined {
+  if (!(typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= 64) || typeof min !== "string") return undefined;
+  const gaps = v - 1;
+  const floor = typeof gap === "string" && gaps > 0 ? "max(" + min + ", calc((100% - " + gaps + " * " + gap + ") / " + v + "))" : "max(" + min + ", calc(100% / " + v + "))";
+  return "repeat(auto-fill, minmax(" + floor + ", 1fr))";
+}"#,
+    },
+    Helper {
+        name: "_justify",
+        // `start` is the initial value, so it is left out (SPEC §5.1).
+        js: r#"function _justify(v) {
+  return v === "center" ? "center" : v === "end" ? "flex-end" : v === "space-between" ? "space-between" : undefined;
+}"#,
+        ts: r#"function _justify(v: string): string | undefined {
+  return v === "center" ? "center" : v === "end" ? "flex-end" : v === "space-between" ? "space-between" : undefined;
+}"#,
+    },
+    Helper {
+        name: "_justify",
+        js: r#"function _justify(v) {
+  return v === "center" ? "center" : v === "end" ? "flex-end" : v === "space-between" ? "space-between" : undefined;
+}"#,
+        ts: r#"function _justify(v: string): string | undefined {
+  return v === "center" ? "center" : v === "end" ? "flex-end" : v === "space-between" ? "space-between" : undefined;
+}"#,
+    },
+    Helper {
+        name: "_fill",
+        js: r#"function _fill(columns, min, gap) {
+  if (typeof columns !== "number" || !Number.isInteger(columns) || columns < 1 || columns > 64) return undefined;
+  const gaps = columns - 1;
+  const floor = gaps > 0 && typeof gap === "string" ? "max(" + min + ", calc((100% - " + gaps + " * " + gap + ") / " + columns + "))" : "max(" + min + ", calc(100% / " + columns + "))";
+  return "repeat(auto-fill, minmax(" + floor + ", 1fr))";
+}"#,
+        ts: r#"function _fill(columns: unknown, min: string, gap: string | undefined): string | undefined {
+  if (typeof columns !== "number" || !Number.isInteger(columns) || columns < 1 || columns > 64) return undefined;
+  const gaps = columns - 1;
+  const floor = gaps > 0 && typeof gap === "string" ? "max(" + min + ", calc((100% - " + gaps + " * " + gap + ") / " + columns + "))" : "max(" + min + ", calc(100% / " + columns + "))";
+  return "repeat(auto-fill, minmax(" + floor + ", 1fr))";
+}"#,
+    },
+    Helper {
         name: "_align",
         js: r#"function _align(v, direction) {
   return v === "start" ? "flex-start" : v === "end" ? "flex-end" : v === "center" || v === "stretch" ? v : direction === "row" ? "center" : undefined;

@@ -9,7 +9,6 @@ New bugs, dead code and moves from a read-only Cursor cloud review of `main` at 
 | ID | Priority | Kind | Status | Where | Fix |
 | --- | --- | --- | --- | --- | --- |
 | T78 | P2 | bug | confirmed (same run) | `crates/weft-swiftui/tests/swift.rs:201-208` | The Swift typecheck tests ran 9+ minutes and were killed when the gate failed. Give nextest a timeout and a Swift module cache, or keep them out of the batch with flaky runtimes. |
-| T87 | P2 | bug | suspected | `crates/weft-web/src/from_jsx/mod.rs:37-66` | JSX import runs on a 64 MiB stack thread only off `wasm32`. Use the same budget or iterative lowering on WASM, or document the limit. |
 | T88 | P2 | bug | suspected | `crates/weft-catalog/src/resolver.rs:52-54` vs `:102-103` | The resolver's `tree()` matches context keys case-sensitively; `appearance()` does not. Make `tree()` case-insensitive. |
 | T90 | P2 | dead code | confirmed gap (orphans not listed) | `toolchain.md:18`; about 750 insta snapshots | Nothing checks for unreferenced snapshots. Run `cargo insta test --unreferenced=reject` in CI, or once and delete the orphans. |
 | T92 | P2 | move | suspected | `tooling/changed.ts`, `tooling/select.ts` → the org's `scoped-check` | A fourth copy of the affected-test planner. The other copies were not checked from this repo. |
@@ -29,12 +28,12 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16 | todo | P2 | 5 | 30% | |
-| T16.3 | todo | P2 | 3 | 0% | |
+| T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
 | T16.7 | todo | P2 | 3 | 0% | |
 | T41 | todo | P2 | 2 | 0% | |
-| T96 | todo | P2 | 3 | 0% | |
+| T96 | done | P2 | 3 | 100% | Cursor / grok 4.7 |
 | T97 | done | P2 | 2 | 100% | MiMo / MiMo |
 | T98 | done | P2 | 2 | 100% | MiMo / MiMo |
 | T99 | done | P3 | 1 | 100% | MiMo / MiMo |
@@ -46,6 +45,13 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 Found while merging #18. After T79, `serialize`, `stringify` and `canonicalize` (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`) return the output of an empty placeholder document (`to_document(Null)`) for a cyclic or too-deep input instead of failing. Only `applyPatches` reports W200. A caller gets a valid-looking empty screen and no signal.
 
 Done when: these entry points return W200 (or the binding's error type) for a too-deep or cyclic input, in Rust and TypeScript alike, with differential fixtures; no entry point turns such input into an empty document silently.
+
+Execution plan:
+
+1. Reproduce the silent empty document from `serialize`, `stringify` and `canonicalize` on a cyclic value and on a value past the depth limit (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`, and the TypeScript wrappers that call them).
+2. Return W200, the same way `applyPatches` already does, instead of `to_document(Null)`. Cover every entry point that can hide the failure, in Rust and TypeScript.
+3. Add differential fixtures: cyclic and too-deep inputs must not come back as an empty screen.
+4. Verify with `moon run root:changed`. Leave unrelated entry points unchanged.
 
 ### T97. Design-tool plugin data over 100 kB
 
@@ -401,6 +407,8 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 ### T16.3. Layout vocabulary: web generators and the reference renderer
 
 T16 scope items 3 and 5 for the web, as the design's generate table says. Depends on T16.2.
+
+Execution plan: follow the four steps below, and only those. Read `docs/layout-design.md` generate table before editing. Update SPEC §9 web rows in the same change as the generators. Retake and review insta snapshots and the `packages/visual` web baselines for `dashboard`, `glass` and `layout`. Do not implement importers (T16.8), SwiftUI, Slint, or design tools. Verify with the visual comparison (including a narrow viewport at one column and a wide one at three) and `moon run root:changed`.
 
 Steps:
 

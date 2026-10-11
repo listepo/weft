@@ -37,7 +37,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
   return (
     <main data-weft-id="layout" aria-label="Layout">
       <div data-weft-id="toolbar" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" }}>
-        <div data-weft-field="">
+        <div data-weft-field="" style={{ flex: "1 1 0%", minWidth: "0" }}>
           <label>
             <span aria-hidden="true">Search</span>
             <input data-weft-id="search" aria-label="Search" type="search" value={_text(data?.query)} onChange={(_e) => onChange?.("$.query", _e.currentTarget.value)} />
@@ -45,7 +45,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
         </div>
         <button data-weft-id="filter" type="button" onClick={(_e) => _act(actions, { id: "filter", action: "list.filter" })}>Filter</button>
       </div>
-      <div data-weft-id="pager" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" }}>
+      <div data-weft-id="pager" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
         {(() => {
           const _href = _url("");
           return (
@@ -59,7 +59,7 @@ export default function WeftScreen({ data, actions, onChange }: WeftProps) {
           );
         })()}
       </div>
-      <div data-weft-id="actions" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center" }}>
+      <div data-weft-id="actions" style={{ gap: "var(--weft-space-sm)", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-end" }}>
         <button data-weft-id="cancel" type="button" onClick={(_e) => _act(actions, { id: "cancel", action: "list.cancel" })}>Cancel</button>
         <button data-weft-id="save" type="button" data-variant="primary" onClick={(_e) => _act(actions, { id: "save", action: "list.save" })}>Save</button>
       </div>

@@ -5,7 +5,7 @@ description: example-grid as solid-jsx
 export default function WeftScreen(props) {
   return (
     <main data-weft-id="root" aria-label="Gallery">
-      <div data-weft-id="cards" style={{ gap: "var(--weft-space-lg)", display: "grid", "grid-template-columns": "repeat(3, minmax(0, 1fr))" }}>
+      <div data-weft-id="cards" style={{ gap: "var(--weft-space-lg)", width: "100%", "max-width": "var(--weft-size-xl)", "box-sizing": "border-box", display: "grid", "grid-template-columns": "repeat(auto-fill, minmax(max(var(--weft-size-sm), calc((100% - 2 * var(--weft-space-lg)) / 3)), 1fr))" }}>
         <div data-weft-id="card-a">Revenue</div>
         <div data-weft-id="card-b">Orders</div>
         <div data-weft-id="card-c">Visitors</div>

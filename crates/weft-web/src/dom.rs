@@ -12,8 +12,8 @@ use weft_core::{
 };
 use weft_import::{
     BuildOptions, Built, ImportResult, LossKind, MAX_DEPTH, MAX_NODES, Note, Scalar, Sem,
-    build_document, is_js_space, js_length, js_number_from, js_prefix, js_trim, limit_reached,
-    squash,
+    build_document, dissolved, is_js_space, js_length, js_number_from, js_prefix, js_trim,
+    limit_reached, squash,
 };
 
 use crate::html::token_var;
@@ -83,6 +83,16 @@ const ALIGN: &[(&str, &str)] = &[
     ("center", "center"),
     ("flex-end", "end"),
     ("stretch", "stretch"),
+];
+
+/// CSS `justify-content` → Weft `justify` (the four values every target draws).
+const JUSTIFY: &[(&str, &str)] = &[
+    ("flex-start", "start"),
+    ("start", "start"),
+    ("center", "center"),
+    ("flex-end", "end"),
+    ("end", "end"),
+    ("space-between", "space-between"),
 ];
 
 fn lookup(table: &[(&str, &'static str)], key: &str) -> Option<&'static str> {
@@ -400,6 +410,23 @@ impl<'d> Ctx<'d> {
         if tag == "template" && self.conventions.is_some() && !self.consumed.contains(&el) {
             return self.template(el, depth, label);
         }
+        if tag == "style" {
+            // A `<style>` is never an element; its media and container queries are a layout loss.
+            let mut text = String::new();
+            for &c in dom.children(el) {
+                if let Some(HNode::Text(t)) = dom.nodes.get(c) {
+                    text.push_str(t);
+                }
+            }
+            let mut sheet = Sem::new("generic", String::new());
+            style_sheet(&mut sheet, &text);
+            if !sheet.notes.is_empty() {
+                let mut notes = sheet.notes;
+                // Report on the document: a sheet is not attached to one element.
+                self.notes.entry(DOCUMENT).or_default().append(&mut notes);
+            }
+            return None;
+        }
         if SKIPPED.contains(&tag)
             || self.consumed.contains(&el)
             || attr("aria-hidden") == Some("true")
@@ -604,12 +631,11 @@ impl<'d> Ctx<'d> {
         if let Some(conventions) = self.conventions {
             self.read_conventions(conventions, el, tag, role, label, &mut s);
         }
+        let mut style = parse_style(attr("style"));
         let styled = self.conventions.is_some()
             && (layout_class(attr("class")).is_some()
                 || matches!(
-                    parse_style(attr("style"))
-                        .get("display")
-                        .map(String::as_str),
+                    style.get("display").map(String::as_str),
                     Some("flex" | "grid")
                 ));
         if (id.is_some() || styled)
@@ -617,8 +643,9 @@ impl<'d> Ctx<'d> {
             && attr("role").is_none()
             && matches!(tag, "div" | "span")
         {
-            layout(&mut s, dom, el, self.conventions);
+            layout(&mut s, dom, el, self.conventions, &mut style);
         }
+        read_grow(&mut s, &mut style);
         // SPEC §5.1: a row centres its children by default, and the renderers write that default
         // out as markup, so reading it back as `align="center"` would add what the source lacks.
         if s.kind.as_deref() == Some("stack")
@@ -629,7 +656,7 @@ impl<'d> Ctx<'d> {
         }
         if self.conventions.is_some() {
             read_tilt(&mut s, attr("style"));
-            left_out_style(&mut s, attr("style"));
+            left_out_style(&mut s, style);
         }
 
         if named == Some("combobox")
@@ -655,6 +682,7 @@ impl<'d> Ctx<'d> {
                 label
             };
             s.children = self.children(el, depth, within);
+            lift_grow(&mut s);
             if tag == "form" {
                 self.forms -= 1;
             }
@@ -818,6 +846,12 @@ impl<'d> Ctx<'d> {
         if let Some(align) = attr("data-align") {
             s.props.insert("align".into(), align.into());
         }
+        if let Some(justify) = attr("data-justify") {
+            s.props.insert("justify".into(), justify.into());
+        }
+        if attr("data-grow").is_some() {
+            s.props.insert("grow".into(), "true".into());
+        }
         if attr("data-wrap").is_some() {
             s.props.insert("wrap".into(), "true".into());
         }
@@ -972,6 +1006,98 @@ fn js_trim_start(s: &str) -> &str {
     s.trim_start_matches(is_js_space)
 }
 
+/// The `columns` and `min-column-width` variable of a `grid-template-columns` the generator
+/// writes: `repeat(N, minmax(0, 1fr))` or the capped `auto-fill` form (SPEC §9).
+fn grid_form(value: &str) -> Option<(u32, Option<&str>)> {
+    let v = js_trim(value);
+    if let Some(count) = repeat_count(v)
+        && let Ok(n) = count.parse::<u32>()
+        && (1..=64).contains(&n)
+    {
+        return Some((n, None));
+    }
+    // repeat(auto-fill, minmax(max(var(--weft-…), calc(… / N)), 1fr))
+    let rest = js_trim_start(v.strip_prefix("repeat(")?);
+    let rest = js_trim_start(rest.strip_prefix("auto-fill,")?);
+    let rest = js_trim_start(rest.strip_prefix("minmax(")?);
+    let rest = js_trim_start(rest.strip_prefix("max(")?);
+    let rest = js_trim_start(rest.strip_prefix("var(")?);
+    let close = rest.find(')')?;
+    let min = &rest[..close];
+    let rest = js_trim_start(&rest[close + 1..]);
+    let rest = js_trim_start(rest.strip_prefix(",")?);
+    let rest = js_trim_start(rest.strip_prefix("calc(")?);
+    let columns = calc_divisor(rest)?;
+    (1..=64).contains(&columns).then_some((columns, Some(min)))
+}
+
+/// The divisor of `calc(… / N)` — the `columns` the capped template caps at.
+fn calc_divisor(body: &str) -> Option<u32> {
+    let at = body.rfind('/')?;
+    let after = js_trim_start(&body[at + 1..]);
+    let end = after
+        .find(|c: char| !c.is_ascii_digit())
+        .unwrap_or(after.len());
+    after[..end].parse().ok()
+}
+
+/// `var(--weft-…)`, as the generator writes a dimension token.
+fn weft_var(value: &str) -> Option<&str> {
+    js_trim(value)
+        .strip_prefix("var(")?
+        .strip_suffix(')')
+        .map(js_trim)
+        .filter(|v| v.starts_with("--weft-"))
+}
+
+/// A token reference in a style, resolved against the token set; the loss when it cannot be.
+fn style_token(conventions: Option<&Conventions>, value: &str, what: &str) -> Result<Value, Note> {
+    match weft_var(value).and_then(|var| conventions.and_then(|c| c.vars.get(var).cloned())) {
+        Some(path) => Ok(Value::Token(path)),
+        None => Err(Note {
+            kind: if value.starts_with("var(--weft-") {
+                LossKind::Tokens
+            } else {
+                LossKind::Layout
+            },
+            note: format!(
+                "{what} {} cannot be mapped back to a design token",
+                js_prefix(value, 80)
+            ),
+        }),
+    }
+}
+
+/// How much free space a child takes: `data-grow` (Weft's own), or a positive `flex-grow` /
+/// `flex` ratio in foreign markup. `None` when the child does not grow.
+fn grow_ratio(dom: &Dom, el: usize) -> Option<f64> {
+    if dom.attr(el, "data-grow").is_some() {
+        return Some(1.0);
+    }
+    let style = parse_style(dom.attr(el, "style"));
+    if let Some(raw) = style.get("flex-grow")
+        && let Ok(n) = js_trim(raw).parse::<f64>()
+        && n > 0.0
+        && n.is_finite()
+    {
+        return Some(n);
+    }
+    if let Some(flex) = style.get("flex")
+        && let Some(first) = flex.split_whitespace().next()
+        && let Ok(n) = first.parse::<f64>()
+        && n > 0.0
+        && n.is_finite()
+    {
+        return Some(n);
+    }
+    None
+}
+
+/// A declaration of a parsed `style`, owned so the map stays free for other uses.
+fn style_get(style: &HashMap<String, String>, key: &str) -> Option<String> {
+    style.get(key).cloned()
+}
+
 /// The 3D tilt a `transform` stands for (SPEC §2.2), unless the element's `data-prop-*` already
 /// gave it. A `transform` that is anything but our functions stays a loss (`left_out_style`).
 fn read_tilt(s: &mut Sem, style: Option<&str>) {
@@ -989,8 +1115,8 @@ fn read_tilt(s: &mut Sem, style: Option<&str>) {
 }
 
 /// Inline style Weft has no prop for: what a stack or grid reads from it is its layout, the rest
-/// is a loss rather than silently gone.
-fn left_out_style(s: &mut Sem, style: Option<&str>) {
+/// is a loss rather than silently gone. `consumed` is what `layout` and `read_grow` already took.
+fn left_out_style(s: &mut Sem, consumed: HashMap<String, String>) {
     const LAYOUT: &[&str] = &[
         "display",
         "flex-direction",
@@ -1000,7 +1126,7 @@ fn left_out_style(s: &mut Sem, style: Option<&str>) {
         "grid-template-columns",
     ];
     let layout = matches!(s.kind.as_deref(), Some("stack" | "grid"));
-    let mut left: Vec<String> = parse_style(style)
+    let mut left: Vec<String> = consumed
         .into_iter()
         .filter(|(k, _)| !(layout && LAYOUT.contains(&k.as_str())))
         .filter(|(k, v)| !(k == "transform" && tilt::parse(v).is_some()))
@@ -1042,6 +1168,24 @@ fn lift_bound_text(s: &mut Sem) {
     }
 }
 
+/// `grow` on a wrapper the importer dissolves (a field's shell, a control's label) belongs to the
+/// Weft element inside it: the shell is the flex item, and the element is what the document names.
+fn lift_grow(s: &mut Sem) {
+    if s.props.get("grow").is_none_or(|g| g != "true") {
+        return;
+    }
+    if s.kind.is_some() || !dissolved(&s.role) {
+        return;
+    }
+    for child in &mut s.children {
+        child
+            .props
+            .entry("grow".into())
+            .or_insert_with(|| "true".into());
+        lift_grow(child);
+    }
+}
+
 /// A sortable column header holds a button; its press is the column's.
 fn lift_header_button(s: &mut Sem) {
     if let [only] = s.children.as_mut_slice()
@@ -1072,31 +1216,84 @@ fn layout_class(class: Option<&str>) -> Option<&'static str> {
 
 /// Weft renderer markup for the role-less layout and text kinds (SPEC §9: they add no node of
 /// their own), recognised only on elements that carry a Weft id, or, in source, a layout class or
-/// style.
-fn layout(s: &mut Sem, dom: &Dom, el: usize, conventions: Option<&Conventions>) {
-    let style = parse_style(dom.attr(el, "style"));
-    let get = |key: &str| style.get(key).map(String::as_str);
+/// style. Reads the drawn layout forms (`data-justify`, `data-grow`, the inline `padding`,
+/// `max-width` and grid template when they name `--weft-` properties) and the foreign spellings,
+/// consuming what it takes from `style` so `left_out_style` reports only what is left.
+fn layout(
+    s: &mut Sem,
+    dom: &Dom,
+    el: usize,
+    conventions: Option<&Conventions>,
+    style: &mut HashMap<String, String>,
+) {
     let has_elements = dom.elements(el).next().is_some();
     let class = conventions.and_then(|_| layout_class(dom.attr(el, "class")));
-    if get("display") == Some("grid") || class == Some("grid") {
+    if style_get(style, "display").as_deref() == Some("grid") || class == Some("grid") {
         s.kind = Some("grid".into());
-        let columns = repeat_count(get("grid-template-columns").unwrap_or("")).unwrap_or("1");
-        s.props.insert("columns".into(), columns.into());
-    } else if get("display") == Some("flex") || has_elements || class.is_some() {
+        match grid_form(
+            style_get(style, "grid-template-columns")
+                .as_deref()
+                .unwrap_or(""),
+        ) {
+            Some((count, min)) => {
+                s.props
+                    .insert("columns".into(), js_number(f64::from(count)));
+                if let Some(min) = min {
+                    match style_token(conventions, &format!("var({min})"), "min-column-width") {
+                        Ok(token) => {
+                            s.values.insert("min-column-width".into(), token);
+                        }
+                        Err(note) => s.notes.push(note),
+                    }
+                }
+                style.remove("grid-template-columns");
+            }
+            None => {
+                if let Some(raw) = style_get(style, "grid-template-columns") {
+                    if raw.contains("auto-fill") || raw.contains("auto-fit") || raw.contains('@') {
+                        s.notes.push(Note {
+                            kind: LossKind::Layout,
+                            note: format!(
+                                "grid-template-columns {} is not Weft's capped auto-fill form; \
+                                 media and container queries have no prop",
+                                js_prefix(&raw, 80)
+                            ),
+                        });
+                    } else {
+                        s.notes.push(Note {
+                            kind: LossKind::Layout,
+                            note: format!(
+                                "grid-template-columns {} cannot be mapped back to columns",
+                                js_prefix(&raw, 80)
+                            ),
+                        });
+                    }
+                    style.remove("grid-template-columns");
+                }
+                s.props.insert("columns".into(), "1".into());
+            }
+        }
+    } else if style_get(style, "display").as_deref() == Some("flex")
+        || has_elements
+        || class.is_some()
+    {
         s.kind = Some("stack".into());
-        if get("flex-direction") == Some("row") || class == Some("row") {
+        if style_get(style, "flex-direction").as_deref() == Some("row") || class == Some("row") {
             s.props.insert("direction".into(), "row".into());
         }
-        if let Some(align) = get("align-items").and_then(|a| lookup(ALIGN, a)) {
+        if let Some(align) = style_get(style, "align-items")
+            .as_deref()
+            .and_then(|a| lookup(ALIGN, a))
+        {
             s.props.insert("align".into(), align.into());
         }
-        if get("flex-wrap") == Some("wrap") {
+        if style_get(style, "flex-wrap").as_deref() == Some("wrap") {
             s.props.insert("wrap".into(), "true".into());
         }
     } else {
         s.kind = Some("text".into());
     }
-    if let Some(tint) = get("--_weft-material-tint") {
+    if let Some(tint) = style_get(style, "--_weft-material-tint") {
         // The element points at the token's own `<var>-tint`; the token is the var without it.
         let token = conventions.and_then(|c| {
             let var = tint.strip_prefix("var(")?.strip_suffix(')')?;
@@ -1110,7 +1307,7 @@ fn layout(s: &mut Sem, dom: &Dom, el: usize, conventions: Option<&Conventions>) 
                 kind: LossKind::Tokens,
                 note: format!(
                     "material {} cannot be mapped back to a design token",
-                    js_prefix(tint, 80)
+                    js_prefix(&tint, 80)
                 ),
             }),
         }
@@ -1123,12 +1320,13 @@ fn layout(s: &mut Sem, dom: &Dom, el: usize, conventions: Option<&Conventions>) 
             .find(|path| c.paths.contains(path))
     });
     let gap_var = conventions.and_then(|c| {
-        let var = get("gap")?.strip_prefix("var(")?.strip_suffix(')')?;
+        let gap = style_get(style, "gap")?;
+        let var = gap.strip_prefix("var(")?.strip_suffix(')')?;
         c.vars.get(js_trim(var)).cloned()
     });
     if let Some(token) = gap_var.or(gap_class) {
         s.values.insert("gap".into(), Value::Token(token));
-    } else if let Some(gap) = get("gap") {
+    } else if let Some(gap) = style_get(style, "gap") {
         s.notes.push(Note {
             kind: if gap.starts_with("var(--weft-") {
                 LossKind::Tokens
@@ -1137,10 +1335,134 @@ fn layout(s: &mut Sem, dom: &Dom, el: usize, conventions: Option<&Conventions>) 
             },
             note: format!(
                 "gap {} cannot be mapped back to a design token",
-                js_prefix(gap, 80)
+                js_prefix(&gap, 80)
             ),
         });
     }
+    // `justify`: `data-justify` (Weft's own; `start` is omitted as the default) or a foreign
+    // `justify-content` among the four values. `space-around`, `space-evenly` and `stretch` are
+    // layout losses (decision 2).
+    if matches!(s.kind.as_deref(), Some("stack")) {
+        if let Some(v) = dom.attr(el, "data-justify") {
+            s.props.insert("justify".into(), v.into());
+        } else if let Some(css) = style_get(style, "justify-content") {
+            match lookup(JUSTIFY, &css) {
+                Some(v) => {
+                    s.props.insert("justify".into(), v.into());
+                }
+                None => s.notes.push(Note {
+                    kind: LossKind::Layout,
+                    note: format!(
+                        "justify-content {} is outside start, center, end and space-between",
+                        js_prefix(&css, 80)
+                    ),
+                }),
+            }
+        }
+        style.remove("justify-content");
+        // Unequal `flex-grow` ratios: any positive grow is `grow`, but the ratio is a loss.
+        let ratios: Vec<f64> = dom
+            .elements(el)
+            .filter_map(|c| grow_ratio(dom, c))
+            .collect();
+        if ratios.len() >= 2 {
+            let first = ratios[0];
+            if ratios.iter().any(|r| (*r - first).abs() > f64::EPSILON) {
+                s.notes.push(Note {
+                    kind: LossKind::Layout,
+                    note: "children grow by unequal flex ratios; Weft shares free space equally"
+                        .into(),
+                });
+            }
+        }
+    }
+    // `padding` and `max-width`, the inline declarations the generator writes through
+    // `var(--weft-…)`. A raw length is a layout loss.
+    if matches!(s.kind.as_deref(), Some("stack" | "grid")) {
+        if let Some(padding) = style_get(style, "padding") {
+            match style_token(conventions, &padding, "padding") {
+                Ok(token) => {
+                    s.values.insert("padding".into(), token);
+                }
+                Err(note) => s.notes.push(note),
+            }
+            style.remove("padding");
+        }
+        if let Some(max) = style_get(style, "max-width") {
+            match style_token(conventions, &max, "max-width") {
+                Ok(token) => {
+                    s.values.insert("max-width".into(), token);
+                    // The cap is the border box, so padding stays inside it.
+                    if style_get(style, "width").as_deref() == Some("100%") {
+                        style.remove("width");
+                    }
+                    if style_get(style, "box-sizing").as_deref() == Some("border-box") {
+                        style.remove("box-sizing");
+                    }
+                }
+                Err(note) => s.notes.push(note),
+            }
+            style.remove("max-width");
+        }
+    }
+}
+
+/// `grow` on any element: `data-grow` / `data-prop-grow` (read in `read_conventions`), or a
+/// positive `flex-grow` / `flex` (Weft writes `flex: 1 1 0%` with `min-width: 0` in a row and
+/// `min-height: 0` in a column).
+fn read_grow(s: &mut Sem, style: &mut HashMap<String, String>) {
+    let from_style = style
+        .get("flex-grow")
+        .or_else(|| style.get("flex"))
+        .and_then(|raw| {
+            let first = raw.split_whitespace().next()?;
+            let n: f64 = first.parse().ok()?;
+            (n > 0.0 && n.is_finite()).then_some(n)
+        });
+    let already = matches!(s.props.get("grow").map(String::as_str), Some("true"));
+    if from_style.is_none() && !already {
+        return;
+    }
+    s.props.insert("grow".into(), "true".into());
+    style.remove("flex");
+    style.remove("flex-grow");
+    style.remove("flex-shrink");
+    style.remove("flex-basis");
+    if style.get("min-width").is_some_and(|v| js_trim(v) == "0") {
+        style.remove("min-width");
+    }
+    if style.get("min-height").is_some_and(|v| js_trim(v) == "0") {
+        style.remove("min-height");
+    }
+}
+
+/// `<style>` rules Weft has no prop for: a media query that is not the appearance one, or a
+/// container query. The generator writes `@media (prefers-color-scheme: dark)` only (SPEC §10.3).
+fn style_sheet(s: &mut Sem, text: &str) {
+    let mut lost = Vec::new();
+    for line in text.split(['\n', '{', '}']) {
+        let at = js_trim(line);
+        if let Some(query) = at.strip_prefix("@container") {
+            lost.push(format!("@container{}", js_prefix(query, 40)));
+        } else if let Some(query) = at.strip_prefix("@media") {
+            let q = js_trim(query);
+            if !q.contains("prefers-color-scheme") {
+                lost.push(format!("@media{}", js_prefix(q, 40)));
+            }
+        }
+    }
+    if lost.is_empty() {
+        return;
+    }
+    lost.sort();
+    lost.dedup();
+    s.notes.push(Note {
+        kind: LossKind::Layout,
+        note: format!(
+            "media or container queries have no prop: {}",
+            lost.join("; ")
+        ),
+    });
 }
 
 /// Never recoverable from rendered HTML, whatever it holds.
@@ -1244,6 +1566,7 @@ pub(crate) fn read_dom(
         );
     }
     let source_ids: HashSet<String> = ctx.reserved.iter().cloned().collect();
+    let top = ctx.notes.remove(&DOCUMENT).unwrap_or_default();
     let mut built = build_document(
         &sems,
         BuildOptions {
@@ -1252,6 +1575,15 @@ pub(crate) fn read_dom(
             diagnostics,
         },
     );
+    let root_path = built.root_path.clone();
+    built
+        .result
+        .losses
+        .extend(top.into_iter().map(|n| weft_import::Loss {
+            kind: n.kind,
+            path: root_path.clone(),
+            note: n.note,
+        }));
     if conventions.is_some() {
         let generated = count_nodes(&built.result.document.root, |n| {
             n.id.as_ref().is_none_or(|id| !source_ids.contains(id))

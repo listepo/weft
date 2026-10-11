@@ -264,6 +264,11 @@ ul > li {
 [data-align="center"] { align-items: center; }
 [data-align="end"] { align-items: flex-end; }
 [data-align="stretch"] { align-items: stretch; }
+[data-justify="center"] { justify-content: center; }
+[data-justify="end"] { justify-content: flex-end; }
+[data-justify="space-between"] { justify-content: space-between; }
+.weft-row > [data-grow] { flex: 1 1 0%; min-width: 0; }
+.weft-stack > [data-grow] { flex: 1 1 0%; min-height: 0; }
 [data-wrap] { flex-wrap: wrap; }
 a { display: inline-block; }
 [hidden] { display: none !important; }
@@ -272,11 +277,11 @@ a { display: inline-block; }
 <body>
 <main data-weft-id="receipt" aria-label="Receipt">
   <div data-weft-id="lines" class="weft-stack">
-    <div data-weft-id="subtotal/row" data-prop-justify="space-between" class="weft-row">
+    <div data-weft-id="subtotal/row" data-prop-justify="space-between" class="weft-row" data-justify="space-between">
       <div data-weft-id="subtotal/name" data-weft-kind="text">Subtotal</div>
       <div data-weft-id="subtotal/value" data-weft-kind="text">12.00</div>
     </div>
-    <div data-weft-id="total/row" data-prop-justify="space-between" class="weft-row">
+    <div data-weft-id="total/row" data-prop-justify="space-between" class="weft-row" data-justify="space-between">
       <div data-weft-id="total/name" data-weft-kind="text">Total</div>
       <div data-weft-id="total/value" data-weft-kind="text">14.40</div>
     </div>

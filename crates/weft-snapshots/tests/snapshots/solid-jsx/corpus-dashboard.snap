@@ -28,7 +28,7 @@ function _url(value) {
 export default function WeftScreen(props) {
   return (
     <main data-weft-id="dashboard" data-state="ready" aria-label="Team dashboard">
-      <div data-weft-id="header" style={{ gap: "var(--weft-space-md)", display: "flex", "flex-direction": "row", "align-items": "center", "flex-wrap": "wrap" }}>
+      <div data-weft-id="header" style={{ gap: "var(--weft-space-md)", display: "flex", "flex-direction": "row", "align-items": "center", "flex-wrap": "wrap", "justify-content": "space-between" }}>
         <h1 data-weft-id="title">
           {!(_text(props.data?.team?.name).trim() === "") ? _squash(_text(props.data?.team?.name)) : ""}
         </h1>
@@ -36,7 +36,7 @@ export default function WeftScreen(props) {
           {!(_text(props.data?.updatedAt).trim() === "") ? _squash(_text(props.data?.updatedAt)) : ""}
         </div>
       </div>
-      <div data-weft-id="stats" style={{ gap: "var(--weft-space-lg)", display: "grid", "grid-template-columns": "repeat(3, minmax(0, 1fr))" }}>
+      <div data-weft-id="stats" style={{ gap: "var(--weft-space-lg)", display: "grid", "grid-template-columns": "repeat(auto-fill, minmax(max(var(--weft-size-sm), calc((100% - 2 * var(--weft-space-lg)) / 3)), 1fr))" }}>
         <section data-weft-id="velocity" aria-label="Velocity">
           <div data-weft-slot="header">
             <h2 data-weft-id="velocity-title">Velocity</h2>
@@ -62,7 +62,7 @@ export default function WeftScreen(props) {
           </div>
         </section>
       </div>
-      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", display: "flex", "flex-direction": "column" }}>
+      <div data-weft-id="notices" style={{ gap: "var(--weft-space-sm)", width: "100%", "max-width": "var(--weft-size-lg)", "box-sizing": "border-box", display: "flex", "flex-direction": "column" }}>
         <div data-weft-id="release" role="alert" data-tone="info">Release 2.4 ships on Friday.</div>
         <div data-weft-id="backup" role="alert" data-tone="success">
           <Show when={!(_text(props.data?.backupStatus).trim() === "")}>
@@ -79,7 +79,7 @@ export default function WeftScreen(props) {
           })()}
         </div>
       </div>
-      <div data-weft-id="footer" style={{ gap: "var(--weft-space-md)", display: "flex", "flex-direction": "row", "align-items": "flex-end", "flex-wrap": "wrap" }}>
+      <div data-weft-id="footer" style={{ gap: "var(--weft-space-md)", display: "flex", "flex-direction": "row", "align-items": "flex-end", "flex-wrap": "wrap", "justify-content": "space-between" }}>
         <div data-weft-id="owner" data-tone="default">Owned by the platform team</div>
         <div data-weft-id="footer-links" style={{ gap: "var(--weft-space-md)", display: "flex", "flex-direction": "row", "align-items": "flex-start" }}>
           {(() => {

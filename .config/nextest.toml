@@ -1,0 +1,11 @@
+# nextest: the workspace's test runner (`root:rust-test`).
+#
+# The Swift typecheck tests of weft-swiftui feed every generated screen to
+# `xcrun swiftc -typecheck`. A cold run takes about five minutes per SDK and
+# more when the machine is loaded, so without a timeout a hang is only noticed
+# when the gate itself is killed. This terminates them cleanly instead; the
+# module cache and the toolchain-and-sources stamp in tests/swift.rs keep a warm
+# run cheap so the limit is not the usual path.
+[[profile.default.overrides]]
+filter = 'test(generated_swift_typechecks)'
+slow-timeout = { period = "60s", terminate-after = 15 }
