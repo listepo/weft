@@ -18,7 +18,7 @@ FRAME "screen#load-error" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryA
   FRAME "stack#actions" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
     | weft.origin = layer(stack#actions)
     | weft.source = {"kind":"stack","id":"actions","props":{"direction":"row","gap":{"token":"space.sm"}}}
-    | weft.style = [[],[],0,[0,0,0,0],null]
+    | weft.style = [[],[],0,null,null]
     INSTANCE "button#retry" layoutMode="HORIZONTAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=16 paddingRight=16 paddingTop=8 paddingBottom=8 fills=[{"type":"SOLID","color":"#2663eb","boundVariables":{"color":"var(color/action/primary)"}}] cornerRadius=8 bound={"paddingLeft":"var(space/md)","paddingRight":"var(space/md)","paddingTop":"var(space/sm)","paddingBottom":"var(space/sm)","topLeftRadius":"var(radius/md)","topRightRadius":"var(radius/md)","bottomLeftRadius":"var(radius/md)","bottomRightRadius":"var(radius/md)"} main="<variant=primary, state=(unset)>"
       | weft.origin = layer(button#retry)
       | weft.source = {"kind":"button","id":"retry","props":{"variant":"primary"},"on":{"press":"load.retry"},"children":["Retry"],"shown":{"text":"Retry"}}

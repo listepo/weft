@@ -22,7 +22,7 @@ FRAME "screen#profile" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxis
   FRAME "stack#links" layoutMode="HORIZONTAL" itemSpacing=16 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
     | weft.origin = layer(stack#links)
     | weft.source = {"kind":"stack","id":"links","props":{"direction":"row","gap":{"token":"space.md"}}}
-    | weft.style = [[],[],0,[0,0,0,0],null]
+    | weft.style = [[],[],0,null,null]
     INSTANCE "link#website" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<link>"
       | weft.origin = layer(link#website)
       | weft.source = {"kind":"link","id":"website","props":{"href":{"bind":"$.user.website"}},"children":["Website"],"shown":{"text":"Website"}}

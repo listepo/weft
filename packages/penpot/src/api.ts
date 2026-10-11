@@ -26,6 +26,14 @@ export type PTrack = { readonly type: string; readonly value: number | null };
 
 export interface PCommonLayout {
   alignItems?: "start" | "end" | "center" | "stretch";
+  justifyContent?:
+    | "start"
+    | "center"
+    | "end"
+    | "space-between"
+    | "space-around"
+    | "space-evenly"
+    | "stretch";
   rowGap: number;
   columnGap: number;
   topPadding: number;
@@ -35,6 +43,15 @@ export interface PCommonLayout {
   horizontalSizing: "fix" | "fill" | "auto";
   verticalSizing: "fix" | "fill" | "auto";
 }
+
+/** How a shape sits in its parent's layout (`shape.layoutChild`). */
+export type PLayoutChild = {
+  horizontalSizing: "auto" | "fill" | "fix";
+  verticalSizing: "auto" | "fill" | "fix";
+  maxWidth: number | null;
+  minWidth: number | null;
+  absolute: boolean;
+};
 
 export interface PFlex extends PCommonLayout {
   dir: "row" | "row-reverse" | "column" | "column-reverse";
@@ -115,6 +132,8 @@ export interface PShapeBase extends PSharedData {
   readonly layoutCell?: { readonly row?: number; readonly column?: number } | undefined;
   /** Token names applied to the shape, by property (`rowGap`, `fill`). */
   readonly tokens: { readonly [property: string]: string | undefined };
+  /** How the shape sits in its parent's layout; absent outside a layout. */
+  readonly layoutChild?: PLayoutChild | undefined;
   applyToken(token: PToken, properties?: string[]): void;
   resize(width: number, height: number): void;
   remove(): void;

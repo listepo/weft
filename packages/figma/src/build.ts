@@ -82,12 +82,35 @@ function figmaHost(api: FigmaApi, library: Library): BuildHost<Built, FComponent
         frame.counterAxisAlignItems = { start: "MIN", center: "CENTER", end: "MAX" }[
           view.align
         ] as FFrame["counterAxisAlignItems"];
+        frame.primaryAxisAlignItems = {
+          start: "MIN",
+          center: "CENTER",
+          end: "MAX",
+          "space-between": "SPACE_BETWEEN",
+        }[view.justify] as FFrame["primaryAxisAlignItems"];
         bindNumber(frame, ["itemSpacing"], library, view.gap.token, view.gap.px);
+      }
+      bindNumber(
+        frame,
+        ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"],
+        library,
+        view.paddingToken,
+        view.padding,
+      );
+      // SPEC §5.1: `max-width` fills up to the cap across the parent.
+      if (view.maxWidth !== undefined) {
+        bindNumber(frame, ["maxWidth"], library, view.maxWidth.token, view.maxWidth.px);
+        frame.layoutSizingHorizontal = "FILL";
       }
       return frame;
     },
     turn(layer, degrees) {
       layer.rotation = -degrees;
+    },
+    grow(layer, parentMode) {
+      if (layer.type === "TEXT") return;
+      if (parentMode === "row") layer.layoutSizingHorizontal = "FILL";
+      else layer.layoutSizingVertical = "FILL";
     },
     text: (drawing) => drawText(api, library, drawing),
     setText: (layer, name, value) => setLayerText(api, layer, name, value),

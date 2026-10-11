@@ -1,4 +1,4 @@
-board "screen#todos" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#todos>","dir":"column","wrap":"nowrap"}
+board "screen#todos" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#todos>","dir":"column","wrap":"nowrap"}
   | weft/weft.document = {"weft":"0.1"}
   | weft/weft.origin = shape(screen#todos)
   | weft/weft.source = {"kind":"screen","id":"todos","props":{"label":"Tasks"}}
@@ -8,14 +8,14 @@ board "screen#todos" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
     | weft/weft.origin = shape(heading#title)
     | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Tasks"],"shown":{"text":"Tasks"}}
     text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Tasks"
-  board "form#add-form" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<form#add-form>","dir":"column","wrap":"nowrap"}
+  board "form#add-form" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<form#add-form>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(form#add-form)
     | weft/weft.source = {"kind":"form","id":"add-form","on":{"submit":"todo.add"}}
     | weft/weft.style = [[],[],0,[0,0,0,0],8]
-    board "stack#add-row" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#add-row>","dir":"row","wrap":"nowrap"}
+    board "stack#add-row" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#add-row>","dir":"row","wrap":"nowrap"}
       | weft/weft.origin = shape(stack#add-row)
       | weft/weft.source = {"kind":"stack","id":"add-row","props":{"direction":"row","gap":{"token":"space.sm"}}}
-      | weft/weft.style = [[],[],0,[0,0,0,0],null]
+      | weft/weft.style = [[],[],0,null,null]
       board "field#draft" inCopy=true head=true componentOf="<type=text, state=(unset)>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":4,"columnGap":4,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<field#draft>","dir":"column"}
         | weft/weft.kind = field
         | weft/weft.origin = shape(field#draft)
@@ -27,15 +27,15 @@ board "screen#todos" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
         | weft/weft.origin = shape(button#add)
         | weft/weft.source = {"kind":"button","id":"add","props":{"disabled":{"bind":"$.draft","not":true},"submit":true,"variant":"primary"},"children":["Add"],"shown":{"text":"Add"}}
         text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Add"
-  board "list#list" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<list#list>","dir":"column","wrap":"nowrap"}
+  board "list#list" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<list#list>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(list#list)
     | weft/weft.source = {"kind":"list","id":"list"}
     | weft/weft.style = [[],[],0,[8,8,8,8],8]
-    board "each#todo-each" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<each#todo-each>","dir":"column","wrap":"nowrap"}
+    board "each#todo-each" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<each#todo-each>","dir":"column","wrap":"nowrap"}
       | weft/weft.origin = shape(each#todo-each)
       | weft/weft.source = {"kind":"each","id":"todo-each","props":{"as":"todo","in":{"bind":"$.todos"}}}
       | weft/weft.style = [[],[],0,[0,0,0,0],0]
-      board "item#todo" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<item#todo>","dir":"column","wrap":"nowrap"}
+      board "item#todo" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<item#todo>","dir":"column","wrap":"nowrap"}
         | weft/weft.origin = shape(item#todo)
         | weft/weft.source = {"kind":"item","id":"todo"}
         | weft/weft.style = [[],[],0,[8,8,8,8],8]

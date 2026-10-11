@@ -3,7 +3,7 @@
 // component copies), so the mapping back to Weft is written once. Everything a layer reports came
 // from a file the plugin does not control, so it is input to check, not a fact to trust.
 import type { PluginData } from "./keys.ts";
-import type { Align, Mode } from "./view.ts";
+import type { Align, Justify, Mode } from "./view.ts";
 
 /**
  * - `frame`: a container the reader descends into (Figma frames and components, Penpot boards).
@@ -12,6 +12,9 @@ import type { Align, Mode } from "./view.ts";
  * - `other`: groups, shapes, vectors and anything else; a group still has children.
  */
 export type LayerKind = "frame" | "instance" | "text" | "other";
+
+/** How a layer sizes itself on one axis as its parent's layout sees it. */
+export type Sizing = "fixed" | "hug" | "fill";
 
 export type LayerLayout = {
   /** `none`: free positions, or a layout Weft has no form for (`label` names it). */
@@ -26,6 +29,20 @@ export type LayerLayout = {
   alignLabel: string;
   wrap: boolean;
   columns: number;
+  /**
+   * Main-axis alignment of a stack; undefined when the tool's value has no Weft form
+   * (`justifyLabel` names it).
+   */
+  justify: Justify | undefined;
+  justifyLabel: string;
+  /** The common padding when every side matches; undefined when the sides differ. */
+  padding: number | undefined;
+  /** The max width the tool reports, if any. */
+  maxWidth: number | undefined;
+  /** The min width the tool reports, if any (Weft has no form for it). */
+  minWidth: number | undefined;
+  /** Whether every grid track is an equal `flex` track. */
+  flexTracks: boolean;
 };
 
 export interface Layer extends PluginData {
@@ -60,10 +77,16 @@ export interface Layer extends PluginData {
   gap(grid: boolean): number;
   /** The token path bound to that spacing, if the tool says one is. */
   gapToken(grid: boolean): Promise<string | undefined>;
+  /** How the layer sizes itself on each axis, as its parent's layout sees it. */
+  readonly sizing: { readonly horizontal: Sizing; readonly vertical: Sizing };
+  /** The token path bound to the common padding, if the tool says one is. */
+  paddingToken(): Promise<string | undefined>;
+  /** The token path bound to the max width, if the tool says one is. */
+  maxWidthToken(): Promise<string | undefined>;
   /**
    * The visual properties Weft has no prop for, as one comparable string (fills, strokes, corners,
-   * padding, and spacing when `withSpacing`). The build stores it; a different value on read is a
-   * visual edit.
+   * and, when `withSpacing`, padding and spacing: on a `stack` or `grid` those are props). The
+   * build stores it; a different value on read is a visual edit.
    */
   style(withSpacing: boolean): string;
   /** An instance's library component: its catalog kind mark and its style; undefined if gone. */

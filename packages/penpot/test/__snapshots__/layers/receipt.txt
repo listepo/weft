@@ -1,0 +1,17 @@
+board "screen#receipt" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#receipt>","dir":"column","wrap":"nowrap"}
+  | weft/weft.document = {"weft":"0.2"}
+  | weft/weft.origin = shape(screen#receipt)
+  | weft/weft.source = {"kind":"screen","id":"receipt","props":{"label":"Receipt"}}
+  | weft/weft.style = [[["#ffffff",1]],[],0,[24,24,24,24],8]
+  board "stack#lines" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":0,"columnGap":0,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#lines>","dir":"column","wrap":"nowrap"}
+    | weft/weft.origin = shape(stack#lines)
+    | weft/weft.source = {"kind":"stack","id":"lines"}
+    | weft/weft.style = [[],[],0,null,null]
+    board "use#subtotal" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<use#subtotal>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(use#subtotal)
+      | weft/weft.source = {"kind":"use","id":"subtotal","props":{"amount":{"bind":"$.subtotal"},"fragment":"price-row","label":"Subtotal"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]
+    board "use#total" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<use#total>","dir":"column","wrap":"nowrap"}
+      | weft/weft.origin = shape(use#total)
+      | weft/weft.source = {"kind":"use","id":"total","props":{"amount":{"bind":"$.total"},"fragment":"price-row","label":"Total"}}
+      | weft/weft.style = [[],[],0,[8,8,8,8],8]

@@ -14,7 +14,7 @@ FRAME "screen#login" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
     FRAME "stack#fields" layoutMode="VERTICAL" itemSpacing=16 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/md)"}
       | weft.origin = layer(stack#fields)
       | weft.source = {"kind":"stack","id":"fields","props":{"gap":{"token":"space.md"}}}
-      | weft.style = [[],[],0,[0,0,0,0],null]
+      | weft.style = [[],[],0,null,null]
       INSTANCE "field#email" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=email, state=(unset)>"
         | weft.origin = layer(field#email)
         | weft.source = {"kind":"field","id":"email","props":{"label":"Email","required":true,"type":"email","value":{"bind":"$.email"}},"shown":{"text":"","label":"Email"}}

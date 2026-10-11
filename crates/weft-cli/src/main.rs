@@ -505,8 +505,7 @@ fn write_atomic(path: &Path, contents: &str) -> Result<()> {
         .map(|m| m.file_type().is_symlink())
         .unwrap_or(false)
     {
-        std::fs::canonicalize(path)
-            .with_context(|| format!("cannot resolve {}", path.display()))?
+        std::fs::canonicalize(path).with_context(|| format!("cannot resolve {}", path.display()))?
     } else {
         path.to_path_buf()
     };

@@ -40,6 +40,7 @@ export type FBindable =
   | "paddingRight"
   | "paddingTop"
   | "paddingBottom"
+  | "maxWidth"
   | "topLeftRadius"
   | "topRightRadius"
   | "bottomLeftRadius"
@@ -93,6 +94,13 @@ export interface FLayout extends FScene, FParent {
   paddingRight: number;
   paddingTop: number;
   paddingBottom: number;
+  /** Shorthand for the sizing dropdown; `FILL` is valid only on an auto-layout child. */
+  layoutSizingHorizontal: "FIXED" | "HUG" | "FILL";
+  layoutSizingVertical: "FIXED" | "HUG" | "FILL";
+  /** Cap on the width; `null` removes it. Bound to a variable like the paddings. */
+  maxWidth: number | null;
+  /** Floor on the width; `null` removes it. Weft has no form for it. */
+  minWidth: number | null;
   gridColumnCount: number;
   gridRowGap: number;
   gridColumnGap: number;

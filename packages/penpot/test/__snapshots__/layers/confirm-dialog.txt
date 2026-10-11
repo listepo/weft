@@ -1,4 +1,4 @@
-board "screen#files" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#files>","dir":"column","wrap":"nowrap"}
+board "screen#files" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#files>","dir":"column","wrap":"nowrap"}
   | weft/weft.document = {"weft":"0.1"}
   | weft/weft.origin = shape(screen#files)
   | weft/weft.source = {"kind":"screen","id":"files","props":{"label":"File"}}
@@ -13,7 +13,7 @@ board "screen#files" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
     | weft/weft.origin = shape(button#delete-file)
     | weft/weft.source = {"kind":"button","id":"delete-file","props":{"variant":"danger"},"on":{"press":"dialog.open"},"children":["Delete file"],"shown":{"text":"Delete file"}}
     text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Delete file"
-  board "dialog#confirm" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":16,"rightPadding":16,"bottomPadding":16,"leftPadding":16},"owner":"<dialog#confirm>","dir":"column","wrap":"nowrap"}
+  board "dialog#confirm" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":16,"rightPadding":16,"bottomPadding":16,"leftPadding":16},"owner":"<dialog#confirm>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(dialog#confirm)
     | weft/weft.source = {"kind":"dialog","id":"confirm","props":{"label":"Delete file?","open":{"bind":"$.confirmOpen"}},"on":{"close":"dialog.close"}}
     | weft/weft.style = [[],[],0,[16,16,16,16],8]
@@ -27,7 +27,7 @@ board "screen#files" width=480 tokens={"fill":"color.white"} fillList=[{"fillCol
       | weft/weft.origin = shape(text#filename)
       | weft/weft.source = {"kind":"text","id":"filename","props":{"text":{"bind":"$.file.name"}},"shown":{"text":"{$.file.name}"}}
       text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.file.name}"
-    board "slot:actions" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:actions>","dir":"column","wrap":"nowrap"}
+    board "slot:actions" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:actions>","dir":"column","wrap":"nowrap"}
       | weft/weft.slot = actions
       board "button#cancel" borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.white","strokeColor":"color.ink"} inCopy=true head=true componentOf="<variant=secondary, state=(unset)>" fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#cancel>","dir":"row"}
         | weft/weft.kind = button

@@ -1,4 +1,4 @@
-board "screen#showroom" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#showroom>","dir":"column","wrap":"nowrap"}
+board "screen#showroom" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#showroom>","dir":"column","wrap":"nowrap"}
   | weft/weft.document = {"weft":"0.1"}
   | weft/weft.origin = shape(screen#showroom)
   | weft/weft.source = {"kind":"screen","id":"showroom","props":{"label":"Showroom"}}
@@ -8,11 +8,11 @@ board "screen#showroom" width=480 tokens={"fill":"color.white"} fillList=[{"fill
     | weft/weft.origin = shape(heading#title)
     | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Showroom"],"shown":{"text":"Showroom"}}
     text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Showroom"
-  board "stack#shelf" tokens={"rowGap":"space.lg","columnGap":"space.lg"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":24,"columnGap":24,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#shelf>","dir":"column","wrap":"nowrap"}
+  board "stack#shelf" tokens={"rowGap":"space.lg","columnGap":"space.lg"} flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":24,"columnGap":24,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#shelf>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#shelf)
     | weft/weft.source = {"kind":"stack","id":"shelf","props":{"gap":{"token":"space.lg"}}}
-    | weft/weft.style = [[],[],0,[0,0,0,0],null]
-    board "section#gem-section" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#gem-section>","dir":"column","wrap":"nowrap"}
+    | weft/weft.style = [[],[],0,null,null]
+    board "section#gem-section" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#gem-section>","dir":"column","wrap":"nowrap"}
       | weft/weft.origin = shape(section#gem-section)
       | weft/weft.source = {"kind":"section","id":"gem-section","props":{"label":"Gem"}}
       | weft/weft.style = [[],[],0,[12,12,12,12],8]
@@ -31,14 +31,14 @@ board "screen#showroom" width=480 tokens={"fill":"color.white"} fillList=[{"fill
         | weft/weft.origin = shape(button#gem-pick)
         | weft/weft.source = {"kind":"button","id":"gem-pick","props":{"variant":"primary"},"on":{"press":"gem.pick"},"children":["Choose this gem"],"shown":{"text":"Choose this gem"}}
         text "text" tokens={"fill":"color.white"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] growType="auto-width" text="Choose this gem"
-      board "slot:header" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
+      board "slot:header" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
         | weft/weft.slot = header
         board "heading#gem-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#gem-title>","dir":"column"}
           | weft/weft.kind = heading
           | weft/weft.origin = shape(heading#gem-title)
           | weft/weft.source = {"kind":"heading","id":"gem-title","props":{"level":2},"children":["Gem"],"shown":{"text":"Gem"}}
           text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Gem"
-    board "section#turned-section" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#turned-section>","dir":"column","wrap":"nowrap"}
+    board "section#turned-section" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":12,"rightPadding":12,"bottomPadding":12,"leftPadding":12},"owner":"<section#turned-section>","dir":"column","wrap":"nowrap"}
       | weft/weft.origin = shape(section#turned-section)
       | weft/weft.source = {"kind":"section","id":"turned-section","props":{"label":"Turned gem"}}
       | weft/weft.style = [[],[],0,[12,12,12,12],8]
@@ -52,7 +52,7 @@ board "screen#showroom" width=480 tokens={"fill":"color.white"} fillList=[{"fill
         | weft/weft.origin = shape(text#turned-caption)
         | weft/weft.source = {"kind":"text","id":"turned-caption","children":["Without a USDZ file Apple platforms show the still image."],"shown":{"text":"Without a USDZ file Apple platforms show the still image."}}
         text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="Without a USDZ file Apple platforms show the still image."
-      board "slot:header" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
+      board "slot:header" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<slot:header>","dir":"column","wrap":"nowrap"}
         | weft/weft.slot = header
         board "heading#turned-title" inCopy=true head=true componentOf="<heading>" flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<heading#turned-title>","dir":"column"}
           | weft/weft.kind = heading

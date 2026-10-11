@@ -1,4 +1,4 @@
-board "screen#wizard" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#wizard>","dir":"column","wrap":"nowrap"}
+board "screen#wizard" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#wizard>","dir":"column","wrap":"nowrap"}
   | weft/weft.document = {"weft":"0.1"}
   | weft/weft.origin = shape(screen#wizard)
   | weft/weft.source = {"kind":"screen","id":"wizard","props":{"label":"Setup wizard"}}
@@ -13,7 +13,7 @@ board "screen#wizard" width=480 tokens={"fill":"color.white"} fillList=[{"fillCo
     | weft/weft.origin = shape(text#progress)
     | weft/weft.source = {"kind":"text","id":"progress","props":{"text":{"bind":"$.progress"}},"shown":{"text":"{$.progress}"}}
     text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] growType="auto-width" text="{$.progress}"
-  board "radio-group#plan" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<radio-group#plan>","dir":"column","wrap":"nowrap"}
+  board "radio-group#plan" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<radio-group#plan>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(radio-group#plan)
     | weft/weft.source = {"kind":"radio-group","id":"plan","props":{"label":"Plan","value":{"bind":"$.plan"}},"shown":{"label":"Plan"}}
     | weft/weft.style = [[],[],0,[8,8,8,8],8]
@@ -37,10 +37,10 @@ board "screen#wizard" width=480 tokens={"fill":"color.white"} fillList=[{"fillCo
       | weft/weft.source = {"kind":"radio","id":"plan-team","props":{"value":"team"},"children":["Team"],"shown":{"text":"Team"}}
       rectangle "mark" width=16 height=16 borderRadius=999 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}]
       text "text" inCopy=true growType="auto-width" text="Team"
-  board "stack#nav" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#nav>","dir":"row","wrap":"nowrap"}
+  board "stack#nav" tokens={"rowGap":"space.sm","columnGap":"space.sm"} flex={"alignItems":"center","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#nav>","dir":"row","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#nav)
     | weft/weft.source = {"kind":"stack","id":"nav","props":{"direction":"row","gap":{"token":"space.sm"}}}
-    | weft/weft.style = [[],[],0,[0,0,0,0],null]
+    | weft/weft.style = [[],[],0,null,null]
     board "button#back" borderRadius=8 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"paddingLeft":"space.md","paddingRight":"space.md","paddingTop":"space.sm","paddingBottom":"space.sm","fill":"color.white","strokeColor":"color.ink"} inCopy=true head=true componentOf="<variant=secondary, state=(unset)>" fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":16,"bottomPadding":8,"leftPadding":16},"owner":"<button#back>","dir":"row"}
       | weft/weft.kind = button
       | weft/weft.origin = shape(button#back)

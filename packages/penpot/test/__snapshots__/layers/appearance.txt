@@ -1,4 +1,4 @@
-board "screen#appearance" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#appearance>","dir":"column","wrap":"nowrap"}
+board "screen#appearance" width=480 tokens={"fill":"color.white"} fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"fix","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":24,"rightPadding":24,"bottomPadding":24,"leftPadding":24},"owner":"<screen#appearance>","dir":"column","wrap":"nowrap"}
   | weft/weft.document = {"weft":"0.1"}
   | weft/weft.origin = shape(screen#appearance)
   | weft/weft.source = {"kind":"screen","id":"appearance","props":{"label":"Appearance"}}
@@ -8,11 +8,11 @@ board "screen#appearance" width=480 tokens={"fill":"color.white"} fillList=[{"fi
     | weft/weft.origin = shape(heading#title)
     | weft/weft.source = {"kind":"heading","id":"title","props":{"level":1},"children":["Appearance"],"shown":{"text":"Appearance"}}
     text "text" tokens={"fill":"color.ink"} inCopy=true fillList=[{"fillColor":"#1a1c21","fillOpacity":1}] fontSize="24" fontWeight="700" growType="auto-width" text="Appearance"
-  board "stack#options" tokens={"rowGap":"space.md","columnGap":"space.md"} flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#options>","dir":"column","wrap":"nowrap"}
+  board "stack#options" tokens={"rowGap":"space.md","columnGap":"space.md"} flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":16,"columnGap":16,"topPadding":0,"rightPadding":0,"bottomPadding":0,"leftPadding":0},"owner":"<stack#options>","dir":"column","wrap":"nowrap"}
     | weft/weft.origin = shape(stack#options)
     | weft/weft.source = {"kind":"stack","id":"options","props":{"align":"stretch","gap":{"token":"space.md"}}}
-    | weft/weft.style = [[],[],0,[0,0,0,0],null]
-    board "segmented-control#theme" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<segmented-control#theme>","dir":"column","wrap":"nowrap"}
+    | weft/weft.style = [[],[],0,null,null]
+    board "segmented-control#theme" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<segmented-control#theme>","dir":"column","wrap":"nowrap"}
       | weft/weft.origin = shape(segmented-control#theme)
       | weft/weft.source = {"kind":"segmented-control","id":"theme","props":{"label":"Theme","value":{"bind":"$.theme"}},"shown":{"label":"Theme"}}
       | weft/weft.style = [[],[],0,[8,8,8,8],8]
@@ -92,7 +92,7 @@ board "screen#appearance" width=480 tokens={"fill":"color.white"} fillList=[{"fi
           text "symbol" inCopy=true growType="auto-width" text="yyyy-mm-dd"
         board "calendar" width=40 height=36 strokes=[{"strokeColor":"#1a1c21","strokeOpacity":1,"strokeWidth":1}] tokens={"fill":"color.white","strokeColor":"color.ink"} inCopy=true fillList=[{"fillColor":"#ffffff","fillOpacity":1}] flex={"horizontalSizing":"fix","verticalSizing":"fix","values":{"rowGap":0,"columnGap":0,"topPadding":8,"rightPadding":12,"bottomPadding":8,"leftPadding":12},"owner":"<calendar>","dir":"row"}
           text "symbol" inCopy=true growType="auto-width" text="31"
-    board "combobox#font" flex={"alignItems":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<combobox#font>","dir":"column","wrap":"nowrap"}
+    board "combobox#font" flex={"alignItems":"start","justifyContent":"start","horizontalSizing":"auto","verticalSizing":"auto","values":{"rowGap":8,"columnGap":8,"topPadding":8,"rightPadding":8,"bottomPadding":8,"leftPadding":8},"owner":"<combobox#font>","dir":"column","wrap":"nowrap"}
       | weft/weft.origin = shape(combobox#font)
       | weft/weft.source = {"kind":"combobox","id":"font","props":{"disabled":true,"label":"Font","value":"Inter"},"shown":{"label":"Font"}}
       | weft/weft.style = [[],[],0,[8,8,8,8],8]

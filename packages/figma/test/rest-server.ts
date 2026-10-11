@@ -37,12 +37,18 @@ function withoutDefaults(fields: Json, defaults: Json): Json {
 
 const LAYOUT_DEFAULTS: Json = {
   layoutMode: "NONE",
+  layoutWrap: "NO_WRAP",
+  primaryAxisAlignItems: "MIN",
   counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
   itemSpacing: 0,
   paddingLeft: 0,
   paddingRight: 0,
   paddingTop: 0,
   paddingBottom: 0,
+  maxWidth: null,
+  minWidth: null,
   gridRowGap: 0,
   fills: [],
   strokes: [],
@@ -81,12 +87,17 @@ export function restJson(node: FakeNode, shared: boolean): Json {
         {
           layoutMode: node.layoutMode,
           layoutWrap: node.layoutWrap,
+          primaryAxisAlignItems: node.primaryAxisAlignItems,
           counterAxisAlignItems: node.counterAxisAlignItems,
+          layoutSizingHorizontal: node.layoutSizingHorizontal,
+          layoutSizingVertical: node.layoutSizingVertical,
           itemSpacing: node.itemSpacing,
           paddingLeft: node.paddingLeft,
           paddingRight: node.paddingRight,
           paddingTop: node.paddingTop,
           paddingBottom: node.paddingBottom,
+          maxWidth: node.maxWidth,
+          minWidth: node.minWidth,
           ...(node.layoutMode === "GRID"
             ? { gridColumnCount: node.gridColumnCount, gridRowGap: node.gridRowGap }
             : {}),

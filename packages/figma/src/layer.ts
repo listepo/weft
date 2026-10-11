@@ -24,11 +24,16 @@ export type ReadLayout = Pick<
   | "layoutMode"
   | "layoutWrap"
   | "itemSpacing"
+  | "primaryAxisAlignItems"
   | "counterAxisAlignItems"
+  | "layoutSizingHorizontal"
+  | "layoutSizingVertical"
   | "paddingLeft"
   | "paddingRight"
   | "paddingTop"
   | "paddingBottom"
+  | "maxWidth"
+  | "minWidth"
   | "gridColumnCount"
   | "gridRowGap"
   | "fills"
@@ -91,15 +96,17 @@ const effects = (list: readonly FEffect[]): unknown =>
 
 /**
  * The visual properties Weft has no prop for, as one comparable string: fills, strokes, corner
- * radius and padding, plus spacing on frames whose spacing is not a prop, and the effects (a
- * material's background blur) when there are any.
+ * radius and, when `withSpacing`, padding and spacing (on a `stack` or `grid` those are props),
+ * plus the effects (a material's background blur) when there are any.
  */
 export function styleKey(layer: ReadLayout, withSpacing: boolean): string {
   const key = [
     paints(layer.fills),
     paints(layer.strokes),
     typeof layer.cornerRadius === "symbol" ? "mixed" : layer.cornerRadius,
-    [layer.paddingLeft, layer.paddingRight, layer.paddingTop, layer.paddingBottom],
+    withSpacing
+      ? [layer.paddingLeft, layer.paddingRight, layer.paddingTop, layer.paddingBottom]
+      : null,
     withSpacing ? layer.itemSpacing : null,
   ];
   // Appended only when there is one, so a frame built before effects were read keeps the
@@ -119,6 +126,15 @@ export type GridAnchor = {
 
 const MODE = { HORIZONTAL: "row", VERTICAL: "column", GRID: "grid", NONE: "none" } as const;
 const ALIGN = { MIN: "start", CENTER: "center", MAX: "end", BASELINE: undefined } as const;
+const JUSTIFY = {
+  MIN: "start",
+  CENTER: "center",
+  MAX: "end",
+  SPACE_BETWEEN: "space-between",
+  SPACE_AROUND: undefined,
+  SPACE_EVENLY: undefined,
+} as const;
+const SIZING = { FIXED: "fixed", HUG: "hug", FILL: "fill" } as const;
 
 const NO_LAYOUT: LayerLayout = {
   mode: "none",
@@ -127,6 +143,12 @@ const NO_LAYOUT: LayerLayout = {
   alignLabel: "MIN",
   wrap: false,
   columns: 1,
+  justify: "start",
+  justifyLabel: "MIN",
+  padding: 0,
+  maxWidth: undefined,
+  minWidth: undefined,
+  flexTracks: true,
 };
 
 /** Wraps a node for one read; variable lookups are cached across the read. */
@@ -176,6 +198,12 @@ export function figmaLayers(variables: VariableLookup): (node: ReadNode) => Laye
       layoutPositioning: node.layoutPositioning,
       get layout(): LayerLayout {
         if (container === undefined) return NO_LAYOUT;
+        const paddings = [
+          container.paddingLeft,
+          container.paddingRight,
+          container.paddingTop,
+          container.paddingBottom,
+        ];
         return {
           mode: MODE[container.layoutMode],
           label: container.layoutMode,
@@ -183,6 +211,19 @@ export function figmaLayers(variables: VariableLookup): (node: ReadNode) => Laye
           alignLabel: container.counterAxisAlignItems,
           wrap: container.layoutWrap === "WRAP",
           columns: container.gridColumnCount,
+          justify: JUSTIFY[container.primaryAxisAlignItems],
+          justifyLabel: container.primaryAxisAlignItems,
+          padding: paddings.every((p) => p === paddings[0]) ? paddings[0] : undefined,
+          maxWidth: container.maxWidth ?? undefined,
+          minWidth: container.minWidth ?? undefined,
+          // Figma draws every auto-layout column as a `FLEX` track.
+          flexTracks: true,
+        };
+      },
+      get sizing() {
+        return {
+          horizontal: SIZING[container?.layoutSizingHorizontal ?? "HUG"],
+          vertical: SIZING[container?.layoutSizingVertical ?? "HUG"],
         };
       },
       get image() {
@@ -209,6 +250,8 @@ export function figmaLayers(variables: VariableLookup): (node: ReadNode) => Laye
         container === undefined ? 0 : grid ? container.gridRowGap : container.itemSpacing,
       gapToken: (grid) =>
         tokenOf(container?.boundVariables?.[grid ? "gridRowGap" : "itemSpacing"]?.id),
+      paddingToken: () => tokenOf(container?.boundVariables?.paddingLeft?.id),
+      maxWidthToken: () => tokenOf(container?.boundVariables?.maxWidth?.id),
       style: (withSpacing) => (container === undefined ? "" : styleKey(container, withSpacing)),
       main: async () => {
         if (node.type !== "INSTANCE") return undefined;

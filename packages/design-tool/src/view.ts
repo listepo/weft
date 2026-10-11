@@ -100,6 +100,8 @@ export function labelDisplay(
 export type Mode = "row" | "column" | "grid";
 /** Cross-axis alignment. Weft's `stretch` is drawn as `start`, which both tools show the same way. */
 export type Align = "start" | "center" | "end";
+/** Main-axis distribution of a `stack` (SPEC §5.1). */
+export type Justify = "start" | "center" | "end" | "space-between";
 
 export type LayoutView = {
   mode: Mode;
@@ -108,6 +110,16 @@ export type LayoutView = {
   columns: number;
   gap: { token?: string | undefined; px: number };
   padding: number;
+  /** The `padding` token, when a `stack` or `grid` sets one (drawn bound in Figma). */
+  paddingToken?: string | undefined;
+  /** How the free space along `mode` is shared; only a `stack` draws it. */
+  justify: Justify;
+  /** Whether this frame fills its parent's main axis (`grow`). */
+  grow: boolean;
+  /** The parent's mode, to know which axis `grow` and a `max-width` fill. */
+  parent: Mode | "none";
+  /** `max-width`: fill up to this many px, bound to `token` when there is one. */
+  maxWidth?: { token?: string | undefined; px: number } | undefined;
   /** The surface a `stack` or `grid` takes from its `material` token: a tint over a blur. */
   material?: ({ token: string } & Material) | undefined;
 };
@@ -117,6 +129,13 @@ const ALIGN: Readonly<Record<string, Align>> = {
   center: "center",
   end: "end",
   stretch: "start",
+};
+
+const JUSTIFY: Readonly<Record<string, Justify>> = {
+  start: "start",
+  center: "center",
+  end: "end",
+  "space-between": "space-between",
 };
 
 /** Padding of the frame a kind becomes; containers that group without a box have none. */
@@ -140,11 +159,15 @@ export function layoutView(
   tokens: ReadonlyMap<string, Token> | undefined,
   parentMode: Mode | "none",
 ): LayoutView {
+  const sizeOf = (name: string) => {
+    const ref = props?.[name];
+    if (typeof ref === "object" && "token" in ref)
+      return { token: ref.token, px: tokenPx(tokens?.get(ref.token)) ?? 0 };
+    return undefined;
+  };
   const gapOf = () => {
-    const gap = props?.["gap"];
-    if (typeof gap === "object" && "token" in gap)
-      return { token: gap.token, px: tokenPx(tokens?.get(gap.token)) ?? 0 };
-    return { px: 0 };
+    const gap = sizeOf("gap");
+    return gap ?? { px: 0 };
   };
   const materialOf = () => {
     const ref = props?.["material"];
@@ -152,10 +175,16 @@ export function layoutView(
     const material = tokenMaterial(tokens?.get(ref.token));
     return material === undefined ? undefined : { token: ref.token, ...material };
   };
-  const padding = PADDING[kind] ?? 8;
+  const grow = props?.["grow"] === true;
+  const paddingRef = sizeOf("padding");
+  // SPEC §5.1: only `stack` and `grid` take `padding`; other kinds keep their own box padding.
+  const padding =
+    paddingRef !== undefined && LAYOUT_KINDS.has(kind) ? paddingRef.px : (PADDING[kind] ?? 8);
+  const maxWidth = LAYOUT_KINDS.has(kind) ? sizeOf("max-width") : undefined;
   if (kind === "stack") {
     const mode: Mode = props?.["direction"] === "row" ? "row" : "column";
     const align = props?.["align"];
+    const justify = props?.["justify"];
     return {
       mode,
       // SPEC §5.1: a row without `align` centres its children, a column keeps them at the start.
@@ -166,6 +195,11 @@ export function layoutView(
       columns: 1,
       gap: gapOf(),
       padding,
+      paddingToken: paddingRef?.token,
+      justify: (typeof justify === "string" ? JUSTIFY[justify] : undefined) ?? "start",
+      grow,
+      parent: parentMode,
+      maxWidth,
       material: materialOf(),
     };
   }
@@ -179,6 +213,11 @@ export function layoutView(
         typeof columns === "number" && Number.isInteger(columns) && columns >= 1 ? columns : 1,
       gap: gapOf(),
       padding,
+      paddingToken: paddingRef?.token,
+      justify: "start",
+      grow,
+      parent: parentMode,
+      maxWidth,
       material: materialOf(),
     };
   }
@@ -190,6 +229,9 @@ export function layoutView(
     columns: 1,
     gap: { px: STRUCTURAL.has(kind) ? 0 : 8 },
     padding: STRUCTURAL.has(kind) ? 0 : padding,
+    justify: "start",
+    grow,
+    parent: parentMode,
   };
 }
 

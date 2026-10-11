@@ -308,6 +308,9 @@ function setNumber(layer: FLayout, field: FBindable, value: number): void {
     case "paddingBottom":
       layer.paddingBottom = value;
       break;
+    case "maxWidth":
+      layer.maxWidth = value;
+      break;
     default:
       layer.cornerRadius = value;
   }

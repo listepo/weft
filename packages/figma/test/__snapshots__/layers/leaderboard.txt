@@ -10,7 +10,7 @@ FRAME "screen#leaderboard" width=480 layoutMode="VERTICAL" itemSpacing=8 primary
   FRAME "stack#leader" layoutMode="HORIZONTAL" itemSpacing=4 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/xs)"}
     | weft.origin = layer(stack#leader)
     | weft.source = {"kind":"stack","id":"leader","props":{"direction":"row","gap":{"token":"space.xs"}}}
-    | weft.style = [[],[],0,[0,0,0,0],null]
+    | weft.style = [[],[],0,null,null]
     INSTANCE "text#leader-label" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
       | weft.origin = layer(text#leader-label)
       | weft.source = {"kind":"text","id":"leader-label","children":["In the lead:"],"shown":{"text":"In the lead:"}}

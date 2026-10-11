@@ -14,7 +14,7 @@ FRAME "screen#todos" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
     FRAME "stack#add-row" layoutMode="HORIZONTAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
       | weft.origin = layer(stack#add-row)
       | weft.source = {"kind":"stack","id":"add-row","props":{"direction":"row","gap":{"token":"space.sm"}}}
-      | weft.style = [[],[],0,[0,0,0,0],null]
+      | weft.style = [[],[],0,null,null]
       INSTANCE "field#draft" layoutMode="VERTICAL" itemSpacing=4 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<type=text, state=(unset)>"
         | weft.origin = layer(field#draft)
         | weft.source = {"kind":"field","id":"draft","props":{"label":"New task","value":{"bind":"$.draft"}},"shown":{"text":"","label":"New task"}}

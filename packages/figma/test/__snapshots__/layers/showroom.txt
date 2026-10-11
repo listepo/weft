@@ -10,7 +10,7 @@ FRAME "screen#showroom" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxi
   FRAME "stack#shelf" layoutMode="VERTICAL" itemSpacing=24 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/lg)"}
     | weft.origin = layer(stack#shelf)
     | weft.source = {"kind":"stack","id":"shelf","props":{"gap":{"token":"space.lg"}}}
-    | weft.style = [[],[],0,[0,0,0,0],null]
+    | weft.style = [[],[],0,null,null]
     FRAME "section#gem-section" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
       | weft.origin = layer(section#gem-section)
       | weft.source = {"kind":"section","id":"gem-section","props":{"label":"Gem"}}

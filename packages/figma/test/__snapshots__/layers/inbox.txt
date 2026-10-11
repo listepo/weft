@@ -46,7 +46,7 @@ FRAME "screen#inbox" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSi
           FRAME "stack#drafts-empty" layoutMode="VERTICAL" itemSpacing=8 counterAxisAlignItems="CENTER" primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/sm)"}
             | weft.origin = layer(stack#drafts-empty)
             | weft.source = {"kind":"stack","id":"drafts-empty","props":{"align":"center","direction":"column","gap":{"token":"space.sm"}}}
-            | weft.style = [[],[],0,[0,0,0,0],null]
+            | weft.style = [[],[],0,null,null]
             INSTANCE "text#no-drafts" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" main="<tone=(unset)>"
               | weft.origin = layer(text#no-drafts)
               | weft.source = {"kind":"text","id":"no-drafts","children":["No drafts."],"shown":{"text":"No drafts."}}

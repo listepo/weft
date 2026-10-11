@@ -10,7 +10,7 @@ FRAME "screen#tilt" width=480 layoutMode="VERTICAL" itemSpacing=8 primaryAxisSiz
   FRAME "stack#deck" layoutMode="VERTICAL" itemSpacing=24 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" bound={"itemSpacing":"var(space/lg)"}
     | weft.origin = layer(stack#deck)
     | weft.source = {"kind":"stack","id":"deck","props":{"gap":{"token":"space.lg"}}}
-    | weft.style = [[],[],0,[0,0,0,0],null]
+    | weft.style = [[],[],0,null,null]
     FRAME "section#front" layoutMode="VERTICAL" itemSpacing=8 primaryAxisSizingMode="AUTO" counterAxisSizingMode="AUTO" paddingLeft=12 paddingRight=12 paddingTop=12 paddingBottom=12
       | weft.origin = layer(section#front)
       | weft.source = {"kind":"section","id":"front","props":{"label":"Front side","perspective":800,"rotate-y":25}}
