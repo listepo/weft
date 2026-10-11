@@ -32,8 +32,10 @@ export component SearchScreen inherits Window {
         alignment: LayoutAlignment.start;
         form := VerticalBox {
             bar := HorizontalLayout {
+                alignment: LayoutAlignment.start;
                 spacing: 8px;
                 VerticalLayout {
+                    horizontal-stretch: 0;
                     Text { text: "Search"; }
                     query := LineEdit {
                         text <=> root.query;
@@ -41,6 +43,7 @@ export component SearchScreen inherits Window {
                     }
                 }
                 go := Button {
+                    horizontal-stretch: 0;
                     text: "Search";
                     primary: true;
                     clicked => { root.perform("search.run", "form"); }

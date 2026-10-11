@@ -57,13 +57,16 @@ export component DashboardScreen inherits Window {
     dashboard := VerticalBox {
         alignment: LayoutAlignment.start;
         header := HorizontalLayout {
+            alignment: LayoutAlignment.space-between;
             spacing: 16px;
             title := Text {
+                horizontal-stretch: 0;
                 text: root.team-name;
                 font-size: 32px;
                 font-weight: 700;
             }
             updated := Text {
+                horizontal-stretch: 0;
                 text: root.updatedAt;
             }
         }
@@ -116,14 +119,19 @@ export component DashboardScreen inherits Window {
             }
         }
         notices := VerticalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 8px;
+            max-width: 720px;
             release := VerticalLayout {
+                vertical-stretch: 0;
                 Text { text: "Release 2.4 ships on Friday."; }
             }
             backup := VerticalLayout {
+                vertical-stretch: 0;
                 Text { text: root.backupStatus; }
             }
             quota := VerticalLayout {
+                vertical-stretch: 0;
                 quota-text := Text {
                     text: "Storage is 90% full.";
                 }
@@ -133,16 +141,22 @@ export component DashboardScreen inherits Window {
             }
         }
         footer := HorizontalLayout {
+            alignment: LayoutAlignment.space-between;
             spacing: 16px;
             owner := Text {
+                horizontal-stretch: 0;
                 text: "Owned by the platform team";
             }
             footer-links := HorizontalLayout {
+                horizontal-stretch: 0;
+                alignment: LayoutAlignment.start;
                 spacing: 16px;
                 docs := TouchArea {
+                    horizontal-stretch: 0;
                     Text { text: "Docs"; color: Palette.accent-background; }
                 }
                 status := TouchArea {
+                    horizontal-stretch: 0;
                     Text { text: "Status page"; color: Palette.accent-background; }
                 }
             }

@@ -30,11 +30,14 @@ export component LeaderboardScreen inherits Window {
             font-weight: 700;
         }
         leader := HorizontalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 4px;
             leader-label := Text {
+                horizontal-stretch: 0;
                 text: "In the lead:";
             }
             leader-name := Text {
+                horizontal-stretch: 0;
                 text: root.players[0].name;
             }
         }

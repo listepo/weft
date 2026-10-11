@@ -41,11 +41,14 @@ export component ProfileScreen inherits Window {
             font-weight: 700;
         }
         links := HorizontalLayout {
+            alignment: LayoutAlignment.start;
             spacing: 16px;
             website := TouchArea {
+                horizontal-stretch: 0;
                 Text { text: "Website"; color: Palette.accent-background; }
             }
             github := TouchArea {
+                horizontal-stretch: 0;
                 Text { text: "GitHub"; color: Palette.accent-background; }
             }
         }

@@ -555,12 +555,60 @@ impl<'a> Reader<'a> {
             match spacing
                 .expr
                 .as_ref()
-                .and_then(|expr| read_expr::spacing_token(expr, self.tokens))
+                .and_then(|expr| read_expr::spacing_token(expr, self.tokens, "space."))
             {
                 Some(token) => {
                     node.props.insert("gap".into(), Value::Token(token));
                 }
-                None => self.lose(LossKind::Tokens, path, "spacing is not a dimension token"),
+                None => self.lose(LossKind::Layout, path, "spacing is not a dimension token"),
+            }
+        }
+        if matches!(
+            base,
+            "HorizontalLayout" | "HorizontalBox" | "VerticalLayout" | "VerticalBox"
+        ) && let Some(alignment) = named(fs, "alignment")
+        {
+            let justify = match alignment.raw.as_str() {
+                "LayoutAlignment.start" => None,
+                "LayoutAlignment.center" => Some("center"),
+                "LayoutAlignment.end" => Some("end"),
+                "LayoutAlignment.space-between" => Some("space-between"),
+                _ => {
+                    self.lose(
+                        LossKind::Layout,
+                        path,
+                        "alignment is not one of Weft's justify values",
+                    );
+                    None
+                }
+            };
+            if let Some(justify) = justify {
+                node.props
+                    .insert("justify".into(), Value::String(justify.into()));
+            }
+        }
+        for (key, prefer) in [("padding", "space."), ("max-width", "size.")] {
+            if let Some(fact) = named(fs, key) {
+                match fact
+                    .expr
+                    .as_ref()
+                    .and_then(|expr| read_expr::spacing_token(expr, self.tokens, prefer))
+                {
+                    Some(token) => {
+                        node.props.insert(key.into(), Value::Token(token));
+                    }
+                    None => {
+                        self.lose(LossKind::Layout, path, &format!("{key} is not a dimension token"))
+                    }
+                }
+            }
+        }
+        for key in ["horizontal-stretch", "vertical-stretch"] {
+            if let Some(fact) = named(fs, key)
+                && (fact.raw == "1" || fact.raw == "1.0")
+                && !node.props.contains_key("grow")
+            {
+                node.props.insert("grow".into(), Value::Bool(true));
             }
         }
         if base != "Text" && named(fs, "font-size").is_some() {
@@ -835,9 +883,7 @@ impl<'a> Reader<'a> {
             return None;
         }
         let fs = facts(el);
-        let plain = fs
-            .iter()
-            .all(|fact| matches!(fact.name.as_str(), "row" | "col" | "visible"));
+        let plain = fs.iter().all(|fact| is_placement(&fact.name, &fact.raw));
         if !plain {
             return None;
         }
@@ -876,7 +922,7 @@ impl<'a> Reader<'a> {
         if named(&fs, "visible").is_some() && hidden.is_none() {
             return None;
         }
-        let kids = self.one(
+        let mut kids = self.one(
             &child,
             id,
             parent,
@@ -887,6 +933,16 @@ impl<'a> Reader<'a> {
                 hidden,
             },
         );
+        if fs
+            .iter()
+            .any(|fact| {
+                matches!(fact.name.as_str(), "horizontal-stretch" | "vertical-stretch")
+                    && (fact.raw == "1" || fact.raw == "1.0")
+            })
+            && let Some(Child::Node(node)) = kids.first_mut()
+        {
+            node.props.insert("grow".into(), Value::Bool(true));
+        }
         if fs
             .iter()
             .any(|fact| fact.name == "row" || fact.name == "col")
@@ -1072,9 +1128,7 @@ fn plain_box(items: &[SyntaxNode]) -> Option<(Option<String>, Vec<SyntaxNode>)> 
         return None;
     }
     let fs = facts(&el);
-    let plain = fs
-        .iter()
-        .all(|f| f.name == "alignment" && f.raw == "LayoutAlignment.start");
+    let plain = fs.iter().all(|f| is_placement(&f.name, &f.raw));
     if !plain {
         return None;
     }
@@ -1091,6 +1145,17 @@ fn string_of(facts: &[Fact], name: &str) -> String {
     named(facts, name)
         .and_then(|f| f.string.clone())
         .unwrap_or_default()
+}
+
+/// A fact that places or sizes a generator wrapper rather than describing its element: grid
+/// placement, `visible`, the default `alignment`, and stretch (`grow` is read from `1`).
+fn is_placement(name: &str, raw: &str) -> bool {
+    match name {
+        "row" | "col" | "visible" => true,
+        "alignment" => raw == "LayoutAlignment.start",
+        "horizontal-stretch" | "vertical-stretch" => raw == "0" || raw == "0.0" || raw == "1" || raw == "1.0",
+        _ => false,
+    }
 }
 
 fn named<'a>(facts: &'a [Fact], name: &str) -> Option<&'a Fact> {
@@ -1308,7 +1373,14 @@ fn only_plain_column(el: &SyntaxNode) -> Option<Vec<SyntaxNode>> {
         return None;
     }
     let inner = element_in(only)?;
-    if base_name(&inner) != "VerticalLayout" || !facts(&inner).is_empty() {
+    if base_name(&inner) != "VerticalLayout" {
+        return None;
+    }
+    let fs = facts(&inner);
+    if !fs
+        .iter()
+        .all(|fact| is_placement(&fact.name, &fact.raw))
+    {
         return None;
     }
     let calls = inner
