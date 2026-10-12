@@ -40,7 +40,10 @@ describe("the Pages deploy", () => {
   });
 
   test("builds the Penpot plugin", () => {
-    assert.match(job("deploy-pages"), /^\s*(?:-\s+)?run:\s*moon run penpot-plugin:build$/m);
+    assert.match(
+      job("deploy-pages"),
+      /^\s*(?:-\s+)?run:\s*moon exec penpot-plugin:build --ignore-ci-checks$/m,
+    );
   });
 
   test("publishes exactly plugins/penpot/dist, under the penpot/ subpath", () => {

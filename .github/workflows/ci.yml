@@ -77,8 +77,10 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
       - run: pnpm install --frozen-lockfile
-      # root:wasm first (the build depends on it): the UI inlines the module's bytes.
-      - run: moon run penpot-plugin:build
+      # root:wasm first (the build depends on it): the UI inlines the module's bytes. The build
+      # keeps runInCI: false so `moon ci` does not rebuild dist/ on every full check, and moon
+      # drops such a task from `moon run` in CI even by name; exec can be told to keep it.
+      - run: moon exec penpot-plugin:build --ignore-ci-checks
       # Pages serves an uploaded artifact at the site root, and the install URL keeps the
       # penpot/ subpath so the rest of the site is free later. Only dist/ is published.
       - name: Stage dist/ under penpot/
