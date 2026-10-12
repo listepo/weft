@@ -14,6 +14,16 @@ Components (props; * = required):
 stack(direction column|row, gap, align, wrap); grid(columns* integer >= 1, gap); section(label*); heading(level* 1-6); text(tone); image(src*, label*); link(href; press); button(variant primary|secondary|danger, disabled, submit; press); form(submit); field(label*, type text|email|password|number|search|multiline, value, placeholder, required, disabled; change); checkbox(label*, checked, disabled; change); switch(label*, checked, disabled; change); radio-group(label*, value; change) containing radio(value*); select(label*, value; change) containing option(value*); list(ordered) containing item; table(label*) containing column(sort none|ascending|descending; press) and row containing cell; tabs containing tab(label*) which holds its panel content; dialog(label*, open, modal; close); alert(tone info|success|warning|danger); menu(label*) containing menu-item(disabled; press).
 Only these components and props exist.`;
 
+// The JSON primer shares the Weft vocabulary word for word, so the JSON formats differ from markup
+// only in syntax. Both JSON formats get it: constrained differs from free only in the decoder.
+const WEFT_JSON = `Weft canonical JSON describes a UI screen as one JSON object: {"weft":"0.1","root":{...}} whose root node has kind "screen".
+Node: {"kind":"button","id":"save","props":{...},"on":{...},"slots":{...},"children":[...]}; leave out empty members. Every node has a unique id.
+Values: a literal ("Email", true, 3), a binding {"bind":"$.user.email"} (inputs write back to the data model), a negated binding {"bind":"$.email","not":true}, a token {"token":"space.md"}. Never mix text and a binding in one value. Inside {"kind":"each","props":{"in":{"bind":"$.items"},"as":"item"}} children use {"bind":"$item.field"}.
+Text: a node that shows text takes it as a string in "children" or as "text": {"bind":"$.path"} in props, never both.
+Events: "on" maps press, submit, change, close to an action name such as "auth.submit" (no arguments). A button with "submit": true submits its form and needs no press.
+Structure: "children" lists nodes in order. Slots: "slots": {"footer": [...]} in form, "actions" in dialog, "header" in section, "empty" in list and table (shown when there are no items). An each node repeats its children for every item of an array.
+${WEFT.slice(WEFT.indexOf("Universal attributes:"))}`;
+
 const A2UI = `A2UI v0.9 describes a UI as a JSON array of messages. Use {"version":"v0.9","createSurface":{"surfaceId":...,"catalogId":"https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json"}} then {"version":"v0.9","updateComponents":{"surfaceId":...,"components":[...]}}.
 components is a flat list. Each entry has a unique "id" and a "component" type; parents list children by id ("children":[ids] or "child":id). One component has id "root". There is no nesting.
 Values: a literal ("Email"), or a data binding {"path":"/user/email"} (a JSON Pointer; inside a template the relative path "title" refers to the current item). Inputs write back to the bound path.
@@ -27,4 +37,11 @@ const HTML = `The screen is semantic HTML5 with ARIA. Conventions: data-bind="pr
 
 const JSX = `The screen is an idiomatic React function component receiving data (the data model) and actions (named host actions). Conventions: values read from data.path; inputs are controlled and write with actions.set("path", value); named actions are called as actions.group.name(); repetition uses data.items.map((item, index) => ...); data-variant sets button variants (primary, danger); className stack, row, gap-sm and gap-md carry layout intent. Use semantic HTML elements and ARIA attributes only; no styling beyond classes, no hooks.`;
 
-export const PRIMERS: Record<Format, string> = { weft: WEFT, a2ui: A2UI, html: HTML, jsx: JSX };
+export const PRIMERS: Record<Format, string> = {
+  weft: WEFT,
+  a2ui: A2UI,
+  html: HTML,
+  jsx: JSX,
+  "weft-json": WEFT_JSON,
+  "weft-json-constrained": WEFT_JSON,
+};
