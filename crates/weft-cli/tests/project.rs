@@ -709,6 +709,162 @@ fn swiftui_keeps_context_in_its_source_comment() {
     assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
 }
 
+/// Notes on the screen and on two elements, one of them an open question (T39's done criterion).
+const BOTH_LEVELS: &str = r#"<screen id="plain" label="Plain" weft="0.3">
+  <context>
+    <entry id="why" by="human" kind="intent" name="Ivan">Back returns home.</entry>
+    <entry id="back-why" by="agent" for="back" kind="decision" name="claude-opus-5-5">Back stays enabled: home always exists.</entry>
+    <entry id="row-wrap" by="agent" for="row" kind="question" name="claude-opus-5-5" status="open">Should the row wrap on a phone?</entry>
+  </context>
+  <stack id="row" direction="row" gap="{token.space.sm}">
+    <button id="back" on-press="nav.back">Back</button>
+  </stack>
+</screen>
+"#;
+
+/// Every generator that has an importer gives `markup` back exactly, notes included; the
+/// generators without one never carry the notes, and the interchange formats say they drop them.
+fn every_round_trip_keeps(name: &str, markup: &str, notes: &[&str]) {
+    let s = web_project(name);
+    let screen = s.write("screens/plain.weft", markup);
+    let r = run(&[&"fmt", &screen]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, markup), "{}", r.stderr);
+
+    for (target, file) in [
+        ("html", "out/html/plain.html"),
+        ("react", "out/react/plain.jsx"),
+        ("solid", "out/solid/plain.tsx"),
+    ] {
+        let r = run(&[&target, &screen, &"--context", &"keep"]);
+        assert_eq!(r.code, 0, "{target}: {}", r.stderr);
+        let r = run(&[&format!("import-{target}"), &s.path(file)]);
+        assert_eq!((r.code, r.stderr.as_str()), (0, ""), "{target}");
+        let back = read_back(&s, &format!("back/{target}/plain.weft"));
+        assert_eq!(back, markup, "{target}");
+    }
+    for (target, file, flags) in [
+        ("slint", "plain.slint", &[][..]),
+        ("swiftui", "plain.swift", &["--no-project"][..]),
+    ] {
+        let mut args: Vec<&dyn AsRef<std::ffi::OsStr>> = vec![&target, &screen];
+        args.extend(flags.iter().map(|f| f as &dyn AsRef<std::ffi::OsStr>));
+        let r = run(&args);
+        assert_eq!(r.code, 0, "{target}: {}", r.stderr);
+        let code = s.write(file, &r.stdout);
+        let import = format!("import-{target}");
+        let mut args: Vec<&dyn AsRef<std::ffi::OsStr>> = vec![&import, &code];
+        args.extend(flags.iter().map(|f| f as &dyn AsRef<std::ffi::OsStr>));
+        let r = run(&args);
+        assert_eq!(
+            (r.code, r.stdout.as_str()),
+            (0, markup),
+            "{target}: {}",
+            r.stderr
+        );
+    }
+
+    // Lit templates reach the DOM, so they carry no notes at all.
+    let r = run(&[&"lit", &screen]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.contains("customElements"), "{}", r.stdout);
+    for note in notes {
+        assert!(!r.stdout.contains(note), "lit carries {note}\n{}", r.stdout);
+    }
+
+    let r = run(&[&"a2ui", &screen]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stderr.contains("/screen#plain/context loss context"),
+        "{}",
+        r.stderr
+    );
+    for note in notes {
+        assert!(!r.stdout.contains(note), "A2UI carries {note}");
+    }
+
+    let document = weft_core::parse(markup, &weft_core::ParseOptions::default())
+        .document
+        .unwrap();
+    let json = weft_core::stringify(&document);
+    let back = weft_core::to_document(&weft_core::parse_json(&json).unwrap());
+    assert_eq!(weft_core::serialize(&back), markup, "canonical JSON");
+    let catalog = weft_catalog::core_catalog().unwrap();
+    let spec = weft_interop::json_render::to_json_render(&document, &catalog, None);
+    let lost: Vec<_> = spec
+        .losses
+        .iter()
+        .filter(|l| l.kind == weft_interop::LossKind::Context)
+        .map(|l| l.path.as_str())
+        .collect();
+    assert_eq!(lost, ["/screen#plain/context"]);
+}
+
+#[test]
+fn context_on_both_levels_survives_fmt_patches_and_every_round_trip() {
+    every_round_trip_keeps(
+        "context-both",
+        BOTH_LEVELS,
+        &["home always exists", "wrap on a phone", "Back returns home"],
+    );
+
+    let catalog = weft_catalog::core_catalog().unwrap();
+    let document = weft_core::parse(BOTH_LEVELS, &weft_core::ParseOptions::default())
+        .document
+        .unwrap();
+    let patches = serde_json::json!([
+        { "op": "resolve-context", "id": "row-wrap" },
+        { "op": "set-context", "id": "back-why", "field": "text", "value": "Back stays enabled." },
+        { "op": "set-context", "id": "why", "field": "for", "value": "row" },
+        {
+            "op": "add-context",
+            "entry": {
+                "id": "back-label", "kind": "source", "by": "agent", "name": "claude-opus-5-5",
+                "for": "back", "text": "The label comes from the style guide."
+            }
+        },
+        {
+            "op": "add-context",
+            "entry": {
+                "id": "copy", "kind": "todo", "by": "agent", "name": "claude-opus-5-5",
+                "status": "open", "text": "Check the copy."
+            }
+        }
+    ]);
+    let result =
+        weft_core::apply_patches(&document, &patches, &weft_core::ApplyOptions::new(&catalog));
+    let patched = weft_core::serialize(&result.document.expect("the context patches apply"));
+    assert!(result.diagnostics.is_empty(), "{:?}", result.diagnostics);
+    for line in [
+        r#"<entry id="back-why" by="agent" for="back" kind="decision" name="claude-opus-5-5">Back stays enabled.</entry>"#,
+        r#"<entry id="row-wrap" by="agent" for="row" kind="question" name="claude-opus-5-5" status="resolved">"#,
+        r#"<entry id="why" by="human" for="row" kind="intent" name="Ivan">"#,
+        r#"<entry id="back-label" by="agent" for="back" kind="source" name="claude-opus-5-5">"#,
+        r#"<entry id="copy" by="agent" kind="todo" name="claude-opus-5-5" status="open">"#,
+    ] {
+        assert!(patched.contains(line), "{line}\n{patched}");
+    }
+    every_round_trip_keeps(
+        "context-patched",
+        &patched,
+        &["Back stays enabled", "style guide", "Check the copy"],
+    );
+
+    let removed = weft_core::apply_patches(
+        &document,
+        &serde_json::json!([
+            { "op": "remove-context", "id": "back-why" },
+            { "op": "remove-context", "id": "row-wrap" },
+            { "op": "remove-context", "id": "why" }
+        ]),
+        &weft_core::ApplyOptions::new(&catalog),
+    );
+    assert_eq!(
+        weft_core::serialize(&removed.document.unwrap()),
+        PLAIN,
+        "the last entry removed leaves no block"
+    );
+}
+
 #[test]
 fn web_arguments_override_the_project() {
     let s = web_project("web-args");

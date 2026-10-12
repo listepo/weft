@@ -550,3 +550,47 @@ fn generated_expressions_round_trip() {
         result.losses
     );
 }
+
+/// Every node's layout props by id: the vocabulary of SPEC §5.1 and the universal `grow`.
+fn layout_props(node: &Node, out: &mut Vec<(String, String, String)>) {
+    for prop in [
+        "justify",
+        "grow",
+        "padding",
+        "max-width",
+        "min-column-width",
+    ] {
+        if let Some(value) = node.props.get(prop) {
+            let id = node.id.clone().unwrap_or_default();
+            out.push((id, prop.to_owned(), weft_core::format_value(value)));
+        }
+    }
+    for child in node.children.iter().chain(node.slots.values().flatten()) {
+        if let Child::Node(child) = child {
+            layout_props(child, out);
+        }
+    }
+}
+
+#[test]
+fn the_layout_screens_read_back_their_layout_without_the_source_comment() {
+    for name in ["dashboard", "glass", "layout"] {
+        let markup =
+            std::fs::read_to_string(here(&format!("../../corpus/{name}/screen.weft"))).unwrap();
+        let corpus = weft_core::parse(&markup, &weft_core::ParseOptions::default())
+            .document
+            .unwrap();
+        let mut want = Vec::new();
+        layout_props(&corpus.root, &mut want);
+        // `start` is the declared default, which the generator leaves out (SPEC §9, Layout), and
+        // `min-column-width` has no GridLayout form, so only the source comment keeps it.
+        want.retain(|(_, prop, value)| {
+            !(prop == "justify" && value == "start") && prop != "min-column-width"
+        });
+        assert!(!want.is_empty(), "{name} uses the layout vocabulary");
+        let back = read_stripped(&format!("tests/fixtures/{name}.slint"));
+        let mut got = Vec::new();
+        layout_props(&back.root, &mut got);
+        assert_eq!(got, want, "{name}\n{}", serialize(&back));
+    }
+}
