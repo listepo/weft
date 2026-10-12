@@ -5118,6 +5118,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "weft-studio"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "weft-catalog",
+ "weft-core",
+ "weft-slint",
+]
+
+[[package]]
 name = "weft-swiftui"
 version = "0.1.0"
 dependencies = [

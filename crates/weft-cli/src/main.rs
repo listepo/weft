@@ -26,8 +26,8 @@ use std::process::ExitCode;
 use anyhow::{Context, Result, bail};
 use clap::{Args, Parser, Subcommand};
 use weft_catalog::{
-    CORE_CATALOG_JSON, PROJECT_FILE, Project, ProjectOptions, core_catalog, load_project_text,
-    merge_catalogs, split_package_read, token_types,
+    CORE_CATALOG_JSON, Project, core_catalog, find_project, load_project_file, merge_catalogs,
+    token_types, write_atomic,
 };
 use weft_core::{
     Catalog, DataCheckOptions, Diagnostic, Document, Mode, ParseOptions, ValidateOptions,
@@ -496,86 +496,6 @@ fn read(file: &Path) -> Result<String> {
     std::fs::read_to_string(file).with_context(|| format!("cannot read {}", file.display()))
 }
 
-/// Writes `contents` by renaming a sibling temp file into the file `path` names, so a crash cannot
-/// leave a half-written target (SPEC §10 tools that rewrite a file). A symbolic link is followed
-/// to its target and left in place; the target's permissions are kept.
-fn write_atomic(path: &Path, contents: &str) -> Result<()> {
-    let target = if path
-        .symlink_metadata()
-        .map(|m| m.file_type().is_symlink())
-        .unwrap_or(false)
-    {
-        std::fs::canonicalize(path).with_context(|| format!("cannot resolve {}", path.display()))?
-    } else {
-        path.to_path_buf()
-    };
-    let permissions = std::fs::metadata(&target)
-        .with_context(|| format!("cannot stat {}", target.display()))?
-        .permissions();
-    let name = target.file_name().unwrap_or_default();
-    let tmp = target.with_file_name(format!(
-        ".{}.tmp-{}",
-        name.to_string_lossy(),
-        std::process::id()
-    ));
-    let written = (|| {
-        std::fs::write(&tmp, contents)?;
-        std::fs::set_permissions(&tmp, permissions)?;
-        std::fs::rename(&tmp, &target)
-    })();
-    if written.is_err() {
-        let _ = std::fs::remove_file(&tmp);
-    }
-    written.with_context(|| format!("cannot write {}", path.display()))
-}
-
-/// SPEC §10.2: after the name is accepted, the resolved path (symbolic links followed) must stay
-/// inside `dir`. Anything else is unreadable (`W704`).
-pub(crate) fn read_project_member(dir: &Path, name: &str) -> Option<String> {
-    let root = std::fs::canonicalize(dir).ok()?;
-    let resolved = std::fs::canonicalize(root.join(name)).ok()?;
-    resolved
-        .ancestors()
-        .any(|p| p == root)
-        .then(|| std::fs::read_to_string(resolved).ok())
-        .flatten()
-}
-
-/// SPEC §10.2 packages: the package is `node_modules/<package>` of the project directory or of the
-/// nearest parent that has it, as Node resolves one, and only files whose resolved path stays
-/// inside that package directory are read. Nothing is run and nothing is fetched.
-fn read_package_file(project_dir: &Path, package: &str, file: &str) -> Option<String> {
-    let start = if project_dir.as_os_str().is_empty() {
-        Path::new(".")
-    } else {
-        project_dir
-    };
-    let package_dir = std::path::absolute(start)
-        .ok()?
-        .ancestors()
-        .map(|dir| dir.join("node_modules").join(package))
-        .find(|dir| dir.join("package.json").is_file())?;
-    read_project_member(&package_dir, file)
-}
-
-/// A file the project names: one of its own, or one of an npm package the loader asks for.
-fn read_member(dir: &Path, name: &str) -> Option<String> {
-    match split_package_read(name) {
-        Some((package, file)) => read_package_file(dir, package, file),
-        None => read_project_member(dir, name),
-    }
-}
-
-/// SPEC §10.1: the first `weft.json` in the document's directory or one above it.
-fn find_project(document: &Path) -> Option<PathBuf> {
-    let absolute = std::path::absolute(document).ok()?;
-    absolute
-        .ancestors()
-        .skip(1)
-        .map(|dir| dir.join(PROJECT_FILE))
-        .find(|candidate| candidate.is_file())
-}
-
 /// The project file that applies to `document`: the one given, else the nearest one.
 fn project_file(document: &Path, args: ProjectArgs) -> Option<PathBuf> {
     if args.no_project {
@@ -596,9 +516,9 @@ fn project_for(
     let Some(file) = project_file(document, args) else {
         return Ok((None, false));
     };
-    let (project, diagnostics) = load_project(&file, mode)?;
-    print_project(&file, &diagnostics, out)?;
-    Ok((Some(project), has_errors(&diagnostics)))
+    let loaded = load_project_file(&file, mode)?;
+    print_project(&file, &loaded.diagnostics, out)?;
+    Ok((Some(loaded.project), has_errors(&loaded.diagnostics)))
 }
 
 /// Project diagnostics. A markup problem in a fragment (SPEC §10.7) has its position in the
@@ -626,24 +546,6 @@ fn print_project(file: &Path, diagnostics: &[Diagnostic], out: &mut dyn Write) -
 /// A setting of the project's §10.6 sections, when there is a project and it sets one.
 fn setting<'a>(project: Option<&'a Project>, path: &[&str]) -> Option<&'a serde_json::Value> {
     project.and_then(|p| p.setting(path))
-}
-
-/// The project and its diagnostics. Files it names are read relative to its directory; the
-/// loader has already refused names that leave it.
-fn load_project(file: &Path, mode: Mode) -> Result<(Project, Vec<Diagnostic>)> {
-    let text = read(file)?;
-    let dir = file.parent().unwrap_or(Path::new("."));
-    let read_member = |name: &str| read_member(dir, name);
-    let loaded = load_project_text(
-        &text,
-        &ProjectOptions {
-            read: Some(&read_member),
-            mode,
-            ..Default::default()
-        },
-    )
-    .context("the embedded core catalog is broken")?;
-    Ok((loaded.project, loaded.diagnostics))
 }
 
 /// The catalogs of a repeated `--catalog` (SPEC §10.2), or `None` without one: they replace the
