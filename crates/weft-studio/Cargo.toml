@@ -1,0 +1,21 @@
+[package]
+name = "weft-studio"
+description = "The document core of WeftStudio, the desktop editor: open, save and the render input of a Weft screen"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+indexmap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+weft-catalog = { workspace = true }
+weft-core = { workspace = true }
+# Default features only: the generator, no Slint crate. The shells' FFI crate adds the runtime.
+weft-slint = { workspace = true }
+
+[lints]
+workspace = true

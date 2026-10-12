@@ -9,12 +9,11 @@ use anyhow::{Context, Result};
 use indexmap::IndexMap;
 use weft_catalog::{
     DEFAULT_TOKENS_JSON, Project, ProjectOptions, Token, TokenModifier, core_catalog, is_resolver,
-    load_project, load_tokens,
+    load_project, load_project_file, load_tokens, read_project_member,
 };
 use weft_core::{Catalog, Document, Mode, ParseOptions, has_errors, parse, parse_json, serialize};
 use weft_import::{ImportResult, Loss};
 
-use crate::load_project as load_project_file;
 use crate::{DIAGNOSTICS, ProjectArgs, load_catalogs, print, project_file, read};
 
 /// The project for `file`, with the directory its file names are relative to. Its diagnostics go
@@ -23,12 +22,12 @@ pub fn project(file: &Path, args: ProjectArgs) -> Result<(Option<Project>, Optio
     let Some(project_path) = project_file(file, args) else {
         return Ok((None, None));
     };
-    let (project, diagnostics) = load_project_file(&project_path, Mode::Lenient)?;
-    print(&project_path, &diagnostics, &mut std::io::stderr())?;
+    let loaded = load_project_file(&project_path, Mode::Lenient)?;
+    print(&project_path, &loaded.diagnostics, &mut std::io::stderr())?;
     let dir = project_path
         .parent()
         .map_or_else(|| PathBuf::from("."), Path::to_path_buf);
-    Ok((Some(project), Some(dir)))
+    Ok((Some(loaded.project), Some(dir)))
 }
 
 /// The catalogs of `--catalog`, else the project's, else the core one.
@@ -87,7 +86,7 @@ fn resolver(file: &Path) -> Result<TokenSet> {
         .file_name()
         .and_then(|n| n.to_str())
         .with_context(|| format!("{} has no file name", file.display()))?;
-    let read_member = |member: &str| crate::read_project_member(dir, member);
+    let read_member = |member: &str| read_project_member(dir, member);
     let loaded = load_project(
         &serde_json::json!({ "tokens": name }),
         &ProjectOptions {

@@ -202,3 +202,30 @@ fn the_slint_target_compiles_slint_only_in_its_tests() {
         ]
     );
 }
+
+#[test]
+fn the_editor_core_has_no_slint_crate() {
+    let entries = entries("weft-studio");
+    let mut deps: Vec<String> = entries
+        .iter()
+        .map(|d| d["name"].as_str().unwrap().to_owned())
+        .collect();
+    deps.sort();
+    // The Slint compiler and runtime belong to the shells' FFI crate (T69.1c). `weft-slint` comes
+    // with its default features only, and those hold no Slint crate (the test above).
+    assert_eq!(
+        deps,
+        [
+            "indexmap",
+            "serde",
+            "serde_json",
+            "thiserror",
+            "weft-catalog",
+            "weft-core",
+            "weft-slint"
+        ]
+    );
+    let slint = entries.iter().find(|d| d["name"] == "weft-slint").unwrap();
+    assert_eq!(slint["features"], serde_json::json!([]));
+    assert_eq!(slint["uses_default_features"], true);
+}

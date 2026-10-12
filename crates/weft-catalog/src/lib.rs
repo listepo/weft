@@ -1,9 +1,11 @@
 //! The Weft core catalog, the design token loader and the catalog version diff: the Rust port of
-//! packages/catalog. Pure functions over JSON values, like weft-core.
+//! packages/catalog. Pure functions over JSON values, like weft-core, except `files`: the project on
+//! disk for the native tools.
 
 mod core;
 mod diff;
 mod document_schema;
+mod files;
 mod project;
 mod resolver;
 mod settings;
@@ -13,6 +15,10 @@ mod version;
 pub use core::{CORE_CATALOG_JSON, CatalogError, DEFAULT_TOKENS_JSON, core_catalog};
 pub use diff::{CatalogChange, CatalogDiff, ChangeLevel, diff_catalogs};
 pub use document_schema::{DocumentSchemaOptions, document_schema};
+pub use files::{
+    ProjectFileError, WriteError, find_project, load_project_file, read_project_member,
+    write_atomic,
+};
 pub use project::{
     CatalogSource, KindSource, MAX_CATALOGS, MAX_TOKEN_FILES, PROJECT_FILE, Project, ProjectLoad,
     ProjectOptions, ReadFile, is_package_name, is_project_file_name, load_project,
