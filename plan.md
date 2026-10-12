@@ -30,7 +30,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
 | T16.7 | todo | P2 | 3 | 0% | |
-| T41 | todo | P2 | 2 | 0% | |
+| T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
 | T96 | done | P2 | 3 | 100% | Cursor / grok 4.7 |
 | T97 | done | P2 | 2 | 100% | MiMo / MiMo |
 | T98 | done | P2 | 2 | 100% | MiMo / MiMo |
@@ -448,6 +448,12 @@ Penpot installs a plugin only from the URL of its `manifest.json`, and plugins a
 3. Runner for the deploy build: GitHub-hosted `ubuntu-latest` or the gate's `xcode-27` runner?
 4. A repository has one Pages site and each deploy replaces it whole: should the deploy assemble a site now (an index page, room for docs or a `render-react` gallery)?
 5. Which icon should the plugin manager show?
+
+**Execution plan (deploy fix).** PR #70 added the `deploy-pages` job, and it fails on every push to `main` (run 38302716278): `moon run penpot-plugin:build` prints "No tasks found". The target exists; moon 2.5.6 drops a task with `runInCI: false` from `moon run` whenever it detects CI, even named explicitly and with `--force`.
+1. `.github/workflows/ci.yml`: build with `moon exec penpot-plugin:build --ignore-ci-checks`, which keeps `runInCI: false`, so `moon ci` still does not build `dist/` on every local full check. `root:wasm` (its dependency) runs in CI already.
+2. `tooling/test/workflows.test.ts`: every `moon run`/`moon exec` in `.github/workflows/*.yml` names tasks that `moon query tasks` knows, and a task with `runInCI: false` is run with `--ignore-ci-checks` (or `--ci false`). `tooling/moon.yml` lists the workflows and the moon configs as inputs.
+3. `plugins/penpot/test/pages.test.ts`: pin the new build command.
+4. Verify: the new test fails on the old workflow and passes on the fixed one; `CI=true moon exec penpot-plugin:build --ignore-ci-checks` writes `plugins/penpot/dist/`; the full check. The deploy itself is confirmed by the next push to `main`.
 
 ### T101. Inline fragments
 
