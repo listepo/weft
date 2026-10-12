@@ -2,6 +2,7 @@
 // app id and screenshots whatever the device shows, so two runs on one device overwrite each other
 // and fail with false pixel diffs. `WEFT_SIMULATOR` picks the remedy: `shared` (default) is one
 // device for everyone with a machine-wide lock so runs take turns, `own` is a device per worktree.
+// `settledShot` decides when a launched screen is on the device and can be screenshotted.
 import { randomUUID } from "node:crypto";
 import { linkSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -162,4 +163,53 @@ export async function acquireLock(path: string, options: LockOptions): Promise<(
   } finally {
     rmSync(pending, { force: true });
   }
+}
+
+export type ShotProbe = {
+  /** Whether the app has said it shows this launch's screen, in the appearance asked for. */
+  drawn: () => boolean;
+  /** A screenshot of the device, or why the simulator refused one. */
+  take: () => Uint8Array | { error: string };
+};
+
+export interface SettleOptions {
+  attempts?: number;
+  firstWaitMs?: number;
+  pollMs?: number;
+  wait?: (ms: number) => Promise<unknown>;
+}
+
+/**
+ * The screenshot of a screen just launched, once the app has said it shows that launch and two
+ * screenshots in a row agree. Agreement alone is not enough: until the new process draws, the
+ * device shows the launch screen or the last frame of the screen before, which hold as still as a
+ * settled screen, and on a loaded CI runner two identical shots of them were taken as the screen
+ * (T104).
+ */
+export async function settledShot(
+  probe: ShotProbe,
+  { attempts = 90, firstWaitMs = 1500, pollMs = 500, wait = sleep }: SettleOptions = {},
+): Promise<Uint8Array> {
+  let drawn = false;
+  let previous: Uint8Array | undefined;
+  let refused = "";
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    await wait(attempt === 0 ? firstWaitMs : pollMs);
+    drawn ||= probe.drawn();
+    if (!drawn) continue;
+    const taken = probe.take();
+    // A simulator that has only just booted refuses screenshots for a while; that is a wait, not
+    // a failure.
+    if (!(taken instanceof Uint8Array)) {
+      refused = taken.error;
+      previous = undefined;
+      continue;
+    }
+    refused = "";
+    if (previous !== undefined && Buffer.compare(previous, taken) === 0) return taken;
+    previous = taken;
+  }
+  if (!drawn) throw new Error("the app never said it shows the screen");
+  if (refused !== "") throw new Error(`no screenshot: ${refused}`);
+  throw new Error("the screen never stopped changing");
 }
