@@ -28,7 +28,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
-| T16.7 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
 | T96 | done | P2 | 3 | 100% | Cursor / grok 4.7 |
 | T97 | done | P2 | 2 | 100% | MiMo / MiMo |
@@ -383,20 +382,6 @@ Steps:
 Size: about 150 lines of code.
 
 Done when: the three screens compile, their screenshots are reviewed, and they read back to the same props without the source comment; `moon run root:changed` exits 0.
-
-### T16.7. Layout vocabulary: Figma and Penpot
-
-T16 scope items 3 to 5 for the design tools. Depends on T16.2.
-
-Steps:
-
-1. `packages/design-tool/src/view.ts` `layoutView`: `justify` as the main-axis alignment, `grow` as fill on the parent's main axis, `padding` and `max-width` (bound to variables in Figma, px in Penpot), `min-column-width` drawn with `columns` and kept in plugin data.
-2. `read.ts` and `foreign.ts`: Weft-built layers from plugin data as now; foreign layers by the import table (four equal paddings, one token, fill as `grow`); the rest are `layout` losses.
-3. Layer-tree snapshots of the Figma and Penpot builds and the round trips for the three screens. §9 rows updated.
-
-Size: about 250 lines of code.
-
-Done when: the Figma and Penpot round trips of `dashboard`, `glass` and `layout` keep every prop, a foreign-layer test covers each listed loss, and `moon run root:changed` exits 0.
 
 ### T41. Hosted Penpot plugin
 

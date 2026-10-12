@@ -1,5 +1,25 @@
 # Done
 
+### T16.7. Layout vocabulary: Figma and Penpot
+
+T16 scope items 3 to 5 for the design tools. Depends on T16.2.
+
+Steps:
+
+1. `packages/design-tool/src/view.ts` `layoutView`: `justify` as the main-axis alignment, `grow` as fill on the parent's main axis, `padding` and `max-width` (bound to variables in Figma, px in Penpot), `min-column-width` drawn with `columns` and kept in plugin data.
+2. `read.ts` and `foreign.ts`: Weft-built layers from plugin data as now; foreign layers by the import table (four equal paddings, one token, fill as `grow`); the rest are `layout` losses.
+3. Layer-tree snapshots of the Figma and Penpot builds and the round trips for the three screens. §9 rows updated.
+
+Size: about 250 lines of code.
+
+Done when: the Figma and Penpot round trips of `dashboard`, `glass` and `layout` keep every prop, a foreign-layer test covers each listed loss, and `moon run root:changed` exits 0.
+
+Execution plan (Claude Code / claude-opus-5-5): the work had already landed on `main` (`5c11e5cb`, PR #68) while the card stayed in `plan.md`, so closing it means checking the done criteria on the current `main`, not rebuilding it: the corpus round trips in `packages/figma/test/roundtrip.test.ts` and `packages/penpot/test/roundtrip.test.ts`, the losses in `packages/design-tool/test/foreign-layout.test.ts`, the layer-tree snapshots, the §9 rows, then `moon run root:changed`.
+
+Result: `layoutView` draws `justify` as the main-axis alignment (Figma `primaryAxisAlignItems`, Penpot `justifyContent`), `grow` as a fill on the parent's main axis, `padding` as four paddings and `max-width` as a max width with a fill (bound to the token's variable in Figma, px in Penpot), and `min-column-width` with `columns` equal flex tracks, the prop kept in plugin data like every prop. `read.ts` reads Weft-built layers from plugin data; `foreign.ts` reads a foreign layer's alignment (`start` left out), a fill on the parent's main axis as `grow`, and four equal paddings or a max width that name one dimension token, and reports the rest as `layout` losses (`SPACE_AROUND`/`SPACE_EVENLY`, a fixed main-axis size, `minWidth`, unequal paddings, grid tracks other than equal flex, absolute positioning). The layer-tree snapshots were retaken; every corpus screen, `dashboard`, `glass` and `layout` among them, round-trips byte-identical through both tools. `SPEC.md` §9 and `AGENT-SPEC.md` say what Figma and Penpot draw and read.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 3 · Files: `SPEC.md`, `AGENT-SPEC.md`, `packages/design-tool`, `packages/figma`, `packages/penpot`, plugin bundles
+Check: on `main` at `39190ead`, `moon run design-tool:test figma:test penpot:test` passes (figma 147, penpot 96 tests), including the foreign-layer cases for each listed loss; `moon run root:changed` exits 0.
+
 ### T39. Context in the document
 
 A `.weft` file carries the context that a person or an agent left for whoever works on it next, so the next agent or person can use it. Approved scope:
