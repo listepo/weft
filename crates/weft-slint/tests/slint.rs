@@ -8,35 +8,21 @@
 
 mod common;
 
-use std::task::{Context, Poll, Waker};
-
 use weft_catalog::token_types;
 use weft_core::{Mode, ValidateOptions, serialize, validate_document};
 use weft_slint::{
     GenerateError, GenerateOptions, ImportError, ImportOptions, MAX_SOURCE_LENGTH, generate,
-    import_slint, read_slint,
+    import_slint, read_slint, runtime,
 };
 
 use common::{document, exported_component, here, screens, setup};
 
 /// Error-level diagnostics of the Slint compiler, and whether it built `component`.
 fn compile(source: &str, component: &str) -> (Vec<String>, bool) {
-    let compiler = slint_interpreter::Compiler::default();
-    let mut build =
-        std::pin::pin!(compiler.build_from_source(source.into(), "screen.slint".into()));
-    let mut cx = Context::from_waker(Waker::noop());
-    // Without a file loader the build never waits, so polling once is enough; the loop guards it.
-    let result = loop {
-        if let Poll::Ready(result) = build.as_mut().poll(&mut cx) {
-            break result;
-        }
-    };
-    let errors = result
-        .diagnostics()
-        .filter(|d| d.level() == slint_interpreter::DiagnosticLevel::Error)
-        .map(|d| d.message().to_owned())
-        .collect();
-    (errors, result.component(component).is_some())
+    match runtime::compile(source, "fluent") {
+        Ok(definition) => (vec![], definition.name() == component),
+        Err(errors) => (errors, false),
+    }
 }
 
 #[test]
