@@ -27,9 +27,9 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
-| T16.8 | todo | P2 | 3 | 0% | |
+| T16.8 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
-| T16.7 | todo | P2 | 3 | 0% | |
+| T16.7 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
 | T96 | done | P2 | 3 | 100% | Cursor / grok 4.7 |
 | T97 | done | P2 | 2 | 100% | MiMo / MiMo |
@@ -37,6 +37,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T99 | done | P3 | 1 | 100% | MiMo / MiMo |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
 | T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
+| T69.1f | in progress | P2 | 2 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -464,3 +465,7 @@ A screen can define a fragment in place, without a project. Approved design: `do
 - Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
 - `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
 - Verify with `moon run root:changed`.
+
+### T69.1f. Windows CI job for the editor
+
+Approved as T69.1 decision 4. T73's workflow (`.github/workflows/ci.yml`) runs on macOS and Linux only; a Windows job beside them runs `cargo nextest run -p weft-studio -p weft-studio-ffi` and the Windows leg of `studio:test` (`dotnet build` and `dotnet test` of `studio/windows`), so the WinUI shell of T69.1e is built and tested by something other than a hand run.
