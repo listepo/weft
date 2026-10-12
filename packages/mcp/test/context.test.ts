@@ -12,7 +12,7 @@ const SCREEN = `<screen id="s" label="Sign in" weft="0.2">
     <entry id="go-why" by="agent" for="go" kind="decision" name="m">Primary, because it is the one action.</entry>
     <entry id="where" by="agent" for="go" kind="question" name="m" status="open">Dialog or screen?</entry>
   </context>
-  <button id="go" on-press="auth.submit" variant="primary">Sign in</button>
+  <button id="go" variant="primary" on-press="auth.submit">Sign in</button>
 </screen>
 `;
 
