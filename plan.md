@@ -26,7 +26,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
-| T12.3 | todo | P2 | 4 | 0% | |
+| T12.3 | in progress | P2 | 4 | 10% | Claude Code / claude-opus-5-5 |
 | T16 | todo | P2 | 5 | 30% | |
 | T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T16.8 | todo | P2 | 3 | 0% | |
@@ -368,6 +368,17 @@ Measure whether constrained JSON beats free markup on validity and edit success,
 1. Three-way (with the free `weft-json` format) or two-way? Which models (Anthropic plus a local LM Studio model)? What budget? Part of T8's continue/stop decision or a separate report? (T12 question 5.)
 2. If a provider cannot take the schema whole (size or recursion limits): a reduced profile per provider, or report the provider as unsupported? (T12 question 6.)
 3. Narrow the schema with project data (token names, action names, data paths as enums) once the measurement shows whether it is worth it? T12.1 describes the catalog only. (T12 question 1.)
+
+**Creator's answers (2026-10-12).** 1: three-way (`weft`, `weft-json`, `weft-json-constrained`); models: Anthropic plus a local LM Studio model; the results are a section of T8's evaluation report (`bench/EVALUATION.md`). 2 and 3: no recommendation was recorded for T12's questions 6 and 1 (T12.1's card only defers project enums until this measurement), so the conservative options apply: a provider that cannot take the schema whole is reported as unsupported, with the reasons, and gets no reduced profile; no project-data narrowing now.
+
+Execution plan (about 200 lines of code, so no split):
+
+1. `research.md` §20: what Anthropic structured outputs and LM Studio (llama.cpp grammars, Outlines) accept, with sources, and how the core document schema measures against those limits.
+2. `bench/src/provider.ts`: `complete(prompt, { schema? })`; Anthropic sends `output_config.format` (`json_schema`), OpenAI-compatible servers `response_format` (`json_schema`, strict); the batching provider refuses a schema rather than drop it; `mockProvider` sees the options. `bench/src/schema-limits.ts`: the Anthropic limits the schema breaks (recursion, numeric bounds, union and optional parameter counts), so `run.ts` reports the provider as unsupported before any call.
+3. Formats `weft-json` and `weft-json-constrained` (`neutral.ts`, `formats.ts`): opt-in through `--formats`, so the default four-format run is unchanged; the corpus JSON is `stringify(parse(screen.weft))` at run time (`corpus.ts`); one JSON primer for both (`primers.ts`); `parseWeftJson` in `adapters/weft.ts` validates in strict mode and reuses the markup adapter's neutral tree; the schema is `documentSchema(coreCatalog)`, sent on the edit, repair and readback prompts of the constrained format only (`run-tasks.ts`, a few lines). Constrained is edit-only: a read reply is not a document.
+4. Test `bench/test/constrained.test.ts` (mocked provider): the schema is sent only for the constrained format, on the first and the repair prompt; the derived corpus JSON gives the same neutral tree as the markup for every screen; a correct, an unchanged and an unparseable reply score the same as their markup counterparts; the request bodies of both providers carry the schema; the core schema is reported unsupported for Anthropic with its reasons.
+5. `test.md` method sections; trial run on LM Studio if a server is up (History row, raw results, a results section in `bench/EVALUATION.md`), else the trial stays open and the task stays in progress; an Anthropic cost estimate for the creator.
+6. `moon run root:changed`; PR.
 
 ### T16. Layout vocabulary
 
