@@ -1398,6 +1398,21 @@ The repo had no `.github/` at all: the documented gate (`moon run :test root:typ
 Model: ZCode / GLM-5.3 · Status: done 2026-10-07 · Priority: P2 · Complexity: 2 · Files: `.github/workflows/ci.yml`
 Check: the workflow is this pull request's own CI — its green run is the check.
 
+### T69.1a. Document core
+
+Sub-task of T69.1 (`crates/weft-studio`, about 300 lines). Move `find_project` and the file-reading project loader from `crates/weft-cli/src/main.rs` into `weft-catalog` and switch the CLI to them, with no change in behaviour. Then `Editor` with `open`, `save`, `state` and `render_input` (the Slint source and the sample data), and an error type with distinct variants (I/O, too large, syntax with diagnostics, generation refused). Done when `crates/weft-studio/tests/editor.rs` passes: every corpus screen opens, renders its input and saves byte-identical into a temporary directory; a non-canonical file saves as `weft fmt` prints it; a syntax error refuses the open with its diagnostics; a strictly invalid document opens and its render is refused with the generator's message; `render.data` feeds the data; a project with errors still opens and reports them; a file over the limit is refused; a failed save leaves the original untouched and no temporary file behind. `crates/weft-cli/tests/deps.rs` asserts that `weft-studio` has no Slint crate, and the CLI tests stay green.
+
+Execution plan:
+
+1. `crates/weft-catalog/src/files.rs`: move `find_project`, `read_project_member` (with the npm package reader) and the file-reading loader, named `load_project_file` because `load_project` already names the JSON loader, out of `crates/weft-cli/src/main.rs`. `write_atomic` moves with them, because the editor's save needs the same atomic write; a target that does not exist yet is a new file. The errors keep the CLI's messages (`cannot read …`, `the embedded core catalog is broken`, `cannot write …`), so the CLI output does not change. `main.rs` and `convert.rs` call the moved functions.
+2. `crates/weft-studio`: `Editor::open(path)`, `save(path)`, `state()` and `render_input()`, and `EditorError` (read, write, too large, syntax with diagnostics, generation refused, sample data, embedded catalog). The size limit is `weft_slint::MAX_SOURCE_LENGTH`. The crate depends on `weft-slint` with its default features, which hold no Slint crate.
+3. Tests: `crates/weft-catalog/tests/files.rs` (discovery, a member outside the project refused, a new file written, a failed write leaving no temporary file); `crates/weft-studio/tests/editor.rs` (the done criteria above, over the corpus and a copy of `examples/project`); `crates/weft-cli/tests/deps.rs` (the dependencies of `weft-studio`, and `weft-slint` without features).
+4. `AGENTS.md` names the crate in its layout. Check with `moon run root:changed`.
+
+Result: `crates/weft-catalog/src/files.rs` holds `find_project`, `read_project_member`, `load_project_file` and `write_atomic` (now also creating a file that does not exist yet), with the CLI's messages; the CLI calls them. `crates/weft-studio` has `Editor::open`, `save`, `state` and `render_input`, `EditorError` and `MAX_FILE_BYTES` (the `weft-slint` source bound). `State` adds `project` and `project_diagnostics` to the fields the T69.1 card lists, so a shell can tell the two sources of problems apart.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 3
+Check: `crates/weft-studio/tests/editor.rs`, `crates/weft-catalog/tests/files.rs`, `crates/weft-cli/tests/deps.rs` (`the_editor_core_has_no_slint_crate`), and the CLI tests unchanged.
+
 ### T69.1b. Slint runtime
 
 Sub-task of T69.1 (`crates/weft-slint` feature `runtime`, about 250 lines, mostly moved). `runtime::compile(source, style)` and `runtime::apply_data(instance, source, data)` replace the two test copies and return problems instead of panicking, because the data is untrusted. `slint-interpreter` becomes an optional dependency of the feature; the `deps.rs` optional list gains it. Done when `tests/slint.rs` and `tests/screenshots.rs` use the feature and keep passing against their baselines, and a value of the wrong type is a reported problem, not a panic.
