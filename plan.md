@@ -385,6 +385,12 @@ Size: about 250 lines of code.
 
 Done when: the generated HTML and JSX of `dashboard`, `glass` and `layout`, with the source comment removed, read back to the same props; a test covers each listed loss; `moon run root:changed` exits 0.
 
+Execution plan (claimed again after the code had landed): steps 1–3 were merged to `main` in PR #72 (`2987544b feat: T16.8 read the layout vocabulary from web markup`), and the T16 closing in `done.md` checked them. What is left:
+
+1. Check each "Done when" bullet on this branch: `crates/weft-web/tests/html.rs` and `jsx_import.rs` (convention round trips of the corpus, whose only layout gaps are the defaults `direction="column"` and `justify="start"`; the foreign-loss tests for `space-around`, `space-evenly`, `stretch`, unequal ratios, raw lengths, `@media` and `@container`), and SPEC §9 "From HTML".
+2. `crates/weft-web/src/html.rs`: two comments still say the HTML importer does not read the drawn forms; say instead why the `data-prop-*` copies stay (they carry what the drawn form leaves out, such as an explicit `justify="start"`). Comments only, no output change.
+3. `moon run root:changed`, then move T16.8 to `done.md`.
+
 ### T16.5. Layout vocabulary: Slint
 
 T16 scope items 3 to 5 for `crates/weft-slint`. Depends on T16.2 (T67.4 and T67.5 are done).
