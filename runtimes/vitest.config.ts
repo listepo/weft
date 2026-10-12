@@ -22,6 +22,7 @@ const needsFileSystem = [
   "packages/core/test/cem.test.ts",
   "packages/core/test/cli.test.ts",
   "packages/core/test/compat.test.ts",
+  "packages/core/test/deep.test.ts",
   "packages/core/test/differential.test.ts",
   "packages/core/test/document-schema.test.ts",
   "packages/core/test/roundtrip.test.ts",
