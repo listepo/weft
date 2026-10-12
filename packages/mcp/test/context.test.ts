@@ -37,6 +37,23 @@ test("weft_context returns the entries under the fixed notice, filtered", async 
   await close();
 });
 
+test("weft_validate and weft_format keep the context, and weft_render never shows it", async () => {
+  const { client, close } = await connect();
+  const valid = await call(client, "weft_validate", { markup: SCREEN });
+  assert.equal(valid.isError, false, valid.blocks.join("\n"));
+  const formatted = await call(client, "weft_format", { markup: SCREEN });
+  assert.equal(formatted.blocks[0], SCREEN);
+  const rendered = await call(client, "weft_render", { markup: SCREEN, html: true });
+  assert.equal(rendered.isError, false, rendered.blocks.join("\n"));
+  assert.equal(rendered.blocks.length, 2);
+  for (const block of rendered.blocks) {
+    for (const note of ["Returning users", "the one action", "Dialog or screen"]) {
+      assert.equal(block.includes(note), false, `${note} in ${block}`);
+    }
+  }
+  await close();
+});
+
 test("an oversized context is cut at the format's limits before a model sees it", () => {
   const entry = (i: number) => ({
     id: `e${i}`,
