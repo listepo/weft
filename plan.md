@@ -27,7 +27,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
 | T12.3 | todo | P2 | 4 | 0% | |
-| T16 | todo | P2 | 5 | 30% | |
+| T16 | in progress | P2 | 5 | 90% | Claude Code / claude-opus-5-5 |
 | T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T16.8 | todo | P2 | 3 | 0% | |
 | T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
@@ -168,6 +168,13 @@ A `.weft` file carries the context that a person or an agent left for whoever wo
 Format change, so the design comes first: syntax, canonical JSON, validation codes, patch operations and the effect on every target go to the creator for approval before `SPEC.md`, `AGENT-SPEC.md`, the Rust core and the targets change together. Done when a screen with context on both levels survives fmt, patches, every round trip that exists, and the MCP tools expose it.
 
 The creator approved the design in `docs/context-design.md`, with the recommendation of each of its open questions. Execution plan, build stage: the build is far over 500 lines of code, so it is split into T39.1–T39.9, one pull request each, in the order of the design's implementation outline. Each subtask changes `SPEC.md` and `AGENT-SPEC.md` for what it builds, in the same commit, regenerates the fixtures it touches, and passes `mise exec -- moon run :test root:typecheck root:lint root:rust-test root:rust-lint`. Before each pull request, merge `origin/main`; T31 builds fragments in parallel and also moves the format to `weft` 0.2, so whichever lands second keeps the other's bump. T39 closes when its done criteria hold after T39.9.
+
+Closing plan (T39.1–T39.9 are merged): prove the done criterion on `main` and fill small gaps with code and a test.
+
+1. One end-to-end test in `crates/weft-cli/tests/project.rs` over a screen with context on the screen and on an element: `fmt` is a fixed point, canonical JSON reads back to the same markup, the context patch operations apply, and every round trip that exists (static HTML with `--context keep`, React, SolidJS, Slint, SwiftUI) gives the screen back; Lit carries none; A2UI and json-render have no place for notes.
+2. A2UI and json-render exports drop the context without saying so: report one `context` loss for the block, with the §9 rows, in `crates/weft-interop`.
+3. MCP: `weft_validate` and `weft_format` keep the context and `weft_render` never shows it, in `packages/mcp/test/context.test.ts` beside the existing `weft_context` and `weft_patch` checks.
+4. Full check, then move T39 to `done.md`.
 
 ### T68. Slint bindings for SwiftUI and WinUI
 
@@ -403,6 +410,14 @@ Weft has two layout kinds today. `stack` lays children out in one line, with `di
 **Dependencies.** T55 and T52 (done) are the precedents. T39 is independent: this ships within `weft` 0.1 (decision 9). T14's style overrides add no `style-padding` for `stack` and `grid` (decision 6). T67.4 and T67.5, which edit the same Slint `read.rs`, are done. T69's "resize within the layout rules" builds on this.
 
 **Split.** T16.1: design (done). T16.2: spec, catalog, core, `AGENT-SPEC.md`, tokens, corpus. T16.3: web generators and the reference renderer. T16.8: web importers. T16.4: SwiftUI generator and importer (done). T16.5: Slint generator and reader. T16.6: A2UI and json-render (done). T16.7: Figma and Penpot through `design-tool`. T16.2 lands first; the others need only T16.2 and can run in parallel, except that T16.8 reads what T16.3 writes. Each closes its part of T16's "Done when" for its targets and moves its §9 rows from loss to mapping.
+
+Closing plan (T16.2–T16.8 are merged): check each "Done when" bullet on `main` and fill small gaps with code and a test; a gap over about 500 lines becomes a proposed follow-up instead.
+
+1. Strict and lenient validation and `W318` in `AGENT-SPEC.md` (`bench/test/agent-spec.test.ts`).
+2. `dashboard`, `glass` and `layout` in the `packages/visual` web comparison and the reviewed SwiftUI baselines.
+3. Generated code without its source comment reads back to the same layout props on every importer whose §9 row says it maps (HTML, React, SolidJS, SwiftUI, Slint `read_slint`), and every unmapped form is a §9 loss; add a Slint test over the three screens if none covers them.
+4. Figma and Penpot round trips of the three screens keep every prop.
+5. Full check, then move T16 to `done.md`.
 
 ### T16.3. Layout vocabulary: web generators and the reference renderer
 
