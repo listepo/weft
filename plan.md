@@ -26,7 +26,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | todo | P2 | 4 | 0% | |
-| T12.3 | in progress | P2 | 4 | 10% | Claude Code / claude-opus-5-5 |
+| T12.3 | in progress | P2 | 4 | 70% | Claude Code / claude-opus-5-5 |
 | T16 | todo | P2 | 5 | 30% | |
 | T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
 | T16.8 | todo | P2 | 3 | 0% | |
@@ -379,6 +379,8 @@ Execution plan (about 200 lines of code, so no split):
 4. Test `bench/test/constrained.test.ts` (mocked provider): the schema is sent only for the constrained format, on the first and the repair prompt; the derived corpus JSON gives the same neutral tree as the markup for every screen; a correct, an unchanged and an unparseable reply score the same as their markup counterparts; the request bodies of both providers carry the schema; the core schema is reported unsupported for Anthropic with its reasons.
 5. `test.md` method sections; trial run on LM Studio if a server is up (History row, raw results, a results section in `bench/EVALUATION.md`), else the trial stays open and the task stays in progress; an Anthropic cost estimate for the creator.
 6. `moon run root:changed`; PR.
+
+Progress: steps 1–4 are done (`bench/test/constrained.test.ts`, 12 tests; the bench suite passes) and `bench/EVALUATION.md` has a status section. Remaining: the trial. No LM Studio server was listening (2026-10-12), so the first "Done when" item holds and the second does not. Next: `lms server start; lms load prism-ml/bonsai-27b`, then `node bench/src/run.ts edit --provider openai --model prism-ml/bonsai-27b --screens login --formats weft,weft-json,weft-json-constrained`, a History row, and the table in the report. An Anthropic run of markup against free JSON (the constrained format is unsupported there) waits for the creator's approval of its cost: about $0.17 for the same trial on Sonnet 5.5, about $7.60 for 36 tasks × 3 samples × 2 formats × the three `DEFAULT_MODELS` (half that with `--batch`).
 
 ### T16. Layout vocabulary
 
