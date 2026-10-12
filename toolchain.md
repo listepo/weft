@@ -61,7 +61,7 @@
 | anyhow | local | https://github.com/dtolnay/anyhow | Errors in the `weft` binary |
 | clap | local | https://github.com/clap-rs/clap | `weft` command-line parsing |
 | proptest | local (dev) | https://github.com/proptest-rs/proptest | Property tests of weft-core, weft-catalog and weft-swiftui: no panics, round trips, idempotent formatting |
-| slint-interpreter | local (dev) | https://github.com/slint-ui/slint | Compiles the `.slint` files weft-slint generates in its tests; without default features, so no backend or renderer |
+| slint-interpreter | local (optional) | https://github.com/slint-ui/slint | The `runtime` feature of weft-slint: compiles the `.slint` files it generates at run time and fills them with sample data, for the editor (T69) and the tests; without default features, so no backend or renderer |
 | i-slint-backend-testing | local (dev) | https://github.com/slint-ui/slint | Headless software renderer for the weft-slint screenshot tests; 1.18.1, `renderer-software` only |
 | i-slint-core | local (dev) | https://github.com/slint-ui/slint | Sets that testing backend and pins its color scheme to light before a screenshot |
 | png | local (dev) | https://github.com/image-rs/image-png | Encodes and decodes the Slint screenshot PNGs; not the full `image` stack |

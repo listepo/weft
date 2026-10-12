@@ -54,8 +54,8 @@ clap = { version = "4.6.7", features = ["derive"] }
 # weft-swiftui: the Swift grammar for the importer (`import` feature); C sources built by cc.
 tree-sitter = "0.27.0"
 tree-sitter-swift = "0.7.4"
-# tests: weft-slint, compiles the generated `.slint` files. Without default features: no backend or
-# renderer, only the compiler; `compat-1-18` is the feature set the crate requires.
+# weft-slint `runtime` feature and its tests: compiles the generated `.slint` files. Without default
+# features: no backend or renderer, only the compiler; `compat-1-18` is the feature set the crate requires.
 slint-interpreter = { version = "1.18.1", default-features = false, features = ["compat-1-18", "std"] }
 # tests: weft-slint screenshots. The testing backend's software renderer draws without a window.
 i-slint-backend-testing = { version = "1.18.1", default-features = false, features = ["renderer-software"] }

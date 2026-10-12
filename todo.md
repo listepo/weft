@@ -3,6 +3,7 @@
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
+- T69.1a. Document core
 - T12.3. Constrained generation: benchmark
 - T16.3. Layout vocabulary: web generators and the reference renderer
 - T16.8. Layout vocabulary: web importers

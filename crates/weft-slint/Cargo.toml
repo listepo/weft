@@ -12,6 +12,9 @@ default = []
 # Syntax tree of i-slint-compiler, for a file the generator did not print or that was edited.
 # No renderer and no backend. Default features stay empty of Slint crates.
 import = ["dep:i-slint-compiler", "dep:weft-import"]
+# The generated source compiled at run time and filled with sample data (`runtime` module): the
+# Slint compiler and interpreter, still without a backend or renderer.
+runtime = ["dep:serde_json", "dep:slint-interpreter"]
 
 [dependencies]
 indexmap = { workspace = true }
@@ -20,17 +23,30 @@ weft-catalog = { workspace = true }
 weft-core = { workspace = true }
 i-slint-compiler = { workspace = true, optional = true }
 weft-import = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+slint-interpreter = { workspace = true, optional = true }
 
 [dev-dependencies]
 i-slint-backend-testing = { workspace = true }
 i-slint-core = { workspace = true }
 png = { workspace = true }
 serde_json = { workspace = true }
-slint-interpreter = { workspace = true }
 
 [[test]]
 name = "import"
 required-features = ["import"]
+
+[[test]]
+name = "slint"
+required-features = ["import", "runtime"]
+
+[[test]]
+name = "screenshots"
+required-features = ["runtime"]
+
+[[test]]
+name = "runtime"
+required-features = ["runtime"]
 
 [lints]
 workspace = true

@@ -11,16 +11,14 @@
 
 mod common;
 
-use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
-use std::task::{Context, Poll, Waker};
 
 use serde_json::Value as Json;
-use slint_interpreter::{ComponentHandle, ComponentInstance, SharedString, Struct, Value};
+use slint_interpreter::ComponentHandle;
 use weft_core::parse_json;
-use weft_slint::{GenerateOptions, generate};
+use weft_slint::{GenerateOptions, generate, runtime};
 
-use common::{document, exported_component, screens, setup};
+use common::{document, ensure_backend, screens, setup};
 
 /// The web screenshots are 480px wide (`packages/visual/test/web/stage.ts`); the same measure here.
 const WIDTH: u32 = 480;
@@ -34,22 +32,6 @@ struct Image {
     width: u32,
     height: u32,
     data: Vec<u8>,
-}
-
-enum SlintTy {
-    String,
-    Bool,
-    Int,
-    Float,
-    StringList,
-    StructList(Vec<(String, Leaf)>),
-}
-
-enum Leaf {
-    String,
-    Bool,
-    Int,
-    Float,
 }
 
 fn platform() -> String {
@@ -77,221 +59,6 @@ fn diffs_dir() -> PathBuf {
         .join(platform())
 }
 
-/// One backend per thread. `threading: false` keeps the platform thread-local, so parallel tests
-/// do not share it; a second call on the same thread finds it already set.
-fn ensure_backend() {
-    i_slint_core::with_global_context(
-        || {
-            let backend = i_slint_backend_testing::TestingBackend::new(
-                i_slint_backend_testing::TestingBackendOptions {
-                    mock_time: true,
-                    threading: false,
-                    renderer_name: Some("software".into()),
-                },
-            );
-            Ok(Box::new(backend) as Box<dyn i_slint_core::platform::Platform>)
-        },
-        |ctx| ctx.set_color_scheme(i_slint_core::items::ColorScheme::Light),
-    )
-    .unwrap();
-}
-
-fn compile(source: &str) -> slint_interpreter::ComponentDefinition {
-    let mut compiler = slint_interpreter::Compiler::default();
-    compiler.set_style("fluent".into());
-    let mut build =
-        std::pin::pin!(compiler.build_from_source(source.into(), "screen.slint".into()));
-    let mut cx = Context::from_waker(Waker::noop());
-    let result = loop {
-        if let Poll::Ready(result) = build.as_mut().poll(&mut cx) {
-            break result;
-        }
-    };
-    let errors: Vec<_> = result
-        .diagnostics()
-        .filter(|d| d.level() == slint_interpreter::DiagnosticLevel::Error)
-        .map(|d| d.message().to_owned())
-        .collect();
-    assert!(errors.is_empty(), "{errors:#?}");
-    result.component(exported_component(source)).unwrap()
-}
-
-fn properties(source: &str) -> Vec<(String, String)> {
-    source
-        .lines()
-        .filter_map(|line| {
-            let rest = line.trim().strip_prefix("in-out property <")?;
-            let (ty, name) = rest.split_once("> ")?;
-            Some((name.trim_end_matches(';').to_owned(), ty.to_owned()))
-        })
-        .collect()
-}
-
-fn leaf(ty: &str) -> Leaf {
-    match ty {
-        "string" => Leaf::String,
-        "bool" => Leaf::Bool,
-        "int" => Leaf::Int,
-        "float" => Leaf::Float,
-        other => panic!("unhandled field type {other}"),
-    }
-}
-
-fn parse_ty(ty: &str) -> SlintTy {
-    match ty {
-        "string" => SlintTy::String,
-        "bool" => SlintTy::Bool,
-        "int" => SlintTy::Int,
-        "float" => SlintTy::Float,
-        "[string]" => SlintTy::StringList,
-        other if other.starts_with("[{") && other.ends_with("}]") => {
-            let inner = &other[2..other.len() - 2];
-            let fields = inner
-                .split(',')
-                .map(|part| {
-                    let (name, ty) = part.trim().split_once(':').unwrap();
-                    (name.trim().to_owned(), leaf(ty.trim()))
-                })
-                .collect();
-            SlintTy::StructList(fields)
-        }
-        other => panic!("unhandled Slint type {other}"),
-    }
-}
-
-/// `$.stats.velocity` is the property `stats-velocity`, so a nested object flattens on `-`.
-/// An array stays whole: it is the model, not another path.
-fn flatten(value: &Json, prefix: &str, out: &mut BTreeMap<String, Json>) {
-    if let Json::Object(map) = value
-        && !map.is_empty()
-    {
-        for (key, child) in map {
-            let name = if prefix.is_empty() {
-                key.clone()
-            } else {
-                format!("{prefix}-{key}")
-            };
-            flatten(child, &name, out);
-        }
-        return;
-    }
-    if !prefix.is_empty() {
-        out.insert(prefix.to_owned(), value.clone());
-    }
-}
-
-fn lookup<'a>(flat: &'a BTreeMap<String, Json>, name: &str) -> Option<&'a Json> {
-    flat.get(name).or_else(|| {
-        // A path Slint's `Window` already owns is stored as `<name>-data`.
-        name.strip_suffix("-data").and_then(|bare| flat.get(bare))
-    })
-}
-
-fn missing(ty: &Leaf) -> Json {
-    match ty {
-        Leaf::String => Json::String(String::new()),
-        Leaf::Bool => Json::Bool(false),
-        Leaf::Int | Leaf::Float => Json::from(0),
-    }
-}
-
-fn leaf_value(ty: &Leaf, json: &Json, at: &str) -> Value {
-    match ty {
-        // A number field is still a LineEdit, so its property is a string and the sample may be a number.
-        Leaf::String => Value::String(SharedString::from(match json {
-            Json::String(text) => text.clone(),
-            Json::Number(number) => number.to_string(),
-            Json::Bool(value) => value.to_string(),
-            other => panic!("{at}: expected text, got {other}"),
-        })),
-        // A bool property is often a text path read for truthiness (`!= ""`), and the sample
-        // still holds the text, as `selection: ""`.
-        Leaf::Bool => Value::Bool(match json {
-            Json::Bool(value) => *value,
-            Json::String(text) => !text.is_empty(),
-            Json::Number(number) => number.as_f64().unwrap_or(0.0) != 0.0,
-            other => panic!("{at}: expected a bool, got {other}"),
-        }),
-        Leaf::Int | Leaf::Float => Value::Number(
-            json.as_f64()
-                .unwrap_or_else(|| panic!("{at}: expected a number, got {json}")),
-        ),
-    }
-}
-
-fn model(items: Vec<Value>) -> Value {
-    let rc = i_slint_core::model::VecModel::from_slice(&items);
-    Value::from(rc)
-}
-
-/// A `[string]` model is sometimes fed by objects whose one text field is the row, as `cities`
-/// is `[{ name }]` while the combo box model is `[string]`.
-fn string_item(item: &Json, at: &str) -> Value {
-    match item {
-        Json::Object(map) => {
-            let texts: Vec<_> = map.iter().filter(|(_, value)| value.is_string()).collect();
-            assert_eq!(
-                texts.len(),
-                1,
-                "{at}: a [string] row needs one text field, got {item}"
-            );
-            leaf_value(&Leaf::String, texts[0].1, at)
-        }
-        other => leaf_value(&Leaf::String, other, at),
-    }
-}
-
-fn json_to_value(ty: &SlintTy, json: &Json, at: &str) -> Value {
-    match ty {
-        SlintTy::String => leaf_value(&Leaf::String, json, at),
-        SlintTy::Bool => leaf_value(&Leaf::Bool, json, at),
-        SlintTy::Int => leaf_value(&Leaf::Int, json, at),
-        SlintTy::Float => leaf_value(&Leaf::Float, json, at),
-        SlintTy::StringList => {
-            let items = json
-                .as_array()
-                .unwrap_or_else(|| panic!("{at}: expected an array, got {json}"))
-                .iter()
-                .map(|item| string_item(item, at))
-                .collect();
-            model(items)
-        }
-        SlintTy::StructList(fields) => {
-            let items = json
-                .as_array()
-                .unwrap()
-                .iter()
-                .map(|row| {
-                    let mut item = Struct::default();
-                    for (name, ty) in fields {
-                        let value = match row.get(name) {
-                            Some(v) => leaf_value(ty, v, name),
-                            None => leaf_value(ty, &missing(ty), name),
-                        };
-                        item.set_field(name.clone(), value);
-                    }
-                    Value::Struct(item)
-                })
-                .collect();
-            model(items)
-        }
-    }
-}
-
-fn apply(source: &str, instance: &ComponentInstance, data: &Json) {
-    let mut flat = BTreeMap::new();
-    flatten(data, "", &mut flat);
-    for (name, ty) in properties(source) {
-        let Some(value) = lookup(&flat, &name) else {
-            continue;
-        };
-        let parsed = parse_ty(&ty);
-        instance
-            .set_property(&name, json_to_value(&parsed, value, &name))
-            .unwrap_or_else(|err| panic!("{name} ({ty}): {err} from {value}"));
-    }
-}
-
 fn trim(width: u32, height: u32, bytes: &[u8]) -> Image {
     let bg = &bytes[..4];
     let mut last = 0u32;
@@ -316,8 +83,12 @@ fn trim(width: u32, height: u32, bytes: &[u8]) -> Image {
 
 fn render(source: &str, data: &Json) -> Image {
     ensure_backend();
-    let instance = compile(source).create().unwrap();
-    apply(source, &instance, data);
+    let instance = runtime::compile(source, "fluent")
+        .unwrap()
+        .create()
+        .unwrap();
+    let problems = runtime::apply_data(&instance, source, data);
+    assert!(problems.is_empty(), "{problems:#?}");
     instance
         .window()
         .set_size(slint_interpreter::PhysicalSize::new(WIDTH, CANVAS));

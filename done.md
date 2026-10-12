@@ -1389,3 +1389,18 @@ Check: the children's checks.
 The repo had no `.github/` at all: the documented gate (`moon run :test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`, README.md) ran only by hand, and publishing from GitHub (T32) would have shipped without it. `.github/workflows/ci.yml` now runs the gate on every pull request and push to main: mise installs the pinned toolchain (moon, Rust with wasm32, deno, bun), pnpm installs the dependencies with the frozen lockfile, the Playwright Chromium is installed for the browser leg of `root:runtimes`, and both actions are pinned to full commit SHAs. The first runs of the workflow are its own shakedown: a tooling failure on the runner is fixed on this branch, a gate failure is the gate working.
 Model: ZCode / GLM-5.3 · Status: done 2026-10-07 · Priority: P2 · Complexity: 2 · Files: `.github/workflows/ci.yml`
 Check: the workflow is this pull request's own CI — its green run is the check.
+
+### T69.1b. Slint runtime
+
+Sub-task of T69.1 (`crates/weft-slint` feature `runtime`, about 250 lines, mostly moved). `runtime::compile(source, style)` and `runtime::apply_data(instance, source, data)` replace the two test copies and return problems instead of panicking, because the data is untrusted. `slint-interpreter` becomes an optional dependency of the feature; the `deps.rs` optional list gains it. Done when `tests/slint.rs` and `tests/screenshots.rs` use the feature and keep passing against their baselines, and a value of the wrong type is a reported problem, not a panic.
+
+Execution plan:
+
+1. `crates/weft-slint/src/runtime.rs` behind the feature `runtime = ["dep:slint-interpreter"]`: `compile` (from the copies in `tests/slint.rs` and `tests/screenshots.rs`: a build polled without a file loader, the style set, error diagnostics returned) and `apply_data` (the property types read from the generated source, the sample data flattened and converted, from `tests/screenshots.rs`), returning problems instead of panicking.
+2. Both tests call the feature (`required-features`); the screenshot baselines stay as they are.
+3. Tests (`tests/runtime.rs`): a value of the wrong type is a reported problem and the other properties are still set; data that is not an object sets nothing; a source with a syntax error, or with two exported components, returns its errors. `crates/weft-cli/tests/deps.rs` lists `slint-interpreter` as optional; `toolchain.md` updates its row.
+4. Check with `moon run root:changed`.
+
+Result: `crates/weft-slint/src/runtime.rs` (feature `runtime`) with `compile` and `apply_data`; `tests/slint.rs` and `tests/screenshots.rs` call it (`required-features`), and the screenshot baselines are unchanged. The headless testing backend setup moved to `tests/common/mod.rs`, shared by the screenshot and runtime tests. `slint-interpreter` and `serde_json` are optional dependencies of the feature.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 3
+Check: `crates/weft-slint/tests/runtime.rs`, `tests/slint.rs` and `tests/screenshots.rs` against their baselines, and `crates/weft-cli/tests/deps.rs` (`the_slint_target_compiles_slint_only_in_its_tests`).

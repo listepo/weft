@@ -1,5 +1,6 @@
-//! What the generator tests and the screenshot tests both load: the corpus, the core catalog
-//! and a strict parse. Each integration test compiles this module on its own.
+//! What the generator tests and the screenshot tests both load: the corpus, the core catalog,
+//! a strict parse and the headless Slint backend. Each integration test compiles this module on
+//! its own.
 
 #![allow(dead_code)]
 
@@ -55,4 +56,23 @@ pub fn exported_component(source: &str) -> &str {
             rest.split_whitespace().next()
         })
         .unwrap()
+}
+
+/// One backend per thread. `threading: false` keeps the platform thread-local, so parallel tests
+/// do not share it; a second call on the same thread finds it already set.
+pub fn ensure_backend() {
+    i_slint_core::with_global_context(
+        || {
+            let backend = i_slint_backend_testing::TestingBackend::new(
+                i_slint_backend_testing::TestingBackendOptions {
+                    mock_time: true,
+                    threading: false,
+                    renderer_name: Some("software".into()),
+                },
+            );
+            Ok(Box::new(backend) as Box<dyn i_slint_core::platform::Platform>)
+        },
+        |ctx| ctx.set_color_scheme(i_slint_core::items::ColorScheme::Light),
+    )
+    .unwrap();
 }
