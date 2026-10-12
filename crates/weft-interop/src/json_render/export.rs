@@ -10,8 +10,8 @@ use weft_core::{Catalog, Child, Content, Document, Node, Value};
 use weft_import::{Loss, LossKind, Losses, safe_url};
 
 use crate::ids::{collect_ids, fresh_id};
-use crate::number;
 use crate::paths::to_pointer;
+use crate::{lose_context, number};
 
 pub struct Exported {
     pub spec: Json,
@@ -43,6 +43,8 @@ pub fn to_json_render(
     };
     collect_ids(&doc.root, &mut ex.ids);
     let root = ex.element(&doc.root, "");
+    let at = format!("/{}#{root}", doc.root.kind);
+    lose_context(doc, &at, "json-render", &mut ex.losses);
     let mut spec = json!({ "root": root, "elements": ex.elements });
     if let Some(state) = state {
         spec["state"] = Json::Object(state.clone());

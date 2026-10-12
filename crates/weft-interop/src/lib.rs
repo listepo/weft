@@ -8,8 +8,9 @@ pub mod json_render;
 mod paths;
 
 use serde_json::{Value as Json, json};
+use weft_core::Document;
 pub use weft_import::{ImportResult, Loss, LossKind};
-use weft_import::{Sem, empty_result, limit_reached};
+use weft_import::{Losses, Sem, empty_result, limit_reached};
 
 /// Longest input either importer reads, in bytes.
 pub const MAX_SOURCE_LENGTH: usize = 2_000_000;
@@ -22,6 +23,15 @@ pub(crate) fn too_long(text: &str) -> Option<ImportResult> {
         limit_reached(&mut diagnostics, "#", &what);
         empty_result(diagnostics)
     })
+}
+
+/// Neither format has a place for notes, so an export that drops the context block (SPEC §2.3)
+/// says so once, at the block's path, rather than handing back a screen that looks complete.
+pub(crate) fn lose_context(doc: &Document, root: &str, format: &str, losses: &mut Losses) {
+    if !doc.context.is_empty() {
+        let note = format!("the context block has no {format} form");
+        losses.push(LossKind::Context, format!("{root}/context"), note);
+    }
 }
 
 /// An element of a named Weft kind. The role is unused once the kind is named, except that role

@@ -10,8 +10,8 @@ use weft_core::{Child, Document, Node, Value};
 use weft_import::{Loss, LossKind, Losses, safe_absolute_url, safe_url};
 
 use crate::ids::{collect_ids, fresh_id};
-use crate::number;
 use crate::paths::to_pointer;
+use crate::{lose_context, number};
 
 pub const CATALOG_ID: &str = "https://a2ui.org/specification/v0_9/catalogs/basic/catalog.json";
 const VERSION: &str = "v0.9";
@@ -49,6 +49,7 @@ pub fn to_a2ui(doc: &Document) -> Exported {
     collect_ids(&doc.root, &mut ex.ids);
     let surface = doc.root.id.clone().unwrap_or_else(|| "screen".into());
     let path = format!("/screen#{surface}");
+    lose_context(doc, &path, "A2UI", &mut ex.losses);
     let mut parts = Parts::of(&doc.root, &mut ex, &path);
     let mut fields = json!({ "children": ex.kids(&doc.root.children, &path, None) });
     ex.finish(&mut fields, &mut parts, &path);
