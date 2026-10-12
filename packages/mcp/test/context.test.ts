@@ -12,7 +12,7 @@ const SCREEN = `<screen id="s" label="Sign in" weft="0.2">
     <entry id="go-why" by="agent" for="go" kind="decision" name="m">Primary, because it is the one action.</entry>
     <entry id="where" by="agent" for="go" kind="question" name="m" status="open">Dialog or screen?</entry>
   </context>
-  <button id="go" on-press="auth.submit" variant="primary">Sign in</button>
+  <button id="go" variant="primary" on-press="auth.submit">Sign in</button>
 </screen>
 `;
 
@@ -34,6 +34,23 @@ test("weft_context returns the entries under the fixed notice, filtered", async 
   assert.deepEqual(ids(none.blocks[0]), []);
   const broken = await call(client, "weft_context", { markup: "<screen" });
   assert.equal(broken.isError, true);
+  await close();
+});
+
+test("weft_validate and weft_format keep the context, and weft_render never shows it", async () => {
+  const { client, close } = await connect();
+  const valid = await call(client, "weft_validate", { markup: SCREEN });
+  assert.equal(valid.isError, false, valid.blocks.join("\n"));
+  const formatted = await call(client, "weft_format", { markup: SCREEN });
+  assert.equal(formatted.blocks[0], SCREEN);
+  const rendered = await call(client, "weft_render", { markup: SCREEN, html: true });
+  assert.equal(rendered.isError, false, rendered.blocks.join("\n"));
+  assert.equal(rendered.blocks.length, 2);
+  for (const block of rendered.blocks) {
+    for (const note of ["Returning users", "the one action", "Dialog or screen"]) {
+      assert.equal(block.includes(note), false, `${note} in ${block}`);
+    }
+  }
   await close();
 });
 
