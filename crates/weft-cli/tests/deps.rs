@@ -183,8 +183,8 @@ fn the_slint_target_compiles_slint_only_in_its_tests() {
         .collect();
     deps.sort();
     // The generator and the comment-path importer are pure Rust over the core. The Slint
-    // compiler (`slint-interpreter`) is a dev-dependency that checks the generated files.
-    // The syntax tree (`i-slint-compiler`) is only the optional `import` feature.
+    // interpreter (`slint-interpreter`, with `serde_json` for the sample data) is only the
+    // optional `runtime` feature, and the syntax tree (`i-slint-compiler`) the optional `import`.
     assert_eq!(deps, ["indexmap", "thiserror", "weft-catalog", "weft-core"]);
     let mut optional: Vec<String> = entries("weft-slint")
         .iter()
@@ -192,7 +192,15 @@ fn the_slint_target_compiles_slint_only_in_its_tests() {
         .map(|d| d["name"].as_str().unwrap().to_owned())
         .collect();
     optional.sort();
-    assert_eq!(optional, ["i-slint-compiler", "weft-import"]);
+    assert_eq!(
+        optional,
+        [
+            "i-slint-compiler",
+            "serde_json",
+            "slint-interpreter",
+            "weft-import"
+        ]
+    );
 }
 
 #[test]

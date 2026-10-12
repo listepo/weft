@@ -1404,3 +1404,18 @@ Execution plan:
 Result: `crates/weft-catalog/src/files.rs` holds `find_project`, `read_project_member`, `load_project_file` and `write_atomic` (now also creating a file that does not exist yet), with the CLI's messages; the CLI calls them. `crates/weft-studio` has `Editor::open`, `save`, `state` and `render_input`, `EditorError` and `MAX_FILE_BYTES` (the `weft-slint` source bound). `State` adds `project` and `project_diagnostics` to the fields the T69.1 card lists, so a shell can tell the two sources of problems apart.
 Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 3
 Check: `crates/weft-studio/tests/editor.rs`, `crates/weft-catalog/tests/files.rs`, `crates/weft-cli/tests/deps.rs` (`the_editor_core_has_no_slint_crate`), and the CLI tests unchanged.
+
+### T69.1b. Slint runtime
+
+Sub-task of T69.1 (`crates/weft-slint` feature `runtime`, about 250 lines, mostly moved). `runtime::compile(source, style)` and `runtime::apply_data(instance, source, data)` replace the two test copies and return problems instead of panicking, because the data is untrusted. `slint-interpreter` becomes an optional dependency of the feature; the `deps.rs` optional list gains it. Done when `tests/slint.rs` and `tests/screenshots.rs` use the feature and keep passing against their baselines, and a value of the wrong type is a reported problem, not a panic.
+
+Execution plan:
+
+1. `crates/weft-slint/src/runtime.rs` behind the feature `runtime = ["dep:slint-interpreter"]`: `compile` (from the copies in `tests/slint.rs` and `tests/screenshots.rs`: a build polled without a file loader, the style set, error diagnostics returned) and `apply_data` (the property types read from the generated source, the sample data flattened and converted, from `tests/screenshots.rs`), returning problems instead of panicking.
+2. Both tests call the feature (`required-features`); the screenshot baselines stay as they are.
+3. Tests (`tests/runtime.rs`): a value of the wrong type is a reported problem and the other properties are still set; data that is not an object sets nothing; a source with a syntax error, or with two exported components, returns its errors. `crates/weft-cli/tests/deps.rs` lists `slint-interpreter` as optional; `toolchain.md` updates its row.
+4. Check with `moon run root:changed`.
+
+Result: `crates/weft-slint/src/runtime.rs` (feature `runtime`) with `compile` and `apply_data`; `tests/slint.rs` and `tests/screenshots.rs` call it (`required-features`), and the screenshot baselines are unchanged. The headless testing backend setup moved to `tests/common/mod.rs`, shared by the screenshot and runtime tests. `slint-interpreter` and `serde_json` are optional dependencies of the feature.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 3
+Check: `crates/weft-slint/tests/runtime.rs`, `tests/slint.rs` and `tests/screenshots.rs` against their baselines, and `crates/weft-cli/tests/deps.rs` (`the_slint_target_compiles_slint_only_in_its_tests`).
