@@ -24,10 +24,6 @@ type Props = { data?: unknown };
 // (SPEC §10.7). Pinned with `test.fails` so a fix shows up as a failure here.
 const JSX_FRAGMENT_GAP = new Set(["receipt"]);
 
-// Drawn by the web generators. The HTML and JSX importers read the forms back in T16.8, so a
-// round trip through either drops justify, grow, padding, max-width and min-column-width.
-const LAYOUT_IMPORT_GAP = new Set(["dashboard", "glass", "layout", "receipt"]);
-
 for (const screen of screens) {
   const { name, data } = screen;
   const load = async (variant: "react" | "solid" | "react-back" | "solid-back") =>
@@ -91,12 +87,10 @@ for (const screen of screens) {
       expect(await commands.ariaSnapshot("#reference")).toBe(react);
     });
 
-    const htmlRoundTrip = LAYOUT_IMPORT_GAP.has(name) ? test.fails : test;
-    htmlRoundTrip("round trip through the HTML importer looks the same", async () => {
+    test("round trip through the HTML importer looks the same", async () => {
       await expectSameLook("#html", "#html-back", `roundtrip/${name}.html`);
     });
-    const jsxRoundTrip =
-      JSX_FRAGMENT_GAP.has(name) || LAYOUT_IMPORT_GAP.has(name) ? test.fails : test;
+    const jsxRoundTrip = JSX_FRAGMENT_GAP.has(name) ? test.fails : test;
     jsxRoundTrip("round trip through the React importer looks the same", async () => {
       await expectSameLook("#react", "#react-back", `roundtrip/${name}.react`);
     });
@@ -133,9 +127,11 @@ function columnCount(selector: string): number {
   if (!(frame instanceof HTMLIFrameElement) || frame.contentDocument === null) {
     throw new Error(`no iframe ${selector}`);
   }
+  // The grid lives in the iframe's realm, so `instanceof HTMLElement` of this page is never true.
   const grid = frame.contentDocument.querySelector('[data-weft-id="stats"]');
-  if (!(grid instanceof HTMLElement)) throw new Error(`${selector} has no stats grid`);
-  const tracks = getComputedStyle(grid).gridTemplateColumns;
+  const view = frame.contentWindow;
+  if (grid === null || view === null) throw new Error(`${selector} has no stats grid`);
+  const tracks = view.getComputedStyle(grid).gridTemplateColumns;
   return tracks.split(/\s+/).filter((part) => part !== "" && part !== "none").length;
 }
 
