@@ -26,8 +26,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T12.3 | todo | P2 | 4 | 0% | |
-| T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
-| T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
 | T96 | done | P2 | 3 | 100% | Cursor / grok 4.7 |
 | T97 | done | P2 | 2 | 100% | MiMo / MiMo |
@@ -351,37 +349,6 @@ Measure whether constrained JSON beats free markup on validity and edit success,
 1. Three-way (with the free `weft-json` format) or two-way? Which models (Anthropic plus a local LM Studio model)? What budget? Part of T8's continue/stop decision or a separate report? (T12 question 5.)
 2. If a provider cannot take the schema whole (size or recursion limits): a reduced profile per provider, or report the provider as unsupported? (T12 question 6.)
 3. Narrow the schema with project data (token names, action names, data paths as enums) once the measurement shows whether it is worth it? T12.1 describes the catalog only. (T12 question 1.)
-
-### T16.3. Layout vocabulary: web generators and the reference renderer
-
-T16 scope items 3 and 5 for the web, as the design's generate table says. Depends on T16.2.
-
-Execution plan: follow the four steps below, and only those. Read `docs/layout-design.md` generate table before editing. Update SPEC §9 web rows in the same change as the generators. Retake and review insta snapshots and the `packages/visual` web baselines for `dashboard`, `glass` and `layout`. Do not implement importers (T16.8), SwiftUI, Slint, or design tools. Verify with the visual comparison (including a narrow viewport at one column and a wide one at three) and `moon run root:changed`.
-
-Steps:
-
-1. `crates/weft-web/src/html.rs`: `data-justify` and `data-grow` with rules in the layout stylesheet; inline `padding`, `width: 100%; max-width` and the capped `auto-fill` grid template, all through `var(--weft-…)`.
-2. The shared JSX render plan (`crates/weft-web/src/jsx/`) for React, SolidJS and Lit, with the same declarations as inline styles.
-3. `packages/render-react/src/render.ts`: `layoutStyle` for the stack and grid props, and `grow` in `renderNode` beside the tilt.
-4. §9 web rows move from loss to mapping; insta snapshots and the `packages/visual` web baselines retaken and reviewed for `dashboard`, `glass` and `layout`.
-
-Size: about 250 lines of code.
-
-Done when: the three screens pass the `packages/visual` cross-target comparison (React, SolidJS, the reference renderer), a narrow-viewport case shows the stats grid at one column and a wide one at three, and `moon run root:changed` exits 0.
-
-### T16.5. Layout vocabulary: Slint
-
-T16 scope items 3 to 5 for `crates/weft-slint`. Depends on T16.2 (T67.4 and T67.5 are done).
-
-Steps:
-
-1. Check first whether a stack without `alignment` stretches its children in Slint 1.18.1 (`research.md` §21 marks it **unverified**); if it does, write `alignment: start` on every stack and retake the screenshots.
-2. Generator: `alignment` for `justify`, `horizontal-stretch`/`vertical-stretch: 1` for `grow` (and `0` on its siblings), `padding` and `max-width` in px; `min-column-width` is kept in the source comment and drawn with `columns`.
-3. Reader: those properties back, px values that equal exactly one dimension token as that token; other values are `layout` losses. §9 rows updated.
-
-Size: about 150 lines of code.
-
-Done when: the three screens compile, their screenshots are reviewed, and they read back to the same props without the source comment; `moon run root:changed` exits 0.
 
 ### T41. Hosted Penpot plugin
 

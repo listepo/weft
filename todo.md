@@ -4,8 +4,6 @@
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
 - T12.3. Constrained generation: benchmark
-- T16.3. Layout vocabulary: web generators and the reference renderer
-- T16.5. Layout vocabulary: Slint
 - T41. Hosted Penpot plugin
 - T96. Too-deep documents: report, do not hide
 - T97. Design-tool plugin data over 100 kB
