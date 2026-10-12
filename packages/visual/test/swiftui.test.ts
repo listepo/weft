@@ -18,7 +18,8 @@
 // worktree a device of its own, created on first use.
 //
 // A screen is screenshotted only once the app says it shows that launch in the appearance asked
-// for, and two screenshots in a row agree (T104).
+// for, and two screenshots in a row agree (T104); a last check makes sure no two screens came out
+// as the same picture.
 import { execFileSync, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import {
@@ -36,7 +37,7 @@ import { basename, join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { matchBaseline } from "../src/baseline.ts";
 import { CORPUS, EXAMPLE, ROOT, SAMPLE, cli, weft } from "../src/cli.ts";
-import { compare } from "../src/compare.ts";
+import { compare, fingerprint } from "../src/compare.ts";
 import {
   LOCK_DIR,
   acquireLock,
@@ -607,6 +608,22 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
       if (result.status !== "missing") expect(result.status).toBe("differ");
     });
   }
+
+  // Where no baselines are reviewed (CI), nothing else would notice a screen shot as another
+  // screen's picture or as the blank launch screen: the stale shots of T104 failed only the two
+  // comparisons above that happened to pair them.
+  test("no two screens are shot as the same picture", async () => {
+    const seen = new Map<string, string>();
+    const same: string[] = [];
+    for (const name of [...names, ...Object.keys(MUTANTS)]) {
+      const png = await shot(name);
+      const key = fingerprint(png, await systemStrips(png));
+      const other = seen.get(key);
+      if (other === undefined) seen.set(key, name);
+      else same.push(`${other} = ${name}`);
+    }
+    expect(same).toEqual([]);
+  });
 });
 
 /** The simulator's state, e.g. `Booted` or `Shutdown`. */
