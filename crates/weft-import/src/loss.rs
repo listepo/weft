@@ -20,7 +20,8 @@ pub enum LossKind {
     Kinds,
     Text,
     Structure,
-    /// Context entries about layers a designer removed (design tools).
+    /// Context entries about layers a designer removed (design tools), or the whole block on an
+    /// export to a format that has no place for notes (A2UI, json-render).
     Context,
 }
 
