@@ -40,3 +40,12 @@ Weft had no failure in that file. The Bonsai smoke run did: `login.e2` changed `
 Continue. On the only full edit run, Weft is at 100% first-try validity and 100% after repair, above the 95% and 99% bars, with success at 100% against baselines at 94.4–100%, and with output closer to HTML than to A2UI. That is not a reason to stop.
 
 It is also not a reason to close T8. The run has one sample, saved no replies, predates the T25 answer rule and the Rust core the final runs are supposed to use, and the matching read run never finished. Repeat the edit and read runs at three samples on the current harness, keep the replies, add the history rows, and revise this report. Until then the numeric bar is met only by the earlier measurement.
+
+## Constrained generation (T12.3)
+
+The question: does canonical JSON held to the catalog's document schema beat free markup on validity and edit success, and what does it cost in output tokens? Three formats answer it: `weft` (markup), `weft-json` (free canonical JSON) and `weft-json-constrained` (the same, decoded under the schema). The method is in [`test.md`](../test.md).
+
+Status, 2026-10-12: the harness is in place and covered by a mocked-provider test; no run has been made yet.
+
+- **Anthropic: unsupported for the constrained format.** Its structured outputs reject recursive schemas, numeric bounds, more than 16 union-typed and more than 24 optional parameters per request. The core document schema has 36 self-reaching `$defs`, 6 bounds, 132 `anyOf` and 416 optional properties (`research.md` §20), so `run.ts` refuses the format on Anthropic before any call. Markup against free JSON still runs there.
+- **LM Studio:** takes the schema as `response_format`. No server was listening when the harness landed, so the trial (login screen, three formats, three samples, Bonsai 27B) is still to run; its table goes here.
