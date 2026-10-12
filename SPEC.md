@@ -668,7 +668,7 @@ type Patch =
   - `bindings`: an expression other than a string literal or one of those reads is not kept.
   - `actions`: a callback that does not only call `root.perform` for an event named above is not kept. The `selected` write-back `root.<property> = [<values>][self.current-index]` is part of the `value` binding, not an action.
   - `tokens`: a `spacing` that is not a px length, or that equals no dimension token or more than one, is not a token.
-  - `layout`: a `font-size` that is not one of those sizes at weight 700 is not a heading level; a link colour other than the accent is not kept; a grid's `row` and `col` are not placed.
+  - `layout`: a `font-size` that is not one of those sizes at weight 700 is not a heading level; a link colour other than the accent is not kept; a grid's `row` and `col` are not placed; a grid's `min-column-width`, drawn with `columns` only, is not read back.
   - `repetition`: a `for` is an `each` read once; the model it walks is not kept.
   - `slots`: a `GroupBox` has no header slot, and a `HorizontalBox` is a row stack rather than a form footer.
   - `hidden`: an `if` is read as its element, shown.
