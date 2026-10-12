@@ -66,6 +66,28 @@ Closing plan (T16.2–T16.8 are merged): check each "Done when" bullet on `main`
 
 Result: every "Done when" bullet holds on `main` after T16.2–T16.8. `grow` and the new props validate in both modes, with `W318` in `AGENT-SPEC.md`; `dashboard`, `glass` and `corpus/layout` use every form, pass the `packages/visual` web comparison and have reviewed SwiftUI baselines. Generated HTML, React and SolidJS read back the same layout props without the source comment (only the default `direction="column"` and `justify="start"` are not written), and so does SwiftUI. Slint now has a test over the three screens (`crates/weft-slint/tests/import.rs`), which reads every layout prop back from the properties alone except `min-column-width`, which has no GridLayout form; SPEC §9 now lists that loss under "From Slint". A2UI and json-render map or list each form, and the Figma and Penpot corpus round trips keep every prop. Closing also fixed what the merges of T16.3–T16.8 left in `packages/visual`: the React and static-page baselines of `dashboard`, `glass`, `layout` and `receipt` were retaken and reviewed, the `test.fails` pins on the web round trips that T16.8 made pass are gone, and the stats-grid reflow check now reads the grid in the iframe's own realm. The full check exits 0.
 
+### T16.8. Layout vocabulary: web importers
+
+T16 scope item 4 for the web, as the design's import table says. Depends on T16.3, whose output it reads back.
+
+Steps:
+
+1. `crates/weft-web/src/dom.rs`: `data-justify`, `data-grow`, and the inline `padding`, `max-width` and grid template when they name `--weft-` properties.
+2. `crates/weft-web/src/from_jsx/`: the same conventions in inline styles.
+3. Foreign markup: `justify-content` among the four values, any positive `flex-grow` as `grow`; `space-around`, `space-evenly`, `stretch`, unequal grow ratios, raw lengths and media or container queries are `layout` losses. §9 rows updated.
+
+Size: about 250 lines of code.
+
+Done when: the generated HTML and JSX of `dashboard`, `glass` and `layout`, with the source comment removed, read back to the same props; a test covers each listed loss; `moon run root:changed` exits 0.
+
+Execution plan (claimed again after the code had landed): steps 1–3 were merged to `main` in PR #72 (`2987544b feat: T16.8 read the layout vocabulary from web markup`), and the T16 closing in `done.md` checked them. What is left:
+
+1. Check each "Done when" bullet on this branch: `crates/weft-web/tests/html.rs` and `jsx_import.rs` (convention round trips of the corpus, whose only layout gaps are the defaults `direction="column"` and `justify="start"`; the foreign-loss tests for `space-around`, `space-evenly`, `stretch`, unequal ratios, raw lengths, `@media` and `@container`), and SPEC §9 "From HTML".
+2. `crates/weft-web/src/html.rs`: two comments still say the HTML importer does not read the drawn forms; say instead why the `data-prop-*` copies stay (they carry what the drawn form leaves out, such as an explicit `justify="start"`). Comments only, no output change.
+3. `moon run root:changed`, then move T16.8 to `done.md`.
+
+Result: verified and closed. The code landed in PR #72 (`2987544b feat: T16.8 read the layout vocabulary from web markup`); this claim only checked it and fixed two stale comments. `crates/weft-web/tests/html.rs` and `jsx_import.rs` round-trip the generated HTML and JSX of every corpus screen without the source comment; `dashboard`, `glass` and `layout` come back with every layout prop except the defaults the generators do not write (`direction="column"` in both, `justify="start"` in JSX). `foreign_layout_forms_weft_cannot_hold_are_layout_losses` (`html.rs`) covers `space-around`, `space-evenly`, `stretch`, unequal `flex-grow` ratios and raw lengths, and `a_media_or_container_query_in_a_style_object_is_a_layout_loss` (`jsx_import.rs`) covers `@media` and `@container`; SPEC §9 "From HTML, React and SolidJS source" maps the drawn forms. The two comments in `crates/weft-web/src/html.rs` that still said the HTML importer did not read the drawn forms now say why the `data-prop-*` copies stay. `moon run root:changed -- --base origin/main` exits 0.
+
 ### T16.4. Layout vocabulary: SwiftUI
 
 T16 scope items 3 to 5 for `crates/weft-swiftui`, as the design's tables and decisions 4 and 5 say. Depends on T16.2.

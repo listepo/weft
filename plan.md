@@ -27,7 +27,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T12.3 | todo | P2 | 4 | 0% | |
 | T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
-| T16.8 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
 | T16.7 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
@@ -370,26 +369,6 @@ Steps:
 Size: about 250 lines of code.
 
 Done when: the three screens pass the `packages/visual` cross-target comparison (React, SolidJS, the reference renderer), a narrow-viewport case shows the stats grid at one column and a wide one at three, and `moon run root:changed` exits 0.
-
-### T16.8. Layout vocabulary: web importers
-
-T16 scope item 4 for the web, as the design's import table says. Depends on T16.3, whose output it reads back.
-
-Steps:
-
-1. `crates/weft-web/src/dom.rs`: `data-justify`, `data-grow`, and the inline `padding`, `max-width` and grid template when they name `--weft-` properties.
-2. `crates/weft-web/src/from_jsx/`: the same conventions in inline styles.
-3. Foreign markup: `justify-content` among the four values, any positive `flex-grow` as `grow`; `space-around`, `space-evenly`, `stretch`, unequal grow ratios, raw lengths and media or container queries are `layout` losses. §9 rows updated.
-
-Size: about 250 lines of code.
-
-Done when: the generated HTML and JSX of `dashboard`, `glass` and `layout`, with the source comment removed, read back to the same props; a test covers each listed loss; `moon run root:changed` exits 0.
-
-Execution plan (claimed again after the code had landed): steps 1–3 were merged to `main` in PR #72 (`2987544b feat: T16.8 read the layout vocabulary from web markup`), and the T16 closing in `done.md` checked them. What is left:
-
-1. Check each "Done when" bullet on this branch: `crates/weft-web/tests/html.rs` and `jsx_import.rs` (convention round trips of the corpus, whose only layout gaps are the defaults `direction="column"` and `justify="start"`; the foreign-loss tests for `space-around`, `space-evenly`, `stretch`, unequal ratios, raw lengths, `@media` and `@container`), and SPEC §9 "From HTML".
-2. `crates/weft-web/src/html.rs`: two comments still say the HTML importer does not read the drawn forms; say instead why the `data-prop-*` copies stay (they carry what the drawn form leaves out, such as an explicit `justify="start"`). Comments only, no output change.
-3. `moon run root:changed`, then move T16.8 to `done.md`.
 
 ### T16.5. Layout vocabulary: Slint
 
