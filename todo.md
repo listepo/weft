@@ -15,4 +15,3 @@
 - T99. Node capped read handles a short read
 - T100. Document versions
 - T101. Inline fragments
-- T69.1f. Windows CI job for the editor
