@@ -38,6 +38,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T99 | done | P3 | 1 | 100% | MiMo / MiMo |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
 | T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
+| T104 | in progress | P1 | 2 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -470,3 +471,13 @@ A screen can define a fragment in place, without a project. Approved design: `do
 - Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
 - `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
 - Verify with `moon run root:changed`.
+
+### T104. SwiftUI screenshots wait for the launched screen
+
+`packages/visual/test/swiftui.test.ts` failed on the CI gate of PRs #74 (run 38303538286) and #75 (run 38306033313), neither touching `packages/visual`: "the example screen follows the appearance" and "login-gap is caught against login and its baseline" got `expected 0 to be greater than 0`, so the two screenshots compared were the same picture. `shoot()` took a screenshot as settled once two in a row agreed, but `simctl launch` returns before the new process draws, and until then the device shows the launch screen or the last frame of the screen before, just as still; on a loaded runner the stale frame was taken. CI has no reviewed baselines, so only the comparisons that happened to pair two such shots noticed. Done means: a shot is taken only once the app says it shows that launch in the asked appearance, a test reproduces the stale-frame case without a simulator, and the suite checks that no two screens come out as the same picture.
+
+**Plan.**
+- `packages/visual/src/simulator.ts`: `settledShot(probe)` waits for the app's word (`drawn`) before the two-equal-shots rule; unit tests in `test/simulator.test.ts` with a fake slow device (the old rule returns the stale frame).
+- `test/swiftui.test.ts`: the host app's `LaunchProbe` (was `InsetProbe`) writes `shown.json` with the launch id from `WEFT_LAUNCH` and the colour scheme its views see, once its scene is active; `shoot()` passes a fresh id per launch and waits for it.
+- `src/compare.ts`: `fingerprint(png, strips)`; a suite test fails when two screens share one.
+- Verify: unit tests, then `WEFT_SIMULATOR=own moon run visual:test` locally (twice), `moon run root:changed`; delete the own device afterwards.

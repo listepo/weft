@@ -16,3 +16,4 @@
 - T99. Node capped read handles a short read
 - T100. Document versions
 - T101. Inline fragments
+- T104. SwiftUI screenshots wait for the launched screen
