@@ -4,4 +4,4 @@ Approved work that is not in `plan.md` yet. It covers what the research plan (`r
 
 ### T69.1f. Windows CI job for the editor
 
-Approved as T69.1 decision 4; it starts after T73 lands its CI workflow. A Windows job runs `cargo nextest run -p weft-studio -p weft-studio-ffi` and the Windows leg of `studio:test` (`dotnet build` and `dotnet test` of `studio/windows`), so the WinUI shell of T69.1e is built and tested by something other than a hand run.
+Approved as T69.1 decision 4. T73's workflow (`.github/workflows/ci.yml`) runs on macOS and Linux only; a Windows job beside them runs `cargo nextest run -p weft-studio -p weft-studio-ffi` and the Windows leg of `studio:test` (`dotnet build` and `dotnet test` of `studio/windows`), so the WinUI shell of T69.1e is built and tested by something other than a hand run.

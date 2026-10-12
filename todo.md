@@ -5,7 +5,6 @@
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
 - T69.1a. Document core
-- T69.1b. Slint runtime
 - T12.3. Constrained generation: benchmark
 - T16. Layout vocabulary
 - T16.3. Layout vocabulary: web generators and the reference renderer
