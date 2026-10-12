@@ -167,7 +167,7 @@ export function openAiProvider(o: OpenAiOptions): Provider {
         },
         { ...o, fetch: o.fetch ?? patientFetch },
       )) as {
-        choices?: { message?: { content?: string | null } }[];
+        choices?: { message?: { content?: string | null; reasoning_content?: string | null } }[];
         usage?: {
           prompt_tokens?: number;
           completion_tokens?: number;
@@ -175,13 +175,21 @@ export function openAiProvider(o: OpenAiOptions): Provider {
         };
       };
       const u = json.usage;
-      // Reasoning is excluded so output size compares the documents the formats produce.
+      const message = json.choices?.[0]?.message;
+      // Under a schema the grammar holds the model from its first token, so it never closes a
+      // thinking block, and LM Studio files the whole constrained reply as reasoning. That text is
+      // the answer, and its tokens are the reply's.
+      const asReasoning = !!options?.schema && !message?.content && !!message?.reasoning_content;
+      // Otherwise reasoning is excluded so output size compares the documents the formats produce.
       const visible =
         u?.completion_tokens === undefined
           ? undefined
-          : u.completion_tokens - (u.completion_tokens_details?.reasoning_tokens ?? 0);
+          : u.completion_tokens -
+            (asReasoning ? 0 : (u.completion_tokens_details?.reasoning_tokens ?? 0));
       return {
-        text: stripThinking(json.choices?.[0]?.message?.content ?? ""),
+        text: asReasoning
+          ? (message?.reasoning_content as string)
+          : stripThinking(message?.content ?? ""),
         ...(u?.prompt_tokens !== undefined ? { inputTokens: u.prompt_tokens } : {}),
         ...(visible !== undefined ? { outputTokens: visible } : {}),
       };

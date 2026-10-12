@@ -155,6 +155,21 @@ describe("provider requests", () => {
     });
     assert.equal("response_format" in (bodies[1] ?? {}), false);
   });
+  test("a constrained reply LM Studio files as reasoning is the answer", async () => {
+    const reply = (content: string) =>
+      (async () =>
+        new Response(
+          JSON.stringify({
+            choices: [{ message: { content, reasoning_content: "{}" } }],
+            usage: { completion_tokens: 5, completion_tokens_details: { reasoning_tokens: 4 } },
+          }),
+        )) as unknown as typeof globalThis.fetch;
+    const empty = openAiProvider({ baseUrl: "http://h/v1", model: "m", fetch: reply("") });
+    assert.deepEqual(await empty.complete("q", { schema }), { text: "{}", outputTokens: 5 });
+    assert.deepEqual(await empty.complete("q"), { text: "", outputTokens: 1 });
+    const answered = openAiProvider({ baseUrl: "http://h/v1", model: "m", fetch: reply("[]") });
+    assert.deepEqual(await answered.complete("q", { schema }), { text: "[]", outputTokens: 1 });
+  });
   test("batch mode refuses a schema instead of dropping it", async () => {
     const p = batchingProvider(async () => [{ text: "x" }]);
     await assert.rejects(p.complete("q", { schema }), /no schema/);
