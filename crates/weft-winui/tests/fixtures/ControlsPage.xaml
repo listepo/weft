@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=Controls namespace=WeftScreens
+<screen id="controls" label="{$.title}" state="ready" weft="0.2">
+  <heading id="h1" level="1">Say "hi" \\{x} &amp; more -\- or -\-&gt;, @\license</heading>
+  <heading id="h2" level="2" text="{$.subtitle}"/>
+  <heading id="h3" level="3">Three</heading>
+  <heading id="h4" level="4">Four</heading>
+  <heading id="h5" level="5">Five</heading>
+  <heading id="h6" level="6">Six</heading>
+  <stack id="tones" direction="row" gap="{token.space.md}" wrap="true">
+    <text id="plain" tone="default">Plain</text>
+    <text id="muted" tone="muted">Muted</text>
+    <text id="good" tone="success">Saved</text>
+    <text id="careful" tone="warning">Careful</text>
+    <text id="bad" tone="danger">Failed</text>
+  </stack>
+  <stack id="shown" direction="column" justify="start">
+    <text id="secret" hidden="true">Hidden</text>
+    <text id="visible" hidden="false">Shown</text>
+    <text id="note" hidden="{!$.agree}" text="{$.note}"/>
+    <text id="quiet" hidden="{$.note}" label="Quiet note">{braces} stay text</text>
+  </stack>
+  <form id="profile" label="Profile" state="{$.formState}" on-submit="profile.save">
+    <field id="name" label="Name" placeholder="Ada" required="true" value="{$.name}" on-change="profile.edit"/>
+    <field id="email" error="{$.emailError}" label="Email" required="{$.emailRequired}" state="invalid" type="email" value="{$.email}"/>
+    <field id="password" disabled="{$.busy}" label="Password" type="password" value="{$.password}"/>
+    <field id="age" label="Age" type="number" value="{$.age}"/>
+    <field id="query" disabled="{!$.agree}" label="Search" type="search" value="literal"/>
+    <field id="bio" label="{$.bioLabel}" type="multiline" value="{$.bio}"/>
+    <checkbox id="agree" checked="{$.agree}" label="Agree" on-change="profile.agree"/>
+    <checkbox id="fixed" checked="true" disabled="true" label="Fixed"/>
+    <switch id="alerts" checked="{$.alerts}" label="Alerts" on-change="profile.alerts"/>
+    <button id="save" disabled="{!$.agree}" state="{$.saveState}" submit="true" variant="primary">Save</button>
+    <slot name="footer">
+      <button id="cancel" label="Cancel the edit" on-press="profile.cancel">Cancel</button>
+      <button id="delete" disabled="false" variant="danger" on-press="profile.delete">Delete</button>
+      <button id="later" text="{$.laterText}" variant="secondary"/>
+    </slot>
+  </form>
+</screen>
+-->
+<Page x:Class="WeftScreens.ControlsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="controls" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="{x:Bind ViewModel.title, Mode=OneWay}" weft:Props.State="ready">
+            <TextBlock AutomationProperties.AutomationId="h1" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Say &quot;hi&quot; \{x} &amp; more -- or -->, @license" />
+            <TextBlock AutomationProperties.AutomationId="h2" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="{x:Bind ViewModel.subtitle, Mode=OneWay}" />
+            <TextBlock AutomationProperties.AutomationId="h3" Style="{StaticResource SubtitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level3" Text="Three" />
+            <TextBlock AutomationProperties.AutomationId="h4" Style="{StaticResource BodyStrongTextBlockStyle}" AutomationProperties.HeadingLevel="Level4" Text="Four" />
+            <TextBlock AutomationProperties.AutomationId="h5" Style="{StaticResource BodyStrongTextBlockStyle}" AutomationProperties.HeadingLevel="Level5" Text="Five" />
+            <TextBlock AutomationProperties.AutomationId="h6" Style="{StaticResource BodyStrongTextBlockStyle}" AutomationProperties.HeadingLevel="Level6" Text="Six" />
+            <StackPanel AutomationProperties.AutomationId="tones" Orientation="Horizontal" Spacing="{StaticResource Weft.space.md}" weft:Props.Wrap="True">
+                <TextBlock AutomationProperties.AutomationId="plain" TextWrapping="Wrap" Text="Plain" />
+                <TextBlock AutomationProperties.AutomationId="muted" TextWrapping="Wrap" Text="Muted" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock AutomationProperties.AutomationId="good" TextWrapping="Wrap" Text="Saved" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                <TextBlock AutomationProperties.AutomationId="careful" TextWrapping="Wrap" Text="Careful" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                <TextBlock AutomationProperties.AutomationId="bad" TextWrapping="Wrap" Text="Failed" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+            </StackPanel>
+            <StackPanel AutomationProperties.AutomationId="shown" Orientation="Vertical">
+                <TextBlock AutomationProperties.AutomationId="secret" TextWrapping="Wrap" Text="Hidden" Visibility="Collapsed" />
+                <TextBlock AutomationProperties.AutomationId="visible" TextWrapping="Wrap" Text="Shown" Visibility="Visible" />
+                <TextBlock AutomationProperties.AutomationId="note" TextWrapping="Wrap" Text="{x:Bind ViewModel.note, Mode=OneWay}" Visibility="{x:Bind ViewModel.agree, Mode=OneWay}" />
+                <TextBlock AutomationProperties.AutomationId="quiet" TextWrapping="Wrap" Text="{}{braces} stay text" AutomationProperties.Name="Quiet note" Visibility="{x:Bind weft:Weft.Hide(ViewModel.note), Mode=OneWay}" />
+            </StackPanel>
+            <StackPanel AutomationProperties.AutomationId="profile" AutomationProperties.LandmarkType="Form" AutomationProperties.Name="Profile" weft:Props.State="{x:Bind ViewModel.formState, Mode=OneWay}" weft:On.Submit="{x:Bind ViewModel.profile_saveCommand}">
+                <TextBox AutomationProperties.AutomationId="name" Text="{x:Bind ViewModel.name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Ada" AutomationProperties.IsRequiredForForm="True" Header="Name" weft:On.Change="{x:Bind ViewModel.profile_editCommand}" />
+                <TextBox AutomationProperties.AutomationId="email" Text="{x:Bind ViewModel.email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="EmailSmtpAddress" AutomationProperties.IsRequiredForForm="{x:Bind ViewModel.emailRequired, Mode=OneWay}" weft:Props.Error="{x:Bind ViewModel.emailError, Mode=OneWay}" Header="Email" weft:Props.State="invalid" />
+                <PasswordBox AutomationProperties.AutomationId="password" Password="{x:Bind ViewModel.password, Mode=TwoWay}" IsEnabled="{x:Bind weft:Weft.Not(ViewModel.busy), Mode=OneWay}" Header="Password" />
+                <TextBox AutomationProperties.AutomationId="age" Text="{x:Bind ViewModel.age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="Number" Header="Age" />
+                <TextBox AutomationProperties.AutomationId="query" Text="literal" InputScope="Search" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.agree), Mode=OneWay}" Header="Search" />
+                <TextBox AutomationProperties.AutomationId="bio" Text="{x:Bind ViewModel.bio, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" Header="{x:Bind ViewModel.bioLabel, Mode=OneWay}" />
+                <CheckBox AutomationProperties.AutomationId="agree" IsChecked="{x:Bind ViewModel.agree, Mode=TwoWay}" Content="Agree" weft:On.Change="{x:Bind ViewModel.profile_agreeCommand}" />
+                <CheckBox AutomationProperties.AutomationId="fixed" IsChecked="True" IsEnabled="False" Content="Fixed" />
+                <ToggleSwitch AutomationProperties.AutomationId="alerts" IsOn="{x:Bind ViewModel.alerts, Mode=TwoWay}" Header="Alerts" weft:On.Change="{x:Bind ViewModel.profile_alertsCommand}" />
+                <Button AutomationProperties.AutomationId="save" Content="Save" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.agree), Mode=OneWay}" weft:On.Submit="{x:Bind ViewModel.profile_saveCommand}" weft:Props.State="{x:Bind ViewModel.saveState, Mode=OneWay}" />
+                <StackPanel Orientation="Horizontal" weft:Slot.Name="footer">
+                    <Button AutomationProperties.AutomationId="cancel" Content="Cancel" AutomationProperties.Name="Cancel the edit" weft:On.Press="{x:Bind ViewModel.profile_cancelCommand}" />
+                    <Button AutomationProperties.AutomationId="delete" Content="Delete" weft:Props.Variant="danger" IsEnabled="True" weft:On.Press="{x:Bind ViewModel.profile_deleteCommand}" />
+                    <Button AutomationProperties.AutomationId="later" Content="{x:Bind ViewModel.laterText, Mode=OneWay}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

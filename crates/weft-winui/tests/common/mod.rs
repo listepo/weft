@@ -1,0 +1,119 @@
+//! What the generator tests and the read-back tests both load: the corpus, the catalog examples,
+//! the controls fixture, the core catalog and a strict parse. Each integration test compiles this
+//! module on its own.
+
+#![allow(dead_code)]
+
+use std::path::{Path, PathBuf};
+
+use indexmap::IndexMap;
+use weft_catalog::{DEFAULT_TOKENS_JSON, Token, core_catalog, load_tokens, token_types};
+use weft_core::{Catalog, Document, Mode, ParseOptions, has_errors, parse, parse_json};
+use weft_winui::{GenerateOptions, Generated, generate};
+
+/// The screens the generator draws so far; every other corpus screen and example is refused.
+/// T105.3–T105.5 grow this list until it holds them all.
+pub const COVERED: &[&str] = &[
+    "example-button",
+    "example-checkbox",
+    "example-field",
+    "example-form",
+    "example-heading",
+    "example-screen",
+    "example-switch",
+    "example-text",
+];
+/// The namespace of the goldens: the Windows build compiles them in one project (T105.7).
+pub const NAMESPACE: &str = "WeftScreens";
+
+pub fn here(path: &str) -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join(path)
+}
+
+pub fn setup() -> (Catalog, IndexMap<String, Token>) {
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    (core_catalog().unwrap(), tokens)
+}
+
+pub fn document(markup: &str, catalog: &Catalog, tokens: &IndexMap<String, Token>) -> Document {
+    let types = token_types(tokens);
+    let parsed = parse(
+        markup,
+        &ParseOptions {
+            catalog: Some(catalog),
+            mode: Mode::Strict,
+            tokens: Some(&types),
+            actions: None,
+        },
+    );
+    assert!(!has_errors(&parsed.diagnostics), "{:?}", parsed.diagnostics);
+    parsed.document.unwrap()
+}
+
+fn weft_files(dir: &Path, nested: bool) -> Vec<PathBuf> {
+    let mut out: Vec<_> = std::fs::read_dir(dir)
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .map(|p| if nested { p.join("screen.weft") } else { p })
+        .filter(|p| p.is_file() && p.extension().is_some_and(|e| e == "weft"))
+        .collect();
+    out.sort();
+    out
+}
+
+/// Every corpus screen and catalog example, named `corpus-<dir>` or `example-<file>`, and the
+/// controls fixture.
+pub fn screens() -> Vec<(String, PathBuf)> {
+    let corpus = weft_files(&here("../../corpus"), true)
+        .into_iter()
+        .map(|p| {
+            let dir = p.parent().unwrap().file_name().unwrap().to_string_lossy();
+            (format!("corpus-{dir}"), p)
+        });
+    let examples = weft_files(&here("../../packages/catalog/examples"), false)
+        .into_iter()
+        .map(|p| {
+            let stem = p.file_stem().unwrap().to_string_lossy();
+            (format!("example-{stem}"), p)
+        });
+    let controls = ("controls".to_owned(), here("tests/fixtures/controls.weft"));
+    corpus.chain(examples).chain([controls]).collect()
+}
+
+pub fn options<'a>(
+    catalog: &'a Catalog,
+    tokens: &'a IndexMap<String, Token>,
+    name: Option<&'a str>,
+) -> GenerateOptions<'a> {
+    GenerateOptions {
+        catalog,
+        tokens,
+        name,
+        namespace: NAMESPACE,
+    }
+}
+
+/// The controls fixture, parsed.
+pub fn controls(catalog: &Catalog, tokens: &IndexMap<String, Token>) -> Document {
+    let markup = std::fs::read_to_string(here("tests/fixtures/controls.weft")).unwrap();
+    document(&markup, catalog, tokens)
+}
+
+/// The covered screens, each generated under its own page name so the goldens never share a class.
+pub fn covered() -> Vec<(String, Document, Generated)> {
+    let (catalog, tokens) = setup();
+    screens()
+        .into_iter()
+        .filter(|(name, _)| name == "controls" || COVERED.contains(&name.as_str()))
+        .map(|(name, path)| {
+            let doc = document(&std::fs::read_to_string(path).unwrap(), &catalog, &tokens);
+            let generated = generate(&doc, &options(&catalog, &tokens, Some(&name))).unwrap();
+            (name, doc, generated)
+        })
+        .collect()
+}
+
+/// A screen around `body`, the shape of every small test document.
+pub fn screen(body: &str) -> String {
+    format!(r#"<screen id="s" weft="0.2">{body}</screen>"#)
+}

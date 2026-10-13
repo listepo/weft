@@ -56,7 +56,7 @@ pub use rules::{
 /// The catalog-independent props every element takes (`hidden`, `label`, `state`, …).
 pub use rules::{universal_prop, universal_props};
 pub use sample::{resolve_path, text, truthy};
-pub use serialize::serialize;
+pub use serialize::{escape_attribute, serialize};
 pub use shape::{to_document, to_value};
 pub use source::{ListSource, NodeSource};
 pub use validate::{ValidateOptions, validate, validate_document};

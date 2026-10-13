@@ -32,6 +32,9 @@ thiserror = "2.0.21"
 semver = { version = "1.0.28", default-features = false }
 # weft-import: the NFKD step of id slugs, as `String.prototype.normalize("NFKD")` does it.
 unicode-normalization = "0.1.25"
+# weft-winui: the XML tree of the XAML importer (namespaces, positions; a DTD is an error by
+# default). Pure Rust, already in the lock file through usvg and fontique.
+roxmltree = "0.21.1"
 # weft-web: the WHATWG HTML parser, so imported pages are read as a browser builds them.
 html5ever = "0.40.1"
 # weft-web: Unicode letter and number classes, as the `\p{L}`/`\p{N}` of the generators' JSX text checks.

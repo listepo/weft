@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleForm namespace=WeftScreens
+<screen id="root" label="Sign in" weft="0.1">
+  <form id="login" state="idle" on-submit="auth.submit">
+    <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
+    <slot name="footer">
+      <button id="go" submit="true" variant="primary">Sign in</button>
+    </slot>
+  </form>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleFormPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Sign in">
+            <StackPanel AutomationProperties.AutomationId="login" AutomationProperties.LandmarkType="Form" weft:Props.State="idle" weft:On.Submit="{x:Bind ViewModel.auth_submitCommand}">
+                <TextBox AutomationProperties.AutomationId="email" Text="{x:Bind ViewModel.email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="EmailSmtpAddress" AutomationProperties.IsRequiredForForm="True" Header="Email" />
+                <StackPanel Orientation="Horizontal" weft:Slot.Name="footer">
+                    <Button AutomationProperties.AutomationId="go" Content="Sign in" Style="{StaticResource AccentButtonStyle}" weft:On.Submit="{x:Bind ViewModel.auth_submitCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

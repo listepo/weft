@@ -204,6 +204,26 @@ fn the_slint_target_compiles_slint_only_in_its_tests() {
 }
 
 #[test]
+fn the_winui_target_is_pure_rust() {
+    let entries = entries("weft-winui");
+    assert!(entries.iter().all(|d| d["optional"] != true));
+    let mut deps = dependencies("weft-winui");
+    deps.sort();
+    // XAML is written as text and nothing here runs or links Windows, so the target builds and
+    // tests on every host; the Windows App SDK only compiles its output (T105.7).
+    assert_eq!(
+        deps,
+        [
+            "indexmap",
+            "thiserror",
+            "weft-catalog",
+            "weft-core",
+            "weft-import"
+        ]
+    );
+}
+
+#[test]
 fn the_editor_core_has_no_slint_crate() {
     let entries = entries("weft-studio");
     let mut deps: Vec<String> = entries
