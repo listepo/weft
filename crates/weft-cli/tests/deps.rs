@@ -209,12 +209,14 @@ fn the_winui_target_is_pure_rust() {
     assert!(entries.iter().all(|d| d["optional"] != true));
     let mut deps = dependencies("weft-winui");
     deps.sort();
-    // XAML is written as text and nothing here runs or links Windows, so the target builds and
-    // tests on every host; the Windows App SDK only compiles its output (T105.7).
+    // XAML is written as text and read with `roxmltree`, pure Rust, and nothing here runs or
+    // links Windows, so the target builds and tests on every host; the Windows App SDK only
+    // compiles its output (T105.7).
     assert_eq!(
         deps,
         [
             "indexmap",
+            "roxmltree",
             "thiserror",
             "weft-catalog",
             "weft-core",

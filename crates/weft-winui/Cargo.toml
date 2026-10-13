@@ -9,13 +9,11 @@ publish.workspace = true
 
 [dependencies]
 indexmap = { workspace = true }
+roxmltree = { workspace = true }
 thiserror = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
 weft-import = { workspace = true }
-
-[dev-dependencies]
-roxmltree = { workspace = true }
 
 [lints]
 workspace = true
