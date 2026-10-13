@@ -1,6 +1,6 @@
 # Design: Weft to WinUI 3 and back
 
-Status: **proposed, waiting for the creator's approval.** No code is written until the creator approves this design and answers the open questions at the end. This document is the design stage of T105. External facts are in `research.md` §23, with sources; facts that could not be checked against a primary source are marked **unverified** there and here, and the sub-task that first depends on one checks it in the Windows build (T105.7) before relying on it.
+Status: **approved.** The creator approved this design and accepted the recommended answer to every open question (the answers are recorded under **Open questions**). External facts are in `research.md` §23, with sources; facts that could not be checked against a primary source are marked **unverified** there and here, and the sub-task that first depends on one checks it in the Windows build (T105.7) before relying on it.
 
 ## Goal
 
@@ -251,6 +251,9 @@ Order: T105.1 → T105.2 → T105.7 (the build exists before most controls, so e
 | `quick-xml` | See § XML parser |
 
 ## Open questions
+
+All answered: the creator accepted the recommendation of each question below.
+
 
 1. **View-model base.** Plain generated C# implementing `INotifyPropertyChanged` and `ICommand`, no NuGet dependency, or the CommunityToolkit.Mvvm 8.4.2 source generators? **Recommendation:** plain generated C#; the app adds the toolkit if it wants it. Also: the host hears actions through a `Performed` event and a `partial void OnPerformed(WeftEvent)` hook; **recommendation:** both, the event for hosts that compose, the partial method for hosts that subclass nothing.
 2. **Property names.** Verbatim Weft names (`ViewModel.user.email`) or PascalCase (`ViewModel.User.Email`) with refusal on collisions? **Recommendation:** verbatim: no renaming, no collisions, and the XAML reads back without the C#.

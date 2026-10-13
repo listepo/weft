@@ -2,18 +2,6 @@
 
 An open, agent-friendly UI description format — strict markup for models, canonical JSON for tools — with a TypeScript prototype: parser, validator, catalog, renderer, importer and MCP server.
 
-## Cloud review findings (2026-10-08)
-
-New bugs, dead code and moves from a read-only Cursor cloud review of `main` at `26b84ed` (agent `bc-0243e483-4830-5d73-b2ca-cd1ce9880bed`; full report: `cloud/weft.md` in the private `listepo/roadmap` repo). They take ids T75–T93, ordered P0, P1, P2. **confirmed** means seen in the tree or reproduced; **suspected** means plausible from the code but not proven. Line numbers are as of the review. None of these is in the task table yet: to take one, add its row and write its execution plan the usual way.
-
-| ID | Priority | Kind | Status | Where | Fix |
-| --- | --- | --- | --- | --- | --- |
-| T92 | P2 | move | suspected | `tooling/changed.ts`, `tooling/select.ts` → the org's `scoped-check` | A fourth copy of the affected-test planner. The other copies were not checked from this repo. |
-
-Already tracked here, not added again: `find_project` and the file-reading `load_project` (`crates/weft-cli/src/main.rs:445-500`) moving into `crates/weft-catalog` is T69.1a; the two private copies of the Slint compile/data code in `crates/weft-slint/tests/` moving to a `runtime` feature is T69.1b.
-
-Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decision 3; slint-bindings should not grow a second renderer); the `dead_code` allows on shared test modules are not dead code.
-
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
@@ -22,7 +10,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
-| T105 | in progress | P2 | 5 | 10% | Claude Code / claude-opus-5-5 |
+| T105 | in progress | P2 | 5 | 15% | Claude Code / claude-opus-5-5 |
 | T105.1 | todo | P2 | 4 | 0% | |
 | T105.2 | todo | P2 | 4 | 0% | |
 | T105.3 | todo | P2 | 4 | 0% | |
@@ -327,7 +315,7 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 **Decisions (creator).** A new target modelled on `crates/weft-slint` and `crates/weft-swiftui`. The output is a XAML `Page` that binds with `{x:Bind}` to a generated C# view model: data paths are its properties, the actions of `on-<event>` are its commands. The importer reads the XAML only; the C# is derived. Checked locally by golden files, XML checks and round trips, and in CI by a Windows job that `dotnet build`s a WinUI project holding every generated corpus screen; screenshots may follow as a separate task. The creator approves the design before any code.
 
-**Execution plan (this round, design only).** Write `docs/winui-design.md` (mapping of every core kind and prop, tokens, layout vocabulary, bindings, events, slots, light and dark, losses, round trip, XML parser, CI job, open questions), `research.md` §23, and the sub-tasks below. Then wait for the creator's approval and answers to the open questions; T105.1 starts only after that.
+**Execution plan (this round, design only).** Write `docs/winui-design.md` (mapping of every core kind and prop, tokens, layout vocabulary, bindings, events, slots, light and dark, losses, round trip, XML parser, CI job, open questions), `research.md` §23, and the sub-tasks below. The creator approved the design and accepted the recommendation of every open question in `docs/winui-design.md`, including a `roxmltree` row in the workspace `rust.md` when T105.8 adds the crate; T105.1 may start.
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
 
