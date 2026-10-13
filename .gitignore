@@ -21,3 +21,7 @@ DerivedData/
 packages/visual/diffs/
 crates/weft-slint/tests/screenshots/diffs/
 plugins/xcode/editor-extension/Generated/
+# Local files (pyrlyn template).
+/.serena
+.env
+.env.local
