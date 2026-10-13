@@ -15,3 +15,4 @@
 - T105.8. Hand-written WinUI importer: structure
 - T105.9. Hand-written WinUI importer: bindings, events, tokens and layout
 - T105.10. WinUI target: SPEC, AGENT-SPEC and docs
+- T105.11. WinUI read-back of generated pages
