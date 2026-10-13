@@ -396,6 +396,45 @@ A literal `href` or `src` now passes through the Trust allowlist on the way to j
 Model: Cursor / grok-4.7 · Status: done · Priority: P1 · Complexity: 2 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-interop/src/json_render/{export,import}.rs`, `crates/weft-snapshots/tests/interop.rs`
 Check: `cargo clippy -p weft-interop --all-targets -- -D warnings`; `cargo test -p weft-snapshots --test interop` — 15 passed.
 
+### T96. Too-deep documents: report, do not hide
+
+Found while merging #18. After T79, `serialize`, `stringify` and `canonicalize` (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`) return the output of an empty placeholder document (`to_document(Null)`) for a cyclic or too-deep input instead of failing. Only `applyPatches` reports W200. A caller gets a valid-looking empty screen and no signal.
+
+Done when: these entry points return W200 (or the binding's error type) for a too-deep or cyclic input, in Rust and TypeScript alike, with differential fixtures; no entry point turns such input into an empty document silently.
+
+Execution plan:
+
+1. Reproduce the silent empty document from `serialize`, `stringify` and `canonicalize` on a cyclic value and on a value past the depth limit (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`, and the TypeScript wrappers that call them).
+2. Return W200, the same way `applyPatches` already does, instead of `to_document(Null)`. Cover every entry point that can hide the failure, in Rust and TypeScript.
+3. Add differential fixtures: cyclic and too-deep inputs must not come back as an empty screen.
+4. Verify with `moon run root:changed`. Leave unrelated entry points unchanged.
+
+Closed from the merged work: `d4cee811` on `main`; the row had stayed in `plan.md` as `done`.
+
+### T97. Design-tool plugin data over 100 kB
+
+Found while merging #18. T83 made `writeJson` (`packages/design-tool/src/keys.ts`) throw once an entry passes 100 kB. It is called partway through `packages/design-tool/src/build.ts`, so one node with a very large source aborts the whole Figma or Penpot build. The message says "bytes" but the check counts string length (UTF-16 code units), not UTF-8 bytes.
+
+Done when: the cap is measured in UTF-8 bytes as Figma documents it; an oversized entry is reported as a build diagnostic and the rest of the build completes (the layer is drawn, its source is not stored, and pull reads it as foreign); tests cover a multi-byte source near the cap.
+
+Closed from the merged work: `977ac07e` on `main`; the row had stayed in `plan.md` as `done`.
+
+### T98. `fmt --write` keeps symlinks and permissions
+
+Found while merging #18. T81's atomic write (temp file, then rename) in the Rust CLI (`crates/weft-cli/src/main.rs`) and the TypeScript CLI replaces the target path. Formatting a symlinked file turns the link into a regular file, and the file's permissions are not kept.
+
+Done when: both CLIs resolve a symlink and write to its target, copy the original file's permissions onto the temp file before the rename, and have tests for a symlinked file and a read-only-group file.
+
+Closed from the merged work: `083856ec` on `main`; the row had stayed in `plan.md` as `done`.
+
+### T99. Node capped read handles a short read
+
+Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` makes a single `readSync` call into a buffer of `maxChars*4+1` bytes allocated up front. A short read is unlikely on a regular file but is not handled, and the buffer is sized for the worst case.
+
+Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
+
+Closed from the merged work: `852067ae` on `main`; the row had stayed in `plan.md` as `done`.
+
 ### T16.6. Layout vocabulary: A2UI and json-render
 
 A2UI now writes `justify` (`start` omitted, `space-between` as `spaceBetween`) and `grow` as `weight` 1, and reads them back. `spaceAround`, `spaceEvenly`, `stretch`, unequal weights, a negative or non-numeric weight, and a weight outside a `Row` or `Column` are `layout` losses. `padding`, `max-width` and `min-column-width` stay losses, with `columns` and `wrap`. json-render already kept every layout prop; `corpus/layout`, `dashboard` and `glass` round-trip unchanged. SPEC §9 and `AGENT-SPEC.md` say so.

@@ -4,9 +4,5 @@
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
 - T41. Hosted Penpot plugin
-- T96. Too-deep documents: report, do not hide
-- T97. Design-tool plugin data over 100 kB
-- T98. `fmt --write` keeps symlinks and permissions
-- T99. Node capped read handles a short read
 - T100. Document versions
 - T101. Inline fragments
