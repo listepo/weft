@@ -1,5 +1,6 @@
 # Toolchain for weft. `mise install` then `pnpm install`; `moon ci` runs every check.
 [tools]
+mold = { version = "2.42.1", os = ["linux"] } # linker, Linux only; mise [env] below turns it on where it is installed
 node = "26.7.0"
 # The registry backend (aqua) ships the native binary; `npm:pnpm` 12 leaves a placeholder script.
 pnpm = "12.3.4"
@@ -29,3 +30,12 @@ uv = "0.12.23"
 hk = "2.5.0"
 # jactionlint checks `run:` scripts with it; without a pin the global mise shim has no version and the lint errors out.
 shellcheck = "0.11.0"
+
+[env]
+# mold as the Linux linker only where mise has installed it (clang is the driver): without mold
+# the variable is empty and the default linker stays, so a Linux machine without mold or clang
+# still builds. Not in .cargo/config.toml: a missing mold there would break every Linux build.
+# Cargo takes these only when RUSTFLAGS is unset. macOS keeps Apple ld; Windows uses rust-lld
+# through .cargo/config.toml. The probe variable stops `mise which` from recursing.
+CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS = "{% if os() == 'linux' and get_env(name='MISE_MOLD_PROBE', default='') == '' %}{{ exec(command='MISE_MOLD_PROBE=1 \"' ~ mise_bin ~ '\" which mold >/dev/null 2>&1 && echo \"-C linker=clang -C link-arg=-fuse-ld=mold\" || true') }}{% endif %}"
+CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS = "{% if os() == 'linux' and get_env(name='MISE_MOLD_PROBE', default='') == '' %}{{ exec(command='MISE_MOLD_PROBE=1 \"' ~ mise_bin ~ '\" which mold >/dev/null 2>&1 && echo \"-C linker=clang -C link-arg=-fuse-ld=mold\" || true') }}{% endif %}"
