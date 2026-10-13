@@ -189,7 +189,12 @@ async function tasksCommand(mode: "edit" | "read", values: TaskOptions): Promise
   const type = mode === "edit" ? "edit" : "question";
   const tasks = loadTasks().filter((t) => t.type === type && screens.includes(t.screen));
   const jobs = planJobs(tasks, formats, models, samples);
-  const options = { readback: values.readback === true };
+  // Ctrl-C saves what finished as a partial run, so a long local run can be split across sessions.
+  const stop = new AbortController();
+  const interrupt = () => stop.abort(new Error("interrupted"));
+  process.once("SIGINT", interrupt);
+  process.once("SIGTERM", interrupt);
+  const options = { readback: values.readback === true, signal: stop.signal };
   const saved = values.resume
     ? (JSON.parse(readFileSync(values.resume, "utf8")) as TaskResult[])
     : [];

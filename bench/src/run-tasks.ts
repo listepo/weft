@@ -217,6 +217,8 @@ function scoreRepair(
 export interface RunOptions {
   /** After a valid edit, send one readback of the changed bindings. Off unless the run asks. */
   readback?: boolean;
+  /** Stops the run: queued jobs are not sent and replies still in flight are not awaited. */
+  signal?: AbortSignal;
 }
 
 export async function runTask(
@@ -402,10 +404,11 @@ export async function runJobs(
   const limit = pLimit(concurrency);
   const out: (TaskResult | undefined)[] = Array.from({ length: jobs.length });
   let error: unknown;
-  await Promise.allSettled(
+  const { signal } = options;
+  const all = Promise.allSettled(
     jobs.map((j, i) =>
       limit(async () => {
-        if (error !== undefined) return;
+        if (error !== undefined || signal?.aborted) return;
         try {
           const r = await runTask(
             j.task,
@@ -415,6 +418,8 @@ export async function runJobs(
             j.sample,
             options,
           );
+          // The caller has already saved what finished before the stop.
+          if (signal?.aborted) return;
           out[i] = r;
           onResult(r);
         } catch (e) {
@@ -425,6 +430,15 @@ export async function runJobs(
       }),
     ),
   );
+  // A local model can take minutes per reply, so a stop does not wait for the ones in flight;
+  // what finished is returned for saving and `--resume` sends the rest later.
+  const stopped = new Promise<void>((resolve) => {
+    if (!signal) return;
+    if (signal.aborted) resolve();
+    else signal.addEventListener("abort", () => resolve(), { once: true });
+  });
+  await Promise.race([all, stopped]);
+  if (signal?.aborted) error ??= signal.reason;
   const results = out.filter((r): r is TaskResult => r !== undefined);
   return error === undefined ? { results } : { results, error };
 }

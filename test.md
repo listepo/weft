@@ -53,7 +53,7 @@ node bench/src/run.ts tokens
 node bench/src/run.ts rescore bench/results/<run>.json
 ```
 
-Options: `--screens a,b`, `--formats weft,html,jsx,a2ui` (also `weft-json`, `weft-json-constrained`), `--samples N` (default 3), `--concurrency N` (default 4), `--base-url` for another OpenAI-compatible server, `--readback` for the binding readback turn on an edit run. `--resume <run>.json` sends only the jobs that saved run lacks (same options, else it refuses) and saves the merged results as a new run. `--estimate` sends nothing and prints the first-turn requests and proxy input tokens per model and format; it needs no API key. Each run writes `bench/results/<mode>-<time>.json` (every reply verbatim with its verdict) and a summary `.md`. A run that fails half-way still saves what it finished.
+Options: `--screens a,b`, `--formats weft,html,jsx,a2ui` (also `weft-json`, `weft-json-constrained`), `--samples N` (default 3), `--concurrency N` (default 4), `--base-url` for another OpenAI-compatible server, `--readback` for the binding readback turn on an edit run. `--resume <run>.json` sends only the jobs that saved run lacks (same options, else it refuses) and saves the merged results as a new run. `--estimate` sends nothing and prints the first-turn requests and proxy input tokens per model and format; it needs no API key. Each run writes `bench/results/<mode>-<time>.json` (every reply verbatim with its verdict) and a summary `.md`. A run that fails half-way, or is stopped with Ctrl-C, still saves what it finished, and `--resume` continues it.
 
 ## Limitations
 

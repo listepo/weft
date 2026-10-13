@@ -492,6 +492,37 @@ test("a resumed run sends only the jobs the saved run lacks", async () => {
   );
 });
 
+test("a stopped run returns what finished without waiting for replies in flight", async () => {
+  const q = question("login.q2");
+  const jobs = planJobs([q], ["weft", "html", "jsx", "a2ui"], ["m"], 1);
+  const stop = new AbortController();
+  let calls = 0;
+  const { results, error } = await runJobs(
+    jobs,
+    () => ({
+      complete: () =>
+        // Only the first reply arrives; the run is stopped while the others wait.
+        ++calls === 1
+          ? Promise.resolve({ text: "ANSWER: 2" })
+          : new Promise<never>(() => setTimeout(() => stop.abort(new Error("interrupted")), 5)),
+    }),
+    2,
+    () => {},
+    { signal: stop.signal },
+  );
+  assert.match(String(error), /interrupted/);
+  // Two replies were in flight when the run stopped; the fourth job was never sent.
+  assert.equal(calls, 3);
+  assert.deepEqual(
+    results.map((r) => r.format),
+    ["weft"],
+  );
+  assert.deepEqual(
+    resumeJobs(jobs, results).remaining.map((j) => j.format),
+    ["html", "jsx", "a2ui"],
+  );
+});
+
 test("resume refuses a saved run with other options", async () => {
   const t = task("login.e1");
   const jobs = planJobs([t], ["weft"], ["m"], 1);
