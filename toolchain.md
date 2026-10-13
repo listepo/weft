@@ -125,3 +125,10 @@ Those tests also cache their work under `~/Library/Caches/weft-swiftui/` (fallin
 
 - `modules/` is the `swiftc -module-cache-path`, filled by the compiler from the SDK modules.
 - `typecheck-<sdk>.stamp` holds the key of the last successful typecheck: the `swiftc` version, the target and every source it saw. A warm run of the same toolchain and sources skips `swiftc` and finishes in about a second. Delete the stamp (or the folder) to typecheck again after a cache is suspect; a new toolchain or any source change writes a new key and typechecks once.
+
+## Linkers
+
+- **Windows (MSVC):** `rust-lld` through `.cargo/config.toml` (`[target.*-pc-windows-msvc] linker`). It ships with rustup, nothing to install.
+- **Linux:** `mold`, pinned in `mise.toml` for Linux only and driven by `clang`. mise `[env]` sets `CARGO_TARGET_{X86_64,AARCH64}_UNKNOWN_LINUX_GNU_RUSTFLAGS` to `-C linker=clang -C link-arg=-fuse-ld=mold` only when mise has mold installed (`mise install`); otherwise the variable is empty and the default linker stays. A Linux machine without mold (or without mise) builds as before; to use mold, run `mise install` and make sure `clang` is on PATH (`apt install clang`). `RUSTFLAGS`, when set, overrides these flags. CI installs mold on Linux runners.
+- **macOS:** Apple's native linker (mold has no macOS support).
+- **Cranelift:** not used. It needs a nightly toolchain and this repository is on stable.
