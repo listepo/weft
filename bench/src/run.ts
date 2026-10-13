@@ -17,8 +17,11 @@ import {
   type Provider,
 } from "./provider.ts";
 import {
+  estimateJobs,
   planJobs,
+  renderEstimate,
   renderSummary,
+  resumeJobs,
   rescore,
   runJobs,
   summarize,
@@ -36,11 +39,14 @@ function usage(): never {
       "       node bench/src/run.ts edit|read [--provider anthropic|openai] [--base-url <url>] [--model a,b]",
       `                                       [--screens a,b] [--formats ${FORMATS.join(",")}] [--samples 3]`,
       "                                       [--concurrency 4] [--batch] [--readback]",
+      "                                       [--resume <results.json>] [--estimate]",
       "       node bench/src/run.ts rescore <results.json>",
       "",
       "--provider openai talks to any OpenAI-compatible server; --base-url defaults to LM Studio",
       `(${LMSTUDIO_URL}) and --model is required. --batch uses the Anthropic Message Batches API.`,
       "--readback sends one plain-language binding diff after a valid edit, for every format.",
+      "--resume sends only the jobs a saved run of the same options lacks and saves them merged.",
+      "--estimate sends nothing and prints the requests and proxy input tokens the run would send.",
       `--formats also takes ${ALL_FORMATS.filter((f) => !FORMATS.includes(f as never)).join(", ")}; the constrained one is edit-only.`,
     ].join("\n"),
   );
@@ -89,6 +95,8 @@ interface TaskOptions {
   concurrency?: string;
   batch?: boolean;
   readback?: boolean;
+  resume?: string;
+  estimate?: boolean;
 }
 
 const positiveInt = (v: string | undefined, fallback: number): number => {
@@ -98,21 +106,22 @@ const positiveInt = (v: string | undefined, fallback: number): number => {
   return n;
 };
 
-function providers(values: TaskOptions): {
-  models: string[];
-  providerFor: (m: string) => Provider;
-} {
+function modelsOf(values: TaskOptions): string[] {
   const kind = values.provider ?? "anthropic";
   if (kind === "openai") {
     if (values.batch || !values.model) usage();
-    const baseUrl = values["base-url"] ?? LMSTUDIO_URL;
-    const apiKey = process.env.OPENAI_API_KEY;
-    return {
-      models: values.model.split(","),
-      providerFor: (model) => openAiProvider({ baseUrl, model, ...(apiKey ? { apiKey } : {}) }),
-    };
+    return values.model.split(",");
   }
   if (kind !== "anthropic") usage();
+  return values.model ? values.model.split(",") : [...DEFAULT_MODELS];
+}
+
+function providers(values: TaskOptions): (m: string) => Provider {
+  if (values.provider === "openai") {
+    const baseUrl = values["base-url"] ?? LMSTUDIO_URL;
+    const apiKey = process.env.OPENAI_API_KEY;
+    return (model) => openAiProvider({ baseUrl, model, ...(apiKey ? { apiKey } : {}) });
+  }
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.error(
@@ -122,20 +131,17 @@ function providers(values: TaskOptions): {
   }
   // One batching provider per model, so each batch holds a single model's requests.
   const batched = new Map<string, Provider>();
-  return {
-    models: values.model ? values.model.split(",") : [...DEFAULT_MODELS],
-    providerFor: (model) => {
-      if (!values.batch) return anthropicProvider({ apiKey, model });
-      if (!batched.has(model))
-        batched.set(
-          model,
-          batchingProvider((prompts) => {
-            console.error(`${model}: batch of ${prompts.length} requests submitted`);
-            return anthropicBatch({ apiKey, model }, prompts);
-          }),
-        );
-      return batched.get(model) as Provider;
-    },
+  return (model) => {
+    if (!values.batch) return anthropicProvider({ apiKey, model });
+    if (!batched.has(model))
+      batched.set(
+        model,
+        batchingProvider((prompts) => {
+          console.error(`${model}: batch of ${prompts.length} requests submitted`);
+          return anthropicBatch({ apiKey, model }, prompts);
+        }),
+      );
+    return batched.get(model) as Provider;
   };
 }
 
@@ -175,7 +181,7 @@ async function tasksCommand(mode: "edit" | "read", values: TaskOptions): Promise
   const formats = (values.formats ? values.formats.split(",") : [...FORMATS]) as Format[];
   for (const f of formats) if (!ALL_FORMATS.includes(f)) usage();
   refuseUnsupported(mode, formats, values);
-  const { models, providerFor } = providers(values);
+  const models = modelsOf(values);
   const screens = values.screens ? values.screens.split(",") : [...SCREENS];
   const samples = positiveInt(values.samples, 3);
   // A batch is only formed from requests issued together, so batch mode starts every job at once.
@@ -183,25 +189,45 @@ async function tasksCommand(mode: "edit" | "read", values: TaskOptions): Promise
   const type = mode === "edit" ? "edit" : "question";
   const tasks = loadTasks().filter((t) => t.type === type && screens.includes(t.screen));
   const jobs = planJobs(tasks, formats, models, samples);
+  const options = { readback: values.readback === true };
+  const saved = values.resume
+    ? (JSON.parse(readFileSync(values.resume, "utf8")) as TaskResult[])
+    : [];
+  const { kept, remaining } = resumeJobs(jobs, saved, options);
+  if (values.estimate) {
+    console.log(renderEstimate(estimateJobs(remaining)));
+    return;
+  }
+  // Looked up only now, so an estimate needs no API key.
+  const providerFor = providers(values);
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  let done = 0;
-  const { results, error } = await runJobs(
-    jobs,
+  let done = kept.length;
+  const run = await runJobs(
+    remaining,
     providerFor,
     concurrency,
     (r) =>
       console.error(
         `[${++done}/${jobs.length}] ${r.model} ${r.id} ${r.format} #${r.sample}: ${r.success ? "ok" : "FAIL"}`,
       ),
-    { readback: values.readback === true },
+    options,
   );
+  const results = [...kept, ...run.results];
+  const error = run.error;
+  // The merged file names its source, so the History row can say which run it continues.
+  const from = values.resume ? `, resumed from ${values.resume.split("/").pop()}` : "";
   if (error !== undefined) {
     console.log(
-      save(mode, stamp, `${mode} run (partial: ${results.length} of ${jobs.length})`, results),
+      save(
+        mode,
+        stamp,
+        `${mode} run (partial: ${results.length} of ${jobs.length}${from})`,
+        results,
+      ),
     );
     throw error;
   }
-  console.log(save(mode, stamp, `${mode} run`, results));
+  console.log(save(mode, stamp, `${mode} run${from ? ` (${from.slice(2)})` : ""}`, results));
 }
 
 function rescoreCommand(file: string | undefined): void {
@@ -229,6 +255,8 @@ const { positionals, values } = parseArgs({
     concurrency: { type: "string" },
     batch: { type: "boolean" },
     readback: { type: "boolean" },
+    resume: { type: "string" },
+    estimate: { type: "boolean" },
   },
 });
 const command = positionals[0];

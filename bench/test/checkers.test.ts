@@ -4,15 +4,19 @@ import { SCREENS, loadTasks, readScreen, type EditTask, type QuestionTask } from
 import { parsers } from "../src/formats.ts";
 import { FORMATS, type Format, type NNode } from "../src/neutral.ts";
 import { mockProvider } from "../src/provider.ts";
+import { countProxy } from "../src/tokens.ts";
 import { bindingChanges } from "../src/readback.ts";
 import {
   checkAnswer,
   checkEdit,
   editPrompt,
+  estimateJobs,
   planJobs,
   readPrompt,
+  renderEstimate,
   renderSummary,
   rescore,
+  resumeJobs,
   runJobs,
   runTask,
   summarize,
@@ -450,6 +454,79 @@ test("runJobs keeps finished results and stops at the first failure", async () =
   assert.equal(peak, 2);
   assert.ok(results.length >= 1 && results.length < 4);
   assert.ok(results.every((r) => r.success));
+});
+
+test("a resumed run sends only the jobs the saved run lacks", async () => {
+  const q = question("login.q2");
+  const jobs = planJobs([q], ["weft", "html"], ["m"], 2);
+  let calls = 0;
+  const answer = () => ({
+    async complete() {
+      if (++calls === 3) throw new Error("quota");
+      return { text: "ANSWER: 2" };
+    },
+  });
+  const first = await runJobs(jobs, answer, 1);
+  assert.match(String(first.error), /quota/);
+  assert.equal(first.results.length, 2);
+  const { kept, remaining } = resumeJobs(jobs, first.results);
+  assert.equal(kept.length, 2);
+  assert.deepEqual(
+    remaining.map((j) => `${j.format}#${j.sample}`),
+    ["html#0", "html#1"],
+  );
+  const sent: string[] = [];
+  const second = await runJobs(
+    remaining,
+    () => mockProvider((p) => (sent.push(p), "ANSWER: 2")),
+    1,
+  );
+  assert.equal(sent.length, 2);
+  const merged = [...kept, ...second.results];
+  assert.deepEqual(
+    summarize(merged).map((s) => [s.format, s.samples]),
+    [
+      ["weft", 2],
+      ["html", 2],
+    ],
+  );
+});
+
+test("resume refuses a saved run with other options", async () => {
+  const t = task("login.e1");
+  const jobs = planJobs([t], ["weft"], ["m"], 1);
+  const [plain] = (await runJobs(jobs, () => mockProvider(() => "```xml\n<screen/>\n```"), 1))
+    .results;
+  assert.ok(plain);
+  assert.throws(() => resumeJobs(jobs, [plain], { readback: true }), /--readback/);
+  assert.throws(() => resumeJobs(planJobs([t], ["html"], ["m"], 1), [plain]), /not in this plan/);
+  assert.throws(() => resumeJobs(jobs, [plain, plain]), /twice/);
+  assert.equal(resumeJobs(jobs, [plain]).remaining.length, 0);
+});
+
+test("estimate counts first-turn requests and prompt tokens without calling a model", () => {
+  const t = task("login.e1");
+  const q = question("login.q1");
+  const jobs = planJobs([t, q], ["weft", "a2ui"], ["a", "b"], 3);
+  const estimates = estimateJobs(jobs);
+  assert.deepEqual(
+    estimates.map((e) => [e.model, e.format, e.requests]),
+    [
+      ["a", "weft", 6],
+      ["a", "a2ui", 6],
+      ["b", "weft", 6],
+      ["b", "a2ui", 6],
+    ],
+  );
+  const weft = estimates[0] as (typeof estimates)[number];
+  assert.equal(
+    weft.inputTokens,
+    3 * (countProxy(editPrompt(t, "weft")) + countProxy(readPrompt(q, "weft"))),
+  );
+  // The format with the larger screen costs more to send.
+  assert.ok((estimates[1]?.inputTokens ?? 0) > weft.inputTokens);
+  const total = estimates.reduce((s, e) => s + e.inputTokens, 0);
+  assert.match(renderEstimate(estimates), new RegExp(`\\| total \\| \\| 24 \\| ${total} \\|`));
 });
 
 test("rescore re-checks saved replies and keeps results without one", async () => {

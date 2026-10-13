@@ -305,6 +305,89 @@ export const planJobs = (
     ),
   );
 
+const jobKey = (model: string, id: string, format: Format, sample: number): string =>
+  [model, id, format, sample].join("\u0000");
+
+/**
+ * Splits a plan into the results a saved run already paid for and the jobs still to send. A saved
+ * result outside the plan, or one asked with a different readback setting, means the options
+ * differ from that run; mixing the two would score unlike runs as one, so it is refused.
+ */
+export function resumeJobs(
+  jobs: Job[],
+  saved: TaskResult[],
+  options: RunOptions = {},
+): { kept: TaskResult[]; remaining: Job[] } {
+  const planned = new Set(jobs.map((j) => jobKey(j.model, j.task.id, j.format, j.sample)));
+  const seen = new Set<string>();
+  for (const r of saved) {
+    const key = jobKey(r.model, r.id, r.format, r.sample ?? 0);
+    if (!planned.has(key))
+      throw new Error(
+        `saved result ${r.model} ${r.id} ${r.format} #${r.sample} is not in this plan`,
+      );
+    if (seen.has(key))
+      throw new Error(`saved result ${r.model} ${r.id} ${r.format} #${r.sample} appears twice`);
+    if (r.type === "edit" && (r.successAfterReadback !== undefined) !== (options.readback === true))
+      throw new Error(`saved result ${r.id} ${r.format} differs from this run in --readback`);
+    seen.add(key);
+  }
+  return {
+    kept: saved,
+    remaining: jobs.filter((j) => !seen.has(jobKey(j.model, j.task.id, j.format, j.sample))),
+  };
+}
+
+export interface Estimate {
+  model: string;
+  format: Format;
+  requests: number;
+  inputTokens: number;
+}
+
+/**
+ * First-turn requests and their input size per model and format, counted with the offline proxy
+ * tokenizer, so a paid run can be priced before anything is sent. Repair and readback turns depend
+ * on the replies and are left to the caller's assumptions.
+ */
+export function estimateJobs(jobs: Job[]): Estimate[] {
+  const out = new Map<string, Estimate>();
+  const size = new Map<string, number>();
+  for (const j of jobs) {
+    const key = `${j.task.id}\u0000${j.format}`;
+    if (!size.has(key))
+      size.set(
+        key,
+        countProxy(
+          j.task.type === "edit" ? editPrompt(j.task, j.format) : readPrompt(j.task, j.format),
+        ),
+      );
+    const group = `${j.model}\u0000${j.format}`;
+    const e = out.get(group) ?? { model: j.model, format: j.format, requests: 0, inputTokens: 0 };
+    e.requests++;
+    e.inputTokens += size.get(key) as number;
+    out.set(group, e);
+  }
+  return [...out.values()];
+}
+
+export function renderEstimate(estimates: Estimate[]): string {
+  const rows = estimates.map(
+    (e) => `| ${e.model} | ${e.format} | ${e.requests} | ${e.inputTokens} |`,
+  );
+  const total = estimates.reduce((s, e) => s + e.inputTokens, 0);
+  const requests = estimates.reduce((s, e) => s + e.requests, 0);
+  return [
+    "First-turn requests only; input tokens from the offline proxy tokenizer. Repair and readback turns are not counted.",
+    "",
+    "| Model | Format | Requests | Input tokens |",
+    "| --- | --- | ---: | ---: |",
+    ...rows,
+    `| total | | ${requests} | ${total} |`,
+    "",
+  ].join("\n");
+}
+
 /**
  * Runs jobs `concurrency` at a time. The first failure (quota, outage) stops new jobs; the results
  * already paid for are returned with the error so the caller can save them.
