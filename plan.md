@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 15% | Claude Code / claude-opus-5-5 |
-| T105.1 | todo | P2 | 4 | 0% | |
+| T105.1 | in progress | P2 | 4 | 5% | Claude Code / claude-opus-5-5 |
 | T105.2 | todo | P2 | 4 | 0% | |
 | T105.3 | todo | P2 | 4 | 0% | |
 | T105.4 | todo | P2 | 4 | 0% | |
@@ -322,6 +322,8 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.1. WinUI generator: first slice and source-comment read-back
 
 Crate `crates/weft-winui`; names and data typing; the XAML writer; `screen`, `stack` (without `justify` or `grow`), `text`, `heading`, `button`, `field`, `checkbox`, `switch` and `form`, with ids, labels, `hidden`, bindings and markers; everything else refused as `Unsupported` with its path. The source comment with the XML escape, and `import_winui`, accepting the comment when regenerating gives the same XAML compared as XML. SPEC §9 "To WinUI" for the slice first. Golden files with `WEFT_UPDATE_FIXTURES=1`. About 480 lines of code. Done when the slice's corpus screens and examples generate, match their goldens and read back exactly.
+
+**Execution plan.** (1) SPEC §9 "To WinUI" for the slice, before the code. (2) `crates/weft-winui` (`indexmap`, `thiserror`, `roxmltree` 0.21, `weft-core`, `weft-catalog`, `weft-import`): `lib.rs` (`Unsupported`), `xaml.rs` (the element writer: attribute values through `weft-core`'s attribute escaper, made public, and a literal starting with `{` written `{}{…}` so XAML never reads it as a markup extension), `data.rs` (types of the paths the slice reads; refuses a path read with two types, a value read as an object, array indexes until `<each>`, and names that are generated members), `generate.rs` (`generate` → `Generated { page, xaml }`: the source comment, then `Page` → `ScrollViewer` → `StackPanel`, the slice's kinds as in `docs/winui-design.md`, every other kind, prop and slot `Unsupported` with its path), `import.rs` (`import_winui`: the comment through `weft_import::provenance`, strict parse, regenerate, compare as XML with `roxmltree`, DTD refused and nodes bounded). The helper classes (`Weft`, `Props`, `On`, `Slot`) are taken from `xmlns:weft="using:<namespace>"`; T105.2 writes them. (3) `weft_import::provenance`: say and test that the escape also satisfies XML comments (no `--`, the payload never touches the close). (4) Tests: goldens in `crates/weft-winui/tests/fixtures/` (the slice's catalog examples and a `controls.weft` covering every slice prop; no corpus screen is inside the slice yet), read-back of each, an edited file and a foreign comment rejected, refusals with paths, XML well-formedness of hostile text; a `deps.rs` row for the crate. (5) `toolchain.md` and the workspace `rust.md` rows for `roxmltree`. Verify with `moon run root:changed -- --base origin/main`.
 
 ### T105.2. WinUI view model, code-behind and helpers
 
