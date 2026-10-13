@@ -1,5 +1,60 @@
 # Done
 
+### T16.3. Layout vocabulary: web generators and the reference renderer
+
+T16 scope items 3 and 5 for the web, as the design's generate table says. Depends on T16.2.
+
+Execution plan: follow the four steps below, and only those. Read `docs/layout-design.md` generate table before editing. Update SPEC §9 web rows in the same change as the generators. Retake and review insta snapshots and the `packages/visual` web baselines for `dashboard`, `glass` and `layout`. Do not implement importers (T16.8), SwiftUI, Slint, or design tools. Verify with the visual comparison (including a narrow viewport at one column and a wide one at three) and `moon run root:changed`.
+
+Steps:
+
+1. `crates/weft-web/src/html.rs`: `data-justify` and `data-grow` with rules in the layout stylesheet; inline `padding`, `width: 100%; max-width` and the capped `auto-fill` grid template, all through `var(--weft-…)`.
+2. The shared JSX render plan (`crates/weft-web/src/jsx/`) for React, SolidJS and Lit, with the same declarations as inline styles.
+3. `packages/render-react/src/render.ts`: `layoutStyle` for the stack and grid props, and `grow` in `renderNode` beside the tilt.
+4. §9 web rows move from loss to mapping; insta snapshots and the `packages/visual` web baselines retaken and reviewed for `dashboard`, `glass` and `layout`.
+
+Size: about 250 lines of code.
+
+Done when: the three screens pass the `packages/visual` cross-target comparison (React, SolidJS, the reference renderer), a narrow-viewport case shows the stats grid at one column and a wide one at three, and `moon run root:changed` exits 0.
+
+Closed from the merged work: `96b34152` (PR #59) draws the layout props on the web targets; the card had stayed in `plan.md` after the merge.
+
+### T16.5. Layout vocabulary: Slint
+
+T16 scope items 3 to 5 for `crates/weft-slint`. Depends on T16.2 (T67.4 and T67.5 are done).
+
+Steps:
+
+1. Check first whether a stack without `alignment` stretches its children in Slint 1.18.1 (`research.md` §21 marks it **unverified**); if it does, write `alignment: start` on every stack and retake the screenshots.
+2. Generator: `alignment` for `justify`, `horizontal-stretch`/`vertical-stretch: 1` for `grow` (and `0` on its siblings), `padding` and `max-width` in px; `min-column-width` is kept in the source comment and drawn with `columns`.
+3. Reader: those properties back, px values that equal exactly one dimension token as that token; other values are `layout` losses. §9 rows updated.
+
+Size: about 150 lines of code.
+
+Done when: the three screens compile, their screenshots are reviewed, and they read back to the same props without the source comment; `moon run root:changed` exits 0.
+
+Closed from the merged work: `e4fccf98` (PR #64) draws the layout vocabulary in Slint; the card had stayed in `plan.md` after the merge.
+
+### T16.7. Layout vocabulary: Figma and Penpot
+
+T16 scope items 3 to 5 for the design tools. Depends on T16.2.
+
+Steps:
+
+1. `packages/design-tool/src/view.ts` `layoutView`: `justify` as the main-axis alignment, `grow` as fill on the parent's main axis, `padding` and `max-width` (bound to variables in Figma, px in Penpot), `min-column-width` drawn with `columns` and kept in plugin data.
+2. `read.ts` and `foreign.ts`: Weft-built layers from plugin data as now; foreign layers by the import table (four equal paddings, one token, fill as `grow`); the rest are `layout` losses.
+3. Layer-tree snapshots of the Figma and Penpot builds and the round trips for the three screens. §9 rows updated.
+
+Size: about 250 lines of code.
+
+Done when: the Figma and Penpot round trips of `dashboard`, `glass` and `layout` keep every prop, a foreign-layer test covers each listed loss, and `moon run root:changed` exits 0.
+
+Execution plan (Claude Code / claude-opus-5-5): the work had already landed on `main` (`5c11e5cb`, PR #68) while the card stayed in `plan.md`, so closing it means checking the done criteria on the current `main`, not rebuilding it: the corpus round trips in `packages/figma/test/roundtrip.test.ts` and `packages/penpot/test/roundtrip.test.ts`, the losses in `packages/design-tool/test/foreign-layout.test.ts`, the layer-tree snapshots, the §9 rows, then `moon run root:changed`.
+
+Result: `layoutView` draws `justify` as the main-axis alignment (Figma `primaryAxisAlignItems`, Penpot `justifyContent`), `grow` as a fill on the parent's main axis, `padding` as four paddings and `max-width` as a max width with a fill (bound to the token's variable in Figma, px in Penpot), and `min-column-width` with `columns` equal flex tracks, the prop kept in plugin data like every prop. `read.ts` reads Weft-built layers from plugin data; `foreign.ts` reads a foreign layer's alignment (`start` left out), a fill on the parent's main axis as `grow`, and four equal paddings or a max width that name one dimension token, and reports the rest as `layout` losses (`SPACE_AROUND`/`SPACE_EVENLY`, a fixed main-axis size, `minWidth`, unequal paddings, grid tracks other than equal flex, absolute positioning). The layer-tree snapshots were retaken; every corpus screen, `dashboard`, `glass` and `layout` among them, round-trips byte-identical through both tools. `SPEC.md` §9 and `AGENT-SPEC.md` say what Figma and Penpot draw and read.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 3 · Files: `SPEC.md`, `AGENT-SPEC.md`, `packages/design-tool`, `packages/figma`, `packages/penpot`, plugin bundles
+Check: on `main` at `39190ead`, `moon run design-tool:test figma:test penpot:test` passes (figma 147, penpot 96 tests), including the foreign-layer cases for each listed loss; `moon run root:changed` exits 0.
+
 ### T104. SwiftUI screenshots wait for the launched screen
 
 `packages/visual/test/swiftui.test.ts` failed on the CI gate of PRs #74 (run 38303538286) and #75 (run 38306033313), neither touching `packages/visual`: "the example screen follows the appearance" and "login-gap is caught against login and its baseline" got `expected 0 to be greater than 0`, so the two screenshots compared were the same picture. `shoot()` took a screenshot as settled once two in a row agreed, but `simctl launch` returns before the new process draws, and until then the device shows the launch screen or the last frame of the screen before, just as still; on a loaded runner the stale frame was taken. CI has no reviewed baselines, so only the comparisons that happened to pair two such shots noticed. Done means: a shot is taken only once the app says it shows that launch in the asked appearance, a test reproduces the stale-frame case without a simulator, and the suite checks that no two screens come out as the same picture.
@@ -80,6 +135,28 @@ Closing plan (T16.2–T16.8 are merged): check each "Done when" bullet on `main`
 
 Result: every "Done when" bullet holds on `main` after T16.2–T16.8. `grow` and the new props validate in both modes, with `W318` in `AGENT-SPEC.md`; `dashboard`, `glass` and `corpus/layout` use every form, pass the `packages/visual` web comparison and have reviewed SwiftUI baselines. Generated HTML, React and SolidJS read back the same layout props without the source comment (only the default `direction="column"` and `justify="start"` are not written), and so does SwiftUI. Slint now has a test over the three screens (`crates/weft-slint/tests/import.rs`), which reads every layout prop back from the properties alone except `min-column-width`, which has no GridLayout form; SPEC §9 now lists that loss under "From Slint". A2UI and json-render map or list each form, and the Figma and Penpot corpus round trips keep every prop. Closing also fixed what the merges of T16.3–T16.8 left in `packages/visual`: the React and static-page baselines of `dashboard`, `glass`, `layout` and `receipt` were retaken and reviewed, the `test.fails` pins on the web round trips that T16.8 made pass are gone, and the stats-grid reflow check now reads the grid in the iframe's own realm. The full check exits 0.
 
+### T16.8. Layout vocabulary: web importers
+
+T16 scope item 4 for the web, as the design's import table says. Depends on T16.3, whose output it reads back.
+
+Steps:
+
+1. `crates/weft-web/src/dom.rs`: `data-justify`, `data-grow`, and the inline `padding`, `max-width` and grid template when they name `--weft-` properties.
+2. `crates/weft-web/src/from_jsx/`: the same conventions in inline styles.
+3. Foreign markup: `justify-content` among the four values, any positive `flex-grow` as `grow`; `space-around`, `space-evenly`, `stretch`, unequal grow ratios, raw lengths and media or container queries are `layout` losses. §9 rows updated.
+
+Size: about 250 lines of code.
+
+Done when: the generated HTML and JSX of `dashboard`, `glass` and `layout`, with the source comment removed, read back to the same props; a test covers each listed loss; `moon run root:changed` exits 0.
+
+Execution plan (claimed again after the code had landed): steps 1–3 were merged to `main` in PR #72 (`2987544b feat: T16.8 read the layout vocabulary from web markup`), and the T16 closing in `done.md` checked them. What is left:
+
+1. Check each "Done when" bullet on this branch: `crates/weft-web/tests/html.rs` and `jsx_import.rs` (convention round trips of the corpus, whose only layout gaps are the defaults `direction="column"` and `justify="start"`; the foreign-loss tests for `space-around`, `space-evenly`, `stretch`, unequal ratios, raw lengths, `@media` and `@container`), and SPEC §9 "From HTML".
+2. `crates/weft-web/src/html.rs`: two comments still say the HTML importer does not read the drawn forms; say instead why the `data-prop-*` copies stay (they carry what the drawn form leaves out, such as an explicit `justify="start"`). Comments only, no output change.
+3. `moon run root:changed`, then move T16.8 to `done.md`.
+
+Result: verified and closed. The code landed in PR #72 (`2987544b feat: T16.8 read the layout vocabulary from web markup`); this claim only checked it and fixed two stale comments. `crates/weft-web/tests/html.rs` and `jsx_import.rs` round-trip the generated HTML and JSX of every corpus screen without the source comment; `dashboard`, `glass` and `layout` come back with every layout prop except the defaults the generators do not write (`direction="column"` in both, `justify="start"` in JSX). `foreign_layout_forms_weft_cannot_hold_are_layout_losses` (`html.rs`) covers `space-around`, `space-evenly`, `stretch`, unequal `flex-grow` ratios and raw lengths, and `a_media_or_container_query_in_a_style_object_is_a_layout_loss` (`jsx_import.rs`) covers `@media` and `@container`; SPEC §9 "From HTML, React and SolidJS source" maps the drawn forms. The two comments in `crates/weft-web/src/html.rs` that still said the HTML importer did not read the drawn forms now say why the `data-prop-*` copies stay. `moon run root:changed -- --base origin/main` exits 0.
+
 ### T16.4. Layout vocabulary: SwiftUI
 
 T16 scope items 3 to 5 for `crates/weft-swiftui`, as the design's tables and decisions 4 and 5 say. Depends on T16.2.
@@ -127,6 +204,23 @@ Built: a library catalog takes an optional `fragments` member, at most 256 names
 Optional `version` on a screen or a fragment, the format move to `weft` 0.3, the `set-version` patch and `weft version-check`. Inline fragments, variants and library fragments stay out.
 
 Built: `version` is an optional literal `MAJOR.MINOR.PATCH` on the root `<screen>` and root `<fragment>` (`W230` otherwise), a member of `Document` beside `weft`, and `{ op: "set-version", value }` sets or removes it. `weft version-check` classifies a fragment from `signature` and `diff_catalogs` (a body change is a patch), a screen by its host contract, and two library catalogs by the kind diff plus their fragment documents. Below `1.0.0` the least version follows Cargo's caret rule. A declared version below that least version is `W810` at `@version` and exit status 1. Writers write `weft="0.3"`; a 0.1 or 0.2 document stays valid.
+
+### T101. Inline fragments
+
+`<fragment name="…">` is a direct child of `<screen>`, after `<context>` and before the body. It is local to that screen and needs no `weft.json`. A name the project already defines is refused. Patches gain a `fragment` member, plus `add-fragment` and `remove-fragment`.
+
+A screen can define a fragment in place, without a project. Approved design: `docs/versions-and-reuse-design.md` §4, and the inline-fragment rows of §7–§9. T100 owns `version` and the format bump to 0.3; T102 owns `<variant>`. This task is only inline fragments.
+
+**Plan.**
+- SPEC §3, §6.2, §7, §8 and §10.7, and AGENT-SPEC, in the same change. Note that the 0.3 bump belongs to T100; do not add a second bump. Primer stays consistent with AGENT-SPEC.
+- Rust core: `Document.fragments`; parse `<fragment name>` as a direct child of `<screen>` after `<context>` and before the body (`W808` leaves a bad one out); uses resolve inline fragments, then the project's; cycles stay `W805` and limits `W806`.
+- Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
+- `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
+- Verify with `moon run root:changed`.
+
+Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
+
+Done: a screen defines `<fragment name>` in place without a project; `W808` covers a bad declaration, a name the project already defines is refused, patches carry `fragment` plus `add-fragment` and `remove-fragment`, and `to-jsx` emits one component per inline fragment. Merged in PR #47, with the corpus receipt support files in follow-up PR #54.
 
 ### T39.9. Context: SwiftUI
 
@@ -319,6 +413,45 @@ A literal `href` or `src` now passes through the Trust allowlist on the way to j
 Model: Cursor / grok-4.7 · Status: done · Priority: P1 · Complexity: 2 · Files: `SPEC.md`, `AGENT-SPEC.md`, `crates/weft-interop/src/json_render/{export,import}.rs`, `crates/weft-snapshots/tests/interop.rs`
 Check: `cargo clippy -p weft-interop --all-targets -- -D warnings`; `cargo test -p weft-snapshots --test interop` — 15 passed.
 
+### T96. Too-deep documents: report, do not hide
+
+Found while merging #18. After T79, `serialize`, `stringify` and `canonicalize` (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`) return the output of an empty placeholder document (`to_document(Null)`) for a cyclic or too-deep input instead of failing. Only `applyPatches` reports W200. A caller gets a valid-looking empty screen and no signal.
+
+Done when: these entry points return W200 (or the binding's error type) for a too-deep or cyclic input, in Rust and TypeScript alike, with differential fixtures; no entry point turns such input into an empty document silently.
+
+Execution plan:
+
+1. Reproduce the silent empty document from `serialize`, `stringify` and `canonicalize` on a cyclic value and on a value past the depth limit (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`, and the TypeScript wrappers that call them).
+2. Return W200, the same way `applyPatches` already does, instead of `to_document(Null)`. Cover every entry point that can hide the failure, in Rust and TypeScript.
+3. Add differential fixtures: cyclic and too-deep inputs must not come back as an empty screen.
+4. Verify with `moon run root:changed`. Leave unrelated entry points unchanged.
+
+Closed from the merged work: `d4cee811` on `main`; the row had stayed in `plan.md` as `done`.
+
+### T97. Design-tool plugin data over 100 kB
+
+Found while merging #18. T83 made `writeJson` (`packages/design-tool/src/keys.ts`) throw once an entry passes 100 kB. It is called partway through `packages/design-tool/src/build.ts`, so one node with a very large source aborts the whole Figma or Penpot build. The message says "bytes" but the check counts string length (UTF-16 code units), not UTF-8 bytes.
+
+Done when: the cap is measured in UTF-8 bytes as Figma documents it; an oversized entry is reported as a build diagnostic and the rest of the build completes (the layer is drawn, its source is not stored, and pull reads it as foreign); tests cover a multi-byte source near the cap.
+
+Closed from the merged work: `977ac07e` on `main`; the row had stayed in `plan.md` as `done`.
+
+### T98. `fmt --write` keeps symlinks and permissions
+
+Found while merging #18. T81's atomic write (temp file, then rename) in the Rust CLI (`crates/weft-cli/src/main.rs`) and the TypeScript CLI replaces the target path. Formatting a symlinked file turns the link into a regular file, and the file's permissions are not kept.
+
+Done when: both CLIs resolve a symlink and write to its target, copy the original file's permissions onto the temp file before the rename, and have tests for a symlinked file and a read-only-group file.
+
+Closed from the merged work: `083856ec` on `main`; the row had stayed in `plan.md` as `done`.
+
+### T99. Node capped read handles a short read
+
+Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` makes a single `readSync` call into a buffer of `maxChars*4+1` bytes allocated up front. A short read is unlikely on a regular file but is not handled, and the buffer is sized for the worst case.
+
+Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
+
+Closed from the merged work: `852067ae` on `main`; the row had stayed in `plan.md` as `done`.
+
 ### T16.6. Layout vocabulary: A2UI and json-render
 
 A2UI now writes `justify` (`start` omitted, `space-between` as `spaceBetween`) and `grow` as `weight` 1, and reads them back. `spaceAround`, `spaceEvenly`, `stretch`, unequal weights, a negative or non-numeric weight, and a weight outside a `Row` or `Column` are `layout` losses. `padding`, `max-width` and `min-column-width` stay losses, with `columns` and `wrap`. json-render already kept every layout prop; `corpus/layout`, `dashboard` and `glass` round-trip unchanged. SPEC §9 and `AGENT-SPEC.md` say so.
@@ -346,6 +479,22 @@ Result: compared, no move. Sources: Weft `tooling/changed.ts`, `tooling/select.t
 - The rest of `changed.ts` + `select.ts` (about 500 lines) has no counterpart, so the planner is not a shared copy. What could move is only the Rust track: a `scoped-check.toml` with a nextest gate (`moon run root:rust-test -- {nextest_filter}`), a clippy gate (`cargo clippy {packages} ...`) and a fmt gate would replace it, but Weft would still need its own planner for moon and Vitest and would have to combine two plans. That trade is an idea for the creator in `ideas.md`, not done here.
 
 No test: the change is documentation only, and the tooling is untouched.
+
+### T78. Bound and cache the Swift typecheck tests
+
+The Swift typecheck tests ran 9+ minutes and were killed when the gate failed (`crates/weft-swiftui/tests/swift.rs:201-208`). Give nextest a timeout and a Swift module cache, or keep them out of the batch with flaky runtimes. Merged in PR #67.
+
+### T88. Resolver `tree()` matches context keys case-insensitively
+
+The resolver's `tree()` matched context keys case-sensitively while `appearance()` did not (`crates/weft-catalog/src/resolver.rs:52-54` vs `:102-103`). `tree()` is now case-insensitive. Merged in PR #65.
+
+### T90. Reject unreferenced insta snapshots
+
+Nothing checked for unreferenced snapshots (about 750 insta snapshots, `toolchain.md`). Run `cargo insta test --unreferenced=reject` in CI, or once and delete the orphans. Merged in PR #66.
+
+### T93. Split the SwiftUI and JSX importer modules
+
+The two giant importer files, `crates/weft-swiftui/src/import/read.rs` and `crates/weft-web/src/jsx/mod.rs`, are split into smaller modules in the same crates. Merged in PR #71.
 
 ### T74. Slint snapshots and screenshots
 
