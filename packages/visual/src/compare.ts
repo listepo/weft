@@ -1,6 +1,7 @@
 // The one comparator every screenshot test uses, web and SwiftUI: pixelmatch over decoded PNGs.
 // A failed comparison writes the expected and actual images and a diff image next to each other
 // under `packages/visual/diffs/`, so a failure can be looked at, not only counted.
+import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -106,4 +107,19 @@ export function compare(
   writeFileSync(join(DIFFS, `${label}.expected.png`), expected);
   writeFileSync(join(DIFFS, `${label}.actual.png`), actual);
   return { width, height, differing, diff };
+}
+
+/**
+ * A hash of the pixels `compare` looks at, the same edge rows left out, so a run can check that no
+ * two of its screenshots are the same picture without comparing every pair. Equal fingerprints mean
+ * `compare` finds no difference.
+ */
+export function fingerprint(
+  image: Uint8Array,
+  { ignoreBottom = 0, ignoreTop = 0 }: Pick<CompareOptions, "ignoreBottom" | "ignoreTop"> = {},
+): string {
+  // `rgba` hands back fresh pixels, so blanking them in place touches no caller's data.
+  const { width, height, data } = rgba(image);
+  blankEdges(data, width, height, ignoreTop, ignoreBottom);
+  return createHash("sha256").update(`${width}x${height}:`).update(data).digest("hex");
 }
