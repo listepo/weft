@@ -41,6 +41,15 @@ Draft pull request #49.
 
 `<fragment name="…">` is a direct child of `<screen>`, after `<context>` and before the body. It is local to that screen and needs no `weft.json`. A name the project already defines is refused. Patches gain a `fragment` member, plus `add-fragment` and `remove-fragment`.
 
+A screen can define a fragment in place, without a project. Approved design: `docs/versions-and-reuse-design.md` §4, and the inline-fragment rows of §7–§9. T100 owns `version` and the format bump to 0.3; T102 owns `<variant>`. This task is only inline fragments.
+
+**Plan.**
+- SPEC §3, §6.2, §7, §8 and §10.7, and AGENT-SPEC, in the same change. Note that the 0.3 bump belongs to T100; do not add a second bump. Primer stays consistent with AGENT-SPEC.
+- Rust core: `Document.fragments`; parse `<fragment name>` as a direct child of `<screen>` after `<context>` and before the body (`W808` leaves a bad one out); uses resolve inline fragments, then the project's; cycles stay `W805` and limits `W806`.
+- Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
+- `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
+- Verify with `moon run root:changed`.
+
 Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
 
 Draft pull request #47.
@@ -331,14 +340,3 @@ Penpot installs a plugin only from the URL of its `manifest.json`, and plugins a
 2. `tooling/test/workflows.test.ts`: every `moon run`/`moon exec` in `.github/workflows/*.yml` names tasks that `moon query tasks` knows, and a task with `runInCI: false` is run with `--ignore-ci-checks` (or `--ci false`). `tooling/moon.yml` lists the workflows and the moon configs as inputs.
 3. `plugins/penpot/test/pages.test.ts`: pin the new build command.
 4. Verify: the new test fails on the old workflow and passes on the fixed one; `CI=true moon exec penpot-plugin:build --ignore-ci-checks` writes `plugins/penpot/dist/`; the full check. The deploy itself is confirmed by the next push to `main`.
-
-### T101. Inline fragments
-
-A screen can define a fragment in place, without a project. Approved design: `docs/versions-and-reuse-design.md` §4, and the inline-fragment rows of §7–§9. T100 owns `version` and the format bump to 0.3; T102 owns `<variant>`. This task is only inline fragments.
-
-**Plan.**
-- SPEC §3, §6.2, §7, §8 and §10.7, and AGENT-SPEC, in the same change. Note that the 0.3 bump belongs to T100; do not add a second bump. Primer stays consistent with AGENT-SPEC.
-- Rust core: `Document.fragments`; parse `<fragment name>` as a direct child of `<screen>` after `<context>` and before the body (`W808` leaves a bad one out); uses resolve inline fragments, then the project's; cycles stay `W805` and limits `W806`.
-- Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
-- `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
-- Verify with `moon run root:changed`.
