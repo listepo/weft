@@ -2,7 +2,9 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { SCREENS, loadTasks } from "./corpus.ts";
-import { FORMATS, type Format } from "./neutral.ts";
+import { ALL_FORMATS, FORMATS, type Format } from "./neutral.ts";
+import { schemaFor } from "./formats.ts";
+import { anthropicSchemaProblems } from "./schema-limits.ts";
 import { PRIMERS } from "./primers.ts";
 import {
   DEFAULT_MODELS,
@@ -32,13 +34,14 @@ function usage(): never {
     [
       "usage: node bench/src/run.ts tokens",
       "       node bench/src/run.ts edit|read [--provider anthropic|openai] [--base-url <url>] [--model a,b]",
-      "                                       [--screens a,b] [--formats weft,html,jsx,a2ui] [--samples 3]",
+      `                                       [--screens a,b] [--formats ${FORMATS.join(",")}] [--samples 3]`,
       "                                       [--concurrency 4] [--batch] [--readback]",
       "       node bench/src/run.ts rescore <results.json>",
       "",
       "--provider openai talks to any OpenAI-compatible server; --base-url defaults to LM Studio",
       `(${LMSTUDIO_URL}) and --model is required. --batch uses the Anthropic Message Batches API.`,
       "--readback sends one plain-language binding diff after a valid edit, for every format.",
+      `--formats also takes ${ALL_FORMATS.filter((f) => !FORMATS.includes(f as never)).join(", ")}; the constrained one is edit-only.`,
     ].join("\n"),
   );
   process.exit(2);
@@ -136,6 +139,30 @@ function providers(values: TaskOptions): {
   };
 }
 
+/**
+ * A provider that cannot take the document schema whole is reported as unsupported, before any
+ * paid call, rather than sent a reduced schema (creator's answer to T12.3 question 2).
+ */
+function refuseUnsupported(mode: string, formats: Format[], values: TaskOptions): void {
+  const schema = formats.map(schemaFor).find((s) => s !== undefined);
+  if (!schema) return;
+  if (mode !== "edit") {
+    console.error("weft-json-constrained runs only in edit mode: a read reply is not a document.");
+    process.exit(2);
+  }
+  if (values.batch) {
+    console.error("weft-json-constrained cannot run with --batch: batch requests carry no schema.");
+    process.exit(2);
+  }
+  if ((values.provider ?? "anthropic") !== "anthropic") return;
+  const problems = anthropicSchemaProblems(schema);
+  if (problems.length === 0) return;
+  console.error(
+    `weft-json-constrained is unsupported on Anthropic; the document schema breaks its structured-output limits:\n${problems.map((p) => `- ${p}`).join("\n")}`,
+  );
+  process.exit(2);
+}
+
 function save(mode: string, stamp: string, title: string, results: TaskResult[]): string {
   const summary = renderSummary(title, summarize(results));
   mkdirSync(RESULTS, { recursive: true });
@@ -145,10 +172,11 @@ function save(mode: string, stamp: string, title: string, results: TaskResult[])
 }
 
 async function tasksCommand(mode: "edit" | "read", values: TaskOptions): Promise<void> {
+  const formats = (values.formats ? values.formats.split(",") : [...FORMATS]) as Format[];
+  for (const f of formats) if (!ALL_FORMATS.includes(f)) usage();
+  refuseUnsupported(mode, formats, values);
   const { models, providerFor } = providers(values);
   const screens = values.screens ? values.screens.split(",") : [...SCREENS];
-  const formats = (values.formats ? values.formats.split(",") : [...FORMATS]) as Format[];
-  for (const f of formats) if (!FORMATS.includes(f)) usage();
   const samples = positiveInt(values.samples, 3);
   // A batch is only formed from requests issued together, so batch mode starts every job at once.
   const concurrency = values.batch ? Number.MAX_SAFE_INTEGER : positiveInt(values.concurrency, 4);

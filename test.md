@@ -13,11 +13,13 @@ The quality test measures how reliably language models read and write Weft, comp
 - 36 **edit** tasks: a change in plain words ("Add a 'Remember me' checkbox bound to `$.remember` below the password field"). The model returns the whole updated document.
 - 24 **question** tasks: a question about the screen ("Which action does the 'Forgot password?' link trigger?"). The model answers with one `ANSWER:` line.
 
+**Weft as JSON (T12.3).** Two more formats run only when named with `--formats`: `weft-json` (the screen and the reply in canonical JSON, SPEC §3) and `weft-json-constrained` (the same, with the edit, repair and readback replies held to the core catalog's document schema, SPEC §3.1, by the provider's structured-output mode). Together with `weft` they separate "JSON instead of markup" from "constrained instead of free". Their screens are `screen.weft` converted at run time, so the corpus keeps one copy. Both get one JSON primer that repeats the Weft primer's vocabulary word for word. The constrained format is edit-only (an answer line is not a document) and needs a provider that takes the schema whole: Anthropic's structured outputs reject recursive schemas, numeric bounds and more than 16 union-typed or 24 optional parameters, and the schema breaks all four (`research.md` §20), so `run.ts` reports Anthropic as unsupported for it and sends nothing. LM Studio takes it as `response_format` (llama.cpp grammars for GGUF models).
+
 **Prompt.** One user message: a short primer for the format, the data model, the screen in that format, and the task. No system prompt, no examples beyond the primer. Primer sizes are in `bench/REPORT.md`.
 
 **Checks.**
 
-- *Valid*: the edit reply parses in its format with no errors (Weft: the core validator in strict mode; HTML, JSX, A2UI: their parsers in `bench/src/adapters/`).
+- *Valid*: the edit reply parses in its format with no errors (Weft: the core validator in strict mode; Weft JSON: `JSON.parse`, then the same validator in strict mode; HTML, JSX, A2UI: their parsers in `bench/src/adapters/`). Weft JSON is read into the same neutral tree as the markup, so every later check is shared.
 - *Success*: the reply is valid, the requested change is there (assertions in the task, checked on a neutral tree shared by all formats, including order and bindings), and nothing else was lost.
 - *Repair*: when an edit reply is invalid, the model gets one more prompt with its reply and the validator's diagnostics, and nothing else. The same rule applies to every format. *Valid after repair* and *success after repair* count the second reply.
 - *Readback* (optional, `node bench/src/run.ts edit --readback`): after an edit reply is valid, on the first try or after the repair, the model gets one more prompt. That prompt lists the bindings, flags, events and loops that changed, in plain words, and nothing else. A negated binding reads `true while $.busy is falsy (NOT $.busy)`; `!` is NOT. The sentences come from the neutral tree, so every format gets the same wording. *Valid after readback* and *success after readback* count that reply. Runs without the flag do not send it, and their table has no readback columns, so the rows below stay comparable.
@@ -41,6 +43,9 @@ node bench/src/run.ts read --provider openai --model prism-ml/bonsai-27b
 node bench/src/run.ts edit [--batch]
 node bench/src/run.ts read [--batch]
 
+# Markup against free and constrained JSON (T12.3); the constrained format is edit-only
+node bench/src/run.ts edit --provider openai --model prism-ml/bonsai-27b --formats weft,weft-json,weft-json-constrained
+
 # Size of the corpus in every format
 node bench/src/run.ts tokens
 
@@ -48,13 +53,14 @@ node bench/src/run.ts tokens
 node bench/src/run.ts rescore bench/results/<run>.json
 ```
 
-Options: `--screens a,b`, `--formats weft,html,jsx,a2ui`, `--samples N` (default 3), `--concurrency N` (default 4), `--base-url` for another OpenAI-compatible server, `--readback` for the binding readback turn on an edit run. Each run writes `bench/results/<mode>-<time>.json` (every reply verbatim with its verdict) and a summary `.md`. A run that fails half-way still saves what it finished.
+Options: `--screens a,b`, `--formats weft,html,jsx,a2ui` (also `weft-json`, `weft-json-constrained`), `--samples N` (default 3), `--concurrency N` (default 4), `--base-url` for another OpenAI-compatible server, `--readback` for the binding readback turn on an edit run. Each run writes `bench/results/<mode>-<time>.json` (every reply verbatim with its verdict) and a summary `.md`. A run that fails half-way still saves what it finished.
 
 ## Limitations
 
 - The corpus is small (12 screens, 60 tasks) and written by the format's authors.
 - Edit success is judged by the task's assertions; a change the assertions do not cover is not checked.
 - One prompt shape; no system prompt, no tool calling, no few-shot examples. The readback turn is a second user message, and only when `--readback` is set.
+- Constrained decoding is measured only where the provider takes the whole schema; a reduced schema per provider is not tried, and the schema names no project tokens, actions or data paths (T12.3 questions 2 and 3).
 - Runs before the history row of 2026-10-04 have one sample, no saved replies and no action-spelling rule.
 
 ## History
@@ -73,3 +79,4 @@ Every kept run is recorded here, newest last; see `AGENTS.md`. Weft columns: fir
 | 2026-10-09 | 51b77bc | LM Studio / prism-ml/bonsai-27b | edit, login only, `--readback` | 3 | 88.9 / 100 / 88.9% | 88.9 / 55.6 / 100% | `edit-2026-10-09T09-08-11-689Z` | T28 rerun. Weft success after readback 100% (88.9% after repair): `login.e2` sample 1 bound `disabled` to `{!$.busy}` again, valid, so repair did not fire; the readback turn fixed it. Baselines after readback: 88.9 / 55.6 / 100%, unchanged |
 | 2026-10-09 | a53bba0 | LM Studio / prism-ml/bonsai-27b | edit, all | 3 | 96.6 / 98.9 / 96.6% | 98.9 / 92.0 / 90.7% | `edit-2026-10-09T11-48-08-510Z` | Partial: 347 of 432 samples. First-try valid / valid after repair / success after repair for Weft; HTML / JSX / A2UI success after repair |
 | 2026-10-09 | 0463daa | LM Studio / prism-ml/bonsai-27b | read, all | 0 | — | — | `read-2026-10-09T20-59-44-500Z` | Partial: 0 of 288 samples; the run saved no rows |
+| 2026-10-12 | 7caefe55 | LM Studio / prism-ml/bonsai-27b | edit, login only, `--formats weft,weft-json,weft-json-constrained` | 3 | 88.9 / 88.9 / 55.6% | — | `edit-2026-10-12T18-31-58-922Z` | T12.3 trial; no baselines. Free JSON 100 / 100 / 100%, constrained JSON 66.7 / 66.7 / 33.3%. Mean output tokens: markup 240, free JSON 648, constrained 380 (no thinking under the schema; free JSON pretty-printed). The schema was obeyed; the invalid constrained replies break cross-node rules (W301, W313) |

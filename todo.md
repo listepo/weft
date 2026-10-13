@@ -3,7 +3,6 @@
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
-- T12.3. Constrained generation: benchmark
 - T41. Hosted Penpot plugin
 - T96. Too-deep documents: report, do not hide
 - T97. Design-tool plugin data over 100 kB

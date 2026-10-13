@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { countTokens } from "gpt-tokenizer/encoding/o200k_base";
 import { SCREENS, readScreen } from "./corpus.ts";
-import { FORMATS, type Format } from "./neutral.ts";
+import { FORMATS, type CorpusFormat as Format } from "./neutral.ts";
 import { countAnthropicTokens, type AnthropicOptions } from "./provider.ts";
 
 /** o200k_base is OpenAI's tokenizer, a proxy for Claude's, which is not published. */

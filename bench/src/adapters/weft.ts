@@ -1,4 +1,4 @@
-import { parse, type Child, type Node, type Value } from "@weft/core";
+import { parse, validate, type Child, type Document, type Node, type Value } from "@weft/core";
 import { coreCatalog } from "@weft/catalog";
 import { node, normPath, type Parsed } from "./types.ts";
 import type { NNode } from "../neutral.ts";
@@ -29,6 +29,30 @@ export function parseWeft(src: string): Parsed {
     .map((d) => `${d.code} ${d.path}: ${d.message}`);
   if (result.document === undefined) return { errors };
   return { tree: convert(result.document.root, [], undefined)[0] ?? node("screen"), errors };
+}
+
+/**
+ * Canonical JSON is judged by the same validator in strict mode and read into the same neutral
+ * tree, so the JSON formats differ from markup only in what the model writes.
+ */
+export function parseWeftJson(src: string): Parsed {
+  let document: unknown;
+  try {
+    document = JSON.parse(src);
+  } catch (e) {
+    return { errors: [`not JSON: ${(e as Error).message}`] };
+  }
+  const errors = validate(document, { catalog: coreCatalog, mode: "strict" })
+    .filter((d) => d.severity === "error")
+    .map((d) => `${d.code} ${d.path}: ${d.message}`);
+  const root = (document as Partial<Document> | null)?.root;
+  if (typeof root !== "object" || root === null) return { errors };
+  try {
+    return { tree: convert(root, [], undefined)[0] ?? node("screen"), errors };
+  } catch {
+    // A shape the validator already rejected (a list that is not an array) cannot be read.
+    return { errors };
+  }
 }
 
 function convert(n: Node, loops: string[], form: string | undefined): NNode[] {

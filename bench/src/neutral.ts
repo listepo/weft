@@ -1,8 +1,16 @@
 // Format-neutral view of a screen. Every format is parsed into this tree so that one
 // expectation vocabulary can judge Weft, HTML, JSX and A2UI output alike.
 
-export type Format = "weft" | "html" | "jsx" | "a2ui";
-export const FORMATS: readonly Format[] = ["weft", "html", "jsx", "a2ui"];
+/** The formats the corpus is written in, and the formats a run uses unless told otherwise. */
+export type CorpusFormat = "weft" | "html" | "jsx" | "a2ui";
+export const FORMATS: readonly CorpusFormat[] = ["weft", "html", "jsx", "a2ui"];
+/**
+ * Weft as canonical JSON, free and held to the catalog's document schema (T12.3). Run only when
+ * named with `--formats`; their screens are derived from `screen.weft`.
+ */
+export const JSON_FORMATS = ["weft-json", "weft-json-constrained"] as const;
+export type Format = CorpusFormat | (typeof JSON_FORMATS)[number];
+export const ALL_FORMATS: readonly Format[] = [...FORMATS, ...JSON_FORMATS];
 
 export interface NNode {
   kind: string;
