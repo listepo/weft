@@ -30,7 +30,7 @@ jobs:
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
       # The workflow lint the pre-push hook (hk.pkl) runs; mise.toml pins jactionlint and shellcheck.
       - run: jactionlint --color
-      - uses: pyrlyn/ci/.github/actions/setup-xcode@87cca51e2e995af39b78e6938bc89a82a844f4e2
+      - uses: pyrlyn/ci/.github/actions/setup-xcode@9748fe1e5a2007d695e4e1a1d9b16492660dd8bc # main
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install chromium
       # The gate in three steps, which together run exactly the documented
