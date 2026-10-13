@@ -1,6 +1,6 @@
 # Design: layout vocabulary
 
-Status: **approved.** The creator approved this design and accepted the recommended answer to every open question; they are recorded under **Decisions**. Nothing here is implemented yet: T16.2–T16.8 build it. This document was T16.1, the design stage of T16. The prior art it relies on, with sources, is `research.md` §21.
+Status: **approved.** The creator approved this design and accepted the recommended answer to every open question; they are recorded under **Decisions**. T16.2–T16.8 implemented it (`done.md`). This document was T16.1, the design stage of T16. The prior art it relies on, with sources, is `research.md` §21.
 
 ## Problem
 

@@ -598,8 +598,8 @@ impl Writer<'_> {
                 }
                 "label" => {}
                 "role" => attrs.set("role", literal_text(Some(value)).unwrap_or_default()),
-                // `grow` is also `data-grow` (see `finish`). It stays here so the HTML importer,
-                // which does not read `data-grow` yet, still recovers the prop.
+                // `grow` is also `data-grow` (see `finish`), which only says `true`; this copy
+                // carries an explicit `grow="false"` back through the HTML importer too.
                 _ => attrs.set(&format!("data-prop-{name}"), format_value(value)),
             }
         }
@@ -1060,7 +1060,9 @@ impl Writer<'_> {
 
     fn layout(&mut self, n: &Node, ctx: &Ctx, depth: usize) {
         // `justify`, `padding`, `max-width` and `min-column-width` are drawn below and also kept
-        // as `data-prop-*`: the HTML importer does not read the drawn form yet.
+        // as `data-prop-*`: the drawn form leaves out the default `justify="start"`, a token path
+        // that makes no custom-property name, and `min-column-width` beside a `columns` that is
+        // not an integer, which the copy still carries back through the HTML importer.
         let mut b = self.base(
             n,
             &["direction", "gap", "align", "wrap", "columns", "material"],
