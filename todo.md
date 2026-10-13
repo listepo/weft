@@ -4,3 +4,12 @@
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
 - T41. Hosted Penpot plugin
+- T106. Weft plugin for cox
+- T106.1. MCP tool logic in Rust
+- T106.2. TypeScript MCP server on the Rust tools
+- T106.3. The cox plugin
+- T106.4. Accessibility snapshot in Rust
+- T106.5. Skills in cox
+- T106.6. Design tab: design
+- T106.7. Design tab: cox side
+- T106.8. Design tab: Weft side
