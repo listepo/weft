@@ -36,6 +36,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T99 | done | P3 | 1 | 100% | MiMo / MiMo |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
 | T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
+| T92 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -83,6 +84,16 @@ Draft pull request #49.
 Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
 
 Draft pull request #47.
+
+### T92. Affected-check planner vs scoped-check
+
+Cloud review row T92: is `tooling/changed.ts` + `tooling/select.ts` a fourth copy of the org's `scoped-check` affected-test planner, and should it move there? Done when the two are compared from their sources, the verdict (move / no move) is written down with the sources, and any piece that could move is an idea in `ideas.md`. No tooling behaviour changes.
+
+Execution plan:
+
+1. Read `tooling/changed.ts`, `tooling/select.ts` and `tooling/test/select.test.ts` here, and `scoped-check` (`README.md`, `src/plan.rs`) with the crates it builds on (`cargo-changed-packages`, `git-changed-paths`, `path-gates`) in `packages/crates`.
+2. List what overlaps (line-for-line or in behaviour) and what Weft needs that `scoped-check` cannot express.
+3. Record the verdict in the `done.md` entry, close the card and the cloud review row. Docs-only change, so no test is possible.
 
 ### T8. Evaluation
 
