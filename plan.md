@@ -21,7 +21,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
-| T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
+| T14 | in progress | P2 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
@@ -143,21 +143,16 @@ Progress (stage 1 done, on branch `t14-figma`):
 - Remaining:
   - style overrides: after approval, the format extension in TS and Rust, then the Figma mapping for colors, radii and padding (only `gap` maps to a token today);
   - a pull from a real Figma file, to confirm the REST facts marked unverified in `packages/figma/README.md` (rotation in radians, number precision, the shape of `sharedPluginData`);
-  - MCP / Claude Code tools (with T30): the source is shared plugin data now (T14.2); still to check that `use_figma` can read and write it;
+  - MCP / Claude Code tools (with T30): `use_figma` reads and writes the shared plugin data (T14.4); the Weft tools on top of it are still to be designed;
   - a check of the plugin in the real Figma app, including the inline module script and WebAssembly in its UI iframe;
-  - the open questions in the report: single components for kinds without variants, `state` as a variant axis, the manifest id, and plugin data on duplicate/detach.
+  - the open questions in the report: single components for kinds without variants, `state` as a variant axis, and the manifest id (plugin data on duplicate and detach is settled by T14.4).
 
 Execution plan, stage 2 (this round; style overrides stay out until the creator approves them):
 
 1. T14.1: the pull over the REST API — done (`done.md`).
 2. MCP / Claude Code tools through the Figma MCP server. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. The creator chose to move the Weft source to shared plugin data, which any plugin and the REST API (`plugin_data=shared`) can read: T14.2, done (`done.md`).
 3. T14.3: the creator dropped files that keep the Weft source in private plugin data; only shared plugin data is supported — done (`done.md`).
-4. T14.4: check `use_figma` against shared plugin data in a real file. The creator approved one new test file in their Figma account ("weft T14 plugin-data check") and nothing else: no other file is opened, changed, shared or deleted. Plan:
-   1. Load the Figma MCP server's `figma-use` skill; create the file with `create_new_file`.
-   2. Through `use_figma`, build a small screen the way the plugin does (the `receipt` layer snapshot in `packages/figma/test/__snapshots__/layers/receipt.txt`): frames with the plugin's `weft.*` keys under the `weft` namespace, a text layer, a component with an instance.
-   3. In a separate `use_figma` call, read the keys back (`getSharedPluginData`, `getSharedPluginDataKeys`) and compare namespace, keys and values byte for byte, including non-ASCII text and a value near the 100 kB limit; check what `setPluginData` does there.
-   4. Check the open facts while the file is there: whether shared data is copied by `clone()` (duplicate) and kept by `detachInstance()`, and whether an instance shows its main component's data.
-   5. Record each fact with its source and date in `packages/figma/README.md` (move what is confirmed out of **Unverified**) and in `research.md`; no code changes, so no new test (the facts back the existing read-back, which already handles both outcomes).
+4. T14.4: `use_figma` reads and writes shared plugin data, checked in a real test file; the fake follows real duplicate, detach and instance inheritance — done (`done.md`).
 
 
 ### T68. Slint bindings for SwiftUI and WinUI
