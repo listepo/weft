@@ -55,6 +55,20 @@ Result: `layoutView` draws `justify` as the main-axis alignment (Figma `primaryA
 Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 3 · Files: `SPEC.md`, `AGENT-SPEC.md`, `packages/design-tool`, `packages/figma`, `packages/penpot`, plugin bundles
 Check: on `main` at `39190ead`, `moon run design-tool:test figma:test penpot:test` passes (figma 147, penpot 96 tests), including the foreign-layer cases for each listed loss; `moon run root:changed` exits 0.
 
+### T104. SwiftUI screenshots wait for the launched screen
+
+`packages/visual/test/swiftui.test.ts` failed on the CI gate of PRs #74 (run 38303538286) and #75 (run 38306033313), neither touching `packages/visual`: "the example screen follows the appearance" and "login-gap is caught against login and its baseline" got `expected 0 to be greater than 0`, so the two screenshots compared were the same picture. `shoot()` took a screenshot as settled once two in a row agreed, but `simctl launch` returns before the new process draws, and until then the device shows the launch screen or the last frame of the screen before, just as still; on a loaded runner the stale frame was taken. CI has no reviewed baselines, so only the comparisons that happened to pair two such shots noticed. Done means: a shot is taken only once the app says it shows that launch in the asked appearance, a test reproduces the stale-frame case without a simulator, and the suite checks that no two screens come out as the same picture.
+
+**Plan.**
+- `packages/visual/src/simulator.ts`: `settledShot(probe)` waits for the app's word (`drawn`) before the two-equal-shots rule; unit tests in `test/simulator.test.ts` with a fake slow device (the old rule returns the stale frame).
+- `test/swiftui.test.ts`: the host app's `LaunchProbe` (was `InsetProbe`) writes `shown.json` with the launch id from `WEFT_LAUNCH` and the colour scheme its views see, once its scene is active; `shoot()` passes a fresh id per launch and waits for it.
+- `src/compare.ts`: `fingerprint(png, strips)`; a suite test fails when two screens share one.
+- Verify: unit tests, then `WEFT_SIMULATOR=own moon run visual:test` locally (twice), `moon run root:changed`; delete the own device afterwards.
+
+Result: `settledShot` (`packages/visual/src/simulator.ts`) waits for the host app's word that it shows this launch in the asked appearance before taking two equal screenshots in a row; the app's `LaunchProbe` writes `shown.json` (launch id from `WEFT_LAUNCH`, colour scheme its views see) after the insets, once its scene is active. `test/simulator.test.ts` fakes a slow device: the old rule returns the stale frame, the new one the screen. The suite now also fails when two screens share a `fingerprint` (`src/compare.ts`), which CI, without reviewed baselines, needs.
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 2
+Check: `WEFT_SIMULATOR=own moon run visual:test` (60 SwiftUI-project tests pass, baselines match) and the SwiftUI project again with every core busy (60 pass); `moon run root:changed -- --base origin/main`.
+
 ### T39. Context in the document
 
 A `.weft` file carries the context that a person or an agent left for whoever works on it next, so the next agent or person can use it. Approved scope:

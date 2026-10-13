@@ -16,7 +16,12 @@
 // device, so `WEFT_SIMULATOR` chooses (see ../src/simulator.ts): `shared`, the default, takes a
 // machine-wide lock for the whole suite so runs take turns on one device; `own` gives each
 // worktree a device of its own, created on first use.
+//
+// A screen is screenshotted only once the app says it shows that launch in the appearance asked
+// for, and two screenshots in a row agree (T104); a last check makes sure no two screens came out
+// as the same picture.
 import { execFileSync, spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import {
   copyFileSync,
   existsSync,
@@ -32,12 +37,13 @@ import { basename, join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { matchBaseline } from "../src/baseline.ts";
 import { CORPUS, EXAMPLE, ROOT, SAMPLE, cli, weft } from "../src/cli.ts";
-import { compare } from "../src/compare.ts";
+import { compare, fingerprint } from "../src/compare.ts";
 import {
   LOCK_DIR,
   acquireLock,
   deviceName,
   findDevice,
+  settledShot,
   simulatorMode,
   type SimulatorDevice,
 } from "../src/simulator.ts";
@@ -191,7 +197,7 @@ struct WeftScreensApp: App {
                 .dynamicTypeSize(.large)
                 .environment(\\.locale, Locale(identifier: "en_US"))
                 .statusBarHidden(true)
-                .background(InsetProbe().ignoresSafeArea())
+                .background(LaunchProbe().ignoresSafeArea())
         }
     }
 }
@@ -235,16 +241,31 @@ struct GlassBackdrop<Content: View>: View {
 // (T60). The suite therefore leaves both strips out of every comparison, and the app says how tall
 // they are on this device, so no size is written down here. They are read from the window, because
 // a view that ignores the safe area is told the inset is zero.
-struct InsetProbe: View {
+//
+// The same probe says which launch is on screen (T104). Until a new process draws, the device shows
+// the launch screen or the last frame of the screen before, as still as a settled screen, so the
+// suite screenshots only once the app has written the launch id it was given and the appearance
+// its views are drawn in, after its scene became active. A change of appearance writes them again.
+struct LaunchProbe: View {
+    @Environment(\\.colorScheme) private var scheme
+
     var body: some View {
-        Color.clear.task {
-            while true {
+        Color.clear.task(id: scheme) {
+            while !Task.isCancelled {
                 let window = UIApplication.shared.connectedScenes
-                    .compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
+                    .compactMap { $0 as? UIWindowScene }
+                    .first(where: { $0.activationState == .foregroundActive })?.keyWindow
                 if let window, window.bounds.width > 0 {
-                    let json = "{\\"width\\": \\(window.bounds.width), \\"top\\": \\(window.safeAreaInsets.top), \\"bottom\\": \\(window.safeAreaInsets.bottom)}"
                     let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    try? json.write(to: dir.appendingPathComponent("insets.json"), atomically: true, encoding: .utf8)
+                    let insets = "{\\"width\\": \\(window.bounds.width), \\"top\\": \\(window.safeAreaInsets.top), \\"bottom\\": \\(window.safeAreaInsets.bottom)}"
+                    try? insets.write(to: dir.appendingPathComponent("insets.json"), atomically: true, encoding: .utf8)
+                    // Written after the insets, so a launch the suite sees as shown has its insets.
+                    let shown = [
+                        "launch": ProcessInfo.processInfo.environment["WEFT_LAUNCH"] ?? "",
+                        "scheme": scheme == .dark ? "dark" : "light",
+                    ]
+                    try? JSONSerialization.data(withJSONObject: shown)
+                        .write(to: dir.appendingPathComponent("shown.json"), options: .atomic)
                     return
                 }
                 try? await Task.sleep(nanoseconds: 100_000_000)
@@ -453,40 +474,57 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
     if (dir !== "") rmSync(dir, { recursive: true, force: true });
   });
 
-  /** Launches `name` and screenshots it once two screenshots in a row agree. */
+  /** The app's Documents folder, where it writes its insets and the launch it shows. */
+  let documents = "";
+  function appDocuments(): string {
+    if (documents !== "") return documents;
+    const container = run("xcrun", ["simctl", "get_app_container", udid, BUNDLE, "data"]);
+    if (container.status !== 0) throw new Error(`no app container: ${container.stderr.trim()}`);
+    documents = join(container.stdout.trim(), "Documents");
+    return documents;
+  }
+
+  /** Whether the app has said it shows `launch` in `scheme`. */
+  function shows(launch: string, scheme: string): boolean {
+    const file = join(appDocuments(), "shown.json");
+    if (!existsSync(file)) return false;
+    const shown = JSON.parse(readFileSync(file, "utf8")) as { launch?: unknown; scheme?: unknown };
+    return shown.launch === launch && shown.scheme === scheme;
+  }
+
+  /** Launches `name` and screenshots it once the app shows it and the screen has settled. */
   async function shoot(name: string): Promise<Uint8Array> {
     // The dark shot is the same screen in the other appearance, not another build of it.
     const lightScreen = DARK_OF.get(name);
     const [screen, scheme] = lightScreen !== undefined ? [lightScreen, "dark"] : [name, "light"];
+    // An id of its own for every launch, so the app's word that it shows a screen cannot be left
+    // over from an earlier launch.
+    const launch = randomUUID();
     execFileSync("xcrun", ["simctl", "launch", "--terminate-running-process", udid, BUNDLE], {
       env: {
         ...process.env,
         SIMCTL_CHILD_WEFT_SCREEN: screen,
         SIMCTL_CHILD_WEFT_SCHEME: scheme,
+        SIMCTL_CHILD_WEFT_LAUNCH: launch,
         // A live RealityView has no fixed first frame, so a model shows its still (SPEC §9).
         SIMCTL_CHILD_WEFT_STILL_MODELS: "1",
       },
       stdio: "ignore",
     });
     const path = join(dir, `${name}.png`);
-    let previous: Buffer | undefined;
-    let failure = "";
-    for (let attempt = 0; attempt < 40; attempt++) {
-      await sleep(attempt === 0 ? 1500 : 500);
-      // A simulator that has only just booted refuses screenshots for a while; that is a wait,
-      // not a failure.
-      const taken = run("xcrun", ["simctl", "io", udid, "screenshot", "--type=png", path]);
-      if (taken.status !== 0) {
-        failure = taken.stderr.trim();
-        previous = undefined;
-        continue;
-      }
-      const png = readFileSync(path);
-      if (previous?.equals(png)) return new Uint8Array(png);
-      previous = png;
+    try {
+      return await settledShot({
+        drawn: () => shows(launch, scheme),
+        take: () => {
+          const taken = run("xcrun", ["simctl", "io", udid, "screenshot", "--type=png", path]);
+          return taken.status === 0
+            ? new Uint8Array(readFileSync(path))
+            : { error: taken.stderr.trim() };
+        },
+      });
+    } catch (error) {
+      throw new Error(`${name} (${scheme}): ${(error as Error).message}`);
     }
-    if (failure !== "") throw new Error(`no screenshot of ${name}: ${failure}`);
-    throw new Error(`${name} never stopped changing on screen`);
   }
 
   /**
@@ -497,9 +535,7 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
   let strips: { ignoreTop: number; ignoreBottom: number } | undefined;
   async function systemStrips(png: Uint8Array) {
     if (strips !== undefined) return strips;
-    const container = run("xcrun", ["simctl", "get_app_container", udid, BUNDLE, "data"]);
-    if (container.status !== 0) throw new Error(`no app container: ${container.stderr.trim()}`);
-    const file = join(container.stdout.trim(), "Documents", "insets.json");
+    const file = join(appDocuments(), "insets.json");
     for (let attempt = 0; attempt < 40; attempt++) {
       if (existsSync(file)) {
         const { width, top, bottom } = JSON.parse(readFileSync(file, "utf8")) as {
@@ -572,6 +608,22 @@ describe.skipIf("reason" in found)("SwiftUI in the iOS Simulator", () => {
       if (result.status !== "missing") expect(result.status).toBe("differ");
     });
   }
+
+  // Where no baselines are reviewed (CI), nothing else would notice a screen shot as another
+  // screen's picture or as the blank launch screen: the stale shots of T104 failed only the two
+  // comparisons above that happened to pair them.
+  test("no two screens are shot as the same picture", async () => {
+    const seen = new Map<string, string>();
+    const same: string[] = [];
+    for (const name of [...names, ...Object.keys(MUTANTS)]) {
+      const png = await shot(name);
+      const key = fingerprint(png, await systemStrips(png));
+      const other = seen.get(key);
+      if (other === undefined) seen.set(key, name);
+      else same.push(`${other} = ${name}`);
+    }
+    expect(same).toEqual([]);
+  });
 });
 
 /** The simulator's state, e.g. `Booted` or `Shutdown`. */

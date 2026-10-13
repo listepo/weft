@@ -1,5 +1,6 @@
 // The simulator-sharing helpers of the SwiftUI suite: the mode setting, the own-mode device name,
-// device selection and the machine-wide lock. None of it needs Xcode.
+// device selection, the machine-wide lock and when a launched screen is screenshotted. None of it
+// needs Xcode.
 import assert from "node:assert/strict";
 import {
   existsSync,
@@ -18,7 +19,9 @@ import {
   acquireLock,
   deviceName,
   findDevice,
+  settledShot,
   simulatorMode,
+  type ShotProbe,
   type SimulatorDevice,
 } from "../src/simulator.ts";
 
@@ -198,5 +201,63 @@ describe("acquireLock", () => {
       assert.equal(holders[i]?.replace("in-", ""), holders[i + 1]?.replace("out-", ""));
     }
     assert.equal(existsSync(lock), false);
+  });
+});
+
+describe("settledShot", () => {
+  const STALE = Uint8Array.of(1);
+  const SCREEN = Uint8Array.of(2);
+  const now = { wait: async () => {} };
+
+  /**
+   * A device on a loaded machine (T104): for its first `slow` polls it still shows the frame before
+   * the launch, perfectly still, and the app has not said it shows the new screen.
+   */
+  function slowLaunch(slow: number, says = true): ShotProbe {
+    let polls = 0;
+    let shown = false;
+    return {
+      drawn: () => {
+        polls++;
+        shown ||= says && polls > slow;
+        return shown;
+      },
+      take: () => (shown ? SCREEN : STALE),
+    };
+  }
+
+  test("waits for the app to show the launch, not only for a still screen", async () => {
+    assert.deepEqual(await settledShot(slowLaunch(5), now), SCREEN);
+  });
+
+  test("a still screen alone is the frame before the launch on a loaded machine", async () => {
+    // The rule before T104 took two equal screenshots in a row, whatever the app said.
+    let takes = 0;
+    const unaware: ShotProbe = { drawn: () => true, take: () => (++takes > 5 ? SCREEN : STALE) };
+    assert.deepEqual(await settledShot(unaware, now), STALE);
+  });
+
+  test("says when the app never shows the launch", async () => {
+    await assert.rejects(settledShot(slowLaunch(0, false), { ...now, attempts: 5 }), /never said/);
+  });
+
+  test("takes a refused screenshot as a wait", async () => {
+    let refusals = 3;
+    const probe: ShotProbe = {
+      drawn: () => true,
+      take: () => (refusals-- > 0 ? { error: "booting" } : SCREEN),
+    };
+    assert.deepEqual(await settledShot(probe, now), SCREEN);
+  });
+
+  test("says why when every screenshot is refused", async () => {
+    const probe: ShotProbe = { drawn: () => true, take: () => ({ error: "booting" }) };
+    await assert.rejects(settledShot(probe, { ...now, attempts: 5 }), /no screenshot: booting/);
+  });
+
+  test("fails a screen that never settles", async () => {
+    let frame = 0;
+    const probe: ShotProbe = { drawn: () => true, take: () => Uint8Array.of(frame++) };
+    await assert.rejects(settledShot(probe, { ...now, attempts: 5 }), /never stopped changing/);
   });
 });

@@ -2,7 +2,7 @@
 // system draws over are left out, and a difference anywhere else still counts.
 import { encode } from "fast-png";
 import { expect, test } from "vitest";
-import { compare } from "../src/compare.ts";
+import { compare, fingerprint } from "../src/compare.ts";
 
 const WIDTH = 4;
 const HEIGHT = 10;
@@ -35,4 +35,17 @@ test("a difference below the ignored top rows still counts", () => {
 test("a tolerance accepts up to that many differing pixels and no more", () => {
   expect(compare(image(2), image(3), "unit/tolerant", { tolerance: 2 }).diff).toBeUndefined();
   expect(compare(image(2), image(3), "unit/strict", { tolerance: 1 }).diff).toBeDefined();
+});
+
+test("a fingerprint is the same for the same pixels and differs for one changed pixel", () => {
+  expect(fingerprint(image(2))).toBe(fingerprint(image(2)));
+  expect(fingerprint(image(2))).not.toBe(fingerprint(image(3)));
+});
+
+test("a fingerprint leaves out the ignored rows, as the comparison does", () => {
+  expect(fingerprint(image(8), { ignoreBottom: 3 })).toBe(
+    fingerprint(image(9), { ignoreBottom: 3 }),
+  );
+  expect(fingerprint(image(1), { ignoreTop: 3 })).toBe(fingerprint(image(0), { ignoreTop: 3 }));
+  expect(fingerprint(image(5), { ignoreTop: 3 })).not.toBe(fingerprint(image(6), { ignoreTop: 3 }));
 });
