@@ -8,11 +8,7 @@ New bugs, dead code and moves from a read-only Cursor cloud review of `main` at 
 
 | ID | Priority | Kind | Status | Where | Fix |
 | --- | --- | --- | --- | --- | --- |
-| T78 | P2 | bug | confirmed (same run) | `crates/weft-swiftui/tests/swift.rs:201-208` | The Swift typecheck tests ran 9+ minutes and were killed when the gate failed. Give nextest a timeout and a Swift module cache, or keep them out of the batch with flaky runtimes. |
-| T88 | P2 | bug | suspected | `crates/weft-catalog/src/resolver.rs:52-54` vs `:102-103` | The resolver's `tree()` matches context keys case-sensitively; `appearance()` does not. Make `tree()` case-insensitive. |
-| T90 | P2 | dead code | confirmed gap (orphans not listed) | `toolchain.md:18`; about 750 insta snapshots | Nothing checks for unreferenced snapshots. Run `cargo insta test --unreferenced=reject` in CI, or once and delete the orphans. |
 | T92 | P2 | move | suspected | `tooling/changed.ts`, `tooling/select.ts` → the org's `scoped-check` | A fourth copy of the affected-test planner. The other copies were not checked from this repo. |
-| T93 | P2 | move | confirmed | `crates/weft-swiftui/src/import/read.rs`, `crates/weft-web/src/jsx/mod.rs` → smaller modules in the same crates | Split the two giant importer files. |
 
 Already tracked here, not added again: `find_project` and the file-reading `load_project` (`crates/weft-cli/src/main.rs:445-500`) moving into `crates/weft-catalog` is T69.1a; the two private copies of the Slint compile/data code in `crates/weft-slint/tests/` moving to a `runtime` feature is T69.1b.
 
@@ -26,33 +22,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
-| T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
-| T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
-
-### T100. Document versions
-
-An optional `version` (`MAJOR.MINOR.PATCH`) on `<screen>` and `<fragment>`. A fragment's change level comes from its parameter signature through the catalog classifier; a body-only change is a patch. Below `1.0.0` the level follows Cargo's rule, as `requires` does. A screen's level follows its host contract: a new action, a new data path, a path read at a new type, a new writable binding or a lost element id is major; new ids alone are minor; any other canonical change is a patch. `weft version-check` reports `W810` when the declared version was not raised enough. A screen and a `<use>` never name a version. A project pins a library through the existing `requires`, so that pin is not a separate task. The format moves to `weft` 0.3.
-
-Done when the parser, the canonical form, `set-version` and `W230` match the spec, writers emit `weft="0.3"`, and `weft version-check` exits 1 on a version that is too low.
-
-Draft pull request #49.
-
-### T101. Inline fragments
-
-`<fragment name="…">` is a direct child of `<screen>`, after `<context>` and before the body. It is local to that screen and needs no `weft.json`. A name the project already defines is refused. Patches gain a `fragment` member, plus `add-fragment` and `remove-fragment`.
-
-A screen can define a fragment in place, without a project. Approved design: `docs/versions-and-reuse-design.md` §4, and the inline-fragment rows of §7–§9. T100 owns `version` and the format bump to 0.3; T102 owns `<variant>`. This task is only inline fragments.
-
-**Plan.**
-- SPEC §3, §6.2, §7, §8 and §10.7, and AGENT-SPEC, in the same change. Note that the 0.3 bump belongs to T100; do not add a second bump. Primer stays consistent with AGENT-SPEC.
-- Rust core: `Document.fragments`; parse `<fragment name>` as a direct child of `<screen>` after `<context>` and before the body (`W808` leaves a bad one out); uses resolve inline fragments, then the project's; cycles stay `W805` and limits `W806`.
-- Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
-- `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
-- Verify with `moon run root:changed`.
-
-Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
-
-Draft pull request #47.
 
 ### T8. Evaluation
 

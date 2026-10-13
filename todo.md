@@ -4,5 +4,3 @@
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
 - T41. Hosted Penpot plugin
-- T100. Document versions
-- T101. Inline fragments
