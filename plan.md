@@ -8,11 +8,7 @@ New bugs, dead code and moves from a read-only Cursor cloud review of `main` at 
 
 | ID | Priority | Kind | Status | Where | Fix |
 | --- | --- | --- | --- | --- | --- |
-| T78 | P2 | bug | confirmed (same run) | `crates/weft-swiftui/tests/swift.rs:201-208` | The Swift typecheck tests ran 9+ minutes and were killed when the gate failed. Give nextest a timeout and a Swift module cache, or keep them out of the batch with flaky runtimes. |
-| T88 | P2 | bug | suspected | `crates/weft-catalog/src/resolver.rs:52-54` vs `:102-103` | The resolver's `tree()` matches context keys case-sensitively; `appearance()` does not. Make `tree()` case-insensitive. |
-| T90 | P2 | dead code | confirmed gap (orphans not listed) | `toolchain.md:18`; about 750 insta snapshots | Nothing checks for unreferenced snapshots. Run `cargo insta test --unreferenced=reject` in CI, or once and delete the orphans. |
 | T92 | P2 | move | suspected | `tooling/changed.ts`, `tooling/select.ts` → the org's `scoped-check` | A fourth copy of the affected-test planner. The other copies were not checked from this repo. |
-| T93 | P2 | move | confirmed | `crates/weft-swiftui/src/import/read.rs`, `crates/weft-web/src/jsx/mod.rs` → smaller modules in the same crates | Split the two giant importer files. |
 
 Already tracked here, not added again: `find_project` and the file-reading `load_project` (`crates/weft-cli/src/main.rs:445-500`) moving into `crates/weft-catalog` is T69.1a; the two private copies of the Slint compile/data code in `crates/weft-slint/tests/` moving to a `runtime` feature is T69.1b.
 
@@ -25,64 +21,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
-| T16.3 | in progress | P2 | 3 | 0% | Cursor / grok 4.7 |
-| T16.8 | todo | P2 | 3 | 0% | |
-| T16.5 | done | P2 | 3 | 100% | MiMo / MiMo |
-| T16.7 | todo | P2 | 3 | 0% | |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
-| T96 | done | P2 | 3 | 100% | Cursor / grok 4.7 |
-| T97 | done | P2 | 2 | 100% | MiMo / MiMo |
-| T98 | done | P2 | 2 | 100% | MiMo / MiMo |
-| T99 | done | P3 | 1 | 100% | MiMo / MiMo |
-| T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
-| T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
-
-### T96. Too-deep documents: report, do not hide
-
-Found while merging #18. After T79, `serialize`, `stringify` and `canonicalize` (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`) return the output of an empty placeholder document (`to_document(Null)`) for a cyclic or too-deep input instead of failing. Only `applyPatches` reports W200. A caller gets a valid-looking empty screen and no signal.
-
-Done when: these entry points return W200 (or the binding's error type) for a too-deep or cyclic input, in Rust and TypeScript alike, with differential fixtures; no entry point turns such input into an empty document silently.
-
-Execution plan:
-
-1. Reproduce the silent empty document from `serialize`, `stringify` and `canonicalize` on a cyclic value and on a value past the depth limit (`crates/weft-binding/src/api.rs`, `crates/weft-core/src/canonical.rs`, and the TypeScript wrappers that call them).
-2. Return W200, the same way `applyPatches` already does, instead of `to_document(Null)`. Cover every entry point that can hide the failure, in Rust and TypeScript.
-3. Add differential fixtures: cyclic and too-deep inputs must not come back as an empty screen.
-4. Verify with `moon run root:changed`. Leave unrelated entry points unchanged.
-
-### T97. Design-tool plugin data over 100 kB
-
-Found while merging #18. T83 made `writeJson` (`packages/design-tool/src/keys.ts`) throw once an entry passes 100 kB. It is called partway through `packages/design-tool/src/build.ts`, so one node with a very large source aborts the whole Figma or Penpot build. The message says "bytes" but the check counts string length (UTF-16 code units), not UTF-8 bytes.
-
-Done when: the cap is measured in UTF-8 bytes as Figma documents it; an oversized entry is reported as a build diagnostic and the rest of the build completes (the layer is drawn, its source is not stored, and pull reads it as foreign); tests cover a multi-byte source near the cap.
-
-### T98. `fmt --write` keeps symlinks and permissions
-
-Found while merging #18. T81's atomic write (temp file, then rename) in the Rust CLI (`crates/weft-cli/src/main.rs`) and the TypeScript CLI replaces the target path. Formatting a symlinked file turns the link into a regular file, and the file's permissions are not kept.
-
-Done when: both CLIs resolve a symlink and write to its target, copy the original file's permissions onto the temp file before the rename, and have tests for a symlinked file and a read-only-group file.
-
-### T99. Node capped read handles a short read
-
-Found while merging #18. The T86 capped read in `packages/catalog/src/node.ts` makes a single `readSync` call into a buffer of `maxChars*4+1` bytes allocated up front. A short read is unlikely on a regular file but is not handled, and the buffer is sized for the worst case.
-
-Done when: the read loops until EOF or the cap, and a test covers a reader that returns fewer bytes than asked.
-
-### T100. Document versions
-
-An optional `version` (`MAJOR.MINOR.PATCH`) on `<screen>` and `<fragment>`. A fragment's change level comes from its parameter signature through the catalog classifier; a body-only change is a patch. Below `1.0.0` the level follows Cargo's rule, as `requires` does. A screen's level follows its host contract: a new action, a new data path, a path read at a new type, a new writable binding or a lost element id is major; new ids alone are minor; any other canonical change is a patch. `weft version-check` reports `W810` when the declared version was not raised enough. A screen and a `<use>` never name a version. A project pins a library through the existing `requires`, so that pin is not a separate task. The format moves to `weft` 0.3.
-
-Done when the parser, the canonical form, `set-version` and `W230` match the spec, writers emit `weft="0.3"`, and `weft version-check` exits 1 on a version that is too low.
-
-Draft pull request #49.
-
-### T101. Inline fragments
-
-`<fragment name="…">` is a direct child of `<screen>`, after `<context>` and before the body. It is local to that screen and needs no `weft.json`. A name the project already defines is refused. Patches gain a `fragment` member, plus `add-fragment` and `remove-fragment`.
-
-Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
-
-Draft pull request #47.
 
 ### T8. Evaluation
 
@@ -330,65 +269,6 @@ T68's done criteria ("a Slint component generated by T67 shows and takes input i
 - slint-bindings at `2b9fa96` (2026-10-07): its `README.md`, `plan.md`, `done.md` (T2 frame times), `crates/slint-bindings-core/src/host.rs`, `crates/slint-bindings-ffi/src/lib.rs`, `swift/Package.swift`, `swift/Sources/SlintBindings/`, `windows/README.md`: https://github.com/listepo/slint-bindings/tree/2b9fa96b17464a628970ce1e1d6628b8c2580b30
 - Apple App Sandbox, user-selected files (**unverified**: the page renders by script): https://developer.apple.com/documentation/security/accessing-files-from-the-macos-app-sandbox
 
-### T16.3. Layout vocabulary: web generators and the reference renderer
-
-T16 scope items 3 and 5 for the web, as the design's generate table says. Depends on T16.2.
-
-Execution plan: follow the four steps below, and only those. Read `docs/layout-design.md` generate table before editing. Update SPEC §9 web rows in the same change as the generators. Retake and review insta snapshots and the `packages/visual` web baselines for `dashboard`, `glass` and `layout`. Do not implement importers (T16.8), SwiftUI, Slint, or design tools. Verify with the visual comparison (including a narrow viewport at one column and a wide one at three) and `moon run root:changed`.
-
-Steps:
-
-1. `crates/weft-web/src/html.rs`: `data-justify` and `data-grow` with rules in the layout stylesheet; inline `padding`, `width: 100%; max-width` and the capped `auto-fill` grid template, all through `var(--weft-…)`.
-2. The shared JSX render plan (`crates/weft-web/src/jsx/`) for React, SolidJS and Lit, with the same declarations as inline styles.
-3. `packages/render-react/src/render.ts`: `layoutStyle` for the stack and grid props, and `grow` in `renderNode` beside the tilt.
-4. §9 web rows move from loss to mapping; insta snapshots and the `packages/visual` web baselines retaken and reviewed for `dashboard`, `glass` and `layout`.
-
-Size: about 250 lines of code.
-
-Done when: the three screens pass the `packages/visual` cross-target comparison (React, SolidJS, the reference renderer), a narrow-viewport case shows the stats grid at one column and a wide one at three, and `moon run root:changed` exits 0.
-
-### T16.8. Layout vocabulary: web importers
-
-T16 scope item 4 for the web, as the design's import table says. Depends on T16.3, whose output it reads back.
-
-Steps:
-
-1. `crates/weft-web/src/dom.rs`: `data-justify`, `data-grow`, and the inline `padding`, `max-width` and grid template when they name `--weft-` properties.
-2. `crates/weft-web/src/from_jsx/`: the same conventions in inline styles.
-3. Foreign markup: `justify-content` among the four values, any positive `flex-grow` as `grow`; `space-around`, `space-evenly`, `stretch`, unequal grow ratios, raw lengths and media or container queries are `layout` losses. §9 rows updated.
-
-Size: about 250 lines of code.
-
-Done when: the generated HTML and JSX of `dashboard`, `glass` and `layout`, with the source comment removed, read back to the same props; a test covers each listed loss; `moon run root:changed` exits 0.
-
-### T16.5. Layout vocabulary: Slint
-
-T16 scope items 3 to 5 for `crates/weft-slint`. Depends on T16.2 (T67.4 and T67.5 are done).
-
-Steps:
-
-1. Check first whether a stack without `alignment` stretches its children in Slint 1.18.1 (`research.md` §21 marks it **unverified**); if it does, write `alignment: start` on every stack and retake the screenshots.
-2. Generator: `alignment` for `justify`, `horizontal-stretch`/`vertical-stretch: 1` for `grow` (and `0` on its siblings), `padding` and `max-width` in px; `min-column-width` is kept in the source comment and drawn with `columns`.
-3. Reader: those properties back, px values that equal exactly one dimension token as that token; other values are `layout` losses. §9 rows updated.
-
-Size: about 150 lines of code.
-
-Done when: the three screens compile, their screenshots are reviewed, and they read back to the same props without the source comment; `moon run root:changed` exits 0.
-
-### T16.7. Layout vocabulary: Figma and Penpot
-
-T16 scope items 3 to 5 for the design tools. Depends on T16.2.
-
-Steps:
-
-1. `packages/design-tool/src/view.ts` `layoutView`: `justify` as the main-axis alignment, `grow` as fill on the parent's main axis, `padding` and `max-width` (bound to variables in Figma, px in Penpot), `min-column-width` drawn with `columns` and kept in plugin data.
-2. `read.ts` and `foreign.ts`: Weft-built layers from plugin data as now; foreign layers by the import table (four equal paddings, one token, fill as `grow`); the rest are `layout` losses.
-3. Layer-tree snapshots of the Figma and Penpot builds and the round trips for the three screens. §9 rows updated.
-
-Size: about 250 lines of code.
-
-Done when: the Figma and Penpot round trips of `dashboard`, `glass` and `layout` keep every prop, a foreign-layer test covers each listed loss, and `moon run root:changed` exits 0.
-
 ### T41. Hosted Penpot plugin
 
 Penpot installs a plugin only from the URL of its `manifest.json`, and plugins are hosted outside Penpot. Today the Weft Penpot plugin is available only to someone who clones the repository and runs `moon run penpot-plugin:serve`. The repository is public on GitHub (`listepo/weft`), so CI can build the plugin and publish `dist/` on GitHub Pages, which serves the files with the right content types and `Access-Control-Allow-Origin: *`.
@@ -429,14 +309,3 @@ Penpot installs a plugin only from the URL of its `manifest.json`, and plugins a
 2. `tooling/test/workflows.test.ts`: every `moon run`/`moon exec` in `.github/workflows/*.yml` names tasks that `moon query tasks` knows, and a task with `runInCI: false` is run with `--ignore-ci-checks` (or `--ci false`). `tooling/moon.yml` lists the workflows and the moon configs as inputs.
 3. `plugins/penpot/test/pages.test.ts`: pin the new build command.
 4. Verify: the new test fails on the old workflow and passes on the fixed one; `CI=true moon exec penpot-plugin:build --ignore-ci-checks` writes `plugins/penpot/dist/`; the full check. The deploy itself is confirmed by the next push to `main`.
-
-### T101. Inline fragments
-
-A screen can define a fragment in place, without a project. Approved design: `docs/versions-and-reuse-design.md` §4, and the inline-fragment rows of §7–§9. T100 owns `version` and the format bump to 0.3; T102 owns `<variant>`. This task is only inline fragments.
-
-**Plan.**
-- SPEC §3, §6.2, §7, §8 and §10.7, and AGENT-SPEC, in the same change. Note that the 0.3 bump belongs to T100; do not add a second bump. Primer stays consistent with AGENT-SPEC.
-- Rust core: `Document.fragments`; parse `<fragment name>` as a direct child of `<screen>` after `<context>` and before the body (`W808` leaves a bad one out); uses resolve inline fragments, then the project's; cycles stay `W805` and limits `W806`.
-- Patches: optional `fragment` on `set`/`insert`/`remove`/`move`; `add-fragment` (`W513` when the name is taken); `remove-fragment` (`W502` for an unknown name; a `<use>` that still names it fails as `W801` and applies nothing).
-- `to-jsx` emits one component per inline fragment. MCP `weft_catalog` lists the screen's inline fragments when given markup. One corpus screen uses an inline fragment. Importers do not produce them.
-- Verify with `moon run root:changed`.
