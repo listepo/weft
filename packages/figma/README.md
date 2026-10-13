@@ -135,8 +135,9 @@ Only shared plugin data is supported. `dataOf(node)` is the one way the package 
 - The only token-typed props in the `weft-core` catalog are `stack.gap` and `grid.gap`. Every other visual edit is reported as a `tokens` loss rather than carried into the markup. `docs/figma-style-overrides-design.md` proposes how Weft could keep such edits.
 - Containers are frames, not instances. Figma instances cannot take arbitrary children, so a library container instance has to be detached before a designer can fill it. A detached instance is read as a frame named after its kind.
 - `rem` tokens are converted at 16 px (`REM_PX`).
-- Figma's documentation says nothing about whether plugin data survives duplicating a layer or detaching an instance. The read-back handles both cases:
+- Figma's documentation says nothing about whether plugin data survives duplicating a layer or detaching an instance. In a real file both keep the shared data (see "Checked in a real file" below). The read-back handles every case:
   - a copy that kept its source gets a fresh id;
+  - a detached instance keeps its source and its id, and reads back as the element it was;
   - a layer without a source is read as a foreign layer.
 
 ## Figma API facts this package relies on
@@ -165,8 +166,23 @@ All facts were checked against the official documentation on 2026-10-05.
 **Unverified:** the official docs do not state these, and the package does not depend on them:
 
 - whether `/` in a variable name groups variables in Figma's UI (variables are named that way here);
-- whether plugin data is copied on duplicate or on detach;
 - the shape of the REST API's `sharedPluginData`: the docs type it `Any`, and the pull reads it as `pluginData` is read, an object of entries per namespace (`{ "weft": { "weft.source": "…" } }`). A pull from a real file confirms it.
+
+## Checked in a real file
+
+On 2026-10-14 (T14.4), through the Figma MCP server's `use_figma` tool (Plugin API code run in the file), in a new test file made for the check, "weft T14 plugin-data check" (https://www.figma.com/design/DFT0NUqPmqtUfuKQ3fmqKl). A screen was built the way the plugin builds `receipt` (frames, a text layer, a component with two instances, a variable collection and a variable, all marked under `weft`), then read back in a separate call. Each fact below is that observation; none is in Figma's documentation.
+
+| Fact | How it was seen |
+| --- | --- |
+| `use_figma` reads and writes shared plugin data: `getSharedPluginData`, `setSharedPluginData` and `getSharedPluginDataKeys` work on frames, text, components, instances, variables and variable collections. Every `weft.*` key the plugin writes (`source`, `document`, `context`, `origin`, `style`, `text`, `label`, `slot`, `kind`, `token`, `modifier`) came back byte for byte in a later call, non-ASCII text and emoji included. A missing key reads `""`. | Write in one call, compare in the next |
+| Private plugin data is not available there: `getPluginData` and `setPluginData` throw "figma.getPluginData is not supported in this host runtime (only private plugins on web can use it)". So shared data is the only way the Weft source reaches agents (T14.2). | The thrown errors |
+| One entry may hold up to 102,400 UTF-8 bytes counting the key: with namespace `weft` and key `probe` the largest value accepted was 102,391 bytes (ASCII, or 2-byte characters to the same byte count), and a 200-character key with that value was refused ("exceeds 100 kB per entry limit"). The package's own cap, 100,000 bytes for the value (`MAX_ENTRY` in `@weft/design-tool`), stays under it. | Binary search on the accepted length |
+| A namespace shorter than 3 characters throws "The namespace must be at least 3 characters". | The thrown error |
+| An instance shows its main component's shared data, live (a key set on the main after the instance exists shows on the instance), unless the instance set the key itself; setting it to `""` on the instance hides the main's value. So every library instance reads `weft.kind`; the read-back takes the kind from the main component only, so this changes nothing. | Reads on the instances |
+| Duplicating (`clone()`) copies every entry, `weft.origin` included, to the copy and its children, so the copy's origin names the original layer. | Reads on the clone |
+| Detaching (`detachInstance()`) gives a frame with a new id that keeps the instance's entries and the inherited ones (`weft.kind`). | Reads on the detached frame |
+
+The fake (`test/fake-figma.ts`) follows the last three facts. Still unverified: the REST API's `sharedPluginData` shape and the two REST facts above, which need a pull with a personal access token, and the plugin itself in the Figma app.
 
 ## Tests
 
@@ -177,6 +193,6 @@ All facts were checked against the official documentation on 2026-10-05.
 - foreign layers and their losses;
 - the plugin message handler;
 - the pull (`test/pull.test.ts`): every corpus screen built into the fake, written as REST JSON with the documented defaults left out (`test/rest-server.ts`), served on a local port and pulled back byte-identical; a designer's edit; the requests' header and parameters; the error messages and the token's redaction; link parsing.
-- shared plugin data (`test/shared-data.test.ts`): a build writes the source only as shared data under `weft`, and the frame reads back byte-identical. The layer snapshots list the shared data. The pull asks for shared data only, and a frame without it reads as foreign layers.
+- shared plugin data (`test/shared-data.test.ts`): a build writes the source only as shared data under `weft`, and the frame reads back byte-identical. The layer snapshots list the shared data. The pull asks for shared data only, and a frame without it reads as foreign layers. An instance that shows its main's `weft.kind` still reads back unchanged, and a detached instance that kept its source reads back as the element it was, with a text edit carried over.
 
 `test/api-types.test.ts` assigns the official `PluginAPI` and node types to the narrow API. If the subset ever drifts from the real API, `tsc` fails.
