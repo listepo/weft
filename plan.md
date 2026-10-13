@@ -10,8 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
-| T105 | in progress | P2 | 5 | 15% | Claude Code / claude-opus-5-5 |
-| T105.1 | in progress | P2 | 4 | 5% | Claude Code / claude-opus-5-5 |
+| T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T105.2 | todo | P2 | 4 | 0% | |
 | T105.3 | todo | P2 | 4 | 0% | |
 | T105.4 | todo | P2 | 4 | 0% | |
@@ -21,7 +20,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.8 | todo | P2 | 4 | 0% | |
 | T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
-| T105.11 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -320,12 +318,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
 
-### T105.1. WinUI generator: first slice and source-comment read-back
-
-Crate `crates/weft-winui`; names and data typing; the XAML writer; `screen`, `stack` (without `justify` or `grow`), `text`, `heading`, `button`, `field`, `checkbox`, `switch` and `form`, with ids, labels, `hidden`, bindings and markers; everything else refused as `Unsupported` with its path. The source comment with the XML escape. SPEC §9 "To WinUI" for the slice first. Golden files with `WEFT_UPDATE_FIXTURES=1`. Done when the slice's corpus screens and examples generate and match their goldens. The read-back moved to T105.11 at claim time: the whole card measured about 700 lines of code and the generator alone about 590, because typing every bound path (the view model is compiled C#) and refusing what x:Bind cannot express took more than the estimate of 480.
-
-**Execution plan.** (1) SPEC §9 "To WinUI" for the slice, before the code. (2) `crates/weft-winui` (`indexmap`, `thiserror`, `weft-core`, `weft-catalog`, `weft-import`): `lib.rs` (`Unsupported`), `xaml.rs` (the element writer: attribute values through `weft-core`'s attribute escaper, made public, and a literal starting with `{` written `{}{…}` so XAML never reads it as a markup extension), `data.rs` (types of the paths the slice reads; refuses a path read with two types, a value read as an object, array indexes until `<each>`, and names that are generated members), `generate.rs` (`generate` → `Generated { page, xaml }`: the source comment, then `Page` → `ScrollViewer` → `StackPanel`, the slice's kinds as in `docs/winui-design.md`, every other kind, prop and slot `Unsupported` with its path). The helper classes (`Weft`, `Props`, `On`, `Slot`) are taken from `xmlns:weft="using:<namespace>"`; T105.2 writes them. (3) `weft_import::provenance`: say and test that the escape also satisfies XML comments (no `--`, the payload never touches the close). (4) Tests: goldens in `crates/weft-winui/tests/fixtures/` (the slice's catalog examples and a `controls.weft` covering every slice prop; no corpus screen is inside the slice yet), refusals with paths, XML well-formedness of hostile text (`roxmltree` as a dev-dependency); a `deps.rs` row for the crate. (5) `toolchain.md` and the workspace `rust.md` rows for `roxmltree`. Verify with `moon run root:changed -- --base origin/main`.
-
 ### T105.2. WinUI view model, code-behind and helpers
 
 `<Name>ViewModel.cs` (properties, item classes with `WeftRoot`/`WeftParent`/`WeftPath`, `ObservableCollection<T>`, one command per action, `Perform`, `Performed`), `<Name>Page.xaml.cs`, and `Weft.cs` core (`On.*` event properties, `Not`, `Truthy`, `Hide`, `Props` markers). About 450 lines of code. Done when the goldens of T105.1 carry their C# and the type and name refusals have tests.
@@ -361,9 +353,3 @@ A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `a
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
 SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.
-
-### T105.11. WinUI read-back of generated pages
-
-Split from T105.1. `import_winui` reads a page `generate` wrote back into the document its `weft:source winui` comment holds: the comment through `weft_import::provenance`, a strict parse, and acceptance only when regenerating with the comment's name and namespace gives the same XAML compared as XML with `roxmltree` (expanded names, attributes in any order, non-blank text; comments and whitespace do not count). Input bounded in bytes and XML nodes, DTDs refused. SPEC §9 "From WinUI" for it. About 110 lines of code. Done when every golden of T105.1 reads back exactly, also reformatted, and an edited page, a foreign comment, a misplaced comment, a DTD and an oversized source are rejected.
-
-**Execution plan.** (1) SPEC §9 "From WinUI". (2) `crates/weft-winui/src/import.rs`; `roxmltree` moves from a dev-dependency to a dependency, and the `deps.rs` row follows. (3) `tests/read_back.rs` over the goldens of T105.1, sharing `tests/common` with the generator tests. Verify with `moon run root:changed -- --base origin/main`.
