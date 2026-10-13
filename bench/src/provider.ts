@@ -6,8 +6,13 @@ export interface Completion {
   outputTokens?: number;
 }
 
+export interface CompleteOptions {
+  /** A JSON Schema the provider's structured-output mode holds the reply to. */
+  schema?: object;
+}
+
 export interface Provider {
-  complete(prompt: string): Promise<Completion>;
+  complete(prompt: string, options?: CompleteOptions): Promise<Completion>;
 }
 
 export const DEFAULT_MODELS = [
@@ -101,21 +106,22 @@ function fromAnthropic(json: AnthropicMessage): Completion {
   };
 }
 
-const anthropicParams = (o: AnthropicOptions, prompt: string) => ({
+const anthropicParams = (o: AnthropicOptions, prompt: string, schema?: object) => ({
   model: o.model,
   max_tokens: o.maxTokens ?? 8192,
   messages: [{ role: "user", content: prompt }],
+  ...(schema ? { output_config: { format: { type: "json_schema", schema } } } : {}),
 });
 
 export function anthropicProvider(o: AnthropicOptions): Provider {
   return {
-    async complete(prompt) {
+    async complete(prompt, options) {
       return fromAnthropic(
         (await post(
           "Anthropic API",
           `${API}/messages`,
           anthropicHeaders(o.apiKey),
-          anthropicParams(o, prompt),
+          anthropicParams(o, prompt, options?.schema),
           o,
         )) as AnthropicMessage,
       );
@@ -141,7 +147,7 @@ export function openAiProvider(o: OpenAiOptions): Provider {
   const headers: Record<string, string> = { "content-type": "application/json" };
   if (o.apiKey) headers.authorization = `Bearer ${o.apiKey}`;
   return {
-    async complete(prompt) {
+    async complete(prompt, options) {
       const json = (await post(
         "OpenAI-compatible API",
         `${o.baseUrl.replace(/\/$/, "")}/chat/completions`,
@@ -150,10 +156,18 @@ export function openAiProvider(o: OpenAiOptions): Provider {
           model: o.model,
           max_tokens: o.maxTokens ?? 32768,
           messages: [{ role: "user", content: prompt }],
+          ...(options?.schema
+            ? {
+                response_format: {
+                  type: "json_schema",
+                  json_schema: { name: "document", strict: true, schema: options.schema },
+                },
+              }
+            : {}),
         },
         { ...o, fetch: o.fetch ?? patientFetch },
       )) as {
-        choices?: { message?: { content?: string | null } }[];
+        choices?: { message?: { content?: string | null; reasoning_content?: string | null } }[];
         usage?: {
           prompt_tokens?: number;
           completion_tokens?: number;
@@ -161,13 +175,21 @@ export function openAiProvider(o: OpenAiOptions): Provider {
         };
       };
       const u = json.usage;
-      // Reasoning is excluded so output size compares the documents the formats produce.
+      const message = json.choices?.[0]?.message;
+      // Under a schema the grammar holds the model from its first token, so it never closes a
+      // thinking block, and LM Studio files the whole constrained reply as reasoning. That text is
+      // the answer, and its tokens are the reply's.
+      const asReasoning = !!options?.schema && !message?.content && !!message?.reasoning_content;
+      // Otherwise reasoning is excluded so output size compares the documents the formats produce.
       const visible =
         u?.completion_tokens === undefined
           ? undefined
-          : u.completion_tokens - (u.completion_tokens_details?.reasoning_tokens ?? 0);
+          : u.completion_tokens -
+            (asReasoning ? 0 : (u.completion_tokens_details?.reasoning_tokens ?? 0));
       return {
-        text: stripThinking(json.choices?.[0]?.message?.content ?? ""),
+        text: asReasoning
+          ? (message?.reasoning_content as string)
+          : stripThinking(message?.content ?? ""),
         ...(u?.prompt_tokens !== undefined ? { inputTokens: u.prompt_tokens } : {}),
         ...(visible !== undefined ? { outputTokens: visible } : {}),
       };
@@ -249,7 +271,9 @@ export function batchingProvider(submit: (prompts: string[]) => Promise<Completi
     );
   };
   return {
-    complete(prompt) {
+    complete(prompt, options) {
+      // The batch requests carry prompts only; dropping the schema would score a free reply as constrained.
+      if (options?.schema) return Promise.reject(new Error("batch mode sends no schema"));
       return new Promise((resolve, reject) => {
         if (queue.length === 0) setImmediate(flush);
         queue.push({ prompt, resolve, reject });
@@ -273,10 +297,12 @@ export async function countAnthropicTokens(o: AnthropicOptions, text: string): P
 }
 
 /** Deterministic stand-in for tests: the reply is a pure function of the prompt. */
-export function mockProvider(reply: (prompt: string) => string): Provider {
+export function mockProvider(
+  reply: (prompt: string, options?: CompleteOptions) => string,
+): Provider {
   return {
-    async complete(prompt) {
-      const text = reply(prompt);
+    async complete(prompt, options) {
+      const text = reply(prompt, options);
       return { text, outputTokens: text.length };
     },
   };

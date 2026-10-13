@@ -1,9 +1,9 @@
 import { countProxy } from "./tokens.ts";
 import { CORPUS_DIR, readScreen, type EditTask, type QuestionTask, type Task } from "./corpus.ts";
-import { FENCE_LANG, extractDocument, parsers } from "./formats.ts";
+import { FENCE_LANG, extractDocument, parsers, schemaFor } from "./formats.ts";
 import { evaluate, missingContent, norm, type Format } from "./neutral.ts";
 import { PRIMERS } from "./primers.ts";
-import type { Provider } from "./provider.ts";
+import type { CompleteOptions, Provider } from "./provider.ts";
 import { bindingChanges } from "./readback.ts";
 import { readFileSync } from "node:fs";
 import pLimit from "p-limit";
@@ -228,7 +228,10 @@ export async function runTask(
   options: RunOptions = {},
 ): Promise<TaskResult> {
   const prompt = task.type === "edit" ? editPrompt(task, format) : readPrompt(task, format);
-  const completion = await provider.complete(prompt);
+  // Only a reply that is a document is held to the schema; an answer line is not one.
+  const schema = task.type === "edit" ? schemaFor(format) : undefined;
+  const constrain: CompleteOptions = schema ? { schema } : {};
+  const completion = await provider.complete(prompt, constrain);
   const outputTokens = completion.outputTokens ?? countProxy(completion.text);
   if (task.type !== "edit")
     return scoreTask(task, format, model, sample, completion.text, outputTokens);
@@ -238,6 +241,7 @@ export async function runTask(
   if (!first.valid) {
     const retry = await provider.complete(
       repairPrompt(task, format, completion.text, first.errors),
+      constrain,
     );
     repairReply = retry.text;
     current = retry.text;
@@ -250,7 +254,7 @@ export async function runTask(
     completion.text,
     outputTokens,
     repairReply,
-    await readbackOf(task, format, provider, current, options),
+    await readbackOf(task, format, provider, current, options, constrain),
   );
   // A run that asked for the turn records the columns even when a reply stayed invalid.
   if (!options.readback || scored.successAfterReadback !== undefined) return scored;
@@ -269,13 +273,14 @@ async function readbackOf(
   provider: Provider,
   reply: string,
   options: RunOptions,
+  constrain: CompleteOptions,
 ): Promise<string | undefined> {
   if (!options.readback) return undefined;
   const edited = parsers[format](extractDocument(reply));
   if (!edited.tree || edited.errors.length > 0) return undefined;
   const original = parsers[format](readScreen(task.screen, format));
   const lines = original.tree ? bindingChanges(original.tree, edited.tree) : [];
-  const follow = await provider.complete(readbackPrompt(task, format, reply, lines));
+  const follow = await provider.complete(readbackPrompt(task, format, reply, lines), constrain);
   return follow.text;
 }
 
