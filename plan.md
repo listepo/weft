@@ -11,7 +11,6 @@ New bugs, dead code and moves from a read-only Cursor cloud review of `main` at 
 | T78 | P2 | bug | confirmed (same run) | `crates/weft-swiftui/tests/swift.rs:201-208` | The Swift typecheck tests ran 9+ minutes and were killed when the gate failed. Give nextest a timeout and a Swift module cache, or keep them out of the batch with flaky runtimes. |
 | T88 | P2 | bug | suspected | `crates/weft-catalog/src/resolver.rs:52-54` vs `:102-103` | The resolver's `tree()` matches context keys case-sensitively; `appearance()` does not. Make `tree()` case-insensitive. |
 | T90 | P2 | dead code | confirmed gap (orphans not listed) | `toolchain.md:18`; about 750 insta snapshots | Nothing checks for unreferenced snapshots. Run `cargo insta test --unreferenced=reject` in CI, or once and delete the orphans. |
-| T92 | P2 | move | suspected | `tooling/changed.ts`, `tooling/select.ts` → the org's `scoped-check` | A fourth copy of the affected-test planner. The other copies were not checked from this repo. |
 | T93 | P2 | move | confirmed | `crates/weft-swiftui/src/import/read.rs`, `crates/weft-web/src/jsx/mod.rs` → smaller modules in the same crates | Split the two giant importer files. |
 
 Already tracked here, not added again: `find_project` and the file-reading `load_project` (`crates/weft-cli/src/main.rs:445-500`) moving into `crates/weft-catalog` is T69.1a; the two private copies of the Slint compile/data code in `crates/weft-slint/tests/` moving to a `runtime` feature is T69.1b.
@@ -36,7 +35,6 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T99 | done | P3 | 1 | 100% | MiMo / MiMo |
 | T100 | in progress | P1 | 4 | 80% | Cursor / grok 4.7 |
 | T101 | in progress | P1 | 4 | 90% | Cursor / grok 4.7 |
-| T92 | in progress | P2 | 1 | 0% | Claude Code / claude-sonnet-5-5 |
 
 ### T96. Too-deep documents: report, do not hide
 
@@ -84,16 +82,6 @@ Draft pull request #49.
 Done when a screen without a project validates and expands an inline fragment, `W808` covers a bad declaration, and `to-jsx` emits one component for it.
 
 Draft pull request #47.
-
-### T92. Affected-check planner vs scoped-check
-
-Cloud review row T92: is `tooling/changed.ts` + `tooling/select.ts` a fourth copy of the org's `scoped-check` affected-test planner, and should it move there? Done when the two are compared from their sources, the verdict (move / no move) is written down with the sources, and any piece that could move is an idea in `ideas.md`. No tooling behaviour changes.
-
-Execution plan:
-
-1. Read `tooling/changed.ts`, `tooling/select.ts` and `tooling/test/select.test.ts` here, and `scoped-check` (`README.md`, `src/plan.rs`) with the crates it builds on (`cargo-changed-packages`, `git-changed-paths`, `path-gates`) in `packages/crates`.
-2. List what overlaps (line-for-line or in behaviour) and what Weft needs that `scoped-check` cannot express.
-3. Record the verdict in the `done.md` entry, close the card and the cloud review row. Docs-only change, so no test is possible.
 
 ### T8. Evaluation
 
