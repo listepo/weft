@@ -1,7 +1,7 @@
 // The workflows name moon targets as plain text, and only the hosted runner used to check them:
-// the Pages deploy ran `moon run penpot-plugin:build`, which moon drops in CI because the task has
-// `runInCI: false`, so the deploy failed on main while the gate stayed green. This suite checks
-// every target in .github/workflows against the workspace's tasks, offline.
+// a since-removed deploy job ran `moon run penpot-plugin:build`, which moon drops in CI because the
+// task has `runInCI: false`, so the deploy failed on main while the gate stayed green. This suite
+// checks every target in .github/workflows against the workspace's tasks, offline.
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync } from "node:fs";
@@ -87,6 +87,22 @@ describe("the moon targets the workflows run", () => {
     test(`${name} runs only tasks that exist and that moon runs in CI`, () => {
       const commands = moonCommands(readFileSync(folder + name, "utf8"));
       assert.deepEqual(commands.flatMap(problems), []);
+    });
+  }
+});
+
+// The creator decided against GitHub Pages, and Pages is off for the repository: a Pages deploy
+// fails on every push to main, which turned main red while every pull request stayed green.
+describe("no workflow deploys to GitHub Pages", () => {
+  for (const name of workflows) {
+    test(`${name} asks for no Pages permission and runs no Pages deploy`, () => {
+      const lines = readFileSync(folder + name, "utf8")
+        .split("\n")
+        .filter((line) => !line.trimStart().startsWith("#"));
+      assert.deepEqual(
+        lines.filter((line) => /^\s*pages:\s*write\b|\bactions\/deploy-pages@/.test(line)),
+        [],
+      );
     });
   }
 });
