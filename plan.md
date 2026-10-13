@@ -103,6 +103,13 @@ Execution plan:
 
 Progress: steps 1–5 are done (repair cycle, summaries, `DEFAULT_MODELS`, results committed under `bench/results/`, trial row in `test.md`). `bench/EVALUATION.md` records those runs against the numeric bar and does not close the task. Remaining: step 6, the three-sample edit and read runs on the current harness, then a history row and a revision of the report. Step 8 waits on that.
 
+Execution plan, round 2 (no paid calls until the creator approves the budget):
+
+1. `run.ts --resume <results.json>`: run only the jobs missing from a saved run (same model, task, format, sample) and save the merged results under a new stamp, so a run stopped by quota or an outage keeps what was paid for. Mocked-provider test in `bench/test/checkers.test.ts`.
+2. `run.ts --estimate`: no calls; prints requests and proxy input tokens per model and format for the planned jobs, the input to the budget request. Test beside the first.
+3. Local three-sample edit and read runs on LM Studio (`prism-ml/bonsai-27b`), all screens, current harness; raw results and History rows in `test.md`.
+4. Cost estimate for the Anthropic runs of step 6 (tasks × samples × models × tokens, prices from the vendor's pricing page with URL and date) and the exact command; `bench/EVALUATION.md` revised with the local runs. The paid runs wait on the creator.
+
 ### T14. Figma round trip and plugin
 
 Convert Weft to Figma and back without loss, and ship a Figma plugin. Approved scope:
