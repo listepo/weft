@@ -22,6 +22,17 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
+| T105 | in progress | P2 | 5 | 10% | Claude Code / claude-opus-5-5 |
+| T105.1 | todo | P2 | 4 | 0% | |
+| T105.2 | todo | P2 | 4 | 0% | |
+| T105.3 | todo | P2 | 4 | 0% | |
+| T105.4 | todo | P2 | 4 | 0% | |
+| T105.5 | todo | P2 | 4 | 0% | |
+| T105.6 | todo | P2 | 2 | 0% | |
+| T105.7 | todo | P2 | 3 | 0% | |
+| T105.8 | todo | P2 | 4 | 0% | |
+| T105.9 | todo | P2 | 4 | 0% | |
+| T105.10 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
 
@@ -309,3 +320,53 @@ Penpot installs a plugin only from the URL of its `manifest.json`, and plugins a
 2. `tooling/test/workflows.test.ts`: every `moon run`/`moon exec` in `.github/workflows/*.yml` names tasks that `moon query tasks` knows, and a task with `runInCI: false` is run with `--ignore-ci-checks` (or `--ci false`). `tooling/moon.yml` lists the workflows and the moon configs as inputs.
 3. `plugins/penpot/test/pages.test.ts`: pin the new build command.
 4. Verify: the new test fails on the old workflow and passes on the fixed one; `CI=true moon exec penpot-plugin:build --ignore-ci-checks` writes `plugins/penpot/dist/`; the full check. The deploy itself is confirmed by the next push to `main`.
+
+### T105. Weft to WinUI 3 and back
+
+Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read WinUI XAML back into Weft, as T67 does for Slint and T34 for SwiftUI. The design is `docs/winui-design.md`; the external facts, with sources, are `research.md` §23.
+
+**Decisions (creator).** A new target modelled on `crates/weft-slint` and `crates/weft-swiftui`. The output is a XAML `Page` that binds with `{x:Bind}` to a generated C# view model: data paths are its properties, the actions of `on-<event>` are its commands. The importer reads the XAML only; the C# is derived. Checked locally by golden files, XML checks and round trips, and in CI by a Windows job that `dotnet build`s a WinUI project holding every generated corpus screen; screenshots may follow as a separate task. The creator approves the design before any code.
+
+**Execution plan (this round, design only).** Write `docs/winui-design.md` (mapping of every core kind and prop, tokens, layout vocabulary, bindings, events, slots, light and dark, losses, round trip, XML parser, CI job, open questions), `research.md` §23, and the sub-tasks below. Then wait for the creator's approval and answers to the open questions; T105.1 starts only after that.
+
+**Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
+
+### T105.1. WinUI generator: first slice and source-comment read-back
+
+Crate `crates/weft-winui`; names and data typing; the XAML writer; `screen`, `stack` (without `justify` or `grow`), `text`, `heading`, `button`, `field`, `checkbox`, `switch` and `form`, with ids, labels, `hidden`, bindings and markers; everything else refused as `Unsupported` with its path. The source comment with the XML escape, and `import_winui`, accepting the comment when regenerating gives the same XAML compared as XML. SPEC §9 "To WinUI" for the slice first. Golden files with `WEFT_UPDATE_FIXTURES=1`. About 480 lines of code. Done when the slice's corpus screens and examples generate, match their goldens and read back exactly.
+
+### T105.2. WinUI view model, code-behind and helpers
+
+`<Name>ViewModel.cs` (properties, item classes with `WeftRoot`/`WeftParent`/`WeftPath`, `ObservableCollection<T>`, one command per action, `Perform`, `Performed`), `<Name>Page.xaml.cs`, and `Weft.cs` core (`On.*` event properties, `Not`, `Truthy`, `Hide`, `Props` markers). About 450 lines of code. Done when the goldens of T105.1 carry their C# and the type and name refusals have tests.
+
+### T105.3. WinUI value and choice controls
+
+`select`, `combobox`, `radio-group`, `segmented-control`, `slider`, `stepper`, `date-picker`, `color-picker`, `link`, `image`, `model`, `alert`, `menu`, with the `Choice` helper and the date and colour converter functions. SPEC §9 rows first. About 480 lines of code. Done when their examples and corpus screens generate, match goldens and read back through the comment.
+
+### T105.4. WinUI repetition and containers
+
+`<each>` (`ItemsRepeater` with typed templates), `list`, `table`, `tabs`, `dialog` (the `Dialog.IsOpen` helper), `section`, `grid` without `min-column-width`, and the slots. SPEC §9 rows first. About 490 lines of code; split at claim time if it grows. Done as T105.3.
+
+### T105.5. WinUI layout vocabulary, tokens and materials
+
+`justify` and `grow` through `Grid` tracks, `align`, `padding`, `max-width`, `min-column-width` (`ColumnsPanel`, `ColumnsLayout`), `WeftTokens.xaml` and per-page tokens, `ThemeDictionaries` for light, dark and high contrast, material as `AcrylicBrush`, the 3D tilt. Checks the unverified resource-key and perspective facts in the Windows build. About 460 lines of code. Done when the `layout`, `glass`, `tilt` and `appearance` corpus screens generate, build and read back.
+
+### T105.6. WinUI CLI and project settings
+
+`weft winui`, `weft winui-tokens`, `weft import-winui` (`--name`, `--namespace`, `--out-dir`, `--force`, `--context`); `weft.json` keys `export.winui.outDir`, `export.winui.namespace`, `export.winui.sharedTokens`, `export.winui.context`, `import.winui.outDir`, `import.winui.context`, with SPEC §10.6 rows, `settings.rs` and the regenerated `schemas/weft.schema.json` in the same change. About 250 lines of code. Done when each option has a CLI test and precedence (argument > `weft.json` > default) is tested.
+
+### T105.7. Windows CI build of the generated pages
+
+A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `actions/setup-dotnet` pinned by SHA, .NET SDK 10.0.402, `dotnet build` of a WinUI 3 class library (`Microsoft.WindowsAppSDK` 2.5.1, warnings as errors) that includes every golden page, view model and the shared files. A Rust test that every corpus screen and catalog example has a golden. Not a required check at first. About 120 lines. Done when the job is green on the T105.1–T105.2 goldens and fails on a deliberately broken golden (shown in the PR).
+
+### T105.8. Hand-written WinUI importer: structure
+
+`read_winui` behind the `import` feature, on `roxmltree` 0.21 (already in `Cargo.lock`; its `rust.md` row needs the creator's permission): kinds, ids, props, markers, slots and structure, with losses and diagnostics, input bounds `W601`/`W602`, DTDs refused. About 480 lines of code. Done when generated XAML without its comment reads back with only listed losses, and hand-written samples report each loss with its path.
+
+### T105.9. Hand-written WinUI importer: bindings, events, tokens and layout
+
+`{x:Bind ViewModel.…}` paths, the `Weft` function bindings and modes into bindings; `weft:On.*`, native `Command` and event bindings into actions; `Weft.*` resource references into tokens; `Grid` tracks back into `justify` and `grow`, alignments into `align`. About 450 lines of code. Done when every corpus screen reads back from its XAML alone with only the losses SPEC §9 lists.
+
+### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
+
+SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.
