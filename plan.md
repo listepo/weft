@@ -152,6 +152,12 @@ Execution plan, stage 2 (this round; style overrides stay out until the creator 
 1. T14.1: the pull over the REST API — done (`done.md`).
 2. MCP / Claude Code tools through the Figma MCP server. The Figma MCP server's `use_figma` tool runs Plugin API code, but its own description says `setPluginData` is not supported there, and plugin data is readable only by the plugin that wrote it. The creator chose to move the Weft source to shared plugin data, which any plugin and the REST API (`plugin_data=shared`) can read: T14.2, done (`done.md`).
 3. T14.3: the creator dropped files that keep the Weft source in private plugin data; only shared plugin data is supported — done (`done.md`).
+4. T14.4: check `use_figma` against shared plugin data in a real file. The creator approved one new test file in their Figma account ("weft T14 plugin-data check") and nothing else: no other file is opened, changed, shared or deleted. Plan:
+   1. Load the Figma MCP server's `figma-use` skill; create the file with `create_new_file`.
+   2. Through `use_figma`, build a small screen the way the plugin does (the `receipt` layer snapshot in `packages/figma/test/__snapshots__/layers/receipt.txt`): frames with the plugin's `weft.*` keys under the `weft` namespace, a text layer, a component with an instance.
+   3. In a separate `use_figma` call, read the keys back (`getSharedPluginData`, `getSharedPluginDataKeys`) and compare namespace, keys and values byte for byte, including non-ASCII text and a value near the 100 kB limit; check what `setPluginData` does there.
+   4. Check the open facts while the file is there: whether shared data is copied by `clone()` (duplicate) and kept by `detachInstance()`, and whether an instance shows its main component's data.
+   5. Record each fact with its source and date in `packages/figma/README.md` (move what is confirmed out of **Unverified**) and in `research.md`; no code changes, so no new test (the facts back the existing read-back, which already handles both outcomes).
 
 
 ### T68. Slint bindings for SwiftUI and WinUI
