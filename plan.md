@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T106 | in progress | P2 | 5 | 65% | Claude Code / claude-opus-5-5 |
-| T106.7 | todo | P2 | 4 | 0% | |
+| T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T106.8 | todo | P2 | 3 | 0% | |
 | T105 | in progress | P2 | 5 | 15% | Claude Code / claude-opus-5-5 |
 | T105.1 | todo | P2 | 4 | 0% | |
@@ -290,7 +290,9 @@ What exists (checked on origin/main): the MCP server is `packages/mcp` (nine too
 
 ### T106.7. Design tab: cox side
 
-The cox tasks the T106.6 proposal defines: T33.47.1–T33.47.8 in pyrlyn/cox (`docs/design/plugin-canvas.md`, A156, branch `t33.47-plugin-canvas`). They cover the plugin-API types, manifest key and grant line, the host calls and SDK arms, the `cox-app` state, wire and FFI, the isolated `CanvasPage`, and the pane. Done when their checks pass in cox and the branch is pushed. The Weft plugin's `cox-plugin-sdk` pin moves to that branch in T106.8.
+The cox tasks the T106.6 proposal defines, as built: T33.47.1–T33.47.10 in pyrlyn/cox (`docs/design/plugin-canvas.md`, A156, branch `t33.47-plugin-canvas`); cox's A157 split T33.47.8 into T33.47.8.1–T33.47.8.10, one layer each, and added T33.47.10, a fix. They cover the plugin-API types, manifest key and grant line, the host calls and SDK arms, the `cox-app` state, wire and FFI, the isolated `CanvasPage`, the pane, its shortcut and palette rows, and the user docs. Done when their checks pass in cox and the branch is pushed. The Weft plugin's `cox-plugin-sdk` pin moves to that branch in T106.8.
+
+Status: every cox card is done and pushed (branch head `fd35f0d0`) but T33.47.8's last checks: by hand, ⌘⇧D and the palette row toggle the pane, two frames show, and a click adds a chip that a second click replaces; and the falsifier 3 measurement in Instruments. Both need a person at the app, so they are with the creator.
 
 ### T106.8. Design tab: Weft side
 
