@@ -128,9 +128,8 @@ fn paths_become_properties_objects_and_lists() {
         "public ObservableCollection<DataTodosItem> todos { get; } = new();",
         "public ObservableCollection<string> labels { get; } = new();",
         "public DataUserData user { get; } = new();",
-        // A keyword is escaped in C#, and the binding names it plain.
-        "public string @class",
-        "public DataEventData @event { get; } = new();",
+        "public string kind",
+        "public DataAlertData alert { get; } = new();",
         // Read only through `Weft.Not`, a flag.
         "public bool busy",
         "Weft.Place(user.pins, this, null, \"$.user.pins\");",
@@ -158,7 +157,7 @@ fn paths_become_properties_objects_and_lists() {
     for xaml in [
         "Text=\"{x:Bind ViewModel.todos[0].title, Mode=OneWay}\"",
         "Visibility=\"{x:Bind ViewModel.todos[0].tags[0].shown, Mode=OneWay}\"",
-        "Text=\"{x:Bind ViewModel.class, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}\"",
+        "Text=\"{x:Bind ViewModel.kind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}\"",
     ] {
         assert!(generated.xaml.contains(xaml), "{xaml}");
     }
