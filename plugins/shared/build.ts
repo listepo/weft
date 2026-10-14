@@ -30,6 +30,18 @@ export const distDir = (name: PluginName): string => join(pluginDir(name), "dist
 export const specCopy = (name: PluginName): string =>
   join(pluginDir(name), PLUGINS[name].skill, "AGENT-SPEC.md");
 
+/**
+ * Plugins that carry the guide but no bundle: the cox plugin is a WebAssembly module with no
+ * Node, and cox copies only its package folder, so its spec skill needs a copy of its own too.
+ */
+export const SPEC_ONLY = [join(REPOSITORY, "plugins/cox/skills/weft-spec/AGENT-SPEC.md")];
+
+/** Every copy of AGENT-SPEC.md the build writes. */
+export const specCopies = (): string[] => [
+  ...(Object.keys(PLUGINS) as PluginName[]).map(specCopy),
+  ...SPEC_ONLY,
+];
+
 // `import.meta.main` (Node 24.2) is how an entry knows it was started as a program. Older Node
 // leaves it undefined, so an entry would end without a word; this says why instead.
 const NODE_GUARD = `if (import.meta.main === undefined) {
@@ -107,8 +119,10 @@ export async function writeBundles(): Promise<void> {
     for (const name of Object.keys(PLUGINS) as PluginName[]) {
       rmSync(distDir(name), { recursive: true, force: true });
       cpSync(built, distDir(name), { recursive: true });
-      mkdirSync(dirname(specCopy(name)), { recursive: true });
-      copyFileSync(join(REPOSITORY, "AGENT-SPEC.md"), specCopy(name));
+    }
+    for (const copy of specCopies()) {
+      mkdirSync(dirname(copy), { recursive: true });
+      copyFileSync(join(REPOSITORY, "AGENT-SPEC.md"), copy);
     }
   } finally {
     rmSync(scratch, { recursive: true, force: true });

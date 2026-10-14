@@ -38,4 +38,4 @@ tasks:
   test:
     script: 'cargo fmt --check && cargo clippy --locked --all-targets -- -D warnings && cargo clippy --locked --release --target wasm32-unknown-unknown -- -D warnings && cargo test --locked'
     deps: ['build']
-    inputs: ['@group(module)', 'tests/**/*', 'plugin.toml']
+    inputs: ['@group(module)', 'tests/**/*', 'plugin.toml', 'skills/**/*']

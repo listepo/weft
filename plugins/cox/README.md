@@ -8,6 +8,8 @@ A cox tool result is one text, so the MCP server's content blocks are joined a b
 
 cox finds plugin tools through `tool_search`, so the agent loads them when a task needs them. Every tool only reads its arguments (`read_only`); the plugin asks cox for no other capability: no files, network, store or model.
 
+The plugin also ships the `weft-spec` skill (`skills/weft-spec`): the Claude Code and Cursor plugins' authoring guide, `AGENT-SPEC.md`, with a `SKILL.md` that names cox's tools. cox lists it in its skill index and loads it with the `skill` tool; a user or project skill named `weft-spec` wins. `plugins/shared/build.ts` writes the `AGENT-SPEC.md` copy (`moon run shared:build`), and `shared:test` fails when it is stale. The Claude Code and Cursor plugins' other skills (`render`, `import`, `export`, `figma-pull`) run Node scripts, which a cox package cannot carry, so they are left out.
+
 ## Build and install
 
 ```sh
@@ -39,7 +41,7 @@ properties = { user = { type = "object", properties = { name = { type = "string"
 `moon run cox-plugin:test` builds the module, then runs clippy and rustfmt for both targets and three test sets:
 
 - `src/lib.rs`: the tool specs, calls and the config table, on the host.
-- `tests/manifest.rs`: `plugin.toml` read into cox's own manifest type (the type cox's `docs/plugin.schema.json` is generated from) and checked by its `validate`, at the pinned cox revision.
+- `tests/manifest.rs`: `plugin.toml` read into cox's own manifest type (the type cox's `docs/plugin.schema.json` is generated from) and checked by its `validate`, at the pinned cox revision, and each declared skill folder holding a `SKILL.md` named for it.
 - `tests/e2e.rs`: `weft.wasm` loaded with `wasm-plugin-host`, the extism engine of cox's plugin host, through `cox_init` and `cox_tool_call`, with results equal to the native build's.
 
 The plugin is a Cargo workspace of its own, so the root workspace's Rust checks never fetch pyrlyn/cox or build guest code.

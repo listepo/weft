@@ -14,8 +14,8 @@ wasm = "weft.wasm"
 memory_mib = 64
 call_ms = 10000
 
-# Only tools: no files, network, store, model or UI. The project comes from the [plugins.weft]
-# table of cox's config, inline.
+# Only tools, plus the skill below: no files, network, store, model or UI. The project comes from
+# the [plugins.weft] table of cox's config, inline.
 [capabilities]
 tools = [
   "weft_primer",
@@ -28,3 +28,9 @@ tools = [
   "weft_render",
   "weft_context",
 ]
+
+# The authoring guide as an Agent Skill (cox T33.46): SKILL.md and its AGENT-SPEC.md copy, which
+# plugins/shared/build.ts writes beside the other plugins' copies.
+[[skills]]
+name = "weft-spec"
+dir = "skills/weft-spec"

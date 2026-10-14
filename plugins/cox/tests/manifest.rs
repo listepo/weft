@@ -42,3 +42,23 @@ fn it_asks_for_nothing_but_tools() {
     };
     assert_eq!(manifest().capabilities, expected);
 }
+
+/// cox loads a skill only when its folder holds a `SKILL.md` whose `name` is the folder's and the
+/// declared one, so a renamed folder or file would drop the guide with nothing but a notice.
+#[test]
+fn every_declared_skill_folder_holds_its_skill() {
+    let manifest = manifest();
+    let names: Vec<&str> = manifest.skills.iter().map(|s| s.name.as_str()).collect();
+    assert_eq!(names, ["weft-spec"]);
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+    for skill in &manifest.skills {
+        let dir = root.join(&skill.dir);
+        let text = std::fs::read_to_string(dir.join("SKILL.md")).unwrap();
+        let header = text.split("---").nth(1).unwrap();
+        assert!(
+            header.lines().any(|l| l == format!("name: {}", skill.name)),
+            "{header}"
+        );
+        assert!(dir.join("AGENT-SPEC.md").is_file());
+    }
+}
