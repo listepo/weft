@@ -54,6 +54,14 @@ pub struct Generated {
     pub xaml: String,
 }
 
+impl Generated {
+    /// Every file of the screen, as file name and content, in the order they are written: the
+    /// CLI writes this list, so a new file needs no change there.
+    pub fn files(&self) -> Vec<(String, &str)> {
+        vec![(format!("{}.xaml", self.page), &self.xaml)]
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum GenerateError {
     /// The document does not validate in strict mode against the catalog and tokens.

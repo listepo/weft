@@ -141,8 +141,8 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `export.html.outDir` | standard output | Where `weft html` writes `<screen>.html` (`--out-dir` overrides it). |
 | `export.html.source` | `false` | The page keeps the screen in a leading comment, so `weft import-html` gives it back exactly (`--no-source` overrides it). Off by default: a deployed page would publish it. |
 | `export.html.data` | none | Sample data `weft html` shows in the page instead of keeping bindings as a template (`--data` overrides it). |
-| `export.react.context`, `export.solid.context`, `export.html.context`, `export.slint.context`, `export.swiftui.context` | `"strip"` for `html`, `"keep"` for the others | Whether the source comment carries the screen's context (`--context keep\|strip` overrides it). |
-| `import.react.context`, `import.solid.context`, `import.html.context`, `import.slint.context`, `import.swiftui.context` | `"keep"` | `"drop"` leaves out the context an import reads back from a source comment (`--context keep\|drop` overrides it). |
+| `export.react.context`, `export.solid.context`, `export.html.context`, `export.slint.context`, `export.swiftui.context`, `export.winui.context` | `"strip"` for `html`, `"keep"` for the others | Whether the source comment carries the screen's context (`--context keep\|strip` overrides it). |
+| `import.react.context`, `import.solid.context`, `import.html.context`, `import.slint.context`, `import.swiftui.context`, `import.winui.context` | `"keep"` | `"drop"` leaves out the context an import reads back from a source comment (`--context keep\|drop` overrides it). |
 | `export.react.outDir` | next to the screen | Where exported React components go; `weft react` prints when it is absent (`--out-dir` overrides it). |
 | `export.react.typescript`, `export.solid.typescript` | `false` | Write TSX with typed props (`--javascript` overrides it). |
 | `export.react.source`, `export.solid.source` | `false` | The component keeps the screen in a leading comment, so `weft import-react` and `weft import-solid` give it back exactly (`--no-source` overrides it). |
@@ -157,6 +157,8 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `import.swiftui.outDir` | standard output | Where `weft import-swiftui` writes `<file>.weft`, and the Xcode command plugin's `import` (next to the view when absent; `--out-dir` overrides it). |
 | `export.a2ui.outDir`, `import.a2ui.outDir` | standard output | Where `weft a2ui` writes `<screen>.a2ui.json` and `weft import-a2ui` writes `<file>.weft` (`--out-dir` overrides them). |
 | `export.slint.outDir`, `import.slint.outDir` | standard output | Where `weft slint` writes `<screen>.slint` and `weft import-slint` writes `<file>.weft` (`--out-dir` overrides them). |
+| `export.winui.outDir`, `import.winui.outDir` | standard output | Where `weft winui` writes `<Name>Page.xaml` and the page's other files, `weft winui-tokens` writes `WeftTokens.xaml`, and `weft import-winui` writes `<file>.weft` (`--out-dir` overrides them). |
+| `export.winui.namespace` | `WeftScreens` | The C# namespace of the generated WinUI pages (`--namespace` overrides it). |
 | `export.schema.outDir` | standard output | Where `weft schema` writes `document.schema.json`, the JSON Schema of the documents the project's catalog admits (`--out-dir` overrides it). |
 | `import.cem.outDir` | standard output | Where `weft import-cem` writes `<file>.catalog.json`, the catalog imported from a Custom Elements Manifest (`--out-dir` overrides it). |
 | `import.cem.name`, `import.cem.version` | the manifest's file stem; `0.0.0` | The name and version of that catalog (`--name` and `--version` override them). |

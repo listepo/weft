@@ -17,7 +17,7 @@ The examples assume you have also made the scratch folder from the [tour](tour.m
 $ mkdir -p weft-tour
 $ cp corpus/login/screen.weft weft-tour/login.weft
 $ weft --help
-Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React, SolidJS, Slint and A2UI
+Validate, format and explain Weft documents, and convert them to and from SwiftUI, WinUI, HTML, React, SolidJS, Slint and A2UI
 
 Usage: weft <COMMAND>
 
@@ -31,6 +31,9 @@ Commands:
   import-swiftui  Read a SwiftUI view back into markup; what Weft cannot hold is listed on stderr as losses
   slint           Generate a Slint component (Slint 1.x, `std-widgets.slint`) from a markup document
   import-slint    Read a generated Slint component back into markup
+  winui           Generate a WinUI 3 page (Windows App SDK) from a markup document
+  winui-tokens    Generate `WeftTokens.xaml`, the design tokens every WinUI page of a project shares
+  import-winui    Read a generated WinUI page (`.xaml`) back into markup
   html            Generate a static HTML page with CSS and no script from a markup document
   react           Generate a React component (JSX or TSX) from a markup document
   solid           Generate a SolidJS component (JSX or TSX) from a markup document
@@ -199,6 +202,19 @@ same
 ```
 
 `--name` sets the component name (`SignInScreen` for `--name sign-in`); without it the name comes from the screen id. The commands use the project's catalog and tokens, or `--catalog` and `--tokens` when you give them to `weft slint`. `--out-dir` writes `<stem>.slint` or `<stem>.weft` (the input file's stem, not the component name) instead of printing. Without it, the project's `export.slint.outDir` or `import.slint.outDir` decides ([Projects](projects.md)). An existing file is left in place unless `--force` is passed. A screen the generator cannot express, and a Slint file it did not print, are reported on stderr and the command exits 1. The mapping is in SPEC §9 and `crates/weft-slint/README.md`.
+
+## `weft winui`, `weft winui-tokens` and `weft import-winui`
+
+`weft winui` prints a WinUI 3 page for a screen (Windows App SDK): `<Name>Page.xaml`, a `Page` bound with `{x:Bind}` to a view model, and the screen's markup in a leading `weft:source winui` comment. `weft import-winui` gives that screen back only while the page is still what the comment generates; an edited page is refused. The generator covers the core kinds of SPEC §9, "To WinUI", so far and names every element it cannot draw yet.
+
+```console
+$ weft winui packages/catalog/examples/form.weft --name sign-in --namespace Acme.Screens --out-dir weft-tour/windows
+$ weft winui-tokens --out-dir weft-tour/windows 2> /dev/null
+$ weft import-winui weft-tour/windows/SignInPage.xaml | diff - <(weft fmt packages/catalog/examples/form.weft) && echo same
+same
+```
+
+`--name` sets the page name (`SignInPage` for `--name sign-in`); without it the name comes from the screen id. `--namespace` is the C# namespace of the page class, else the project's `export.winui.namespace`, else `WeftScreens`. `--out-dir` writes every file of the page there (else `export.winui.outDir`, else print); printed, several files are each headed by `==> <file> <==`. An existing file is kept unless `--force`, and then no file of the set is written. `weft winui-tokens` writes `WeftTokens.xaml`, a resource dictionary to merge into `App.xaml`; it holds the dimension tokens the pages reference and names on stderr the other tokens it leaves out. `--context` works as for the other generators and importers.
 
 ## `weft html`, `weft react`, `weft solid`, `weft lit`, `weft css-tokens`, `weft css-base` and the importers
 

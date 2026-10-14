@@ -103,6 +103,16 @@ const SLINT_EXPORT: &[Setting] = &[
     setting("outDir", OUT_DIR, Kind::File),
     with_default("context", CONTEXT_EXPORT, KEEP_STRIP, "\"keep\""),
 ];
+const WINUI_EXPORT: &[Setting] = &[
+    setting("outDir", OUT_DIR, Kind::File),
+    with_default(
+        "namespace",
+        "The C# namespace of the generated page classes and of the `Weft` helper classes, such as `Acme.Screens`. The CLI's `--namespace` overrides it.",
+        Kind::Text,
+        "\"WeftScreens\"",
+    ),
+    with_default("context", CONTEXT_EXPORT, KEEP_STRIP, "\"keep\""),
+];
 const OUT_ONLY: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];
 /// Importers that give back a generated file's source comment, and with it its context.
 const SOURCE_IMPORT: &[Setting] = &[
@@ -187,6 +197,11 @@ const EXPORT: &[Setting] = &[
         Kind::Section(SLINT_EXPORT),
     ),
     setting(
+        "winui",
+        "WinUI 3 pages for the Windows App SDK (`weft winui`) and the shared `WeftTokens.xaml` (`weft winui-tokens`).",
+        Kind::Section(WINUI_EXPORT),
+    ),
+    setting(
         "schema",
         "The JSON Schema of the canonical documents the project's catalog admits, `document.schema.json` (`weft schema`). Default folder: standard output.",
         Kind::Section(OUT_ONLY),
@@ -221,6 +236,11 @@ const IMPORT: &[Setting] = &[
     setting(
         "slint",
         "Slint source files (`weft import-slint`).",
+        Kind::Section(SOURCE_IMPORT),
+    ),
+    setting(
+        "winui",
+        "WinUI XAML pages (`weft import-winui`).",
         Kind::Section(SOURCE_IMPORT),
     ),
     setting(

@@ -1543,3 +1543,233 @@ fn a_package_fragment_outside_the_package_is_w703() {
         r.stdout
     );
 }
+
+/// The example project with its own `space.sm`, a namespace and both WinUI output directories.
+fn winui_project(name: &str) -> Scratch {
+    let s = swiftui_project(name);
+    with_settings(
+        &s,
+        serde_json::json!({
+            "export": { "winui": { "outDir": "windows", "namespace": "Acme.Screens" } },
+            "import": { "winui": { "outDir": "imported" } }
+        }),
+    );
+    s
+}
+
+#[test]
+fn winui_writes_where_the_project_says_with_its_tokens_and_reads_back() {
+    let s = winui_project("winui");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let r = run(&[&"winui", &screen]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    let page = read_back(&s, "windows/PlainPage.xaml");
+    assert!(
+        page.contains("x:Class=\"Acme.Screens.PlainPage\""),
+        "{page}"
+    );
+    assert!(page.contains("{StaticResource Weft.space.sm}"), "{page}");
+
+    // `winui-tokens` finds the project from the working directory; what WinUI has no form for
+    // is named on stderr and left out.
+    let r = run_in(&s.path("screens"), &[&"winui-tokens"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, ""), "{}", r.stderr);
+    assert!(r.stderr.contains("weft: token color."), "{}", r.stderr);
+    let tokens = read_back(&s, "windows/WeftTokens.xaml");
+    assert!(
+        tokens.contains("<x:Double x:Key=\"Weft.space.sm\">12</x:Double>"),
+        "{tokens}"
+    );
+
+    let r = run(&[&"import-winui", &s.path("windows/PlainPage.xaml")]);
+    assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
+    assert_eq!(read_back(&s, "imported/PlainPage.weft"), PLAIN);
+}
+
+#[test]
+fn winui_arguments_override_the_project() {
+    let s = winui_project("winui-args");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let elsewhere = s.path("elsewhere");
+    // `--out-dir`, `--namespace` and `--name` beat the project.
+    let r = run(&[
+        &"winui",
+        &screen,
+        &"--out-dir",
+        &elsewhere,
+        &"--namespace",
+        &"Other.Ui",
+        &"--name",
+        &"Home",
+    ]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    let page = std::fs::read_to_string(elsewhere.join("HomePage.xaml")).unwrap();
+    assert!(page.contains("x:Class=\"Other.Ui.HomePage\""), "{page}");
+    assert!(!s.path("windows").exists());
+
+    // An existing file is kept unless `--force`.
+    let r = run(&[
+        &"winui",
+        &screen,
+        &"--out-dir",
+        &elsewhere,
+        &"--name",
+        &"Home",
+    ]);
+    assert_eq!(r.code, 2);
+    assert!(r.stderr.contains("pass --force"), "{}", r.stderr);
+    assert!(std::fs::read_to_string(elsewhere.join("HomePage.xaml")).unwrap() == page);
+    let r = run(&[
+        &"winui",
+        &screen,
+        &"--out-dir",
+        &elsewhere,
+        &"--name",
+        &"Home",
+        &"--force",
+    ]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    let page = std::fs::read_to_string(elsewhere.join("HomePage.xaml")).unwrap();
+    assert!(page.contains("x:Class=\"Acme.Screens.HomePage\""), "{page}");
+
+    // Without the project: printed, in the default namespace.
+    let r = run(&[&"winui", &screen, &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(
+        r.stdout.contains("x:Class=\"WeftScreens.PlainPage\""),
+        "{}",
+        r.stdout
+    );
+    // A namespace C# cannot hold is refused, from the flag or the project.
+    let r = run(&[&"winui", &screen, &"--namespace", &"1st"]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(
+        r.stderr.contains("`1st` is not a C# namespace"),
+        "{}",
+        r.stderr
+    );
+
+    // `--tokens`, `--project`, `--out-dir` and `--force` of `winui-tokens`.
+    let (project, own) = (s.path("weft.json"), s.path("tokens/swift.tokens.json"));
+    for force in [false, true] {
+        let mut args: Vec<&dyn AsRef<std::ffi::OsStr>> = vec![
+            &"winui-tokens",
+            &"--project",
+            &project,
+            &"--tokens",
+            &own,
+            &"--out-dir",
+            &elsewhere,
+        ];
+        if force {
+            args.push(&"--force");
+        }
+        let r = run(&args);
+        assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    }
+    let tokens = std::fs::read_to_string(elsewhere.join("WeftTokens.xaml")).unwrap();
+    assert!(
+        tokens.contains("Weft.space.sm\">12<") && !tokens.contains("space.xs"),
+        "{tokens}"
+    );
+    let r = run(&[
+        &"winui-tokens",
+        &"--project",
+        &s.path("weft.json"),
+        &"--out-dir",
+        &elsewhere,
+    ]);
+    assert_eq!(r.code, 2, "{}", r.stderr);
+    // Without a project: printed, with the default tokens.
+    let r = run_in(&s.path("screens"), &[&"winui-tokens", &"--no-project"]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.contains("Weft.space.sm\">8<"), "{}", r.stdout);
+
+    // `import-winui`: `--out-dir` and `--force` beat the project; without it, printed.
+    let xaml = elsewhere.join("HomePage.xaml");
+    for force in [false, true] {
+        let mut args: Vec<&dyn AsRef<std::ffi::OsStr>> =
+            vec![&"import-winui", &xaml, &"--out-dir", &elsewhere];
+        if force {
+            args.push(&"--force");
+        }
+        let r = run(&args);
+        assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    }
+    assert_eq!(
+        std::fs::read_to_string(elsewhere.join("HomePage.weft")).unwrap(),
+        PLAIN
+    );
+    let r = run(&[&"import-winui", &xaml, &"--out-dir", &elsewhere]);
+    assert_eq!(r.code, 2, "{}", r.stderr);
+    let r = run(&[&"import-winui", &xaml, &"--no-project"]);
+    assert_eq!(
+        (r.code, r.stdout.as_str(), r.stderr.as_str()),
+        (0, PLAIN, "")
+    );
+    assert!(!s.path("imported").exists());
+
+    // An edited page is not believed.
+    let edited = s.write(
+        "Edited.xaml",
+        &page.replace("Content=\"Back\"", "Content=\"Forward\""),
+    );
+    let r = run(&[&"import-winui", &edited, &"--no-project"]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(r.stderr.contains("it was edited"), "{}", r.stderr);
+}
+
+#[test]
+fn winui_keeps_context_in_its_source_comment() {
+    let s = Scratch::new("winui-context");
+    let screen = s.write("screens/plain.weft", NOTED);
+    let r = run(&[&"winui", &screen]);
+    assert_eq!(r.code, 0, "{}", r.stderr);
+    assert!(r.stdout.contains("Back returns home."), "{}", r.stdout);
+    let xaml = s.write("PlainPage.xaml", &r.stdout);
+    let r = run(&[&"import-winui", &xaml]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, NOTED), "{}", r.stderr);
+    let r = run(&[&"import-winui", &xaml, &"--context", &"drop"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
+    let r = run(&[&"winui", &screen, &"--context", &"strip"]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+
+    // The project's settings stand in for the flags, which still win.
+    with_settings(
+        &s,
+        serde_json::json!({
+            "export": { "winui": { "context": "strip" } },
+            "import": { "winui": { "context": "drop" } }
+        }),
+    );
+    let r = run(&[&"winui", &screen]);
+    assert!(!r.stdout.contains("Back returns home"), "{}", r.stdout);
+    let r = run(&[&"winui", &screen, &"--context", &"keep"]);
+    assert!(r.stdout.contains("Back returns home."), "{}", r.stdout);
+    let r = run(&[&"import-winui", &xaml]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, PLAIN), "{}", r.stderr);
+    let r = run(&[&"import-winui", &xaml, &"--context", &"keep"]);
+    assert_eq!((r.code, r.stdout.as_str()), (0, NOTED), "{}", r.stderr);
+}
+
+#[test]
+fn winui_refuses_what_it_cannot_generate_and_exits_1() {
+    let s = Scratch::new("winui-refused");
+    with_settings(
+        &s,
+        serde_json::json!({ "export": { "winui": { "namespace": "not a namespace" } } }),
+    );
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let r = run(&[&"winui", &screen]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(r.stderr.contains("is not a C# namespace"), "{}", r.stderr);
+
+    // A kind outside the slice is reported with its path.
+    let tabs = s.write(
+        "screens/tabs.weft",
+        r#"<screen id="s" label="S" weft="0.3"><tabs id="t" label="T"></tabs></screen>"#,
+    );
+    let r = run(&[&"winui", &tabs, &"--no-project"]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(r.stderr.contains("tabs#t"), "{}", r.stderr);
+}
