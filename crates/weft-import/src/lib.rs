@@ -24,7 +24,7 @@ pub use ids::IdState;
 pub use kinds::{
     DISSOLVED_ROLES, KindIndex, ROLE_DEFAULTS, ROLE_REFINEMENTS, Refinement, Resolved, dissolved,
 };
-pub use limits::{MAX_DEPTH, MAX_NODES, limit_reached};
+pub use limits::{MAX_DEPTH, MAX_NODES, limit_reached, on_reader_stack};
 pub use loss::{ImportResult, Loss, LossKind, Losses, empty_result};
 pub use props::{Scalar, coerce, fill_required};
 pub use repair::{element_path, repair};

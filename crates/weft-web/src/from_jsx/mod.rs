@@ -27,7 +27,7 @@ use oxc_ast::ast::{
 use oxc_parser::{ParseOptions as OxcOptions, Parser};
 use oxc_span::{ContentEq, SourceType};
 use weft_core::{Code, Diagnostic};
-use weft_import::{ImportResult, Loss, empty_result, js_length, limit_reached};
+use weft_import::{ImportResult, Loss, empty_result, js_length, limit_reached, on_reader_stack};
 
 use crate::dom::{Conventions, read_dom};
 use crate::import::ImportOptions;
@@ -39,40 +39,17 @@ use eval::{Env, Eval, Sv, bind_pattern};
 /// Longest source read, in UTF-16 code units, as JavaScript counts string length.
 pub const MAX_JSX_LENGTH: usize = 2_000_000;
 
-/// The stack the parser and the reader get on native targets. The nesting estimate keeps a
-/// parse within 1 MiB in a release build; debug builds and deep evaluation need more. On
-/// `wasm32` there is no thread to stack-size: the reader runs on the module's link-time 1 MiB
-/// stack, and that same estimate is the whole budget.
-#[cfg(not(target_arch = "wasm32"))]
-const STACK: usize = 64 << 20;
-
 /// Imports a React or SolidJS component (`.jsx`, or `.tsx` when `typescript`). Never fails: what
 /// cannot be read is reported in the result.
 pub fn import_jsx(source: &str, typescript: bool, options: &ImportOptions<'_>) -> ImportResult {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let ran = std::thread::scope(|s| {
-            std::thread::Builder::new()
-                .name("weft-import-jsx".into())
-                .stack_size(STACK)
-                .spawn_scoped(s, || read(source, typescript, options))
-                .map(|h| h.join())
-        });
-        match ran {
-            Ok(Ok(result)) => return result,
-            Ok(Err(_)) => {
-                return empty_result(vec![Diagnostic::new(
-                    Code::W601,
-                    "#",
-                    "The JSX reader stopped unexpectedly.",
-                    "a React or SolidJS component",
-                )]);
-            }
-            // No thread to be had: read on this one, within the same nesting estimate.
-            Err(_) => {}
-        }
-    }
-    read(source, typescript, options)
+    on_reader_stack("weft-import-jsx", || read(source, typescript, options)).unwrap_or_else(|| {
+        empty_result(vec![Diagnostic::new(
+            Code::W601,
+            "#",
+            "The JSX reader stopped unexpectedly.",
+            "a React or SolidJS component",
+        )])
+    })
 }
 
 fn unreadable(mut diagnostics: Vec<Diagnostic>, message: String) -> ImportResult {
