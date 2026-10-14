@@ -15,7 +15,9 @@ const MAX_NOTE: usize = 500;
 
 /// The comment text after the marker line: `\` escapes the next character, so the payload never
 /// contains a sequence that would end or nest an HTML or JavaScript comment (`-->`, `--!>`, `<!--`,
-/// `*/`). Every `@` is followed by a `\` too: context is untrusted text, and `@license` or
+/// `*/`). No `--` survives at all, which is the stricter rule of an XML comment (XML 1.0 §2.5,
+/// WinUI XAML); `comment` ends the payload with a line break, so its last `-` never touches the
+/// close either. Every `@` is followed by a `\` too: context is untrusted text, and `@license` or
 /// `@preserve` would make a minifier keep the comment, with the screen's notes, in a production
 /// bundle.
 pub fn escape(markup: &str) -> String {
@@ -173,6 +175,17 @@ mod tests {
             assert!(!escaped.contains(bad), "{bad} in {escaped}");
         }
         assert_eq!(unescape(&escaped), markup);
+    }
+
+    #[test]
+    fn payloads_follow_the_xml_comment_rule() {
+        // XML forbids `--` anywhere in a comment and a `-` right before its close.
+        for markup in ["-", "a--", "---", "<t>-</t>-", "\\--\\-", "x -\\- y"] {
+            let xml = comment("<!--", "winui", markup, "-->");
+            let body = &xml["<!--".len()..xml.len() - "-->".len()];
+            assert!(!body.contains("--") && !body.ends_with('-'), "{xml}");
+            assert_eq!(find(&xml, "<!--", "-->").unwrap().1, markup);
+        }
     }
 
     #[test]

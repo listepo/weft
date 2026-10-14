@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleField namespace=WeftScreens
+<screen id="root" label="Sign up" weft="0.1">
+  <field id="email" disabled="false" error="{$.errors.email}" label="Email" placeholder="you@\example.com" required="true" state="valid" type="email" value="{$.email}" on-change="form.edit"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleFieldPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Sign up">
+            <TextBox AutomationProperties.AutomationId="email" Text="{x:Bind ViewModel.email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="you@example.com" InputScope="EmailSmtpAddress" AutomationProperties.IsRequiredForForm="True" IsEnabled="True" weft:Props.Error="{x:Bind ViewModel.errors.email, Mode=OneWay}" Header="Email" weft:Props.State="valid" weft:On.Change="{x:Bind ViewModel.form_editCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

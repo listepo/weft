@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleText namespace=WeftScreens
+<screen id="root" label="Status" weft="0.1">
+  <text id="saved" tone="success">All changes saved.</text>
+  <text id="user" text="{$.user.name}"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleTextPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Status">
+            <TextBlock AutomationProperties.AutomationId="saved" TextWrapping="Wrap" Text="All changes saved." Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+            <TextBlock AutomationProperties.AutomationId="user" TextWrapping="Wrap" Text="{x:Bind ViewModel.user.name, Mode=OneWay}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

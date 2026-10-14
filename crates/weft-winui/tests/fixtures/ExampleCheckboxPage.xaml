@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleCheckbox namespace=WeftScreens
+<screen id="root" label="Terms" weft="0.1">
+  <checkbox id="terms" checked="{$.acceptTerms}" disabled="false" label="I accept the terms" on-change="form.edit"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleCheckboxPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Terms">
+            <CheckBox AutomationProperties.AutomationId="terms" IsChecked="{x:Bind ViewModel.acceptTerms, Mode=TwoWay}" IsEnabled="True" Content="I accept the terms" weft:On.Change="{x:Bind ViewModel.form_editCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

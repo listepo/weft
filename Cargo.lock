@@ -5174,6 +5174,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "weft-winui"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "roxmltree",
+ "thiserror 2.0.21",
+ "weft-catalog",
+ "weft-core",
+ "weft-import",
+]
+
+[[package]]
 name = "wgpu"
 version = "30.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

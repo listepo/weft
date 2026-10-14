@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleScreen namespace=WeftScreens
+<screen id="root" label="Home" state="ready" weft="0.1">
+  <heading id="title" level="1">Welcome back</heading>
+  <text id="intro">Pick up where you left off.</text>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleScreenPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Home" weft:Props.State="ready">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Welcome back" />
+            <TextBlock AutomationProperties.AutomationId="intro" TextWrapping="Wrap" Text="Pick up where you left off." />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

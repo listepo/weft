@@ -60,7 +60,7 @@ pub use rules::{
 /// The catalog-independent props every element takes (`hidden`, `label`, `state`, …).
 pub use rules::{universal_prop, universal_props};
 pub use sample::{resolve_path, text, truthy};
-pub use serialize::serialize;
+pub use serialize::{escape_attribute, serialize};
 pub use shape::{to_document, to_value};
 pub use source::{ListSource, NodeSource, element_paths, path_segment};
 pub use url::{safe_absolute_url, safe_url};
