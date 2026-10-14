@@ -3,7 +3,6 @@
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
-- T41. Hosted Penpot plugin
 - T106. Weft plugin for cox
 - T106.3. The cox plugin
 - T106.4. Accessibility snapshot in Rust

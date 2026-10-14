@@ -759,6 +759,49 @@ All 12 corpus screens survive Weft → Penpot → Weft byte-identical over an in
 
 The Penpot API facts are cited with URLs, checked 2026-10-05, in `packages/penpot/README.md`, with an unverified list. weft.json gains no options: `export.penpot` and `import.penpot` stay reserved, and `PluginOptions` names the extension point. Style overrides are excluded until `docs/figma-style-overrides-design.md` is approved. Checks in a real Penpot remain open: hosting, async variants and tokens, grid cells, plugin data on copies, and the UI theme.
 
+### T41. Hosted Penpot plugin
+
+Penpot installs a plugin only from the URL of its `manifest.json`, and plugins are hosted outside Penpot. Today the Weft Penpot plugin is available only to someone who clones the repository and runs `moon run penpot-plugin:serve`. The repository is public on GitHub (`listepo/weft`), so CI can build the plugin and publish `dist/` on GitHub Pages, which serves the files with the right content types and `Access-Control-Allow-Origin: *`.
+
+**Context.**
+- `plugins/penpot`: `build.ts` runs the shared `@weft/design-plugin` build and writes `dist/manifest.json`, `plugin.js` (the SES sandbox script, no WebAssembly) and `ui.html` (the core inlined). `manifest.json` uses version 2, so paths resolve from the manifest's folder and a subpath works; it has `name`, `description`, `code` and `permissions`, but no `icon`. `moon.yml` has `build` (depends on `root:wasm`, `runInCI: false`) and `serve` (`serve.config.ts`, port 4400, `cors: true`). `dist/` is gitignored; `test/bundle.test.ts` builds into a temp folder and checks the manifest.
+- `plugins/penpot/README.md` says hosting is T41 and that nobody has checked whether a real Penpot needs the CORS header; `packages/penpot/README.md` lists hosting among the unverified items, and T40's result in `done.md` leaves hosting open. The plugin's UI needs no network access.
+- Plugin identity: Penpot derives `host` from the manifest URL and gives each install a random id, unless a plugin with the same name and host is already registered. Weft keeps shared plugin data under the `weft` namespace, so boards built with a localhost install stay readable from the hosted one.
+- GitHub: `main` has no `.github/` folder, and nothing mentions Pages. Open PR #4 (T73) adds `.github/workflows/ci.yml` (the merge gate on pull requests and pushes to `main`, `runs-on: xcode-27`, actions pinned to commit SHAs, `permissions: contents: read`) and moves XcodeGen to `mise.osx.toml` so `mise install` works on Linux. Pages is not enabled (`GET /repos/listepo/weft/pages` returns 404).
+
+**Scope.**
+- A Pages deploy job next to T73's gate: only on pushes to `main`, after the gate passes; builds with `moon run penpot-plugin:build` and publishes `plugins/penpot/dist` under a fixed path through `actions/upload-pages-artifact` and `actions/deploy-pages`, pinned to SHAs; `pages: write` and `id-token: write` on that job only, the `github-pages` environment, and a concurrency group so two deploys never race.
+- A check step after the deploy: fetch `manifest.json`, `plugin.js` and `ui.html` from the Pages URL and fail unless each returns 200 with a JSON, JavaScript or HTML content type and `Access-Control-Allow-Origin: *`.
+- An offline Vitest test that reads the workflow and pins that the deploy runs only on `main` after the gate, builds the Penpot plugin, publishes exactly its `dist/`, and pins every action to a SHA.
+- An `icon` in `manifest.json` if Penpot's plugin manager needs one; the build copies it into `dist/`, and `bundle.test.ts` checks it.
+- Docs: `plugins/penpot/README.md` gives the install URL first and keeps local serving for development; the root `README.md` mentions the URL; `packages/penpot/README.md` moves hosting from unverified to verified, with the date.
+- No new tool option, so no `weft.json` key.
+
+**Out of scope.** Listing the plugin in Penpot's own plugin catalogue. Hosting the Figma plugin. Versioned or per-PR preview deployments. A custom domain. T40's other open checks in a real Penpot (async variants, tokens, grid cells, plugin data on copies, UI theme).
+
+**Done when.**
+- A push to `main` deploys, and the check step passes.
+- Penpot (design.penpot.app) installs the plugin from the Pages URL in its plugin manager, and Build and Export both work on a corpus screen.
+- `plugins/penpot/README.md` gives that URL.
+- The full check exits 0.
+
+**Dependencies.** T73: extend its `ci.yml` rather than adding a second gate; T73 also makes `mise install` work on Linux. The creator enables Pages with the source set to "GitHub Actions" (a repository setting; agents do not change it).
+
+**Open questions for the creator.**
+1. URL: `https://listepo.github.io/weft/penpot/manifest.json` (a subpath, leaving room for other pages) or the site root?
+2. Deploy on every push to `main`, or only on a release tag, so users never get an unreleased plugin?
+3. Runner for the deploy build: GitHub-hosted `ubuntu-latest` or the gate's `xcode-27` runner?
+4. A repository has one Pages site and each deploy replaces it whole: should the deploy assemble a site now (an index page, room for docs or a `render-react` gallery)?
+5. Which icon should the plugin manager show?
+
+**Execution plan (deploy fix).** PR #70 added the `deploy-pages` job, and it fails on every push to `main` (run 38302716278): `moon run penpot-plugin:build` prints "No tasks found". The target exists; moon 2.5.6 drops a task with `runInCI: false` from `moon run` whenever it detects CI, even named explicitly and with `--force`.
+1. `.github/workflows/ci.yml`: build with `moon exec penpot-plugin:build --ignore-ci-checks`, which keeps `runInCI: false`, so `moon ci` still does not build `dist/` on every local full check. `root:wasm` (its dependency) runs in CI already.
+2. `tooling/test/workflows.test.ts`: every `moon run`/`moon exec` in `.github/workflows/*.yml` names tasks that `moon query tasks` knows, and a task with `runInCI: false` is run with `--ignore-ci-checks` (or `--ci false`). `tooling/moon.yml` lists the workflows and the moon configs as inputs.
+3. `plugins/penpot/test/pages.test.ts`: pin the new build command.
+4. Verify: the new test fails on the old workflow and passes on the fixed one; `CI=true moon exec penpot-plugin:build --ignore-ci-checks` writes `plugins/penpot/dist/`; the full check. The deploy itself is confirmed by the next push to `main`.
+
+Dropped: the creator decided against GitHub Pages; the deploy job and its test were removed; the plugin is installed from a local `moon run penpot-plugin:serve`.
+
 ### T35. Web targets both ways: HTML/CSS, React and SolidJS
 
 Generate static HTML with CSS, React (JSX/TSX) and SolidJS components from `.weft`, and read each of them back from source. Approved scope: one Rust crate next to the core (JSX and TSX parsed with oxc, HTML with html5ever, or better maintained options), exposed through the CLI and through WebAssembly. The TypeScript `@weft/to-jsx` and the HTML import of `@weft/from-aria` move into it, and their packages keep their API as wrappers, as T22 did for the core, so there is one implementation. Code that Weft generated comes back without loss; hand-written code imports with a loss table. Done when every corpus screen survives Weft → HTML/CSS, React and Solid → Weft byte-identical after formatting, the generated React and Solid components render with the same accessibility tree as today's renderer, and hand-written samples import with the expected losses.
