@@ -1580,6 +1580,9 @@ fn winui_writes_where_the_project_says_with_its_tokens_and_reads_back() {
         tokens.contains("<x:Double x:Key=\"Weft.space.sm\">12</x:Double>"),
         "{tokens}"
     );
+    // The helpers are in the project's namespace, as its pages.
+    let helpers = read_back(&s, "windows/Weft.cs");
+    assert!(helpers.contains("\nnamespace Acme.Screens;\n"), "{helpers}");
 
     let r = run(&[&"import-winui", &s.path("windows/PlainPage.xaml")]);
     assert_eq!((r.code, r.stdout.as_str(), r.stderr.as_str()), (0, "", ""));
@@ -1649,7 +1652,7 @@ fn winui_arguments_override_the_project() {
         r.stderr
     );
 
-    // `--tokens`, `--project`, `--out-dir` and `--force` of `winui-tokens`.
+    // `--tokens`, `--namespace`, `--project`, `--out-dir` and `--force` of `winui-tokens`.
     let (project, own) = (s.path("weft.json"), s.path("tokens/swift.tokens.json"));
     for force in [false, true] {
         let mut args: Vec<&dyn AsRef<std::ffi::OsStr>> = vec![
@@ -1658,6 +1661,8 @@ fn winui_arguments_override_the_project() {
             &project,
             &"--tokens",
             &own,
+            &"--namespace",
+            &"Other.Ui",
             &"--out-dir",
             &elsewhere,
         ];
@@ -1672,6 +1677,15 @@ fn winui_arguments_override_the_project() {
         tokens.contains("Weft.space.sm\">12<") && !tokens.contains("space.xs"),
         "{tokens}"
     );
+    let helpers = std::fs::read_to_string(elsewhere.join("Weft.cs")).unwrap();
+    assert!(helpers.contains("\nnamespace Other.Ui;\n"), "{helpers}");
+    let r = run(&[&"winui-tokens", &"--no-project", &"--namespace", &"1st"]);
+    assert_eq!((r.code, r.stdout.as_str()), (1, ""));
+    assert!(
+        r.stderr.contains("`1st` is not a C# namespace"),
+        "{}",
+        r.stderr
+    );
     let r = run(&[
         &"winui-tokens",
         &"--project",
@@ -1684,6 +1698,12 @@ fn winui_arguments_override_the_project() {
     let r = run_in(&s.path("screens"), &[&"winui-tokens", &"--no-project"]);
     assert_eq!(r.code, 0, "{}", r.stderr);
     assert!(r.stdout.contains("Weft.space.sm\">8<"), "{}", r.stdout);
+    assert!(r.stdout.contains("==> Weft.cs <==\n"), "{}", r.stdout);
+    assert!(
+        r.stdout.contains("\nnamespace WeftScreens;\n"),
+        "{}",
+        r.stdout
+    );
 
     // `import-winui`: `--out-dir` and `--force` beat the project; without it, printed.
     let xaml = elsewhere.join("HomePage.xaml");
@@ -1723,10 +1743,12 @@ fn winui_arguments_override_the_project() {
 fn winui_keeps_context_in_its_source_comment() {
     let s = Scratch::new("winui-context");
     let screen = s.write("screens/plain.weft", NOTED);
-    let r = run(&[&"winui", &screen]);
+    // Printed, the page comes with its C#, so it is written to read it back alone.
+    let r = run(&[&"winui", &screen, &"--out-dir", &s.path("out")]);
     assert_eq!(r.code, 0, "{}", r.stderr);
-    assert!(r.stdout.contains("Back returns home."), "{}", r.stdout);
-    let xaml = s.write("PlainPage.xaml", &r.stdout);
+    let xaml = s.path("out/PlainPage.xaml");
+    let page = std::fs::read_to_string(&xaml).unwrap();
+    assert!(page.contains("Back returns home."), "{page}");
     let r = run(&[&"import-winui", &xaml]);
     assert_eq!((r.code, r.stdout.as_str()), (0, NOTED), "{}", r.stderr);
     let r = run(&[&"import-winui", &xaml, &"--context", &"drop"]);

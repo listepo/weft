@@ -64,7 +64,8 @@ pub struct Generated {
 }
 
 impl Generated {
-    /// The three files, each with its name.
+    /// Every file of the screen, as file name and content, in the order they are written: the
+    /// CLI writes this list, so a new file needs no change there.
     pub fn files(&self) -> [(String, &str); 3] {
         [
             (format!("{}.xaml", self.page), &self.xaml),
@@ -95,14 +96,6 @@ fn check_namespace(namespace: &str) -> Result<(), GenerateError> {
         Ok(())
     } else {
         Err(GenerateError::Namespace(namespace.to_owned()))
-    }
-}
-
-impl Generated {
-    /// Every file of the screen, as file name and content, in the order they are written: the
-    /// CLI writes this list, so a new file needs no change there.
-    pub fn files(&self) -> Vec<(String, &str)> {
-        vec![(format!("{}.xaml", self.page), &self.xaml)]
     }
 }
 
