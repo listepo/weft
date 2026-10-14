@@ -97,28 +97,32 @@ describe("the declared inputs of the Rust builds", () => {
     }
   ).tasks;
 
-  // `--all-features` joins the builds with and without the `web` feature of weft-wasm.
-  for (const [target, root] of [
-    ["wasm", "weft-wasm"],
-    ["native", "weft-node"],
+  // `--all-features` joins the builds with and without the `web` feature of weft-wasm. The cox
+  // plugin is a Cargo workspace of its own on weft-binding; its default features build less than
+  // this closure, so its tasks list a little more than they read, never less.
+  for (const [project, target, root, lock] of [
+    ["root", "wasm", "weft-wasm", "Cargo.lock"],
+    ["root", "native", "weft-node", "Cargo.lock"],
+    ["cox-plugin", "build", "weft-binding", "plugins/cox/Cargo.lock"],
+    ["cox-plugin", "test", "weft-binding", "plugins/cox/Cargo.lock"],
   ] as const) {
-    const declared = tasks.root?.[target];
+    const declared = tasks[project]?.[target];
     const folders = crateFolders(real, root);
     const globs = Object.keys(declared?.inputGlobs ?? {});
     const files = Object.keys(declared?.inputFiles ?? {});
 
-    test(`root:${target} lists the crates ${root} is built from, and no other`, () => {
-      assert.ok(declared, `root:${target} is not a moon task`);
+    test(`${project}:${target} lists the crates ${root} is built from, and no other`, () => {
+      assert.ok(declared, `${project}:${target} is not a moon task`);
       assert.deepEqual(
         globs.filter((glob) => glob.startsWith("crates/")).sort(),
         folders.map((folder) => `${folder}/**/*`),
       );
-      for (const file of ["Cargo.toml", "Cargo.lock"]) {
-        assert.ok(files.includes(file), `${file} is not an input of root:${target}`);
+      for (const file of ["Cargo.toml", lock]) {
+        assert.ok(files.includes(file), `${file} is not an input of ${project}:${target}`);
       }
     });
 
-    test(`root:${target} lists the files its crates include from outside their folders`, () => {
+    test(`${project}:${target} lists the files its crates include from outside their folders`, () => {
       const covered = (path: string) =>
         files.includes(path) || globs.some((glob) => matchesGlob(path, glob));
       for (const folder of folders) {
@@ -135,7 +139,7 @@ describe("the declared inputs of the Rust builds", () => {
           for (const path of externalIncludes(folder, source, text)) {
             assert.ok(
               covered(path),
-              `${source} includes ${path}, which root:${target} does not list`,
+              `${source} includes ${path}, which ${project}:${target} does not list`,
             );
           }
         }

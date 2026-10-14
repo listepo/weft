@@ -1,0 +1,29 @@
+# The Weft plugin for cox (plan.md T106.3). Build the module with `moon run cox-plugin:build`,
+# then `cox plugin install plugins/cox`. The schema is cox's docs/plugin.schema.json; the test
+# tests/manifest.rs reads this file into cox's own manifest type.
+api = 1
+id = "weft"
+version = "0.1.0"
+name = "Weft"
+description = "Write, check and fix Weft UI markup: the Weft agent tools of the MCP server"
+wasm = "weft.wasm"
+
+# The core catalog, a project's catalogs and a large markup fit well under the host maximum;
+# a call validates or formats in milliseconds, so the budget only bounds a runaway input.
+[limits]
+memory_mib = 64
+call_ms = 10000
+
+# Only tools: no files, network, store, model or UI. The project comes from the [plugins.weft]
+# table of cox's config, inline. weft_render follows with T106.4.
+[capabilities]
+tools = [
+  "weft_primer",
+  "weft_capabilities",
+  "weft_catalog",
+  "weft_schema",
+  "weft_validate",
+  "weft_format",
+  "weft_patch",
+  "weft_context",
+]
