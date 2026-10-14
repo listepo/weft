@@ -25,8 +25,9 @@ pub fn serialize(document: &Document) -> String {
     format!("{}\n", lines.join("\n"))
 }
 
-/// Tabs and newlines become references because XML would otherwise read them as spaces.
-fn escape_attribute(value: &str) -> String {
+/// An XML attribute value. Tabs and newlines become references because XML would otherwise read
+/// them as spaces. Generators that write XML of their own (WinUI XAML) use it too.
+pub fn escape_attribute(value: &str) -> String {
     let mut out = String::with_capacity(value.len());
     for c in value.chars() {
         match c {

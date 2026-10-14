@@ -4,7 +4,6 @@
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
 - T105. Weft to WinUI 3 and back
-- T105.1. WinUI generator: first slice and source-comment read-back
 - T105.2. WinUI view model, code-behind and helpers
 - T105.3. WinUI value and choice controls
 - T105.4. WinUI repetition and containers

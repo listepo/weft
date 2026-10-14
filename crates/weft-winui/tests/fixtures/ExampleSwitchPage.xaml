@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleSwitch namespace=WeftScreens
+<screen id="root" label="Notifications" weft="0.1">
+  <switch id="push" checked="{$.pushEnabled}" disabled="false" label="Push notifications" on-change="settings.update"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleSwitchPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Notifications">
+            <ToggleSwitch AutomationProperties.AutomationId="push" IsOn="{x:Bind ViewModel.pushEnabled, Mode=TwoWay}" IsEnabled="True" Header="Push notifications" weft:On.Change="{x:Bind ViewModel.settings_updateCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

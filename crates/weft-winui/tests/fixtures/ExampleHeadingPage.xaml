@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleHeading namespace=WeftScreens
+<screen id="root" label="Settings" weft="0.1">
+  <heading id="title" level="1">Settings</heading>
+  <heading id="subtitle" level="2" text="{$.section.title}"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleHeadingPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Settings">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Settings" />
+            <TextBlock AutomationProperties.AutomationId="subtitle" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="{x:Bind ViewModel.section.title, Mode=OneWay}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>
