@@ -2,7 +2,7 @@
 //! it. Pure functions over strings and values; no I/O, so the same crate builds for the CLI,
 //! WebAssembly and native Node addons.
 
-mod aria;
+pub mod aria;
 mod canonical;
 mod context;
 mod context_check;

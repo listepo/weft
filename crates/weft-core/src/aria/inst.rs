@@ -246,6 +246,14 @@ impl<'a> Inst<'a> {
         }
     }
 
+    /// A prop as written, when it is literal text: what an extension's `role` is read from.
+    pub fn literal(&self, name: &str) -> Option<&'a str> {
+        match self.node.props.get(name)? {
+            Value::String(s) => Some(s),
+            _ => None,
+        }
+    }
+
     pub fn text(&self, name: &str) -> String {
         show(self.prop(name).as_deref())
     }

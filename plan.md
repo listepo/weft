@@ -304,8 +304,8 @@ Decisions: the tree lives in `weft-core` (module `aria`), beside `controls` and 
 Sub-tasks, in order:
 
 - T106.4.1: the instance tree in `weft-core` (`aria/inst.rs`): `each` expanded with instance ids, hidden nodes removed, the `text` prop turned into content, `filled`, slot regions and the prop readings of `expand.ts` (label, clamped numbers, field, select, tab, radio, date, colour and number controls over `controls`). Unit tests per reading.
-- T106.4.2: the tree (`aria/tree.rs`): roles, names and states per kind as `aria.ts` builds them, table and tab structure, normalization and the Playwright-style YAML. Tests port `aria.test.ts`'s cases.
-- T106.4.3: wiring: a binding function (`ariaTree`, WebAssembly and native), `weft_render` returning the snapshot from Rust (the TypeScript server adds only the reference page for `html: true`), the `@weft/render-react` wrappers and the removal of the TypeScript tree. Verified by the existing render-react, from-aria and mcp tests, and a check that the corpus snapshots are unchanged.
+- T106.4.2: the tree (`aria/tree.rs`, `aria/normalize.rs`): roles, names and states per kind as `aria.ts` builds them, table and tab structure, and normalization. Tests port `aria.test.ts`'s cases.
+- T106.4.3: the Playwright-style YAML (`aria/yaml.rs`), then wiring: a binding function (`ariaTree`, WebAssembly and native), `weft_render` returning the snapshot from Rust (the TypeScript server adds only the reference page for `html: true`), the `@weft/render-react` wrappers and the removal of the TypeScript tree. Verified by the existing render-react, from-aria and mcp tests, and a check that the corpus snapshots are unchanged.
 - T106.4.4: the cox plugin serves `weft_render`; `html: true` returns `weft-web`'s static page, which the description says. Unit, manifest and e2e tests, and the module size.
 
 ### T106.4.1. Instance tree in Rust

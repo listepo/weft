@@ -168,3 +168,119 @@ fn a_hidden_root_has_no_instance() {
     root.props.insert("hidden".into(), crate::Value::Bool(true));
     assert!(expand_root(&root, catalog(), &Json::Null).is_none());
 }
+
+// ---- The tree and its snapshot; the cases of `@weft/render-react`'s `aria.test.ts`. ----
+
+fn tree(inner: &str, data: Json) -> Json {
+    let tree = super::expected_tree(&document(inner), catalog(), &data);
+    serde_json::to_value(tree).unwrap()
+}
+
+/// The children of `main`.
+fn main_of(inner: &str, data: Json) -> Json {
+    tree(inner, data)["children"][0]["children"].clone()
+}
+
+#[test]
+fn a_login_form_declares_roles_names_and_states() {
+    let inner = r#"<form id="f" label="Sign in"><field id="email" type="email" label="Email" value="{$.email}"/><checkbox id="keep" label="Keep me signed in" checked="true"/><slot name="footer"><button id="go" disabled="{!$.email}">Sign in</button></slot></form>"#;
+    assert_eq!(
+        tree(inner, json!({ "email": "" })),
+        json!({ "role": "fragment", "name": "", "children": [{ "role": "main", "name": "S", "children": [{
+            "role": "form", "name": "Sign in", "children": [
+                { "role": "textbox", "name": "Email" },
+                { "role": "checkbox", "name": "Keep me signed in", "states": { "checked": true } },
+                { "role": "button", "name": "Sign in", "states": { "disabled": true } },
+            ],
+        }] }] })
+    );
+}
+
+#[test]
+fn tables_get_a_header_row_and_tabs_their_selected_panel() {
+    let inner = r#"<table id="t" label="Orders"><column id="c">Order</column><each id="e" in="{$.rows}" as="r"><row id="row" selected="{$r.sel}"><cell id="x"><text id="tx" text="{$r.id}"/></cell></row></each></table><tabs id="tabs" selected="b"><tab id="a" label="A">Alpha</tab><tab id="b" label="B">Beta</tab></tabs>"#;
+    let data = json!({ "rows": [{ "id": "1", "sel": true }, { "id": "2" }] });
+    assert_eq!(
+        main_of(inner, data),
+        json!([
+            { "role": "table", "name": "Orders", "children": [
+                { "role": "rowgroup", "name": "", "children": [
+                    { "role": "row", "name": "Order", "children": [{ "role": "columnheader", "name": "Order" }] },
+                ] },
+                { "role": "rowgroup", "name": "", "children": [
+                    { "role": "row", "name": "1", "states": { "selected": true }, "children": [{ "role": "cell", "name": "1" }] },
+                    { "role": "row", "name": "2", "children": [{ "role": "cell", "name": "2" }] },
+                ] },
+            ] },
+            { "role": "tablist", "name": "", "children": [
+                { "role": "tab", "name": "A" },
+                { "role": "tab", "name": "B", "states": { "selected": true } },
+            ] },
+            { "role": "tabpanel", "name": "B", "children": [{ "role": "text", "name": "Beta" }] },
+        ])
+    );
+}
+
+#[test]
+fn unnamed_landmarks_layout_and_role_none_dissolve() {
+    let inner = r#"<section id="s"><form id="f"><stack id="st"><text id="t">Hi</text></stack></form></section><x-acme-spacer id="sp" role="none">There</x-acme-spacer>"#;
+    assert_eq!(
+        main_of(inner, json!({})),
+        json!([{ "role": "text", "name": "Hi There" }])
+    );
+}
+
+#[test]
+fn a_link_keeps_a_safe_url_only() {
+    let inner =
+        r#"<link id="a" href="https://x.test">A</link><link id="c" href="javascript:x">C</link>"#;
+    assert_eq!(
+        main_of(inner, json!({})),
+        json!([
+            { "role": "link", "name": "A", "url": "https://x.test" },
+            { "role": "link", "name": "C" },
+        ])
+    );
+}
+
+#[test]
+fn controls_show_their_role_name_and_value() {
+    let inner = r##"<slider id="s" label="Volume" value="3" min="0" max="10" step="2"/><stepper id="t" label="Guests" value="2"/><date-picker id="d" label="Due" value="2026-10-05"/><color-picker id="c" label="Accent" value="#3B82F6" disabled="true"/><combobox id="b" label="Fruit" value="app"><option id="o" value="apple">Apple</option></combobox><segmented-control id="g" label="View" value="day"><segment id="a" value="day">Day</segment><segment id="w" value="week">Week</segment></segmented-control><dialog id="dl" label="Closed">x</dialog>"##;
+    assert_eq!(
+        main_of(inner, json!({})),
+        json!([
+            { "role": "slider", "name": "Volume", "children": [{ "role": "text", "name": "4" }] },
+            { "role": "spinbutton", "name": "Guests", "children": [{ "role": "text", "name": "2" }] },
+            { "role": "textbox", "name": "Due", "children": [{ "role": "text", "name": "2026-10-05" }] },
+            { "role": "textbox", "name": "Accent", "states": { "disabled": true }, "children": [{ "role": "text", "name": "#3b82f6" }] },
+            { "role": "combobox", "name": "Fruit", "children": [{ "role": "text", "name": "app" }] },
+            { "role": "radiogroup", "name": "View", "children": [
+                { "role": "radio", "name": "Day", "states": { "checked": true } },
+                { "role": "radio", "name": "Week" },
+            ] },
+        ])
+    );
+}
+
+fn aria(value: Json) -> super::AriaNode {
+    serde_json::from_value(value).unwrap()
+}
+
+#[test]
+fn normalizing_merges_text_dissolves_generic_nodes_and_drops_a_repeated_name() {
+    let raw = aria(json!({ "role": "fragment", "name": "", "children": [
+        { "role": "button", "name": " Go ", "children": [{ "role": "text", "name": "Go" }] },
+        { "role": "generic", "name": "", "children": [
+            { "role": "text", "name": "a" },
+            { "role": "text", "name": " b  c" },
+        ] },
+        { "role": "text", "name": "d" },
+    ] }));
+    assert_eq!(
+        serde_json::to_value(super::normalize_aria(&raw)).unwrap(),
+        json!({ "role": "fragment", "name": "", "children": [
+            { "role": "button", "name": "Go" },
+            { "role": "text", "name": "a b c d" },
+        ] })
+    );
+}
