@@ -159,17 +159,19 @@ pub(crate) fn read_markup(markup: &str, context: &Context, mode: Mode, with_data
 pub enum Outcome {
     /// Text blocks, as MCP `content`; `is_error` marks a failure the model should fix.
     Content { blocks: Vec<String>, is_error: bool },
-    /// `weft_render` after its checks: the strictly valid document for the host's renderer.
+    /// `weft_render` with `html`: the accessibility tree, and the strictly valid document for the
+    /// host's page renderer, whose page is the second block.
     Render(Box<RenderRequest>),
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RenderRequest {
+    /// The first block: the accessibility tree as a Playwright-style snapshot.
+    pub tree: String,
     pub document: Document,
     pub catalog: Catalog,
     /// The sample data model the bindings read, when the call gave one.
     pub data: Option<Json>,
-    pub html: bool,
 }
 
 impl Outcome {
@@ -202,12 +204,12 @@ impl Outcome {
                 to_compact(&out)
             }
             Outcome::Render(r) => {
-                let mut render = json!({ "document": r.document, "catalog": r.catalog });
+                let mut render =
+                    json!({ "tree": r.tree, "document": r.document, "catalog": r.catalog });
                 // Absent, not null: the renderer reads a missing data model as no data.
                 if let Some(data) = &r.data {
                     render["data"] = data.clone();
                 }
-                render["html"] = Json::Bool(r.html);
                 to_compact(&json!({ "render": render }))
             }
         }

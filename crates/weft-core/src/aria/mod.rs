@@ -5,6 +5,7 @@
 mod inst;
 mod normalize;
 mod tree;
+mod yaml;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value as Json;
@@ -12,6 +13,7 @@ use serde_json::Value as Json;
 use crate::{Catalog, Document, Map, expand};
 
 pub use normalize::normalize_aria;
+pub use yaml::format_aria_snapshot;
 
 /// One node: `role` is an ARIA role, `text` for a run of text (the text is its `name`), or
 /// `fragment` for the root, which holds the top-level nodes as a snapshot of `<body>` does.

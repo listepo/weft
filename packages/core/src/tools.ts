@@ -32,10 +32,13 @@ export type ToolDecl = {
 
 export type ToolContent = { type: "text"; text: string }[];
 
-/** A call's result: text blocks, or for `weft_render` the checked document to draw. */
+/**
+ * A call's result: text blocks, or for `weft_render` with `html` the accessibility tree (the
+ * first block) and the checked document whose page the host draws as the second.
+ */
 export type ToolResult =
   | { content: ToolContent; isError?: true }
-  | { render: { document: unknown; catalog: Catalog; data: unknown; html: boolean } };
+  | { render: { tree: string; document: unknown; catalog: Catalog; data: unknown } };
 
 export type ToolConstants = {
   limits: Record<string, number>;

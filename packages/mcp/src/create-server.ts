@@ -3,7 +3,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { coreCatalog } from "@weft/catalog";
 import type { Document } from "@weft/core";
 import { toolHost, type ToolResult } from "@weft/core/tools";
-import { expectedTree, formatAriaSnapshot, renderPage } from "@weft/render-react";
+import { renderPage } from "@weft/render-react";
 import { z } from "zod";
 import type { Context, Limits, ServerSettings } from "./context.ts";
 
@@ -15,25 +15,21 @@ export type ServerOptions = {
 };
 
 /**
- * `weft_render`'s last step: the Rust tools have checked the markup strictly, and the reference
- * renderer draws the accessibility tree and, on request, the page. The tool contract is "never
+ * `weft_render` with `html`'s last step: the Rust tools have checked the markup strictly and built
+ * the accessibility tree, and the reference renderer draws the page. The tool contract is "never
  * throw", so whatever escapes the renderer becomes an error result.
  */
 function finish(result: ToolResult): CallToolResult {
   if (!("render" in result)) return result;
   try {
-    const { catalog, data, html } = result.render;
+    const { tree, catalog, data } = result.render;
     const document = result.render.document as Document;
-    const options = { catalog, data };
-    const tree = formatAriaSnapshot(expectedTree(document, options));
-    const content = [
-      {
-        type: "text" as const,
-        text: tree === "" ? "(nothing is exposed to assistive technology)" : tree,
-      },
-    ];
-    if (html) content.push({ type: "text", text: renderPage(document, options) });
-    return { content };
+    return {
+      content: [
+        { type: "text", text: tree },
+        { type: "text", text: renderPage(document, { catalog, data }) },
+      ],
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return { content: [{ type: "text", text: `Internal error: ${message}` }], isError: true };

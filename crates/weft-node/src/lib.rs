@@ -90,6 +90,16 @@ impl Catalog {
         js(api::expand_document(document.as_deref(), &self.inner))
     }
 
+    /// The accessibility tree the reference renderer exposes for a document, as an `AriaNode`.
+    #[napi]
+    pub fn aria_tree(&self, document: Option<String>, data: Option<String>) -> Result<String> {
+        js(api::aria_tree(
+            document.as_deref(),
+            data.as_deref(),
+            &self.inner,
+        ))
+    }
+
     #[napi]
     pub fn apply_patches(
         &self,
@@ -193,6 +203,16 @@ impl Catalog {
 #[napi]
 pub fn parse(markup: String, options: String) -> Result<String> {
     js(api::parse_markup(&markup, None, &options))
+}
+
+#[napi]
+pub fn normalize_aria(tree: String) -> Result<String> {
+    js(api::normalize_tree(&tree))
+}
+
+#[napi]
+pub fn format_aria(tree: String) -> Result<String> {
+    js(api::format_tree(&tree))
 }
 
 #[napi]

@@ -3,6 +3,7 @@
 
 use serde_json::{Map, Value as Json, json};
 use weft_catalog::{DocumentSchemaOptions, document_schema};
+use weft_core::aria::{expected_tree, format_aria_snapshot};
 use weft_core::{
     ApplyOptions, Author, Child, DataCheckOptions, Document, Mode, Node, Value, apply_patches,
     check_data, did_you_mean, has_errors, js_number, serialize, to_compact,
@@ -363,7 +364,11 @@ fn patch(host: &ToolHost, args: &Args) -> Run {
     Ok(warned(serialize(&document), &all, limits.diagnostics))
 }
 
-/// The checks of `weft_render`; the host's renderer draws the document it hands back.
+/// What `weft_render` says when the tree is empty, so the result is never a blank block.
+const NOTHING_EXPOSED: &str = "(nothing is exposed to assistive technology)";
+
+/// The checks of `weft_render`, then the accessibility tree; for `html` the host's renderer draws
+/// the page of the document it hands back.
 fn render(host: &ToolHost, args: &Args) -> Run {
     let limits = &host.settings.limits;
     let markup = args.required_string("markup", limits.markup_chars)?;
@@ -380,12 +385,22 @@ fn render(host: &ToolHost, args: &Args) -> Run {
     let read = read_markup(markup, c, Mode::Strict, true);
     let ok = read.ok();
     match read.document {
-        Some(document) if ok => Ok(Outcome::Render(Box::new(RenderRequest {
-            document,
-            catalog: c.catalog.clone(),
-            data: data.cloned(),
-            html,
-        }))),
+        Some(document) if ok => {
+            let tree = expected_tree(&document, &c.catalog, data.unwrap_or(&Json::Null));
+            let mut tree = format_aria_snapshot(&tree);
+            if tree.is_empty() {
+                tree = NOTHING_EXPOSED.to_owned();
+            }
+            if !html {
+                return Ok(Outcome::text(tree));
+            }
+            Ok(Outcome::Render(Box::new(RenderRequest {
+                tree,
+                document,
+                catalog: c.catalog.clone(),
+                data: data.cloned(),
+            })))
+        }
         _ => Err(diagnostics_text(
             &[scoped, &read.diagnostics].concat(),
             limits.diagnostics,

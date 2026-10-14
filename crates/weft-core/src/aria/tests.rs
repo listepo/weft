@@ -284,3 +284,31 @@ fn normalizing_merges_text_dissolves_generic_nodes_and_drops_a_repeated_name() {
         ] })
     );
 }
+
+#[test]
+fn the_snapshot_is_the_yaml_playwright_prints() {
+    let tricky = aria(json!({ "role": "fragment", "name": "", "children": [
+        { "role": "button", "name": "say \"hi\": now", "states": { "pressed": "mixed", "disabled": true } },
+        { "role": "text", "name": "42" },
+        { "role": "link", "name": "x", "url": "https://x.test/#a b", "children": [{ "role": "text", "name": "y" }] },
+        { "role": "heading", "name": "", "states": { "level": 2 }, "children": [{ "role": "text", "name": "- z" }] },
+        { "role": "textbox", "name": "Note", "children": [{ "role": "text", "name": "1_000.5e3" }] },
+        { "role": "textbox", "name": "Plain", "children": [{ "role": "text", "name": "TRUE story" }] },
+    ] }));
+    assert_eq!(
+        super::format_aria_snapshot(&tricky),
+        [
+            r#"- 'button "say \"hi\": now" [disabled] [pressed=mixed]'"#,
+            r#"- text: "42""#,
+            r#"- link "x":"#,
+            "  - /url: https://x.test/#a b",
+            "  - text: y",
+            r#"- heading [level=2]: "- z""#,
+            r#"- textbox "Note": "1_000.5e3""#,
+            r#"- textbox "Plain": TRUE story"#,
+        ]
+        .join("\n")
+    );
+    let empty = aria(json!({ "role": "fragment", "name": "" }));
+    assert_eq!(super::format_aria_snapshot(&empty), "");
+}

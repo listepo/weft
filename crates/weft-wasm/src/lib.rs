@@ -43,6 +43,20 @@ impl Catalog {
         Ok(api::expand_document(document.as_deref(), &self.0)?)
     }
 
+    /// The accessibility tree the reference renderer exposes for a document, as an `AriaNode`.
+    #[wasm_bindgen(js_name = ariaTree)]
+    pub fn aria_tree(
+        &self,
+        document: Option<String>,
+        data: Option<String>,
+    ) -> Result<String, JsError> {
+        Ok(api::aria_tree(
+            document.as_deref(),
+            data.as_deref(),
+            &self.0,
+        )?)
+    }
+
     #[wasm_bindgen(js_name = applyPatches)]
     pub fn apply_patches(
         &self,
@@ -185,6 +199,16 @@ impl ToolHost {
 #[wasm_bindgen]
 pub fn parse(markup: &str, options: &str) -> Result<String, JsError> {
     Ok(api::parse_markup(markup, None, options)?)
+}
+
+#[wasm_bindgen(js_name = normalizeAria)]
+pub fn normalize_aria(tree: &str) -> Result<String, JsError> {
+    Ok(api::normalize_tree(tree)?)
+}
+
+#[wasm_bindgen(js_name = formatAria)]
+pub fn format_aria(tree: &str) -> Result<String, JsError> {
+    Ok(api::format_tree(tree)?)
 }
 
 #[wasm_bindgen]

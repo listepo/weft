@@ -222,14 +222,30 @@ fn patch_applies_all_or_nothing_and_keeps_its_bounds() {
 }
 
 #[test]
-fn render_checks_strictly_then_hands_the_document_to_the_host() {
+fn render_checks_strictly_then_gives_the_tree_and_for_html_the_document() {
+    let (error, blocks) = run(&host(), "weft_render", json!({"markup": GOOD}));
+    assert_eq!(
+        (error, blocks),
+        (
+            false,
+            vec!["- main \"Demo\":\n  - button \"Go\"".to_owned()]
+        )
+    );
+    let hidden = "<screen id=\"s\" label=\"x\" weft=\"0.1\" hidden=\"{$.off}\"/>";
+    let (_, blocks) = run(
+        &host(),
+        "weft_render",
+        json!({"markup": hidden, "data": {"off": true}}),
+    );
+    assert_eq!(blocks, ["(nothing is exposed to assistive technology)"]);
     match host().call(
         "weft_render",
         &json!({"markup": GOOD, "data": {"a": 1}, "html": true}).to_string(),
     ) {
         Outcome::Render(r) => {
             assert_eq!(r.document.root.kind, "screen");
-            assert_eq!((r.data, r.html), (Some(json!({"a": 1})), true));
+            assert_eq!(r.tree, "- main \"Demo\":\n  - button \"Go\"");
+            assert_eq!(r.data, Some(json!({"a": 1})));
         }
         other => panic!("{other:?}"),
     }

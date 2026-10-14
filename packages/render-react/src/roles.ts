@@ -1,4 +1,5 @@
-// ARIA role facts the renderer and `expectedTree` both depend on.
+// ARIA role facts the renderer depends on; the Rust core's accessibility tree (`ariaTree` of
+// `@weft/core`) restates them.
 import { label, type Inst } from "./expand.ts";
 
 // Concrete (non-abstract) roles of WAI-ARIA 1.2. An extension's `role` outside this list would
@@ -15,28 +16,6 @@ const ARIA_ROLES = new Set(
     "treegrid treeitem"
   ).split(" "),
 );
-
-// Roles whose accessible name is computed from their content when no label is given (ARIA 1.2).
-export const NAME_FROM_CONTENT = new Set([
-  "button",
-  "cell",
-  "checkbox",
-  "columnheader",
-  "gridcell",
-  "heading",
-  "link",
-  "menuitem",
-  "menuitemcheckbox",
-  "menuitemradio",
-  "option",
-  "radio",
-  "row",
-  "rowheader",
-  "switch",
-  "tab",
-  "tooltip",
-  "treeitem",
-]);
 
 // Roles that add nothing to the accessibility tree; their children take their place.
 export const TRANSPARENT = new Set(["none", "presentation", "generic"]);
