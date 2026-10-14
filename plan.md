@@ -9,10 +9,9 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
-| T106 | in progress | P2 | 5 | 35% | Claude Code / claude-opus-5-5 |
-| T106.4 | in progress | P3 | 4 | 50% | Claude Code / claude-opus-5-5 |
-| T106.4.3 | in progress | P3 | 3 | 0% | Claude Code / claude-opus-5-5 |
-| T106.4.4 | todo | P3 | 2 | 0% | |
+| T106 | in progress | P2 | 5 | 40% | Claude Code / claude-opus-5-5 |
+| T106.4 | in progress | P3 | 4 | 75% | Claude Code / claude-opus-5-5 |
+| T106.4.4 | in progress | P3 | 2 | 0% | Claude Code / claude-opus-5-5 |
 | T106.5 | todo | P2 | 3 | 0% | |
 | T106.6 | todo | P2 | 3 | 0% | |
 | T106.7 | todo | P2 | 4 | 0% | |
@@ -304,11 +303,7 @@ Sub-tasks, in order:
 - T106.4.1: the instance tree in `weft-core` (`aria/inst.rs`): `each` expanded with instance ids, hidden nodes removed, the `text` prop turned into content, `filled`, slot regions and the prop readings of `expand.ts` (label, clamped numbers, field, select, tab, radio, date, colour and number controls over `controls`). Unit tests per reading.
 - T106.4.2: the tree (`aria/tree.rs`, `aria/normalize.rs`): roles, names and states per kind as `aria.ts` builds them, table and tab structure, and normalization. Tests port `aria.test.ts`'s cases.
 - T106.4.3: the Playwright-style YAML (`aria/yaml.rs`), then wiring: a binding function (`ariaTree`, WebAssembly and native), `weft_render` returning the snapshot from Rust (the TypeScript server adds only the reference page for `html: true`), the `@weft/render-react` wrappers and the removal of the TypeScript tree. Verified by the existing render-react, from-aria and mcp tests, and a check that the corpus snapshots are unchanged.
-- T106.4.4: the cox plugin serves `weft_render`; `html: true` returns `weft-web`'s static page, which the description says. Unit, manifest and e2e tests, and the module size.
-
-### T106.4.3. weft_render on the Rust tree
-
-Part of T106.4 (plan in its card).
+- T106.4.4: the cox plugin serves `weft_render`; `html: true` returns `weft-web`'s static page, which the description says. Unit, manifest and e2e tests, and the module size. Plan: `RenderRequest` carries the scope's resolved tokens (`Context` keeps them from the project), so the page validates against the tokens the markup was checked with; without project tokens the default tokens, as `toHtml`. The plugin depends on `weft-web` and `weft-catalog` by path, joins the tree and the page a blank line apart like its other multi-block results, and turns a refused page into an error result with the diagnostics. Files: `crates/weft-binding/src/tools/{host,call,tests}.rs`, `plugins/cox/{Cargo.toml,src/lib.rs,plugin.toml,README.md,tests/*}`. Verified by `cox-plugin:test` and the binding tests.
 
 ### T106.4.4. weft_render in the cox plugin
 

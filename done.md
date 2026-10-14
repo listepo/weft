@@ -308,6 +308,12 @@ Part of T106.4: the tree `aria.ts` builds, in `weft-core` (`aria/tree.rs`, `aria
 
 Done: `weft_core::aria::expected_tree` and `normalize_aria`: roles, names and states per kind, the table's header and body row groups, the tab list and selected panel, closed dialogs and decorative images left out, and the normalization of a Playwright snapshot. Tests are `aria.test.ts`'s cases on the same documents. The YAML writer moved to T106.4.3 to keep this task within the size rule.
 
+### T106.4.3. weft_render on the Rust tree
+
+Part of T106.4: the Playwright-style YAML and the wiring.
+
+Done: `weft_core::aria::format_aria_snapshot` (`aria/yaml.rs`); the binding functions `ariaTree`, `normalizeAria` and `formatAria` (WebAssembly and native) behind `@weft/core`'s `ariaTree`, `normalizeAria` and `formatAriaSnapshot`; `weft_render` returns the snapshot from Rust, and for `html: true` the TypeScript server adds only the reference page; `@weft/render-react`'s `expectedTree`, `normalizeAria` and `formatAriaSnapshot` wrap the core, and its TypeScript tree is gone (`parseAriaSnapshot` and `diffAria` stay, for the DOM tests). Verified by the render-react, from-aria, mcp and core tests, and a one-off differential check that the old TypeScript tree and YAML equal the Rust ones over the corpus, fixtures and compat screens, with and without data.
+
 ### T39.3. Context: patch operations
 
 `add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.
