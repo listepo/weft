@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.2 | todo | P2 | 4 | 0% | |
+| T105.2 | in progress | P2 | 4 | 10% | Claude Code / claude-opus-5-5 |
 | T105.3 | todo | P2 | 4 | 0% | |
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
@@ -300,6 +300,8 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.2. WinUI view model, code-behind and helpers
 
 `<Name>ViewModel.cs` (properties, item classes with `WeftRoot`/`WeftParent`/`WeftPath`, `ObservableCollection<T>`, one command per action, `Perform`, `Performed`), `<Name>Page.xaml.cs`, and `Weft.cs` core (`On.*` event properties, `Not`, `Truthy`, `Hide`, `Props` markers). About 450 lines of code. Done when the goldens of T105.1 carry their C# and the type and name refusals have tests.
+
+**Execution plan.** (1) SPEC §9 "To WinUI" first: the view model, the code-behind, `Weft.cs`, array indexes as x:Bind indexers, the C# names of the data classes and the refusals. (2) `src/data.rs`: a typed tree of the paths (leaf, object, array) with soft types for reads through helpers and markers, indexes allowed, and the name refusals (C# keywords become `@name`; `object` members, a member equal to its class, two data classes with one name are refused). (3) `src/csharp.rs`: `<Name>ViewModel.cs` (leaf properties with change notification, get-only objects and `ObservableCollection<T>` arrays, item classes with `WeftRoot`/`WeftParent`/`WeftPath` placed by the view model, one `WeftCommand` per action, `Perform`, `Performed`, `partial void OnPerformed`) and `<Name>Page.xaml.cs`; `Generated` gains `view_model`, `code_behind` and their file names. (4) `src/Weft.cs` behind `helpers(namespace)`: `WeftEvent`, `WeftCommand`, `IWeftItem`, `Weft.Not`/`Truthy`/`Hide`/`Set`/`Place`, `Props`, `On` (`Press`, `Change`, `Submit`, `Close`) and `Slot`. (5) Tests: goldens of every covered screen gain `.cs` files, a fixture with objects, arrays and keywords, the C# checked for balanced braces, and the type and name refusals. Verify with `moon run root:changed`, then the full check.
 
 ### T105.3. WinUI value and choice controls
 
