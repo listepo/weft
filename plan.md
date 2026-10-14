@@ -16,7 +16,7 @@ Not added: Weft → Slint generation stays in `crates/weft-slint` (T69.1 decisio
 
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
-| T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
+| T8 | in progress | P1 | 3 | 75% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 70% | Claude Code / claude-opus-5-5 |
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
@@ -48,6 +48,8 @@ Execution plan, round 2 (no paid calls until the creator approves the budget):
 2. `run.ts --estimate`: no calls; prints requests and proxy input tokens per model and format for the planned jobs, the input to the budget request. Test beside the first.
 3. Local three-sample edit and read runs on LM Studio (`prism-ml/bonsai-27b`), all screens, current harness; raw results and History rows in `test.md`.
 4. Cost estimate for the Anthropic runs of step 6 (tasks × samples × models × tokens, prices from the vendor's pricing page with URL and date) and the exact command; `bench/EVALUATION.md` revised with the local runs. The paid runs wait on the creator.
+
+Round 2 progress: steps 1, 2 and 4 are done, and a stopped run (Ctrl-C, SIGTERM) now saves what finished, so `--resume` can continue it. The estimate for the Anthropic runs is in `bench/EVALUATION.md`: $15.77, or $7.89 with `--batch`. Step 3 is open: a local edit run takes about a day (3.4 minutes per sample), and the local read run reached 190 of 288 samples before the disk filled up and lost it. Blocked on the creator: the budget for the paid runs (step 6).
 
 ### T14. Figma round trip and plugin
 
