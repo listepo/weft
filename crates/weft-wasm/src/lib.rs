@@ -43,6 +43,20 @@ impl Catalog {
         Ok(api::expand_document(document.as_deref(), &self.0)?)
     }
 
+    /// The accessibility tree the reference renderer exposes for a document, as an `AriaNode`.
+    #[wasm_bindgen(js_name = ariaTree)]
+    pub fn aria_tree(
+        &self,
+        document: Option<String>,
+        data: Option<String>,
+    ) -> Result<String, JsError> {
+        Ok(api::aria_tree(
+            document.as_deref(),
+            data.as_deref(),
+            &self.0,
+        )?)
+    }
+
     #[wasm_bindgen(js_name = applyPatches)]
     pub fn apply_patches(
         &self,
@@ -150,10 +164,51 @@ impl Catalog {
     }
 }
 
+/// The agent tools of `weft-binding::tools`, for the MCP server (`@weft/core/tools`). In the web
+/// module only: the core module stays what a browser validator needs.
+#[cfg(feature = "web")]
+#[wasm_bindgen]
+pub struct ToolHost(weft_binding::tools::ToolHost);
+
+#[cfg(feature = "web")]
+#[wasm_bindgen]
+impl ToolHost {
+    #[wasm_bindgen(constructor)]
+    pub fn new(context: &str, settings: &str) -> Result<ToolHost, JsError> {
+        Ok(ToolHost(weft_binding::tools::ToolHost::from_wire(
+            context, settings,
+        )?))
+    }
+
+    /// Every tool's declaration, as a JSON array.
+    pub fn decls(&self) -> String {
+        weft_core::to_compact(&self.0.decls())
+    }
+
+    /// One call's result: an MCP `CallToolResult`, or `{"render": …}` for the wrapper to finish.
+    pub fn call(&self, name: &str, args: Option<String>) -> String {
+        self.0.call_wire(name, args.as_deref()).to_json()
+    }
+
+    pub fn constants(&self) -> String {
+        self.0.constants()
+    }
+}
+
 /// `parse` without a catalog: the syntax layer only.
 #[wasm_bindgen]
 pub fn parse(markup: &str, options: &str) -> Result<String, JsError> {
     Ok(api::parse_markup(markup, None, options)?)
+}
+
+#[wasm_bindgen(js_name = normalizeAria)]
+pub fn normalize_aria(tree: &str) -> Result<String, JsError> {
+    Ok(api::normalize_tree(tree)?)
+}
+
+#[wasm_bindgen(js_name = formatAria)]
+pub fn format_aria(tree: &str) -> Result<String, JsError> {
+    Ok(api::format_tree(tree)?)
 }
 
 #[wasm_bindgen]

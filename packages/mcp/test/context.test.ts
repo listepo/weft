@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { test } from "vitest";
 import { loadProject } from "@weft/catalog";
 import { hostOptions } from "../src/project.ts";
-import { CONTEXT_NOTICE, withinLimits } from "../src/tools/context.ts";
+import { CONTEXT_NOTICE } from "../src/index.ts";
 import { call, connect } from "./connect.ts";
 
 const SCREEN = `<screen id="s" label="Sign in" weft="0.2">
@@ -54,18 +54,18 @@ test("weft_validate and weft_format keep the context, and weft_render never show
   await close();
 });
 
-test("an oversized context is cut at the format's limits before a model sees it", () => {
-  const entry = (i: number) => ({
-    id: `e${i}`,
-    kind: "intent",
-    by: "agent",
-    name: "m",
-    text: "x".repeat(600),
-  });
-  const { entries, omitted } = withinLimits(Array.from({ length: 40 }, (_, i) => entry(i)));
+test("an oversized context is cut at the format's limits before a model sees it", async () => {
+  const entry = (i: number) =>
+    `<entry id="e${i}" by="agent" kind="intent" name="m">${"x".repeat(600)}</entry>`;
+  const markup = `<screen id="s" label="Big" weft="0.2"><context>${Array.from({ length: 40 }, (_, i) => entry(i)).join("")}</context></screen>`;
+  const { client, close } = await connect();
+  const { entries, omitted } = listed(
+    (await call(client, "weft_context", { markup })).blocks[0],
+  ) as Listed & { entries: { text: string }[] };
   assert.equal(entries[0]?.text.length, 500);
   assert.equal(entries.length, 32);
   assert.equal(omitted, 8);
+  await close();
 });
 
 test("weft_patch writes context as the agent, and a read-only host refuses it", async () => {

@@ -14,6 +14,7 @@
 | claude (Claude Code) | https://code.claude.com/docs/en/setup | Hosts the plugin (`plugins/claude-code`); `claude plugin validate` checks its manifests | https://github.com/anthropics/claude-code |
 | Cursor | https://cursor.com/download | Hosts the plugin (`plugins/cursor`); no test needs it | https://cursor.com |
 | Open Design | https://open-design.ai | Hosts the plugin (`plugins/open-design`); no test needs it | https://github.com/nexu-io/open-design |
+| cox | https://github.com/pyrlyn/cox (`cox plugin install plugins/cox`) | Hosts the plugin (`plugins/cox`); no test needs it, the end-to-end test loads the module with cox's engine | https://github.com/pyrlyn/cox |
 | cargo-nextest | mise | Runs the Rust tests | https://github.com/nextest-rs/nextest |
 | jactionlint | mise (`github:jdx/jactionlint`) | Lints the workflows (CI, the pre-push hook and `mise x -- jactionlint`) | https://github.com/jdx/jactionlint |
 | hk | mise | Runs jactionlint as a pre-push hook (`hk.pkl`) | https://github.com/jdx/hk |
@@ -77,7 +78,10 @@
 | unicode-properties | local | https://github.com/unicode-rs/unicode-properties | Unicode letter and number classes (`\p{L}`, `\p{N}`) for the JSX generators' check of which text runs print as written |
 | html5ever | local | https://github.com/servo/html5ever | Parses HTML in `weft-web` with the WHATWG tree builder, so imported pages read as a browser builds them |
 | oxc_parser, oxc_ast, oxc_allocator, oxc_span | local | https://github.com/oxc-project/oxc | Parse JSX and TSX in `weft-web`'s React and SolidJS importers; pure Rust, builds for wasm32 |
+| cox-plugin-sdk | local (`plugins/cox`, git) | https://github.com/pyrlyn/cox | The cox plugin's exports and ABI types (with `cox-plugin-api` and `extism-pdk`); not on crates.io, so a git dependency pinned to a commit. The first fetch clones pyrlyn/cox: about 560 MB in `~/.cargo/git/db` and 290 MB checked out |
 | roxmltree | local | https://github.com/RazrFalcon/roxmltree | The XML tree of weft-winui: its tests check the generated XAML is well-formed, and `import_winui` compares a page with the one its source comment regenerates; namespaces resolved, DTDs refused, nodes bounded |
+| toml | local (dev, `plugins/cox`) | https://github.com/toml-rs/toml | Reads `plugin.toml` into cox's manifest type in the plugin's manifest test |
+| wasm-plugin-host | local (dev, `plugins/cox`, git) | https://github.com/pyrlyn/crates | The extism engine of cox's plugin host (`packages/crates`), which the plugin's end-to-end test loads the module with; not on crates.io yet, so pinned to a commit |
 
 ## npm
 

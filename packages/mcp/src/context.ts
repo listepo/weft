@@ -1,5 +1,7 @@
 import type { CatalogSource, KindSource, LimitName } from "@weft/catalog";
+import { coreCatalog } from "@weft/catalog";
 import type { Catalog, DataSchema, Mode } from "@weft/core";
+import { toolHost } from "@weft/core/tools";
 
 /** What every tool needs to judge markup; the host decides, never the model. */
 export type Context = {
@@ -18,26 +20,21 @@ export type Context = {
 
 export type Limits = Readonly<Record<LimitName, number>>;
 
+// The tools, their texts and their bounds live in crates/weft-binding (`tools`), which the cox
+// plugin calls too; these are read from there so the server keeps no copy.
+const constants = toolHost({ catalog: coreCatalog }).constants();
+
 /**
- * Default bounds on what a model can make the server chew on. Tool arguments are untrusted input; the
- * numbers are generous for real screens (the largest corpus screen is under 3,000 characters).
+ * Default bounds on what a model can make the server chew on: tool arguments are untrusted
+ * input. Lengths count UTF-16 code units of the argument or of its JSON text.
  */
-export const LIMITS: Limits = {
-  /** UTF-16 code units of one markup argument. */
-  markupChars: 200_000,
-  /** UTF-16 code units of the JSON text of the `data` argument of `weft_render`. */
-  dataChars: 200_000,
-  /** Patches in one `weft_patch` call. */
-  patches: 100,
-  /** UTF-16 code units of the JSON text of the whole patch list. */
-  patchesChars: 200_000,
-  /** UTF-16 code units of the JSON text of the `project` argument (SPEC §10). */
-  projectChars: 500_000,
-  /** Diagnostics returned in one result; the rest are counted, not listed. */
-  diagnostics: 40,
-  /** JSON values (objects, arrays, scalars) in one call's arguments, enforced by the SDK. */
-  inputElements: 20_000,
-};
+export const LIMITS = constants.limits as Limits;
+/** The primer `weft_primer` returns with the default limits. */
+export const PRIMER = constants.primer;
+/** Names `weft_capabilities` lists per category. */
+export const LISTED = constants.listed;
+/** Sent with every `weft_context` result, so no entry can pass for the tool's own words. */
+export const CONTEXT_NOTICE = constants.contextNotice;
 
 /**
  * How one server runs. Its host sets this (`weft-mcp --project`, SPEC §10.6); a tool argument,

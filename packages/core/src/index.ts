@@ -1,5 +1,12 @@
 export * from "./model.ts";
 export { canonicalize, stringify } from "./canonical.ts";
+export {
+  ariaTree,
+  formatAriaSnapshot,
+  normalizeAria,
+  type AriaNode,
+  type AriaStates,
+} from "./aria.ts";
 export { expand, type Expanded } from "./expand.ts";
 export {
   checkData,

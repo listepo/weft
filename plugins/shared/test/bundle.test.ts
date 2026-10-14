@@ -10,7 +10,7 @@ import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseAst } from "vite";
 import { afterAll, beforeAll, describe, test } from "vitest";
-import { buildBundle, distDir, PLUGINS, specCopy, type PluginName } from "../build.ts";
+import { buildBundle, distDir, PLUGINS, specCopies, type PluginName } from "../build.ts";
 import { main as exportMain } from "../scripts/export.ts";
 import { main as importMain } from "../scripts/import.ts";
 import { main as renderMain } from "../scripts/render.ts";
@@ -75,10 +75,12 @@ describe("the committed bundles", () => {
           `${name}: ${file} is stale`,
         );
       }
+    }
+    for (const copy of specCopies()) {
       assert.equal(
-        readFileSync(specCopy(name), "utf8"),
+        readFileSync(copy, "utf8"),
         readFileSync(join(REPOSITORY, "AGENT-SPEC.md"), "utf8"),
-        `${name}: AGENT-SPEC.md copy is stale`,
+        `${relative(REPOSITORY, copy)} is stale`,
       );
     }
   });

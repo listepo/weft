@@ -252,14 +252,6 @@ function contribution(n: Inst): string {
   return contentText(ordered(n));
 }
 
-export type FieldRole = "textbox" | "spinbutton" | "searchbox";
-
-// SPEC §5.1: `field` is a textbox refined by `type` as ARIA requires.
-export function fieldRole(n: Inst): FieldRole {
-  const type = text(n, "type");
-  return type === "number" ? "spinbutton" : type === "search" ? "searchbox" : "textbox";
-}
-
 // A field is invalid when its state says so or when it shows an error message.
 export const fieldInvalid = (n: Inst): boolean => state(n) === "invalid" || text(n, "error") !== "";
 

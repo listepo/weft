@@ -1,0 +1,41 @@
+# The Weft plugin for cox: a Rust WebAssembly module in a Cargo workspace of its own (Cargo.toml).
+id: 'cox-plugin'
+language: 'rust'
+
+workspace:
+  inheritedTasks:
+    # The inherited Vitest task does not apply; `test` below runs the Rust tests.
+    exclude: ['test']
+
+fileGroups:
+  # The plugin and the workspace crates weft-binding is built from, with the files they include
+  # from outside their folders. The root Cargo.toml is read too: those crates inherit their
+  # versions and dependencies from it. tooling/test/inputs.test.ts checks the crate list against
+  # `cargo metadata`, so a new dependency of weft-binding cannot leave a stale cached module.
+  module:
+    - 'Cargo.toml'
+    - 'Cargo.lock'
+    - 'src/**/*'
+    - '/Cargo.toml'
+    - '/packages/catalog/catalog.json'
+    - '/packages/catalog/tokens/default.tokens.json'
+    - '/crates/weft-binding/**/*'
+    - '/crates/weft-catalog/**/*'
+    - '/crates/weft-core/**/*'
+    - '/crates/weft-import/**/*'
+    - '/crates/weft-web/**/*'
+
+tasks:
+  # Writes the gitignored weft.wasm next to plugin.toml, the package `cox plugin install
+  # plugins/cox` copies. The remaps keep the builder's home directory and checkout path out of the
+  # module's panic messages, as in root:wasm.
+  build:
+    script: 'export RUSTFLAGS="--remap-path-prefix=${CARGO_HOME:-$HOME/.cargo}=/cargo --remap-path-prefix=${RUSTUP_HOME:-$HOME/.rustup}=/rustup --remap-path-prefix=$(rustc --print sysroot)/lib/rustlib/src/rust=/rustc/$(rustc -vV | sed -n "s/^commit-hash: //p") --remap-path-prefix=$(cd ../.. && pwd -P)=/weft" && cargo build --locked --release --target wasm32-unknown-unknown && cp target/wasm32-unknown-unknown/release/weft_cox.wasm weft.wasm'
+    inputs: ['@group(module)']
+    outputs: ['weft.wasm']
+  # Lint and format checks for both targets, then the unit, manifest and end-to-end tests; the
+  # end-to-end test loads the module `build` wrote.
+  test:
+    script: 'cargo fmt --check && cargo clippy --locked --all-targets -- -D warnings && cargo clippy --locked --release --target wasm32-unknown-unknown -- -D warnings && cargo test --locked'
+    deps: ['build']
+    inputs: ['@group(module)', 'tests/**/*', 'plugin.toml', 'skills/**/*']

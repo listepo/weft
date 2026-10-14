@@ -1,6 +1,6 @@
 # Weft for agents
 
-How an AI agent reads, writes, edits and repairs Weft. This is the agent's side of the format: [`SPEC.md`](SPEC.md) is the contract and wins on any conflict; this document says what an agent must do to stay inside it. The MCP primer (`packages/mcp/src/primer.ts`) is a condensed version of it.
+How an AI agent reads, writes, edits and repairs Weft. This is the agent's side of the format: [`SPEC.md`](SPEC.md) is the contract and wins on any conflict; this document says what an agent must do to stay inside it. The agent tools' primer (`crates/weft-binding/src/tools/primer.txt`) is a condensed version of it.
 
 The examples are valid in strict mode against the core catalog `weft-core` 0.2 and in canonical form; `bench/test/agent-spec.test.ts` checks them.
 

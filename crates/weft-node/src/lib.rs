@@ -14,6 +14,41 @@ fn js<T>(result: std::result::Result<T, BindingError>) -> Result<T> {
     result.map_err(|e| Error::from_reason(e.to_string()))
 }
 
+/// The agent tools of `weft-binding::tools`, for the MCP server (`@weft/core/tools`).
+#[napi]
+pub struct ToolHost {
+    inner: weft_binding::tools::ToolHost,
+}
+
+#[napi]
+impl ToolHost {
+    #[napi(constructor)]
+    pub fn new(context: String, settings: String) -> Result<Self> {
+        Ok(Self {
+            inner: js(weft_binding::tools::ToolHost::from_wire(
+                &context, &settings,
+            ))?,
+        })
+    }
+
+    /// Every tool's declaration, as a JSON array.
+    #[napi]
+    pub fn decls(&self) -> String {
+        weft_core::to_compact(&self.inner.decls())
+    }
+
+    /// One call's result: an MCP `CallToolResult`, or `{"render": …}` for the wrapper to finish.
+    #[napi]
+    pub fn call(&self, name: String, args: Option<String>) -> String {
+        self.inner.call_wire(&name, args.as_deref()).to_json()
+    }
+
+    #[napi]
+    pub fn constants(&self) -> String {
+        self.inner.constants()
+    }
+}
+
 /// A catalog parsed once and reused across calls; the wrapper keeps one per catalog object.
 #[napi]
 pub struct Catalog {
@@ -53,6 +88,16 @@ impl Catalog {
     #[napi]
     pub fn expand(&self, document: Option<String>) -> Result<String> {
         js(api::expand_document(document.as_deref(), &self.inner))
+    }
+
+    /// The accessibility tree the reference renderer exposes for a document, as an `AriaNode`.
+    #[napi]
+    pub fn aria_tree(&self, document: Option<String>, data: Option<String>) -> Result<String> {
+        js(api::aria_tree(
+            document.as_deref(),
+            data.as_deref(),
+            &self.inner,
+        ))
     }
 
     #[napi]
@@ -158,6 +203,16 @@ impl Catalog {
 #[napi]
 pub fn parse(markup: String, options: String) -> Result<String> {
     js(api::parse_markup(&markup, None, &options))
+}
+
+#[napi]
+pub fn normalize_aria(tree: String) -> Result<String> {
+    js(api::normalize_tree(&tree))
+}
+
+#[napi]
+pub fn format_aria(tree: String) -> Result<String> {
+    js(api::format_tree(&tree))
 }
 
 #[napi]

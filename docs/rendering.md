@@ -38,7 +38,7 @@ Open `packages/render-react/gallery/index.html`. The folder is ignored by git.
 
 ## The accessibility tree
 
-`weft_render` shows what a screen reader or a browsing agent gets, in the notation of a Playwright aria snapshot. It needs no browser, so it is cheap to run after every edit. Bindings resolve against the data you give it. The login screen without data has no email, so the button is disabled:
+`weft_render` shows what a screen reader or a browsing agent gets, in the notation of a Playwright aria snapshot. It needs no browser, so it is cheap to run after every edit. The tree comes from the Rust core (`ariaTree` in `@weft/core`), so every host of the tool prints the same one, and the reference renderer's tests check it against the page in a browser. Bindings resolve against the data you give it. The login screen without data has no email, so the button is disabled:
 
 ```console
 $ node docs/examples/mcp-call.mjs weft_render markup=@weft-tour/login.weft

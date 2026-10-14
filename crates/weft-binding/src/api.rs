@@ -9,11 +9,13 @@ use serde_json::Value as Json;
 use weft_catalog::{
     CatalogSource, KindSource, ProjectOptions, Token, TokenProblem, load_project_text,
 };
+use weft_core::aria::{AriaNode, expected_tree, format_aria_snapshot, normalize_aria};
 use weft_core::{
-    ApplyOptions, Catalog, Code, DataCheckOptions, Diagnostic, Document, MAX_DEPTH, ParseOptions,
-    ValidateOptions, apply_patches, canonicalize, check_data, check_data_json, compile_data_schema,
-    data_schema_diagnostics, did_you_mean, format_value, parse, parse_partial, read_value,
-    serialize, stringify, to_document, to_value, validate, validate_document,
+    ApplyOptions, Catalog, Code, DataCheckOptions, Diagnostic, Document, JsonError, MAX_DEPTH,
+    ParseOptions, ValidateOptions, apply_patches, canonicalize, check_data, check_data_json,
+    compile_data_schema, data_schema_diagnostics, did_you_mean, format_value, parse, parse_json,
+    parse_partial, read_value, serialize, stringify, to_document, to_value, validate,
+    validate_document,
 };
 
 use crate::boundary::{
@@ -425,6 +427,53 @@ pub fn format_attribute_value(value: Option<&str>) -> Result<String> {
     Ok(format_value(&to_value(&read_input(value)?)))
 }
 
+/// `expectedTree`: the accessibility tree (an `AriaNode`) the reference renderer exposes for a
+/// document, with `data` for its bindings. A document too deep for any valid one exposes nothing.
+pub fn aria_tree(document: Option<&str>, data: Option<&str>, catalog: &Catalog) -> Result<String> {
+    let data = match data {
+        None => Json::Null,
+        Some(text) => read_input(Some(text))?,
+    };
+    let tree = match read_document(document) {
+        Ok(d) => expected_tree(&d, catalog, &data),
+        Err(BindingError::TooDeep) => normalize_aria(&AriaNode {
+            role: "fragment".into(),
+            ..AriaNode::default()
+        }),
+        Err(e) => return Err(e),
+    };
+    write(&tree)
+}
+
+/// `normalizeAria`: a tree in the form a Playwright snapshot prints.
+pub fn normalize_tree(tree: &str) -> Result<String> {
+    write(&normalize_aria(&read_tree(tree)?))
+}
+
+/// `formatAriaSnapshot`: the YAML Playwright prints for a tree, as a JSON string.
+pub fn format_tree(tree: &str) -> Result<String> {
+    write(&format_aria_snapshot(&read_tree(tree)?))
+}
+
+/// Trees come from the wrapper (`AriaNode`) or from parsed Playwright output, never from a
+/// document, so a shape this module cannot read is a bug on the JavaScript side.
+fn read_tree(text: &str) -> Result<AriaNode> {
+    let value = match parse_json(text) {
+        Ok(v) => v,
+        Err(JsonError::TooDeep) => return Err(BindingError::TooDeep),
+        Err(JsonError::Syntax(source)) => {
+            return Err(BindingError::Wire {
+                what: "aria tree",
+                source,
+            });
+        }
+    };
+    serde_json::from_value(value).map_err(|source| BindingError::Wire {
+        what: "aria tree",
+        source,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -440,6 +489,32 @@ mod tests {
 
     const LOGIN: &str =
         r#"<screen id="login" label="Sign in" weft="0.1"><button id="go">Go</button></screen>"#;
+
+    #[test]
+    fn the_aria_functions_read_documents_and_trees_from_json() {
+        let document = json(&parse_markup(LOGIN, None, "{}").unwrap())["document"].to_string();
+        let tree = aria_tree(Some(&document), None, &catalog()).unwrap();
+        assert_eq!(
+            json(&tree),
+            json!({"role": "fragment", "name": "", "children": [
+                {"role": "main", "name": "Sign in", "children": [{"role": "button", "name": "Go"}]},
+            ]})
+        );
+        assert_eq!(
+            json(&format_tree(&tree).unwrap()),
+            json!("- main \"Sign in\":\n  - button \"Go\"")
+        );
+        let raw = r#"{"role":"generic","name":"","children":[{"role":"text","name":" a "}]}"#;
+        assert_eq!(
+            json(&normalize_tree(raw).unwrap()),
+            json!({"role": "generic", "name": "", "children": [{"role": "text", "name": "a"}]})
+        );
+        // A document too deep for any valid one exposes nothing; a malformed tree is a wire bug.
+        let deep = format!("{}{}", "[".repeat(2000), "]".repeat(2000));
+        let nothing = aria_tree(Some(&deep), None, &catalog()).unwrap();
+        assert_eq!(json(&nothing), json!({"role": "fragment", "name": ""}));
+        assert!(format_tree(r#"{"name":"x"}"#).is_err());
+    }
 
     #[test]
     fn parse_returns_the_document_diagnostics_and_one_position_per_node() {

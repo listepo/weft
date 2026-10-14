@@ -88,6 +88,7 @@ fn the_html_importer_reads_the_tab_bindings_back() {
             tokens: &tokens,
             source: false,
             appearance: None,
+            paths: false,
         },
     )
     .unwrap();

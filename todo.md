@@ -3,6 +3,8 @@
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
+- T106. Weft plugin for cox
+- T106.7. Design tab: cox side
 - T105. Weft to WinUI 3 and back
 - T105.2. WinUI view model, code-behind and helpers
 - T105.3. WinUI value and choice controls

@@ -36,6 +36,7 @@ fn the_static_page_draws_the_expansion() {
         tokens: &tokens,
         source: true,
         appearance: None,
+        paths: false,
     };
     let html = to_html(&screen, &options).unwrap();
     assert!(html.contains(r#"data-weft-id="top/bar""#), "{html}");

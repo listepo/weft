@@ -75,4 +75,4 @@ A second argument, `{ mode, limits }`, sets the server's own settings: the defau
 
 ## Adding a tool
 
-A tool is one function `(server, context, settings) => void` in `src/tools/`, listed in `src/tools/index.ts`. `weft_render` is such a file; it renders with the host's catalog from `Context` and bounds its input with `settings.limits`. A new limit or option gets a key in `weft.json` in the same change (SPEC section 10.6).
+The tools live in Rust, in `crates/weft-binding/src/tools/`, which the cox plugin (`plugins/cox`) calls as well: a declaration in `decls.rs` (name, title, description, JSON input schema) and a function in `call.rs`. This server registers every declaration, lets the SDK check the arguments against its schema, and passes the call to Rust through `toolHost` of `@weft/core/tools`; only `weft_render`'s drawing, by `@weft/render-react`, happens here. A new limit or option gets a key in `weft.json` in the same change (SPEC section 10.6).

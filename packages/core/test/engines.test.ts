@@ -82,6 +82,7 @@ describe("the addon and the module", () => {
     const native = addon as typeof module;
     assert.deepEqual(surface(native), surface(module));
     assert.deepEqual(methods(native.Catalog), methods(module.Catalog));
+    assert.deepEqual(methods(native.ToolHost), methods(module.ToolHost));
   });
 
   test.skipIf(addon === undefined)("answer a call with the same text", () => {

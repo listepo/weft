@@ -266,6 +266,132 @@ The MCP tool `weft_context` returns a screen's entries under its fixed notice; `
 
 Built: `packages/mcp/src/tools/context.ts` reads the markup leniently, filters by `for` (`""` for entries about the screen), `kind` and `status`, and cuts the result at the format's limits (100 entries, 500 characters each, 16,000 in all) with an `omitted` count, since a lenient read only warns about an oversized block. `weft_patch`'s description lists the context forms, or says the context is read-only. The primer, `docs/mcp.md`, the package README and the plugins' tool lists name the new tool. The explain and CLI parts of the old T39.4 card moved to T39.5 (explain) and T39.6 (the export and import keys and `--context`), which also renumbered code targets to T39.6 and Figma and Penpot to T39.7.
 
+### T106.1. MCP tool logic in Rust
+
+Part of T106. The reuse rule: the cox plugin must not copy the tool layer, so it moved into `crates/weft-binding` first, behind one API both the TypeScript server (T106.2) and the cox plugin (T106.3) call. No behaviour change.
+
+Split when claimed, because the port is about 960 lines of code: T106.1.1 settings, declarations and primer; T106.1.2 the tool host, project scoping, results and argument checks; T106.1.3 the nine tool functions and their tests.
+
+Done: `crates/weft-binding/src/tools/` (no feature: `weft_schema` uses `weft_catalog::document_schema`, which needs no `weft-web`).
+
+- `settings.rs`: `Limits` (the defaults of `packages/mcp/src/context.ts`) and `Settings { limits, mode, context }`, read in the shape of `weft.json`'s `validate.mode`, `mcp.limits` and `mcp.context` (SPEC §10.6), so no new option.
+- `decls.rs` and `primer.txt`: each tool's name, title, description, JSON input schema and annotations, and the primer, with the limits and settings in the texts; the primer text is `packages/mcp/src/primer.ts`'s with `{markupChars}` and `{patches}` placeholders.
+- `host.rs`: `Context` (catalog, catalogs, kinds, token types, actions, data schema), the per-call `project` scope (limit, `#/project` prefix, the call's mode), reading markup, diagnostics truncation and `Outcome` (MCP content blocks, or a render request: `weft_render` checks the data limit and reads strictly, then hands the document and scoped catalog to the host's renderer until T106.4).
+- `args.rs`: the declared argument bounds (types, `maxLength` in UTF-16 units, `maxItems`, enums, `inputElements`), which the MCP SDK checks in the TypeScript server and nothing checks in cox.
+- `call.rs`: one function per tool, ported from `packages/mcp/src/tools/*.ts`; `mod.rs`: `ToolHost::{new, core, from_project, decls, call}`.
+- Tests: native cases mirroring `packages/mcp/test/*.test.ts` in `tools/tests.rs` and each file. Byte parity with the TypeScript server was checked once with a throwaway script over 84 calls (both settings sets, every tool, project scoping, failures) and 18 declarations: identical except argument-check failures, which the SDK words itself and which never reach Rust from the TypeScript server.
+- Known difference: a context text cut at 500 UTF-16 units inside a surrogate pair drops the whole pair, where JavaScript keeps a lone high surrogate.
+
+### T106.2. TypeScript MCP server on the Rust tools
+
+`packages/mcp` registers the tools from the Rust declarations and calls `ToolHost.call`; its own copies of the logic are deleted. Done when every existing `packages/mcp` and plugin test passes; only imports of moved helpers change.
+
+Done: `ToolHost::from_wire` and `ToolHost::constants` in `weft-binding::tools`; a `ToolHost` class in the wasm web module and the native addon (`engines.test.ts` keeps their methods equal); `toolHost` in `@weft/core/tools`. `createServer` registers every Rust declaration through `z.object` of `z.fromJSONSchema(...).shape`, so unknown arguments are still stripped and the listing gains no `additionalProperties`; a render request is finished with `@weft/render-react`. `primer.ts`, `result.ts` and `src/tools/*.ts` are deleted; `read.ts` stays because `plugins/shared/scripts/lib.ts` uses `readMarkup`. The oversized-context test now runs through `weft_context`. Tool listing compared with the old server: the same schemas, key order aside.
+
+### T106.3. The cox plugin
+
+`plugins/cox`: a Rust `cdylib` for `wasm32-unknown-unknown` on `cox-plugin-sdk` (a git dependency on pyrlyn/cox pinned to a commit: the SDK is not on crates.io) and `weft-binding`, with `plugin.toml` (`id = "weft"`, `[capabilities] tools` = the tool names). `init` returns one `ToolSpec` per declared tool (`read_only` risk; cox defers plugin tools behind `tool_search`), `tool_call` runs `ToolHost::call` and joins the content blocks into `ToolOutput.text`. The host context comes from `InitIn.config`, the user's `[plugins.weft]` table, read as a `weft.json` with inline contents (catalog, tokens, actions, data, `validate.mode`, `mcp.limits`, `mcp.context`), so the plugin has no option of its own and needs no file access. Plan when claimed: build and packaging of the `.wasm`, how a user installs it (`cox plugin install`), the tests (native dispatch, a `wasm32` build check, the manifest checked against cox's `plugin.schema.json` without reading outside the repository, and an extism end-to-end test if the host fits), the moon project and its `inputs`, `toolchain.md` and `rust.md` rows.
+
+Done: `plugins/cox` (crate `weft-cox`, moon project `cox-plugin`), a Cargo workspace of its own so the root Rust checks never fetch pyrlyn/cox. `cox-plugin-sdk` is pinned to cox `8dbc1daa`; the first fetch clones about 560 MB of history into `~/.cargo/git/db` plus a 290 MB checkout. The plugin serves eight tools as `wasm__weft__<tool>` (`read_only`, `exclusive`, deferred); `weft_render` follows with T106.4. `[plugins.weft]` is read with `ToolHost::from_project`; project errors fail `cox_init` with the diagnostics, warnings go to `cox_notify`. `plugin.toml` asks for tools only, with `[limits] memory_mib = 64, call_ms = 10000`. `moon run cox-plugin:build` writes the gitignored `plugins/cox/weft.wasm` (1.23 MB, 0.40 MB gzipped, no local paths); `cox plugin install plugins/cox` installs it.
+
+Tests (`moon run cox-plugin:test`: rustfmt, clippy for the host and `wasm32`, then `cargo test`): specs, dispatch and config in `src/lib.rs`; `tests/manifest.rs` reads `plugin.toml` into cox's own `PluginManifest` (unknown keys denied, the type `docs/plugin.schema.json` is generated from) and runs its `validate`, so no schema is vendored; `tests/e2e.rs` loads `weft.wasm` with `wasm-plugin-host` (the shared extism engine in `packages/crates`, pinned git dev-dependency, unpublished) through `cox_init` and `cox_tool_call` and compares four calls with the native build. `tooling/test/inputs.test.ts` checks both tasks' crate inputs against `cargo metadata`.
+
+### T106.4. Accessibility snapshot in Rust
+
+`weft_render`'s tree (`expectedTree` and `formatAriaSnapshot` of `@weft/render-react`) moves to Rust so cox gets the tool and the TypeScript server keeps one copy; `html: true` keeps returning the reference page in the TypeScript server, and in cox returns the page of `weft-web`'s generator (a different renderer, said in the tool description). Until this is done the cox plugin leaves `weft_render` out, which is the one parity gap.
+
+Decisions: the tree lives in `weft-core` (module `aria`), beside `controls` and `sample`, which already hold the control and data readings it needs, so the core-only WebAssembly module the TypeScript tool host and the cox plugin both load has it without the web generators. `@weft/render-react`'s `expectedTree`, `normalizeAria` and `formatAriaSnapshot` become wrappers over it, so there is one copy: the React renderer's own readings (`expand.ts`) stay, and its browser and server tests now check the Rust tree against the React DOM. `parseAriaSnapshot` and `diffAria` read Playwright output in tests and stay TypeScript.
+
+Sub-tasks, in order:
+
+- T106.4.1: the instance tree in `weft-core` (`aria/inst.rs`): `each` expanded with instance ids, hidden nodes removed, the `text` prop turned into content, `filled`, slot regions and the prop readings of `expand.ts` (label, clamped numbers, field, select, tab, radio, date, colour and number controls over `controls`). Unit tests per reading.
+- T106.4.2: the tree (`aria/tree.rs`, `aria/normalize.rs`): roles, names and states per kind as `aria.ts` builds them, table and tab structure, and normalization. Tests port `aria.test.ts`'s cases.
+- T106.4.3: the Playwright-style YAML (`aria/yaml.rs`), then wiring: a binding function (`ariaTree`, WebAssembly and native), `weft_render` returning the snapshot from Rust (the TypeScript server adds only the reference page for `html: true`), the `@weft/render-react` wrappers and the removal of the TypeScript tree. Verified by the existing render-react, from-aria and mcp tests, and a check that the corpus snapshots are unchanged.
+- T106.4.4: the cox plugin serves `weft_render`; `html: true` returns `weft-web`'s static page, which the description says. Unit, manifest and e2e tests, and the module size. Plan: `RenderRequest` carries the scope's resolved tokens (`Context` keeps them from the project), so the page validates against the tokens the markup was checked with; without project tokens the default tokens, as `toHtml`. The plugin depends on `weft-web` and `weft-catalog` by path, joins the tree and the page a blank line apart like its other multi-block results, and turns a refused page into an error result with the diagnostics. Files: `crates/weft-binding/src/tools/{host,call,tests}.rs`, `plugins/cox/{Cargo.toml,src/lib.rs,plugin.toml,README.md,tests/*}`. Verified by `cox-plugin:test` and the binding tests.
+
+Done: all four sub-tasks; the cox plugin serves all nine tools.
+
+### T106.4.1. Instance tree in Rust
+
+Part of T106.4: the instance tree of `@weft/render-react`'s `expand.ts` in `weft-core` (`aria/inst.rs`), so the accessibility tree can be built without TypeScript.
+
+Done: `each` expanded with instance ids, hidden nodes removed, the `text` prop as content, `filled` and the `empty` slot, slot order, and the prop readings (label, clamped numbers, field, select, tab, radio, date, colour and number controls, names from content) over `controls` and `sample`. `safe_url`, `js_trim`, `squash` and `js_number_from` moved from `weft-import` into `weft-core`, which `weft-import` re-exports. Unit tests per reading in `aria/tests.rs`.
+
+### T106.4.2. Accessibility tree and snapshot in Rust
+
+Part of T106.4: the tree `aria.ts` builds, in `weft-core` (`aria/tree.rs`, `aria/normalize.rs`).
+
+Done: `weft_core::aria::expected_tree` and `normalize_aria`: roles, names and states per kind, the table's header and body row groups, the tab list and selected panel, closed dialogs and decorative images left out, and the normalization of a Playwright snapshot. Tests are `aria.test.ts`'s cases on the same documents. The YAML writer moved to T106.4.3 to keep this task within the size rule.
+
+### T106.4.3. weft_render on the Rust tree
+
+Part of T106.4: the Playwright-style YAML and the wiring.
+
+Done: `weft_core::aria::format_aria_snapshot` (`aria/yaml.rs`); the binding functions `ariaTree`, `normalizeAria` and `formatAria` (WebAssembly and native) behind `@weft/core`'s `ariaTree`, `normalizeAria` and `formatAriaSnapshot`; `weft_render` returns the snapshot from Rust, and for `html: true` the TypeScript server adds only the reference page; `@weft/render-react`'s `expectedTree`, `normalizeAria` and `formatAriaSnapshot` wrap the core, and its TypeScript tree is gone (`parseAriaSnapshot` and `diffAria` stay, for the DOM tests). Verified by the render-react, from-aria, mcp and core tests, and a one-off differential check that the old TypeScript tree and YAML equal the Rust ones over the corpus, fixtures and compat screens, with and without data.
+
+### T106.4.4. weft_render in the cox plugin
+
+Part of T106.4: the cox plugin serves `weft_render`.
+
+Done: `RenderRequest` carries the scope's resolved tokens; the plugin draws `html: true`'s page with `weft-web`'s static generator (project tokens, else the defaults) after the tree, a blank line apart, and returns the tree and the page's diagnostics as an error when the page refuses the markup. Its `weft_render` description says the page comes from the static generator. Unit tests (tree, page, refused page, description), the manifest test (nine granted tools) and the e2e test (the module's `weft_render` page equals the native build's). The module is 1.37 MB (1.29 MB before).
+
+### T106.5. Skills in cox
+
+The Claude Code and Cursor plugins ship skills (`spec` with `AGENT-SPEC.md`; `render`, `export`, `import` and `figma-pull`, which run the bundled Node scripts). A cox plugin cannot carry skills today, so a cox task adds a general, data-only `[[skills]]` manifest entry (a package-relative `SKILL.md` folder, one grant line per skill, loaded by `cox-ext` like `.cox/skills`), and the Weft plugin ships the `spec` skill (its `AGENT-SPEC.md` copy kept current by the existing stale-copy test). The script skills need Node and the bundled scripts, which a cox package does not carry; they are left out, and their Rust-backed equivalents are tools for a later task. Plan: cox side is T33.46 (amendment A155, branch `t33.46-plugin-skills` in pyrlyn/cox): T33.46.1 the `[[skills]]` manifest entry and its `skill:<name> <dir>` grant line, T33.46.2 `cox-ext` parsing, merging (a local skill wins) and the skill tool naming the skill's folder so a skill can read files it bundles, T33.46.3 the session loading a granted plugin's skills. Weft side: `plugins/cox/skills/weft-spec/SKILL.md` (the Cursor skill's text, with cox's tool names and no script skills) and its `AGENT-SPEC.md` copy, written by `plugins/shared/build.ts` beside the other plugins' copies and checked by the same stale-copy test; `[[skills]]` in `plugin.toml`; the `cox-plugin-sdk` pin moved to the T33.46 commit, since the pinned manifest type refuses the new key; `tests/manifest.rs` checks each declared folder holds a `SKILL.md` named for it; README. Verified by `cox-plugin:test` and `shared:test`.
+
+Done: cox T33.46 (branch `t33.46-plugin-skills` in pyrlyn/cox, pushed, not merged; commits `8474ac1f`, `fe495bff`, `597c0e95`) adds `[[skills]]`, the `skill:<name> <dir>` grant line and the session loading a granted plugin's skills. The plugin ships `skills/weft-spec` (`SKILL.md` and the `AGENT-SPEC.md` copy that `plugins/shared/build.ts` writes and `bundle.test.ts` keeps current), declared in `plugin.toml`. `cox-plugin-sdk` is pinned to cox `597c0e95`, on that unmerged branch, until it reaches cox main. `tests/manifest.rs` checks each declared skill folder holds its `SKILL.md`. The script skills (render, import, export, figma-pull) are not in cox, since they need Node.
+
+### T106.6. Design tab: design
+
+A Design tab like Claude Design: a canvas in the cox desktop app showing the agent's Weft screens rendered as real UI, updated live as the agent patches them, where a person can select an element and have that reach the agent. Before code, a short design in this card and a cox proposal under `docs/design/` (with its cox plan amendment and tasks), covering what the tab shows, how cox hosts it, the plugin-API extension, live updates and selection to the agent context. Open questions go to the creator with a recommendation each.
+
+Plan: (1) this design; (2) the cox proposal `docs/design/plugin-canvas.md` with amendment A156 and tasks T33.47.1–T33.47.8 in pyrlyn/cox, branch `t33.47-plugin-canvas` (stacked on `t33.46-plugin-skills`, pushed, no PR); (3) T106.7 and T106.8 planned from it. Done when both are pushed and the open questions are with the creator.
+
+**Design.** cox gains a general, desktop-only *plugin canvas*: one pane beside the transcript (like the browser pane) showing pages a plugin draws as static HTML, one *frame* per page. It is not Weft-specific; Weft is its first user.
+
+- **What it shows.** One frame per screen: the last markup the plugin's tools saw for each screen id, drawn by `weft-web`'s static generator (`to_html_with_data`, the same page `weft_render` returns with `html`), with the project tokens or the defaults. Light and dark come from the project's resolver appearance: the page follows `prefers-color-scheme`, which the web view takes from the app's appearance, so the canvas switches with the app. A frame's width is the plugin's to give; T106.8 starts at 390 pt, a phone, and the pane scrolls and zooms.
+- **How cox hosts it.** A manifest key `[capabilities.desktop] canvas = true` and one grant line, `desktop.canvas`. `InitOut.desktop.canvas` declares the pane's title, SF Symbol and the selection attribute. Two new optional exports: `cox_canvas` returns the frames (`{ id, title, width_pt, html }`), and `cox_canvas_select` takes a selection and returns an attachment. Each frame is a separate WebKit `WebPage` with page JavaScript off (`allowsContentJavaScript = false`), a content rule list that blocks every load (no network, not even images), every navigation refused but the first `load(html:)`, a non-persistent data store and no message handler in the page's world. Only a host-owned script in an isolated content world runs: it outlines the hovered and selected element and posts the selection to the app. Plugin HTML is never trusted and never filtered as a string; the isolation is WebKit's. Caps: at most 12 frames, 1 MiB per frame and 4 MiB in all, ids and titles checked and sanitized, `cox_canvas` within `min(limits.call_ms, 2 s)`, three misses stop the canvas for the session. The terminal has no canvas (PL§15.6 "not offered"); the text fallback is what the tools already return (`weft_render`'s tree).
+- **Live updates.** cox's redraw model (PL§8): the plugin calls `cox_redraw()` after one of its tools changes a screen, and the host calls `cox_canvas` again while the pane is visible. A frame whose HTML is unchanged is not reloaded; a reloaded one keeps its scroll and selection.
+- **Selection to the agent.** The isolated script reports the frame id and the value of the nearest ancestor's selection attribute (`data-weft-path`). The host checks both, calls `cox_canvas_select`, and puts the returned text into the composer as a visible `text/plain` attachment chip, which the person can remove; it reaches the model only with the next turn they send, through cox's existing attachment path (`<attachment name=… media_type=…>`). No hidden prompt rewrite and no automatic turn.
+- **Weft side (T106.8).** The plugin keeps the last markup per screen id from its tools' inputs (`weft_validate`, `weft_format`, `weft_patch`, `weft_render`) and calls `cox_redraw()` when one changes. `weft-web` gains an `HtmlOptions` flag that writes `data-weft-path` on every element: its path in the form diagnostics use (`kind#id`, or `kind[index]` without an id, AGENT-SPEC), so the agent can name it in a patch; it is a host option of the page, not a tool option, so it needs no `weft.json` key. A selection becomes about 1 KiB of text: the screen id, the element's path, kind, id and its markup line. New grant line for the person to approve: `desktop.canvas`.
+
+**Defaults recorded (no creator decision needed):** a frame per screen; the app's appearance; selection only, no direct edits on the canvas; blocked images show their `alt`; ⌘⇧D shows and hides the pane; with several canvas plugins the pane header picks one.
+
+**Open questions for the creator (each with a recommendation):**
+
+1. Where the canvas lives: a pane beside the transcript (recommended: the inspector is 320 pt, too narrow for a screen), an inspector tab, or a separate window.
+2. How a selection reaches the agent: a visible composer attachment the person sends (recommended), the plugin rewriting the next prompt through a `UserPromptSubmit` hook (invisible until sent), or a turn sent on each click (no).
+3. Remote images in a screen (`<image src="https://…">`): blocked, the `alt` shown (recommended: the canvas never touches the network), or loaded from hosts the plugin's `net` grant lists.
+4. Editing on the canvas (drag, resize, inline text): not in this design (recommended: selection first; direct manipulation needs patches from the canvas and gets its own design).
+
+Done: the design is in this card. The cox proposal is pushed to pyrlyn/cox branch `t33.47-plugin-canvas` (commit `d31bf566`, stacked on `t33.46-plugin-skills`): `docs/design/plugin-canvas.md`, amendment A156, tasks T33.47 and T33.47.1–T33.47.8, and a PL§15.4 pointer. The isolation rests on WebKit's own headers (`WKWebpagePreferences.h`, `WKUserContentController.h`) and WebKit's content-blocker format, checked 2026-10-14; T33.47.6 tests it. The four open questions are with the creator; the build follows the recommendations until they answer. There is no test because this task changes no code: the checks are in T106.7 and T106.8.
+
+### T106.8. Design tab: Weft side
+
+The plugin declares the canvas, draws the screens its tools see, redraws when one changes and turns a selection into an attachment. Planned split, each within the task size rule:
+
+- T106.8.1: `weft-web` `HtmlOptions` gains a flag that writes `data-weft-path` on every element (its diagnostic path: `kind#id`, or `kind[index]` without an id). It is a page option for hosts, not a tool option, so no `weft.json` key. Unit tests on a nested screen, with and without ids.
+- T106.8.2: `plugins/cox`: `[capabilities.desktop] canvas = true`, `CanvasDecl { title: "Weft", symbol, select_attr: "data-weft-path" }`; the last markup per screen id taken from the tools' inputs and `cox_redraw()` when one changes; `cox_canvas` returns one frame per screen from `to_html_with_data` (project tokens or the defaults, the resolver appearance, the path flag); `cox_canvas_select` returns the screen id, the element's path, kind, id and its markup line as an attachment of about 1 KiB. The `cox-plugin-sdk` pin moves to the T33.47 commit. Unit tests and the e2e test through the module. README and the grant line.
+
+Done: T106.8.1 and T106.8.2 (below). The plugin declares the canvas on the desktop with `desktop.canvas` granted, draws one frame per screen its tools saw with each element's path, and turns a click into an attachment. `cox_redraw` is not called: cox asks for the frames after each of the plugin's tools finishes, and the call needs a `ui` capability the plugin does not ask for.
+
+
+### T106.8.1. data-weft-path page option
+
+Part of T106.8: `weft-web`'s `HtmlOptions` gains a flag that writes `data-weft-path` on every element, its diagnostic path (`kind#id`, or `kind[index]` without an id, `slot[name]` for a slot), so a host that shows the page can tell which element a click reached. A page option for hosts, not a tool option, so no `weft.json` key.
+
+Plan: export `path_segment` from `weft-core` (the diagnostics' own segment writer, reused rather than copied); `HtmlOptions::paths`; the writer walks the drawn document once (after fragment uses expand and data fills it) and maps each node to its path; `base()` writes the attribute; every `HtmlOptions` literal sets `paths: false`. Verified by a unit test on a screen without ids (index steps count text children, slots) and an integration test on a nested strict screen (six `kind#id` paths, none when the flag is off).
+
+Done: `HtmlOptions::paths`, `weft_core::path_segment` exported, both tests; `cargo nextest run -p weft-web` 57 passed, clippy `-D warnings` and `cargo fmt --check` clean. Inside an expanded fragment use the path is the drawn screen's, not the fragment file's.
+
+### T106.8.2. The canvas in the cox plugin
+
+Part of T106.8: `plugins/cox` fills cox's canvas pane (cox T33.47).
+
+Plan: `[capabilities.desktop] canvas = true` in `plugin.toml`; `src/canvas.rs` keeps the last markup per screen id from the successful tool calls (the input of `weft_validate`, `weft_format` and `weft_render`, the output of `weft_patch`, with the last `data` and `project` given), at most 12 screens; `cox_canvas` draws each changed screen through `weft_render` with `html` in its scope and `data-weft-path` on; `cox_canvas_select` names the screen, the path and the element's markup line. The page follows the resolver's light and dark, so `weft-binding`'s tool context and render request carry the token modifiers. The element-path walk moves from `weft-web` into `weft-core` (`element_paths`), so the page and the selection share it. `cox-plugin-sdk` pinned to cox `fd35f0d0`. Verified by `cox-plugin:test` (unit, manifest and e2e through the module) and the `weft-core`, `weft-binding` and `weft-web` tests.
+
+Done: as planned. The canvas exists only on the desktop surface with `desktop.canvas` granted (`InitIn.surface`, `InitIn.granted`), so the terminal gets no pane to drop and the tools keep no screens there. Frame ids are `s<n>`, since a screen id may hold characters a frame id may not; the title is the screen id; frames are 390 pt wide. A markup that does not draw in strict mode keeps the last page that did. A selection is about 300 bytes: `Selected on the Weft canvas: screen …, element … (kind#id).` and the quoted markup line (at most 400 characters); a path from inside an expanded fragment use or sample data is named as such. `weft_render`'s `html` page in cox also follows the resolver's light and dark now. `cox-plugin-sdk` is pinned to cox `fd35f0d0` on the unmerged `t33.47-plugin-canvas` branch. The module is 1.40 MB (1.37 MB before). Deviation: no `cox_redraw` (see T106.8).
+
 ### T39.3. Context: patch operations
 
 `add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.

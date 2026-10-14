@@ -15,7 +15,6 @@ mod props;
 pub mod provenance;
 mod sem;
 mod text;
-mod url;
 
 pub use build::{BuildOptions, Built, build_document};
 pub use cem::{CemImport, CemOptions, MAX_KINDS, MAX_MANIFEST_LENGTH, MAX_MEMBERS, import_cem};
@@ -30,4 +29,4 @@ pub use sem::{Note, Sem};
 pub use text::{
     clean, is_js_space, js_length, js_number_from, js_prefix, js_trim, literal, slug, squash,
 };
-pub use url::{safe_absolute_url, safe_url};
+pub use weft_core::{safe_absolute_url, safe_url};

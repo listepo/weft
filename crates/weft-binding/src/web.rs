@@ -216,6 +216,7 @@ pub fn to_html(
         tokens: &tokens,
         source: wire.source,
         appearance: None,
+        paths: false,
     };
     write(&match weft_web::to_html(&document, &options) {
         Ok(code) => Page::Code { code },

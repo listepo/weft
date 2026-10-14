@@ -14,7 +14,7 @@ If an `AGENTS.md` or `CLAUDE.md` exists higher in the tree, follow it too; on co
 ## Rules
 
 - **The spec changes first.** A behaviour change that the spec does not describe starts with a `SPEC.md` edit in the same commit.
-- **`AGENT-SPEC.md` stays current.** A change to `SPEC.md`, the core catalog, the diagnostic codes, the patch operations or the MCP tools updates `AGENT-SPEC.md` in the same commit, and the MCP primer (`packages/mcp/src/primer.ts`) must not contradict it. `bench/test/agent-spec.test.ts` catches a missing component or code and an example that no longer validates; the rest is on the author of the change. The benchmark's Weft primer (`bench/src/primers.ts`) changes only as a method change recorded in `test.md`.
+- **`AGENT-SPEC.md` stays current.** A change to `SPEC.md`, the core catalog, the diagnostic codes, the patch operations or the MCP tools updates `AGENT-SPEC.md` in the same commit, and the tools' primer (`crates/weft-binding/src/tools/primer.txt`) must not contradict it. `bench/test/agent-spec.test.ts` catches a missing component or code and an example that no longer validates; the rest is on the author of the change. The benchmark's Weft primer (`bench/src/primers.ts`) changes only as a method change recorded in `test.md`.
 - **`packages/core/src/model.ts` is the shared contract.** Change it only together with `SPEC.md`.
 - **Documents are untrusted input.** Parsers and validators never throw on bad input; they return diagnostics. No `eval`, no dynamic code, no network access from a document.
 - **Diagnostics are an API.** A published code never changes meaning. Every diagnostic carries path, expectation and, where one exists, a hint.

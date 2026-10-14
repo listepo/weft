@@ -44,6 +44,7 @@ fn every_corpus_screen_becomes_a_static_page() {
             tokens: &tokens,
             source: false,
             appearance: None,
+            paths: false,
         };
         let html = to_html(&document, &options).unwrap();
         if std::env::var_os("WEFT_DUMP").is_some() {
@@ -82,6 +83,7 @@ fn generated_pages_come_back_exactly() {
             tokens: &tokens,
             source: true,
             appearance: None,
+            paths: false,
         };
         let html = to_html(&document, &options).unwrap();
         let back = import_html(&html, &import_options(&catalog, &tokens));
@@ -128,6 +130,7 @@ fn generated_pages_without_their_source_come_back_by_convention() {
             tokens: &tokens,
             source: false,
             appearance: None,
+            paths: false,
         };
         let html = to_html(&document, &options).unwrap();
         let back = import_html(&html, &import_options(&catalog, &tokens));
@@ -169,6 +172,7 @@ fn a_tilt_is_a_transform_next_to_the_layout_style() {
         tokens: &tokens,
         source: false,
         appearance: None,
+        paths: false,
     };
     let html = to_html(&tilted(), &options).unwrap();
     assert!(
@@ -256,6 +260,7 @@ fn page(document: &Document) -> String {
         tokens: &tokens,
         source: false,
         appearance: None,
+        paths: false,
     };
     to_html(document, &options).unwrap()
 }
@@ -292,6 +297,7 @@ fn an_unsafe_model_path_is_refused_with_w317() {
         tokens: &tokens,
         source: false,
         appearance: None,
+        paths: false,
     };
     let Err(invalid) = to_html(&document, &options) else {
         panic!("an unsafe path was written")
@@ -403,4 +409,38 @@ fn foreign_layout_forms_weft_cannot_hold_are_layout_losses() {
     let dark = r#"<main data-weft-id="s" aria-label="S"><style>@media (prefers-color-scheme: dark) { :root { --weft-ink: #fff } }</style><div data-weft-id="a"></div></main>"#;
     let lost = notes(dark);
     assert!(!lost.iter().any(|n| n.contains("@media")), "{lost:?}");
+}
+
+const NESTED: &str = r#"<screen id="home" weft="0.3"><stack id="body"><heading id="hi" level="1" text="Hi"/><stack id="actions"><button id="back" text="Back"/><button id="buy" text="Buy"/></stack></stack></screen>"#;
+
+#[test]
+fn a_host_can_ask_for_each_elements_path() {
+    let catalog = core_catalog().unwrap();
+    let tokens = load_tokens(&parse_json(DEFAULT_TOKENS_JSON).unwrap()).tokens;
+    let options = HtmlOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+        source: false,
+        appearance: None,
+        paths: true,
+    };
+    let html = to_html(&shown(NESTED), &options).unwrap();
+    // A strict page gives every element an id, so each step is `kind#id`; the unit tests cover
+    // the steps of elements without one.
+    for path in [
+        "/screen#home",
+        "/screen#home/stack#body",
+        "/screen#home/stack#body/heading#hi",
+        "/screen#home/stack#body/stack#actions",
+        "/screen#home/stack#body/stack#actions/button#back",
+        "/screen#home/stack#body/stack#actions/button#buy",
+    ] {
+        assert!(
+            html.contains(&format!("data-weft-path=\"{path}\"")),
+            "{path}\n{html}"
+        );
+    }
+    assert_eq!(html.matches("data-weft-path=").count(), 6, "{html}");
+    // Off, as every page but a host's is.
+    assert!(!page(&shown(NESTED)).contains("data-weft-path"));
 }

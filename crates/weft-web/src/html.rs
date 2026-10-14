@@ -2,7 +2,8 @@
 //! conventions (corpus/README.md): `data-bind="prop:$.path"` for bindings, `data-action="event:name"`
 //! for events, `<template data-each data-as>` for repetition and `<template data-empty>` for an
 //! empty slot, `data-variant`, `data-state` and `data-tone` for presentation states, and
-//! `data-weft-id` on every element that has an id. The page is a template: bound values are left
+//! `data-weft-id` on every element that has an id, and `data-weft-path` on every element when a host
+//! asks for it (`HtmlOptions::paths`). The page is a template: bound values are left
 //! for a host to fill in. Every design token becomes a CSS custom property `--weft-<path>`.
 //!
 //! Given sample data (`to_html_with_data`), the page shows it instead: the document is filled in
@@ -13,6 +14,8 @@
 //! URLs only when they are http(s), mailto or relative, and CSS only through the token value shapes
 //! below.
 
+use std::collections::HashMap;
+
 use indexmap::IndexMap;
 use serde_json::Value as Json;
 use weft_catalog::{
@@ -20,8 +23,8 @@ use weft_catalog::{
 };
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, MODEL_ASSETS, Mode, Node,
-    ValidateOptions, Value, asset_problem, controls, format_value, has_errors, js_number,
-    serialize, validate_document,
+    ValidateOptions, Value, asset_problem, controls, element_paths, format_value, has_errors,
+    js_number, serialize, validate_document,
 };
 
 use weft_import::safe_url;
@@ -39,6 +42,11 @@ pub struct HtmlOptions<'a> {
     /// The light and dark tokens of the project's resolver (`weft_catalog::appearance`): the page
     /// follows the system appearance (`tokens_css`).
     pub appearance: Option<Appearance<'a>>,
+    /// Write each element's path as `data-weft-path` (SPEC §6.1: `kind#id`, or `kind[index]`
+    /// without an id), so a host that shows the page can tell which element a click reached. The
+    /// path is in the screen the page draws, after fragment uses expand and data fills it, so
+    /// outside a use it is the path a diagnostic names.
+    pub paths: bool,
 }
 
 /// The document does not validate in strict mode against the catalog and tokens.
@@ -111,6 +119,16 @@ pub fn to_html_with_data(
         out: String::new(),
         inline_end: false,
         sample: data.is_some(),
+        // Keyed by each node's address: the writer meets the same nodes, so no field on `Node`
+        // has to carry its path.
+        paths: if options.paths {
+            element_paths(document)
+                .into_iter()
+                .map(|(node, path)| (std::ptr::from_ref(node), path))
+                .collect()
+        } else {
+            HashMap::new()
+        },
     };
     w.node(&document.root, &Ctx::default(), 0);
     out.push_str(&w.out);
@@ -528,6 +546,8 @@ struct Writer<'a> {
     inline_end: bool,
     /// The document was filled in with sample data: show the `empty` slot instead of templating it.
     sample: bool,
+    /// Each element's path, when the host asked for them.
+    paths: HashMap<*const Node, String>,
 }
 
 impl Writer<'_> {
@@ -577,6 +597,9 @@ impl Writer<'_> {
         let mut binds = Vec::new();
         if let Some(id) = &n.id {
             attrs.set("data-weft-id", id.clone());
+        }
+        if let Some(path) = self.paths.get(&std::ptr::from_ref(n)) {
+            attrs.set("data-weft-path", path.clone());
         }
         for (name, value) in &n.props {
             if let Some(b) = binding(value) {
