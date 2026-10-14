@@ -19,6 +19,7 @@ weft-interop = { path = "crates/weft-interop" }
 weft-slint = { path = "crates/weft-slint" }
 weft-swiftui = { path = "crates/weft-swiftui" }
 weft-web = { path = "crates/weft-web" }
+weft-winui = { path = "crates/weft-winui" }
 # weft-core
 indexmap = { version = "2.14.2", features = ["serde"] }
 # JavaScript's number-to-string rules, so canonical JSON and messages match the TypeScript core.

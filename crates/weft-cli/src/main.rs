@@ -1,6 +1,7 @@
 //! `weft validate`, `weft fmt`, `weft explain`, and the generators and importers of SPEC §9:
 //! SwiftUI (`weft swiftui`, `weft import-swiftui`, in `swiftui.rs`), Slint (`weft slint`,
-//! `weft import-slint`, in `slint.rs`) and the web targets (`weft
+//! `weft import-slint`, in `slint.rs`), WinUI (`weft winui`, `weft winui-tokens`,
+//! `weft import-winui`, in `winui.rs`) and the web targets (`weft
 //! html|react|solid`, `weft import-html|import-react|import-solid`, in `web.rs`), and `weft
 //! import-cem`, a catalog from a Custom Elements Manifest (in `cem.rs`), and `weft schema`, the
 //! JSON Schema of the documents a catalog admits (in `schema.rs`). The project file (`weft.json`, SPEC §10) found
@@ -18,6 +19,7 @@ mod slint;
 mod swiftui;
 mod version_check;
 mod web;
+mod winui;
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -39,7 +41,7 @@ use weft_core::{
 #[command(
     name = "weft",
     version,
-    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI, HTML, React, SolidJS, Slint and A2UI"
+    about = "Validate, format and explain Weft documents, and convert them to and from SwiftUI, WinUI, HTML, React, SolidJS, Slint and A2UI"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -309,6 +311,77 @@ enum Command {
         out_dir: Option<PathBuf>,
         /// Whether context read back from the source comment enters the document (default: the
         /// project's `import.slint.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ImportContext>,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
+    },
+    /// Generate a WinUI 3 page (Windows App SDK) from a markup document.
+    Winui {
+        file: PathBuf,
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+        /// core catalog).
+        #[arg(long)]
+        catalog: Vec<PathBuf>,
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
+        #[arg(long)]
+        tokens: Option<PathBuf>,
+        /// Page name (`<Name>Page`); the screen id when absent.
+        #[arg(long)]
+        name: Option<String>,
+        /// C# namespace of the page and the helpers (default: the project's
+        /// `export.winui.namespace`, else `WeftScreens`).
+        #[arg(long)]
+        namespace: Option<String>,
+        #[command(flatten)]
+        project: ProjectArgs,
+        /// Write the page's files (`<Name>Page.xaml`, …) here instead of printing (default: the
+        /// project's `export.winui.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+        /// Whether the source comment carries the screen's context (default: the project's
+        /// `export.winui.context`, else `keep`).
+        #[arg(long, value_enum)]
+        context: Option<convert::ExportContext>,
+        /// Overwrite the output files when they already exist.
+        #[arg(long)]
+        force: bool,
+    },
+    /// Generate `WeftTokens.xaml`, the design tokens every WinUI page of a project shares.
+    WinuiTokens {
+        /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
+        #[arg(long)]
+        tokens: Option<PathBuf>,
+        /// Project file; without it, the nearest `weft.json` in or above the working directory.
+        #[arg(long, conflicts_with = "no_project")]
+        project: Option<PathBuf>,
+        /// Ignore any project file.
+        #[arg(long)]
+        no_project: bool,
+        /// Write `WeftTokens.xaml` here instead of printing (default: the project's
+        /// `export.winui.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+        /// Overwrite the output file when it already exists.
+        #[arg(long)]
+        force: bool,
+    },
+    /// Read a generated WinUI page (`.xaml`) back into markup.
+    ImportWinui {
+        file: PathBuf,
+        /// Catalog JSON, repeatable; the files replace the project's catalogs, in order (default: the
+        /// core catalog).
+        #[arg(long)]
+        catalog: Vec<PathBuf>,
+        #[command(flatten)]
+        project: ProjectArgs,
+        /// Write `<file stem>.weft` here instead of printing (default: the project's
+        /// `import.winui.outDir`, else print).
+        #[arg(long)]
+        out_dir: Option<PathBuf>,
+        /// Whether context read back from the source comment enters the document (default: the
+        /// project's `import.winui.context`, else `keep`).
         #[arg(long, value_enum)]
         context: Option<convert::ImportContext>,
         /// Overwrite the output file when it already exists.
@@ -912,6 +985,66 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             force,
         } => slint::import(
             slint::ImportArgs {
+                file,
+                catalog,
+                project,
+                out_dir,
+                context: context.map(|c| c == convert::ImportContext::Keep),
+                force,
+            },
+            out,
+        ),
+        Command::Winui {
+            file,
+            catalog,
+            tokens,
+            name,
+            namespace,
+            project,
+            out_dir,
+            context,
+            force,
+        } => winui::export(
+            winui::ExportArgs {
+                file,
+                catalog,
+                tokens,
+                name,
+                namespace,
+                project,
+                out_dir,
+                context: context.map(|c| c == convert::ExportContext::Keep),
+                force,
+            },
+            out,
+        ),
+        Command::WinuiTokens {
+            tokens,
+            project,
+            no_project,
+            out_dir,
+            force,
+        } => winui::export_tokens(
+            winui::TokensArgs {
+                tokens,
+                project: ProjectArgs {
+                    project,
+                    no_project,
+                },
+                out_dir,
+                force,
+            },
+            out,
+        ),
+        Command::ImportWinui {
+            file,
+            catalog,
+            project,
+            out_dir,
+            context,
+            force,
+        } => winui::import(
+            winui::ImportArgs {
                 file,
                 catalog,
                 project,

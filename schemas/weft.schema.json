@@ -324,6 +324,31 @@
           "additionalProperties": false,
           "description": "Slint components for Slint 1.x (`weft slint`)."
         },
+        "winui": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "namespace": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The C# namespace of the generated page classes and of the `Weft` helper classes, such as `Acme.Screens`. The CLI's `--namespace` overrides it.",
+              "default": "WeftScreens"
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "strip"
+              ],
+              "description": "Whether the source comment carries the screen's context (SPEC §2.3): `keep` or `strip`. The CLI's `--context` overrides it.",
+              "default": "keep"
+            }
+          },
+          "additionalProperties": false,
+          "description": "WinUI 3 pages for the Windows App SDK (`weft winui`) and the shared `WeftTokens.xaml` (`weft winui-tokens`)."
+        },
         "schema": {
           "type": "object",
           "properties": {
@@ -447,6 +472,25 @@
           },
           "additionalProperties": false,
           "description": "Slint source files (`weft import-slint`)."
+        },
+        "winui": {
+          "type": "object",
+          "properties": {
+            "outDir": {
+              "$ref": "#/$defs/fileName",
+              "description": "Directory, relative to the project file, that output files go to. Default: next to the input file."
+            },
+            "context": {
+              "enum": [
+                "keep",
+                "drop"
+              ],
+              "description": "Whether context read back from a generated file's source comment enters the document (SPEC §2.3): `keep` or `drop`. `drop` suits files from outside the team. The CLI's `--context` overrides it.",
+              "default": "keep"
+            }
+          },
+          "additionalProperties": false,
+          "description": "WinUI XAML pages (`weft import-winui`)."
         },
         "cem": {
           "type": "object",

@@ -9,12 +9,14 @@ mod generate;
 mod import;
 #[cfg(feature = "import")]
 mod read;
+mod tokens;
 mod xaml;
 
 pub use generate::{GenerateError, GenerateOptions, Generated, generate};
 pub use import::{ImportError, ImportOptions, MAX_SOURCE_LENGTH, MAX_XML_DEPTH, import_winui};
 #[cfg(feature = "import")]
 pub use read::read_winui;
+pub use tokens::{TOKENS_FILE, generate_tokens};
 #[cfg(feature = "import")]
 pub use weft_import::{ImportResult, Loss, LossKind};
 
