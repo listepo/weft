@@ -1,9 +1,11 @@
 //! WinUI 3 for Weft (SPEC §9, "To WinUI" and "From WinUI"): `generate` writes one XAML `Page`
-//! per screen for the Windows App SDK, bound with `{x:Bind}` to a generated view model, and
+//! per screen for the Windows App SDK, bound with `{x:Bind}` to a generated C# view model, with
+//! the page's code-behind; `helpers` writes the shared `Weft.cs` those files use; and
 //! `import_winui` reads such a page back into the Weft document its source comment holds.
 //! `read_winui` (feature `import`) reads a page `import_winui` rejects, element by element. The
 //! design is `docs/winui-design.md`. Pure Rust: nothing here needs Windows.
 
+mod csharp;
 mod data;
 mod generate;
 mod import;
@@ -12,7 +14,7 @@ mod read;
 mod tokens;
 mod xaml;
 
-pub use generate::{GenerateError, GenerateOptions, Generated, generate};
+pub use generate::{GenerateError, GenerateOptions, Generated, generate, helpers};
 pub use import::{ImportError, ImportOptions, MAX_SOURCE_LENGTH, import_winui};
 #[cfg(feature = "import")]
 pub use read::{MAX_XML_DEPTH, read_winui};

@@ -5,13 +5,14 @@
 use indexmap::IndexMap;
 use weft_catalog::{Token, token_types};
 use weft_core::{
-    Catalog, Child, Diagnostic, Document, Mode, Node, ValidateOptions, Value, has_errors,
+    Catalog, Child, Diagnostic, Document, Mode, Node, PropType, ValidateOptions, Value, has_errors,
     js_number, serialize, validate_document,
 };
 use weft_import::provenance;
 
 use crate::Unsupported;
-use crate::data::{Data, Leaf};
+use crate::csharp::{self, command};
+use crate::data::{Data, Leaf, Read};
 use crate::xaml::{Element, boolean, literal, type_name};
 
 /// The source comment's options start with this word; `import_winui` checks it.
@@ -46,12 +47,55 @@ pub struct GenerateOptions<'a> {
     pub namespace: &'a str,
 }
 
-/// The files of one screen. The view model and the code-behind follow (T105.2).
+/// The files of one screen (`files` names them). The page binds to its view model, and the
+/// view model and the helpers of `helpers` are plain C#.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Generated {
-    /// The page class, `<Name>Page`, which is also the file name before `.xaml`.
+    /// The page class, `<Name>Page`: the file name before `.xaml` and `.xaml.cs`.
     pub page: String,
     pub xaml: String,
+    /// `<Name>Page.xaml.cs`: the page class with its `ViewModel`.
+    pub code_behind: String,
+    /// The view-model class, `<Name>ViewModel`: the file name before `.cs`.
+    pub view_model: String,
+    /// `<Name>ViewModel.cs`: one property per data path, one command per action, `Perform` and
+    /// `Performed`.
+    pub view_model_source: String,
+}
+
+impl Generated {
+    /// The three files, each with its name.
+    pub fn files(&self) -> [(String, &str); 3] {
+        [
+            (format!("{}.xaml", self.page), &self.xaml),
+            (format!("{}.xaml.cs", self.page), &self.code_behind),
+            (format!("{}.cs", self.view_model), &self.view_model_source),
+        ]
+    }
+}
+
+/// `Weft.cs`, the helpers every page of `namespace` uses: the binding functions, the `Props`
+/// markers, the `On` events, `Slot`, and the event and command types. A project writes it once.
+pub fn helpers(namespace: &str) -> Result<String, GenerateError> {
+    check_namespace(namespace)?;
+    let helpers = include_str!("Weft.cs");
+    Ok(helpers.replacen(
+        "namespace WeftNamespace;",
+        &format!("namespace {namespace};"),
+        1,
+    ))
+}
+
+fn check_namespace(namespace: &str) -> Result<(), GenerateError> {
+    let identifier = |s: &str| {
+        s.starts_with(|c: char| c.is_ascii_alphabetic() || c == '_')
+            && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+    };
+    if namespace.split('.').all(identifier) {
+        Ok(())
+    } else {
+        Err(GenerateError::Namespace(namespace.to_owned()))
+    }
 }
 
 impl Generated {
@@ -92,13 +136,7 @@ pub fn generate(
         return Err(GenerateError::Invalid(diagnostics));
     }
     let namespace = options.namespace;
-    let identifier = |s: &str| {
-        s.starts_with(|c: char| c.is_ascii_alphabetic() || c == '_')
-            && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
-    };
-    if !namespace.split('.').all(identifier) {
-        return Err(GenerateError::Namespace(namespace.to_owned()));
-    }
+    check_namespace(namespace)?;
     // The comment keeps the screen as written (SPEC §9, Provenance); the page draws its uses.
     let source = serialize(document);
     let expanded = weft_core::expand(document, options.catalog).document;
@@ -108,14 +146,22 @@ pub fn generate(
             .or(expanded.root.id.as_deref())
             .unwrap_or("screen"),
     );
-    let mut g = Gen::default();
+    let mut g = Gen {
+        catalog: options.catalog,
+        data: Data::default(),
+        problems: vec![],
+        forms: vec![],
+    };
     let panel = g.node(&expanded.root);
-    let mut commands = vec![];
-    actions(&expanded.root, &mut commands);
+    let mut names = vec![];
+    actions(&expanded.root, &mut names);
+    let commands: Vec<String> = names.iter().map(|a| command(a)).collect();
     g.data.check(&commands, &mut g.problems);
     if !g.problems.is_empty() {
         return Err(GenerateError::Unsupported(g.problems));
     }
+    let view_model_source = csharp::view_model(&g.data, &name, namespace, &names)
+        .map_err(GenerateError::Unsupported)?;
     let page = format!("{name}Page");
     let mut root = Element::new("Page");
     root.attr("x:Class", format!("{namespace}.{page}"));
@@ -134,7 +180,13 @@ pub fn generate(
         provenance::comment("<!--", &options, &source, "-->")
     );
     root.write(0, &mut xaml);
-    Ok(Generated { page, xaml })
+    Ok(Generated {
+        page,
+        xaml,
+        code_behind: csharp::code_behind(&name, namespace),
+        view_model: format!("{name}ViewModel"),
+        view_model_source,
+    })
 }
 
 fn path_of(node: &Node) -> String {
@@ -144,13 +196,13 @@ fn path_of(node: &Node) -> String {
     }
 }
 
-/// `todo.add` → `todo_addCommand`: action names hold no `_` (SPEC §2.2), so the name maps back.
-fn command(action: &str) -> String {
-    format!("{}Command", action.replace('.', "_"))
-}
-
+/// The actions the screen names, each once, in document order.
 fn actions(node: &Node, out: &mut Vec<String>) {
-    out.extend(node.on.values().map(|a| command(a)));
+    for action in node.on.values() {
+        if !out.contains(action) {
+            out.push(action.clone());
+        }
+    }
     let slots = node.slots.values().flatten();
     for child in node.children.iter().chain(slots) {
         if let Child::Node(n) = child {
@@ -159,15 +211,15 @@ fn actions(node: &Node, out: &mut Vec<String>) {
     }
 }
 
-#[derive(Default)]
-struct Gen {
+struct Gen<'a> {
+    catalog: &'a Catalog,
     data: Data,
     problems: Vec<Unsupported>,
     /// The enclosing forms' submit commands, innermost last.
     forms: Vec<Option<String>>,
 }
 
-impl Gen {
+impl Gen<'_> {
     fn refuse(&mut self, node: &Node, message: impl Into<String>) {
         self.problems.push(Unsupported::new(path_of(node), message));
     }
@@ -182,7 +234,7 @@ impl Gen {
         match node.props.get(prop)? {
             Value::String(s) if leaf == Leaf::Text => Some(literal(s)),
             Value::Bool(b) if leaf == Leaf::Flag => Some(boolean(*b).to_owned()),
-            Value::Bind { bind, not: false } => self.bound(&at, bind, Some(leaf), two_way),
+            Value::Bind { bind, not: false } => self.bound(&at, bind, Read::Is(leaf), two_way),
             // A negated binding is never two-way (SPEC §5.1), and x:Bind has no operators.
             Value::Bind { bind, not: true } if leaf == Leaf::Flag => self.call(&at, "Not", bind),
             _ => {
@@ -192,16 +244,18 @@ impl Gen {
         }
     }
 
-    /// `{x:Bind ViewModel.path}` read as `leaf` (`None`: any type, for a marker).
-    fn bound(&mut self, at: &str, bind: &str, leaf: Option<Leaf>, two_way: bool) -> Option<String> {
-        let path = self.data.read(bind, leaf, at, &mut self.problems)?;
+    /// `{x:Bind ViewModel.path}`.
+    fn bound(&mut self, at: &str, bind: &str, read: Read, two_way: bool) -> Option<String> {
+        let path = self.data.read(bind, read, at, &mut self.problems)?;
         let mode = if two_way { "TwoWay" } else { "OneWay" };
         Some(format!("{{x:Bind {path}, Mode={mode}}}"))
     }
 
-    /// `{x:Bind weft:Weft.<function>(ViewModel.path)}`: a helper that takes any value.
+    /// `{x:Bind weft:Weft.<function>(ViewModel.path)}`: a helper that tests any value as a flag.
     fn call(&mut self, at: &str, function: &str, bind: &str) -> Option<String> {
-        let path = self.data.read(bind, None, at, &mut self.problems)?;
+        let path = self
+            .data
+            .read(bind, Read::Like(Leaf::Flag), at, &mut self.problems)?;
         Some(format!(
             "{{x:Bind weft:Weft.{function}({path}), Mode=OneWay}}"
         ))
@@ -215,7 +269,15 @@ impl Gen {
             Some(Value::String(s)) => Some(literal(s)),
             Some(Value::Bool(b)) => Some(boolean(*b).to_owned()),
             Some(Value::Number(n)) => Some(js_number(*n)),
-            Some(Value::Bind { bind, not: false }) => self.bound(&at, bind, None, false),
+            Some(Value::Bind { bind, not: false }) => {
+                // A marker holds any value; the prop's catalog type suggests the property's.
+                let def = self.catalog.components.get(&node.kind);
+                let flag = def
+                    .and_then(|d| d.prop(prop))
+                    .is_some_and(|p| p.kind == PropType::Boolean);
+                let leaf = if flag { Leaf::Flag } else { Leaf::Text };
+                self.bound(&at, bind, Read::Like(leaf), false)
+            }
             Some(Value::Bind { bind, not: true }) => self.call(&at, "Not", bind),
             Some(Value::Token(_)) => {
                 self.refuse(node, format!("a token in `{prop}`"));
@@ -343,7 +405,7 @@ impl Gen {
             Some(Value::Bind { bind, not: false }) => self.call(&path_of(node), "Hide", bind),
             // x:Bind turns a `bool` property into a `Visibility` itself.
             Some(Value::Bind { bind, not: true }) => {
-                self.bound(&path_of(node), bind, Some(Leaf::Flag), false)
+                self.bound(&path_of(node), bind, Read::Is(Leaf::Flag), false)
             }
             _ => None,
         };

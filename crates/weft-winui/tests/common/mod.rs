@@ -61,8 +61,12 @@ fn weft_files(dir: &Path, nested: bool) -> Vec<PathBuf> {
     out
 }
 
+/// The fixtures of `tests/fixtures/`, each named after its file: every prop the generator draws,
+/// and the data shapes the view model holds.
+pub const FIXTURES: &[&str] = &["controls", "data"];
+
 /// Every corpus screen and catalog example, named `corpus-<dir>` or `example-<file>`, and the
-/// controls fixture.
+/// fixtures.
 pub fn screens() -> Vec<(String, PathBuf)> {
     let corpus = weft_files(&here("../../corpus"), true)
         .into_iter()
@@ -76,8 +80,10 @@ pub fn screens() -> Vec<(String, PathBuf)> {
             let stem = p.file_stem().unwrap().to_string_lossy();
             (format!("example-{stem}"), p)
         });
-    let controls = ("controls".to_owned(), here("tests/fixtures/controls.weft"));
-    corpus.chain(examples).chain([controls]).collect()
+    let fixtures = FIXTURES
+        .iter()
+        .map(|f| (f.to_string(), here(&format!("tests/fixtures/{f}.weft"))));
+    corpus.chain(examples).chain(fixtures).collect()
 }
 
 pub fn options<'a>(
@@ -104,7 +110,7 @@ pub fn covered() -> Vec<(String, Document, Generated)> {
     let (catalog, tokens) = setup();
     screens()
         .into_iter()
-        .filter(|(name, _)| name == "controls" || COVERED.contains(&name.as_str()))
+        .filter(|(name, _)| FIXTURES.contains(&name.as_str()) || COVERED.contains(&name.as_str()))
         .map(|(name, path)| {
             let doc = document(&std::fs::read_to_string(path).unwrap(), &catalog, &tokens);
             let generated = generate(&doc, &options(&catalog, &tokens, Some(&name))).unwrap();
