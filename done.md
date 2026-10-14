@@ -266,6 +266,22 @@ The MCP tool `weft_context` returns a screen's entries under its fixed notice; `
 
 Built: `packages/mcp/src/tools/context.ts` reads the markup leniently, filters by `for` (`""` for entries about the screen), `kind` and `status`, and cuts the result at the format's limits (100 entries, 500 characters each, 16,000 in all) with an `omitted` count, since a lenient read only warns about an oversized block. `weft_patch`'s description lists the context forms, or says the context is read-only. The primer, `docs/mcp.md`, the package README and the plugins' tool lists name the new tool. The explain and CLI parts of the old T39.4 card moved to T39.5 (explain) and T39.6 (the export and import keys and `--context`), which also renumbered code targets to T39.6 and Figma and Penpot to T39.7.
 
+### T106.1. MCP tool logic in Rust
+
+Part of T106. The reuse rule: the cox plugin must not copy the tool layer, so it moved into `crates/weft-binding` first, behind one API both the TypeScript server (T106.2) and the cox plugin (T106.3) call. No behaviour change.
+
+Split when claimed, because the port is about 960 lines of code: T106.1.1 settings, declarations and primer; T106.1.2 the tool host, project scoping, results and argument checks; T106.1.3 the nine tool functions and their tests.
+
+Done: `crates/weft-binding/src/tools/` (no feature: `weft_schema` uses `weft_catalog::document_schema`, which needs no `weft-web`).
+
+- `settings.rs`: `Limits` (the defaults of `packages/mcp/src/context.ts`) and `Settings { limits, mode, context }`, read in the shape of `weft.json`'s `validate.mode`, `mcp.limits` and `mcp.context` (SPEC §10.6), so no new option.
+- `decls.rs` and `primer.txt`: each tool's name, title, description, JSON input schema and annotations, and the primer, with the limits and settings in the texts; the primer text is `packages/mcp/src/primer.ts`'s with `{markupChars}` and `{patches}` placeholders.
+- `host.rs`: `Context` (catalog, catalogs, kinds, token types, actions, data schema), the per-call `project` scope (limit, `#/project` prefix, the call's mode), reading markup, diagnostics truncation and `Outcome` (MCP content blocks, or a render request: `weft_render` checks the data limit and reads strictly, then hands the document and scoped catalog to the host's renderer until T106.4).
+- `args.rs`: the declared argument bounds (types, `maxLength` in UTF-16 units, `maxItems`, enums, `inputElements`), which the MCP SDK checks in the TypeScript server and nothing checks in cox.
+- `call.rs`: one function per tool, ported from `packages/mcp/src/tools/*.ts`; `mod.rs`: `ToolHost::{new, core, from_project, decls, call}`.
+- Tests: native cases mirroring `packages/mcp/test/*.test.ts` in `tools/tests.rs` and each file. Byte parity with the TypeScript server was checked once with a throwaway script over 84 calls (both settings sets, every tool, project scoping, failures) and 18 declarations: identical except argument-check failures, which the SDK words itself and which never reach Rust from the TypeScript server.
+- Known difference: a context text cut at 500 UTF-16 units inside a surrogate pair drops the whole pair, where JavaScript keeps a lone high surrogate.
+
 ### T39.3. Context: patch operations
 
 `add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.

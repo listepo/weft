@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
 | T106 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
-| T106.1 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T106.2 | todo | P2 | 3 | 0% | |
 | T106.3 | todo | P2 | 3 | 0% | |
 | T106.4 | todo | P3 | 4 | 0% | |
@@ -323,20 +322,6 @@ Done when T106.1–T106.8 are done. Sub-tasks, in order (each within the task si
 - T106.8: Design tab, Weft side: the plugin renders the screens, keeps the tab live and passes the selection to the agent.
 
 What exists (checked on origin/main): the MCP server is `packages/mcp` (nine tools: `weft_primer`, `weft_capabilities`, `weft_catalog`, `weft_schema`, `weft_validate`, `weft_format`, `weft_patch`, `weft_render`, `weft_context`), bundled into the Claude Code, Cursor and Open Design plugins by `plugins/shared`. Its checks already run on the Rust core through `@weft/core` and `@weft/catalog`, but the tool layer itself (primer text, limits, diagnostics truncation, project scoping, the capabilities shape, the catalog index, context filtering, the tool descriptions) is TypeScript, and `weft_render`'s accessibility tree and page come from `@weft/render-react` (TypeScript only). `crates/weft-binding` holds the JSON-text functions both engines call; `crates/weft-web` has the static HTML/CSS generator (`to_html`). cox has no way for a plugin to carry skills (`plugin.toml` has `[[agents]]` and `[[mcp]]`, no skills) and its desktop plugin API is text widgets only (PL§15.4 lists plugin web views as "never", marked open in A134), so T106.5 and T106.7 extend cox.
-
-### T106.1. MCP tool logic in Rust
-
-The reuse rule: the cox plugin must not copy the tool layer, so it moves into `crates/weft-binding` first, behind one JSON-text API both the TypeScript server (T106.2) and the cox plugin (T106.3) call. No behaviour change: the texts and JSON the tools return stay byte-identical.
-
-**Execution plan.**
-1. `crates/weft-binding/src/tools/` (module `tools`, behind the existing `web` feature because `weft_schema` needs `weft-web`):
-   - `settings.rs`: `Limits` (the defaults of `packages/mcp/src/context.ts`) and `Settings { limits, mode, context }`, read from JSON with the same names as `weft.json`'s `validate.mode`, `mcp.limits` and `mcp.context` (SPEC §10.6), so no new option.
-   - `host.rs`: `ToolHost`: the host context (catalog, catalogs, kinds, token types, actions, data schema) plus settings, built from JSON text once; `scope` loads a call's `project` argument with `weft_catalog::load_project_text` (prefix `#/project`, the call's mode) and the length limit; diagnostics text with the `diagnostics` limit.
-   - `decls.rs`: each tool's name, title, description (with the limits and settings in it, as today) and JSON input schema, and annotations.
-   - `primer.rs`: the primer text with its limits (moved from `packages/mcp/src/primer.ts`).
-   - `call.rs`: `ToolHost::call(name, args_json) -> {content: [text…], isError?}`, one function per tool, ported from `packages/mcp/src/tools/*.ts`: capabilities, catalog (index, one kind, fragments, inline fragments, did-you-mean), schema, validate, format, patch, context (filters and the format's limits). `weft_render` checks the data limit, scopes and reads the markup strictly, and on success returns the strictly valid document and the scoped catalog for the host to render (T106.2 renders it with `@weft/render-react`; T106.4 moves the tree to Rust).
-2. Native tests in each file, mirroring the cases of `packages/mcp/test/*.test.ts` (results, errors, limits, project scoping, read-only context).
-3. Verify: `cargo test -p weft-binding --features web`, `moon run root:changed -- --base origin/main`.
 
 ### T106.2. TypeScript MCP server on the Rust tools
 

@@ -5,7 +5,6 @@
 - T69.1. Editor skeleton
 - T41. Hosted Penpot plugin
 - T106. Weft plugin for cox
-- T106.1. MCP tool logic in Rust
 - T106.2. TypeScript MCP server on the Rust tools
 - T106.3. The cox plugin
 - T106.4. Accessibility snapshot in Rust
