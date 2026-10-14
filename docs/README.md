@@ -27,6 +27,7 @@ This guide is for people who use Weft: developers who wire it into an app or an 
 | [Publishing a catalog](publishing-catalogs.md) | Make a library of components with its own prefix and ship it as an npm package. |
 | [Catalogs](catalogs.md) | The known catalogs and the prefixes they take. |
 | [Contributing](contributing.md) | Build, test and change Weft. |
+| [Development](development.md) | The fast iteration loop and the merge gate. |
 
 ## How to read the commands
 
