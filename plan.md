@@ -18,7 +18,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.6 | todo | P2 | 2 | 0% | |
 | T105.7 | todo | P2 | 3 | 0% | |
-| T105.8 | todo | P2 | 4 | 0% | |
 | T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
 
@@ -325,10 +324,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.7. Windows CI build of the generated pages
 
 A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `actions/setup-dotnet` pinned by SHA, .NET SDK 10.0.402, `dotnet build` of a WinUI 3 class library (`Microsoft.WindowsAppSDK` 2.5.1, warnings as errors) that includes every golden page, view model and the shared files. A Rust test that every corpus screen and catalog example has a golden. Not a required check at first. About 120 lines. Done when the job is green on the T105.1–T105.2 goldens and fails on a deliberately broken golden (shown in the PR).
-
-### T105.8. Hand-written WinUI importer: structure
-
-`read_winui` behind the `import` feature, on `roxmltree` 0.21 (already in `Cargo.lock`; its `rust.md` row needs the creator's permission): kinds, ids, props, markers, slots and structure, with losses and diagnostics, input bounds `W601`/`W602`, DTDs refused. About 480 lines of code. Done when generated XAML without its comment reads back with only listed losses, and hand-written samples report each loss with its path.
 
 ### T105.9. Hand-written WinUI importer: bindings, events, tokens and layout
 

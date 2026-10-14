@@ -21,8 +21,8 @@ A new crate `crates/weft-winui`, shaped like `crates/weft-slint`:
 | Generator | `generate(document, &GenerateOptions { catalog, tokens, name, namespace, shared_tokens, context }) -> Result<Generated, GenerateError>`, pure Rust, no Windows dependency. `Generated` holds three files (below). `GenerateError::Unsupported` lists every path it refuses, as T67 does. |
 | Shared files | `generate_tokens(tokens, namespace)` writes `WeftTokens.xaml`; `helpers(namespace)` writes `Weft.cs`. A project writes each once. |
 | Source-comment import | `import_winui(source) -> Result<Document, ImportError>`: reads the `weft:source` comment and accepts it only if generating from it gives the same XAML (below). Always built, no extra dependency beyond the XML reader. |
-| Hand-written import | `read_winui(source) -> ReadResult { document, losses, diagnostics }` behind the `import` feature, like `weft-slint`'s, using `weft-import` for the shared loss and diagnostic types. |
-| Input bounds | The importer refuses input over 2 MB (`W601`) and more nodes than the bound (`W602`), as the other importers do. |
+| Hand-written import | `read_winui(source, &ImportOptions { catalog, tokens }) -> ImportResult { document, losses, diagnostics }` behind the `import` feature, like `weft-slint`'s, using `weft-import` for the shared loss types and the lenient repair. |
+| Input bounds | The importer refuses input over 2 MB and more XML nodes than the bound; `read_winui` reports both as `W602`, also XML nested past 800 levels (counted before parsing, since roxmltree recurses per element), and cuts the elements past `MAX_NODES` or `MAX_DEPTH`, as the other importers do. |
 | CLI | `weft winui`, `weft winui-tokens`, `weft import-winui` (T105.6). |
 | Settings | `export.winui.*` and `import.winui.*` in `weft.json` (T105.6, SPEC §10.6). |
 

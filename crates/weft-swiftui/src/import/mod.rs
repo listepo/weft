@@ -8,12 +8,11 @@
 //! nesting are bounded (`W602`), and the result always validates in lenient mode.
 
 mod read;
-mod repair;
 mod syntax;
 
 use weft_core::{Catalog, Code, Diagnostic, serialize};
 pub use weft_import::{ImportResult, Loss, LossKind, MAX_DEPTH, MAX_NODES};
-use weft_import::{empty_result, limit_reached, provenance};
+use weft_import::{empty_result, limit_reached, provenance, repair};
 
 use crate::generate::SOURCE_OPTIONS;
 
@@ -87,7 +86,7 @@ pub fn import_swiftui(source: &str, options: &ImportOptions<'_>) -> ImportResult
             note: "the source has Swift syntax errors; the parts the parser could not read are skipped".to_owned(),
         });
     }
-    repair::repair(&mut result, options.catalog);
+    repair(&mut result, options.catalog);
     result.diagnostics.splice(0..0, diagnostics);
     verified(text, &result, options.catalog).unwrap_or(result)
 }

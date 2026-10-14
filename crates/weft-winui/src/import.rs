@@ -14,7 +14,7 @@ use crate::generate::{GenerateOptions, TARGET, generate};
 pub const MAX_SOURCE_LENGTH: usize = 2_000_000;
 /// A generated page has a few XML nodes per Weft element (the element, its indentation text and
 /// a wrapper at most), and a document at most `MAX_NODES` elements.
-const MAX_XML_NODES: u32 = weft_import::MAX_NODES as u32 * 8;
+pub(crate) const MAX_XML_NODES: u32 = weft_import::MAX_NODES as u32 * 8;
 
 pub struct ImportOptions<'a> {
     pub catalog: &'a Catalog,

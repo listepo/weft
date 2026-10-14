@@ -1,6 +1,6 @@
 //! Expression and modifier helpers of the SwiftUI reader.
 
-use weft_core::{Node, Value};
+use weft_core::Value;
 
 use super::super::syntax::{Arg, Call, Closure, Expr, Stmt};
 use crate::data::Leaf;
@@ -8,12 +8,7 @@ use crate::swift;
 
 use super::types::VIEW_MEMBERS;
 
-pub fn element_path(parent: &str, node: &Node) -> String {
-    match &node.id {
-        Some(id) => format!("{parent}/{}#{id}", node.kind),
-        None => format!("{parent}/{}", node.kind),
-    }
-}
+pub use weft_import::element_path;
 
 /// `[A-Za-z][A-Za-z0-9_-]*` (SPEC §2.2).
 pub fn is_id(s: &str) -> bool {
