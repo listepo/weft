@@ -6,6 +6,7 @@
 pub mod api;
 pub mod boundary;
 mod sources;
+pub mod tools;
 #[cfg(feature = "web")]
 pub mod web;
 
