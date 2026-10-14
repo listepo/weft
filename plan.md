@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T41 | in progress | P2 | 2 | 70% | Claude Code / claude-opus-5-5 |
 | T106 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
-| T106.2 | todo | P2 | 3 | 0% | |
+| T106.2 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T106.3 | todo | P2 | 3 | 0% | |
 | T106.4 | todo | P3 | 4 | 0% | |
 | T106.5 | todo | P2 | 3 | 0% | |
@@ -337,7 +337,14 @@ What exists (checked on origin/main): the MCP server is `packages/mcp` (nine too
 
 ### T106.2. TypeScript MCP server on the Rust tools
 
-`packages/mcp` registers the tools from the Rust declarations and calls `ToolHost.call`; its own copies of the logic are deleted. Plan when claimed: a `ToolHost` class in both stubs (`weft-wasm`, `weft-node`; `packages/core/test/engines.test.ts` keeps their lists equal) and its `@weft/core` wrapper; each tool's input schema converted from the declared JSON Schema for the MCP SDK; `weft_render` finishes the render request with `@weft/render-react`; `AGENTS.md`'s pointer to the primer moves to the Rust file; `moon run shared:build` refreshes the committed plugin `dist/`. Done when every existing `packages/mcp` and plugin test passes unchanged.
+`packages/mcp` registers the tools from the Rust declarations and calls `ToolHost.call`; its own copies of the logic are deleted. Done when every existing `packages/mcp` and plugin test passes; only imports of moved helpers change.
+
+**Execution plan.**
+1. Rust: `ToolHost::from_wire(context_json, settings_json)` in `weft-binding::tools` (context `{catalog, catalogs?, kinds?, tokens?: [[path, type]…], actions?, data?: <JSON Schema>}`; settings in the `weft.json` shape), `Deserialize` for `CatalogSource` and `KindSource`, and `ToolHost::constants()` (`{limits, listed, contextNotice, primer}`) so the TypeScript side keeps no copy of them. A `ToolHost` class with `decls()`, `call(name, args)` and `constants()` in `weft-wasm` and `weft-node`.
+2. `@weft/core`: a `toolHost(context, settings)` wrapper over the engine's class (`packages/core/src/tools.ts`, exported as `@weft/core/tools`); `engines.test.ts` keeps both export lists equal.
+3. `packages/mcp`: `createServer` builds one host and registers every declaration with `z.fromJSONSchema` of its input schema; handlers send `JSON.stringify(args)` to `call`, and a render request is finished with `@weft/render-react`. Delete `primer.ts`, `read.ts`, `result.ts` and the tool modules' logic; `LIMITS`, `PRIMER`, `LISTED` and `CONTEXT_NOTICE` come from `constants()`. `withinLimits` is tested through `weft_context` instead of directly.
+4. `AGENTS.md` and `AGENT-SPEC.md` point at `crates/weft-binding/src/tools/primer.txt`; `moon run shared:build` refreshes the plugin `dist/`.
+5. Verify: `cargo test -p weft-binding`, `moon run root:changed -- --base origin/main`.
 
 ### T106.3. The cox plugin
 
