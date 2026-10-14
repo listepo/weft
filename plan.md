@@ -14,7 +14,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.3 | todo | P2 | 4 | 0% | |
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
-| T105.7 | todo | P2 | 3 | 0% | |
+| T105.7 | in progress | P2 | 3 | 10% | Claude Code / claude-opus-5-5 |
 | T105.10 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -310,6 +310,14 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.7. Windows CI build of the generated pages
 
 A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `actions/setup-dotnet` pinned by SHA, .NET SDK 10.0.402, `dotnet build` of a WinUI 3 class library (`Microsoft.WindowsAppSDK` 2.5.1, warnings as errors) that includes every golden page, view model and the shared files. A Rust test that every corpus screen and catalog example has a golden. Not a required check at first. About 120 lines. Done when the job is green on the T105.1–T105.2 goldens and fails on a deliberately broken golden (shown in the PR).
+
+Execution plan:
+
+1. `crates/weft-winui/windows/WeftScreens.csproj`: a `net10.0-windows10.0.19041.0` WinUI class library (`UseWinUI`, `Nullable`, `TreatWarningsAsErrors`, `Microsoft.WindowsAppSDK` 2.5.1) that takes every golden `*Page.xaml`, `*.cs` and `WeftTokens.xaml` from `tests/fixtures/` (not the importer's `handwritten.xaml`).
+2. `WeftTokens.xaml` becomes a golden of the default tokens, so the build has the dictionary the pages name.
+3. The `winui` job in `ci.yml` (not a required check: only `pipeline / gate` is). `.github/infra.yml` turns off pyrlyn/ci's `dotnet` check, which would otherwise run `dotnet test` of the new project on Linux and, through the required gate, make the build required; moving the build there is the step that makes it required later.
+4. Rust test in `tests/winui.rs`: every corpus screen and catalog example has its three goldens except the screens in `PENDING`, an explicit list T105.3–T105.5 shrink (it replaces `COVERED`); no golden belongs to a screen that is gone.
+5. Verify: `moon run root:changed`, jactionlint, the job green on the PR, a red run on a deliberately broken golden linked in the PR, then reverted.
 
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
