@@ -1,16 +1,24 @@
 //! Makes an imported document valid in lenient mode, as SPEC §9 promises: content a kind cannot
 //! hold is dropped, required values get stand-ins, and anything the validator still rejects is
-//! removed. Each change is a loss.
+//! removed. Each change is a loss. Shared by the source readers that build `Node`s directly.
 
 use weft_core::{
     Catalog, Child, Content, Mode, Node, Severity, ValidateOptions, Value, validate_document,
 };
 
-use super::read::element_path;
-use super::{ImportResult, Loss, LossKind};
+use crate::limits::MAX_DEPTH;
+use crate::loss::{ImportResult, Loss, LossKind};
 
 /// Rounds of "validate, remove what is rejected"; each round removes at least one thing.
 const MAX_ROUNDS: usize = 64;
+
+/// The path of `node` under `parent` (SPEC §6.1): `/kind#id`, or `/kind` without an id.
+pub fn element_path(parent: &str, node: &Node) -> String {
+    match &node.id {
+        Some(id) => format!("{parent}/{}#{id}", node.kind),
+        None => format!("{parent}/{}", node.kind),
+    }
+}
 
 pub fn repair(result: &mut ImportResult, catalog: &Catalog) {
     let root = &mut result.document.root;
@@ -95,7 +103,7 @@ fn fix(
                             .get(&n.kind)
                             .and_then(|c| c.allowed_parents.as_ref())
                             .is_none_or(|p| p.contains(&rules_kind)));
-                if fits && depth < super::MAX_DEPTH {
+                if fits && depth < MAX_DEPTH {
                     fix(&mut n, Some(&rules_kind), catalog, &here, losses, depth + 1);
                     if n.kind == "each" && n.children.is_empty() {
                         continue;
@@ -226,7 +234,7 @@ fn find_mut<'n>(node: &'n mut Node, id: &str, depth: usize) -> Option<&'n mut No
     if node.id.as_deref() == Some(id) {
         return Some(node);
     }
-    if depth > super::MAX_DEPTH + 1 {
+    if depth > MAX_DEPTH + 1 {
         return None;
     }
     for list in lists(node) {
@@ -242,7 +250,7 @@ fn find_mut<'n>(node: &'n mut Node, id: &str, depth: usize) -> Option<&'n mut No
 }
 
 fn remove_child(node: &mut Node, id: &str, depth: usize) -> bool {
-    if depth > super::MAX_DEPTH + 1 {
+    if depth > MAX_DEPTH + 1 {
         return false;
     }
     for list in lists(node) {
