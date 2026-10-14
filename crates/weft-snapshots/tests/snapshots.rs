@@ -82,6 +82,7 @@ fn static_html() {
             tokens: &tokens,
             source: false,
             appearance: None,
+            paths: false,
         };
         to_html(document, &options).unwrap()
     });
@@ -97,6 +98,7 @@ fn static_html_with_data() {
             tokens: &tokens,
             source: false,
             appearance: None,
+            paths: false,
         };
         to_html_with_data(document, &options, Some(data)).unwrap()
     });
@@ -318,6 +320,7 @@ fn html_appearance() {
         tokens: &project.tokens,
         source: false,
         appearance,
+        paths: false,
     };
     snapshot("example-review", to_html(&document, &options).unwrap());
 }

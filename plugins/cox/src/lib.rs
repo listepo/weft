@@ -119,6 +119,7 @@ fn page(request: &RenderRequest) -> Value {
         tokens,
         source: false,
         appearance: None,
+        paths: false,
     };
     match to_html_with_data(&request.document, &options, request.data.as_ref()) {
         Ok(html) => output(&format!("{}\n\n{html}", request.tree), false),

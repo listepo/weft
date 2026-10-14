@@ -366,6 +366,14 @@ Plan: (1) this design; (2) the cox proposal `docs/design/plugin-canvas.md` with 
 
 Done: the design is in this card. The cox proposal is pushed to pyrlyn/cox branch `t33.47-plugin-canvas` (commit `d31bf566`, stacked on `t33.46-plugin-skills`): `docs/design/plugin-canvas.md`, amendment A156, tasks T33.47 and T33.47.1–T33.47.8, and a PL§15.4 pointer. The isolation rests on WebKit's own headers (`WKWebpagePreferences.h`, `WKUserContentController.h`) and WebKit's content-blocker format, checked 2026-10-14; T33.47.6 tests it. The four open questions are with the creator; the build follows the recommendations until they answer. There is no test because this task changes no code: the checks are in T106.7 and T106.8.
 
+### T106.8.1. data-weft-path page option
+
+Part of T106.8: `weft-web`'s `HtmlOptions` gains a flag that writes `data-weft-path` on every element, its diagnostic path (`kind#id`, or `kind[index]` without an id, `slot[name]` for a slot), so a host that shows the page can tell which element a click reached. A page option for hosts, not a tool option, so no `weft.json` key.
+
+Plan: export `path_segment` from `weft-core` (the diagnostics' own segment writer, reused rather than copied); `HtmlOptions::paths`; the writer walks the drawn document once (after fragment uses expand and data fills it) and maps each node to its path; `base()` writes the attribute; every `HtmlOptions` literal sets `paths: false`. Verified by a unit test on a screen without ids (index steps count text children, slots) and an integration test on a nested strict screen (six `kind#id` paths, none when the flag is off).
+
+Done: `HtmlOptions::paths`, `weft_core::path_segment` exported, both tests; `cargo nextest run -p weft-web` 57 passed, clippy `-D warnings` and `cargo fmt --check` clean. Inside an expanded fragment use the path is the drawn screen's, not the fragment file's.
+
 ### T39.3. Context: patch operations
 
 `add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.

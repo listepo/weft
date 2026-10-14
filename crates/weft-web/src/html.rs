@@ -2,7 +2,8 @@
 //! conventions (corpus/README.md): `data-bind="prop:$.path"` for bindings, `data-action="event:name"`
 //! for events, `<template data-each data-as>` for repetition and `<template data-empty>` for an
 //! empty slot, `data-variant`, `data-state` and `data-tone` for presentation states, and
-//! `data-weft-id` on every element that has an id. The page is a template: bound values are left
+//! `data-weft-id` on every element that has an id, and `data-weft-path` on every element when a host
+//! asks for it (`HtmlOptions::paths`). The page is a template: bound values are left
 //! for a host to fill in. Every design token becomes a CSS custom property `--weft-<path>`.
 //!
 //! Given sample data (`to_html_with_data`), the page shows it instead: the document is filled in
@@ -13,6 +14,8 @@
 //! URLs only when they are http(s), mailto or relative, and CSS only through the token value shapes
 //! below.
 
+use std::collections::HashMap;
+
 use indexmap::IndexMap;
 use serde_json::Value as Json;
 use weft_catalog::{
@@ -21,7 +24,7 @@ use weft_catalog::{
 use weft_core::{
     Catalog, Child, ComponentDef, Content, Diagnostic, Document, MODEL_ASSETS, Mode, Node,
     ValidateOptions, Value, asset_problem, controls, format_value, has_errors, js_number,
-    serialize, validate_document,
+    path_segment, serialize, validate_document,
 };
 
 use weft_import::safe_url;
@@ -39,6 +42,11 @@ pub struct HtmlOptions<'a> {
     /// The light and dark tokens of the project's resolver (`weft_catalog::appearance`): the page
     /// follows the system appearance (`tokens_css`).
     pub appearance: Option<Appearance<'a>>,
+    /// Write each element's path as `data-weft-path` (SPEC §6.1: `kind#id`, or `kind[index]`
+    /// without an id), so a host that shows the page can tell which element a click reached. The
+    /// path is in the screen the page draws, after fragment uses expand and data fills it, so
+    /// outside a use it is the path a diagnostic names.
+    pub paths: bool,
 }
 
 /// The document does not validate in strict mode against the catalog and tokens.
@@ -111,11 +119,45 @@ pub fn to_html_with_data(
         out: String::new(),
         inline_end: false,
         sample: data.is_some(),
+        paths: if options.paths {
+            element_paths(document)
+        } else {
+            HashMap::new()
+        },
     };
     w.node(&document.root, &Ctx::default(), 0);
     out.push_str(&w.out);
     out.push_str("</body>\n</html>\n");
     Ok(out)
+}
+
+/// Each element's path in `document`, keyed by its address there: the writer meets the same
+/// nodes, so no field on `Node` has to carry it.
+fn element_paths(document: &Document) -> HashMap<*const Node, String> {
+    let root = &document.root;
+    let mut stack = vec![(
+        root,
+        format!("/{}", path_segment(&root.kind, root.id.as_deref(), None)),
+    )];
+    let mut paths = HashMap::new();
+    while let Some((node, path)) = stack.pop() {
+        for (name, list) in &node.slots {
+            push_list(&mut stack, list, &format!("{path}/slot[{name}]"));
+        }
+        push_list(&mut stack, &node.children, &path);
+        paths.insert(std::ptr::from_ref(node), path);
+    }
+    paths
+}
+
+/// The elements of one list, indexed as diagnostics index them: text counts too.
+fn push_list<'a>(stack: &mut Vec<(&'a Node, String)>, list: &'a [Child], path: &str) {
+    for (index, child) in list.iter().enumerate() {
+        if let Child::Node(node) = child {
+            let segment = path_segment(&node.kind, node.id.as_deref(), Some(index));
+            stack.push((node.as_ref(), format!("{path}/{segment}")));
+        }
+    }
 }
 
 // ---- CSS ----
@@ -528,6 +570,8 @@ struct Writer<'a> {
     inline_end: bool,
     /// The document was filled in with sample data: show the `empty` slot instead of templating it.
     sample: bool,
+    /// Each element's path, when the host asked for them.
+    paths: HashMap<*const Node, String>,
 }
 
 impl Writer<'_> {
@@ -577,6 +621,9 @@ impl Writer<'_> {
         let mut binds = Vec::new();
         if let Some(id) = &n.id {
             attrs.set("data-weft-id", id.clone());
+        }
+        if let Some(path) = self.paths.get(&std::ptr::from_ref(n)) {
+            attrs.set("data-weft-path", path.clone());
         }
         for (name, value) in &n.props {
             if let Some(b) = binding(value) {
@@ -1582,6 +1629,31 @@ fn tab_nodes(list: &[Child]) -> Vec<&Node> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_element_without_an_id_is_its_kind_and_its_place() {
+        // Parsed without a catalog, so no id is required; text counts in a list's indices.
+        let markup = r#"<screen weft="0.3"><stack>Hi<button/></stack></screen>"#;
+        let parsed = weft_core::parse(markup, &weft_core::ParseOptions::default());
+        let mut document = parsed.document.expect("parses");
+        let mut ok = Node::new("button");
+        ok.id = Some("ok".into());
+        document
+            .root
+            .slots
+            .insert("header".into(), vec![Child::Node(Box::new(ok))]);
+        let mut paths: Vec<String> = element_paths(&document).into_values().collect();
+        paths.sort();
+        assert_eq!(
+            paths,
+            [
+                "/screen",
+                "/screen/slot[header]/button#ok",
+                "/screen/stack[0]",
+                "/screen/stack[0]/button[1]",
+            ]
+        );
+    }
 
     /// The `(property, fallback)` of every `var(--weft-…, fallback)` in the base stylesheet.
     fn base_references() -> Vec<(String, String)> {

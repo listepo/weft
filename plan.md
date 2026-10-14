@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T106 | in progress | P2 | 5 | 65% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
-| T106.8 | todo | P2 | 3 | 0% | |
+| T106.8 | in progress | P2 | 3 | 40% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 15% | Claude Code / claude-opus-5-5 |
 | T105.1 | todo | P2 | 4 | 0% | |
 | T105.2 | todo | P2 | 4 | 0% | |
@@ -300,6 +300,8 @@ The plugin declares the canvas, draws the screens its tools see, redraws when on
 
 - T106.8.1: `weft-web` `HtmlOptions` gains a flag that writes `data-weft-path` on every element (its diagnostic path: `kind#id`, or `kind[index]` without an id). It is a page option for hosts, not a tool option, so no `weft.json` key. Unit tests on a nested screen, with and without ids.
 - T106.8.2: `plugins/cox`: `[capabilities.desktop] canvas = true`, `CanvasDecl { title: "Weft", symbol, select_attr: "data-weft-path" }`; the last markup per screen id taken from the tools' inputs and `cox_redraw()` when one changes; `cox_canvas` returns one frame per screen from `to_html_with_data` (project tokens or the defaults, the resolver appearance, the path flag); `cox_canvas_select` returns the screen id, the element's path, kind, id and its markup line as an attachment of about 1 KiB. The `cox-plugin-sdk` pin moves to the T33.47 commit. Unit tests and the e2e test through the module. README and the grant line.
+
+Status: T106.8.1 is done (`done.md`). T106.8.2 next: plan as above, in `plugins/cox/src` (a `canvas` module beside `lib.rs`), `plugin.toml`, `Cargo.toml`, `tests/`, README; verified by `cox-plugin:test` and `root:changed`.
 
 ### T105. Weft to WinUI 3 and back
 

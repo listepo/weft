@@ -33,6 +33,7 @@ pub fn import_html(html: &str, options: &ImportOptions<'_>) -> ImportResult {
                 tokens: options.tokens,
                 source: true,
                 appearance: None,
+                paths: false,
             },
         )
         && same_body(&dom, &parse_html(&again))

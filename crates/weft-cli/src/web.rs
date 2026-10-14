@@ -147,6 +147,7 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
                 tokens: &tokens.tokens,
                 source,
                 appearance: appearance(&tokens.modifiers),
+                paths: false,
             };
             match to_html_with_data(&document, &options, data.as_ref()) {
                 Ok(html) => (html, "html"),
