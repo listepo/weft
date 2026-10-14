@@ -1,0 +1,37 @@
+[package]
+name = "weft-studio-ffi"
+description = "The C ABI of WeftStudio, the desktop editor: the ws_* editor calls and the sb_* surface of slint-bindings in one library"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+# rlib only. The static library (macOS) and the DLL (Windows) are a second link of this crate, so a
+# shell's build asks for them (`cargo rustc --crate-type staticlib|cdylib`) instead of every test.
+crate-type = ["rlib"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+slint-bindings-ffi = { workspace = true }
+slint-interpreter = { workspace = true }
+weft-slint = { workspace = true, features = ["runtime"] }
+weft-studio = { workspace = true }
+
+[dev-dependencies]
+abi-drift = { workspace = true }
+cbindgen = { workspace = true }
+csbindgen = { workspace = true }
+
+# The workspace forbids unsafe code; a C ABI needs it, so only the `abi` module allows it.
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
