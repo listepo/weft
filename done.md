@@ -282,6 +282,12 @@ Done: `crates/weft-binding/src/tools/` (no feature: `weft_schema` uses `weft_cat
 - Tests: native cases mirroring `packages/mcp/test/*.test.ts` in `tools/tests.rs` and each file. Byte parity with the TypeScript server was checked once with a throwaway script over 84 calls (both settings sets, every tool, project scoping, failures) and 18 declarations: identical except argument-check failures, which the SDK words itself and which never reach Rust from the TypeScript server.
 - Known difference: a context text cut at 500 UTF-16 units inside a surrogate pair drops the whole pair, where JavaScript keeps a lone high surrogate.
 
+### T106.2. TypeScript MCP server on the Rust tools
+
+`packages/mcp` registers the tools from the Rust declarations and calls `ToolHost.call`; its own copies of the logic are deleted. Done when every existing `packages/mcp` and plugin test passes; only imports of moved helpers change.
+
+Done: `ToolHost::from_wire` and `ToolHost::constants` in `weft-binding::tools`; a `ToolHost` class in the wasm web module and the native addon (`engines.test.ts` keeps their methods equal); `toolHost` in `@weft/core/tools`. `createServer` registers every Rust declaration through `z.object` of `z.fromJSONSchema(...).shape`, so unknown arguments are still stripped and the listing gains no `additionalProperties`; a render request is finished with `@weft/render-react`. `primer.ts`, `result.ts` and `src/tools/*.ts` are deleted; `read.ts` stays because `plugins/shared/scripts/lib.ts` uses `readMarkup`. The oversized-context test now runs through `weft_context`. Tool listing compared with the old server: the same schemas, key order aside.
+
 ### T39.3. Context: patch operations
 
 `add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.
