@@ -9,9 +9,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
-| T106 | in progress | P2 | 5 | 40% | Claude Code / claude-opus-5-5 |
-| T106.4 | in progress | P3 | 4 | 75% | Claude Code / claude-opus-5-5 |
-| T106.4.4 | in progress | P3 | 2 | 0% | Claude Code / claude-opus-5-5 |
+| T106 | in progress | P2 | 5 | 50% | Claude Code / claude-opus-5-5 |
 | T106.5 | todo | P2 | 3 | 0% | |
 | T106.6 | todo | P2 | 3 | 0% | |
 | T106.7 | todo | P2 | 4 | 0% | |
@@ -291,23 +289,6 @@ Done when T106.1–T106.8 are done. Sub-tasks, in order (each within the task si
 - T106.8: Design tab, Weft side: the plugin renders the screens, keeps the tab live and passes the selection to the agent.
 
 What exists (checked on origin/main): the MCP server is `packages/mcp` (nine tools: `weft_primer`, `weft_capabilities`, `weft_catalog`, `weft_schema`, `weft_validate`, `weft_format`, `weft_patch`, `weft_render`, `weft_context`), bundled into the Claude Code, Cursor and Open Design plugins by `plugins/shared`. Its checks already run on the Rust core through `@weft/core` and `@weft/catalog`, but the tool layer itself (primer text, limits, diagnostics truncation, project scoping, the capabilities shape, the catalog index, context filtering, the tool descriptions) is TypeScript, and `weft_render`'s accessibility tree and page come from `@weft/render-react` (TypeScript only). `crates/weft-binding` holds the JSON-text functions both engines call; `crates/weft-web` has the static HTML/CSS generator (`to_html`). cox has no way for a plugin to carry skills (`plugin.toml` has `[[agents]]` and `[[mcp]]`, no skills) and its desktop plugin API is text widgets only (PL§15.4 lists plugin web views as "never", marked open in A134), so T106.5 and T106.7 extend cox.
-
-### T106.4. Accessibility snapshot in Rust
-
-`weft_render`'s tree (`expectedTree` and `formatAriaSnapshot` of `@weft/render-react`) moves to Rust so cox gets the tool and the TypeScript server keeps one copy; `html: true` keeps returning the reference page in the TypeScript server, and in cox returns the page of `weft-web`'s generator (a different renderer, said in the tool description). Until this is done the cox plugin leaves `weft_render` out, which is the one parity gap.
-
-Decisions: the tree lives in `weft-core` (module `aria`), beside `controls` and `sample`, which already hold the control and data readings it needs, so the core-only WebAssembly module the TypeScript tool host and the cox plugin both load has it without the web generators. `@weft/render-react`'s `expectedTree`, `normalizeAria` and `formatAriaSnapshot` become wrappers over it, so there is one copy: the React renderer's own readings (`expand.ts`) stay, and its browser and server tests now check the Rust tree against the React DOM. `parseAriaSnapshot` and `diffAria` read Playwright output in tests and stay TypeScript.
-
-Sub-tasks, in order:
-
-- T106.4.1: the instance tree in `weft-core` (`aria/inst.rs`): `each` expanded with instance ids, hidden nodes removed, the `text` prop turned into content, `filled`, slot regions and the prop readings of `expand.ts` (label, clamped numbers, field, select, tab, radio, date, colour and number controls over `controls`). Unit tests per reading.
-- T106.4.2: the tree (`aria/tree.rs`, `aria/normalize.rs`): roles, names and states per kind as `aria.ts` builds them, table and tab structure, and normalization. Tests port `aria.test.ts`'s cases.
-- T106.4.3: the Playwright-style YAML (`aria/yaml.rs`), then wiring: a binding function (`ariaTree`, WebAssembly and native), `weft_render` returning the snapshot from Rust (the TypeScript server adds only the reference page for `html: true`), the `@weft/render-react` wrappers and the removal of the TypeScript tree. Verified by the existing render-react, from-aria and mcp tests, and a check that the corpus snapshots are unchanged.
-- T106.4.4: the cox plugin serves `weft_render`; `html: true` returns `weft-web`'s static page, which the description says. Unit, manifest and e2e tests, and the module size. Plan: `RenderRequest` carries the scope's resolved tokens (`Context` keeps them from the project), so the page validates against the tokens the markup was checked with; without project tokens the default tokens, as `toHtml`. The plugin depends on `weft-web` and `weft-catalog` by path, joins the tree and the page a blank line apart like its other multi-block results, and turns a refused page into an error result with the diagnostics. Files: `crates/weft-binding/src/tools/{host,call,tests}.rs`, `plugins/cox/{Cargo.toml,src/lib.rs,plugin.toml,README.md,tests/*}`. Verified by `cox-plugin:test` and the binding tests.
-
-### T106.4.4. weft_render in the cox plugin
-
-Part of T106.4 (plan in its card).
 
 ### T106.5. Skills in cox
 

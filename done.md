@@ -296,6 +296,21 @@ Done: `plugins/cox` (crate `weft-cox`, moon project `cox-plugin`), a Cargo works
 
 Tests (`moon run cox-plugin:test`: rustfmt, clippy for the host and `wasm32`, then `cargo test`): specs, dispatch and config in `src/lib.rs`; `tests/manifest.rs` reads `plugin.toml` into cox's own `PluginManifest` (unknown keys denied, the type `docs/plugin.schema.json` is generated from) and runs its `validate`, so no schema is vendored; `tests/e2e.rs` loads `weft.wasm` with `wasm-plugin-host` (the shared extism engine in `packages/crates`, pinned git dev-dependency, unpublished) through `cox_init` and `cox_tool_call` and compares four calls with the native build. `tooling/test/inputs.test.ts` checks both tasks' crate inputs against `cargo metadata`.
 
+### T106.4. Accessibility snapshot in Rust
+
+`weft_render`'s tree (`expectedTree` and `formatAriaSnapshot` of `@weft/render-react`) moves to Rust so cox gets the tool and the TypeScript server keeps one copy; `html: true` keeps returning the reference page in the TypeScript server, and in cox returns the page of `weft-web`'s generator (a different renderer, said in the tool description). Until this is done the cox plugin leaves `weft_render` out, which is the one parity gap.
+
+Decisions: the tree lives in `weft-core` (module `aria`), beside `controls` and `sample`, which already hold the control and data readings it needs, so the core-only WebAssembly module the TypeScript tool host and the cox plugin both load has it without the web generators. `@weft/render-react`'s `expectedTree`, `normalizeAria` and `formatAriaSnapshot` become wrappers over it, so there is one copy: the React renderer's own readings (`expand.ts`) stay, and its browser and server tests now check the Rust tree against the React DOM. `parseAriaSnapshot` and `diffAria` read Playwright output in tests and stay TypeScript.
+
+Sub-tasks, in order:
+
+- T106.4.1: the instance tree in `weft-core` (`aria/inst.rs`): `each` expanded with instance ids, hidden nodes removed, the `text` prop turned into content, `filled`, slot regions and the prop readings of `expand.ts` (label, clamped numbers, field, select, tab, radio, date, colour and number controls over `controls`). Unit tests per reading.
+- T106.4.2: the tree (`aria/tree.rs`, `aria/normalize.rs`): roles, names and states per kind as `aria.ts` builds them, table and tab structure, and normalization. Tests port `aria.test.ts`'s cases.
+- T106.4.3: the Playwright-style YAML (`aria/yaml.rs`), then wiring: a binding function (`ariaTree`, WebAssembly and native), `weft_render` returning the snapshot from Rust (the TypeScript server adds only the reference page for `html: true`), the `@weft/render-react` wrappers and the removal of the TypeScript tree. Verified by the existing render-react, from-aria and mcp tests, and a check that the corpus snapshots are unchanged.
+- T106.4.4: the cox plugin serves `weft_render`; `html: true` returns `weft-web`'s static page, which the description says. Unit, manifest and e2e tests, and the module size. Plan: `RenderRequest` carries the scope's resolved tokens (`Context` keeps them from the project), so the page validates against the tokens the markup was checked with; without project tokens the default tokens, as `toHtml`. The plugin depends on `weft-web` and `weft-catalog` by path, joins the tree and the page a blank line apart like its other multi-block results, and turns a refused page into an error result with the diagnostics. Files: `crates/weft-binding/src/tools/{host,call,tests}.rs`, `plugins/cox/{Cargo.toml,src/lib.rs,plugin.toml,README.md,tests/*}`. Verified by `cox-plugin:test` and the binding tests.
+
+Done: all four sub-tasks; the cox plugin serves all nine tools.
+
 ### T106.4.1. Instance tree in Rust
 
 Part of T106.4: the instance tree of `@weft/render-react`'s `expand.ts` in `weft-core` (`aria/inst.rs`), so the accessibility tree can be built without TypeScript.
@@ -313,6 +328,12 @@ Done: `weft_core::aria::expected_tree` and `normalize_aria`: roles, names and st
 Part of T106.4: the Playwright-style YAML and the wiring.
 
 Done: `weft_core::aria::format_aria_snapshot` (`aria/yaml.rs`); the binding functions `ariaTree`, `normalizeAria` and `formatAria` (WebAssembly and native) behind `@weft/core`'s `ariaTree`, `normalizeAria` and `formatAriaSnapshot`; `weft_render` returns the snapshot from Rust, and for `html: true` the TypeScript server adds only the reference page; `@weft/render-react`'s `expectedTree`, `normalizeAria` and `formatAriaSnapshot` wrap the core, and its TypeScript tree is gone (`parseAriaSnapshot` and `diffAria` stay, for the DOM tests). Verified by the render-react, from-aria, mcp and core tests, and a one-off differential check that the old TypeScript tree and YAML equal the Rust ones over the corpus, fixtures and compat screens, with and without data.
+
+### T106.4.4. weft_render in the cox plugin
+
+Part of T106.4: the cox plugin serves `weft_render`.
+
+Done: `RenderRequest` carries the scope's resolved tokens; the plugin draws `html: true`'s page with `weft-web`'s static generator (project tokens, else the defaults) after the tree, a blank line apart, and returns the tree and the page's diagnostics as an error when the page refuses the markup. Its `weft_render` description says the page comes from the static generator. Unit tests (tree, page, refused page, description), the manifest test (nine granted tools) and the e2e test (the module's `weft_render` page equals the native build's). The module is 1.37 MB (1.29 MB before).
 
 ### T39.3. Context: patch operations
 
