@@ -3,7 +3,6 @@
 - T68. Slint bindings for SwiftUI and WinUI
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
-- T41. Hosted Penpot plugin
 - T105. Weft to WinUI 3 and back
 - T105.1. WinUI generator: first slice and source-comment read-back
 - T105.2. WinUI view model, code-behind and helpers

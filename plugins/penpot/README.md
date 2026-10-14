@@ -1,12 +1,6 @@
 # Weft Penpot plugin
 
-Install it in Penpot's plugin manager from:
-
-```
-https://listepo.github.io/weft/penpot/manifest.json
-```
-
-That URL is the hosted copy of `dist/`, published by GitHub Pages on every push to `main` (the `deploy-pages` job of `.github/workflows/ci.yml`). Penpot loads a plugin only from the URL of its `manifest.json`; the manifest uses version 2, so `plugin.js` and `ui.html` come from the same folder.
+There is no hosted copy: serve the plugin locally with `moon run penpot-plugin:serve` and install it in Penpot's plugin manager from `http://localhost:4400/manifest.json` (see "Build and run").
 
 A Penpot plugin with two actions:
 
@@ -24,19 +18,17 @@ The build and the UI page are shared with the Figma plugin and live in `@weft/de
 
 ## Build and run
 
-Local build and serve are for developing the plugin; users install the hosted URL above.
-
 ```sh
 mise exec -- moon run penpot-plugin:build
 ```
 
-This builds the WebAssembly core first, then writes `dist/manifest.json`, `dist/plugin.js` and `dist/ui.html`. Penpot loads a plugin from a URL and plugins are hosted outside Penpot, so `dist/` is not committed: it is served (by Pages, or locally below). The manifest uses version 2, so `plugin.js` and `ui.html` are loaded from the manifest's folder.
+This builds the WebAssembly core first, then writes `dist/manifest.json`, `dist/plugin.js` and `dist/ui.html`. Penpot loads a plugin from a URL and plugins are hosted outside Penpot, so `dist/` is not committed: it is served locally (below). The manifest uses version 2, so `plugin.js` and `ui.html` are loaded from the manifest's folder.
 
 ```sh
 mise exec -- moon run penpot-plugin:serve
 ```
 
-This builds, then serves `dist/` on `http://localhost:4400` with `Access-Control-Allow-Origin: *` (`serve.config.ts`), because Penpot fetches the files from its own origin and Vite's default allows only localhost origins. Install the plugin in Penpot's plugin manager with `http://localhost:4400/manifest.json`. Whether a real Penpot needs the CORS header has not been checked; the local server and GitHub Pages both send it either way.
+This builds, then serves `dist/` on `http://localhost:4400` with `Access-Control-Allow-Origin: *` (`serve.config.ts`), because Penpot fetches the files from its own origin and Vite's default allows only localhost origins. Install the plugin in Penpot's plugin manager with `http://localhost:4400/manifest.json`. Whether a real Penpot needs the CORS header has not been checked; the server sends it either way.
 
 The plugin asks for `content:write` and `library:write`, which include the read permissions. It needs no network access: the default token set (`packages/catalog/tokens/default.tokens.json`) is inlined into the UI.
 
@@ -48,4 +40,4 @@ The plugin asks for `content:write` and `library:write`, which include the read 
 - The UI script runs through `@weft/design-plugin`'s shared UI harness, without `process` or `fetch`.
 - The two exchange structured-cloned messages the way Penpot carries them: `parent.postMessage` to `penpot.ui.onMessage`, and `penpot.ui.sendMessage` to a `message` event.
 
-This shows the split works. It does not replace a run in a real Penpot. `test/pages.test.ts` is offline: it reads the Pages workflow and pins the deploy (only on `main` after the gate, `dist/` under `penpot/`, every action on a commit SHA).
+This shows the split works. It does not replace a run in a real Penpot.
