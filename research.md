@@ -421,3 +421,69 @@ Prior art for loading several catalogs at once: how component vocabularies are n
 | Figma plugins import library components by key, and cannot list them | `importComponentByKeyAsync(key)` and `importComponentSetByKeyAsync(key)` load a published component; `ComponentNode.key` is that key; `TeamLibraryAPI` lists only variable collections and variables | `@figma/plugin-typings` 1.140.0 (`plugin-api.d.ts`) |
 | Penpot: any file can be published as a shared library and connected to others | Connected libraries are listed one by one in the assets panel; unpublishing disconnects them, and assets already used stay but lose the link | https://help.penpot.app/user-guide/design-systems/libraries/ |
 | Penpot plugins can connect libraries | `LibraryContext` has `local`, `connected: Library[]`, `availableLibraries()` and `connectLibrary(libraryId)` | `@penpot/plugin-types` 1.5.0 (`index.d.ts`) |
+
+## 23. WinUI 3 (T105)
+
+Checked on 2026-10-14. The question is how a Weft screen becomes a WinUI 3 page bound to a generated C# view model, how the XAML reads back, and what a Windows CI job needs to build it. API pages were read in their `windows-app-sdk-2.0` view (the default, updated 2026-07-28); the conceptual pages carry their own `ms.date`. The design built on these facts is `docs/winui-design.md`.
+
+### Versions
+
+| Fact | Finding | Source (checked) |
+| --- | --- | --- |
+| Windows App SDK stable | `Microsoft.WindowsAppSDK` 2.5.1, published 2026-09-16; it depends on `Microsoft.WindowsAppSDK.WinUI` ≥ 2.3.9. 2.5.4-experimental is the newest experimental package | https://www.nuget.org/packages/Microsoft.WindowsAppSDK (2026-10-14) |
+| Release channels and support | 2.0 was released 2026-04-29 on the Current channel, servicing ends 2027-04-29; the experimental channel carries `TableView` and charts | https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/release-channels (ms.date 2026-09-29; checked 2026-10-14) |
+| .NET | .NET 10 is LTS: SDK 10.0.402, runtime 10.0.13, released 2026-10-13; .NET 11 is at rc.2 | https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json (2026-10-14) |
+| Microsoft's getting-started path | Uses the .NET 10 SDK and the winapp CLI 0.6 | https://learn.microsoft.com/en-us/windows/apps/get-started/start-here (ms.date 2026-10-08; checked 2026-10-14) |
+| GitHub runner | `windows-latest` is the Windows Server 2025 image | https://github.com/actions/runner-images (README, 2026-10-14) |
+| `actions/setup-dotnet` | Latest release v6.0.0 | https://github.com/actions/setup-dotnet/releases (2026-10-14) |
+| CommunityToolkit.Mvvm | 8.4.2, 2026-03-25: observable base classes, commands, messaging | https://www.nuget.org/packages/CommunityToolkit.Mvvm (2026-10-14) |
+| The Windows SDK build in `TargetFramework` (`net10.0-windows10.0.<build>`) | **unverified**: to be taken from the current WinUI project template when T105.7 writes the project | — |
+| The XAML compiler runs only on Windows | **unverified**: it ships as a Windows executable in the Windows App SDK packages; T105.7 relies on the Windows job either way | — |
+
+### Binding
+
+| Fact | Finding | Source (checked) |
+| --- | --- | --- |
+| x:Bind is compiled and typed | Bindings are generated as code at compile time; the root is the page (or the template's `x:DataType` inside a `DataTemplate`, which is required there); errors in a path are build errors | https://learn.microsoft.com/en-us/windows/apps/develop/platform/xaml/x-bind-markup-extension (ms.date 2026-07-15; checked 2026-10-14) |
+| x:Bind's default mode is `OneTime` | So every binding of changing data states `Mode=OneWay` or `Mode=TwoWay` | same page |
+| x:Bind converts `bool` to `Visibility` | `true` → `Visible`, `false` → `Collapsed`, without a converter; property bindings only, not function bindings | same page |
+| x:Bind binds events to methods | The method must not be overloaded and must match the event's signature, have no parameters, or take parameters assignable from the event's | same page |
+| x:Bind supports indexers | `Teams[0].Players` when the property's type implements `IList<T>` (not `IReadOnlyList<T>`); `Players['John Smith']` for `IDictionary<string, T>` | same page |
+| x:Bind `UpdateSourceTrigger` | Settable on x:Bind; the default is `PropertyChanged` for every property except `TextBox.Text`, whose default is `LostFocus` | same page |
+| x:Bind attached-property paths | A path step names an attached property in parentheses, `{x:Bind Button22.(Grid.Row)}` | same page |
+| Function bindings | A path may call a method, also a static one through a namespace prefix (`{x:Bind local:Helpers.Not(ViewModel.X)}`); arguments are paths or literals; a two-way function binding needs `BindBack`, a method that takes the new value | https://learn.microsoft.com/en-us/windows/apps/develop/data-binding/function-bindings (ms.date 2026-09-05; checked 2026-10-14) |
+| Two-way x:Bind to a custom attached property, and a C# keyword as a path segment | **unverified**; T105.7's build checks both | — |
+| `ItemsRepeater` | No built-in UI, selection or scrolling; `ItemsSource` takes any `IEnumerable` (`INotifyCollectionChanged` for updates); a `DataTemplate` child is its `ItemTemplate`; layouts are `StackLayout` (`Orientation`, `Spacing`) and `UniformGridLayout`; no default accessibility | https://learn.microsoft.com/en-us/windows/apps/develop/ui/controls/items-repeater (ms.date 2026-09-19; checked 2026-10-14) |
+| `UniformGridLayout` sizing | Every item is the same size; without `MinItemWidth`/`MinItemHeight` the first item's measured size is the minimum; `MaximumRowsOrColumns`, `ItemsStretch` (`None`, `Fill`, `Uniform`) and `ItemsJustification` share the rest | same page; https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.controls.uniformgridlayout |
+
+### Controls and properties
+
+All API rows: `https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/<name>`, view `windows-app-sdk-2.0`, updated 2026-07-28, checked 2026-10-14.
+
+| Fact | Finding | Page |
+| --- | --- | --- |
+| Automation properties | `AutomationId`, `Name`, `HeadingLevel` (`Level1`–`Level9`), `LandmarkType` (`Custom`, `Form`, `Main`, `Navigation`, `Search`), `LocalizedLandmarkType`, `IsRequiredForForm`, `HelpText` are attached properties | `microsoft.ui.xaml.automation.automationproperties` |
+| `StackPanel` | `Orientation`, `Spacing`, `Padding`, `BorderBrush`, `CornerRadius` | `microsoft.ui.xaml.controls.stackpanel` |
+| `Grid` | `RowSpacing`, `ColumnSpacing`, `Padding`; tracks `Auto`, pixel or star | `microsoft.ui.xaml.controls.grid` |
+| `InfoBar` severities | `Informational`, `Success`, `Warning`, `Error` | `microsoft.ui.xaml.controls.infobarseverity` |
+| `NumberBox` | `Minimum`, `Maximum`, `SmallChange`, `LargeChange`, `SpinButtonPlacementMode` (`Hidden`, `Compact`, `Inline`), `Header`; `Value` is a double (**unverified** for `NaN` when empty) | `microsoft.ui.xaml.controls.numberbox` |
+| `SelectorBar` | Available since Windows App SDK 1.5; `SelectorBarItem` items, `SelectedItem` | `microsoft.ui.xaml.controls.selectorbar` |
+| `ComboBox` | `IsEditable`, `Text`, `Header`, `PlaceholderText`, `SelectedValue`, `SelectedValuePath` | `microsoft.ui.xaml.controls.combobox` |
+| `RadioButtons` | `Header`, `SelectedIndex`, `SelectedItem`, `Items`/`ItemsSource`; no value property | `microsoft.ui.xaml.controls.radiobuttons` |
+| `TabViewItem` | `Header`, `IsClosable`; `TabView.IsAddTabButtonVisible` | `microsoft.ui.xaml.controls.tabviewitem` |
+| `ContentDialog` | Shown by `ShowAsync`, needs `XamlRoot` in a desktop app; `Title`, primary/secondary/close buttons, `Closed` event | `microsoft.ui.xaml.controls.contentdialog` |
+| `AcrylicBrush` | `TintColor`, `TintOpacity`, `TintLuminosityOpacity`, `FallbackColor`, `AlwaysUseFallback`; no blur radius | `microsoft.ui.xaml.media.acrylicbrush` |
+| `PerspectiveTransform3D` | `Depth`, `OffsetX`, `OffsetY` | `microsoft.ui.xaml.media.media3d.perspectivetransform3d` |
+| `CompositeTransform3D` | `RotationX`, `RotationY`, `RotationZ` in degrees (counter-clockwise), scale and translate, applied scale → rotate → translate about `CenterX/Y/Z` | `microsoft.ui.xaml.media.media3d.compositetransform3d` |
+| Theme dictionaries and the type ramp | `ResourceDictionary.ThemeDictionaries` keyed `Light`, `Dark`, `HighContrast`; `{ThemeResource}` re-evaluates when the theme changes, `{StaticResource}` does not; type ramp styles `CaptionTextBlockStyle`, `BodyTextBlockStyle`, `BodyStrongTextBlockStyle`, `SubtitleTextBlockStyle`, `TitleTextBlockStyle`, `TitleLargeTextBlockStyle`, `DisplayTextBlockStyle` | https://learn.microsoft.com/en-us/windows/apps/develop/platform/xaml/xaml-theme-resources (ms.date 2026-07-27; checked 2026-10-14) |
+| `AccentButtonStyle`, the status text brushes, dots in an `x:Key`, perspective on a parent projecting its child | **unverified**; T105.3 and T105.5 check them in the Windows build | — |
+
+### XML
+
+| Fact | Finding | Source (checked) |
+| --- | --- | --- |
+| XML comments | `--` must not occur inside a comment, and a comment must not end with `--->` | https://www.w3.org/TR/xml/#sec-comments (XML 1.0, fifth edition; checked 2026-10-14) |
+| `roxmltree` | 0.21.1, released 2025-10-12; read-only tree, namespaces, node positions; MIT or Apache-2.0 | https://crates.io/crates/roxmltree (2026-10-14) |
+| `roxmltree` parsing options | `allow_dtd` defaults to `false` (a DTD is an error), `nodes_limit` defaults to `u32::MAX` | https://docs.rs/roxmltree/0.21.1/roxmltree/struct.ParsingOptions.html (2026-10-14) |
+| `quick-xml` | 0.42.0, released 2026-08-22; streaming reader and writer | https://crates.io/crates/quick-xml (2026-10-14) |
+| Already in the lock file | `roxmltree` 0.21.1 and `xml-rs` 0.8.29 | `Cargo.lock` of this repository (2026-10-14) |

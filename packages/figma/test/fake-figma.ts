@@ -358,6 +358,40 @@ export class FakeInstance extends FakeLayout implements FInstance {
       }
     this.main = main;
   }
+  /** Keys set to `""` on this instance: in Figma they stay empty instead of showing the main's. */
+  readonly #masked = new Set<string>();
+  // Checked in a real file through `use_figma` (T14.4): an instance reads its main component's
+  // shared plugin data, live, unless it set the key itself; clearing the key hides the main's.
+  override getSharedPluginData(namespace: string, key: string): string {
+    if (this.shared.get(namespace)?.has(key)) return super.getSharedPluginData(namespace, key);
+    if (this.#masked.has(`${namespace}\0${key}`)) return "";
+    return this.main.getSharedPluginData(namespace, key);
+  }
+  override setSharedPluginData(namespace: string, key: string, value: string): void {
+    super.setSharedPluginData(namespace, key, value);
+    if (value === "") this.#masked.add(`${namespace}\0${key}`);
+    else this.#masked.delete(`${namespace}\0${key}`);
+  }
+  /**
+   * Figma's detach, as checked in a real file (T14.4): a frame with a new id takes the instance's
+   * place and keeps its shared plugin data, the inherited entries included.
+   */
+  detachInstance(): FakeFrame {
+    const frame = new FakeFrame(this.figma);
+    this.copyLayout(frame);
+    for (const [ns, entries] of this.main.shared)
+      for (const [key, value] of entries)
+        if (this.getSharedPluginData(ns, key) === value && !this.shared.get(ns)?.has(key))
+          frame.setSharedPluginData(ns, key, value);
+    const parent = this.parent;
+    if (parent !== undefined) {
+      const at = parent.children.indexOf(this);
+      this.remove();
+      parent.children.splice(at, 0, frame);
+      frame.parent = parent;
+    }
+    return frame;
+  }
   async getMainComponentAsync(): Promise<FakeComponent> {
     return this.main;
   }
