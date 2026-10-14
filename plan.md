@@ -315,6 +315,7 @@ The cox tasks the T106.6 proposal defines: the plugin-API types, manifest and gr
 ### T106.8. Design tab: Weft side
 
 The plugin declares the tab, renders the screens its tools see (the last markup per screen id) to HTML with `weft-web`, redraws after `weft_patch`/`weft_format`/`weft_validate`, and turns a selection into agent context. Plan when claimed.
+
 ### T105. Weft to WinUI 3 and back
 
 Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read WinUI XAML back into Weft, as T67 does for Slint and T34 for SwiftUI. The design is `docs/winui-design.md`; the external facts, with sources, are `research.md` §23.
