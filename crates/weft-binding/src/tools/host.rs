@@ -201,12 +201,15 @@ impl Outcome {
                 }
                 to_compact(&out)
             }
-            Outcome::Render(r) => to_compact(&json!({"render": {
-                "document": r.document,
-                "catalog": r.catalog,
-                "data": r.data,
-                "html": r.html,
-            }})),
+            Outcome::Render(r) => {
+                let mut render = json!({ "document": r.document, "catalog": r.catalog });
+                // Absent, not null: the renderer reads a missing data model as no data.
+                if let Some(data) = &r.data {
+                    render["data"] = data.clone();
+                }
+                render["html"] = Json::Bool(r.html);
+                to_compact(&json!({ "render": render }))
+            }
         }
     }
 }

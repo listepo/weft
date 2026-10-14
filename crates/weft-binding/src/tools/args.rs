@@ -11,6 +11,10 @@ fn invalid(message: String) -> String {
     format!("Invalid arguments: {message}")
 }
 
+pub(crate) fn too_deep() -> String {
+    invalid("they nest too deep.".to_owned())
+}
+
 /// JSON values in a tree: objects, arrays and scalars alike.
 fn elements(value: &Json) -> usize {
     1 + match value {
@@ -25,7 +29,7 @@ impl Args {
     pub fn read(text: &str, max_elements: usize) -> Result<Args, String> {
         let value = match parse_json(if text.trim().is_empty() { "{}" } else { text }) {
             Ok(v) => v,
-            Err(JsonError::TooDeep) => return Err(invalid("they nest too deep.".to_owned())),
+            Err(JsonError::TooDeep) => return Err(too_deep()),
             Err(JsonError::Syntax(e)) => return Err(invalid(format!("not JSON: {e}."))),
         };
         if elements(&value) > max_elements {

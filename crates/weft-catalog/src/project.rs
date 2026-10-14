@@ -6,7 +6,7 @@
 
 use indexmap::IndexMap;
 use semver::{Comparator, Op, Version, VersionReq};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Map as Object, Value as Json};
 use weft_core::fragment::{FRAGMENT, host_reaches};
 use weft_core::{
@@ -78,24 +78,25 @@ pub struct Project {
     pub settings: Object<String, Json>,
 }
 
-/// A catalog the project loaded over the core.
-#[derive(Clone, Debug, PartialEq, Serialize)]
+/// A catalog the project loaded over the core. Deserialize reads back what a JavaScript host
+/// holds from `loadProject`, for the tool host it hands to Rust.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CatalogSource {
     pub name: String,
     pub version: String,
     /// Absent for the project catalog.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub prefix: Option<String>,
     /// The file the catalog was read from; absent for project content.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source: Option<String>,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct KindSource {
     pub catalog: String,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub extended_by: Vec<String>,
 }
 

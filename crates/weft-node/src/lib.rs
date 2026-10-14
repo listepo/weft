@@ -14,6 +14,41 @@ fn js<T>(result: std::result::Result<T, BindingError>) -> Result<T> {
     result.map_err(|e| Error::from_reason(e.to_string()))
 }
 
+/// The agent tools of `weft-binding::tools`, for the MCP server (`@weft/core/tools`).
+#[napi]
+pub struct ToolHost {
+    inner: weft_binding::tools::ToolHost,
+}
+
+#[napi]
+impl ToolHost {
+    #[napi(constructor)]
+    pub fn new(context: String, settings: String) -> Result<Self> {
+        Ok(Self {
+            inner: js(weft_binding::tools::ToolHost::from_wire(
+                &context, &settings,
+            ))?,
+        })
+    }
+
+    /// Every tool's declaration, as a JSON array.
+    #[napi]
+    pub fn decls(&self) -> String {
+        weft_core::to_compact(&self.inner.decls())
+    }
+
+    /// One call's result: an MCP `CallToolResult`, or `{"render": …}` for the wrapper to finish.
+    #[napi]
+    pub fn call(&self, name: String, args: Option<String>) -> String {
+        self.inner.call_wire(&name, args.as_deref()).to_json()
+    }
+
+    #[napi]
+    pub fn constants(&self) -> String {
+        self.inner.constants()
+    }
+}
+
 /// A catalog parsed once and reused across calls; the wrapper keeps one per catalog object.
 #[napi]
 pub struct Catalog {

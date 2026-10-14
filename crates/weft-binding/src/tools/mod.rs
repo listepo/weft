@@ -9,9 +9,15 @@ pub mod decls;
 pub mod host;
 pub mod settings;
 
-use serde_json::Value as Json;
-use weft_catalog::{CatalogError, ProjectOptions, core_catalog, load_project};
-use weft_core::{Diagnostic, Mode, has_errors};
+use indexmap::IndexMap;
+use serde::Deserialize;
+use serde_json::{Value as Json, json};
+use weft_catalog::{
+    CatalogError, CatalogSource, KindSource, ProjectOptions, core_catalog, load_project,
+};
+use weft_core::{Catalog, Diagnostic, Mode, compile_data_schema, has_errors, to_compact};
+
+use crate::boundary::BindingError;
 
 pub use host::{Context, Outcome, RenderRequest};
 pub use settings::{ContextPolicy, Limits, Settings};
@@ -23,6 +29,17 @@ pub struct ToolHost {
     settings: Settings,
     /// The core catalog's name and version, which `weft_capabilities` always lists first.
     core: (String, String),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct WireContext {
+    catalog: Catalog,
+    catalogs: Option<Vec<CatalogSource>>,
+    kinds: Option<IndexMap<String, KindSource>>,
+    tokens: Option<Vec<(String, String)>>,
+    actions: Option<Vec<String>>,
+    data: Option<Json>,
 }
 
 /// Why a host could not start.
@@ -38,7 +55,7 @@ pub enum ToolHostError {
 }
 
 impl ToolHost {
-    pub fn new(context: Context, settings: Settings) -> Result<ToolHost, ToolHostError> {
+    pub fn new(context: Context, settings: Settings) -> Result<ToolHost, CatalogError> {
         let core = core_catalog()?;
         Ok(ToolHost {
             context,
@@ -48,7 +65,7 @@ impl ToolHost {
     }
 
     /// A host with the core catalog only.
-    pub fn core(settings: Settings) -> Result<ToolHost, ToolHostError> {
+    pub fn core(settings: Settings) -> Result<ToolHost, CatalogError> {
         ToolHost::new(Context::of_catalog(core_catalog()?), settings)
     }
 
@@ -74,6 +91,38 @@ impl ToolHost {
         Ok((host, loaded.diagnostics))
     }
 
+    /// A host from a JavaScript server's context and settings, as JSON text: the context is
+    /// `{catalog, catalogs?, kinds?, tokens?: [[path, type], …], actions?, data?: JSON Schema}`
+    /// (entries for the tokens, so the order of the `Map` survives), the settings the `weft.json`
+    /// tool sections.
+    pub fn from_wire(context: &str, settings: &str) -> crate::Result<ToolHost> {
+        let wire = |what| move |source| BindingError::Wire { what, source };
+        let c: WireContext = serde_json::from_str(context).map_err(wire("tool host context"))?;
+        let settings: Json = serde_json::from_str(settings).map_err(wire("tool settings"))?;
+        let settings = Settings::from_json(&settings).map_err(wire("tool settings"))?;
+        let context = Context {
+            catalog: c.catalog,
+            catalogs: c.catalogs,
+            kinds: c.kinds,
+            tokens: c.tokens.map(|t| t.into_iter().collect()),
+            actions: c.actions,
+            data: c.data.as_ref().map(|d| compile_data_schema(d).0),
+        };
+        ToolHost::new(context, settings)
+            .map_err(|CatalogError::Embedded(e)| BindingError::Catalog(e))
+    }
+
+    /// What the TypeScript server exports beside the tools: `{limits, listed, contextNotice,
+    /// primer}`, so it keeps no copy of them.
+    pub fn constants(&self) -> String {
+        to_compact(&json!({
+            "limits": self.settings.limits,
+            "listed": decls::LISTED,
+            "contextNotice": decls::CONTEXT_NOTICE,
+            "primer": decls::primer(&self.settings),
+        }))
+    }
+
     pub fn settings(&self) -> &Settings {
         &self.settings
     }
@@ -87,6 +136,15 @@ impl ToolHost {
     /// the model can read and fix.
     pub fn call(&self, name: &str, args: &str) -> Outcome {
         call::call(self, name, args)
+    }
+
+    /// `call` for a JavaScript host, whose `JSON.stringify` gives nothing (`None`) for arguments
+    /// that nest deeper than its stack, as the rest of the boundary treats such input.
+    pub fn call_wire(&self, name: &str, args: Option<&str>) -> Outcome {
+        match args {
+            Some(args) => self.call(name, args),
+            None => Outcome::failure(args::too_deep()),
+        }
     }
 }
 

@@ -3,14 +3,14 @@
 //! `mcp.context` sections of `weft.json` (SPEC §10.6), read in that shape so that no host grows
 //! an option of its own; a tool argument never sets them, so a model cannot lift its own bounds.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value as Json;
 use weft_core::Mode;
 
 /// Default bounds; tool arguments are untrusted input, and the numbers are generous for real
 /// screens (the largest corpus screen is under 3,000 characters). Lengths count UTF-16 code
 /// units, as the TypeScript server's argument checks did.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Limits {
     /// One markup argument.

@@ -62,7 +62,11 @@ fn project(settings: &Settings) -> Json {
 }
 
 fn object(properties: Json, required: &[&str]) -> Json {
-    json!({ "type": "object", "properties": properties, "required": required })
+    let mut schema = json!({ "type": "object", "properties": properties });
+    if !required.is_empty() {
+        schema["required"] = json!(required);
+    }
+    schema
 }
 
 /// One tool's declaration: `{name, title, description, inputSchema, annotations}`.

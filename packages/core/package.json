@@ -9,7 +9,8 @@
     "./wasm": "./src/wasm.ts",
     "./web": "./src/web.ts",
     "./cem": "./src/cem.ts",
-    "./document-schema": "./src/document-schema.ts"
+    "./document-schema": "./src/document-schema.ts",
+    "./tools": "./src/tools.ts"
   },
   "dependencies": {
     "zod": "4.6.5"

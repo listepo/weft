@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { test } from "vitest";
 import { readProject } from "@weft/catalog/node";
 import { hostOptions } from "../src/project.ts";
-import { LISTED } from "../src/tools/capabilities.ts";
+import { LISTED } from "../src/index.ts";
 import { call, connect } from "./connect.ts";
 
 const dir = new URL("../../../examples/project/", import.meta.url);

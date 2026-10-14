@@ -331,3 +331,33 @@ fn bad_calls_are_failures_not_panics() {
         super::decls::primer(&Settings::default())
     );
 }
+
+#[test]
+fn a_javascript_host_hands_over_its_context_and_settings_as_json() {
+    let context = format!(
+        r#"{{"catalog":{},"tokens":[["color.b","color"],["color.a","color"]],"actions":["a.b"],"data":{{"type":"object"}}}}"#,
+        weft_catalog::CORE_CATALOG_JSON
+    );
+    let host = ToolHost::from_wire(&context, r#"{"mcp":{"limits":{"patches":7}}}"#).unwrap();
+    let caps = first(&host, "weft_capabilities", json!({}));
+    assert_eq!(caps["tokens"]["names"], json!(["color.a", "color.b"]));
+    assert_eq!(
+        (caps["actions"]["count"].clone(), caps["data"].clone()),
+        (json!(1), json!(true))
+    );
+    let constants: Json = serde_json::from_str(&host.constants()).unwrap();
+    assert_eq!(constants["limits"]["patches"], 7);
+    assert_eq!(constants["listed"], 200);
+    assert!(
+        constants["primer"]
+            .as_str()
+            .unwrap()
+            .ends_with("at most 7 patches per call.")
+    );
+    assert!(ToolHost::from_wire("{}", "{}").is_err());
+    assert!(matches!(
+        host.call_wire("weft_primer", None),
+        Outcome::Content { is_error: true, .. }
+    ));
+    assert!(ToolHost::from_wire(&context, r#"{"mcp":{"context":"nope"}}"#).is_err());
+}
