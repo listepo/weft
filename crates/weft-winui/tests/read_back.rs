@@ -10,7 +10,9 @@ use common::{controls, covered, document, options, screen, setup};
 use indexmap::IndexMap;
 use weft_catalog::Token;
 use weft_core::Catalog;
-use weft_winui::{ImportError, ImportOptions, MAX_SOURCE_LENGTH, generate, import_winui};
+use weft_winui::{
+    ImportError, ImportOptions, MAX_SOURCE_LENGTH, MAX_XML_DEPTH, generate, import_winui,
+};
 
 fn import<'a>(catalog: &'a Catalog, tokens: &'a IndexMap<String, Token>) -> ImportOptions<'a> {
     ImportOptions { catalog, tokens }
@@ -122,4 +124,28 @@ fn an_edited_or_foreign_page_is_rejected() {
         import_winui(&long, &options),
         Err(ImportError::TooLong)
     ));
+}
+
+#[test]
+fn deep_nesting_is_an_error_not_a_crash() {
+    let (catalog, tokens) = setup();
+    let options = import(&catalog, &tokens);
+    let (_, _, generated) = covered()
+        .into_iter()
+        .find(|(n, ..)| n == "controls")
+        .unwrap();
+    let nested = |depth: usize| {
+        let grids = format!("{}{}", "<Grid>".repeat(depth), "</Grid>".repeat(depth));
+        assert!(generated.xaml.contains("<ScrollViewer>"));
+        let xaml = generated
+            .xaml
+            .replacen("<ScrollViewer>", &format!("<ScrollViewer>{grids}"), 1);
+        import_winui(&xaml, &options)
+    };
+    // Within the bound the page parses, deeper than a test thread's stack allows, and is compared.
+    assert!(matches!(
+        nested(MAX_XML_DEPTH - 8),
+        Err(ImportError::Edited)
+    ));
+    assert!(matches!(nested(MAX_XML_DEPTH), Err(ImportError::Xml(_))));
 }

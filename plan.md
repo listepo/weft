@@ -20,7 +20,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.7 | todo | P2 | 3 | 0% | |
 | T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
-| T105.12 | in progress | P2 | 2 | 0% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -333,9 +332,3 @@ A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `a
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
 SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.
-
-### T105.12. WinUI read-back: nesting bound
-
-`import_winui` parses untrusted XAML with `roxmltree`, which recurses once per nested element, so a deeply nested source overflows the stack and aborts the process instead of returning an `ImportError`. Bound it as `read_winui` does: the `nested_past` pre-scan with `MAX_XML_DEPTH`, and the parse on `weft_import::on_reader_stack`. Done when a source nested past the bound is rejected with an error, not a crash.
-
-**Execution plan.** (1) Move `nested_past` and `MAX_XML_DEPTH` from `crates/weft-winui/src/read/mod.rs` into `src/import.rs`, next to `MAX_XML_NODES`, so both readers share them; the public `MAX_XML_DEPTH` stays exported. (2) `import_winui` rejects a source nested past the bound as `ImportError::Xml` and runs the rest on `on_reader_stack`. (3) A test in `tests/read_back.rs` that fails with a stack overflow before the fix. (4) SPEC §9 "From WinUI": the nesting bound holds for `import_winui` too. Verify with `moon run root:changed -- --base origin/main`.
