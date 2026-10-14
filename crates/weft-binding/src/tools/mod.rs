@@ -105,6 +105,7 @@ impl ToolHost {
             catalogs: c.catalogs,
             kinds: c.kinds,
             tokens: c.tokens.map(|t| t.into_iter().collect()),
+            token_values: None,
             actions: c.actions,
             data: c.data.as_ref().map(|d| compile_data_schema(d).0),
         };

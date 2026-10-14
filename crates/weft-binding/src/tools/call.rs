@@ -399,6 +399,7 @@ fn render(host: &ToolHost, args: &Args) -> Run {
                 document,
                 catalog: c.catalog.clone(),
                 data: data.cloned(),
+                tokens: c.token_values.clone(),
             })))
         }
         _ => Err(diagnostics_text(

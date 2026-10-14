@@ -246,6 +246,18 @@ fn render_checks_strictly_then_gives_the_tree_and_for_html_the_document() {
             assert_eq!(r.document.root.kind, "screen");
             assert_eq!(r.tree, "- main \"Demo\":\n  - button \"Go\"");
             assert_eq!(r.data, Some(json!({"a": 1})));
+            assert_eq!(r.tokens, None);
+        }
+        other => panic!("{other:?}"),
+    }
+    // A host drawing the page itself gets the values the markup's token references were checked
+    // against.
+    let tokens = json!([{"brand": {"$type": "color", "$value": "#123456"}}]);
+    let args = json!({"markup": GOOD, "html": true, "project": {"tokens": tokens}});
+    match host().call("weft_render", &args.to_string()) {
+        Outcome::Render(r) => {
+            let names: Vec<&String> = r.tokens.as_ref().map(|t| t.keys().collect()).unwrap();
+            assert_eq!(names, ["brand"]);
         }
         other => panic!("{other:?}"),
     }

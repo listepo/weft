@@ -15,7 +15,7 @@ memory_mib = 64
 call_ms = 10000
 
 # Only tools: no files, network, store, model or UI. The project comes from the [plugins.weft]
-# table of cox's config, inline. weft_render follows with T106.4.
+# table of cox's config, inline.
 [capabilities]
 tools = [
   "weft_primer",
@@ -25,5 +25,6 @@ tools = [
   "weft_validate",
   "weft_format",
   "weft_patch",
+  "weft_render",
   "weft_context",
 ]

@@ -4,7 +4,9 @@
 
 use indexmap::IndexMap;
 use serde_json::{Value as Json, json};
-use weft_catalog::{CatalogSource, KindSource, Project, ProjectOptions, load_project, token_types};
+use weft_catalog::{
+    CatalogSource, KindSource, Project, ProjectOptions, Token, load_project, token_types,
+};
 use weft_core::{
     Catalog, DataCheckOptions, DataSchema, Diagnostic, Document, Mode, ParseOptions, check_data,
     has_errors, parse, to_compact,
@@ -23,6 +25,9 @@ pub struct Context {
     pub kinds: Option<IndexMap<String, KindSource>>,
     /// Token path → DTCG `$type`. Token references are checked only when given (SPEC §6).
     pub tokens: Option<IndexMap<String, String>>,
+    /// The resolved tokens behind `tokens`, when a project declared them: a host that draws the
+    /// page itself needs the values the markup was checked against, not only their types.
+    pub token_values: Option<IndexMap<String, Token>>,
     /// Known host actions. Action names are checked only when given.
     pub actions: Option<Vec<String>>,
     /// The data model's schema. Bindings are checked against it only when given (SPEC §10.5).
@@ -36,6 +41,7 @@ impl Context {
             catalogs: None,
             kinds: None,
             tokens: None,
+            token_values: None,
             actions: None,
             data: None,
         }
@@ -45,6 +51,7 @@ impl Context {
     pub fn of_project(project: Project) -> Context {
         Context {
             tokens: project.tokens.as_ref().map(token_types),
+            token_values: project.tokens,
             catalog: project.catalog,
             catalogs: Some(project.catalogs),
             kinds: Some(project.kinds),
@@ -172,6 +179,8 @@ pub struct RenderRequest {
     pub catalog: Catalog,
     /// The sample data model the bindings read, when the call gave one.
     pub data: Option<Json>,
+    /// The scope's resolved tokens (`Context::token_values`); `None` without project tokens.
+    pub tokens: Option<IndexMap<String, Token>>,
 }
 
 impl Outcome {

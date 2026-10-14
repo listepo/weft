@@ -113,6 +113,10 @@ fn the_module_answers_as_the_native_build() {
             json!({ "markup": "<screen weft=\"0.1\" id=\"s\" label=\"S\"/>" }),
         ),
         ("weft_validate", json!({})),
+        (
+            "weft_render",
+            json!({ "markup": "<screen weft=\"0.1\" id=\"s\" label=\"S\"><button id=\"b\" on-press=\"a.b\">Go</button></screen>", "html": true }),
+        ),
     ] {
         let call = cox_plugin_sdk::ToolCallIn {
             name: name.into(),

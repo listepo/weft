@@ -7,17 +7,19 @@
 
 use cox_plugin_sdk::{InitOut, ToolCallIn, Value};
 use serde_json::json;
-use weft_binding::tools::{Outcome, ToolHost, ToolHostError};
+use weft_binding::tools::{Outcome, RenderRequest, ToolHost, ToolHostError};
+use weft_catalog::{DEFAULT_TOKENS_JSON, load_tokens};
+use weft_web::{HtmlOptions, to_html_with_data};
 
-/// `weft_render` waits for the accessibility snapshot in Rust (T106.4): its page and tree come
-/// from `@weft/render-react` in the MCP server.
-const NOT_YET: &[&str] = &["weft_render"];
+/// Appended to `weft_render`'s description: the page here is not the MCP server's, and an agent
+/// comparing them should know why they differ.
+const RENDER_PAGE: &str = "In this host the html page comes from Weft's static HTML generator, not the React reference renderer, so it can differ from the page other hosts return.";
 
-/// The tools this plugin serves, in listing order. `plugin.toml` grants the same names.
+/// The tools this plugin serves, in listing order: all of the MCP server's. `plugin.toml` grants
+/// the same names.
 pub fn tool_names() -> Vec<String> {
     weft_binding::tools::decls::NAMES
         .iter()
-        .filter(|name| !NOT_YET.contains(name))
         .map(|name| (*name).to_owned())
         .collect()
 }
@@ -51,15 +53,18 @@ impl Weft {
     /// one plugin one at a time, so each is `read_only` and `exclusive`; cox defers plugin tools
     /// behind `tool_search`.
     pub fn specs(&self) -> Vec<Value> {
-        let names = tool_names();
         self.host
             .decls()
             .into_iter()
-            .filter(|decl| names.iter().any(|name| decl["name"] == name.as_str()))
             .map(|decl| {
+                let mut description = decl["description"].as_str().unwrap_or_default().to_owned();
+                if decl["name"] == "weft_render" {
+                    description.push(' ');
+                    description.push_str(RENDER_PAGE);
+                }
                 json!({
                     "name": decl["name"],
-                    "description": decl["description"],
+                    "description": description,
                     "input_schema": decl["inputSchema"],
                     "deferred": true,
                     "risk": "read_only",
@@ -88,8 +93,42 @@ impl Weft {
         let args = call.input.to_string();
         match self.host.call(&call.name, &args) {
             Outcome::Content { blocks, is_error } => output(&blocks.join("\n\n"), is_error),
-            // Unreachable while `weft_render` is held back; kept total for when it is served.
-            Outcome::Render(_) => output("weft_render is not available in cox yet.", true),
+            Outcome::Render(request) => page(&request),
+        }
+    }
+}
+
+/// `weft_render` with `html`: the tree, then the static page, as the MCP server's two blocks. The
+/// page is checked against the tokens it is drawn with, so markup that names a token those do not
+/// define gets the tree and the page's diagnostics, as an error.
+fn page(request: &RenderRequest) -> Value {
+    // Without project tokens the markup's references went unchecked; the page uses the defaults,
+    // as `toHtml` does.
+    let defaults;
+    let tokens = match &request.tokens {
+        Some(tokens) => tokens,
+        None => {
+            defaults = serde_json::from_str(DEFAULT_TOKENS_JSON)
+                .map(|json| load_tokens(&json).tokens)
+                .unwrap_or_default();
+            &defaults
+        }
+    };
+    let options = HtmlOptions {
+        catalog: &request.catalog,
+        tokens,
+        source: false,
+        appearance: None,
+    };
+    match to_html_with_data(&request.document, &options, request.data.as_ref()) {
+        Ok(html) => output(&format!("{}\n\n{html}", request.tree), false),
+        Err(invalid) => {
+            let diagnostics = json!({ "diagnostics": invalid.0 }).to_string();
+            let text = format!(
+                "{}\n\nThe page could not be drawn: {diagnostics}",
+                request.tree
+            );
+            output(&text, true)
         }
     }
 }
@@ -152,12 +191,18 @@ mod tests {
     }
 
     #[test]
-    fn every_mcp_tool_but_render_is_a_read_only_spec() {
+    fn every_mcp_tool_is_a_read_only_spec() {
         let specs = weft(json!({})).specs();
         let names: Vec<&str> = specs.iter().filter_map(|s| s["name"].as_str()).collect();
         assert_eq!(names, tool_names());
-        assert_eq!(names.len(), weft_binding::tools::decls::NAMES.len() - 1);
-        assert!(!names.contains(&"weft_render"));
+        assert_eq!(names, weft_binding::tools::decls::NAMES);
+        let render = &specs[names.iter().position(|n| *n == "weft_render").unwrap()];
+        assert!(
+            render["description"]
+                .as_str()
+                .unwrap()
+                .ends_with(RENDER_PAGE)
+        );
         for spec in &specs {
             assert_eq!(spec["risk"], "read_only");
             assert_eq!(spec["concurrency"], "exclusive");
@@ -198,7 +243,7 @@ mod tests {
                 .unwrap()
                 .contains("markup is required")
         );
-        for name in ["weft_render", "read"] {
+        for name in ["render", "read"] {
             let unknown = call(&weft, name, json!({}));
             assert_eq!(unknown["is_error"], true);
             assert_eq!(unknown["text"], format!("Unknown tool: {name}."));
@@ -225,6 +270,51 @@ mod tests {
         );
         let schema = &weft.specs()[0]["input_schema"];
         assert_eq!(schema["type"], "object");
+    }
+
+    const SCREEN: &str = "<screen weft=\"0.1\" id=\"s\" label=\"Demo\"><stack id=\"k\" gap=\"{token.brand.gap}\"><button id=\"go\" on-press=\"demo.go\" text=\"{$.cta}\"/></stack></screen>";
+    const TREE: &str = "- main \"Demo\":\n  - button \"Go\"";
+
+    #[test]
+    fn render_gives_the_tree_and_with_html_the_static_page() {
+        let project = json!({ "tokens": [{ "brand": { "gap": { "$type": "dimension", "$value": "8px" } } }] });
+        let weft = weft(project);
+        let data = json!({ "cta": "Go" });
+        let tree = call(
+            &weft,
+            "weft_render",
+            json!({ "markup": SCREEN, "data": data }),
+        );
+        assert_eq!(tree, output(TREE, false));
+
+        let page = call(
+            &weft,
+            "weft_render",
+            json!({ "markup": SCREEN, "data": data, "html": true }),
+        );
+        assert_eq!(page["is_error"], false, "{page}");
+        let text = page["text"].as_str().unwrap();
+        let html = text.strip_prefix(&format!("{TREE}\n\n")).unwrap();
+        assert!(html.starts_with("<!doctype html>"), "{html}");
+        assert!(html.contains(">Go</button>"), "{html}");
+        assert!(html.contains("8px"), "{html}");
+    }
+
+    #[test]
+    fn a_page_the_default_tokens_cannot_draw_is_the_tree_and_its_diagnostics() {
+        // The core host checks no token references, so the markup passes and the page refuses it.
+        let page = call(
+            &weft(json!({})),
+            "weft_render",
+            json!({ "markup": SCREEN, "data": { "cta": "Go" }, "html": true }),
+        );
+        assert_eq!(page["is_error"], true, "{page}");
+        let text = page["text"].as_str().unwrap();
+        let rest = text
+            .strip_prefix(&format!("{TREE}\n\nThe page could not be drawn: "))
+            .unwrap();
+        let report: Value = serde_json::from_str(rest).unwrap();
+        assert!(report["diagnostics"][0]["code"].is_string(), "{report}");
     }
 
     #[test]

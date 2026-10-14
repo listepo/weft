@@ -22,8 +22,13 @@ crate-type = ["cdylib", "rlib"]
 cox-plugin-sdk = { git = "https://github.com/pyrlyn/cox", rev = "8dbc1daa7d7afe7016f026c16b1ad71c32846195" }
 serde = "1.0"
 serde_json = "1.0"
-# The core only (no `web` feature): the tools need no importers or generators.
+# The core only (no `web` feature): the tools need no importers.
 weft-binding = { path = "../../crates/weft-binding" }
+# The default tokens, for a page drawn without project tokens.
+weft-catalog = { path = "../../crates/weft-catalog" }
+# `weft_render`'s page with `html`: the static generator, where the MCP server has the React
+# reference renderer, which needs JavaScript.
+weft-web = { path = "../../crates/weft-web" }
 
 [dev-dependencies]
 # Parses plugin.toml into cox's own manifest type in tests/manifest.rs.

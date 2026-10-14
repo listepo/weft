@@ -2,10 +2,9 @@
 
 A [cox](https://github.com/pyrlyn/cox) plugin that gives the cox agent the Weft agent tools: the ones the MCP server (`packages/mcp`) gives Claude Code, Cursor and Open Design. The tools come from the same Rust code (`crates/weft-binding`, module `tools`), so their descriptions, limits, checks and results are the same in every host. The plugin is a WebAssembly module (`wasm32-unknown-unknown`, an extism guest) built with cox's Rust SDK, `cox-plugin-sdk`.
 
-| Tool | In cox |
-| --- | --- |
-| `weft_primer`, `weft_capabilities`, `weft_catalog`, `weft_schema`, `weft_validate`, `weft_format`, `weft_patch`, `weft_context` | `wasm__weft__<tool>` |
-| `weft_render` | not yet: its accessibility tree and page come from `@weft/render-react` in the MCP server (plan.md T106.4) |
+All nine tools are served: `weft_primer`, `weft_capabilities`, `weft_catalog`, `weft_schema`, `weft_validate`, `weft_format`, `weft_patch`, `weft_render` and `weft_context`, named `wasm__weft__<tool>` in cox.
+
+A cox tool result is one text, so the MCP server's content blocks are joined a blank line apart. `weft_render`'s accessibility tree comes from the same Rust code in both hosts. With `html: true` the page differs: the MCP server draws it with the React reference renderer (`@weft/render-react`), and the plugin, which has no JavaScript, with the static generator (`crates/weft-web`), and its description says so. The static page uses the project's tokens, or the default tokens without them. Markup that names a token those tokens do not define gets the tree and the page's diagnostics, as an error. A token resolver's light and dark contexts are not applied to the page yet.
 
 cox finds plugin tools through `tool_search`, so the agent loads them when a task needs them. Every tool only reads its arguments (`read_only`); the plugin asks cox for no other capability: no files, network, store or model.
 
@@ -16,7 +15,7 @@ mise exec -- moon run cox-plugin:build   # writes plugins/cox/weft.wasm
 cox plugin install plugins/cox
 ```
 
-The first build fetches pyrlyn/cox for the SDK (a git dependency pinned to a commit: about 560 MB of history in `~/.cargo/git`). The module is about 1.2 MB.
+The first build fetches pyrlyn/cox for the SDK (a git dependency pinned to a commit: about 560 MB of history in `~/.cargo/git`). The module is about 1.4 MB.
 
 ## Project
 
