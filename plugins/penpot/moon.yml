@@ -18,8 +18,3 @@ tasks:
     command: 'vite preview --config serve.config.ts'
     deps: ['build']
     preset: 'server'
-  test:
-    # test/pages.test.ts reads the Pages workflow that publishes dist/; a change there must
-    # invalidate this suite even though nothing under the project folder moves.
-    inputs:
-      - '/.github/workflows/ci.yml'
