@@ -5,6 +5,10 @@
 - T69.1. Editor skeleton
 - T106. Weft plugin for cox
 - T106.4. Accessibility snapshot in Rust
+- T106.4.1. Instance tree in Rust
+- T106.4.2. Accessibility tree and snapshot in Rust
+- T106.4.3. weft_render on the Rust tree
+- T106.4.4. weft_render in the cox plugin
 - T106.5. Skills in cox
 - T106.6. Design tab: design
 - T106.7. Design tab: cox side

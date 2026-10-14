@@ -10,7 +10,11 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T106 | in progress | P2 | 5 | 35% | Claude Code / claude-opus-5-5 |
-| T106.4 | todo | P3 | 4 | 0% | |
+| T106.4 | in progress | P3 | 4 | 0% | Claude Code / claude-opus-5-5 |
+| T106.4.1 | in progress | P3 | 3 | 0% | Claude Code / claude-opus-5-5 |
+| T106.4.2 | todo | P3 | 3 | 0% | |
+| T106.4.3 | todo | P3 | 3 | 0% | |
+| T106.4.4 | todo | P3 | 2 | 0% | |
 | T106.5 | todo | P2 | 3 | 0% | |
 | T106.6 | todo | P2 | 3 | 0% | |
 | T106.7 | todo | P2 | 4 | 0% | |
@@ -293,7 +297,32 @@ What exists (checked on origin/main): the MCP server is `packages/mcp` (nine too
 
 ### T106.4. Accessibility snapshot in Rust
 
-`weft_render`'s tree (`expectedTree` and `formatAriaSnapshot` of `@weft/render-react`) moves to Rust so cox gets the tool and the TypeScript server keeps one copy; `html: true` keeps returning the reference page in the TypeScript server, and in cox returns the page of `weft-web`'s generator (a different renderer, said in the tool description). Until this is done the cox plugin leaves `weft_render` out, which is the one parity gap. Plan when claimed.
+`weft_render`'s tree (`expectedTree` and `formatAriaSnapshot` of `@weft/render-react`) moves to Rust so cox gets the tool and the TypeScript server keeps one copy; `html: true` keeps returning the reference page in the TypeScript server, and in cox returns the page of `weft-web`'s generator (a different renderer, said in the tool description). Until this is done the cox plugin leaves `weft_render` out, which is the one parity gap.
+
+Decisions: the tree lives in `weft-core` (module `aria`), beside `controls` and `sample`, which already hold the control and data readings it needs, so the core-only WebAssembly module the TypeScript tool host and the cox plugin both load has it without the web generators. `@weft/render-react`'s `expectedTree`, `normalizeAria` and `formatAriaSnapshot` become wrappers over it, so there is one copy: the React renderer's own readings (`expand.ts`) stay, and its browser and server tests now check the Rust tree against the React DOM. `parseAriaSnapshot` and `diffAria` read Playwright output in tests and stay TypeScript.
+
+Sub-tasks, in order:
+
+- T106.4.1: the instance tree in `weft-core` (`aria/inst.rs`): `each` expanded with instance ids, hidden nodes removed, the `text` prop turned into content, `filled`, slot regions and the prop readings of `expand.ts` (label, clamped numbers, field, select, tab, radio, date, colour and number controls over `controls`). Unit tests per reading.
+- T106.4.2: the tree (`aria/tree.rs`): roles, names and states per kind as `aria.ts` builds them, table and tab structure, normalization and the Playwright-style YAML. Tests port `aria.test.ts`'s cases.
+- T106.4.3: wiring: a binding function (`ariaTree`, WebAssembly and native), `weft_render` returning the snapshot from Rust (the TypeScript server adds only the reference page for `html: true`), the `@weft/render-react` wrappers and the removal of the TypeScript tree. Verified by the existing render-react, from-aria and mcp tests, and a check that the corpus snapshots are unchanged.
+- T106.4.4: the cox plugin serves `weft_render`; `html: true` returns `weft-web`'s static page, which the description says. Unit, manifest and e2e tests, and the module size.
+
+### T106.4.1. Instance tree in Rust
+
+Part of T106.4 (plan in its card).
+
+### T106.4.2. Accessibility tree and snapshot in Rust
+
+Part of T106.4 (plan in its card).
+
+### T106.4.3. weft_render on the Rust tree
+
+Part of T106.4 (plan in its card).
+
+### T106.4.4. weft_render in the cox plugin
+
+Part of T106.4 (plan in its card).
 
 ### T106.5. Skills in cox
 
