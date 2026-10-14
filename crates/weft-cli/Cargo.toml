@@ -23,6 +23,7 @@ weft-interop = { workspace = true }
 weft-slint = { workspace = true }
 weft-swiftui = { workspace = true }
 weft-web = { workspace = true }
+weft-winui = { workspace = true }
 
 [lints]
 workspace = true

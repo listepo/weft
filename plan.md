@@ -16,7 +16,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.3 | todo | P2 | 4 | 0% | |
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
-| T105.6 | todo | P2 | 2 | 0% | |
 | T105.7 | todo | P2 | 3 | 0% | |
 | T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
@@ -315,11 +314,7 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 ### T105.5. WinUI layout vocabulary, tokens and materials
 
-`justify` and `grow` through `Grid` tracks, `align`, `padding`, `max-width`, `min-column-width` (`ColumnsPanel`, `ColumnsLayout`), `WeftTokens.xaml` and per-page tokens, `ThemeDictionaries` for light, dark and high contrast, material as `AcrylicBrush`, the 3D tilt. Checks the unverified resource-key and perspective facts in the Windows build. About 460 lines of code. Done when the `layout`, `glass`, `tilt` and `appearance` corpus screens generate, build and read back.
-
-### T105.6. WinUI CLI and project settings
-
-`weft winui`, `weft winui-tokens`, `weft import-winui` (`--name`, `--namespace`, `--out-dir`, `--force`, `--context`); `weft.json` keys `export.winui.outDir`, `export.winui.namespace`, `export.winui.sharedTokens`, `export.winui.context`, `import.winui.outDir`, `import.winui.context`, with SPEC §10.6 rows, `settings.rs` and the regenerated `schemas/weft.schema.json` in the same change. About 250 lines of code. Done when each option has a CLI test and precedence (argument > `weft.json` > default) is tested.
+`justify` and `grow` through `Grid` tracks, `align`, `padding`, `max-width`, `min-column-width` (`ColumnsPanel`, `ColumnsLayout`), `WeftTokens.xaml` (beyond the dimensions T105.6 writes) and per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (moved from T105.6: a key ships with its behaviour), `ThemeDictionaries` for light, dark and high contrast, material as `AcrylicBrush`, the 3D tilt. Checks the unverified resource-key and perspective facts in the Windows build. About 460 lines of code. Done when the `layout`, `glass`, `tilt` and `appearance` corpus screens generate, build and read back.
 
 ### T105.7. Windows CI build of the generated pages
 

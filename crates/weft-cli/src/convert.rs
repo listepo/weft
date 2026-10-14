@@ -209,26 +209,48 @@ pub fn emit(
     force: bool,
     out: &mut dyn Write,
 ) -> Result<()> {
-    let Some(dir) = dir else {
-        out.write_all(text.as_bytes())?;
-        return Ok(());
-    };
     let stem = file
         .file_stem()
         .with_context(|| format!("{} has no file name", file.display()))?;
-    std::fs::create_dir_all(&dir).with_context(|| format!("cannot create {}", dir.display()))?;
     // Not `with_extension`: it would cut a stem with a dot in it (`login.v2`).
     let mut name = stem.to_os_string();
     name.push(".");
     name.push(extension);
-    let target = dir.join(name);
-    if target.exists() && !force {
+    emit_files(&[(name, text)], dir, force, out)
+}
+
+/// [`emit`] for a generator that names its own files. Printed, several files are each headed by
+/// `==> <name> <==`, as `head` does; written, every target is checked before any is written, so a
+/// refusal leaves no half-updated set.
+pub fn emit_files(
+    files: &[(impl AsRef<Path>, &str)],
+    dir: Option<PathBuf>,
+    force: bool,
+    out: &mut dyn Write,
+) -> Result<()> {
+    let Some(dir) = dir else {
+        for (i, (name, text)) in files.iter().enumerate() {
+            if files.len() > 1 {
+                let gap = if i == 0 { "" } else { "\n" };
+                writeln!(out, "{gap}==> {} <==", name.as_ref().display())?;
+            }
+            out.write_all(text.as_bytes())?;
+        }
+        return Ok(());
+    };
+    let targets: Vec<_> = files.iter().map(|(name, _)| dir.join(name)).collect();
+    if !force && let Some(target) = targets.iter().find(|t| t.exists()) {
         anyhow::bail!(
             "{} already exists; pass --force to overwrite it",
             target.display()
         );
     }
-    std::fs::write(&target, text).with_context(|| format!("cannot write {}", target.display()))
+    std::fs::create_dir_all(&dir).with_context(|| format!("cannot create {}", dir.display()))?;
+    for (target, (_, text)) in targets.iter().zip(files) {
+        std::fs::write(target, text)
+            .with_context(|| format!("cannot write {}", target.display()))?;
+    }
+    Ok(())
 }
 
 /// The screen to generate from, checked strictly against `catalog`: generators write code only
@@ -285,4 +307,42 @@ pub fn finish_import(
     } else {
         0
     })
+}
+
+#[cfg(test)]
+mod tests {
+    // A failed unwrap is a failed test, which is the point.
+    #![allow(clippy::unwrap_used)]
+
+    use super::*;
+
+    #[test]
+    fn several_printed_files_are_headed_as_head_does() {
+        let mut out = vec![];
+        emit_files(&[("A.xaml", "a\n")], None, false, &mut out).unwrap();
+        assert_eq!(String::from_utf8(out).unwrap(), "a\n");
+        let mut out = vec![];
+        let files = [("A.xaml", "a\n"), ("A.cs", "b\n")];
+        emit_files(&files, None, false, &mut out).unwrap();
+        assert_eq!(
+            String::from_utf8(out).unwrap(),
+            "==> A.xaml <==\na\n\n==> A.cs <==\nb\n"
+        );
+    }
+
+    #[test]
+    fn one_existing_file_keeps_the_whole_set_from_being_written() {
+        let dir = std::env::temp_dir().join(format!("weft-emit-files-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("A.cs"), "kept").unwrap();
+        let files = [("A.xaml", "a"), ("A.cs", "b")];
+        let refused = emit_files(&files, Some(dir.clone()), false, &mut vec![]);
+        assert!(refused.unwrap_err().to_string().contains("--force"));
+        assert!(!dir.join("A.xaml").exists());
+        emit_files(&files, Some(dir.clone()), true, &mut vec![]).unwrap();
+        assert_eq!(std::fs::read_to_string(dir.join("A.cs")).unwrap(), "b");
+        assert_eq!(std::fs::read_to_string(dir.join("A.xaml")).unwrap(), "a");
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
 }
