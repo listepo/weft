@@ -18,7 +18,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.6 | todo | P2 | 2 | 0% | |
 | T105.7 | todo | P2 | 3 | 0% | |
-| T105.8 | todo | P2 | 4 | 0% | |
+| T105.8 | in progress | P2 | 4 | 5% | Claude Code / claude-opus-5-5 |
 | T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
 
@@ -329,6 +329,14 @@ A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `a
 ### T105.8. Hand-written WinUI importer: structure
 
 `read_winui` behind the `import` feature, on `roxmltree` 0.21 (already in `Cargo.lock`; its `rust.md` row needs the creator's permission): kinds, ids, props, markers, slots and structure, with losses and diagnostics, input bounds `W601`/`W602`, DTDs refused. About 480 lines of code. Done when generated XAML without its comment reads back with only listed losses, and hand-written samples report each loss with its path.
+
+**Execution plan.**
+
+1. SPEC §9 "From WinUI" first: the hand-written reader's structure rules (controls → kinds, `AutomationId` → id, markers, `weft:Slot.Name`, the screen panel, the wrappers it dissolves, `W601`/`W602`) and its losses.
+2. Reuse, not copy: move the lenient-mode repair of `crates/weft-swiftui/src/import/repair.rs` (content, placement, required labels and props) and its `element_path` into `weft-import`, and call it from both readers.
+3. `crates/weft-winui/src/read/` behind a new `import` feature: `mod.rs` (bounds on length and XML nodes, DTD refused, the `Page` and its screen panel, depth bound, ids, repair) and `controls.rs` (element → kind, literal props, markers, slots; every other attribute, binding, token, event and layout value a loss with its XAML path, until T105.9 reads them).
+4. Tests in `crates/weft-winui/tests/read.rs` (`required-features = ["import"]`): each golden without its comment reads back with exactly the listed losses; hand-written samples give each loss and diagnostic with its path; length, node and depth bounds; a DTD is `W601`; the result validates in lenient mode.
+5. `roxmltree` row in `toolchain.md` (and in the workspace `rust.md`, left uncommitted there for the creator).
 
 ### T105.9. Hand-written WinUI importer: bindings, events, tokens and layout
 
