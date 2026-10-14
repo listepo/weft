@@ -11,13 +11,13 @@ use crate::json::js_number;
 pub fn numeric(number: Option<f64>, text: Option<&str>) -> Option<f64> {
     match (number, text) {
         (Some(n), _) => n.is_finite().then_some(n),
-        (None, Some(t)) => float(t.trim()).then(|| t.trim().parse().ok()).flatten(),
+        (None, Some(t)) => is_float(t.trim()).then(|| t.trim().parse().ok()).flatten(),
         (None, None) => None,
     }
 }
 
 /// `^-?(\d+(\.\d+)?|\.\d+)([eE][-+]?\d+)?$`, the text a number input accepts.
-fn float(s: &str) -> bool {
+pub fn is_float(s: &str) -> bool {
     let s = s.strip_prefix('-').unwrap_or(s);
     let (mantissa, exponent) = match s.find(['e', 'E']) {
         Some(at) => (&s[..at], Some(&s[at + 1..])),

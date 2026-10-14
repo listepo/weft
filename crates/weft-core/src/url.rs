@@ -1,7 +1,7 @@
 //! SPEC §9 Trust: URLs in `link.href` and `image.src` are used only when they are `http`,
 //! `https`, `mailto` or relative; anything else is dropped. Tabs, newlines and surrounding
-//! control characters are removed first, as a URL parser would. Generators share this so an
-//! exporter cannot skip the allowlist.
+//! control characters are removed first, as a URL parser would. Importers, generators and the
+//! accessibility tree (`aria`) share this, so none of them can skip the allowlist.
 
 /// A URL a renderer may use: `http`, `https`, `mailto`, or a relative reference with no scheme.
 pub fn safe_url(value: &str) -> Option<String> {

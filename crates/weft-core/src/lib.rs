@@ -9,6 +9,7 @@ mod context_patch;
 pub mod controls;
 mod data;
 mod diagnostics;
+mod ecma;
 mod expand;
 mod explain;
 pub mod fragment;
@@ -23,6 +24,7 @@ mod serialize;
 mod shape;
 mod source;
 mod syntax;
+mod url;
 mod validate;
 mod values;
 
@@ -35,6 +37,7 @@ pub use data::{
 pub use diagnostics::{
     Code, Diagnostic, Mode, Position, Severity, did_you_mean, has_errors, one_of,
 };
+pub use ecma::{is_js_space, js_number_from, js_trim, squash};
 pub use expand::{EXPANDED_LIMIT, Expanded, expand};
 pub use explain::{Change, ChangeKind, Readback, explain, explain_changes, explain_with_context};
 pub use json::{
@@ -59,5 +62,6 @@ pub use sample::{resolve_path, text, truthy};
 pub use serialize::serialize;
 pub use shape::{to_document, to_value};
 pub use source::{ListSource, NodeSource};
+pub use url::{safe_absolute_url, safe_url};
 pub use validate::{ValidateOptions, validate, validate_document};
 pub use values::{BadValue, format_value, read_value};
