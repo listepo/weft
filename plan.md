@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T106 | in progress | P2 | 5 | 0% | Claude Code / claude-opus-5-5 |
-| T106.3 | todo | P2 | 3 | 0% | |
+| T106.3 | in progress | P2 | 3 | 0% | Claude Code / claude-opus-5-5 |
 | T106.4 | todo | P3 | 4 | 0% | |
 | T106.5 | todo | P2 | 3 | 0% | |
 | T106.6 | todo | P2 | 3 | 0% | |
@@ -295,6 +295,15 @@ What exists (checked on origin/main): the MCP server is `packages/mcp` (nine too
 ### T106.3. The cox plugin
 
 `plugins/cox`: a Rust `cdylib` for `wasm32-unknown-unknown` on `cox-plugin-sdk` (a git dependency on pyrlyn/cox pinned to a commit: the SDK is not on crates.io) and `weft-binding`, with `plugin.toml` (`id = "weft"`, `[capabilities] tools` = the tool names). `init` returns one `ToolSpec` per declared tool (`read_only` risk; cox defers plugin tools behind `tool_search`), `tool_call` runs `ToolHost::call` and joins the content blocks into `ToolOutput.text`. The host context comes from `InitIn.config`, the user's `[plugins.weft]` table, read as a `weft.json` with inline contents (catalog, tokens, actions, data, `validate.mode`, `mcp.limits`, `mcp.context`), so the plugin has no option of its own and needs no file access. Plan when claimed: build and packaging of the `.wasm`, how a user installs it (`cox plugin install`), the tests (native dispatch, a `wasm32` build check, the manifest checked against cox's `plugin.schema.json` without reading outside the repository, and an extism end-to-end test if the host fits), the moon project and its `inputs`, `toolchain.md` and `rust.md` rows.
+
+**Execution plan.**
+1. `plugins/cox` is a Cargo workspace of its own (one package, `weft-cox`, `cdylib` + `rlib`), like cox's own guest workspace: the root workspace's `cargo nextest run --workspace` and clippy never fetch pyrlyn/cox or build guest code. Dependencies: `cox-plugin-sdk` (git, pinned to cox `8dbc1daa`; `extism-pdk` comes with it, default features off), `weft-binding` by path, `serde_json`. Its `Cargo.lock` starts as a copy of the root one so shared crates keep their versions.
+2. `src/lib.rs`, pure and tested on the host: `Weft::from_config(&Value)` reads `InitIn.config` (the `[plugins.weft]` table, a `weft.json` with inline contents) through `ToolHost::from_project`; `specs()` turns the Rust declarations into `ToolSpec`s (`read_only`, `exclusive` as cox runs plugin tools one at a time, `deferred`), leaving out `weft_render` until T106.4; `call(ToolCallIn)` runs `ToolHost::call` and joins the text blocks into a `ToolOutput`. The `wasm32` exports keep the host in a `Mutex<Option<…>>` set by `init`; project warnings go to `notify`.
+3. `plugin.toml`: `id = "weft"`, `wasm = "weft.wasm"`, `[limits] memory_mib = 64, call_ms = 10000`, `[capabilities] tools` = the eight names. No other capability: no files, network, kv or model.
+4. moon project `cox` (`plugins/cox/moon.yml`): `build` (`cargo build --release --target wasm32-unknown-unknown`, copies the module to the gitignored `plugins/cox/weft.wasm`; the user then runs `cox plugin install plugins/cox`) and `test` (clippy, fmt check and `cargo test`, after `build`). Inputs are the plugin folder plus the crates `weft-binding` is built from; `tooling/test/inputs.test.ts` checks them against `cargo metadata`.
+5. Tests: native dispatch and config in `src/lib.rs`; `tests/manifest.rs` parses `plugin.toml` into cox's own `PluginManifest` (the type `docs/plugin.schema.json` is generated from, unknown keys denied) and runs its `validate`, so nothing is read outside the repository and nothing is vendored; `tests/e2e.rs` loads `weft.wasm` with `wasm-plugin-host` (crates.io, the extism engine cox's host is built on) and calls `cox_init` and one `cox_tool_call`.
+6. `plugins/cox/README.md` (build, install, config), `toolchain.md` rows; `rust.md` rows are proposed to the creator (a workspace file).
+7. Verify: `cargo test` and `cargo clippy` in `plugins/cox`, `moon run cox:test tooling:test`, `moon run root:changed -- --base origin/main`; report the `.wasm` size.
 
 ### T106.4. Accessibility snapshot in Rust
 
