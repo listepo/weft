@@ -6,7 +6,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 75% | Claude Code / claude-opus-5-5 |
-| T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
+| T68 | in progress | P2 | 5 | 40% | Claude Code / claude-opus-5-5 |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
