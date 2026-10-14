@@ -9,8 +9,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
-| T106 | in progress | P2 | 5 | 60% | Claude Code / claude-opus-5-5 |
-| T106.6 | todo | P2 | 3 | 0% | |
+| T106 | in progress | P2 | 5 | 65% | Claude Code / claude-opus-5-5 |
 | T106.7 | todo | P2 | 4 | 0% | |
 | T106.8 | todo | P2 | 3 | 0% | |
 | T105 | in progress | P2 | 5 | 15% | Claude Code / claude-opus-5-5 |
@@ -289,17 +288,16 @@ Done when T106.1–T106.8 are done. Sub-tasks, in order (each within the task si
 
 What exists (checked on origin/main): the MCP server is `packages/mcp` (nine tools: `weft_primer`, `weft_capabilities`, `weft_catalog`, `weft_schema`, `weft_validate`, `weft_format`, `weft_patch`, `weft_render`, `weft_context`), bundled into the Claude Code, Cursor and Open Design plugins by `plugins/shared`. Its checks already run on the Rust core through `@weft/core` and `@weft/catalog`, but the tool layer itself (primer text, limits, diagnostics truncation, project scoping, the capabilities shape, the catalog index, context filtering, the tool descriptions) is TypeScript, and `weft_render`'s accessibility tree and page come from `@weft/render-react` (TypeScript only). `crates/weft-binding` holds the JSON-text functions both engines call; `crates/weft-web` has the static HTML/CSS generator (`to_html`). cox has no way for a plugin to carry skills (`plugin.toml` has `[[agents]]` and `[[mcp]]`, no skills) and its desktop plugin API is text widgets only (PL§15.4 lists plugin web views as "never", marked open in A134), so T106.5 and T106.7 extend cox.
 
-### T106.6. Design tab: design
-
-A Design tab like Claude Design: a canvas in the cox desktop app showing the agent's Weft screens rendered as real UI, updated live as the agent patches them, where a person can select an element and have that reach the agent. Before code, a short design in this card and a cox proposal under `docs/design/` (with its cox plan amendment and tasks), covering what the tab shows (screens rendered through `weft-web`'s HTML/CSS generator, light and dark from the project's appearance, several screens as frames), how cox hosts it (a new desktop-only inspector content kind: plugin-produced static HTML in a sandboxed web view with page JavaScript off, no network, no navigation, and a host-owned selection script in an isolated world; the terminal shows a text fallback), the plugin-API extension (manifest key, grant line, ABI fields, size caps, sanitising), live updates (the plugin redraws when its tools change a screen) and selection to the agent context. Open questions go to the creator with a recommendation each.
-
 ### T106.7. Design tab: cox side
 
-The cox tasks the T106.6 proposal defines: the plugin-API types, manifest and grant line, the `cox-app`/`cox-ffi` plumbing and the macOS view. Done when the proposal's checks pass in cox. Plan when claimed.
+The cox tasks the T106.6 proposal defines: T33.47.1–T33.47.8 in pyrlyn/cox (`docs/design/plugin-canvas.md`, A156, branch `t33.47-plugin-canvas`). They cover the plugin-API types, manifest key and grant line, the host calls and SDK arms, the `cox-app` state, wire and FFI, the isolated `CanvasPage`, and the pane. Done when their checks pass in cox and the branch is pushed. The Weft plugin's `cox-plugin-sdk` pin moves to that branch in T106.8.
 
 ### T106.8. Design tab: Weft side
 
-The plugin declares the tab, renders the screens its tools see (the last markup per screen id) to HTML with `weft-web`, redraws after `weft_patch`/`weft_format`/`weft_validate`, and turns a selection into agent context. Plan when claimed.
+The plugin declares the canvas, draws the screens its tools see, redraws when one changes and turns a selection into an attachment. Planned split, each within the task size rule:
+
+- T106.8.1: `weft-web` `HtmlOptions` gains a flag that writes `data-weft-path` on every element (its diagnostic path: `kind#id`, or `kind[index]` without an id). It is a page option for hosts, not a tool option, so no `weft.json` key. Unit tests on a nested screen, with and without ids.
+- T106.8.2: `plugins/cox`: `[capabilities.desktop] canvas = true`, `CanvasDecl { title: "Weft", symbol, select_attr: "data-weft-path" }`; the last markup per screen id taken from the tools' inputs and `cox_redraw()` when one changes; `cox_canvas` returns one frame per screen from `to_html_with_data` (project tokens or the defaults, the resolver appearance, the path flag); `cox_canvas_select` returns the screen id, the element's path, kind, id and its markup line as an attachment of about 1 KiB. The `cox-plugin-sdk` pin moves to the T33.47 commit. Unit tests and the e2e test through the module. README and the grant line.
 
 ### T105. Weft to WinUI 3 and back
 
