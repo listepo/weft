@@ -10,7 +10,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
 | T106 | in progress | P2 | 5 | 50% | Claude Code / claude-opus-5-5 |
-| T106.5 | todo | P2 | 3 | 0% | |
+| T106.5 | in progress | P2 | 3 | 30% | Claude Code / claude-opus-5-5 |
 | T106.6 | todo | P2 | 3 | 0% | |
 | T106.7 | todo | P2 | 4 | 0% | |
 | T106.8 | todo | P2 | 3 | 0% | |
@@ -292,7 +292,7 @@ What exists (checked on origin/main): the MCP server is `packages/mcp` (nine too
 
 ### T106.5. Skills in cox
 
-The Claude Code and Cursor plugins ship skills (`spec` with `AGENT-SPEC.md`; `render`, `export`, `import` and `figma-pull`, which run the bundled Node scripts). A cox plugin cannot carry skills today, so a cox task adds a general, data-only `[[skills]]` manifest entry (a package-relative `SKILL.md` folder, one grant line per skill, loaded by `cox-ext` like `.cox/skills`), and the Weft plugin ships the `spec` skill (its `AGENT-SPEC.md` copy kept current by the existing stale-copy test). The script skills need Node and the bundled scripts, which a cox package does not carry; they are left out, and their Rust-backed equivalents are tools for a later task. Plan when claimed (cox task id, cox plan amendment).
+The Claude Code and Cursor plugins ship skills (`spec` with `AGENT-SPEC.md`; `render`, `export`, `import` and `figma-pull`, which run the bundled Node scripts). A cox plugin cannot carry skills today, so a cox task adds a general, data-only `[[skills]]` manifest entry (a package-relative `SKILL.md` folder, one grant line per skill, loaded by `cox-ext` like `.cox/skills`), and the Weft plugin ships the `spec` skill (its `AGENT-SPEC.md` copy kept current by the existing stale-copy test). The script skills need Node and the bundled scripts, which a cox package does not carry; they are left out, and their Rust-backed equivalents are tools for a later task. Plan: cox side is T33.46 (amendment A155, branch `t33.46-plugin-skills` in pyrlyn/cox): T33.46.1 the `[[skills]]` manifest entry and its `skill:<name> <dir>` grant line, T33.46.2 `cox-ext` parsing, merging (a local skill wins) and the skill tool naming the skill's folder so a skill can read files it bundles, T33.46.3 the session loading a granted plugin's skills. Weft side: `plugins/cox/skills/weft-spec/SKILL.md` (the Cursor skill's text, with cox's tool names and no script skills) and its `AGENT-SPEC.md` copy, written by `plugins/shared/build.ts` beside the other plugins' copies and checked by the same stale-copy test; `[[skills]]` in `plugin.toml`; the `cox-plugin-sdk` pin moved to the T33.46 commit, since the pinned manifest type refuses the new key; `tests/manifest.rs` checks each declared folder holds a `SKILL.md` named for it; README. Verified by `cox-plugin:test` and `shared:test`.
 
 ### T106.6. Design tab: design
 
