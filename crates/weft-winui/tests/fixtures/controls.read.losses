@@ -1,0 +1,30 @@
+Bindings /screen#controls: `AutomationProperties.Name` on `StackPanel`: a binding
+Bindings /screen#controls/heading#h2: `Text` on `TextBlock`: a binding
+Tokens /screen#controls/stack#tones: `Spacing` on `StackPanel`: a token reference
+Bindings /screen#controls/stack#shown/text#note: `Text` on `TextBlock`: a binding
+Bindings /screen#controls/stack#shown/text#note: `Visibility` on `TextBlock`: a binding
+Bindings /screen#controls/stack#shown/text#quiet: `Visibility` on `TextBlock`: a binding
+Bindings /screen#controls/form#profile: `Props.State` on `StackPanel`: a binding
+Actions /screen#controls/form#profile: `On.Submit` on `StackPanel` is not read yet
+Bindings /screen#controls/form#profile/field#name: `Text` on `TextBox`: a binding
+Actions /screen#controls/form#profile/field#name: `On.Change` on `TextBox` is not read yet
+Bindings /screen#controls/form#profile/field#email: `Text` on `TextBox`: a binding
+Bindings /screen#controls/form#profile/field#email: `AutomationProperties.IsRequiredForForm` on `TextBox`: a binding
+Bindings /screen#controls/form#profile/field#email: `Props.Error` on `TextBox`: a binding
+Bindings /screen#controls/form#profile/field#password: `Password` on `PasswordBox`: a binding
+Bindings /screen#controls/form#profile/field#password: `IsEnabled` on `PasswordBox`: a binding
+Bindings /screen#controls/form#profile/field#age: `Text` on `TextBox`: a binding
+Bindings /screen#controls/form#profile/field#query: `IsEnabled` on `TextBox`: a binding
+Bindings /screen#controls/form#profile/field#bio: `Text` on `TextBox`: a binding
+Bindings /screen#controls/form#profile/field#bio: `Header` on `TextBox`: a binding
+Bindings /screen#controls/form#profile/checkbox#agree: `IsChecked` on `CheckBox`: a binding
+Actions /screen#controls/form#profile/checkbox#agree: `On.Change` on `CheckBox` is not read yet
+Bindings /screen#controls/form#profile/switch#alerts: `IsOn` on `ToggleSwitch`: a binding
+Actions /screen#controls/form#profile/switch#alerts: `On.Change` on `ToggleSwitch` is not read yet
+Bindings /screen#controls/form#profile/button#save: `IsEnabled` on `Button`: a binding
+Actions /screen#controls/form#profile/button#save: `On.Submit` on `Button` is not read yet
+Bindings /screen#controls/form#profile/button#save: `Props.State` on `Button`: a binding
+Actions /screen#controls/form#profile/button#cancel: `On.Press` on `Button` is not read yet
+Actions /screen#controls/form#profile/button#delete: `On.Press` on `Button` is not read yet
+Bindings /screen#controls/form#profile/button#later: `Content` on `Button`: a binding
+Names /screen#controls/form#profile/field#bio: `field` needs a label; "" stands in

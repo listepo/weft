@@ -1,0 +1,38 @@
+<screen id="controls" state="ready" weft="0.3">
+  <heading id="h1" level="1">Say "hi" \{x} &amp; more -- or --&gt;, @license</heading>
+  <heading id="h2" level="2"/>
+  <heading id="h3" level="3">Three</heading>
+  <heading id="h4" level="4">Four</heading>
+  <heading id="h5" level="5">Five</heading>
+  <heading id="h6" level="6">Six</heading>
+  <stack id="tones" direction="row" wrap="true">
+    <text id="plain">Plain</text>
+    <text id="muted" tone="muted">Muted</text>
+    <text id="good" tone="success">Saved</text>
+    <text id="careful" tone="warning">Careful</text>
+    <text id="bad" tone="danger">Failed</text>
+  </stack>
+  <stack id="shown" direction="column">
+    <text id="secret" hidden="true">Hidden</text>
+    <text id="visible" hidden="false">Shown</text>
+    <text id="note"/>
+    <text id="quiet" label="Quiet note">{braces} stay text</text>
+  </stack>
+  <form id="profile" label="Profile">
+    <field id="name" label="Name" placeholder="Ada" required="true"/>
+    <field id="email" label="Email" state="invalid" type="email"/>
+    <field id="password" label="Password" type="password"/>
+    <field id="age" label="Age" type="number"/>
+    <field id="query" label="Search" type="search" value="literal"/>
+    <field id="bio" label="" type="multiline"/>
+    <checkbox id="agree" label="Agree"/>
+    <checkbox id="fixed" checked="true" disabled="true" label="Fixed"/>
+    <switch id="alerts" label="Alerts"/>
+    <button id="save" variant="primary">Save</button>
+    <slot name="footer">
+      <button id="cancel" label="Cancel the edit">Cancel</button>
+      <button id="delete" disabled="false" variant="danger">Delete</button>
+      <button id="later"/>
+    </slot>
+  </form>
+</screen>

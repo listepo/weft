@@ -1,0 +1,22 @@
+<screen id="screen-1" weft="0.3">
+  <grid id="grid-1" columns="2">
+    <heading id="Title" level="2">Checkout</heading>
+    <text id="text-1">Total: 42 EUR</text>
+    <stack id="items" direction="row">
+      <button id="pay">Pay</button>
+      <button id="button-1">Later</button>
+      <button id="button-2">Twice</button>
+      <checkbox id="agree" label="I agree"/>
+      <text id="line"/>
+    </stack>
+    <stack id="art">
+      <field id="coupon" label="Coupon"/>
+    </stack>
+    <stack id="extras">
+      <text id="extra">Gift wrap</text>
+      <button id="wrap"/>
+    </stack>
+    <heading id="heading-bad-level" level="2">Bad level</heading>
+    <list id="lines"/>
+  </grid>
+</screen>

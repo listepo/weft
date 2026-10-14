@@ -7,6 +7,12 @@ rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
 
+[features]
+default = []
+# `read_winui`: hand-written or edited XAML, read element by element. No extra dependency; the
+# feature keeps the reader's tables out of builds that only generate, as in weft-slint.
+import = []
+
 [dependencies]
 indexmap = { workspace = true }
 roxmltree = { workspace = true }
@@ -14,6 +20,10 @@ thiserror = { workspace = true }
 weft-catalog = { workspace = true }
 weft-core = { workspace = true }
 weft-import = { workspace = true }
+
+[[test]]
+name = "read"
+required-features = ["import"]
 
 [lints]
 workspace = true

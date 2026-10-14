@@ -1,0 +1,37 @@
+Ids /screen#screen-1: an id was generated
+Props /screen#screen-1: `Background` on `Page`: a markup extension
+Props /screen#screen-1: `Page.Resources` is not read
+Ids /screen#screen-1/grid#grid-1: an id was generated
+Layout /screen#screen-1/grid#grid-1: `Margin` on `Grid`: a layout value
+Tokens /screen#screen-1/grid#grid-1: `RowSpacing` on `Grid`: a token reference
+Ids /screen#screen-1/grid#grid-1/text#text-1: the id "1bad" is not a valid Weft id, or is taken
+Tokens /screen#screen-1/grid#grid-1/text#text-1: `FontSize` on `TextBlock`: a literal look
+Layout /screen#screen-1/grid#grid-1/text#text-1: `Grid.Column` on `TextBlock`: a layout value
+Text /screen#screen-1/grid#grid-1/text#text-1: `Bold` formatting is dropped; its text is kept
+Layout /screen#screen-1/grid#grid-1/stack#items: `Spacing` on `StackPanel`: a layout value
+Text /screen#screen-1/grid#grid-1/stack#items: text directly inside a `stack` is not read
+Layout /screen#screen-1/grid#grid-1/stack#items: `Border`: a scrolling or framing wrapper; its content is read in its place
+Actions /screen#screen-1/grid#grid-1/stack#items/button#pay: `Click` on `Button`: an event handler
+Props /screen#screen-1/grid#grid-1/stack#items/button#pay: `Style` on `Button`: a markup extension
+Ids /screen#screen-1/grid#grid-1/stack#items/button#button-1: an id was generated
+Actions /screen#screen-1/grid#grid-1/stack#items/button#button-1: `Command` on `Button`: an event handler
+Props /screen#screen-1/grid#grid-1/stack#items/button#button-1: `ToolTipService.ToolTip` on `Button`: an attribute with no Weft prop
+Ids /screen#screen-1/grid#grid-1/stack#items/button#button-2: the id "pay" is not a valid Weft id, or is taken
+Kinds /screen#screen-1/grid#grid-1/stack#items: `RatingControl` is not a Weft kind; its content is read in its place
+Values /screen#screen-1/grid#grid-1/stack#items/checkbox#agree: `IsChecked="Maybe"` is not a value of `checked`
+Repetition /screen#screen-1/grid#grid-1/stack#items: `ItemsRepeater`: an ItemsRepeater is read once, from its template
+Bindings /screen#screen-1/grid#grid-1/stack#items/text#line: `Text` on `TextBlock`: a binding
+Structure /screen#screen-1/grid#grid-1/stack#art: `Canvas`: a panel Weft has no layout for is read as a stack
+Props /screen#screen-1/grid#grid-1/stack#art/field#coupon: `Uid` on `TextBox`: an attribute of another namespace
+Values /screen#screen-1/grid#grid-1/stack#art/field#coupon: `InputScope="Url"` on `TextBox` has no Weft value
+Props /screen#screen-1/grid#grid-1/stack#art/field#coupon: `IsReadOnly` on `TextBox`: an attribute with no Weft prop
+Props /screen#screen-1/grid#grid-1/stack#art/field#coupon: `Props.Shade`: a `field` has no `shade`
+Values /screen#screen-1/grid#grid-1/stack#extras: `Visibility="Hidden"` on `StackPanel` has no Weft value
+Layout /screen#screen-1/grid#grid-1/stack#extras: `Padding` on the `footer` slot row: a layout value
+Structure /screen#screen-1/grid#grid-1/stack#extras/button#wrap: `TextBox` inside a `button` is not read
+Slots /screen#screen-1/grid#grid-1/stack#extras: a `stack` has no `footer` slot; its elements are children
+Ids /screen#screen-1/grid#grid-1/heading#heading-bad-level: an id was generated
+Values /screen#screen-1/grid#grid-1/heading#heading-bad-level: `AutomationProperties.HeadingLevel="Level9"` on `TextBlock` has no Weft value
+Layout /screen#screen-1/grid#grid-1: `Grid.ColumnDefinitions`: the track sizes are not read
+Values /screen#screen-1/grid#grid-1/heading#heading-bad-level: the required `level` is missing; a stand-in is set
+Structure /screen#screen-1/grid#grid-1/list#lines/text#stray: `text` cannot be a child of `list` and is dropped
