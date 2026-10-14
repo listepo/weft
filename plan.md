@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.3 | todo | P2 | 4 | 0% | |
+| T105.3 | in progress | P2 | 4 | 10% | Claude Code / claude-opus-5-5 |
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.7 | todo | P2 | 3 | 0% | |
@@ -299,6 +299,8 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.3. WinUI value and choice controls
 
 `select`, `combobox`, `radio-group`, `segmented-control`, `slider`, `stepper`, `date-picker`, `color-picker`, `link`, `image`, `model`, `alert`, `menu`, with the `Choice` helper and the date and colour converter functions. SPEC §9 rows first. About 480 lines of code. Done when their examples and corpus screens generate, match goldens and read back through the comment.
+
+**Execution plan.** (1) SPEC §9 "To WinUI": the new kinds, `Choice.Value`, the converter functions and the new markers; `docs/winui-design.md` rows where the build differs (every choice, date and colour control shows its text value through `weft:Choice.Value`, since a static `BindBack` cannot write a view-model property). (2) `src/data.rs`/`src/csharp.rs`: a number leaf (`double`). (3) `src/controls.rs`, its own module so T105.4/T105.5 do not conflict: the kinds above, `<option>`/`<radio>`/`<segment>`/`<menu-item>` built by their parents, literal number bounds through `weft_core::controls`, literal date bounds through `date_text`. (4) `src/Weft.cs`: `Choice`, `Weft.Day/DayText/Clock/ClockText/Color/Hex/Swatch/Link/Image/Earliest/Latest`, markers `Href`, `Src`, `Usdz`, `Min`, `Max`, `On` hooks for `Slider`, `NumberBox`, `MenuFlyoutItem`; checked by compiling `Weft.cs` and the view models with `dotnet build` (macOS, `EnableWindowsTargeting`). (5) Tests: the examples without `<each>` and the corpus screens `account`, `error-state`, `login`, `menu`, `profile`, `signup`, `wizard-step` join `COVERED` (goldens, comment read-back), a fixture of every new prop, refusals. Verify with `moon run root:changed`, then the full check.
 
 ### T105.4. WinUI repetition and containers
 
