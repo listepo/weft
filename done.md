@@ -296,6 +296,18 @@ Done: `plugins/cox` (crate `weft-cox`, moon project `cox-plugin`), a Cargo works
 
 Tests (`moon run cox-plugin:test`: rustfmt, clippy for the host and `wasm32`, then `cargo test`): specs, dispatch and config in `src/lib.rs`; `tests/manifest.rs` reads `plugin.toml` into cox's own `PluginManifest` (unknown keys denied, the type `docs/plugin.schema.json` is generated from) and runs its `validate`, so no schema is vendored; `tests/e2e.rs` loads `weft.wasm` with `wasm-plugin-host` (the shared extism engine in `packages/crates`, pinned git dev-dependency, unpublished) through `cox_init` and `cox_tool_call` and compares four calls with the native build. `tooling/test/inputs.test.ts` checks both tasks' crate inputs against `cargo metadata`.
 
+### T106.4.1. Instance tree in Rust
+
+Part of T106.4: the instance tree of `@weft/render-react`'s `expand.ts` in `weft-core` (`aria/inst.rs`), so the accessibility tree can be built without TypeScript.
+
+Done: `each` expanded with instance ids, hidden nodes removed, the `text` prop as content, `filled` and the `empty` slot, slot order, and the prop readings (label, clamped numbers, field, select, tab, radio, date, colour and number controls, names from content) over `controls` and `sample`. `safe_url`, `js_trim`, `squash` and `js_number_from` moved from `weft-import` into `weft-core`, which `weft-import` re-exports. Unit tests per reading in `aria/tests.rs`.
+
+### T106.4.2. Accessibility tree and snapshot in Rust
+
+Part of T106.4: the tree `aria.ts` builds, in `weft-core` (`aria/tree.rs`, `aria/normalize.rs`).
+
+Done: `weft_core::aria::expected_tree` and `normalize_aria`: roles, names and states per kind, the table's header and body row groups, the tab list and selected panel, closed dialogs and decorative images left out, and the normalization of a Playwright snapshot. Tests are `aria.test.ts`'s cases on the same documents. The YAML writer moved to T106.4.3 to keep this task within the size rule.
+
 ### T39.3. Context: patch operations
 
 `add-context`, `set-context`, `resolve-context` and `remove-context` (SPEC §7, AGENT-SPEC §3) in `crates/weft-core/src/patch.rs` and `shape.rs`, codes `W510`–`W512`, the `author` and `context` options of `applyPatches` through `weft-binding`, `weft-wasm`, `weft-node` and `packages/core`. Element `remove` that leaves a dangling `for` fails with `W309` naming the entries. Patch cases in `patch-cases.ts`, fixtures regenerated.
