@@ -220,7 +220,7 @@ checksum = "417bef24afe1460300965a25ff4a24b8b45ad011948302ec221e8a0a81eb2c79"
 [[package]]
 name = "cox-plugin-api"
 version = "0.1.2"
-source = "git+https://github.com/pyrlyn/cox?rev=597c0e957729b421ea85f057b4d37b829ac974fb#597c0e957729b421ea85f057b4d37b829ac974fb"
+source = "git+https://github.com/pyrlyn/cox?rev=fd35f0d037d87c8470ddc0245d493ef123b046aa#fd35f0d037d87c8470ddc0245d493ef123b046aa"
 dependencies = [
  "schemars",
  "serde",
@@ -231,7 +231,7 @@ dependencies = [
 [[package]]
 name = "cox-plugin-sdk"
 version = "0.1.2"
-source = "git+https://github.com/pyrlyn/cox?rev=597c0e957729b421ea85f057b4d37b829ac974fb#597c0e957729b421ea85f057b4d37b829ac974fb"
+source = "git+https://github.com/pyrlyn/cox?rev=fd35f0d037d87c8470ddc0245d493ef123b046aa#fd35f0d037d87c8470ddc0245d493ef123b046aa"
 dependencies = [
  "cox-plugin-api",
  "extism-pdk",
@@ -3099,6 +3099,7 @@ dependencies = [
  "wasm-plugin-host",
  "weft-binding",
  "weft-catalog",
+ "weft-core",
  "weft-web",
 ]
 

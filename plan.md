@@ -9,9 +9,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T68 | in progress | P2 | 5 | 0% | Grok Bot / grok |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 40% | Claude Code / claude-opus-5-5 |
-| T106 | in progress | P2 | 5 | 65% | Claude Code / claude-opus-5-5 |
+| T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
-| T106.8 | in progress | P2 | 3 | 40% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 15% | Claude Code / claude-opus-5-5 |
 | T105.1 | todo | P2 | 4 | 0% | |
 | T105.2 | todo | P2 | 4 | 0% | |
@@ -293,15 +292,6 @@ What exists (checked on origin/main): the MCP server is `packages/mcp` (nine too
 The cox tasks the T106.6 proposal defines, as built: T33.47.1–T33.47.10 in pyrlyn/cox (`docs/design/plugin-canvas.md`, A156, branch `t33.47-plugin-canvas`); cox's A157 split T33.47.8 into T33.47.8.1–T33.47.8.10, one layer each, and added T33.47.10, a fix. They cover the plugin-API types, manifest key and grant line, the host calls and SDK arms, the `cox-app` state, wire and FFI, the isolated `CanvasPage`, the pane, its shortcut and palette rows, and the user docs. Done when their checks pass in cox and the branch is pushed. The Weft plugin's `cox-plugin-sdk` pin moves to that branch in T106.8.
 
 Status: every cox card is done and pushed (branch head `fd35f0d0`) but T33.47.8's last checks: by hand, ⌘⇧D and the palette row toggle the pane, two frames show, and a click adds a chip that a second click replaces; and the falsifier 3 measurement in Instruments. Both need a person at the app, so they are with the creator.
-
-### T106.8. Design tab: Weft side
-
-The plugin declares the canvas, draws the screens its tools see, redraws when one changes and turns a selection into an attachment. Planned split, each within the task size rule:
-
-- T106.8.1: `weft-web` `HtmlOptions` gains a flag that writes `data-weft-path` on every element (its diagnostic path: `kind#id`, or `kind[index]` without an id). It is a page option for hosts, not a tool option, so no `weft.json` key. Unit tests on a nested screen, with and without ids.
-- T106.8.2: `plugins/cox`: `[capabilities.desktop] canvas = true`, `CanvasDecl { title: "Weft", symbol, select_attr: "data-weft-path" }`; the last markup per screen id taken from the tools' inputs and `cox_redraw()` when one changes; `cox_canvas` returns one frame per screen from `to_html_with_data` (project tokens or the defaults, the resolver appearance, the path flag); `cox_canvas_select` returns the screen id, the element's path, kind, id and its markup line as an attachment of about 1 KiB. The `cox-plugin-sdk` pin moves to the T33.47 commit. Unit tests and the e2e test through the module. README and the grant line.
-
-Status: T106.8.1 is done (`done.md`). T106.8.2 next: plan as above, in `plugins/cox/src` (a `canvas` module beside `lib.rs`), `plugin.toml`, `Cargo.toml`, `tests/`, README; verified by `cox-plugin:test` and `root:changed`.
 
 ### T105. Weft to WinUI 3 and back
 

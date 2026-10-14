@@ -5,7 +5,6 @@
 - T69.1. Editor skeleton
 - T106. Weft plugin for cox
 - T106.7. Design tab: cox side
-- T106.8. Design tab: Weft side
 - T105. Weft to WinUI 3 and back
 - T105.1. WinUI generator: first slice and source-comment read-back
 - T105.2. WinUI view model, code-behind and helpers

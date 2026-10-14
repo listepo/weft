@@ -6,7 +6,7 @@
 // Helpers of a test file fail the test the same way a #[test] body does.
 #![allow(clippy::unwrap_used, clippy::panic)]
 
-use cox_plugin_sdk::{Capabilities, PluginManifest};
+use cox_plugin_sdk::{Capabilities, DesktopCaps, PluginManifest};
 use weft_cox::{Weft, tool_names};
 
 fn manifest() -> PluginManifest {
@@ -35,9 +35,13 @@ fn it_grants_exactly_the_tools_the_plugin_declares() {
 }
 
 #[test]
-fn it_asks_for_nothing_but_tools() {
+fn it_asks_for_nothing_but_tools_and_the_canvas() {
     let expected = Capabilities {
         tools: tool_names(),
+        desktop: DesktopCaps {
+            canvas: true,
+            ..DesktopCaps::default()
+        },
         ..Capabilities::default()
     };
     assert_eq!(manifest().capabilities, expected);

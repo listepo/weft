@@ -366,6 +366,16 @@ Plan: (1) this design; (2) the cox proposal `docs/design/plugin-canvas.md` with 
 
 Done: the design is in this card. The cox proposal is pushed to pyrlyn/cox branch `t33.47-plugin-canvas` (commit `d31bf566`, stacked on `t33.46-plugin-skills`): `docs/design/plugin-canvas.md`, amendment A156, tasks T33.47 and T33.47.1–T33.47.8, and a PL§15.4 pointer. The isolation rests on WebKit's own headers (`WKWebpagePreferences.h`, `WKUserContentController.h`) and WebKit's content-blocker format, checked 2026-10-14; T33.47.6 tests it. The four open questions are with the creator; the build follows the recommendations until they answer. There is no test because this task changes no code: the checks are in T106.7 and T106.8.
 
+### T106.8. Design tab: Weft side
+
+The plugin declares the canvas, draws the screens its tools see, redraws when one changes and turns a selection into an attachment. Planned split, each within the task size rule:
+
+- T106.8.1: `weft-web` `HtmlOptions` gains a flag that writes `data-weft-path` on every element (its diagnostic path: `kind#id`, or `kind[index]` without an id). It is a page option for hosts, not a tool option, so no `weft.json` key. Unit tests on a nested screen, with and without ids.
+- T106.8.2: `plugins/cox`: `[capabilities.desktop] canvas = true`, `CanvasDecl { title: "Weft", symbol, select_attr: "data-weft-path" }`; the last markup per screen id taken from the tools' inputs and `cox_redraw()` when one changes; `cox_canvas` returns one frame per screen from `to_html_with_data` (project tokens or the defaults, the resolver appearance, the path flag); `cox_canvas_select` returns the screen id, the element's path, kind, id and its markup line as an attachment of about 1 KiB. The `cox-plugin-sdk` pin moves to the T33.47 commit. Unit tests and the e2e test through the module. README and the grant line.
+
+Done: T106.8.1 and T106.8.2 (below). The plugin declares the canvas on the desktop with `desktop.canvas` granted, draws one frame per screen its tools saw with each element's path, and turns a click into an attachment. `cox_redraw` is not called: cox asks for the frames after each of the plugin's tools finishes, and the call needs a `ui` capability the plugin does not ask for.
+
+
 ### T106.8.1. data-weft-path page option
 
 Part of T106.8: `weft-web`'s `HtmlOptions` gains a flag that writes `data-weft-path` on every element, its diagnostic path (`kind#id`, or `kind[index]` without an id, `slot[name]` for a slot), so a host that shows the page can tell which element a click reached. A page option for hosts, not a tool option, so no `weft.json` key.
@@ -373,6 +383,14 @@ Part of T106.8: `weft-web`'s `HtmlOptions` gains a flag that writes `data-weft-p
 Plan: export `path_segment` from `weft-core` (the diagnostics' own segment writer, reused rather than copied); `HtmlOptions::paths`; the writer walks the drawn document once (after fragment uses expand and data fills it) and maps each node to its path; `base()` writes the attribute; every `HtmlOptions` literal sets `paths: false`. Verified by a unit test on a screen without ids (index steps count text children, slots) and an integration test on a nested strict screen (six `kind#id` paths, none when the flag is off).
 
 Done: `HtmlOptions::paths`, `weft_core::path_segment` exported, both tests; `cargo nextest run -p weft-web` 57 passed, clippy `-D warnings` and `cargo fmt --check` clean. Inside an expanded fragment use the path is the drawn screen's, not the fragment file's.
+
+### T106.8.2. The canvas in the cox plugin
+
+Part of T106.8: `plugins/cox` fills cox's canvas pane (cox T33.47).
+
+Plan: `[capabilities.desktop] canvas = true` in `plugin.toml`; `src/canvas.rs` keeps the last markup per screen id from the successful tool calls (the input of `weft_validate`, `weft_format` and `weft_render`, the output of `weft_patch`, with the last `data` and `project` given), at most 12 screens; `cox_canvas` draws each changed screen through `weft_render` with `html` in its scope and `data-weft-path` on; `cox_canvas_select` names the screen, the path and the element's markup line. The page follows the resolver's light and dark, so `weft-binding`'s tool context and render request carry the token modifiers. The element-path walk moves from `weft-web` into `weft-core` (`element_paths`), so the page and the selection share it. `cox-plugin-sdk` pinned to cox `fd35f0d0`. Verified by `cox-plugin:test` (unit, manifest and e2e through the module) and the `weft-core`, `weft-binding` and `weft-web` tests.
+
+Done: as planned. The canvas exists only on the desktop surface with `desktop.canvas` granted (`InitIn.surface`, `InitIn.granted`), so the terminal gets no pane to drop and the tools keep no screens there. Frame ids are `s<n>`, since a screen id may hold characters a frame id may not; the title is the screen id; frames are 390 pt wide. A markup that does not draw in strict mode keeps the last page that did. A selection is about 300 bytes: `Selected on the Weft canvas: screen …, element … (kind#id).` and the quoted markup line (at most 400 characters); a path from inside an expanded fragment use or sample data is named as such. `weft_render`'s `html` page in cox also follows the resolver's light and dark now. `cox-plugin-sdk` is pinned to cox `fd35f0d0` on the unmerged `t33.47-plugin-canvas` branch. The module is 1.40 MB (1.37 MB before). Deviation: no `cox_redraw` (see T106.8).
 
 ### T39.3. Context: patch operations
 

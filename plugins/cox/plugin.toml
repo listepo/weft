@@ -14,8 +14,8 @@ wasm = "weft.wasm"
 memory_mib = 64
 call_ms = 10000
 
-# Only tools, plus the skill below: no files, network, store, model or UI. The project comes from
-# the [plugins.weft] table of cox's config, inline.
+# Tools, the skill below and, in the desktop app, the canvas pane: no files, network, store,
+# model or other UI. The project comes from the [plugins.weft] table of cox's config, inline.
 [capabilities]
 tools = [
   "weft_primer",
@@ -28,6 +28,11 @@ tools = [
   "weft_render",
   "weft_context",
 ]
+
+# The Design tab (plan.md T106.8): the screens the tools saw, drawn as static pages in cox's
+# isolated canvas pane. Its own grant line, `desktop.canvas`.
+[capabilities.desktop]
+canvas = true
 
 # The authoring guide as an Agent Skill (cox T33.46): SKILL.md and its AGENT-SPEC.md copy, which
 # plugins/shared/build.ts writes beside the other plugins' copies.

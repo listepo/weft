@@ -106,6 +106,7 @@ impl ToolHost {
             kinds: c.kinds,
             tokens: c.tokens.map(|t| t.into_iter().collect()),
             token_values: None,
+            token_modifiers: Vec::new(),
             actions: c.actions,
             data: c.data.as_ref().map(|d| compile_data_schema(d).0),
         };

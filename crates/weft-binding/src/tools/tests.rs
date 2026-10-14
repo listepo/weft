@@ -261,6 +261,25 @@ fn render_checks_strictly_then_gives_the_tree_and_for_html_the_document() {
         }
         other => panic!("{other:?}"),
     }
+    // And its resolver's modifiers, so the page can follow light and dark.
+    let color = |hex| json!({"brand": {"$type": "color", "$value": hex}});
+    let resolver = json!({
+        "version": "2025.10",
+        "sets": {"s": {"sources": [color("#123456")]}},
+        "modifiers": {"theme": {"contexts": {"light": [], "dark": [color("#654321")]}}},
+        "resolutionOrder": [{"$ref": "#/sets/s"}, {"$ref": "#/modifiers/theme"}]
+    });
+    let args = json!({"markup": GOOD, "html": true, "project": {"tokens": resolver}});
+    match host().call("weft_render", &args.to_string()) {
+        Outcome::Render(r) => {
+            assert_eq!(r.modifiers[0].name, "theme");
+            assert_eq!(
+                r.modifiers[0].contexts["dark"]["brand"].value,
+                json!("#654321")
+            );
+        }
+        other => panic!("{other:?}"),
+    }
     let (error, _) = run(
         &host(),
         "weft_render",

@@ -400,6 +400,7 @@ fn render(host: &ToolHost, args: &Args) -> Run {
                 catalog: c.catalog.clone(),
                 data: data.cloned(),
                 tokens: c.token_values.clone(),
+                modifiers: c.token_modifiers.clone(),
             })))
         }
         _ => Err(diagnostics_text(

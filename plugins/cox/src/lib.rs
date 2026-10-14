@@ -2,14 +2,21 @@
 //! MCP server gives other hosts, from the same Rust (`weft_binding::tools`), so their texts, limits
 //! and checks cannot drift between hosts. cox names them `wasm__weft__<tool>`.
 //!
+//! On the desktop it also fills cox's canvas pane with the screens its tools saw (`canvas`).
+//!
 //! The decisions are plain functions so the tests run them on the host; the exports, which need
 //! extism's memory, build only for `wasm32`.
 
-use cox_plugin_sdk::{InitOut, ToolCallIn, Value};
+pub mod canvas;
+
+use canvas::Canvas;
+use cox_plugin_sdk::{
+    CanvasAttach, CanvasOut, CanvasSelect, DesktopOut, InitOut, Surface, ToolCallIn, Value,
+};
 use serde_json::json;
 use weft_binding::tools::{Outcome, RenderRequest, ToolHost, ToolHostError};
-use weft_catalog::{DEFAULT_TOKENS_JSON, load_tokens};
-use weft_web::{HtmlOptions, to_html_with_data};
+use weft_catalog::{DEFAULT_TOKENS_JSON, appearance, load_tokens};
+use weft_web::{HtmlOptions, Invalid, to_html_with_data};
 
 /// Appended to `weft_render`'s description: the page here is not the MCP server's, and an agent
 /// comparing them should know why they differ.
@@ -27,6 +34,9 @@ pub fn tool_names() -> Vec<String> {
 /// One session's tool host, from the user's `[plugins.weft]` table.
 pub struct Weft {
     host: ToolHost,
+    /// Only on the desktop with `desktop.canvas` granted: elsewhere no pane would show the
+    /// screens, so the tools keep none.
+    canvas: Option<Canvas>,
 }
 
 impl Weft {
@@ -40,7 +50,10 @@ impl Weft {
         // A table cox could not read reaches the plugin as null, which means no project too.
         let config = if config.is_null() { &empty } else { config };
         match ToolHost::from_project(config) {
-            Ok((host, warnings)) => Ok((Weft { host }, warnings.iter().map(line).collect())),
+            Ok((host, warnings)) => {
+                let weft = Weft { host, canvas: None };
+                Ok((weft, warnings.iter().map(line).collect()))
+            }
             Err(ToolHostError::Project(errors)) => {
                 let lines: Vec<String> = errors.iter().map(line).collect();
                 Err(format!("[plugins.weft] has errors:\n{}", lines.join("\n")))
@@ -74,24 +87,55 @@ impl Weft {
             .collect()
     }
 
+    /// Turns the canvas on when cox drives the desktop app and the person granted
+    /// `desktop.canvas` (`InitIn.surface`, `InitIn.granted`), so no other surface gets a pane it
+    /// would only drop with a notice.
+    pub fn open_canvas(&mut self, surface: Option<Surface>, granted: &Value) {
+        if surface == Some(Surface::Desktop) && granted["desktop"]["canvas"] == true {
+            self.canvas = Some(Canvas::default());
+        }
+    }
+
     pub fn declarations(&self) -> InitOut {
         InitOut {
             tools: self.specs(),
+            desktop: DesktopOut {
+                canvas: self.canvas.as_ref().map(|_| canvas::decl()),
+                ..DesktopOut::default()
+            },
             ..InitOut::default()
         }
+    }
+
+    /// `cox_canvas`: the screens' pages.
+    pub fn frames(&mut self) -> CanvasOut {
+        match &mut self.canvas {
+            Some(canvas) => canvas.frames(&self.host),
+            None => CanvasOut::default(),
+        }
+    }
+
+    /// `cox_canvas_select`: what a click adds to the composer.
+    pub fn select(&self, selection: &CanvasSelect) -> Option<CanvasAttach> {
+        let canvas = self.canvas.as_ref()?;
+        canvas.select(&selection.frame, &selection.value)
     }
 
     /// Runs one call and returns its `ToolOutput`. The MCP server's content blocks become one
     /// text, a blank line apart; a failure the model should fix stays a result, never an error of
     /// the export.
-    pub fn call(&self, call: &ToolCallIn) -> Value {
+    pub fn call(&mut self, call: &ToolCallIn) -> Value {
         if !tool_names().contains(&call.name) {
             return output(&format!("Unknown tool: {}.", call.name), true);
         }
         // cox hands over the model's input as parsed JSON; the host reads it as text, as an MCP
         // call's arguments, so both hosts run the same checks on it.
         let args = call.input.to_string();
-        match self.host.call(&call.name, &args) {
+        let outcome = self.host.call(&call.name, &args);
+        if let Some(canvas) = &mut self.canvas {
+            canvas.saw(&call.name, &call.input, &outcome);
+        }
+        match outcome {
             Outcome::Content { blocks, is_error } => output(&blocks.join("\n\n"), is_error),
             Outcome::Render(request) => page(&request),
         }
@@ -102,6 +146,22 @@ impl Weft {
 /// page is checked against the tokens it is drawn with, so markup that names a token those do not
 /// define gets the tree and the page's diagnostics, as an error.
 fn page(request: &RenderRequest) -> Value {
+    match draw(request, false) {
+        Ok(html) => output(&format!("{}\n\n{html}", request.tree), false),
+        Err(invalid) => {
+            let diagnostics = json!({ "diagnostics": invalid.0 }).to_string();
+            let text = format!(
+                "{}\n\nThe page could not be drawn: {diagnostics}",
+                request.tree
+            );
+            output(&text, true)
+        }
+    }
+}
+
+/// The static page of a render request: its scope's tokens, following the system's light and
+/// dark when its resolver has both; `paths` marks each element for the canvas.
+fn draw(request: &RenderRequest, paths: bool) -> Result<String, Invalid> {
     // Without project tokens the markup's references went unchecked; the page uses the defaults,
     // as `toHtml` does.
     let defaults;
@@ -118,20 +178,10 @@ fn page(request: &RenderRequest) -> Value {
         catalog: &request.catalog,
         tokens,
         source: false,
-        appearance: None,
-        paths: false,
+        appearance: appearance(&request.modifiers),
+        paths,
     };
-    match to_html_with_data(&request.document, &options, request.data.as_ref()) {
-        Ok(html) => output(&format!("{}\n\n{html}", request.tree), false),
-        Err(invalid) => {
-            let diagnostics = json!({ "diagnostics": invalid.0 }).to_string();
-            let text = format!(
-                "{}\n\nThe page could not be drawn: {diagnostics}",
-                request.tree
-            );
-            output(&text, true)
-        }
-    }
+    to_html_with_data(&request.document, &options, request.data.as_ref())
 }
 
 fn output(text: &str, is_error: bool) -> Value {
@@ -147,7 +197,10 @@ fn line(diagnostic: &impl serde::Serialize) -> String {
 mod guest {
     use std::sync::Mutex;
 
-    use cox_plugin_sdk::{InitIn, InitOut, NoticeLevel, ToolCallIn, Value, notify};
+    use cox_plugin_sdk::{
+        CanvasAttach, CanvasIn, CanvasOut, CanvasSelect, InitIn, InitOut, NoticeLevel, ToolCallIn,
+        Value, notify,
+    };
 
     use super::Weft;
 
@@ -157,7 +210,8 @@ mod guest {
     static WEFT: Mutex<Option<Weft>> = Mutex::new(None);
 
     fn init(init: InitIn) -> Result<InitOut, String> {
-        let (weft, warnings) = Weft::from_config(&init.config)?;
+        let (mut weft, warnings) = Weft::from_config(&init.config)?;
+        weft.open_canvas(init.surface, &init.granted);
         let out = weft.declarations();
         *WEFT.lock().map_err(|_| "the plugin state is poisoned")? = Some(weft);
         for warning in warnings {
@@ -168,12 +222,30 @@ mod guest {
     }
 
     fn tool_call(call: ToolCallIn) -> Result<Value, String> {
-        let state = WEFT.lock().map_err(|_| "the plugin state is poisoned")?;
-        let weft = state.as_ref().ok_or("cox_tool_call before cox_init")?;
+        let mut state = WEFT.lock().map_err(|_| "the plugin state is poisoned")?;
+        let weft = state.as_mut().ok_or("cox_tool_call before cox_init")?;
         Ok(weft.call(&call))
     }
 
-    cox_plugin_sdk::register!(init => init, tool_call => tool_call);
+    // The frame width is the plugin's, so the pane's size is not needed.
+    fn canvas(_: CanvasIn) -> Result<CanvasOut, String> {
+        let mut state = WEFT.lock().map_err(|_| "the plugin state is poisoned")?;
+        let weft = state.as_mut().ok_or("cox_canvas before cox_init")?;
+        Ok(weft.frames())
+    }
+
+    fn canvas_select(selection: CanvasSelect) -> Result<Option<CanvasAttach>, String> {
+        let state = WEFT.lock().map_err(|_| "the plugin state is poisoned")?;
+        let weft = state.as_ref().ok_or("cox_canvas_select before cox_init")?;
+        Ok(weft.select(&selection))
+    }
+
+    cox_plugin_sdk::register!(
+        init => init,
+        tool_call => tool_call,
+        canvas => canvas,
+        canvas_select => canvas_select,
+    );
 }
 
 #[cfg(test)]
@@ -184,7 +256,7 @@ mod tests {
         Weft::from_config(&config).unwrap().0
     }
 
-    fn call(weft: &Weft, name: &str, input: Value) -> Value {
+    fn call(weft: &mut Weft, name: &str, input: Value) -> Value {
         weft.call(&ToolCallIn {
             name: name.into(),
             input,
@@ -215,9 +287,9 @@ mod tests {
 
     #[test]
     fn a_call_returns_the_mcp_text() {
-        let weft = weft(Value::Null);
+        let mut weft = weft(Value::Null);
         let valid = call(
-            &weft,
+            &mut weft,
             "weft_validate",
             json!({ "markup": "<screen weft=\"0.1\" id=\"s\" label=\"S\"><text id=\"t\">Hi</text></screen>" }),
         );
@@ -226,7 +298,7 @@ mod tests {
         assert_eq!(text["valid"], true, "{text}");
 
         let host = ToolHost::core(Default::default()).unwrap();
-        let primer = call(&weft, "weft_primer", json!({}));
+        let primer = call(&mut weft, "weft_primer", json!({}));
         let Outcome::Content { blocks, .. } = host.call("weft_primer", "{}") else {
             panic!("the primer is text");
         };
@@ -235,8 +307,8 @@ mod tests {
 
     #[test]
     fn bad_calls_are_results_the_model_can_fix() {
-        let weft = weft(json!({}));
-        let missing = call(&weft, "weft_validate", json!({}));
+        let mut weft = weft(json!({}));
+        let missing = call(&mut weft, "weft_validate", json!({}));
         assert_eq!(missing["is_error"], true);
         assert!(
             missing["text"]
@@ -245,7 +317,7 @@ mod tests {
                 .contains("markup is required")
         );
         for name in ["render", "read"] {
-            let unknown = call(&weft, name, json!({}));
+            let unknown = call(&mut weft, name, json!({}));
             assert_eq!(unknown["is_error"], true);
             assert_eq!(unknown["text"], format!("Unknown tool: {name}."));
         }
@@ -253,16 +325,16 @@ mod tests {
 
     #[test]
     fn the_config_table_is_the_project_and_its_settings() {
-        let weft = weft(json!({
+        let mut weft = weft(json!({
             "actions": ["save"],
             "validate": { "mode": "strict" },
             "mcp": { "context": "read-only", "limits": { "markupChars": 100 } },
         }));
-        let capabilities = call(&weft, "weft_capabilities", json!({}));
+        let capabilities = call(&mut weft, "weft_capabilities", json!({}));
         let text: Value = serde_json::from_str(capabilities["text"].as_str().unwrap()).unwrap();
         assert_eq!(text["actions"]["names"], json!(["save"]));
         let long = "x".repeat(101);
-        let refused = call(&weft, "weft_validate", json!({ "markup": long }));
+        let refused = call(&mut weft, "weft_validate", json!({ "markup": long }));
         assert!(
             refused["text"]
                 .as_str()
@@ -279,17 +351,17 @@ mod tests {
     #[test]
     fn render_gives_the_tree_and_with_html_the_static_page() {
         let project = json!({ "tokens": [{ "brand": { "gap": { "$type": "dimension", "$value": "8px" } } }] });
-        let weft = weft(project);
+        let mut weft = weft(project);
         let data = json!({ "cta": "Go" });
         let tree = call(
-            &weft,
+            &mut weft,
             "weft_render",
             json!({ "markup": SCREEN, "data": data }),
         );
         assert_eq!(tree, output(TREE, false));
 
         let page = call(
-            &weft,
+            &mut weft,
             "weft_render",
             json!({ "markup": SCREEN, "data": data, "html": true }),
         );
@@ -305,7 +377,7 @@ mod tests {
     fn a_page_the_default_tokens_cannot_draw_is_the_tree_and_its_diagnostics() {
         // The core host checks no token references, so the markup passes and the page refuses it.
         let page = call(
-            &weft(json!({})),
+            &mut weft(json!({})),
             "weft_render",
             json!({ "markup": SCREEN, "data": { "cta": "Go" }, "html": true }),
         );
@@ -316,6 +388,63 @@ mod tests {
             .unwrap();
         let report: Value = serde_json::from_str(rest).unwrap();
         assert!(report["diagnostics"][0]["code"].is_string(), "{report}");
+    }
+
+    #[test]
+    fn only_the_desktop_with_the_grant_gets_a_canvas_and_the_tools_fill_it() {
+        let granted = json!({ "desktop": { "canvas": true } });
+        for (surface, granted) in [
+            (Some(Surface::Terminal), &granted),
+            (None, &granted),
+            (Some(Surface::Desktop), &json!({ "tools": [] })),
+        ] {
+            let mut weft = weft(json!({}));
+            weft.open_canvas(surface, granted);
+            assert_eq!(weft.declarations().desktop.canvas, None);
+            call(&mut weft, "weft_validate", json!({ "markup": SCREEN }));
+            assert_eq!(weft.frames(), CanvasOut::default());
+        }
+        let mut weft = weft(json!({}));
+        weft.open_canvas(Some(Surface::Desktop), &granted);
+        assert_eq!(weft.declarations().desktop.canvas, Some(canvas::decl()));
+        let screen = "<screen weft=\"0.1\" id=\"s\" label=\"Demo\"><button id=\"go\" on-press=\"demo.go\" text=\"Go\"/></screen>";
+        call(&mut weft, "weft_validate", json!({ "markup": screen }));
+        let frames = weft.frames().frames;
+        assert_eq!(frames.len(), 1);
+        assert!(
+            frames[0]
+                .html
+                .contains("data-weft-path=\"/screen#s/button#go\"")
+        );
+        let selection = CanvasSelect {
+            frame: frames[0].id.clone(),
+            value: "/screen#s/button#go".into(),
+        };
+        assert_eq!(weft.select(&selection).unwrap().name, "Weft: button#go");
+    }
+
+    #[test]
+    fn a_page_follows_the_resolvers_light_and_dark() {
+        let color = |hex| json!({ "ink": { "$type": "color", "$value": hex } });
+        let tokens = json!({
+            "version": "2025.10",
+            "sets": { "s": { "sources": [color("#111111")] } },
+            "modifiers": { "theme": { "contexts": { "light": [], "dark": [color("#eeeeee")] } } },
+            "resolutionOrder": [{ "$ref": "#/sets/s" }, { "$ref": "#/modifiers/theme" }]
+        });
+        let mut weft = weft(json!({ "tokens": tokens }));
+        let markup = "<screen weft=\"0.1\" id=\"s\" label=\"S\"/>";
+        let page = call(
+            &mut weft,
+            "weft_render",
+            json!({ "markup": markup, "html": true }),
+        );
+        let text = page["text"].as_str().unwrap();
+        assert!(
+            text.contains("@media (prefers-color-scheme: dark)"),
+            "{text}"
+        );
+        assert!(text.contains("#eeeeee"), "{text}");
     }
 
     #[test]

@@ -5,7 +5,8 @@
 use indexmap::IndexMap;
 use serde_json::{Value as Json, json};
 use weft_catalog::{
-    CatalogSource, KindSource, Project, ProjectOptions, Token, load_project, token_types,
+    CatalogSource, KindSource, Project, ProjectOptions, Token, TokenModifier, load_project,
+    token_types,
 };
 use weft_core::{
     Catalog, DataCheckOptions, DataSchema, Diagnostic, Document, Mode, ParseOptions, check_data,
@@ -28,6 +29,9 @@ pub struct Context {
     /// The resolved tokens behind `tokens`, when a project declared them: a host that draws the
     /// page itself needs the values the markup was checked against, not only their types.
     pub token_values: Option<IndexMap<String, Token>>,
+    /// The modifiers of the project's token resolver, so a host that draws the page can follow
+    /// the system's light and dark appearance (`weft_catalog::appearance`); empty without one.
+    pub token_modifiers: Vec<TokenModifier>,
     /// Known host actions. Action names are checked only when given.
     pub actions: Option<Vec<String>>,
     /// The data model's schema. Bindings are checked against it only when given (SPEC §10.5).
@@ -42,6 +46,7 @@ impl Context {
             kinds: None,
             tokens: None,
             token_values: None,
+            token_modifiers: Vec::new(),
             actions: None,
             data: None,
         }
@@ -52,6 +57,7 @@ impl Context {
         Context {
             tokens: project.tokens.as_ref().map(token_types),
             token_values: project.tokens,
+            token_modifiers: project.modifiers,
             catalog: project.catalog,
             catalogs: Some(project.catalogs),
             kinds: Some(project.kinds),
@@ -181,6 +187,8 @@ pub struct RenderRequest {
     pub data: Option<Json>,
     /// The scope's resolved tokens (`Context::token_values`); `None` without project tokens.
     pub tokens: Option<IndexMap<String, Token>>,
+    /// The scope's resolver modifiers (`Context::token_modifiers`), for the page's appearance.
+    pub modifiers: Vec<TokenModifier>,
 }
 
 impl Outcome {

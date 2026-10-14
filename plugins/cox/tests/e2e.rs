@@ -56,15 +56,30 @@ fn load() -> PluginHost {
 }
 
 fn init(host: &PluginHost, config: Value) -> Result<Option<Value>, PluginError> {
+    init_on(host, config, "terminal", json!({ "tools": [] }))
+}
+
+fn init_on(
+    host: &PluginHost,
+    config: Value,
+    surface: &str,
+    granted: Value,
+) -> Result<Option<Value>, PluginError> {
     let input = json!({
         "api": 1,
         "plugin_id": "weft",
         "config": config,
         "session": { "id": "s", "cwd": "/w" },
-        "granted": { "tools": [] },
-        "surface": "terminal",
+        "granted": granted,
+        "surface": surface,
     });
     host.call(Lane::Control, "cox_init", &input, Duration::from_secs(10))
+}
+
+fn export(host: &PluginHost, name: &str, input: Value) -> Value {
+    host.call(Lane::Control, name, &input, Duration::from_secs(10))
+        .unwrap()
+        .unwrap()
 }
 
 fn tool(host: &PluginHost, name: &str, input: Value) -> Value {
@@ -104,7 +119,7 @@ fn init_lists_the_tools_and_a_call_checks_markup() {
 fn the_module_answers_as_the_native_build() {
     let host = load();
     init(&host, Value::Null).unwrap();
-    let (native, _) = weft_cox::Weft::from_config(&json!({})).unwrap();
+    let (mut native, _) = weft_cox::Weft::from_config(&json!({})).unwrap();
     for (name, input) in [
         ("weft_primer", json!({})),
         ("weft_catalog", json!({ "kind": "button" })),
@@ -141,4 +156,56 @@ fn a_broken_config_fails_init_and_the_tools_with_it() {
         Duration::from_secs(10),
     );
     assert!(refused.is_err());
+}
+
+/// The Design tab through the module: the desktop gets the pane, a tool call fills it with the
+/// native build's page, and a click on an element comes back as its attachment.
+#[test]
+fn the_desktop_canvas_shows_what_the_tools_saw() {
+    let host = load();
+    let granted = json!({ "tools": [], "desktop": { "canvas": true } });
+    let out = init_on(&host, json!({}), "desktop", granted.clone())
+        .unwrap()
+        .unwrap();
+    assert_eq!(out["desktop"]["canvas"]["select_attr"], "data-weft-path");
+    let (mut native, _) = weft_cox::Weft::from_config(&json!({})).unwrap();
+    native.open_canvas(Some(cox_plugin_sdk::Surface::Desktop), &granted);
+
+    let markup = "<screen weft=\"0.1\" id=\"home\" label=\"Home\"><button id=\"buy\" on-press=\"shop.buy\" text=\"Buy\"/></screen>";
+    let input = json!({ "markup": markup });
+    tool(&host, "weft_validate", input.clone());
+    native.call(&cox_plugin_sdk::ToolCallIn {
+        name: "weft_validate".into(),
+        input,
+    });
+    let frames = export(
+        &host,
+        "cox_canvas",
+        json!({ "width_pt": 800, "height_pt": 600 }),
+    );
+    assert_eq!(frames, serde_json::to_value(native.frames()).unwrap());
+    assert_eq!(frames["frames"][0]["title"], "home");
+    let html = frames["frames"][0]["html"].as_str().unwrap();
+    assert!(
+        html.contains("data-weft-path=\"/screen#home/button#buy\""),
+        "{html}"
+    );
+
+    let click = json!({ "frame": frames["frames"][0]["id"], "value": "/screen#home/button#buy" });
+    let attach = export(&host, "cox_canvas_select", click);
+    assert_eq!(attach["name"], "Weft: button#buy");
+    assert!(
+        attach["text"].as_str().unwrap().contains("Markup line 1:"),
+        "{attach}"
+    );
+    let elsewhere = json!({ "frame": "s9", "value": "/screen#home" });
+    let none: Option<Value> = host
+        .call(
+            Lane::Control,
+            "cox_canvas_select",
+            &elsewhere,
+            Duration::from_secs(10),
+        )
+        .unwrap();
+    assert!(none.as_ref().is_none_or(Value::is_null), "{none:?}");
 }

@@ -62,7 +62,7 @@ pub use rules::{universal_prop, universal_props};
 pub use sample::{resolve_path, text, truthy};
 pub use serialize::serialize;
 pub use shape::{to_document, to_value};
-pub use source::{ListSource, NodeSource, path_segment};
+pub use source::{ListSource, NodeSource, element_paths, path_segment};
 pub use url::{safe_absolute_url, safe_url};
 pub use validate::{ValidateOptions, validate, validate_document};
 pub use values::{BadValue, format_value, read_value};
