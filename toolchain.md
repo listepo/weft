@@ -27,6 +27,7 @@
 | codex (optional) | https://github.com/openai/codex | `plugins/xcode/scripts/xcode-agents.ts` registers the MCP server with it; its test skips without it | https://github.com/openai/codex |
 | iOS Simulator (`xcrun simctl`) | Xcode, with the iOS 27.0 runtime and an iPhone 17 simulator | `@weft/visual` builds the generated SwiftUI screens into an app and screenshots them; skipped without it | https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device |
 | Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode (skipped without it); the browser leg of `moon run root:runtimes` fails without it | https://github.com/microsoft/playwright |
+| .NET SDK 10.0.402 | `actions/setup-dotnet` in the `winui` job of `ci.yml` (Windows only for the XAML steps) | Builds the WinUI goldens (`crates/weft-winui/windows/WeftScreens.csproj`) | https://github.com/dotnet/sdk |
 
 ## mise
 
@@ -121,6 +122,12 @@
 | @figma/plugin-typings | local | https://github.com/figma/plugin-typings | Official Figma Plugin API types; the conversion is typed against them |
 | @penpot/plugin-types | local | https://github.com/penpot/penpot | Official Penpot plugin API types (MPL-2.0); `@weft/penpot` and the Penpot plugin are typed against them. Pinned to 1.5.0 from the `next` tag, approved by the creator: `latest` (1.4.2) has no design tokens API |
 | ses | local | https://github.com/endojs/endo | The SES library Penpot runs plugins in; the Penpot plugin's bundle test evaluates the plugin in an SES compartment |
+
+## NuGet
+
+| Package | Where | Source | Why here |
+| --- | --- | --- | --- |
+| Microsoft.WindowsAppSDK | local (`crates/weft-winui/windows/WeftScreens.csproj`) | https://github.com/microsoft/WindowsAppSDK | WinUI 3 and its XAML compiler for the Windows build of the goldens |
 
 ## Rust tests
 
