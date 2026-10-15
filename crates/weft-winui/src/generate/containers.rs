@@ -23,7 +23,12 @@ pub(super) const KINDS: &[(&str, &str, &str)] = &[
 ];
 
 /// The named slots the containers draw.
-pub(super) const SLOTS: &[(&str, &str)] = &[("section", "header"), ("dialog", "actions")];
+pub(super) const SLOTS: &[(&str, &str)] = &[
+    ("section", "header"),
+    ("dialog", "actions"),
+    ("list", "empty"),
+    ("table", "empty"),
+];
 
 /// A section's card: the theme's card brushes, with literal sizes since Weft gives it none.
 pub(crate) const CARD: &[(&str, &str)] = &[
@@ -85,7 +90,7 @@ impl Gen<'_> {
             "list" => {
                 e.attr("SelectionMode", "None");
                 self.marker(e, node, "ordered", "Ordered");
-                self.children(e, &node.children);
+                self.list(e, node);
             }
             "item" | "cell" => self.mixed(e, node),
             "table" => self.table(e, node),
@@ -137,7 +142,10 @@ impl Gen<'_> {
         let mut panel = Element::new("StackPanel");
         for child in children {
             match child {
-                Child::Node(n) => panel.children.extend(self.node(n)),
+                Child::Node(n) => {
+                    let c = self.child(n, Some(&panel));
+                    panel.children.extend(c);
+                }
                 Child::Text(t) if t.trim().is_empty() => {}
                 Child::Text(t) => {
                     let mut run = Element::new("TextBlock");
@@ -206,13 +214,21 @@ impl Gen<'_> {
                 .extend(headers.into_iter().enumerate().map(|(i, c)| place(c, 0, i)));
             e.children.push(header);
         }
-        let rows = self.placed(rows.into_iter());
-        e.children.extend(rows);
+        for row in rows {
+            // A repeated column would need a track per item of the header.
+            if row.kind == "each" && nodes(&row.children).any(|n| n.kind != "row") {
+                self.later(row, "an `<each>` of columns");
+                continue;
+            }
+            let row = self.child(row, Some(e));
+            e.children.extend(row);
+        }
+        self.empty(e, node, None);
         self.columns = outer;
     }
 }
 
-fn nodes(children: &[Child]) -> impl Iterator<Item = &Node> {
+pub(super) fn nodes(children: &[Child]) -> impl Iterator<Item = &Node> {
     children.iter().filter_map(|c| match c {
         Child::Node(n) => Some(&**n),
         Child::Text(_) => None,

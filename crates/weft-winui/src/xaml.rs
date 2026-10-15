@@ -7,7 +7,7 @@ use weft_core::escape_attribute;
 const INDENT: &str = "    ";
 
 pub struct Element {
-    name: &'static str,
+    pub name: &'static str,
     attrs: Vec<(String, String)>,
     pub children: Vec<Element>,
 }
@@ -23,6 +23,14 @@ impl Element {
 
     pub fn attr(&mut self, name: impl Into<String>, value: impl Into<String>) {
         self.attrs.push((name.into(), value.into()));
+    }
+
+    /// The value of an attribute already set.
+    pub fn get(&self, name: &str) -> Option<&str> {
+        self.attrs
+            .iter()
+            .find(|(n, _)| n == name)
+            .map(|(_, v)| v.as_str())
     }
 
     pub fn write(&self, depth: usize, out: &mut String) {

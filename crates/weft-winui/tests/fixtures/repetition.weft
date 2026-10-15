@@ -1,0 +1,48 @@
+<screen id="repetition" label="Repetition" weft="0.2">
+  <stack id="tags" direction="row" gap="{token.space.sm}">
+    <text id="tags-label">Tags:</text>
+    <each id="tag-each" as="tag" in="{$.tags}">
+      <text id="tag-name" text="{$tag.name}"/>
+      <button id="tag-remove" hidden="{!$.editing}" on-press="tag.remove">Remove</button>
+    </each>
+  </stack>
+  <section id="groups" label="Groups">
+    <each id="group-each" as="group" in="{$.groups}">
+      <heading id="group-title" level="3" text="{$group.title}"/>
+      <stack id="members">
+        <each id="member-each" as="member" in="{$group.members}">
+          <checkbox id="member-on" checked="{$member.on}" label="{$member.name}"/>
+          <text id="member-group" text="{$group.title}"/>
+        </each>
+      </stack>
+    </each>
+  </section>
+  <list id="results" label="Results" state="{$.resultsState}">
+    <each id="result-each" as="result" in="{$.results}">
+      <item id="result" text="{$result.title}" on-press="result.open"/>
+    </each>
+    <slot name="empty">
+      <text id="no-results">None.</text>
+    </slot>
+  </list>
+  <list id="fixed" label="Fixed" state="{$.fixedState}">
+    <item id="fixed-a">A</item>
+    <slot name="empty">
+      <text id="fixed-empty">Empty.</text>
+    </slot>
+  </list>
+  <table id="scores" label="Scores">
+    <column id="col-player">Player</column>
+    <row id="score-head">
+      <cell id="head-cell">Top</cell>
+    </row>
+    <each id="score-each" as="score" in="{$.scores}">
+      <row id="score-row">
+        <cell id="score-player" text="{$score.player}"/>
+      </row>
+    </each>
+    <slot name="empty">
+      <text id="no-scores">No scores.</text>
+    </slot>
+  </table>
+</screen>

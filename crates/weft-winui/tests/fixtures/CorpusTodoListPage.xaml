@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusTodoList namespace=WeftScreens
+<screen id="todos" label="Tasks" weft="0.1">
+  <heading id="title" level="1">Tasks</heading>
+  <form id="add-form" on-submit="todo.add">
+    <stack id="add-row" direction="row" gap="{token.space.sm}">
+      <field id="draft" label="New task" value="{$.draft}"/>
+      <button id="add" disabled="{!$.draft}" submit="true" variant="primary">Add</button>
+    </stack>
+  </form>
+  <list id="list">
+    <each id="todo-each" as="todo" in="{$.todos}">
+      <item id="todo">
+        <checkbox id="todo-done" checked="{$todo.done}" label="{$todo.title}"/>
+        <button id="todo-remove" on-press="todo.remove">Remove</button>
+      </item>
+    </each>
+  </list>
+  <text id="remaining" text="{$.remainingLabel}"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusTodoListPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="todos" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Tasks">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Tasks" />
+            <StackPanel AutomationProperties.AutomationId="add-form" AutomationProperties.LandmarkType="Form" weft:On.Submit="{x:Bind ViewModel.todo_addCommand}">
+                <StackPanel AutomationProperties.AutomationId="add-row" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
+                    <TextBox AutomationProperties.AutomationId="draft" Text="{x:Bind ViewModel.draft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="New task" />
+                    <Button AutomationProperties.AutomationId="add" Content="Add" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.draft), Mode=OneWay}" weft:On.Submit="{x:Bind ViewModel.todo_addCommand}" />
+                </StackPanel>
+            </StackPanel>
+            <ListView AutomationProperties.AutomationId="list" SelectionMode="None" ItemsSource="{x:Bind ViewModel.todos, Mode=OneWay}" weft:Each.Id="todo-each" weft:Each.As="todo">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="weft:CorpusTodoListTodosItem">
+                        <ContentControl AutomationProperties.AutomationId="todo" AutomationProperties.LocalizedControlType="list item">
+                            <StackPanel>
+                                <CheckBox AutomationProperties.AutomationId="todo-done" IsChecked="{x:Bind done, Mode=TwoWay}" Content="{x:Bind title, Mode=OneWay}" />
+                                <Button AutomationProperties.AutomationId="todo-remove" Content="Remove" weft:On.Press="{x:Bind WeftRoot.todo_removeCommand}" />
+                            </StackPanel>
+                        </ContentControl>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <TextBlock AutomationProperties.AutomationId="remaining" TextWrapping="Wrap" Text="{x:Bind ViewModel.remainingLabel, Mode=OneWay}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

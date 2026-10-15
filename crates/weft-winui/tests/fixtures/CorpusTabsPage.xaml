@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusTabs namespace=WeftScreens
+<screen id="account" label="Account" weft="0.1">
+  <heading id="title" level="1">Account</heading>
+  <tabs id="tabs" label="Account sections">
+    <tab id="tab-overview" label="Overview">
+      <text id="account-name" text="{$.account.name}"/>
+      <text id="account-email" text="{$.account.email}"/>
+    </tab>
+    <tab id="tab-billing" label="Billing">
+      <text id="plan" text="{$.billing.plan}"/>
+      <button id="change-plan" variant="primary" on-press="billing.change">Change plan</button>
+    </tab>
+    <tab id="tab-team" label="Team">
+      <list id="members">
+        <each id="members-each" as="member" in="{$.team}">
+          <item id="member">
+            <text id="member-name" text="{$member.name}"/>
+          </item>
+        </each>
+      </list>
+    </tab>
+  </tabs>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusTabsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="account" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Account">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Account" />
+            <TabView AutomationProperties.AutomationId="tabs" IsAddTabButtonVisible="False" AutomationProperties.Name="Account sections">
+                <TabViewItem AutomationProperties.AutomationId="tab-overview" IsClosable="False" Tag="tab-overview" Header="Overview">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="account-name" TextWrapping="Wrap" Text="{x:Bind ViewModel.account.name, Mode=OneWay}" />
+                        <TextBlock AutomationProperties.AutomationId="account-email" TextWrapping="Wrap" Text="{x:Bind ViewModel.account.email, Mode=OneWay}" />
+                    </StackPanel>
+                </TabViewItem>
+                <TabViewItem AutomationProperties.AutomationId="tab-billing" IsClosable="False" Tag="tab-billing" Header="Billing">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="plan" TextWrapping="Wrap" Text="{x:Bind ViewModel.billing.plan, Mode=OneWay}" />
+                        <Button AutomationProperties.AutomationId="change-plan" Content="Change plan" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.billing_changeCommand}" />
+                    </StackPanel>
+                </TabViewItem>
+                <TabViewItem AutomationProperties.AutomationId="tab-team" IsClosable="False" Tag="tab-team" Header="Team">
+                    <StackPanel>
+                        <ListView AutomationProperties.AutomationId="members" SelectionMode="None" ItemsSource="{x:Bind ViewModel.team, Mode=OneWay}" weft:Each.Id="members-each" weft:Each.As="member">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="weft:CorpusTabsTeamItem">
+                                    <ContentControl AutomationProperties.AutomationId="member" AutomationProperties.LocalizedControlType="list item">
+                                        <StackPanel>
+                                            <TextBlock AutomationProperties.AutomationId="member-name" TextWrapping="Wrap" Text="{x:Bind name, Mode=OneWay}" />
+                                        </StackPanel>
+                                    </ContentControl>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </TabViewItem>
+            </TabView>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

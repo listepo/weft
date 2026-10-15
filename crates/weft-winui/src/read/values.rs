@@ -27,8 +27,9 @@ struct Bound {
     once: bool,
 }
 
-/// Reads `{x:Bind …}` on `el`; the error says why it is not a Weft binding.
-fn x_bind(el: Xml<'_, '_>, value: &str) -> Result<Bound, String> {
+/// Reads `{x:Bind …}` on `el`, inside the `<each>` loops `loops` (outermost first); the error
+/// says why it is not a Weft binding.
+fn x_bind(el: Xml<'_, '_>, value: &str, loops: &[String]) -> Result<Bound, String> {
     let Some(inner) = value
         .strip_prefix("{x:Bind")
         .and_then(|v| v.strip_suffix('}'))
@@ -67,25 +68,40 @@ fn x_bind(el: Xml<'_, '_>, value: &str) -> Result<Bound, String> {
         }
     };
     Ok(Bound {
-        path: data_path(path)?,
+        path: data_path(path, loops)?,
         function,
         once,
     })
 }
 
-/// `ViewModel.todos[0].title` → `$.todos.0.title`. Inside a template `WeftRoot` is the view model;
-/// a path relative to the item belongs to `<each>`, which is read once.
-fn data_path(p: &str) -> Result<String, String> {
-    let rest = p
+/// `ViewModel.todos[0].title` → `$.todos.0.title`. Inside a template `WeftRoot` is the view model,
+/// a path of its own is the innermost loop's item (`title` → `$todo.title`), and each
+/// `WeftParent.` steps out one loop. Outside the loops an `<each>` declares, an item path has no
+/// Weft form.
+fn data_path(p: &str, loops: &[String]) -> Result<String, String> {
+    let not_ours = || format!("`{p}` is not a path of the page's view model");
+    let (root, rest) = match p
         .strip_prefix("ViewModel.")
         .or_else(|| p.strip_prefix("WeftRoot."))
-        .ok_or_else(|| format!("`{p}` is not a path of the page's view model"))?;
+    {
+        Some(rest) => ("$".to_owned(), rest),
+        None => {
+            let mut rest = p;
+            let mut up = 0;
+            while let Some(r) = rest.strip_prefix("WeftParent.") {
+                rest = r;
+                up += 1;
+            }
+            let at = loops.len().checked_sub(up + 1).ok_or_else(not_ours)?;
+            (format!("${}", loops[at]), rest)
+        }
+    };
     // An index closes before a member, another index or the end: `a[0]b` is not a path.
     let closed = rest
         .split(']')
         .skip(1)
         .all(|after| after.is_empty() || after.starts_with(['.', '[']));
-    let path = format!("$.{}", rest.replace(']', "").replace('[', "."));
+    let path = format!("{root}.{}", rest.replace(']', "").replace('[', "."));
     if closed && is_binding(&path) {
         Ok(path)
     } else {
@@ -122,6 +138,12 @@ fn resource(value: &str, thickness: bool) -> Option<&str> {
 }
 
 impl Reader<'_> {
+    /// The list an `ItemsSource` binding repeats, as a plain Weft path.
+    pub(super) fn list_path(&self, el: Xml<'_, '_>, value: &str) -> Option<String> {
+        let bound = x_bind(el, value, &self.loops).ok()?;
+        (bound.function.is_none() && !bound.once).then_some(bound.path)
+    }
+
     /// `value` as `prop` of `node`, when the kind has the prop and the prop takes it.
     fn put(&mut self, node: &mut Node, prop: &str, value: Value, here: &str, attr: &str) {
         let def = self
@@ -178,7 +200,7 @@ impl Reader<'_> {
         here: &str,
     ) {
         let tag = el.tag_name().name();
-        let bound = match x_bind(el, value) {
+        let bound = match x_bind(el, value, &self.loops) {
             Ok(b) => b,
             Err(why) => {
                 return self.lose(
@@ -230,7 +252,8 @@ impl Reader<'_> {
             return self.put(node, "submit", Value::Bool(true), here, attr);
         }
         let command = attr == "Command" || attr.starts_with("On.");
-        let Some(action) = x_bind(el, value).ok().and_then(|b| action(&b, command)) else {
+        let bound = x_bind(el, value, &self.loops).ok();
+        let Some(action) = bound.and_then(|b| action(&b, command)) else {
             let note = format!(
                 "`{attr}` on `{tag}`: not a command of the view model named after a Weft action"
             );

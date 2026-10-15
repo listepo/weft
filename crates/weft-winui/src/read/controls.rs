@@ -163,12 +163,14 @@ const EXPECTED: &[(&str, &str)] = &[
     ("alert", "IsClosable"),
 ];
 
-/// The table kinds, which panels and buttons carry no semantics for, by `LocalizedControlType`.
+/// The kinds panels and buttons carry no semantics for, by `LocalizedControlType`: the table's,
+/// and the item a list's template draws.
 const TABLE: &[(&str, &str, &str)] = &[
     ("StackPanel", "table", "table"),
     ("Grid", "row", "row"),
     ("ContentControl", "cell", "cell"),
     ("Button", "column header", "column"),
+    ("ContentControl", "list item", "item"),
 ];
 
 const LAYOUT: &[&str] = &[
@@ -395,14 +397,14 @@ pub fn wrapper(el: Xml<'_, '_>) -> Option<Option<(LossKind, &'static str)>> {
     Some(match el.tag_name().name() {
         "DataTemplate" | "MenuFlyout" => None,
         // A content control takes one element; the generator's bare panel holds the several of
-        // an alert, dialog, item, tab or cell, while a `stack` of the source carries its
-        // AutomationId.
+        // an alert, dialog, item (a list's own or its template's), tab or cell, while a `stack`
+        // of the source carries its AutomationId.
         "StackPanel"
             if el.attributes().next().is_none()
                 && el.parent_element().is_some_and(|p| {
                     let holder = ["InfoBar", "ContentDialog", "ListViewItem", "TabViewItem"];
                     holder.contains(&p.tag_name().name())
-                        || kind_of(p).is_some_and(|(kind, _)| kind == "cell")
+                        || kind_of(p).is_some_and(|(kind, _)| matches!(kind, "cell" | "item"))
                 }) =>
         {
             None

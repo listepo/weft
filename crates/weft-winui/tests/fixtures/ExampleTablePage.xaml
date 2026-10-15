@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleTable namespace=WeftScreens
+<screen id="root" label="Orders" weft="0.1">
+  <table id="orders" label="Recent orders" state="ready">
+    <column id="col-id">Order</column>
+    <column id="col-total" sort="descending" on-press="orders.sort">Total</column>
+    <each id="order-each" as="order" in="{$.orders}">
+      <row id="order-row" selected="false">
+        <cell id="order-id">
+          <text id="order-id-text" text="{$order.id}"/>
+        </cell>
+        <cell id="order-total">
+          <text id="order-total-text" text="{$order.total}"/>
+        </cell>
+      </row>
+    </each>
+    <slot name="empty">
+      <text id="orders-empty">No orders yet.</text>
+      <button id="orders-shop" on-press="nav.shop">Start shopping</button>
+    </slot>
+  </table>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleTablePage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Orders">
+            <StackPanel AutomationProperties.AutomationId="orders" AutomationProperties.LocalizedControlType="table" AutomationProperties.Name="Recent orders" weft:Props.State="ready">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button AutomationProperties.AutomationId="col-id" AutomationProperties.LocalizedControlType="column header" Content="Order" />
+                    <Button AutomationProperties.AutomationId="col-total" AutomationProperties.LocalizedControlType="column header" Content="Total" weft:Props.Sort="descending" weft:On.Press="{x:Bind ViewModel.orders_sortCommand}" Grid.Column="1" />
+                </Grid>
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.orders, Mode=OneWay}" weft:Each.Id="order-each" weft:Each.As="order">
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="weft:ExampleTableOrdersItem">
+                            <Grid AutomationProperties.AutomationId="order-row" AutomationProperties.LocalizedControlType="row" weft:Props.Selected="False">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ContentControl AutomationProperties.AutomationId="order-id" AutomationProperties.LocalizedControlType="cell">
+                                    <StackPanel>
+                                        <TextBlock AutomationProperties.AutomationId="order-id-text" TextWrapping="Wrap" Text="{x:Bind id, Mode=OneWay}" />
+                                    </StackPanel>
+                                </ContentControl>
+                                <ContentControl AutomationProperties.AutomationId="order-total" AutomationProperties.LocalizedControlType="cell" Grid.Column="1">
+                                    <StackPanel>
+                                        <TextBlock AutomationProperties.AutomationId="order-total-text" TextWrapping="Wrap" Text="{x:Bind total, Mode=OneWay}" />
+                                    </StackPanel>
+                                </ContentControl>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+                <StackPanel weft:Slot.Name="empty" Visibility="{x:Bind weft:Weft.Empty(ViewModel.orders.Count), Mode=OneWay}">
+                    <TextBlock AutomationProperties.AutomationId="orders-empty" TextWrapping="Wrap" Text="No orders yet." />
+                    <Button AutomationProperties.AutomationId="orders-shop" Content="Start shopping" weft:On.Press="{x:Bind ViewModel.nav_shopCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

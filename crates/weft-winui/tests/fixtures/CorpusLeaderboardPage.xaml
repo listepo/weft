@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusLeaderboard namespace=WeftScreens
+<screen id="leaderboard" label="Leaderboard" weft="0.1">
+  <heading id="title" level="1">Leaderboard</heading>
+  <stack id="leader" direction="row" gap="{token.space.xs}">
+    <text id="leader-label">In the lead:</text>
+    <text id="leader-name" text="{$.players.0.name}"/>
+  </stack>
+  <list id="players" ordered="true">
+    <each id="player-each" as="player" in="{$.players}">
+      <item id="player">
+        <text id="player-name" text="{$player.name}"/>
+        <text id="player-score" text="{$player.score}" tone="muted"/>
+      </item>
+    </each>
+  </list>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusLeaderboardPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="leaderboard" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Leaderboard">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Leaderboard" />
+            <StackPanel AutomationProperties.AutomationId="leader" Orientation="Horizontal" Spacing="{StaticResource Weft.space.xs}">
+                <TextBlock AutomationProperties.AutomationId="leader-label" TextWrapping="Wrap" Text="In the lead:" />
+                <TextBlock AutomationProperties.AutomationId="leader-name" TextWrapping="Wrap" Text="{x:Bind ViewModel.players[0].name, Mode=OneWay}" />
+            </StackPanel>
+            <ListView AutomationProperties.AutomationId="players" SelectionMode="None" weft:Props.Ordered="True" ItemsSource="{x:Bind ViewModel.players, Mode=OneWay}" weft:Each.Id="player-each" weft:Each.As="player">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="weft:CorpusLeaderboardPlayersItem">
+                        <ContentControl AutomationProperties.AutomationId="player" AutomationProperties.LocalizedControlType="list item">
+                            <StackPanel>
+                                <TextBlock AutomationProperties.AutomationId="player-name" TextWrapping="Wrap" Text="{x:Bind name, Mode=OneWay}" />
+                                <TextBlock AutomationProperties.AutomationId="player-score" TextWrapping="Wrap" Text="{x:Bind score, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ContentControl>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

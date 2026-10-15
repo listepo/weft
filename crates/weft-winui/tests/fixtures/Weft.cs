@@ -115,6 +115,16 @@ public static class Weft
             : null;
     }
 
+    /// <summary>A bound <c>empty</c> slot (SPEC §5.1): shown when nothing repeats, or when the
+    /// component's <c>state</c> is <c>empty</c>.</summary>
+    public static Visibility Empty(int count) => count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public static Visibility Empty(object? state, int count) =>
+        count == 0 || state as string == "empty" ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>The <c>empty</c> slot of a component whose static items never leave it empty.</summary>
+    public static Visibility EmptyState(object? state) => Empty(state, 1);
+
     internal static DependencyProperty Marker(string name, Type owner) =>
         DependencyProperty.RegisterAttached(name, typeof(object), owner, new PropertyMetadata(null));
 }
@@ -266,6 +276,19 @@ public static class Slot
     public static void SetName(DependencyObject o, object? value) => o.SetValue(NameProperty, value);
 }
 
+/// <summary>An <c>&lt;each&gt;</c>'s id and loop variable on the repeater or list that draws it;
+/// only the importer reads them.</summary>
+public static class Each
+{
+    public static readonly DependencyProperty IdProperty = Weft.Marker("Id", typeof(Each));
+    public static readonly DependencyProperty AsProperty = Weft.Marker("As", typeof(Each));
+
+    public static object? GetId(DependencyObject o) => o.GetValue(IdProperty);
+    public static void SetId(DependencyObject o, object? value) => o.SetValue(IdProperty, value);
+    public static object? GetAs(DependencyObject o) => o.GetValue(AsProperty);
+    public static void SetAs(DependencyObject o, object? value) => o.SetValue(AsProperty, value);
+}
+
 /// <summary>A dialog's <c>open</c>, two-way: true shows the dialog, false hides it, and a
 /// dismissal by the user writes false back and runs the dialog's <c>close</c>, which a dialog the
 /// view model hides does not.</summary>
@@ -409,8 +432,16 @@ public static class On
                 break;
             default:
                 // A table row presses on a tap. A form: Enter in one of its single-line fields
-                // submits it, even when the field handled the key itself.
-                element.Tapped += (_, _) => Fire(element, PressProperty);
+                // submits it, even when the field handled the key itself. An item a list draws
+                // from its ItemsSource presses through the list, by click or key, as a static one.
+                element.Loaded += (_, _) => Clicks(Templated(element));
+                element.Tapped += (_, _) =>
+                {
+                    if (Templated(element) is null)
+                    {
+                        Fire(element, PressProperty);
+                    }
+                };
                 element.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(Entered), true);
                 break;
         }
@@ -430,16 +461,24 @@ public static class On
         list.IsItemClickEnabled = true;
         list.ItemClick += (_, e) =>
         {
-            // The clicked item is the ListViewItem itself, or the content it shows.
-            var item = e.ClickedItem as ListViewItem
+            // The clicked item is the ListViewItem itself, or the content it shows; an item of
+            // the ItemsSource presses the element its template drew.
+            FrameworkElement? item = e.ClickedItem as ListViewItem
                 ?? Ancestor(e.ClickedItem as DependencyObject)
                 ?? list.Items.OfType<ListViewItem>().FirstOrDefault(i => ReferenceEquals(i.Content, e.ClickedItem));
+            item ??= (list.ContainerFromItem(e.ClickedItem) as ListViewItem)?.ContentTemplateRoot as FrameworkElement;
             if (item is not null)
             {
                 Fire(item, PressProperty);
             }
         };
     }
+
+    // The list whose ItemsSource item `element` draws, as the root of the item's template.
+    private static ListViewBase? Templated(FrameworkElement element) =>
+        Ancestor(VisualTreeHelper.GetParent(element)) is { } item && ReferenceEquals(item.ContentTemplateRoot, element)
+            ? ItemsControl.ItemsControlFromItemContainer(item) as ListViewBase
+            : null;
 
     private static ListViewItem? Ancestor(DependencyObject? o)
     {

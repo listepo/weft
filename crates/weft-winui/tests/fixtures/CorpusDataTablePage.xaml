@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusDataTable namespace=WeftScreens
+<screen id="users" label="Users" weft="0.1">
+  <heading id="title" level="1">Users</heading>
+  <table id="table" label="Users">
+    <column id="col-name" sort="ascending" on-press="users.sort">Name</column>
+    <column id="col-email" sort="none" on-press="users.sort">Email</column>
+    <column id="col-role" sort="none" on-press="users.sort">Role</column>
+    <column id="col-actions">Actions</column>
+    <each id="rows" as="user" in="{$.users}">
+      <row id="row">
+        <cell id="cell-name">
+          <text id="user-name" text="{$user.name}"/>
+        </cell>
+        <cell id="cell-email">
+          <text id="user-email" text="{$user.email}"/>
+        </cell>
+        <cell id="cell-role">
+          <text id="user-role" text="{$user.role}"/>
+        </cell>
+        <cell id="cell-actions">
+          <button id="delete" label="{$user.deleteLabel}" variant="danger" on-press="users.delete">Delete</button>
+        </cell>
+      </row>
+    </each>
+  </table>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusDataTablePage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="users" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Users">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Users" />
+            <StackPanel AutomationProperties.AutomationId="table" AutomationProperties.LocalizedControlType="table" AutomationProperties.Name="Users">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button AutomationProperties.AutomationId="col-name" AutomationProperties.LocalizedControlType="column header" Content="Name" weft:Props.Sort="ascending" weft:On.Press="{x:Bind ViewModel.users_sortCommand}" />
+                    <Button AutomationProperties.AutomationId="col-email" AutomationProperties.LocalizedControlType="column header" Content="Email" weft:Props.Sort="none" weft:On.Press="{x:Bind ViewModel.users_sortCommand}" Grid.Column="1" />
+                    <Button AutomationProperties.AutomationId="col-role" AutomationProperties.LocalizedControlType="column header" Content="Role" weft:Props.Sort="none" weft:On.Press="{x:Bind ViewModel.users_sortCommand}" Grid.Column="2" />
+                    <Button AutomationProperties.AutomationId="col-actions" AutomationProperties.LocalizedControlType="column header" Content="Actions" Grid.Column="3" />
+                </Grid>
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.users, Mode=OneWay}" weft:Each.Id="rows" weft:Each.As="user">
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="weft:CorpusDataTableUsersItem">
+                            <Grid AutomationProperties.AutomationId="row" AutomationProperties.LocalizedControlType="row">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ContentControl AutomationProperties.AutomationId="cell-name" AutomationProperties.LocalizedControlType="cell">
+                                    <StackPanel>
+                                        <TextBlock AutomationProperties.AutomationId="user-name" TextWrapping="Wrap" Text="{x:Bind name, Mode=OneWay}" />
+                                    </StackPanel>
+                                </ContentControl>
+                                <ContentControl AutomationProperties.AutomationId="cell-email" AutomationProperties.LocalizedControlType="cell" Grid.Column="1">
+                                    <StackPanel>
+                                        <TextBlock AutomationProperties.AutomationId="user-email" TextWrapping="Wrap" Text="{x:Bind email, Mode=OneWay}" />
+                                    </StackPanel>
+                                </ContentControl>
+                                <ContentControl AutomationProperties.AutomationId="cell-role" AutomationProperties.LocalizedControlType="cell" Grid.Column="2">
+                                    <StackPanel>
+                                        <TextBlock AutomationProperties.AutomationId="user-role" TextWrapping="Wrap" Text="{x:Bind role, Mode=OneWay}" />
+                                    </StackPanel>
+                                </ContentControl>
+                                <ContentControl AutomationProperties.AutomationId="cell-actions" AutomationProperties.LocalizedControlType="cell" Grid.Column="3">
+                                    <StackPanel>
+                                        <Button AutomationProperties.AutomationId="delete" Content="Delete" weft:Props.Variant="danger" AutomationProperties.Name="{x:Bind deleteLabel, Mode=OneWay}" weft:On.Press="{x:Bind WeftRoot.users_deleteCommand}" />
+                                    </StackPanel>
+                                </ContentControl>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

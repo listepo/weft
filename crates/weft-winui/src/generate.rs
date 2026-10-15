@@ -17,6 +17,7 @@ use crate::xaml::{Element, boolean, literal, type_name};
 
 pub(crate) mod containers;
 mod controls;
+mod repetition;
 
 /// The source comment's options start with this word; `import_winui` checks it.
 pub(crate) const TARGET: &str = "winui";
@@ -151,6 +152,7 @@ pub fn generate(
         forms: vec![],
         editable: false,
         columns: 0,
+        name: name.clone(),
     };
     let panel = g.node(&expanded.root);
     let mut names = vec![];
@@ -221,6 +223,8 @@ struct Gen<'a> {
     editable: bool,
     /// The columns of the enclosing table, which each of its rows lines up with.
     columns: usize,
+    /// The page's name, which the generated classes start with.
+    name: String,
 }
 
 impl Gen<'_> {
@@ -332,7 +336,7 @@ impl Gen<'_> {
     fn children(&mut self, e: &mut Element, children: &[Child]) {
         for child in children {
             if let Child::Node(n) = child
-                && let Some(c) = self.node(n)
+                && let Some(c) = self.child(n, Some(e))
             {
                 e.children.push(c);
             }
@@ -340,6 +344,9 @@ impl Gen<'_> {
     }
 
     fn node(&mut self, node: &Node) -> Option<Element> {
+        if node.kind == "each" {
+            return self.child(node, None);
+        }
         let mut all = KINDS.iter().chain(controls::KINDS).chain(containers::KINDS);
         let Some(&(kind, control, props)) = all.find(|k| k.0 == node.kind) else {
             self.later(node, &format!("`{}`", node.kind));
@@ -423,7 +430,8 @@ impl Gen<'_> {
         self.marker(&mut e, node, "state", "State");
         for (event, action) in &node.on {
             let name = format!("weft:On.{}", type_name(event));
-            e.attr(name, format!("{{x:Bind ViewModel.{}}}", command(action)));
+            let root = self.data.root();
+            e.attr(name, format!("{{x:Bind {root}.{}}}", command(action)));
         }
         if matches!(kind, "screen" | "stack" | "form") {
             self.children(&mut e, &node.children);
@@ -492,7 +500,8 @@ impl Gen<'_> {
         if matches!(node.props.get("submit"), Some(Value::Bool(true)))
             && let Some(Some(submit)) = self.forms.last()
         {
-            e.attr("weft:On.Submit", format!("{{x:Bind ViewModel.{submit}}}"));
+            let root = self.data.root();
+            e.attr("weft:On.Submit", format!("{{x:Bind {root}.{submit}}}"));
         }
     }
 

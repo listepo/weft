@@ -304,9 +304,36 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
             r#"<grid id="g" columns="101"><text id="a">A</text></grid>"#,
             "grid#g",
         ),
+        // A repeater cannot share a grid's tracks, fill a choice, or sit among static items or
+        // columns.
         (
-            r#"<list id="l" label="L"><item id="i">A</item><slot name="empty"><text id="e">E</text></slot></list>"#,
-            "list#l",
+            r#"<grid id="g" columns="2"><each id="e" as="x" in="{$.xs}"><text id="t" text="{$x.a}"/></each></grid>"#,
+            "each#e",
+        ),
+        (
+            r#"<select id="se" label="S"><each id="e" as="x" in="{$.xs}"><option id="o" value="{$x.a}">O</option></each></select>"#,
+            "each#e",
+        ),
+        (
+            r#"<list id="l" label="L"><item id="i">A</item><each id="e" as="x" in="{$.xs}"><item id="j" text="{$x.a}"/></each></list>"#,
+            "each#e",
+        ),
+        (
+            r#"<table id="tb" label="T"><each id="e" as="x" in="{$.xs}"><column id="c" text="{$x.a}"/></each></table>"#,
+            "each#e",
+        ),
+        // A loop's item is an object, and `WeftParent` reaches only the item its list is under.
+        (
+            r#"<stack id="st"><each id="e" as="x" in="{$.xs}"><text id="t" text="{$x}"/></each></stack>"#,
+            "text#t",
+        ),
+        (
+            r#"<stack id="st"><each id="e" as="x" in="{$.xs}"><text id="t" text="{$x.0}"/></each></stack>"#,
+            "$x.0",
+        ),
+        (
+            r#"<stack id="st"><each id="e" as="x" in="{$.xs}"><each id="f" as="y" in="{$.ys}"><text id="t" text="{$x.a}"/></each></each></stack>"#,
+            "text#t",
         ),
         (r#"<button id="b" variant="{$.v}">A</button>"#, "button#b"),
         (r#"<text id="t" tone="{$.tone}">A</text>"#, "text#t"),
