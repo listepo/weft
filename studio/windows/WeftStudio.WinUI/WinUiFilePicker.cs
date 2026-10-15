@@ -1,6 +1,8 @@
 // The Windows App SDK pickers (1.8 and later): constructed with the window's AppWindow.Id, they
 // return a path rather than a StorageFile, so the editor reads and writes the file itself.
 
+// System holds the GetAwaiter extension that lets C# await a WinRT IAsyncOperation.
+using System;
 using System.Threading.Tasks;
 using Microsoft.UI;
 using Microsoft.Windows.Storage.Pickers;
