@@ -1912,3 +1912,15 @@ The creator authorized dependency updates across the audit. Update only vulnerab
 Execution plan: reproduce the advisory audit; apply compatible package-manager updates; review the lockfile diff; run advisory regression checks and the project test/lint/format gates; publish a PR and merge only after required checks pass. No custom dependency implementation is needed. Rollback is a revert of the dependency-update commit.
 
 Validation: pnpm audit reports zero vulnerabilities after updating the existing SolidJS and babel-preset-solid dependencies. The complete required moon gate (`:test root:typecheck root:lint root:rust-test root:rust-lint root:runtimes`) exits zero: 38 tasks completed, including 1002 Rust tests, 320 web visual checks (4 expected failures) and 60 SwiftUI checks. Earlier Xcode/simulator timeouts under load passed on the final full run; no snapshots, guards, timeouts or expected results were weakened. Existing packages are reused; no custom implementation or new dependency was added.
+
+### T901. Update the cox plugin test host
+
+The separate plugin lockfile retains vulnerable Wasmtime versions through the pinned shared test host. Update the existing shared dependency without changing the guest ABI or plugin behavior.
+
+Execution plan:
+
+1. Reproduce the RustSec findings against `plugins/cox/Cargo.lock`; reuse the maintained `wasm-plugin-host` package and existing end-to-end tests.
+2. Pin the merged security fix from pyrlyn/crates in `plugins/cox/Cargo.toml`, regenerate its lockfile, and verify the old runtime is absent. Rollback is a revert of this dependency-only change.
+3. Run the plugin build, clippy and tests, the nested audit, and the full repository merge gate. Close this card only after successful checks.
+
+Done: reused the existing shared host at merged commit `7fc02456ec732e6b742ffb8245ad78d5318e7b9d`; the nested lockfile now contains Wasmtime/WASI 49.0.3 and no Wasmtime 43. The nested RustSec audit changed from vulnerable to clean. Plugin build, strict host/guest clippy, all 21 plugin tests (including four end-to-end cases), and the full 38-task repository gate passed. No guest ABI, generated output, new dependency, or custom implementation was needed.

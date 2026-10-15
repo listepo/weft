@@ -37,7 +37,7 @@ weft-web = { path = "../../crates/weft-web" }
 toml = "1"
 # The shared extism engine of cox's plugin host (packages/crates); tests/e2e.rs loads the module
 # with it. Not on crates.io yet, so pinned to a pyrlyn/crates commit.
-wasm-plugin-host = { git = "https://github.com/pyrlyn/crates", rev = "6e2d756f458503bf4fe53a1bbd6a559923566cff" }
+wasm-plugin-host = { git = "https://github.com/pyrlyn/crates", rev = "7fc02456ec732e6b742ffb8245ad78d5318e7b9d" }
 
 [lints.rust]
 unsafe_code = "forbid"
