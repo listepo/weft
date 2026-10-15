@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusAppearance namespace=WeftScreens
+<screen id="appearance" label="Appearance" weft="0.1">
+  <heading id="title" level="1">Appearance</heading>
+  <stack id="options" align="stretch" gap="{token.space.md}">
+    <segmented-control id="theme" label="Theme" value="{$.theme}">
+      <segment id="theme-light" value="light">Light</segment>
+      <segment id="theme-dark" disabled="true" value="dark">Dark</segment>
+      <segment id="theme-auto" text="{$.automatic}" value="auto"/>
+    </segmented-control>
+    <slider id="size" label="Text size" max="24" min="12" value="{$.size}"/>
+    <slider id="contrast" disabled="true" label="Contrast" value="{$.contrast}"/>
+    <stepper id="columns" label="Columns" value="{$.columns}"/>
+    <stepper id="zoom" disabled="{$.locked}" label="Zoom" max="3" step="0.5" value="{$.zoom}"/>
+    <color-picker id="accent" disabled="true" label="Accent colour" value="#d946ef"/>
+    <date-picker id="since" disabled="true" label="Member since" type="date" value="2024-05-17"/>
+    <combobox id="font" disabled="true" label="Font" value="Inter">
+      <option id="font-inter" value="Inter">Inter</option>
+      <option id="font-mono" value="Menlo">Menlo</option>
+    </combobox>
+  </stack>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusAppearancePage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="appearance" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Appearance">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Appearance" />
+            <StackPanel AutomationProperties.AutomationId="options" Spacing="{StaticResource Weft.space.md}">
+                <SelectorBar AutomationProperties.AutomationId="theme" weft:Choice.Value="{x:Bind ViewModel.theme, Mode=TwoWay}" AutomationProperties.Name="Theme" HorizontalAlignment="Stretch">
+                    <SelectorBarItem AutomationProperties.AutomationId="theme-light" Text="Light" Tag="light" />
+                    <SelectorBarItem AutomationProperties.AutomationId="theme-dark" Text="Dark" Tag="dark" IsEnabled="False" />
+                    <SelectorBarItem AutomationProperties.AutomationId="theme-auto" Text="{x:Bind ViewModel.automatic, Mode=OneWay}" Tag="auto" />
+                </SelectorBar>
+                <Slider AutomationProperties.AutomationId="size" Minimum="12" Maximum="24" Value="{x:Bind ViewModel.size, Mode=TwoWay}" Header="Text size" HorizontalAlignment="Stretch" />
+                <Slider AutomationProperties.AutomationId="contrast" Value="{x:Bind ViewModel.contrast, Mode=TwoWay}" IsEnabled="False" Header="Contrast" HorizontalAlignment="Stretch" />
+                <NumberBox AutomationProperties.AutomationId="columns" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.columns, Mode=TwoWay}" Header="Columns" HorizontalAlignment="Stretch" />
+                <NumberBox AutomationProperties.AutomationId="zoom" SpinButtonPlacementMode="Inline" Maximum="3" SmallChange="0.5" Value="{x:Bind ViewModel.zoom, Mode=TwoWay}" IsEnabled="{x:Bind weft:Weft.Not(ViewModel.locked), Mode=OneWay}" Header="Zoom" HorizontalAlignment="Stretch" />
+                <DropDownButton AutomationProperties.AutomationId="accent" weft:Choice.Value="#d946ef" IsEnabled="False" AutomationProperties.Name="Accent colour" HorizontalAlignment="Stretch">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Width="16" Height="16" CornerRadius="4" Background="#d946ef" />
+                        <TextBlock Text="Accent colour" />
+                    </StackPanel>
+                    <DropDownButton.Flyout>
+                        <Flyout>
+                            <ColorPicker IsAlphaEnabled="False" />
+                        </Flyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+                <CalendarDatePicker AutomationProperties.AutomationId="since" weft:Choice.Value="2024-05-17" IsEnabled="False" Header="Member since" HorizontalAlignment="Stretch" />
+                <ComboBox AutomationProperties.AutomationId="font" IsEditable="True" weft:Choice.Value="Inter" IsEnabled="False" Header="Font" HorizontalAlignment="Stretch">
+                    <ComboBoxItem AutomationProperties.AutomationId="font-inter" Content="Inter" ToolTipService.ToolTip="Inter" Tag="Inter" />
+                    <ComboBoxItem AutomationProperties.AutomationId="font-mono" Content="Menlo" ToolTipService.ToolTip="Menlo" Tag="Menlo" />
+                </ComboBox>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
