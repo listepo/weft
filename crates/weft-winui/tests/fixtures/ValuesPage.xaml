@@ -23,6 +23,13 @@
   <slider id="above" label="Above" max="-5" min="{$.bottom}" value="{$.level}"/>
   <stepper id="count" label="Count" max="8" min="2" step="2" value="{$.count}" on-change="count.set"/>
   <stepper id="free" label="Free" value="3"/>
+  <date-picker id="day" label="Day" max="{$.lastDay}" min="2026-01-01" value="{$.day}" on-change="day.pick"/>
+  <date-picker id="bad-day" label="Bad day" max="2026-02-30" min="soon" type="date" value="tomorrow"/>
+  <date-picker id="alarm" disabled="{$.locked}" label="Alarm" max="18:00" min="{$.opens}" type="time" value="{$.alarm}"/>
+  <date-picker id="meeting" disabled="true" label="Meeting" max="2026-12-31T18:00" min="2026-01-01T09:00" type="datetime" value="2026-05-17T10:30" on-change="meeting.move"/>
+  <color-picker id="accent" label="Accent" value="{$.accent}" on-change="accent.pick"/>
+  <color-picker id="plain" disabled="{!$.custom}" label="Plain" value="#D946EF"/>
+  <color-picker id="broken" label="Broken" value="red"/>
   <link id="mail" href="mailto:help@\example.com">Mail us</link>
   <link id="relative" href="/help">Help</link>
   <link id="script" href="javascript:alert(1)" label="Unsafe link">Unsafe</link>
@@ -75,6 +82,46 @@
             <Slider AutomationProperties.AutomationId="above" Minimum="{x:Bind ViewModel.bottom, Mode=OneWay}" Maximum="-5" Value="{x:Bind ViewModel.level, Mode=TwoWay}" Header="Above" />
             <NumberBox AutomationProperties.AutomationId="count" SpinButtonPlacementMode="Inline" Minimum="2" Maximum="8" SmallChange="2" Value="{x:Bind ViewModel.count, Mode=TwoWay}" Header="Count" weft:On.Change="{x:Bind ViewModel.count_setCommand}" />
             <NumberBox AutomationProperties.AutomationId="free" SpinButtonPlacementMode="Inline" Value="3" Header="Free" />
+            <CalendarDatePicker AutomationProperties.AutomationId="day" weft:Choice.Value="{x:Bind ViewModel.day, Mode=TwoWay}" MinDate="{x:Bind weft:Weft.Earliest('2026-01-01')}" MaxDate="{x:Bind weft:Weft.Latest(ViewModel.lastDay), Mode=OneWay}" Header="Day" weft:On.Change="{x:Bind ViewModel.day_pickCommand}" />
+            <CalendarDatePicker AutomationProperties.AutomationId="bad-day" weft:Choice.Value="tomorrow" weft:Props.Min="soon" weft:Props.Max="2026-02-30" Header="Bad day" />
+            <TimePicker AutomationProperties.AutomationId="alarm" weft:Choice.Value="{x:Bind ViewModel.alarm, Mode=TwoWay}" IsEnabled="{x:Bind weft:Weft.Not(ViewModel.locked), Mode=OneWay}" weft:Props.Min="{x:Bind ViewModel.opens, Mode=OneWay}" weft:Props.Max="18:00" Header="Alarm" />
+            <StackPanel AutomationProperties.AutomationId="meeting" weft:Choice.Value="2026-05-17T10:30" Orientation="Horizontal" AutomationProperties.Name="Meeting" weft:On.Change="{x:Bind ViewModel.meeting_moveCommand}">
+                <CalendarDatePicker Header="Meeting" IsEnabled="False" MinDate="{x:Bind weft:Weft.Earliest('2026-01-01T09:00')}" MaxDate="{x:Bind weft:Weft.Latest('2026-12-31T18:00')}" />
+                <TimePicker IsEnabled="False" />
+            </StackPanel>
+            <DropDownButton AutomationProperties.AutomationId="accent" weft:Choice.Value="{x:Bind ViewModel.accent, Mode=TwoWay}" AutomationProperties.Name="Accent" weft:On.Change="{x:Bind ViewModel.accent_pickCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border Width="16" Height="16" CornerRadius="4" Background="{x:Bind weft:Weft.Swatch(ViewModel.accent), Mode=OneWay}" />
+                    <TextBlock Text="Accent" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                    <Flyout>
+                        <ColorPicker IsAlphaEnabled="False" />
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+            <DropDownButton AutomationProperties.AutomationId="plain" weft:Choice.Value="#D946EF" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.custom), Mode=OneWay}" AutomationProperties.Name="Plain">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border Width="16" Height="16" CornerRadius="4" Background="#d946ef" />
+                    <TextBlock Text="Plain" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                    <Flyout>
+                        <ColorPicker IsAlphaEnabled="False" />
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+            <DropDownButton AutomationProperties.AutomationId="broken" weft:Choice.Value="red" AutomationProperties.Name="Broken">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border Width="16" Height="16" CornerRadius="4" Background="#000000" />
+                    <TextBlock Text="Broken" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                    <Flyout>
+                        <ColorPicker IsAlphaEnabled="False" />
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
             <HyperlinkButton AutomationProperties.AutomationId="mail" Content="Mail us" NavigateUri="mailto:help@example.com" />
             <HyperlinkButton AutomationProperties.AutomationId="relative" Content="Help" weft:Props.Href="/help" />
             <HyperlinkButton AutomationProperties.AutomationId="script" Content="Unsafe" weft:Props.Href="javascript:alert(1)" AutomationProperties.Name="Unsafe link" />

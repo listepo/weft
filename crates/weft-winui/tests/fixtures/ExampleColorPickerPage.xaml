@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleColorPicker namespace=WeftScreens
+<screen id="root" label="Theme" weft="0.1">
+  <color-picker id="accent" disabled="false" label="Accent colour" value="{$.accent}" on-change="theme.update"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleColorPickerPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Theme">
+            <DropDownButton AutomationProperties.AutomationId="accent" weft:Choice.Value="{x:Bind ViewModel.accent, Mode=TwoWay}" IsEnabled="True" AutomationProperties.Name="Accent colour" weft:On.Change="{x:Bind ViewModel.theme_updateCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border Width="16" Height="16" CornerRadius="4" Background="{x:Bind weft:Weft.Swatch(ViewModel.accent), Mode=OneWay}" />
+                    <TextBlock Text="Accent colour" />
+                </StackPanel>
+                <DropDownButton.Flyout>
+                    <Flyout>
+                        <ColorPicker IsAlphaEnabled="False" />
+                    </Flyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
