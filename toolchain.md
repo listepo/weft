@@ -20,8 +20,8 @@
 | hk | mise | Runs jactionlint as a pre-push hook (`hk.pkl`) | https://github.com/jdx/hk |
 | shellcheck | mise | Checks `run:` scripts inside jactionlint | https://github.com/koalaman/shellcheck |
 | cargo-insta | `cargo install cargo-insta` (optional) | Reviews changed snapshots (`cargo insta review`); the tests run without it | https://github.com/mitsuhiko/insta |
-| Xcode (`xcrun swiftc`, `xcodebuild`, `swift`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14, and builds the SwiftPM plugins, the sample projects and the Source Editor Extension (`plugins/xcode`); those tests skip without it | https://developer.apple.com/xcode/ |
-| XcodeGen | mise | Generates the `.xcodeproj` of the Xcode sample and of the Source Editor Extension from YAML (`plugins/xcode`), so no project file is committed | https://github.com/yonaskolb/XcodeGen |
+| Xcode (`xcrun swiftc`, `xcodebuild`, `swift`) | Mac App Store | Typechecks the Swift that weft-swiftui generates, for iOS 17 and macOS 14, and builds the SwiftPM plugins, the sample projects and the Source Editor Extension (`plugins/xcode`), and WeftStudio for macOS (`studio/macos`, arm64); those tests skip without it | https://developer.apple.com/xcode/ |
+| XcodeGen | mise | Generates the `.xcodeproj` of the Xcode sample, of the Source Editor Extension (`plugins/xcode`) and of WeftStudio for macOS (`studio/macos`) from YAML, so no project file is committed | https://github.com/yonaskolb/XcodeGen |
 | uv | mise | Installs the Python tools of the `pipx:` backend | https://github.com/astral-sh/uv |
 | Translate Toolkit | mise (`pipx:translate-toolkit`) | Localization file converters and checks (`po2json`, `pofilter`, `pocount`) | https://github.com/translate/translate |
 | codex (optional) | https://github.com/openai/codex | `plugins/xcode/scripts/xcode-agents.ts` registers the MCP server with it; its test skips without it | https://github.com/openai/codex |
@@ -43,7 +43,7 @@
 | github:wasm-bindgen/wasm-bindgen | global | https://github.com/wasm-bindgen/wasm-bindgen | WebAssembly JS glue |
 | npm:@napi-rs/cli | global | https://github.com/napi-rs/napi-rs | Native addon builds |
 | cargo:cargo-nextest | global | https://github.com/nextest-rs/nextest | Rust test runner |
-| aqua:yonaskolb/XcodeGen | global | https://github.com/yonaskolb/XcodeGen | Xcode projects of `plugins/xcode` |
+| aqua:yonaskolb/XcodeGen | global | https://github.com/yonaskolb/XcodeGen | Xcode projects of `plugins/xcode` and `studio/macos` |
 | uv | global | https://github.com/astral-sh/uv | Backend for the `pipx:` tools |
 | pipx:translate-toolkit | global | https://github.com/translate/translate | Localization converters and checks |
 | github:jdx/jactionlint | global | https://github.com/jdx/jactionlint | Workflow lint |

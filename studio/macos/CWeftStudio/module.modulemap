@@ -1,0 +1,4 @@
+module CWeftStudio {
+    header "../../../crates/weft-studio-ffi/include/weft_studio.h"
+    export *
+}
