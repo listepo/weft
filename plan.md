@@ -15,7 +15,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.7 | todo | P2 | 3 | 0% | |
-| T105.9 | in progress | P2 | 4 | 5% | Claude Code / claude-opus-5-5 |
 | T105.10 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -311,18 +310,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.7. Windows CI build of the generated pages
 
 A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `actions/setup-dotnet` pinned by SHA, .NET SDK 10.0.402, `dotnet build` of a WinUI 3 class library (`Microsoft.WindowsAppSDK` 2.5.1, warnings as errors) that includes every golden page, view model and the shared files. A Rust test that every corpus screen and catalog example has a golden. Not a required check at first. About 120 lines. Done when the job is green on the T105.1–T105.2 goldens and fails on a deliberately broken golden (shown in the PR).
-
-### T105.9. Hand-written WinUI importer: bindings, events, tokens and layout
-
-`{x:Bind ViewModel.…}` paths, the `Weft` function bindings and modes into bindings; `weft:On.*`, native `Command` and event bindings into actions; `Weft.*` resource references into tokens; `Grid` tracks back into `justify` and `grow`, alignments into `align`. About 450 lines of code. Done when every corpus screen reads back from its XAML alone with only the losses SPEC §9 lists.
-
-**Execution plan.**
-
-1. `crates/weft-winui/src/read/values.rs`: parse an `{x:Bind …}` value (path from `ViewModel.`/`WeftRoot.` with `[i]` indexes into `$.a.0.b`; `Mode=OneWay|TwoWay`, `UpdateSourceTrigger`; the function bindings `Weft.Not`, `Truthy`, `Hide` through a prefix that resolves to a `using:` namespace); apply it per conversion (`IsEnabled` and `Visibility` invert, markers keep `Not` as `{!…}`); a bound `Text`/`Content` is the `text` prop. A missing or `OneTime` mode, other options, `{Binding}` and item-relative paths stay `bindings` losses.
-2. Events: `weft:On.<Event>="{x:Bind ViewModel.a_bCommand}"` → `on-<event>="a.b"` (checked against the kind's events), `On.Submit` on a button → `submit="true"`; native `Command="{x:Bind …Command}"` and `Click="{x:Bind ViewModel.a_b}"` (and the change events) → `on-press`/`on-change`. Code-behind handlers stay `actions` losses.
-3. Tokens: `{StaticResource|ThemeResource Weft.<path>}` (`.thickness` stripped) on `Spacing`, `RowSpacing`/`ColumnSpacing`, `Padding`, `MaxWidth` → the token props, when the path is a token of the given tokens; else a `tokens` loss.
-4. `crates/weft-winui/src/read/layout.rs`: a `Grid` with tracks on one axis that has an `Auto` track (or only `RowDefinitions`) is a `stack`: direction from the axis, children ordered by `Grid.Column`/`Grid.Row`, a star child track → `grow`, the empty star tracks → `justify` (`end`, `center`, `space-between`), spacing → `gap`. The children's shared cross-axis alignment → `align` (a row's `Center` is the default and not read). Other track patterns and mixed alignments are `layout` losses.
-5. Tests in `crates/weft-winui/tests/read.rs`: each binding form and mode, each event form, token references, the layout mappings, and every covered screen read back from its XAML alone with no `bindings`/`actions`/`tokens` losses; regenerate `controls.read.*` and `handwritten.read.*`. SPEC §9 "From WinUI" and its loss list updated.
 
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
