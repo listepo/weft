@@ -16,7 +16,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.7 | todo | P2 | 3 | 0% | |
 | T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
-| T105.12 | todo | P2 | 3 | 0% | |
+| T105.13 | todo | P2 | 3 | 0% | |
 
 ### T8. Evaluation
 
@@ -316,7 +316,7 @@ A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `a
 
 SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.
 
-### T105.12. WinUI date and colour pickers
+### T105.13. WinUI date and colour pickers
 
-Split from T105.3 to keep it under 500 lines of code. `date-picker` (`CalendarDatePicker`, `TimePicker`, and a horizontal `StackPanel` of both for `datetime`) and `color-picker` (a `DropDownButton` swatch whose `Flyout` holds a `ColorPicker` without alpha), with `Choice.Value` cases for them, the converter functions `Weft.Day/DayText/Clock/ClockText/Color/Hex/Swatch/Earliest/Latest`, the `Props.Min`/`Props.Max` markers, the SPEC §9 and `docs/winui-design.md` rows, and the hand-written reader reading the `datetime` row and the colour button back. The pre-split implementation, with goldens, tests and the reader cases, is commit `e47549f6` on branch `claude/t105-12-winui-date-colour`: rebase it onto `main` after T105.3 and keep only these parts. About 230 lines of code. Done when `example-date-picker` and `example-color-picker` join the covered screens, the `values` fixture has the pickers back, and their goldens match and read back.
+Split from T105.3 to keep it under 500 lines of code. `date-picker` (`CalendarDatePicker`, `TimePicker`, and a horizontal `StackPanel` of both for `datetime`) and `color-picker` (a `DropDownButton` swatch whose `Flyout` holds a `ColorPicker` without alpha), with `Choice.Value` cases for them, the converter functions `Weft.Day/DayText/Clock/ClockText/Color/Hex/Swatch/Earliest/Latest`, the `Props.Min`/`Props.Max` markers, the SPEC §9 and `docs/winui-design.md` rows, and the hand-written reader reading the `datetime` row and the colour button back. The pre-split implementation, with goldens, tests and the reader cases, is commit `e47549f6` on branch `claude/t105-13-winui-date-colour`: rebase it onto `main` after T105.3 and keep only these parts. About 230 lines of code. Done when `example-date-picker` and `example-color-picker` join the covered screens, the `values` fixture has the pickers back, and their goldens match and read back.
 
