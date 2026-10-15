@@ -5,6 +5,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | # | Status | Priority | Complexity | Readiness | Agent |
 | --- | --- | --- | --- | --- | --- |
 | T8 | in progress | P1 | 3 | 70% | Claude Code / claude-opus-5-5 |
+| T902 | in progress | P1 | 2 | 10% | Claude Code / claude-opus-5-5 |
 | T14 | in progress | P2 | 5 | 75% | Claude Code / claude-opus-5-5 |
 | T69 | todo | P2 | 5 | 0% | |
 | T69.1 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
@@ -32,6 +33,16 @@ Execution plan:
 8. Verify with `pnpm run ci`.
 
 Progress: steps 1–5 are done (repair cycle, summaries, `DEFAULT_MODELS`, results committed under `bench/results/`, trial row in `test.md`). `bench/EVALUATION.md` records those runs against the numeric bar and does not close the task. Remaining: step 6, the three-sample edit and read runs on the current harness, then a history row and a revision of the report. Step 8 waits on that.
+
+### T902. Flaky studio-windows smoke test
+
+Bug. `The_app_shows_a_corpus_screen_and_saves_it_as_the_same_bytes` (`studio/windows/WeftStudio.Tests/SmokeTests.cs`) fails now and then on the `studio-windows` job: on main (run 38812071828) and on two PR runs the title stays `screen.weft` for the whole 60 s after Ctrl+Shift+S, so Save As never ran. The window capture taken before the keystroke matches a passing run. Done when the cause is found and fixed (not a longer timeout or a retry), the job passes several reruns in a row, and a failure says what was missing.
+
+Execution plan:
+
+1. Probe PR: repeat the Save As step and record the foreground window and the focus window around the click and the keystroke (`Native.cs`, `GetForegroundWindow`, `GetGUIThreadInfo`), to see which one is not ready when the keystroke is lost.
+2. Fix the test to wait, bounded, for that condition before it types, with an assertion that names the missing condition and the windows it found.
+3. Rerun the `studio-windows` job several times on the fix PR; record the runs in the PR.
 
 ### T14. Figma round trip and plugin
 
