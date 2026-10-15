@@ -1,15 +1,19 @@
-//! Weft → WinUI over the corpus screens and catalog examples the generator covers so far, and a
-//! fixture of every prop it draws: the XAML matches its reviewed golden file and is well-formed
-//! XML, and what the slice cannot draw is refused with its path. `WEFT_UPDATE_FIXTURES=1`
-//! rewrites the golden files.
+//! Weft → WinUI over the corpus screens and catalog examples the generator covers so far, a
+//! fixture of every prop it draws and one of the data shapes a view model holds: the XAML, the
+//! code-behind, the view model and the shared `Weft.cs` match their reviewed golden files, and
+//! what the generator cannot express is refused with its path. `WEFT_UPDATE_FIXTURES=1` rewrites
+//! the golden files.
 
 // A test crate: a failed unwrap or panic is a failed test, which is the point.
 #![allow(clippy::unwrap_used, clippy::panic)]
 
 mod common;
 
-use common::{COVERED, controls, covered, document, here, options, screen, screens, setup};
-use weft_winui::{GenerateError, GenerateOptions, generate};
+use common::{
+    COVERED, FIXTURES, NAMESPACE, controls, covered, document, here, options, screen, screens,
+    setup,
+};
+use weft_winui::{GenerateError, GenerateOptions, Generated, generate, helpers};
 
 #[test]
 fn exactly_the_covered_screens_generate() {
@@ -24,23 +28,168 @@ fn exactly_the_covered_screens_generate() {
         }
     }
     let mut expected: Vec<&str> = COVERED.to_vec();
-    expected.push("controls");
+    expected.extend(FIXTURES);
     assert_eq!(generated, expected);
 }
 
+fn golden(file: &str, text: &str) {
+    let golden = here(&format!("tests/fixtures/{file}"));
+    if std::env::var_os("WEFT_UPDATE_FIXTURES").is_some() {
+        std::fs::write(&golden, text).unwrap();
+    }
+    let expected = std::fs::read_to_string(&golden).unwrap_or_default();
+    assert_eq!(text, expected, "{file}");
+}
+
+/// Every `{` of a C# file is closed in order, outside string literals: a cheap guard until the
+/// Windows build (T105.7) compiles the goldens.
+fn balanced(file: &str, source: &str) {
+    let mut depth = 0i32;
+    let mut quoted = false;
+    for c in source.chars() {
+        match c {
+            '"' => quoted = !quoted,
+            '{' if !quoted => depth += 1,
+            '}' if !quoted => depth -= 1,
+            _ => {}
+        }
+        assert!(depth >= 0, "{file}");
+    }
+    assert_eq!((depth, quoted), (0, false), "{file}");
+}
+
 #[test]
-fn generated_xaml_matches_the_golden_files() {
-    let update = std::env::var_os("WEFT_UPDATE_FIXTURES").is_some();
+fn generated_files_match_the_golden_files() {
     for (name, _, generated) in covered() {
         let xml = roxmltree::Document::parse(&generated.xaml).unwrap();
         assert_eq!(xml.root_element().tag_name().name(), "Page", "{name}");
-        let golden = here(&format!("tests/fixtures/{}.xaml", generated.page));
-        if update {
-            std::fs::write(&golden, &generated.xaml).unwrap();
+        for (file, text) in generated.files() {
+            if file.ends_with(".cs") {
+                balanced(&file, text);
+            }
+            golden(&file, text);
         }
-        let expected = std::fs::read_to_string(&golden).unwrap_or_default();
-        assert_eq!(generated.xaml, expected, "{name}");
     }
+    let shared = helpers(NAMESPACE).unwrap();
+    balanced("Weft.cs", &shared);
+    golden("Weft.cs", &shared);
+}
+
+fn data() -> Generated {
+    let (catalog, tokens) = setup();
+    let markup = std::fs::read_to_string(here("tests/fixtures/data.weft")).unwrap();
+    let doc = document(&markup, &catalog, &tokens);
+    generate(&doc, &options(&catalog, &tokens, None)).unwrap()
+}
+
+/// The body of class `name` in a generated C# file.
+fn class<'a>(source: &'a str, name: &str) -> &'a str {
+    let start = source
+        .find(&format!("public sealed partial class {name} "))
+        .unwrap_or_else(|| panic!("{name}"));
+    let end = source[start..].find("\n}\n").unwrap();
+    &source[start..start + end]
+}
+
+#[test]
+fn paths_become_properties_objects_and_lists() {
+    let generated = data();
+    let vm = &generated.view_model_source;
+    assert_eq!(generated.view_model, "DataViewModel");
+    let root = class(vm, "DataViewModel");
+    for line in [
+        "public string title",
+        "public ObservableCollection<DataTodosItem> todos { get; } = new();",
+        "public ObservableCollection<string> labels { get; } = new();",
+        "public DataUserData user { get; } = new();",
+        // A keyword is escaped in C#, and the binding names it plain.
+        "public string @class",
+        "public DataEventData @event { get; } = new();",
+        // Read only through `Weft.Not`, a flag.
+        "public bool busy",
+        "Weft.Place(user.pins, this, null, \"$.user.pins\");",
+    ] {
+        assert!(root.contains(line), "{line}\n{root}");
+    }
+    let todo = class(vm, "DataTodosItem");
+    for line in [
+        "INotifyPropertyChanged, IWeftItem",
+        "public DataViewModel? WeftRoot { get; private set; }",
+        "public object? WeftParent { get; private set; }",
+        "public string WeftPath { get; private set; }",
+        "public bool done",
+        "public DataTodosOwnerData owner { get; } = new();",
+        "Weft.Place(tags, WeftRoot, this, WeftPath + \".tags\");",
+    ] {
+        assert!(todo.contains(line), "{line}\n{todo}");
+    }
+    let tag = class(vm, "DataTodosTagsItem");
+    assert!(tag.contains("public DataTodosItem? WeftParent"), "{tag}");
+    assert!(tag.contains("public bool shown"), "{tag}");
+    let away = class(vm, "DataUserData");
+    assert!(away.contains("public bool away"), "{away}");
+    assert!(!away.contains("WeftRoot"), "{away}");
+    for xaml in [
+        "Text=\"{x:Bind ViewModel.todos[0].title, Mode=OneWay}\"",
+        "Visibility=\"{x:Bind ViewModel.todos[0].tags[0].shown, Mode=OneWay}\"",
+        "Text=\"{x:Bind ViewModel.class, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}\"",
+    ] {
+        assert!(generated.xaml.contains(xaml), "{xaml}");
+    }
+}
+
+#[test]
+fn each_action_is_one_command_that_performs_it() {
+    let vm = data().view_model_source;
+    let root = class(&vm, "DataViewModel");
+    assert_eq!(
+        root.matches("new WeftCommand(\"todo.add\", Perform)")
+            .count(),
+        1
+    );
+    assert!(root.contains("public ICommand todo_toggleCommand { get; }"));
+    assert!(root.contains("public event EventHandler<WeftEvent>? Performed;"));
+    assert!(
+        root.contains("public void Perform(string action, string? id = null, string? item = null)")
+    );
+    assert!(root.contains("partial void OnPerformed(WeftEvent e);"));
+}
+
+#[test]
+fn the_code_behind_owns_the_view_model() {
+    let generated = data();
+    let files = generated.files();
+    let names: Vec<_> = files.iter().map(|(f, _)| f.as_str()).collect();
+    assert_eq!(
+        names,
+        ["DataPage.xaml", "DataPage.xaml.cs", "DataViewModel.cs"]
+    );
+    let code = &generated.code_behind;
+    assert!(code.contains("namespace WeftScreens;"));
+    assert!(code.contains("public sealed partial class DataPage : Page"));
+    assert!(code.contains("public DataViewModel ViewModel { get; } = new();"));
+    assert!(code.contains("InitializeComponent();"));
+}
+
+#[test]
+fn helpers_take_the_namespace() {
+    let shared = helpers("Acme.Screens").unwrap();
+    assert!(shared.contains("\nnamespace Acme.Screens;\n"));
+    assert!(!shared.contains("WeftNamespace"));
+    for name in ["Not", "Truthy", "Hide"] {
+        let function = format!(" {name}(object? value) =>");
+        assert!(shared.contains(&function), "{name}");
+    }
+    for event in ["Press", "Change", "Submit", "Close"] {
+        assert!(
+            shared.contains(&format!("{event}Property = Event(\"{event}\")")),
+            "{event}"
+        );
+    }
+    assert!(matches!(
+        helpers("Acme Screens"),
+        Err(GenerateError::Namespace(_))
+    ));
 }
 
 #[test]
@@ -111,10 +260,8 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
         (r#"<button id="b" variant="{$.v}">A</button>"#, "button#b"),
         (r#"<text id="t" tone="{$.tone}">A</text>"#, "text#t"),
         (r#"<field id="f" label="F" type="{$.type}"/>"#, "field#f"),
-        (
-            r#"<text id="t" text="{$.items.0.name}"/>"#,
-            "$.items.0.name",
-        ),
+        (r#"<text id="t" text="{$.0.name}"/>"#, "$.0.name"),
+        (r#"<text id="t" text="{$.a.ToString}"/>"#, "$.a.ToString"),
         (r#"<text id="t" text="{$.Performed}"/>"#, "$.Performed"),
         (
             r#"<text id="t" text="{$.user.WeftPath}"/>"#,
@@ -135,6 +282,49 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
     let command =
         screen(r#"<button id="b" on-press="go">Go</button><text id="t" text="{$.goCommand}"/>"#);
     assert_eq!(refused(&command), ["text#t"]);
+}
+
+#[test]
+fn a_path_has_one_csharp_type() {
+    let item_twice = screen(
+        r#"<checkbox id="c" checked="{$.todos.0.done}" label="C"/><text id="t" text="{$.todos.1.done}"/>"#,
+    );
+    assert_eq!(refused(&item_twice), ["text#t"]);
+    let list_and_object =
+        screen(r#"<text id="a" text="{$.todos.0}"/><text id="b" text="{$.todos.count}"/>"#);
+    assert_eq!(refused(&list_and_object), ["text#a"]);
+    let list_and_text =
+        screen(r#"<text id="a" text="{$.todos}"/><text id="b" text="{$.todos.0.title}"/>"#);
+    assert_eq!(refused(&list_and_text), ["text#a"]);
+    let lists_of_lists = screen(r#"<text id="a" text="{$.grid.0.0}"/>"#);
+    assert_eq!(refused(&lists_of_lists), ["text#a"]);
+}
+
+#[test]
+fn a_name_csharp_cannot_hold_is_refused() {
+    // `user_name` and `user.name` are both the class `SUserNameData`.
+    let one_class = screen(
+        r#"<text id="a" text="{$.user_name.first}"/><text id="b" text="{$.user.name.first}"/>"#,
+    );
+    assert_eq!(refused(&one_class), ["$.user.name"]);
+    // A member cannot share its class's name.
+    assert_eq!(
+        refused(&screen(r#"<text id="a" text="{$.SViewModel}"/>"#)),
+        ["$.SViewModel"]
+    );
+    let member = screen(r#"<text id="a" text="{$.todos.0.STodosItem}"/>"#);
+    assert_eq!(refused(&member), ["$.todos.0.STodosItem"]);
+    for name in [
+        "Perform",
+        "Performed",
+        "OnPerformed",
+        "Equals",
+        "GetType",
+        "WeftRoot",
+    ] {
+        let body = format!(r#"<text id="a" text="{{$.{name}}}"/>"#);
+        assert_eq!(refused(&screen(&body)), [format!("$.{name}")], "{name}");
+    }
 }
 
 #[test]

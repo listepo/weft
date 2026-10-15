@@ -3,7 +3,6 @@ Props /screen#screen-1: `Background` on `Page`: a markup extension
 Props /screen#screen-1: `Page.Resources` is not read
 Ids /screen#screen-1/grid#grid-1: an id was generated
 Layout /screen#screen-1/grid#grid-1: `Margin` on `Grid`: a layout value
-Tokens /screen#screen-1/grid#grid-1: `RowSpacing` on `Grid`: a token reference
 Ids /screen#screen-1/grid#grid-1/text#text-1: the id "1bad" is not a valid Weft id, or is taken
 Tokens /screen#screen-1/grid#grid-1/text#text-1: `FontSize` on `TextBlock`: a literal look
 Layout /screen#screen-1/grid#grid-1/text#text-1: `Grid.Column` on `TextBlock`: a layout value
@@ -14,7 +13,7 @@ Layout /screen#screen-1/grid#grid-1/stack#items: `Border`: a scrolling or framin
 Actions /screen#screen-1/grid#grid-1/stack#items/button#pay: `Click` on `Button`: an event handler
 Props /screen#screen-1/grid#grid-1/stack#items/button#pay: `Style` on `Button`: a markup extension
 Ids /screen#screen-1/grid#grid-1/stack#items/button#button-1: an id was generated
-Actions /screen#screen-1/grid#grid-1/stack#items/button#button-1: `Command` on `Button`: an event handler
+Actions /screen#screen-1/grid#grid-1/stack#items/button#button-1: `Command` on `Button`: not a command of the view model named after a Weft action
 Props /screen#screen-1/grid#grid-1/stack#items/button#button-1: `ToolTipService.ToolTip` on `Button`: an attribute with no Weft prop
 Ids /screen#screen-1/grid#grid-1/stack#items/button#button-2: the id "pay" is not a valid Weft id, or is taken
 Kinds /screen#screen-1/grid#grid-1/stack#items: `RatingControl` is not a Weft kind; its content is read in its place

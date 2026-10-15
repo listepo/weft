@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=Data namespace=WeftScreens
+<screen id="data" label="{$.title}" weft="0.2">
+  <text id="first" text="{$.todos.0.title}"/>
+  <checkbox id="done" checked="{$.todos.0.done}" label="Done" on-change="todo.toggle"/>
+  <text id="tag" hidden="{!$.todos.0.tags.0.shown}" text="{$.todos.0.tags.0.name}"/>
+  <text id="owner" text="{$.todos.0.owner.name}"/>
+  <text id="label" text="{$.labels.0}"/>
+  <text id="city" hidden="{$.user.away}" text="{$.user.address.city}"/>
+  <text id="pinned" text="{$.user.pins.0.note}"/>
+  <field id="kind" label="Class" value="{$.class}"/>
+  <switch id="flag" checked="{$.event.on}" label="Event"/>
+  <button id="add" disabled="{$.busy}" on-press="todo.add">Add</button>
+  <button id="again" on-press="todo.add">Again</button>
+</screen>
+-->
+<Page x:Class="WeftScreens.DataPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="data" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="{x:Bind ViewModel.title, Mode=OneWay}">
+            <TextBlock AutomationProperties.AutomationId="first" TextWrapping="Wrap" Text="{x:Bind ViewModel.todos[0].title, Mode=OneWay}" />
+            <CheckBox AutomationProperties.AutomationId="done" IsChecked="{x:Bind ViewModel.todos[0].done, Mode=TwoWay}" Content="Done" weft:On.Change="{x:Bind ViewModel.todo_toggleCommand}" />
+            <TextBlock AutomationProperties.AutomationId="tag" TextWrapping="Wrap" Text="{x:Bind ViewModel.todos[0].tags[0].name, Mode=OneWay}" Visibility="{x:Bind ViewModel.todos[0].tags[0].shown, Mode=OneWay}" />
+            <TextBlock AutomationProperties.AutomationId="owner" TextWrapping="Wrap" Text="{x:Bind ViewModel.todos[0].owner.name, Mode=OneWay}" />
+            <TextBlock AutomationProperties.AutomationId="label" TextWrapping="Wrap" Text="{x:Bind ViewModel.labels[0], Mode=OneWay}" />
+            <TextBlock AutomationProperties.AutomationId="city" TextWrapping="Wrap" Text="{x:Bind ViewModel.user.address.city, Mode=OneWay}" Visibility="{x:Bind weft:Weft.Hide(ViewModel.user.away), Mode=OneWay}" />
+            <TextBlock AutomationProperties.AutomationId="pinned" TextWrapping="Wrap" Text="{x:Bind ViewModel.user.pins[0].note, Mode=OneWay}" />
+            <TextBox AutomationProperties.AutomationId="kind" Text="{x:Bind ViewModel.class, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Class" />
+            <ToggleSwitch AutomationProperties.AutomationId="flag" IsOn="{x:Bind ViewModel.event.on, Mode=TwoWay}" Header="Event" />
+            <Button AutomationProperties.AutomationId="add" Content="Add" IsEnabled="{x:Bind weft:Weft.Not(ViewModel.busy), Mode=OneWay}" weft:On.Press="{x:Bind ViewModel.todo_addCommand}" />
+            <Button AutomationProperties.AutomationId="again" Content="Again" weft:On.Press="{x:Bind ViewModel.todo_addCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -11,12 +11,10 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.2 | todo | P2 | 4 | 0% | |
 | T105.3 | todo | P2 | 4 | 0% | |
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.7 | todo | P2 | 3 | 0% | |
-| T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -297,10 +295,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
 
-### T105.2. WinUI view model, code-behind and helpers
-
-`<Name>ViewModel.cs` (properties, item classes with `WeftRoot`/`WeftParent`/`WeftPath`, `ObservableCollection<T>`, one command per action, `Perform`, `Performed`), `<Name>Page.xaml.cs`, and `Weft.cs` core (`On.*` event properties, `Not`, `Truthy`, `Hide`, `Props` markers). About 450 lines of code. Done when the goldens of T105.1 carry their C# and the type and name refusals have tests.
-
 ### T105.3. WinUI value and choice controls
 
 `select`, `combobox`, `radio-group`, `segmented-control`, `slider`, `stepper`, `date-picker`, `color-picker`, `link`, `image`, `model`, `alert`, `menu`, with the `Choice` helper and the date and colour converter functions. SPEC §9 rows first. About 480 lines of code. Done when their examples and corpus screens generate, match goldens and read back through the comment.
@@ -316,10 +310,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.7. Windows CI build of the generated pages
 
 A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `actions/setup-dotnet` pinned by SHA, .NET SDK 10.0.402, `dotnet build` of a WinUI 3 class library (`Microsoft.WindowsAppSDK` 2.5.1, warnings as errors) that includes every golden page, view model and the shared files. A Rust test that every corpus screen and catalog example has a golden. Not a required check at first. About 120 lines. Done when the job is green on the T105.1–T105.2 goldens and fails on a deliberately broken golden (shown in the PR).
-
-### T105.9. Hand-written WinUI importer: bindings, events, tokens and layout
-
-`{x:Bind ViewModel.…}` paths, the `Weft` function bindings and modes into bindings; `weft:On.*`, native `Command` and event bindings into actions; `Weft.*` resource references into tokens; `Grid` tracks back into `justify` and `grow`, alignments into `align`. About 450 lines of code. Done when every corpus screen reads back from its XAML alone with only the losses SPEC §9 lists.
 
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
