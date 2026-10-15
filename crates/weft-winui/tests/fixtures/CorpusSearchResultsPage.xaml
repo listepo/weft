@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusSearchResults namespace=WeftScreens
+<screen id="search" label="Search" weft="0.1">
+  <form id="form" on-submit="search.run">
+    <stack id="bar" direction="row" gap="{token.space.sm}">
+      <field id="query" label="Search" type="search" value="{$.query}"/>
+      <button id="go" submit="true" variant="primary">Search</button>
+    </stack>
+  </form>
+  <list id="results">
+    <each id="results-each" as="result" in="{$.results}">
+      <item id="result">
+        <heading id="result-title" level="3" text="{$result.title}"/>
+        <text id="result-snippet" text="{$result.snippet}"/>
+        <link id="result-open" on-press="results.open">Open</link>
+      </item>
+    </each>
+    <slot name="empty">
+      <text id="empty">No results found</text>
+    </slot>
+  </list>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusSearchResultsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="search" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Search">
+            <StackPanel AutomationProperties.AutomationId="form" AutomationProperties.LandmarkType="Form" weft:On.Submit="{x:Bind ViewModel.search_runCommand}">
+                <StackPanel AutomationProperties.AutomationId="bar" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
+                    <TextBox AutomationProperties.AutomationId="query" Text="{x:Bind ViewModel.query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="Search" Header="Search" />
+                    <Button AutomationProperties.AutomationId="go" Content="Search" Style="{StaticResource AccentButtonStyle}" weft:On.Submit="{x:Bind ViewModel.search_runCommand}" />
+                </StackPanel>
+            </StackPanel>
+            <ListView AutomationProperties.AutomationId="results" SelectionMode="None" ItemsSource="{x:Bind ViewModel.results, Mode=OneWay}" weft:Each.Id="results-each" weft:Each.As="result">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="weft:CorpusSearchResultsResultsItem">
+                        <ContentControl AutomationProperties.AutomationId="result" AutomationProperties.LocalizedControlType="list item">
+                            <StackPanel>
+                                <TextBlock AutomationProperties.AutomationId="result-title" Style="{StaticResource SubtitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level3" Text="{x:Bind title, Mode=OneWay}" />
+                                <TextBlock AutomationProperties.AutomationId="result-snippet" TextWrapping="Wrap" Text="{x:Bind snippet, Mode=OneWay}" />
+                                <HyperlinkButton AutomationProperties.AutomationId="result-open" Content="Open" weft:On.Press="{x:Bind WeftRoot.results_openCommand}" />
+                            </StackPanel>
+                        </ContentControl>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <ListView.Footer>
+                    <StackPanel weft:Slot.Name="empty" Visibility="{x:Bind weft:Weft.Empty(ViewModel.results.Count), Mode=OneWay}">
+                        <TextBlock AutomationProperties.AutomationId="empty" TextWrapping="Wrap" Text="No results found" />
+                    </StackPanel>
+                </ListView.Footer>
+            </ListView>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

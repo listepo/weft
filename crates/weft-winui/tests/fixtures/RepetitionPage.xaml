@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=Repetition namespace=WeftScreens
+<screen id="repetition" label="Repetition" weft="0.2">
+  <stack id="tags" direction="row" gap="{token.space.sm}">
+    <text id="tags-label">Tags:</text>
+    <each id="tag-each" as="tag" in="{$.tags}">
+      <text id="tag-name" text="{$tag.name}"/>
+      <button id="tag-remove" hidden="{!$.editing}" on-press="tag.remove">Remove</button>
+    </each>
+  </stack>
+  <section id="groups" label="Groups">
+    <each id="group-each" as="group" in="{$.groups}">
+      <heading id="group-title" level="3" text="{$group.title}"/>
+      <stack id="members">
+        <each id="member-each" as="member" in="{$group.members}">
+          <checkbox id="member-on" checked="{$member.on}" label="{$member.name}"/>
+          <text id="member-group" text="{$group.title}"/>
+        </each>
+      </stack>
+    </each>
+  </section>
+  <list id="results" label="Results" state="{$.resultsState}">
+    <each id="result-each" as="result" in="{$.results}">
+      <item id="result" text="{$result.title}" on-press="result.open"/>
+    </each>
+    <slot name="empty">
+      <text id="no-results">None.</text>
+    </slot>
+  </list>
+  <list id="fixed" label="Fixed" state="{$.fixedState}">
+    <item id="fixed-a">A</item>
+    <slot name="empty">
+      <text id="fixed-empty">Empty.</text>
+    </slot>
+  </list>
+  <table id="scores" label="Scores">
+    <column id="col-player">Player</column>
+    <row id="score-head">
+      <cell id="head-cell">Top</cell>
+    </row>
+    <each id="score-each" as="score" in="{$.scores}">
+      <row id="score-row">
+        <cell id="score-player" text="{$score.player}"/>
+      </row>
+    </each>
+    <slot name="empty">
+      <text id="no-scores">No scores.</text>
+    </slot>
+  </table>
+</screen>
+-->
+<Page x:Class="WeftScreens.RepetitionPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="repetition" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Repetition">
+            <StackPanel AutomationProperties.AutomationId="tags" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
+                <TextBlock AutomationProperties.AutomationId="tags-label" TextWrapping="Wrap" Text="Tags:" />
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.tags, Mode=OneWay}" weft:Each.Id="tag-each" weft:Each.As="tag">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="weft:RepetitionTagsItem">
+                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
+                                <TextBlock AutomationProperties.AutomationId="tag-name" TextWrapping="Wrap" Text="{x:Bind name, Mode=OneWay}" />
+                                <Button AutomationProperties.AutomationId="tag-remove" Content="Remove" Visibility="{x:Bind WeftRoot.editing, Mode=OneWay}" weft:On.Press="{x:Bind WeftRoot.tag_removeCommand}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </StackPanel>
+            <StackPanel AutomationProperties.AutomationId="groups" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Groups">
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.groups, Mode=OneWay}" weft:Each.Id="group-each" weft:Each.As="group">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Spacing="12" />
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="weft:RepetitionGroupsItem">
+                            <StackPanel Spacing="12">
+                                <TextBlock AutomationProperties.AutomationId="group-title" Style="{StaticResource SubtitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level3" Text="{x:Bind title, Mode=OneWay}" />
+                                <StackPanel AutomationProperties.AutomationId="members">
+                                    <ItemsRepeater ItemsSource="{x:Bind members, Mode=OneWay}" weft:Each.Id="member-each" weft:Each.As="member">
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate x:DataType="weft:RepetitionGroupsMembersItem">
+                                                <StackPanel>
+                                                    <CheckBox AutomationProperties.AutomationId="member-on" IsChecked="{x:Bind on, Mode=TwoWay}" Content="{x:Bind name, Mode=OneWay}" />
+                                                    <TextBlock AutomationProperties.AutomationId="member-group" TextWrapping="Wrap" Text="{x:Bind WeftParent.title, Mode=OneWay}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </StackPanel>
+            <ListView AutomationProperties.AutomationId="results" SelectionMode="None" ItemsSource="{x:Bind ViewModel.results, Mode=OneWay}" weft:Each.Id="result-each" weft:Each.As="result" AutomationProperties.Name="Results" weft:Props.State="{x:Bind ViewModel.resultsState, Mode=OneWay}">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="weft:RepetitionResultsItem">
+                        <ContentControl AutomationProperties.AutomationId="result" Content="{x:Bind title, Mode=OneWay}" weft:On.Press="{x:Bind WeftRoot.result_openCommand}" AutomationProperties.LocalizedControlType="list item" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <ListView.Footer>
+                    <StackPanel weft:Slot.Name="empty" Visibility="{x:Bind weft:Weft.Empty(ViewModel.resultsState, ViewModel.results.Count), Mode=OneWay}">
+                        <TextBlock AutomationProperties.AutomationId="no-results" TextWrapping="Wrap" Text="None." />
+                    </StackPanel>
+                </ListView.Footer>
+            </ListView>
+            <ListView AutomationProperties.AutomationId="fixed" SelectionMode="None" AutomationProperties.Name="Fixed" weft:Props.State="{x:Bind ViewModel.fixedState, Mode=OneWay}">
+                <ListViewItem AutomationProperties.AutomationId="fixed-a" Content="A" />
+                <ListView.Footer>
+                    <StackPanel weft:Slot.Name="empty" Visibility="{x:Bind weft:Weft.EmptyState(ViewModel.fixedState), Mode=OneWay}">
+                        <TextBlock AutomationProperties.AutomationId="fixed-empty" TextWrapping="Wrap" Text="Empty." />
+                    </StackPanel>
+                </ListView.Footer>
+            </ListView>
+            <StackPanel AutomationProperties.AutomationId="scores" AutomationProperties.LocalizedControlType="table" AutomationProperties.Name="Scores">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button AutomationProperties.AutomationId="col-player" AutomationProperties.LocalizedControlType="column header" Content="Player" />
+                </Grid>
+                <Grid AutomationProperties.AutomationId="score-head" AutomationProperties.LocalizedControlType="row">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl AutomationProperties.AutomationId="head-cell" AutomationProperties.LocalizedControlType="cell" Content="Top" />
+                </Grid>
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.scores, Mode=OneWay}" weft:Each.Id="score-each" weft:Each.As="score">
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="weft:RepetitionScoresItem">
+                            <Grid AutomationProperties.AutomationId="score-row" AutomationProperties.LocalizedControlType="row">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ContentControl AutomationProperties.AutomationId="score-player" AutomationProperties.LocalizedControlType="cell" Content="{x:Bind player, Mode=OneWay}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+                <StackPanel weft:Slot.Name="empty" Visibility="Collapsed">
+                    <TextBlock AutomationProperties.AutomationId="no-scores" TextWrapping="Wrap" Text="No scores." />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

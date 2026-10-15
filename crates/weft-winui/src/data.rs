@@ -65,11 +65,22 @@ pub struct Shape {
     like: Option<Leaf>,
     /// The element that first read the path or a path below it.
     at: String,
+    /// The item of an `<each>`, an object whatever its members.
+    object: bool,
+}
+
+/// An `<each>` the generator is inside: its loop variable, the shape of its item, and whether
+/// its list is below the enclosing loop's item, whose `WeftParent` then reaches that item.
+struct Scope {
+    name: String,
+    item: usize,
+    nested: bool,
 }
 
 /// Every data path of a screen; shape 0 is the view model.
 pub struct Data {
     pub shapes: Vec<Shape>,
+    scopes: Vec<Scope>,
 }
 
 impl Default for Data {
@@ -78,7 +89,10 @@ impl Default for Data {
             path: "$".to_owned(),
             ..Shape::default()
         };
-        Data { shapes: vec![root] }
+        Data {
+            shapes: vec![root],
+            scopes: vec![],
+        }
     }
 }
 
@@ -91,35 +105,7 @@ impl Data {
         at: &str,
         problems: &mut Vec<Unsupported>,
     ) -> Option<String> {
-        let Some(path) = bind.strip_prefix("$.") else {
-            problems.push(Unsupported::new(
-                at,
-                format!("`{bind}` reads a loop variable, and `<each>` is not generated yet"),
-            ));
-            return None;
-        };
-        let segments: Vec<&str> = path.split('.').collect();
-        if let Some(message) = refused(&segments) {
-            problems.push(Unsupported::new(bind, message));
-            return None;
-        }
-        let mut shape = 0;
-        let mut xbind = "ViewModel".to_owned();
-        for segment in segments {
-            let index = segment.starts_with(|c: char| c.is_ascii_digit());
-            let next = if index {
-                xbind.push_str(&format!("[{segment}]"));
-                self.shapes[shape].item
-            } else {
-                xbind.push('.');
-                xbind.push_str(segment);
-                self.shapes[shape].fields.get(segment).copied()
-            };
-            shape = next.unwrap_or_else(|| self.add(shape, segment, index));
-            if self.shapes[shape].at.is_empty() {
-                self.shapes[shape].at = at.to_owned();
-            }
-        }
+        let (xbind, shape) = self.walk(bind, at, problems)?;
         let s = &mut self.shapes[shape];
         match read {
             Read::Is(leaf) => match &s.is {
@@ -141,6 +127,121 @@ impl Data {
         Some(xbind)
     }
 
+    /// The x:Bind path of the list an `<each>` repeats, and the shape of its item.
+    pub fn list(
+        &mut self,
+        bind: &str,
+        at: &str,
+        problems: &mut Vec<Unsupported>,
+    ) -> Option<(String, usize)> {
+        let (xbind, shape) = self.walk(bind, at, problems)?;
+        let item = match self.shapes[shape].item {
+            Some(item) => item,
+            None => self.add(shape, "0", true),
+        };
+        self.shapes[item].object = true;
+        if self.shapes[item].at.is_empty() {
+            self.shapes[item].at = at.to_owned();
+        }
+        Some((xbind, item))
+    }
+
+    /// Inside the `<each>` over `bind` whose item is `item`, until `leave`.
+    pub fn enter(&mut self, name: &str, item: usize, bind: &str) {
+        // `WeftParent` is the nearest enclosing list item of the data, which is the enclosing
+        // loop's item only when this list is a member path below it.
+        let nested = self.scopes.last().is_some_and(|s| {
+            bind.strip_prefix('$')
+                .and_then(|b| b.strip_prefix(s.name.as_str()))
+                .and_then(|rest| rest.strip_prefix('.'))
+                .is_some_and(|rest| !rest.split('.').any(is_index))
+        });
+        self.scopes.push(Scope {
+            name: name.to_owned(),
+            item,
+            nested,
+        });
+    }
+
+    pub fn leave(&mut self) {
+        self.scopes.pop();
+    }
+
+    /// The view model as a binding reaches it: the page's, or a template item's `WeftRoot`.
+    pub fn root(&self) -> &'static str {
+        if self.scopes.is_empty() {
+            "ViewModel"
+        } else {
+            "WeftRoot"
+        }
+    }
+
+    /// The x:Bind path and the shape `bind` reaches, adding the shapes it names.
+    fn walk(
+        &mut self,
+        bind: &str,
+        at: &str,
+        problems: &mut Vec<Unsupported>,
+    ) -> Option<(String, usize)> {
+        let (mut shape, mut xbind, path) = match self.start(bind) {
+            Ok(start) => start,
+            Err(message) => {
+                problems.push(Unsupported::new(at, message));
+                return None;
+            }
+        };
+        let segments: Vec<&str> = path.split('.').collect();
+        if let Some(message) = refused(&segments, shape == 0) {
+            problems.push(Unsupported::new(bind, message));
+            return None;
+        }
+        for segment in segments {
+            let index = is_index(segment);
+            let next = if index {
+                xbind.push_str(&format!("[{segment}]"));
+                self.shapes[shape].item
+            } else {
+                if !xbind.is_empty() {
+                    xbind.push('.');
+                }
+                xbind.push_str(segment);
+                self.shapes[shape].fields.get(segment).copied()
+            };
+            shape = next.unwrap_or_else(|| self.add(shape, segment, index));
+            if self.shapes[shape].at.is_empty() {
+                self.shapes[shape].at = at.to_owned();
+            }
+        }
+        Some((xbind, shape))
+    }
+
+    /// Where `bind` starts: the view model (`WeftRoot` inside a template) or a loop's item, as a
+    /// shape, the x:Bind path to it, and the path after it.
+    fn start<'b>(&self, bind: &'b str) -> Result<(usize, String, &'b str), String> {
+        if let Some(path) = bind.strip_prefix("$.") {
+            return Ok((0, self.root().to_owned(), path));
+        }
+        let (name, path) = bind[1..].split_once('.').unwrap_or((&bind[1..], ""));
+        let Some(i) = self.scopes.iter().rposition(|s| s.name == name) else {
+            return Err(format!(
+                "`{bind}` reads a loop variable no `<each>` around it declares"
+            ));
+        };
+        if self.scopes[i + 1..].iter().any(|s| !s.nested) {
+            return Err(format!(
+                "`{bind}` reads an enclosing loop's item from a loop over another list, which \
+                 cannot reach it"
+            ));
+        }
+        if path.is_empty() {
+            return Err(format!(
+                "`{bind}` reads the loop's item itself, which is not generated"
+            ));
+        }
+        let up = vec!["WeftParent"; self.scopes.len() - 1 - i].join(".");
+        Ok((self.scopes[i].item, up, path))
+    }
+
     fn add(&mut self, parent: usize, segment: &str, index: bool) -> usize {
         let path = format!("{}.{segment}", self.shapes[parent].path);
         self.shapes.push(Shape {
@@ -160,7 +261,7 @@ impl Data {
         let s = &self.shapes[at];
         match (s.item, s.is.as_ref().map(|i| i.0), s.like) {
             (Some(item), _, _) => Ty::Array(item),
-            _ if !s.fields.is_empty() || at == 0 => Ty::Object,
+            _ if !s.fields.is_empty() || at == 0 || s.object => Ty::Object,
             (_, Some(leaf), _) | (_, None, Some(leaf)) => Ty::Leaf(leaf),
             (_, None, None) => Ty::Leaf(Leaf::Text),
         }
@@ -208,13 +309,23 @@ impl Data {
     }
 }
 
-/// Why a path cannot be a member chain of the generated classes, if it cannot.
-fn refused(segments: &[&str]) -> Option<String> {
-    if segments[0].starts_with(|c: char| c.is_ascii_digit()) {
-        return Some("the view model is an object, not a list".to_owned());
+fn is_index(segment: &str) -> bool {
+    segment.starts_with(|c: char| c.is_ascii_digit())
+}
+
+/// Why a path cannot be a member chain of the generated classes, if it cannot; `root` when it
+/// starts at the view model rather than at a loop's item.
+fn refused(segments: &[&str], root: bool) -> Option<String> {
+    if is_index(segments[0]) {
+        let what = if root {
+            "the view model"
+        } else {
+            "a loop's item"
+        };
+        return Some(format!("{what} is an object, not a list"));
     }
     let member = |(i, s): (usize, &&str)| {
-        s.starts_with("Weft") || MEMBERS.contains(s) || (i == 0 && ROOT_MEMBERS.contains(s))
+        s.starts_with("Weft") || MEMBERS.contains(s) || (i == 0 && root && ROOT_MEMBERS.contains(s))
     };
     if let Some((_, s)) = segments.iter().enumerate().find(|p| member(*p)) {
         return Some(format!("`{s}` is the name of a generated member"));

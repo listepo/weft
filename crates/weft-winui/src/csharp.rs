@@ -81,27 +81,37 @@ pub fn view_model(
     Ok(out)
 }
 
-fn collect(data: &Data, shape: usize, prefix: &str, parent: Option<&str>, out: &mut Vec<Class>) {
-    for (field, &child) in &data.shapes[shape].fields {
-        let base = format!("{prefix}{}", type_name(field));
-        let (at, name, item) = match data.ty(child) {
+/// `$.cart.items` → `<Name>CartItems`: the members of the path in PascalCase, without indexes.
+/// An object's class adds `Data` and a list item's `Item`.
+pub fn class_base(name: &str, path: &str) -> String {
+    let members = path
+        .split('.')
+        .skip(1)
+        .filter(|s| !s.starts_with(|c: char| c.is_ascii_digit()));
+    format!("{name}{}", members.map(type_name).collect::<String>())
+}
+
+fn collect(data: &Data, shape: usize, name: &str, parent: Option<&str>, out: &mut Vec<Class>) {
+    for &child in data.shapes[shape].fields.values() {
+        let base = class_base(name, &data.shapes[child].path);
+        let (at, name_of, item) = match data.ty(child) {
             Ty::Object => (child, format!("{base}Data"), false),
             Ty::Array(item) if data.ty(item) == Ty::Object => (item, format!("{base}Item"), true),
             _ => continue,
         };
         let inner = if item {
-            Some(name.clone())
+            Some(name_of.clone())
         } else {
             parent.map(str::to_owned)
         };
         let parent = parent.map(str::to_owned);
         out.push(Class {
             shape: at,
-            name,
+            name: name_of,
             item,
             parent,
         });
-        collect(data, at, &base, inner.as_deref(), out);
+        collect(data, at, name, inner.as_deref(), out);
     }
 }
 

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusOrders namespace=WeftScreens
+<screen id="orders" label="Orders" weft="0.1">
+  <heading id="title" level="2">Orders</heading>
+  <table id="open-orders" label="Open orders" state="ready">
+    <column id="col-id" sort="descending" on-press="orders.sortById">Order</column>
+    <column id="col-total" sort="none" text="{$.labels.total}"/>
+    <each id="order-each" as="order" in="{$.orders}">
+      <row id="order" selected="{$order.selected}" on-press="orders.open">
+        <cell id="order-id" text="{$order.id}"/>
+        <cell id="order-total">
+          <text id="order-amount" text="{$order.total}"/>
+        </cell>
+      </row>
+    </each>
+    <slot name="empty">
+      <text id="no-orders">No open orders.</text>
+    </slot>
+  </table>
+  <table id="archived" label="Archived orders" state="empty">
+    <column id="col-archived">Order</column>
+    <slot name="empty">
+      <text id="archived-empty">Nothing archived yet.</text>
+    </slot>
+  </table>
+  <table id="pending" label="Pending orders" state="loading">
+    <column id="col-pending">Order</column>
+    <row id="pending-row" selected="true">
+      <cell id="pending-cell">Fetching…</cell>
+    </row>
+  </table>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusOrdersPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="orders" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Orders">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Orders" />
+            <StackPanel AutomationProperties.AutomationId="open-orders" AutomationProperties.LocalizedControlType="table" AutomationProperties.Name="Open orders" weft:Props.State="ready">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button AutomationProperties.AutomationId="col-id" AutomationProperties.LocalizedControlType="column header" Content="Order" weft:Props.Sort="descending" weft:On.Press="{x:Bind ViewModel.orders_sortByIdCommand}" />
+                    <Button AutomationProperties.AutomationId="col-total" AutomationProperties.LocalizedControlType="column header" Content="{x:Bind ViewModel.labels.total, Mode=OneWay}" weft:Props.Sort="none" Grid.Column="1" />
+                </Grid>
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.orders, Mode=OneWay}" weft:Each.Id="order-each" weft:Each.As="order">
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="weft:CorpusOrdersOrdersItem">
+                            <Grid AutomationProperties.AutomationId="order" AutomationProperties.LocalizedControlType="row" weft:Props.Selected="{x:Bind selected, Mode=OneWay}" weft:On.Press="{x:Bind WeftRoot.orders_openCommand}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ContentControl AutomationProperties.AutomationId="order-id" AutomationProperties.LocalizedControlType="cell" Content="{x:Bind id, Mode=OneWay}" />
+                                <ContentControl AutomationProperties.AutomationId="order-total" AutomationProperties.LocalizedControlType="cell" Grid.Column="1">
+                                    <StackPanel>
+                                        <TextBlock AutomationProperties.AutomationId="order-amount" TextWrapping="Wrap" Text="{x:Bind total, Mode=OneWay}" />
+                                    </StackPanel>
+                                </ContentControl>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+                <StackPanel weft:Slot.Name="empty" Visibility="{x:Bind weft:Weft.Empty(ViewModel.orders.Count), Mode=OneWay}">
+                    <TextBlock AutomationProperties.AutomationId="no-orders" TextWrapping="Wrap" Text="No open orders." />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel AutomationProperties.AutomationId="archived" AutomationProperties.LocalizedControlType="table" AutomationProperties.Name="Archived orders" weft:Props.State="empty">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button AutomationProperties.AutomationId="col-archived" AutomationProperties.LocalizedControlType="column header" Content="Order" />
+                </Grid>
+                <StackPanel weft:Slot.Name="empty">
+                    <TextBlock AutomationProperties.AutomationId="archived-empty" TextWrapping="Wrap" Text="Nothing archived yet." />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel AutomationProperties.AutomationId="pending" AutomationProperties.LocalizedControlType="table" AutomationProperties.Name="Pending orders" weft:Props.State="loading">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button AutomationProperties.AutomationId="col-pending" AutomationProperties.LocalizedControlType="column header" Content="Order" />
+                </Grid>
+                <Grid AutomationProperties.AutomationId="pending-row" AutomationProperties.LocalizedControlType="row" weft:Props.Selected="True">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl AutomationProperties.AutomationId="pending-cell" AutomationProperties.LocalizedControlType="cell" Content="Fetching…" />
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

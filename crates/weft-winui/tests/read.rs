@@ -660,3 +660,43 @@ fn deep_input_is_cut_with_w602() {
         assert_eq!(result.document.root.children, vec![]);
     }
 }
+
+#[test]
+fn a_marked_repeater_is_an_each_and_its_paths_are_relative() {
+    let (doc, lost) = read_body(concat!(
+        r#"<ItemsRepeater ItemsSource="{x:Bind ViewModel.tags, Mode=OneWay}" weft:Each.As="tag">"#,
+        r#"<ItemsRepeater.ItemTemplate><DataTemplate x:DataType="weft:PTagsItem"><StackPanel>"#,
+        r#"<TextBlock AutomationProperties.AutomationId="a" Text="{x:Bind name, Mode=OneWay}" />"#,
+        r#"<TextBlock AutomationProperties.AutomationId="b" Text="{x:Bind WeftRoot.title, Mode=OneWay}" />"#,
+        r#"<TextBlock AutomationProperties.AutomationId="c" Text="{x:Bind WeftParent.name, Mode=OneWay}" />"#,
+        r#"</StackPanel></DataTemplate></ItemsRepeater.ItemTemplate></ItemsRepeater>"#,
+        r#"<ItemsRepeater AutomationProperties.AutomationId="d" ItemsSource="{x:Bind ViewModel.tags, Mode=OneWay}" weft:Each.As="no name" />"#,
+        r#"<ItemsRepeater AutomationProperties.AutomationId="e" ItemsSource="{x:Bind ViewModel.tags, Mode=OneWay}" />"#,
+        r#"<ItemsRepeater AutomationProperties.AutomationId="f" ItemsSource="{x:Bind weft:Weft.Not(ViewModel.tags), Mode=OneWay}" weft:Each.As="tag" />"#,
+    ));
+    assert_eq!(
+        doc,
+        concat!(
+            r#"<each id="each-tag" as="tag" in="{$.tags}">"#,
+            "\n",
+            r#"  <text id="a" text="{$tag.name}"/>"#,
+            "\n",
+            r#"  <text id="b" text="{$.title}"/>"#,
+            "\n",
+            r#"  <text id="c"/>"#,
+            "\n",
+            "</each>\n",
+        )
+    );
+    // Without a valid `Each.As` or with a computed source, the repeater is a hand-written one.
+    assert_eq!(
+        lost,
+        concat!(
+            "Ids /screen#s/each#each-tag: an id was generated\n",
+            "Bindings /screen#s/each#each-tag/text#c: `Text` on `TextBlock`: `WeftParent.name` is not a path of the page's view model\n",
+            "Repetition /screen#s: `ItemsRepeater`: an ItemsRepeater is read once, from its template\n",
+            "Repetition /screen#s: `ItemsRepeater`: an ItemsRepeater is read once, from its template\n",
+            "Repetition /screen#s: `ItemsRepeater`: an ItemsRepeater is read once, from its template\n",
+        )
+    );
+}

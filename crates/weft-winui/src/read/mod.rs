@@ -13,7 +13,7 @@ mod values;
 use roxmltree::{Node as Xml, ParsingOptions};
 use weft_core::{
     Catalog, Child, Code, Content, Diagnostic, Document, Map, Node, PropType, Value, WEFT_VERSION,
-    is_id, squash, universal_prop,
+    is_binding, is_id, squash, universal_prop,
 };
 use weft_import::{
     IdState, ImportResult, LossKind, Losses, MAX_DEPTH, MAX_NODES, Scalar, coerce, element_path,
@@ -82,6 +82,7 @@ fn read(source: &str, options: &ImportOptions<'_>) -> ImportResult {
         ids: IdState::default(),
         elements: 0,
         limited: false,
+        loops: vec![],
     };
     // Ids the source states are claimed first, so a generated id never takes one.
     reader.ids.reserved = top
@@ -128,6 +129,8 @@ struct Reader<'a> {
     ids: IdState,
     elements: usize,
     limited: bool,
+    /// The loop variables of the `<each>` templates being read, outermost first.
+    loops: Vec<String>,
 }
 
 /// Where the elements read under one parent go: its children, or one of its slots.
@@ -227,19 +230,25 @@ impl Reader<'_> {
         }
         let tag = el.tag_name().name();
         if let Some((owner, property)) = tag.split_once('.') {
+            let each = el.parent_element().is_some_and(|p| self.repeats(p));
             match property {
-                "Content" | "Items" | "Flyout" | "ItemTemplate" => {
+                // A repeating list's template is its `<each>`, read with the list.
+                "ItemTemplate" if each && owner == "ListView" => {}
+                "Content" | "Items" | "Flyout" | "ItemTemplate" | "Footer" => {
                     self.through(el, parent, parent_kind, depth, out);
                 }
-                // The grid counts its columns itself.
+                // The grid counts its columns itself; a repeater's stack follows its parent's.
                 "ColumnDefinitions" | "RowDefinitions" if owner == "Grid" => {}
+                "Layout" if owner == "ItemsRepeater" => {}
                 _ => self.lose(LossKind::Props, parent, format!("`{tag}` is not read")),
             }
             return;
         }
         if let Some(slot) = slot_name(el) {
+            // An `empty` slot's `Visibility` is the rule of SPEC §5.1, not a prop.
+            let derived = |name: &str| name == "Visibility" && slot == "empty";
             for a in el.attributes() {
-                if !matches!(a.name(), "Orientation" | "Slot.Name") {
+                if !matches!(a.name(), "Orientation" | "Slot.Name") && !derived(a.name()) {
                     let (kind, what) = controls::loss_of(a.name(), a.value());
                     let note = format!("`{}` on the `{slot}` slot row: {what}", a.name());
                     self.lose(kind, parent, note);
@@ -272,6 +281,12 @@ impl Reader<'_> {
             }
             return;
         }
+        if is_named(el, "ItemsRepeater")
+            && let Some(each) = self.each(el, parent, parent_kind, depth)
+        {
+            out.children.push(Child::Node(Box::new(each)));
+            return;
+        }
         if let Some(loss) = controls::wrapper(el) {
             if let Some((kind, what)) = loss {
                 self.lose(kind, parent, format!("`{tag}`: {what}"));
@@ -299,7 +314,66 @@ impl Reader<'_> {
         }
         self.attributes(el, &mut node, &here);
         self.body(el, &mut node, &here, depth);
+        if tag == "ListView"
+            && let Some(each) = self.each(el, &here, kind, depth)
+        {
+            node.children.push(Child::Node(Box::new(each)));
+        }
         out.children.push(Child::Node(Box::new(node)));
+    }
+
+    /// Whether `el` draws an `<each>`: a loop variable and a list to repeat.
+    fn repeats(&self, el: Xml<'_, '_>) -> bool {
+        let list = el.attribute("ItemsSource");
+        each_name(el).is_some() && list.and_then(|v| self.list_path(el, v)).is_some()
+    }
+
+    /// The `<each>` an `ItemsRepeater` or a `ListView` with `weft:Each.As` draws: its list from
+    /// `ItemsSource`, its children from the template, whose own paths are the loop's item.
+    fn each(
+        &mut self,
+        el: Xml<'_, '_>,
+        parent: &str,
+        parent_kind: &str,
+        depth: usize,
+    ) -> Option<Node> {
+        let name = each_name(el)?;
+        let path = self.list_path(el, el.attribute("ItemsSource")?)?;
+        let mut node = Node::new("each");
+        let explicit = el
+            .attributes()
+            .find(|a| {
+                a.namespace().is_some_and(|n| n.starts_with("using:")) && a.name() == "Each.Id"
+            })
+            .map(|a| a.value());
+        node.id = Some(self.id(explicit, "each", name, parent));
+        node.props.insert(
+            "in".into(),
+            Value::Bind {
+                bind: path,
+                not: false,
+            },
+        );
+        node.props
+            .insert("as".into(), Value::String(name.to_owned()));
+        let here = element_path(parent, &node);
+        self.loops.push(name.to_owned());
+        let mut placed = Placed::default();
+        let templates = elements(el).filter(|t| t.tag_name().name().ends_with(".ItemTemplate"));
+        for root in templates.flat_map(elements).flat_map(elements) {
+            // The panel the generator gives a template of several elements has the parent's flow.
+            let shared = is_named(root, "StackPanel")
+                && root
+                    .attributes()
+                    .all(|a| matches!(a.name(), "Orientation" | "Spacing"));
+            match shared {
+                true => self.through(root, &here, parent_kind, depth + 1, &mut placed),
+                false => self.element(root, &here, parent_kind, depth + 1, &mut placed),
+            }
+        }
+        self.loops.pop();
+        node.children = placed.children;
+        Some(node)
     }
 
     /// The elements inside `el`, read in its place.
@@ -360,6 +434,8 @@ impl Reader<'_> {
                     self.event(el, node, (name, &[event.as_str()]), value, here);
                     continue;
                 }
+                // `<each>` reads its markers and list itself.
+                Some(_) if helper == Some(&"Each.") && self.repeats(el) => continue,
                 Some(_) if helper.is_some() => {
                     let kind = match helper {
                         Some(&"Each.") => LossKind::Repetition,
@@ -376,6 +452,7 @@ impl Reader<'_> {
                 None => {}
             }
             if name == "AutomationProperties.AutomationId"
+                || (name == "ItemsSource" && self.repeats(el))
                 || controls::expected(&node.kind, name, value)
                 || self.consumed.contains(&name)
                 || (name == "HorizontalAlignment" && value == "Stretch" && max_width)
@@ -646,6 +723,14 @@ fn is_named(el: Xml<'_, '_>, name: &str) -> bool {
 fn explicit_id<'a>(el: Xml<'a, '_>) -> Option<&'a str> {
     el.attribute("AutomationProperties.AutomationId")
         .or_else(|| el.attribute((XAML, "Name")))
+}
+
+/// The loop variable `weft:Each.As` names, when it is one.
+fn each_name<'a>(el: Xml<'a, '_>) -> Option<&'a str> {
+    el.attributes()
+        .find(|a| a.namespace().is_some_and(|n| n.starts_with("using:")) && a.name() == "Each.As")
+        .map(|a| a.value())
+        .filter(|name| is_binding(&format!("${name}")))
 }
 
 fn slot_name<'a>(el: Xml<'a, '_>) -> Option<&'a str> {
