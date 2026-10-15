@@ -26,6 +26,8 @@
     "plugins/*/serve.config.ts",
     "plugins/*/scripts",
     "plugins/*/src",
-    "plugins/*/test"
+    "plugins/*/test",
+    "studio/scripts",
+    "studio/test"
   ]
 }

@@ -27,7 +27,7 @@
 | codex (optional) | https://github.com/openai/codex | `plugins/xcode/scripts/xcode-agents.ts` registers the MCP server with it; its test skips without it | https://github.com/openai/codex |
 | iOS Simulator (`xcrun simctl`) | Xcode, with the iOS 27.0 runtime and an iPhone 17 simulator | `@weft/visual` builds the generated SwiftUI screens into an app and screenshots them; skipped without it | https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device |
 | Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode (skipped without it); the browser leg of `moon run root:runtimes` fails without it | https://github.com/microsoft/playwright |
-| .NET SDK 10.0.402 | `actions/setup-dotnet` in the `winui` job of `ci.yml` (Windows only for the XAML steps) | Builds the WinUI goldens (`crates/weft-winui/windows/WeftScreens.csproj`) | https://github.com/dotnet/sdk |
+| .NET SDK 10.0.402 | `actions/setup-dotnet` in the `winui` and `studio-windows` jobs of `ci.yml` (Windows only for the XAML steps) | Builds the WinUI goldens (`crates/weft-winui/windows/WeftScreens.csproj`) and WeftStudio for Windows (`studio/windows`), and runs its tests | https://github.com/dotnet/sdk |
 
 ## mise
 
@@ -131,7 +131,9 @@
 
 | Package | Where | Source | Why here |
 | --- | --- | --- | --- |
-| Microsoft.WindowsAppSDK | local (`crates/weft-winui/windows/WeftScreens.csproj`) | https://github.com/microsoft/WindowsAppSDK | WinUI 3 and its XAML compiler for the Windows build of the goldens |
+| Microsoft.WindowsAppSDK | local (`crates/weft-winui/windows/WeftScreens.csproj`, `studio/windows/WeftStudio.WinUI`) | https://github.com/microsoft/WindowsAppSDK | WinUI 3 and its XAML compiler for the Windows build of the goldens; WeftStudio's window, menus and file pickers (`Microsoft.Windows.Storage.Pickers`), at 2.5.1 like slint-bindings' control |
+| MSTest.Sdk | local (`studio/windows/WeftStudio.Tests`) | https://github.com/microsoft/testfx | WeftStudio's document model and smoke tests, on Microsoft.Testing.Platform (`studio/windows/global.json`); 4.5.1 as slint-bindings' host tests |
+| FlaUI.UIA3 | local (`studio/windows/WeftStudio.Tests`) | https://github.com/FlaUI/FlaUI | Drives the built WeftStudio through UI Automation in the smoke test: window title, capture, the Save As accelerator |
 
 ## Rust tests
 

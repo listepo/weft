@@ -1,0 +1,19 @@
+<Project>
+  <!-- Which weft_studio_ffi.dll this build loads. Platform=ARM64 or RuntimeIdentifier=win-arm64
+       selects ARM64; everything else is x64. Cargo's folders are debug/release. -->
+  <PropertyGroup>
+    <WeftRid Condition="'$(RuntimeIdentifier)' == 'win-arm64' Or '$(Platform)' == 'ARM64'">win-arm64</WeftRid>
+    <WeftRid Condition="'$(WeftRid)' == ''">win-x64</WeftRid>
+    <WeftTargetTriple Condition="'$(WeftRid)' == 'win-arm64'">aarch64-pc-windows-msvc</WeftTargetTriple>
+    <WeftTargetTriple Condition="'$(WeftRid)' == 'win-x64'">x86_64-pc-windows-msvc</WeftTargetTriple>
+    <WeftCargoConfig Condition="'$(Configuration)' == 'Release'">release</WeftCargoConfig>
+    <WeftCargoConfig Condition="'$(WeftCargoConfig)' == ''">debug</WeftCargoConfig>
+    <WeftCargoFlags Condition="'$(WeftCargoConfig)' == 'release'">--release</WeftCargoFlags>
+    <WeftRepoRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</WeftRepoRoot>
+    <WeftNativeDll>$(WeftRepoRoot)target\$(WeftTargetTriple)\$(WeftCargoConfig)\weft_studio_ffi.dll</WeftNativeDll>
+  </PropertyGroup>
+
+  <!-- SlintBindingsDir: the slint-bindings checkout of the pinned rev, written by
+       `node studio/scripts/slint-bindings.ts --msbuild` (gitignored). -->
+  <Import Project="SlintBindings.g.props" Condition="Exists('$(MSBuildThisFileDirectory)SlintBindings.g.props')" />
+</Project>

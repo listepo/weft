@@ -1,0 +1,23 @@
+<!-- The document model against the real weft_studio_ffi.dll with a fake picker, and a FlaUI smoke
+     run of the built app. The model's sources are compiled in rather than referenced: they use no
+     WinUI type, so these tests need no Windows App SDK runtime. -->
+<Project Sdk="MSTest.Sdk/4.5.1">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\WeftStudio.WinUI\Model\*.cs" Link="Model\%(Filename)%(Extension)" />
+    <Compile Include="$(WeftRepoRoot)crates\weft-studio-ffi\bindings\csharp\NativeMethods.g.cs" Link="Model\NativeMethods.g.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>WeftRepoRoot</_Parameter1>
+      <_Parameter2>$(WeftRepoRoot)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

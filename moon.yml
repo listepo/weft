@@ -154,6 +154,7 @@ tasks:
         "/bench/**/*",
         "/runtimes/**/*",
         "/tooling/**/*",
+        "/studio/**/*",
         "/tsconfig.json",
       ]
   lint:
@@ -165,6 +166,7 @@ tasks:
         "/bench/**/*",
         "/runtimes/**/*",
         "/tooling/**/*",
+        "/studio/**/*",
         "/compat/**/*",
         "/*.json",
         "/.claude-plugin/*.json",

@@ -1,0 +1,13 @@
+# WeftStudio, the desktop editor (T69): the native shells around crates/weft-studio-ffi. Each leg
+# needs its own OS and toolchain and skips with a message elsewhere.
+id: "studio"
+language: "typescript"
+
+tasks:
+  test:
+    # The shells build weft-studio-ffi and read the corpus screens and the generated bindings.
+    inputs:
+      - "/crates/**/*"
+      - "!/crates/weft-slint/tests/screenshots/diffs/**"
+      - "/Cargo.toml"
+      - "/Cargo.lock"

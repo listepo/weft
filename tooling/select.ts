@@ -95,6 +95,8 @@ const TASK_CRATE: Readonly<Record<string, string>> = {
   "root:cli": "weft-cli",
   "xcode-plugin:bundle": "weft-cli",
   "visual:test": "weft-cli",
+  // The shells link the one library of the editor.
+  "studio:test": "weft-studio-ffi",
 };
 
 // The runtime legs run only these suites, though their declared inputs name every package.

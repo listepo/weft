@@ -1,0 +1,35 @@
+<!-- WeftStudio for Windows (T69.1e): WinUI 3 chrome around slint-bindings' SlintPanel, with the
+     document in weft_studio_ffi.dll (studio/windows/Directory.Build.targets builds and copies it). -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>WeftStudio</AssemblyName>
+    <RootNamespace>WeftStudio.WinUI</RootNamespace>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <!-- Unpackaged, carrying the Windows App SDK runtime, so it starts on a machine or a CI runner
+         without it installed; packaging is milestone 6 of T69. -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The version slint-bindings' control uses. -->
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(WeftRepoRoot)crates\weft-studio-ffi\bindings\csharp\NativeMethods.g.cs" Link="Model\NativeMethods.g.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(SlintBindingsDir)' != ''">
+    <!-- The control's own build insists on slint_bindings_ffi.dll; ours carries its sb_* calls. -->
+    <ProjectReference Include="$(SlintBindingsDir)windows\SlintBindings.WinUI\SlintBindings.WinUI.csproj"
+                      AdditionalProperties="SlintNativeDll=$(WeftNativeDll)" />
+  </ItemGroup>
+  <Target Name="RequireSlintBindingsDir" BeforeTargets="CollectPackageReferences;BeforeBuild" Condition="'$(SlintBindingsDir)' == ''">
+    <Error Text="No slint-bindings checkout: run `node studio/scripts/slint-bindings.ts --msbuild` from the repository root." />
+  </Target>
+</Project>
