@@ -13,7 +13,8 @@
     <WeftNativeDll>$(WeftRepoRoot)target\$(WeftTargetTriple)\$(WeftCargoConfig)\weft_studio_ffi.dll</WeftNativeDll>
   </PropertyGroup>
 
-  <!-- SlintBindingsDir: the slint-bindings checkout of the pinned rev, written by
-       `node studio/scripts/slint-bindings.ts --msbuild` (gitignored). -->
+  <!-- SlintBindingsDir: the slint-bindings checkout of the pinned rev, written to this gitignored
+       file by studio/scripts/slint-bindings.ts with its msbuild flag. XML comments cannot hold
+       a double hyphen, so the flag is not spelled out here. -->
   <Import Project="SlintBindings.g.props" Condition="Exists('$(MSBuildThisFileDirectory)SlintBindings.g.props')" />
 </Project>
