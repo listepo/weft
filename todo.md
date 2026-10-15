@@ -9,5 +9,4 @@
 - T105.4. WinUI repetition and containers
 - T105.5. WinUI layout vocabulary, tokens and materials
 - T105.7. Windows CI build of the generated pages
-- T105.9. Hand-written WinUI importer: bindings, events, tokens and layout
 - T105.10. WinUI target: SPEC, AGENT-SPEC and docs

@@ -1,11 +1,11 @@
-<screen id="controls" state="ready" weft="0.3">
+<screen id="controls" label="{$.title}" state="ready" weft="0.3">
   <heading id="h1" level="1">Say "hi" \{x} &amp; more -- or --&gt;, @license</heading>
-  <heading id="h2" level="2"/>
+  <heading id="h2" level="2" text="{$.subtitle}"/>
   <heading id="h3" level="3">Three</heading>
   <heading id="h4" level="4">Four</heading>
   <heading id="h5" level="5">Five</heading>
   <heading id="h6" level="6">Six</heading>
-  <stack id="tones" direction="row" wrap="true">
+  <stack id="tones" direction="row" gap="{token.space.md}" wrap="true">
     <text id="plain">Plain</text>
     <text id="muted" tone="muted">Muted</text>
     <text id="good" tone="success">Saved</text>
@@ -15,24 +15,24 @@
   <stack id="shown" direction="column">
     <text id="secret" hidden="true">Hidden</text>
     <text id="visible" hidden="false">Shown</text>
-    <text id="note"/>
-    <text id="quiet" label="Quiet note">{braces} stay text</text>
+    <text id="note" hidden="{!$.agree}" text="{$.note}"/>
+    <text id="quiet" hidden="{$.note}" label="Quiet note">{braces} stay text</text>
   </stack>
-  <form id="profile" label="Profile">
-    <field id="name" label="Name" placeholder="Ada" required="true"/>
-    <field id="email" label="Email" state="invalid" type="email"/>
-    <field id="password" label="Password" type="password"/>
-    <field id="age" label="Age" type="number"/>
-    <field id="query" label="Search" type="search" value="literal"/>
-    <field id="bio" label="" type="multiline"/>
-    <checkbox id="agree" label="Agree"/>
+  <form id="profile" label="Profile" state="{$.formState}" on-submit="profile.save">
+    <field id="name" label="Name" placeholder="Ada" required="true" value="{$.name}" on-change="profile.edit"/>
+    <field id="email" error="{$.emailError}" label="Email" required="{$.emailRequired}" state="invalid" type="email" value="{$.email}"/>
+    <field id="password" disabled="{$.busy}" label="Password" type="password" value="{$.password}"/>
+    <field id="age" label="Age" type="number" value="{$.age}"/>
+    <field id="query" disabled="{!$.agree}" label="Search" type="search" value="literal"/>
+    <field id="bio" label="{$.bioLabel}" type="multiline" value="{$.bio}"/>
+    <checkbox id="agree" checked="{$.agree}" label="Agree" on-change="profile.agree"/>
     <checkbox id="fixed" checked="true" disabled="true" label="Fixed"/>
-    <switch id="alerts" label="Alerts"/>
-    <button id="save" variant="primary">Save</button>
+    <switch id="alerts" checked="{$.alerts}" label="Alerts" on-change="profile.alerts"/>
+    <button id="save" disabled="{!$.agree}" state="{$.saveState}" submit="true" variant="primary">Save</button>
     <slot name="footer">
-      <button id="cancel" label="Cancel the edit">Cancel</button>
-      <button id="delete" disabled="false" variant="danger">Delete</button>
-      <button id="later"/>
+      <button id="cancel" label="Cancel the edit" on-press="profile.cancel">Cancel</button>
+      <button id="delete" disabled="false" variant="danger" on-press="profile.delete">Delete</button>
+      <button id="later" text="{$.laterText}"/>
     </slot>
   </form>
 </screen>

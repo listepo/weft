@@ -15,7 +15,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.7 | todo | P2 | 3 | 0% | |
-| T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -311,10 +310,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.7. Windows CI build of the generated pages
 
 A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `actions/setup-dotnet` pinned by SHA, .NET SDK 10.0.402, `dotnet build` of a WinUI 3 class library (`Microsoft.WindowsAppSDK` 2.5.1, warnings as errors) that includes every golden page, view model and the shared files. A Rust test that every corpus screen and catalog example has a golden. Not a required check at first. About 120 lines. Done when the job is green on the T105.1–T105.2 goldens and fails on a deliberately broken golden (shown in the PR).
-
-### T105.9. Hand-written WinUI importer: bindings, events, tokens and layout
-
-`{x:Bind ViewModel.…}` paths, the `Weft` function bindings and modes into bindings; `weft:On.*`, native `Command` and event bindings into actions; `Weft.*` resource references into tokens; `Grid` tracks back into `justify` and `grow`, alignments into `align`. About 450 lines of code. Done when every corpus screen reads back from its XAML alone with only the losses SPEC §9 lists.
 
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
