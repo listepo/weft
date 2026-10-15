@@ -11,7 +11,8 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.5 | todo | P2 | 4 | 0% | |
+| T105.5 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
+| T105.15 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -292,9 +293,15 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
 
-### T105.5. WinUI layout vocabulary, tokens and materials
+### T105.5. WinUI layout vocabulary
 
-`justify` and `grow` through `Grid` tracks, `align`, `padding`, `max-width`, `min-column-width` (`ColumnsPanel`, `ColumnsLayout`), `WeftTokens.xaml` (beyond the dimensions T105.6 writes) and per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (moved from T105.6: a key ships with its behaviour), `ThemeDictionaries` for light, dark and high contrast, material as `AcrylicBrush`, the 3D tilt. Checks the unverified resource-key and perspective facts in the Windows build. About 460 lines of code. Done when the `layout`, `glass`, `tilt` and `appearance` corpus screens generate, build and read back.
+`justify` and `grow` through `Grid` tracks, `align`, `padding`, `max-width` and `min-column-width` (`ColumnsPanel`) on the generator side, matching what `read_winui` already reads back. Split at claim time: the tokens, themes, materials, the 3D tilt and repeating reflowing grids moved to T105.15. About 300 lines of code. Done when the `layout`, `receipt`, `inbox` and `dashboard` corpus screens and the `grid` and `stack` examples generate, match goldens, build in the Windows `winui` job and read back through the comment and from the XAML alone with only the losses SPEC §9 lists.
+
+**Execution plan.** (1) SPEC §9 "To WinUI" and `docs/winui-design.md`: the stack as a `Grid` for `justify` and `grow`, each child's cross-axis alignment for `align` (a row's default `Center` written out), `Padding` from the token's `.thickness` resource, `MaxWidth`, and `weft:ColumnsPanel` for `min-column-width`. (2) `src/tokens.rs`: a `Thickness` beside each dimension in `WeftTokens.xaml`. (3) `src/generate.rs` (or a new `generate/layout.rs`): the stack's element, tracks and child placement, `align`, `padding` and `max-width` on `stack` and `grid`, `min-column-width` as a `ColumnsPanel` with `Columns`, `MinColumnWidth` and `Spacing`; an `<each>` in a stack drawn as a `Grid` stays refused. (4) `src/Weft.cs`: `ColumnsPanel`, a panel showing `Columns` columns while each is at least `MinColumnWidth` wide, fewer down to one below that, children in order. (5) Reader: `ColumnsPanel` reads back as a `grid` with `columns` and `min-column-width`. (6) Tests: goldens (row stacks gain `VerticalAlignment="Center"`), a `layout` fixture (every `justify`, `grow`, `align`, `padding`, `max-width`, `min-column-width`), refusals, reader tests; `cargo test -p weft-winui --all-features`, then the Windows job.
+
+### T105.15. WinUI tokens, materials, tilt and reflowing repeats
+
+Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeDictionaries` for light, dark and high contrast) and per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour), `material` as an `AcrylicBrush` on a `Border` (with `padding` inside it), the 3D tilt (`perspective`, `rotate-x`, `rotate-y`, `rotate-z`), and `weft:ColumnsLayout` for an `<each>` in a grid with `min-column-width`. Checks the unverified resource-key and perspective facts in the Windows build. Done when the `glass`, `tilt` and `showroom` corpus screens generate, build and read back.
 
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
