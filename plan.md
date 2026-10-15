@@ -14,7 +14,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105.3 | todo | P2 | 4 | 0% | |
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
-| T105.7 | todo | P2 | 3 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -306,10 +305,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.5. WinUI layout vocabulary, tokens and materials
 
 `justify` and `grow` through `Grid` tracks, `align`, `padding`, `max-width`, `min-column-width` (`ColumnsPanel`, `ColumnsLayout`), `WeftTokens.xaml` (beyond the dimensions T105.6 writes) and per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (moved from T105.6: a key ships with its behaviour), `ThemeDictionaries` for light, dark and high contrast, material as `AcrylicBrush`, the 3D tilt. Checks the unverified resource-key and perspective facts in the Windows build. About 460 lines of code. Done when the `layout`, `glass`, `tilt` and `appearance` corpus screens generate, build and read back.
-
-### T105.7. Windows CI build of the generated pages
-
-A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `actions/setup-dotnet` pinned by SHA, .NET SDK 10.0.402, `dotnet build` of a WinUI 3 class library (`Microsoft.WindowsAppSDK` 2.5.1, warnings as errors) that includes every golden page, view model and the shared files. A Rust test that every corpus screen and catalog example has a golden. Not a required check at first. About 120 lines. Done when the job is green on the T105.1–T105.2 goldens and fails on a deliberately broken golden (shown in the PR).
 
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 

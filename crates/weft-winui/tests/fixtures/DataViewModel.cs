@@ -34,14 +34,14 @@ public sealed partial class DataViewModel : INotifyPropertyChanged
 
     public DataUserData user { get; } = new();
 
-    public string @class
+    public string kind
     {
-        get => Weft_class;
-        set => WeftSet(ref Weft_class, value);
+        get => Weft_kind;
+        set => WeftSet(ref Weft_kind, value);
     }
-    private string Weft_class = "";
+    private string Weft_kind = "";
 
-    public DataEventData @event { get; } = new();
+    public DataAlertData alert { get; } = new();
 
     public bool busy
     {
@@ -270,7 +270,7 @@ public sealed partial class DataUserPinsItem : INotifyPropertyChanged, IWeftItem
     }
 }
 
-public sealed partial class DataEventData : INotifyPropertyChanged
+public sealed partial class DataAlertData : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 

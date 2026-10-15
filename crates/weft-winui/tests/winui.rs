@@ -10,26 +10,50 @@
 mod common;
 
 use common::{
-    COVERED, FIXTURES, NAMESPACE, controls, covered, document, here, options, screen, screens,
-    setup,
+    NAMESPACE, PENDING, controls, covered, document, here, options, screen, screens, setup,
 };
-use weft_winui::{GenerateError, GenerateOptions, Generated, generate, helpers};
+use weft_winui::{
+    GenerateError, GenerateOptions, Generated, TOKENS_FILE, generate, generate_tokens, helpers,
+};
 
 #[test]
-fn exactly_the_covered_screens_generate() {
+fn every_screen_but_the_pending_ones_generates() {
     let (catalog, tokens) = setup();
-    let mut generated = vec![];
+    let (mut generated, mut refused) = (vec![], vec![]);
     for (name, path) in screens() {
         let doc = document(&std::fs::read_to_string(path).unwrap(), &catalog, &tokens);
         match generate(&doc, &options(&catalog, &tokens, None)) {
             Ok(_) => generated.push(name),
-            Err(GenerateError::Unsupported(problems)) => assert!(!problems.is_empty(), "{name}"),
+            Err(GenerateError::Unsupported(problems)) => {
+                assert!(!problems.is_empty(), "{name}");
+                refused.push(name);
+            }
             Err(e) => panic!("{name}: {e}"),
         }
     }
-    let mut expected: Vec<&str> = COVERED.to_vec();
-    expected.extend(FIXTURES);
-    assert_eq!(generated, expected);
+    assert_eq!(refused, PENDING);
+    assert!(!generated.is_empty());
+}
+
+/// The Windows build (T105.7) compiles every `.xaml` and `.cs` file of `tests/fixtures/`, so the
+/// set must be exactly the goldens of the screens that generate and the shared files: a screen
+/// without its goldens would go unbuilt, a stale golden would be built for nothing.
+#[test]
+fn every_screen_that_generates_has_its_golden_files_and_no_other() {
+    let mut expected: Vec<String> = covered()
+        .iter()
+        .flat_map(|(_, _, generated)| generated.files().map(|(file, _)| file))
+        .chain(["Weft.cs".to_owned(), TOKENS_FILE.to_owned()])
+        .collect();
+    expected.sort();
+    let mut found: Vec<String> = std::fs::read_dir(here("tests/fixtures"))
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        // The read-back's hand-written input, not generator output; the build leaves it out.
+        .filter(|f| (f.ends_with(".xaml") || f.ends_with(".cs")) && f != "handwritten.xaml")
+        .collect();
+    found.sort();
+    assert_eq!(found, expected);
 }
 
 fn golden(file: &str, text: &str) {
@@ -41,8 +65,8 @@ fn golden(file: &str, text: &str) {
     assert_eq!(text, expected, "{file}");
 }
 
-/// Every `{` of a C# file is closed in order, outside string literals: a cheap guard until the
-/// Windows build (T105.7) compiles the goldens.
+/// Every `{` of a C# file is closed in order, outside string literals: a cheap guard where the
+/// Windows build (T105.7) cannot run.
 fn balanced(file: &str, source: &str) {
     let mut depth = 0i32;
     let mut quoted = false;
@@ -73,6 +97,8 @@ fn generated_files_match_the_golden_files() {
     let shared = helpers(NAMESPACE).unwrap();
     balanced("Weft.cs", &shared);
     golden("Weft.cs", &shared);
+    let (_, tokens) = setup();
+    golden(TOKENS_FILE, &generate_tokens(&tokens).0);
 }
 
 fn data() -> Generated {
@@ -102,9 +128,8 @@ fn paths_become_properties_objects_and_lists() {
         "public ObservableCollection<DataTodosItem> todos { get; } = new();",
         "public ObservableCollection<string> labels { get; } = new();",
         "public DataUserData user { get; } = new();",
-        // A keyword is escaped in C#, and the binding names it plain.
-        "public string @class",
-        "public DataEventData @event { get; } = new();",
+        "public string kind",
+        "public DataAlertData alert { get; } = new();",
         // Read only through `Weft.Not`, a flag.
         "public bool busy",
         "Weft.Place(user.pins, this, null, \"$.user.pins\");",
@@ -132,7 +157,7 @@ fn paths_become_properties_objects_and_lists() {
     for xaml in [
         "Text=\"{x:Bind ViewModel.todos[0].title, Mode=OneWay}\"",
         "Visibility=\"{x:Bind ViewModel.todos[0].tags[0].shown, Mode=OneWay}\"",
-        "Text=\"{x:Bind ViewModel.class, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}\"",
+        "Text=\"{x:Bind ViewModel.kind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}\"",
     ] {
         assert!(generated.xaml.contains(xaml), "{xaml}");
     }
