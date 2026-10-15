@@ -22,7 +22,20 @@ public sealed class SmokeTests
     private static readonly TimeSpan Wait = TimeSpan.FromSeconds(60);
 
     [TestMethod]
-    public void The_app_shows_a_corpus_screen_and_saves_it_as_the_same_bytes()
+    public void Probe()
+    {
+        var lines = new List<string>();
+        for (var i = 0; i < 12; i++)
+        {
+            try { Once(lines, i); }
+            catch (Exception ex) { lines.Add($"#{i} THREW {ex.GetType().Name}: {ex.Message.Split('\n')[0]}"); }
+        }
+        var report = string.Join("\n", lines);
+        Console.WriteLine(report);
+        Assert.Fail(report);
+    }
+
+    private static void Once(List<string> lines, int i)
     {
         using var scratch = new Scratch();
         var screen = Paths.Corpus("login");
@@ -45,10 +58,15 @@ public sealed class SmokeTests
 
             // Focus the panel as a user does, so the accelerator has to get past the surface.
             var panel = window.BoundingRectangle;
+            var hwnd = window.Properties.NativeWindowHandle.Value;
+            string State() => $"fg {Native.Describe(Native.Foreground())} (app {Native.Describe(hwnd)}) focus {Native.Describe(Native.Focus(hwnd))} inside {Native.FocusInside(hwnd)}";
+            var preClick = State();
             Mouse.Click(new System.Drawing.Point(panel.Left + 24, menu.BoundingRectangle.Bottom + 24));
+            var preKeys = State();
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_S);
-            Assert.IsTrue(Retry.WhileFalse(() => window.Title == "copy.weft", Wait).Result, $"title: {window.Title}");
-            CollectionAssert.AreEqual(File.ReadAllBytes(screen), File.ReadAllBytes(copy));
+            var ok = Retry.WhileFalse(() => window.Title == "copy.weft", TimeSpan.FromSeconds(15)).Result;
+            var after = State();
+            lines.Add($"#{i} {(ok ? "ok" : "MISS")} | preClick: {preClick} | preKeys: {preKeys} | after: {after} | title {window.Title}");
         }
         finally
         {
