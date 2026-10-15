@@ -16,7 +16,6 @@ use weft_winui::{GenerateOptions, Generated, generate};
 /// shrink this list until it is empty.
 pub const PENDING: &[&str] = &[
     "corpus-account",
-    "corpus-appearance",
     "corpus-booking",
     "corpus-glass",
     "corpus-showroom",
