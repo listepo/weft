@@ -74,7 +74,7 @@
                     <TextBlock AutomationProperties.AutomationId="incidents-value" TextWrapping="Wrap" Text="{x:Bind ViewModel.stats.incidents, Mode=OneWay}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
                 </StackPanel>
             </weft:ColumnsPanel>
-            <StackPanel AutomationProperties.AutomationId="notices" Spacing="{StaticResource Weft.space.sm}" MaxWidth="{StaticResource Weft.size.lg}" Orientation="Vertical">
+            <StackPanel AutomationProperties.AutomationId="notices" Orientation="Vertical" Spacing="{StaticResource Weft.space.sm}" MaxWidth="{StaticResource Weft.size.lg}">
                 <InfoBar AutomationProperties.AutomationId="release" IsOpen="True" IsClosable="False" Severity="Informational" Message="Release 2.4 ships on Friday." />
                 <InfoBar AutomationProperties.AutomationId="backup" IsOpen="True" IsClosable="False" Severity="Success" Message="{x:Bind ViewModel.backupStatus, Mode=OneWay}" />
                 <InfoBar AutomationProperties.AutomationId="quota" IsOpen="True" IsClosable="False" Severity="Warning">
@@ -91,7 +91,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock AutomationProperties.AutomationId="owner" TextWrapping="Wrap" Text="Owned by the platform team" VerticalAlignment="Bottom" />
-                <StackPanel AutomationProperties.AutomationId="footer-links" Spacing="{StaticResource Weft.space.md}" Orientation="Horizontal" VerticalAlignment="Bottom" Grid.Column="2">
+                <StackPanel AutomationProperties.AutomationId="footer-links" Orientation="Horizontal" Spacing="{StaticResource Weft.space.md}" VerticalAlignment="Bottom" Grid.Column="2">
                     <HyperlinkButton AutomationProperties.AutomationId="docs" Content="Docs" weft:Props.Href="/docs" VerticalAlignment="Top" />
                     <HyperlinkButton AutomationProperties.AutomationId="status" Content="Status page" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.statusUrl), Mode=OneWay}" VerticalAlignment="Top" />
                 </StackPanel>

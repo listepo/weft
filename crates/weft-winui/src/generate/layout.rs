@@ -25,6 +25,17 @@ impl Gen<'_> {
             // Star columns alone are a `grid`'s tracks, so they would read back as one.
             self.later(node, "a row whose every child grows");
         }
+        let gap = match (grow || spare, row) {
+            (false, _) => "Spacing",
+            (true, true) => "ColumnSpacing",
+            (true, false) => "RowSpacing",
+        };
+        // A `StackPanel`'s flow is set before its children, since an `<each>` among them repeats
+        // in it. A `StackPanel` is vertical by default, so only a stated `direction` is written.
+        if !(grow || spare) && node.props.contains_key("direction") {
+            e.attr("Orientation", if row { "Horizontal" } else { "Vertical" });
+        }
+        self.gap(e, node, &[gap]);
         let mut children = vec![];
         for kid in &kids {
             if kid.kind == "each" && nodes(&kid.children).any(|n| n.props.contains_key("grow")) {
@@ -36,12 +47,6 @@ impl Gen<'_> {
                 children.push(child);
             }
         }
-        let gap = match (grow || spare, row) {
-            (false, _) => "Spacing",
-            (true, true) => "ColumnSpacing",
-            (true, false) => "RowSpacing",
-        };
-        self.gap(e, node, &[gap]);
         self.frame(e, node);
         self.marker(e, node, "wrap", "Wrap");
         if justify != "start" && (grow || !spare) {
@@ -73,10 +78,6 @@ impl Gen<'_> {
             }
         }
         if !(grow || spare) {
-            // A `StackPanel` is vertical by default, so only a stated `direction` is written.
-            if node.props.contains_key("direction") {
-                e.attr("Orientation", if row { "Horizontal" } else { "Vertical" });
-            }
             e.children = children;
             return;
         }

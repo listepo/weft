@@ -559,3 +559,31 @@ fn a_namespace_must_be_a_csharp_namespace() {
         );
     }
 }
+
+#[test]
+fn an_each_repeats_in_its_stacks_flow() {
+    let (catalog, tokens) = setup();
+    let markup = screen(
+        r#"<stack id="tags" direction="row" gap="{token.space.sm}"><text id="label">Tags:</text><each id="e" as="tag" in="{$.tags}"><text id="name" text="{$tag.name}"/><text id="count" text="{$tag.count}"/></each></stack>"#,
+    );
+    let doc = document(&markup, &catalog, &tokens);
+    let generated = generate(&doc, &options(&catalog, &tokens, None)).unwrap();
+    let xml = roxmltree::Document::parse(&generated.xaml).unwrap();
+    let flow = |name: &str| {
+        let n = xml
+            .descendants()
+            .find(|n| n.has_tag_name(name) && n.attribute("Orientation").is_some())
+            .unwrap_or_else(|| panic!("no {name} with the row's flow"));
+        (n.attribute("Orientation"), n.attribute("Spacing"))
+    };
+    let row = (Some("Horizontal"), Some("{StaticResource Weft.space.sm}"));
+    assert_eq!(flow("StackLayout"), row);
+    let panels = xml
+        .descendants()
+        .filter(|n| {
+            n.has_tag_name("StackPanel") && n.attribute("Orientation") == Some("Horizontal")
+        })
+        .count();
+    // The stack itself and the template's panel of the item's two texts.
+    assert_eq!(panels, 2);
+}

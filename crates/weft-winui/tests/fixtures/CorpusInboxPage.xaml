@@ -68,7 +68,7 @@
                         <ListView AutomationProperties.AutomationId="drafts" SelectionMode="None" weft:Props.State="empty">
                             <ListView.Footer>
                                 <StackPanel weft:Slot.Name="empty">
-                                    <StackPanel AutomationProperties.AutomationId="drafts-empty" Spacing="{StaticResource Weft.space.sm}" Orientation="Vertical">
+                                    <StackPanel AutomationProperties.AutomationId="drafts-empty" Orientation="Vertical" Spacing="{StaticResource Weft.space.sm}">
                                         <TextBlock AutomationProperties.AutomationId="no-drafts" TextWrapping="Wrap" Text="No drafts." HorizontalAlignment="Center" />
                                         <TextBlock AutomationProperties.AutomationId="no-drafts-hint" TextWrapping="Wrap" Text="Messages you start appear here." HorizontalAlignment="Center" />
                                     </StackPanel>
