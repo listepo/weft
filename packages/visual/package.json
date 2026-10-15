@@ -16,7 +16,7 @@
     "@weft/penpot": "workspace:*",
     "@weft/render-react": "workspace:*",
     "@weft/to-jsx": "workspace:*",
-    "babel-preset-solid": "1.9.15",
+    "babel-preset-solid": "1.9.16",
     "fast-png": "8.0.0",
     "lit": "3.3.3",
     "oxc-transform": "0.152.0",
@@ -24,6 +24,6 @@
     "playwright": "1.63.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "solid-js": "1.9.15"
+    "solid-js": "1.9.17"
   }
 }
