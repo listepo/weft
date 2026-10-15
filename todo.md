@@ -8,4 +8,3 @@
 - T105.14. WinUI repetition
 - T105.5. WinUI layout vocabulary, tokens and materials
 - T105.10. WinUI target: SPEC, AGENT-SPEC and docs
-- T105.13. WinUI date and colour pickers
