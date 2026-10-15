@@ -18,7 +18,6 @@ pub const PENDING: &[&str] = &[
     "corpus-account",
     "corpus-appearance",
     "corpus-booking",
-    "corpus-confirm-dialog",
     "corpus-dashboard",
     "corpus-data-table",
     "corpus-glass",
@@ -28,27 +27,18 @@ pub const PENDING: &[&str] = &[
     "corpus-orders",
     "corpus-receipt",
     "corpus-search-results",
-    "corpus-settings",
     "corpus-showroom",
     "corpus-tabs",
     "corpus-tilt",
     "corpus-todo-list",
-    "example-cell",
     "example-color-picker",
-    "example-column",
     "example-date-picker",
-    "example-dialog",
     "example-grid",
-    "example-item",
     "example-list",
     "example-menu-item",
     "example-option",
-    "example-row",
-    "example-section",
     "example-stack",
-    "example-tab",
     "example-table",
-    "example-tabs",
 ];
 /// The namespace of the goldens: the Windows build compiles them in one project (T105.7).
 pub const NAMESPACE: &str = "WeftScreens";
@@ -89,8 +79,8 @@ fn weft_files(dir: &Path, nested: bool) -> Vec<PathBuf> {
 }
 
 /// The fixtures of `tests/fixtures/`, each named after its file: every prop the generator draws,
-/// and the data shapes the view model holds.
-pub const FIXTURES: &[&str] = &["controls", "data", "values"];
+/// the containers the examples leave out, and the data shapes the view model holds.
+pub const FIXTURES: &[&str] = &["containers", "controls", "data", "values"];
 
 /// Every corpus screen and catalog example, named `corpus-<dir>` or `example-<file>`, and the
 /// fixtures.

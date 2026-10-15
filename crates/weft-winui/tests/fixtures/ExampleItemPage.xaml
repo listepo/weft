@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleItem namespace=WeftScreens
+<screen id="root" label="Inbox" weft="0.1">
+  <list id="inbox" ordered="true">
+    <item id="msg-1" on-press="inbox.open">
+      <text id="msg-1-from" tone="muted">Ana</text>
+      <text id="msg-1-subject">Welcome aboard</text>
+    </item>
+  </list>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleItemPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Inbox">
+            <ListView AutomationProperties.AutomationId="inbox" SelectionMode="None" weft:Props.Ordered="True">
+                <ListViewItem AutomationProperties.AutomationId="msg-1" weft:On.Press="{x:Bind ViewModel.inbox_openCommand}">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="msg-1-from" TextWrapping="Wrap" Text="Ana" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock AutomationProperties.AutomationId="msg-1-subject" TextWrapping="Wrap" Text="Welcome aboard" />
+                    </StackPanel>
+                </ListViewItem>
+            </ListView>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=Containers namespace=WeftScreens
+<screen id="containers" label="Containers" weft="0.2">
+  <section id="profile" hidden="{$.noProfile}" label="{$.profileLabel}">
+    <text id="bio">Designer.</text>
+    <slot name="header">
+      <heading id="profile-title" level="2">Profile</heading>
+      <button id="profile-edit" on-press="profile.edit">Edit</button>
+    </slot>
+  </section>
+  <grid id="tiles" columns="3" gap="{token.space.md}" label="Tiles">
+    <text id="tile-1">One</text>
+    <text id="tile-2">Two</text>
+    <text id="tile-3">Three</text>
+    <text id="tile-4">Four</text>
+    <button id="tile-5">Five</button>
+  </grid>
+  <grid id="single" columns="1">
+    <text id="single-1">Alone</text>
+  </grid>
+  <dialog id="ask" label="Leave?" modal="{$.blocking}" open="{$.asking}" on-close="ask.close">
+    <text id="ask-text">Unsaved changes are lost.</text>
+    <slot name="actions">
+      <button id="ask-stay" on-press="ask.close">Stay</button>
+      <button id="ask-leave" variant="primary" on-press="ask.leave">Leave</button>
+    </slot>
+  </dialog>
+  <dialog id="note" label="Note" open="true">
+    <text id="note-text">Saved.</text>
+  </dialog>
+  <list id="steps" label="Steps" ordered="true" state="ready">
+    <item id="step-1" on-press="step.open">Unpack</item>
+    <item id="step-2" text="{$.stepTwo}"/>
+    <item id="step-3">
+      Plug in
+      <button id="step-3-help" on-press="step.help">Help</button>
+    </item>
+  </list>
+  <table id="people" label="People" state="{$.peopleState}">
+    <column id="col-name" sort="ascending" on-press="people.sort">Name</column>
+    <column id="col-role" text="{$.roleHeader}"/>
+    <column id="col-age">Age</column>
+    <row id="row-ana" selected="{$.anaSelected}" on-press="people.open">
+      <cell id="ana-name">Ana</cell>
+      <cell id="ana-role" text="{$.anaRole}"/>
+      <cell id="ana-age">
+        <text id="ana-age-text">34</text>
+        <button id="ana-age-edit" on-press="age.edit">Edit</button>
+      </cell>
+    </row>
+    <row id="row-bo">
+      <cell id="bo-name">Bo</cell>
+    </row>
+  </table>
+  <tabs id="views" label="Views" selected="{$.view}" on-change="view.pick">
+    <tab id="tab-list" label="List">
+      <text id="tab-list-text">Rows.</text>
+    </tab>
+    <tab id="tab-board" label="{$.boardLabel}">
+      <text id="tab-board-text">Cards.</text>
+      <button id="tab-board-add" on-press="card.add">Add</button>
+    </tab>
+  </tabs>
+  <tabs id="fixed" selected="tab-a">
+    <tab id="tab-a" label="A">
+      <text id="tab-a-text">First.</text>
+    </tab>
+  </tabs>
+</screen>
+-->
+<Page x:Class="WeftScreens.ContainersPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="containers" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Containers">
+            <StackPanel AutomationProperties.AutomationId="profile" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="{x:Bind ViewModel.profileLabel, Mode=OneWay}" Visibility="{x:Bind weft:Weft.Hide(ViewModel.noProfile), Mode=OneWay}">
+                <StackPanel weft:Slot.Name="header">
+                    <TextBlock AutomationProperties.AutomationId="profile-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Profile" />
+                    <Button AutomationProperties.AutomationId="profile-edit" Content="Edit" weft:On.Press="{x:Bind ViewModel.profile_editCommand}" />
+                </StackPanel>
+                <TextBlock AutomationProperties.AutomationId="bio" TextWrapping="Wrap" Text="Designer." />
+            </StackPanel>
+            <Grid AutomationProperties.AutomationId="tiles" RowSpacing="{StaticResource Weft.space.md}" ColumnSpacing="{StaticResource Weft.space.md}" AutomationProperties.Name="Tiles">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock AutomationProperties.AutomationId="tile-1" TextWrapping="Wrap" Text="One" />
+                <TextBlock AutomationProperties.AutomationId="tile-2" TextWrapping="Wrap" Text="Two" Grid.Column="1" />
+                <TextBlock AutomationProperties.AutomationId="tile-3" TextWrapping="Wrap" Text="Three" Grid.Column="2" />
+                <TextBlock AutomationProperties.AutomationId="tile-4" TextWrapping="Wrap" Text="Four" Grid.Row="1" />
+                <Button AutomationProperties.AutomationId="tile-5" Content="Five" Grid.Row="1" Grid.Column="1" />
+            </Grid>
+            <Grid AutomationProperties.AutomationId="single">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock AutomationProperties.AutomationId="single-1" TextWrapping="Wrap" Text="Alone" />
+            </Grid>
+            <ContentDialog AutomationProperties.AutomationId="ask" weft:Dialog.IsOpen="{x:Bind ViewModel.asking, Mode=TwoWay}" weft:Props.Modal="{x:Bind ViewModel.blocking, Mode=OneWay}" AutomationProperties.Name="Leave?" weft:On.Close="{x:Bind ViewModel.ask_closeCommand}">
+                <StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="ask-text" TextWrapping="Wrap" Text="Unsaved changes are lost." />
+                    <StackPanel Orientation="Horizontal" weft:Slot.Name="actions">
+                        <Button AutomationProperties.AutomationId="ask-stay" Content="Stay" weft:On.Press="{x:Bind ViewModel.ask_closeCommand}" />
+                        <Button AutomationProperties.AutomationId="ask-leave" Content="Leave" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.ask_leaveCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </ContentDialog>
+            <ContentDialog AutomationProperties.AutomationId="note" weft:Dialog.IsOpen="True" AutomationProperties.Name="Note">
+                <StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="note-text" TextWrapping="Wrap" Text="Saved." />
+                </StackPanel>
+            </ContentDialog>
+            <ListView AutomationProperties.AutomationId="steps" SelectionMode="None" weft:Props.Ordered="True" AutomationProperties.Name="Steps" weft:Props.State="ready">
+                <ListViewItem AutomationProperties.AutomationId="step-1" Content="Unpack" weft:On.Press="{x:Bind ViewModel.step_openCommand}" />
+                <ListViewItem AutomationProperties.AutomationId="step-2" Content="{x:Bind ViewModel.stepTwo, Mode=OneWay}" />
+                <ListViewItem AutomationProperties.AutomationId="step-3">
+                    <StackPanel>
+                        <TextBlock TextWrapping="Wrap" Text="Plug in" />
+                        <Button AutomationProperties.AutomationId="step-3-help" Content="Help" weft:On.Press="{x:Bind ViewModel.step_helpCommand}" />
+                    </StackPanel>
+                </ListViewItem>
+            </ListView>
+            <StackPanel AutomationProperties.AutomationId="people" AutomationProperties.LocalizedControlType="table" AutomationProperties.Name="People" weft:Props.State="{x:Bind ViewModel.peopleState, Mode=OneWay}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button AutomationProperties.AutomationId="col-name" AutomationProperties.LocalizedControlType="column header" Content="Name" weft:Props.Sort="ascending" weft:On.Press="{x:Bind ViewModel.people_sortCommand}" />
+                    <Button AutomationProperties.AutomationId="col-role" AutomationProperties.LocalizedControlType="column header" Content="{x:Bind ViewModel.roleHeader, Mode=OneWay}" Grid.Column="1" />
+                    <Button AutomationProperties.AutomationId="col-age" AutomationProperties.LocalizedControlType="column header" Content="Age" Grid.Column="2" />
+                </Grid>
+                <Grid AutomationProperties.AutomationId="row-ana" AutomationProperties.LocalizedControlType="row" weft:Props.Selected="{x:Bind ViewModel.anaSelected, Mode=OneWay}" weft:On.Press="{x:Bind ViewModel.people_openCommand}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl AutomationProperties.AutomationId="ana-name" AutomationProperties.LocalizedControlType="cell" Content="Ana" />
+                    <ContentControl AutomationProperties.AutomationId="ana-role" AutomationProperties.LocalizedControlType="cell" Content="{x:Bind ViewModel.anaRole, Mode=OneWay}" Grid.Column="1" />
+                    <ContentControl AutomationProperties.AutomationId="ana-age" AutomationProperties.LocalizedControlType="cell" Grid.Column="2">
+                        <StackPanel>
+                            <TextBlock AutomationProperties.AutomationId="ana-age-text" TextWrapping="Wrap" Text="34" />
+                            <Button AutomationProperties.AutomationId="ana-age-edit" Content="Edit" weft:On.Press="{x:Bind ViewModel.age_editCommand}" />
+                        </StackPanel>
+                    </ContentControl>
+                </Grid>
+                <Grid AutomationProperties.AutomationId="row-bo" AutomationProperties.LocalizedControlType="row">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl AutomationProperties.AutomationId="bo-name" AutomationProperties.LocalizedControlType="cell" Content="Bo" />
+                </Grid>
+            </StackPanel>
+            <TabView AutomationProperties.AutomationId="views" IsAddTabButtonVisible="False" weft:Choice.Value="{x:Bind ViewModel.view, Mode=TwoWay}" AutomationProperties.Name="Views" weft:On.Change="{x:Bind ViewModel.view_pickCommand}">
+                <TabViewItem AutomationProperties.AutomationId="tab-list" IsClosable="False" Tag="tab-list" Header="List">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="tab-list-text" TextWrapping="Wrap" Text="Rows." />
+                    </StackPanel>
+                </TabViewItem>
+                <TabViewItem AutomationProperties.AutomationId="tab-board" IsClosable="False" Tag="tab-board" Header="{x:Bind ViewModel.boardLabel, Mode=OneWay}">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="tab-board-text" TextWrapping="Wrap" Text="Cards." />
+                        <Button AutomationProperties.AutomationId="tab-board-add" Content="Add" weft:On.Press="{x:Bind ViewModel.card_addCommand}" />
+                    </StackPanel>
+                </TabViewItem>
+            </TabView>
+            <TabView AutomationProperties.AutomationId="fixed" IsAddTabButtonVisible="False" weft:Choice.Value="tab-a">
+                <TabViewItem AutomationProperties.AutomationId="tab-a" IsClosable="False" Tag="tab-a" Header="A">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="tab-a-text" TextWrapping="Wrap" Text="First." />
+                    </StackPanel>
+                </TabViewItem>
+            </TabView>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

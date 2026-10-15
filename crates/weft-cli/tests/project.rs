@@ -1786,12 +1786,12 @@ fn winui_refuses_what_it_cannot_generate_and_exits_1() {
     assert_eq!((r.code, r.stdout.as_str()), (1, ""));
     assert!(r.stderr.contains("is not a C# namespace"), "{}", r.stderr);
 
-    // A kind outside the slice is reported with its path.
-    let tabs = s.write(
-        "screens/tabs.weft",
-        r#"<screen id="s" label="S" weft="0.3"><tabs id="t" label="T"></tabs></screen>"#,
+    // What C# cannot type, a path read both as a flag and as text, is reported with its path.
+    let typed = s.write(
+        "screens/typed.weft",
+        r#"<screen id="s" label="S" weft="0.3"><checkbox id="c" checked="{$.x}" label="C"/><text id="t" text="{$.x}"/></screen>"#,
     );
-    let r = run(&[&"winui", &tabs, &"--no-project"]);
+    let r = run(&[&"winui", &typed, &"--no-project"]);
     assert_eq!((r.code, r.stdout.as_str()), (1, ""));
-    assert!(r.stderr.contains("tabs#t"), "{}", r.stderr);
+    assert!(r.stderr.contains("text#t"), "{}", r.stderr);
 }

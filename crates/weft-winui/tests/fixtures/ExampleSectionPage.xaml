@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleSection namespace=WeftScreens
+<screen id="root" label="Account" weft="0.1">
+  <section id="profile" label="Profile">
+    <text id="bio">Product designer based in Lisbon.</text>
+    <slot name="header">
+      <heading id="profile-title" level="2">Profile</heading>
+    </slot>
+  </section>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleSectionPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Account">
+            <StackPanel AutomationProperties.AutomationId="profile" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Profile">
+                <StackPanel weft:Slot.Name="header">
+                    <TextBlock AutomationProperties.AutomationId="profile-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Profile" />
+                </StackPanel>
+                <TextBlock AutomationProperties.AutomationId="bio" TextWrapping="Wrap" Text="Product designer based in Lisbon." />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

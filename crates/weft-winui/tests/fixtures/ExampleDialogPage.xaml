@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleDialog namespace=WeftScreens
+<screen id="root" label="Files" weft="0.1">
+  <dialog id="confirm" label="Delete file?" modal="true" open="{$.confirmOpen}" on-close="dialog.close">
+    <text id="warn">This cannot be undone.</text>
+    <slot name="actions">
+      <button id="cancel" on-press="dialog.close">Cancel</button>
+      <button id="ok" variant="danger" on-press="file.delete">Delete</button>
+    </slot>
+  </dialog>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleDialogPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Files">
+            <ContentDialog AutomationProperties.AutomationId="confirm" weft:Dialog.IsOpen="{x:Bind ViewModel.confirmOpen, Mode=TwoWay}" weft:Props.Modal="True" AutomationProperties.Name="Delete file?" weft:On.Close="{x:Bind ViewModel.dialog_closeCommand}">
+                <StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="warn" TextWrapping="Wrap" Text="This cannot be undone." />
+                    <StackPanel Orientation="Horizontal" weft:Slot.Name="actions">
+                        <Button AutomationProperties.AutomationId="cancel" Content="Cancel" weft:On.Press="{x:Bind ViewModel.dialog_closeCommand}" />
+                        <Button AutomationProperties.AutomationId="ok" Content="Delete" weft:Props.Variant="danger" weft:On.Press="{x:Bind ViewModel.file_deleteCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </ContentDialog>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

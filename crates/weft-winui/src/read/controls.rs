@@ -5,6 +5,8 @@
 use roxmltree::Node as Xml;
 use weft_import::LossKind;
 
+use crate::generate::containers::CARD;
+
 pub const PRESENTATION: &str = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
 pub const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 
@@ -68,7 +70,7 @@ pub const ATTRS: &[(&str, &str, &str, Conv)] = &[
     ),
     ("heading", "Style", "level", Conv::Words(RAMP)),
     (
-        "button link radio segment option item",
+        "button link radio segment option item column cell",
         "Content",
         "",
         Conv::Same,
@@ -153,8 +155,20 @@ const EXPECTED: &[(&str, &str)] = &[
     ("list", "SelectionMode"),
     ("tabs", "IsAddTabButtonVisible"),
     ("tab", "IsClosable"),
+    // A tab's `Tag` repeats its id, for `Choice.Value`.
+    ("tab", "Tag"),
+    // A table's panels line up column headers and cells by track.
+    ("column cell", "Grid.Column"),
     ("alert", "IsOpen"),
     ("alert", "IsClosable"),
+];
+
+/// The table kinds, which panels and buttons carry no semantics for, by `LocalizedControlType`.
+const TABLE: &[(&str, &str, &str)] = &[
+    ("StackPanel", "table", "table"),
+    ("Grid", "row", "row"),
+    ("ContentControl", "cell", "cell"),
+    ("Button", "column header", "column"),
 ];
 
 const LAYOUT: &[&str] = &[
@@ -263,10 +277,14 @@ pub fn attr_of(
         .find(|(kinds, attr, ..)| *attr == name && listed(kinds, kind))
 }
 
-pub fn expected(kind: &str, name: &str) -> bool {
-    EXPECTED
-        .iter()
-        .any(|(kinds, attr)| *attr == name && listed(kinds, kind))
+pub fn expected(kind: &str, name: &str, value: &str) -> bool {
+    let card = kind == "section" && CARD.contains(&(name, value));
+    let table = name == "AutomationProperties.LocalizedControlType"
+        && TABLE.iter().any(|t| (t.1, t.2) == (value, kind));
+    card || table
+        || EXPECTED
+            .iter()
+            .any(|(kinds, attr)| *attr == name && listed(kinds, kind))
 }
 
 /// The loss for an attribute nothing reads: a binding, a token, an event, layout or look.
@@ -298,7 +316,14 @@ pub fn kind_of(el: Xml<'_, '_>) -> Option<(&'static str, Option<&'static str>)> 
         return None;
     }
     let at = |name: &str| el.attribute(name);
-    let kind = match el.tag_name().name() {
+    let tag = el.tag_name().name();
+    if let Some(&(_, _, kind)) = TABLE
+        .iter()
+        .find(|t| t.0 == tag && at("AutomationProperties.LocalizedControlType") == Some(t.1))
+    {
+        return Some((kind, None));
+    }
+    let kind = match tag {
         "StackPanel" => match at("AutomationProperties.LandmarkType") {
             Some("Form") => "form",
             Some("Custom")
@@ -369,13 +394,26 @@ pub fn wrapper(el: Xml<'_, '_>) -> Option<Option<(LossKind, &'static str)>> {
     }
     Some(match el.tag_name().name() {
         "DataTemplate" | "MenuFlyout" => None,
-        // An InfoBar takes one content element; the generator's bare panel holds an alert's
-        // several children, while a `stack` of the source always carries its AutomationId.
+        // A content control takes one element; the generator's bare panel holds the several of
+        // an alert, dialog, item, tab or cell, while a `stack` of the source carries its
+        // AutomationId.
         "StackPanel"
+            if el.attributes().next().is_none()
+                && el.parent_element().is_some_and(|p| {
+                    let holder = ["InfoBar", "ContentDialog", "ListViewItem", "TabViewItem"];
+                    holder.contains(&p.tag_name().name())
+                        || kind_of(p).is_some_and(|(kind, _)| kind == "cell")
+                }) =>
+        {
+            None
+        }
+        // The header row of a table, which holds its columns.
+        "Grid"
             if el.attributes().next().is_none()
                 && el
                     .parent_element()
-                    .is_some_and(|p| p.tag_name().name() == "InfoBar") =>
+                    .and_then(kind_of)
+                    .is_some_and(|(kind, _)| kind == "table") =>
         {
             None
         }

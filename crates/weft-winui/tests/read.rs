@@ -321,7 +321,6 @@ fn weft_resources_are_tokens() {
             "Layout /screen#s/stack#c: `Spacing` on `StackPanel`: a layout value\n",
             "Props /screen#s/stack#c: `Padding` on `StackPanel`: a markup extension\n",
             "Tokens /screen#s/grid#d: `ColumnSpacing` disagrees with the `gap` already read\n",
-            "Layout /screen#s/grid#d: `Grid.ColumnDefinitions`: the track sizes are not read\n",
         )
     );
 }
@@ -406,6 +405,60 @@ fn grid_tracks_are_justify_and_grow() {
             "{spec:?}: {doc}"
         );
     }
+}
+
+#[test]
+fn a_grid_filled_in_order_reads_as_its_columns_alone() {
+    let rows = |n: usize| "<RowDefinition Height=\"Auto\" />".repeat(n);
+    let grid = |id: &str, columns: &str, rows: &str, cells: &str| {
+        format!(
+            r#"<Grid AutomationProperties.AutomationId="{id}"><Grid.ColumnDefinitions>{columns}</Grid.ColumnDefinitions><Grid.RowDefinitions>{rows}</Grid.RowDefinitions>{cells}</Grid>"#
+        )
+    };
+    let star = "<ColumnDefinition Width=\"*\" /><ColumnDefinition />";
+    let filled = grid(
+        "f",
+        star,
+        &rows(2),
+        concat!(
+            r#"<TextBlock AutomationProperties.AutomationId="a" Text="A" />"#,
+            r#"<TextBlock AutomationProperties.AutomationId="b" Text="B" Grid.Column="1" />"#,
+            r#"<TextBlock AutomationProperties.AutomationId="c" Text="C" Grid.Row="1" />"#,
+        ),
+    );
+    // Out of fill order, a wide column and a spare row each keep the tracks a loss.
+    let swapped = grid(
+        "o",
+        star,
+        &rows(1),
+        concat!(
+            r#"<TextBlock AutomationProperties.AutomationId="d" Text="D" Grid.Column="1" />"#,
+            r#"<TextBlock AutomationProperties.AutomationId="e" Text="E" />"#,
+        ),
+    );
+    let wide = grid(
+        "w",
+        "<ColumnDefinition Width=\"2*\" />",
+        &rows(1),
+        r#"<TextBlock AutomationProperties.AutomationId="g" Text="G" />"#,
+    );
+    let spare = grid(
+        "p",
+        star,
+        &rows(2),
+        r#"<TextBlock AutomationProperties.AutomationId="h" Text="H" />"#,
+    );
+    let (doc, lost) = read_body(&format!("{filled}{swapped}{wide}{spare}"));
+    assert!(doc.starts_with(r#"<grid id="f" columns="2">"#), "{doc}");
+    assert!(!lost.contains("grid#f"), "{lost}");
+    for id in ["o", "w", "p"] {
+        let tracks = format!("/grid#{id}: `Grid.RowDefinitions`: the track sizes are not read");
+        assert!(lost.contains(&tracks), "{id}: {lost}");
+    }
+    assert!(
+        lost.contains("text#d: `Grid.Column` on `TextBlock`"),
+        "{lost}"
+    );
 }
 
 #[test]

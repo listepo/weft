@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusSettings namespace=WeftScreens
+<screen id="settings" label="Settings" weft="0.1">
+  <heading id="title" level="1">Settings</heading>
+  <section id="notifications" label="Notifications">
+    <heading id="notifications-title" level="2">Notifications</heading>
+    <switch id="email-alerts" checked="{$.emailAlerts}" label="Email alerts"/>
+    <switch id="push-alerts" checked="{$.pushAlerts}" label="Push notifications"/>
+  </section>
+  <section id="appearance" label="Appearance">
+    <heading id="appearance-title" level="2">Appearance</heading>
+    <select id="language" label="Language" value="{$.language}">
+      <option id="lang-en" value="en">English</option>
+      <option id="lang-de" value="de">Deutsch</option>
+      <option id="lang-fr" value="fr">Français</option>
+    </select>
+    <switch id="dark-mode" checked="{$.darkMode}" label="Dark mode"/>
+  </section>
+  <button id="save" disabled="{!$.dirty}" variant="primary" on-press="settings.save">Save changes</button>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusSettingsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="settings" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Settings">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Settings" />
+            <StackPanel AutomationProperties.AutomationId="notifications" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Notifications">
+                <TextBlock AutomationProperties.AutomationId="notifications-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Notifications" />
+                <ToggleSwitch AutomationProperties.AutomationId="email-alerts" IsOn="{x:Bind ViewModel.emailAlerts, Mode=TwoWay}" Header="Email alerts" />
+                <ToggleSwitch AutomationProperties.AutomationId="push-alerts" IsOn="{x:Bind ViewModel.pushAlerts, Mode=TwoWay}" Header="Push notifications" />
+            </StackPanel>
+            <StackPanel AutomationProperties.AutomationId="appearance" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Appearance">
+                <TextBlock AutomationProperties.AutomationId="appearance-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Appearance" />
+                <ComboBox AutomationProperties.AutomationId="language" weft:Choice.Value="{x:Bind ViewModel.language, Mode=TwoWay}" Header="Language">
+                    <ComboBoxItem AutomationProperties.AutomationId="lang-en" Content="English" Tag="en" />
+                    <ComboBoxItem AutomationProperties.AutomationId="lang-de" Content="Deutsch" Tag="de" />
+                    <ComboBoxItem AutomationProperties.AutomationId="lang-fr" Content="Français" Tag="fr" />
+                </ComboBox>
+                <ToggleSwitch AutomationProperties.AutomationId="dark-mode" IsOn="{x:Bind ViewModel.darkMode, Mode=TwoWay}" Header="Dark mode" />
+            </StackPanel>
+            <Button AutomationProperties.AutomationId="save" Content="Save changes" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.dirty), Mode=OneWay}" weft:On.Press="{x:Bind ViewModel.settings_saveCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

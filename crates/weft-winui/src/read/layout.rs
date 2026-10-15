@@ -1,7 +1,8 @@
 //! The layout vocabulary of the XAML (docs/winui-design.md, "Layout vocabulary"): a `Grid` drawn
 //! for a justified or growing `stack` (tracks on one axis, a star track for a growing child, empty
 //! star tracks for the free space) reads back as the stack's `direction`, `grow` and `justify`,
-//! and the children's shared cross-axis alignment as its `align`.
+//! and the children's shared cross-axis alignment as its `align`. A `grid`'s own tracks read as
+//! its `columns` alone when they are the ones the generator writes.
 
 use roxmltree::Node as Xml;
 use weft_core::{Child, Node, Value};
@@ -67,6 +68,36 @@ pub fn stack_tracks(el: Xml<'_, '_>) -> Option<Tracks> {
                 .is_some_and(|h| !std::mem::replace(h, true))
     });
     fits.then_some(tracks)
+}
+
+/// Whether `el` is a `grid` as the generator draws it: star columns over `Auto` rows, as many
+/// rows as its children fill, each child alone in the next cell in document order. Its tracks
+/// and placements then say nothing beyond `columns`.
+pub fn filled(el: Xml<'_, '_>) -> bool {
+    let defs = |name: &str| elements(el).find(|c| c.tag_name().name() == name);
+    let sizes = |list: Option<Xml<'_, '_>>, attr: &str| -> Vec<String> {
+        list.map(|l| {
+            elements(l)
+                .map(|t| t.attribute(attr).unwrap_or("*").to_owned())
+                .collect()
+        })
+        .unwrap_or_default()
+    };
+    let columns = sizes(defs("Grid.ColumnDefinitions"), "Width");
+    let rows = sizes(defs("Grid.RowDefinitions"), "Height");
+    let kids: Vec<_> = children(el).collect();
+    if columns.is_empty() || columns.iter().any(|c| !matches!(c.as_str(), "*" | "1*")) {
+        return false;
+    }
+    let width = columns.len();
+    rows.len() == kids.len().div_ceil(width)
+        && rows.iter().all(|r| r == "Auto")
+        && kids.iter().enumerate().all(|(i, c)| {
+            !c.has_attribute("Grid.RowSpan")
+                && !c.has_attribute("Grid.ColumnSpan")
+                && track(*c, "Grid.Row") == Some(i / width)
+                && track(*c, "Grid.Column") == Some(i % width)
+        })
 }
 
 impl Reader<'_> {
