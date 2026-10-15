@@ -28,6 +28,20 @@
     <heading id="framed-title" level="2">Framed</heading>
     <text id="framed-text">Centred in a padded column.</text>
   </stack>
+  <stack id="lefts" align="start">
+    <text id="lefts-a">Left</text>
+  </stack>
+  <stack id="rights" align="end">
+    <text id="rights-a">Right</text>
+  </stack>
+  <stack id="bottom" gap="{token.space.sm}" justify="end">
+    <text id="bottom-a">Last</text>
+    <text id="bottom-b">Lines</text>
+  </stack>
+  <stack id="spread" justify="space-between">
+    <text id="spread-a">Top</text>
+    <text id="spread-b">Bottom</text>
+  </stack>
   <grid id="cards" columns="4" gap="{token.space.md}" max-width="{token.size.xl}" min-column-width="{token.size.sm}" padding="{token.space.sm}">
     <text id="card-a">One</text>
     <text id="card-b">Two</text>
@@ -90,6 +104,30 @@
                 <TextBlock AutomationProperties.AutomationId="framed-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Framed" HorizontalAlignment="Center" />
                 <TextBlock AutomationProperties.AutomationId="framed-text" TextWrapping="Wrap" Text="Centred in a padded column." HorizontalAlignment="Center" />
             </StackPanel>
+            <StackPanel AutomationProperties.AutomationId="lefts">
+                <TextBlock AutomationProperties.AutomationId="lefts-a" TextWrapping="Wrap" Text="Left" HorizontalAlignment="Left" />
+            </StackPanel>
+            <StackPanel AutomationProperties.AutomationId="rights">
+                <TextBlock AutomationProperties.AutomationId="rights-a" TextWrapping="Wrap" Text="Right" HorizontalAlignment="Right" />
+            </StackPanel>
+            <Grid AutomationProperties.AutomationId="bottom" RowSpacing="{StaticResource Weft.space.sm}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock AutomationProperties.AutomationId="bottom-a" TextWrapping="Wrap" Text="Last" Grid.Row="1" />
+                <TextBlock AutomationProperties.AutomationId="bottom-b" TextWrapping="Wrap" Text="Lines" Grid.Row="2" />
+            </Grid>
+            <Grid AutomationProperties.AutomationId="spread">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock AutomationProperties.AutomationId="spread-a" TextWrapping="Wrap" Text="Top" />
+                <TextBlock AutomationProperties.AutomationId="spread-b" TextWrapping="Wrap" Text="Bottom" Grid.Row="2" />
+            </Grid>
             <weft:ColumnsPanel AutomationProperties.AutomationId="cards" Padding="{StaticResource Weft.space.sm.thickness}" MaxWidth="{StaticResource Weft.size.xl}" Columns="4" MinColumnWidth="{StaticResource Weft.size.sm}" Spacing="{StaticResource Weft.space.md}">
                 <TextBlock AutomationProperties.AutomationId="card-a" TextWrapping="Wrap" Text="One" />
                 <TextBlock AutomationProperties.AutomationId="card-b" TextWrapping="Wrap" Text="Two" />

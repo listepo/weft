@@ -6,6 +6,7 @@
   <text id="tag" hidden="{!$.todos.0.tags.0.shown}" text="{$.todos.0.tags.0.name}"/>
   <text id="owner" text="{$.todos.0.owner.name}"/>
   <text id="label" text="{$.labels.0}"/>
+  <checkbox id="first-flag" checked="{$.flags.0}" label="First"/>
   <text id="city" hidden="{$.user.away}" text="{$.user.address.city}"/>
   <text id="pinned" text="{$.user.pins.0.note}"/>
   <field id="kind" label="Class" value="{$.kind}"/>
@@ -22,6 +23,7 @@
             <TextBlock AutomationProperties.AutomationId="tag" TextWrapping="Wrap" Text="{x:Bind ViewModel.todos[0].tags[0].name, Mode=OneWay}" Visibility="{x:Bind ViewModel.todos[0].tags[0].shown, Mode=OneWay}" />
             <TextBlock AutomationProperties.AutomationId="owner" TextWrapping="Wrap" Text="{x:Bind ViewModel.todos[0].owner.name, Mode=OneWay}" />
             <TextBlock AutomationProperties.AutomationId="label" TextWrapping="Wrap" Text="{x:Bind ViewModel.labels[0], Mode=OneWay}" />
+            <CheckBox AutomationProperties.AutomationId="first-flag" IsChecked="{x:Bind ViewModel.flags[0], Mode=TwoWay}" Content="First" />
             <TextBlock AutomationProperties.AutomationId="city" TextWrapping="Wrap" Text="{x:Bind ViewModel.user.address.city, Mode=OneWay}" Visibility="{x:Bind weft:Weft.Hide(ViewModel.user.away), Mode=OneWay}" />
             <TextBlock AutomationProperties.AutomationId="pinned" TextWrapping="Wrap" Text="{x:Bind ViewModel.user.pins[0].note, Mode=OneWay}" />
             <TextBox AutomationProperties.AutomationId="kind" Text="{x:Bind ViewModel.kind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Class" />

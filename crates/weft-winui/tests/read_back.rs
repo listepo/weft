@@ -149,3 +149,29 @@ fn deep_nesting_is_an_error_not_a_crash() {
     ));
     assert!(matches!(nested(MAX_XML_DEPTH), Err(ImportError::Xml(_))));
 }
+
+#[test]
+fn processing_instructions_are_ignored_and_xml_nodes_are_bounded() {
+    let (catalog, tokens) = setup();
+    let options = import(&catalog, &tokens);
+    let (_, doc, generated) = covered()
+        .into_iter()
+        .find(|(n, ..)| n == "controls")
+        .unwrap();
+    let noted = generated
+        .xaml
+        .replace("<ScrollViewer>", "<ScrollViewer><?note x?>");
+    assert_eq!(import_winui(&noted, &options).unwrap(), doc);
+    let flooded = generated.xaml.replace(
+        "<ScrollViewer>",
+        &format!(
+            "<ScrollViewer>{}",
+            "<!---->".repeat(weft_import::MAX_NODES * 8)
+        ),
+    );
+    assert!(flooded.len() < MAX_SOURCE_LENGTH);
+    assert!(matches!(
+        import_winui(&flooded, &options),
+        Err(ImportError::Xml(_))
+    ));
+}

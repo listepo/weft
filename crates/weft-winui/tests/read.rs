@@ -778,3 +778,37 @@ fn a_marked_repeater_is_an_each_and_its_paths_are_relative() {
         )
     );
 }
+
+#[test]
+fn a_user_control_or_window_reads_like_a_page() {
+    let (catalog, tokens) = setup();
+    let ns = r#"xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation""#;
+    let body = r#"<StackPanel AutomationProperties.AutomationId="s"><Viewbox><TextBlock AutomationProperties.AutomationId="t" Text="Hi"/></Viewbox><RelativePanel AutomationProperties.AutomationId="r"><Button AutomationProperties.AutomationId="b" Content="Go"/></RelativePanel></StackPanel>"#;
+    let read_as = |root: &str| {
+        let result = read(&format!("<{root} {ns}>{body}</{root}>"), &catalog, &tokens);
+        assert!(
+            result.diagnostics.is_empty(),
+            "{root}: {:?}",
+            result.diagnostics
+        );
+        (serialize(&result.document), losses(&result))
+    };
+    let page = read_as("Page");
+    // A `Viewbox` is read through; a `RelativePanel` is a stack.
+    assert!(
+        page.0
+            .contains("  <text id=\"t\">Hi</text>\n  <stack id=\"r\">"),
+        "{}",
+        page.0
+    );
+    assert!(page.1.contains("Layout /screen#s: `Viewbox`"), "{}", page.1);
+    assert!(
+        page.1
+            .contains("Structure /screen#s/stack#r: `RelativePanel`"),
+        "{}",
+        page.1
+    );
+    for root in ["UserControl", "Window"] {
+        assert_eq!(read_as(root), page, "{root}");
+    }
+}

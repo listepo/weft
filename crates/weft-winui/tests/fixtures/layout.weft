@@ -26,6 +26,20 @@
     <heading id="framed-title" level="2">Framed</heading>
     <text id="framed-text">Centred in a padded column.</text>
   </stack>
+  <stack id="lefts" align="start">
+    <text id="lefts-a">Left</text>
+  </stack>
+  <stack id="rights" align="end">
+    <text id="rights-a">Right</text>
+  </stack>
+  <stack id="bottom" gap="{token.space.sm}" justify="end">
+    <text id="bottom-a">Last</text>
+    <text id="bottom-b">Lines</text>
+  </stack>
+  <stack id="spread" justify="space-between">
+    <text id="spread-a">Top</text>
+    <text id="spread-b">Bottom</text>
+  </stack>
   <grid id="cards" columns="4" gap="{token.space.md}" max-width="{token.size.xl}" min-column-width="{token.size.sm}" padding="{token.space.sm}">
     <text id="card-a">One</text>
     <text id="card-b">Two</text>

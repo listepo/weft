@@ -13,7 +13,7 @@
     <text id="tile-4">Four</text>
     <button id="tile-5">Five</button>
   </grid>
-  <grid id="single" columns="1">
+  <grid id="single" columns="1" max-width="{token.size.md}" padding="{token.space.sm}">
     <text id="single-1">Alone</text>
   </grid>
   <dialog id="ask" label="Leave?" modal="{$.blocking}" open="{$.asking}" on-close="ask.close">
@@ -48,6 +48,12 @@
     </row>
     <row id="row-bo">
       <cell id="bo-name">Bo</cell>
+    </row>
+    <row id="row-cy">
+      <cell id="cy-name">Cy</cell>
+      <cell id="cy-role">Lead</cell>
+      <cell id="cy-age">41</cell>
+      <cell id="cy-note">New</cell>
     </row>
   </table>
   <tabs id="views" label="Views" selected="{$.view}" on-change="view.pick">

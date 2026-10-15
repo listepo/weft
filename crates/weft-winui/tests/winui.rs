@@ -127,6 +127,7 @@ fn paths_become_properties_objects_and_lists() {
         "public string title",
         "public ObservableCollection<DataTodosItem> todos { get; } = new();",
         "public ObservableCollection<string> labels { get; } = new();",
+        "public ObservableCollection<bool> flags { get; } = new();",
         "public DataUserData user { get; } = new();",
         "public string kind",
         "public DataAlertData alert { get; } = new();",
@@ -216,6 +217,12 @@ fn helpers_take_the_namespace() {
         "DateTimeOffset Latest(string? value)",
         "class Choice",
         "class Dialog",
+        "class ColumnsPanel : Panel",
+        // SPEC §9 Trust: a bound address opens or loads only these schemes.
+        "uri.Scheme is \"http\" or \"https\" or \"mailto\"",
+        "\"ms-appx:///\"",
+        // Enter in a single-line field submits its form.
+        "e.Key == VirtualKey.Enter && field",
     ] {
         assert!(shared.contains(function), "{function}");
     }
@@ -363,6 +370,34 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
         (
             r#"<text id="t" text="{$.user.WeftPath}"/>"#,
             "$.user.WeftPath",
+        ),
+        // An x:Bind path names a C# member, so a keyword cannot be one.
+        (r#"<text id="t" text="{$.class}"/>"#, "$.class"),
+        (
+            r#"<stack id="r" padding="{$.p}"><text id="a">A</text></stack>"#,
+            "stack#r",
+        ),
+        (
+            r#"<stack id="r" max-width="{$.w}"><text id="a">A</text></stack>"#,
+            "stack#r",
+        ),
+        (
+            r#"<grid id="g" columns="2" min-column-width="{$.w}"><text id="a">A</text></grid>"#,
+            "grid#g",
+        ),
+        (
+            r#"<stack id="r" gap="{$.g}"><text id="a">A</text></stack>"#,
+            "stack#r",
+        ),
+        // A list's template draws one item.
+        (
+            r#"<list id="l" label="L"><each id="e" as="x" in="{$.xs}"><item id="i" text="{$x.a}"/><item id="j" text="{$x.b}"/></each></list>"#,
+            "each#e",
+        ),
+        // One `Count` decides whether the slot shows.
+        (
+            r#"<table id="tb" label="T"><column id="c">C</column><each id="e" as="x" in="{$.xs}"><row id="r"><cell id="c1" text="{$x.a}"/></row></each><each id="f" as="y" in="{$.ys}"><row id="r2"><cell id="c2" text="{$y.a}"/></row></each><slot name="empty"><text id="none">None</text></slot></table>"#,
+            "table#tb",
         ),
     ];
     for (body, path) in cases {
@@ -586,4 +621,25 @@ fn an_each_repeats_in_its_stacks_flow() {
         .count();
     // The stack itself and the template's panel of the item's two texts.
     assert_eq!(panels, 2);
+}
+
+#[test]
+fn a_screen_strict_validation_rejects_is_not_generated() {
+    let (catalog, tokens) = setup();
+    let markup = screen(r#"<text id="t" bogus="1">A</text>"#);
+    let parsed = weft_core::parse(
+        &markup,
+        &weft_core::ParseOptions {
+            catalog: Some(&catalog),
+            mode: weft_core::Mode::Lenient,
+            tokens: None,
+            actions: None,
+        },
+    );
+    let doc = parsed.document.unwrap();
+    let result = generate(&doc, &options(&catalog, &tokens, None));
+    assert!(
+        matches!(result, Err(GenerateError::Invalid(_))),
+        "{result:?}"
+    );
 }
