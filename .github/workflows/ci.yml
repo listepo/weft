@@ -79,6 +79,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 90
     env:
+      # mise-action authenticates only its own step; the mise shims that cargo and pnpm run through
+      # install the mise.toml tools it skipped, and unauthenticated that hits GitHub's 60/hour limit.
+      GITHUB_TOKEN: ${{ github.token }}
       DOTNET_CLI_TELEMETRY_OPTOUT: "1"
       DOTNET_NOLOGO: "1"
     steps:
