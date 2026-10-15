@@ -121,11 +121,11 @@ public static class Weft
 
     /// <summary>A date-picker's <c>min</c> and <c>max</c>, of a date or a date and time; without one,
     /// the picker's own range of a hundred years either way.</summary>
-    public static DateTimeOffset Earliest(object? value) => Day(DatePart(value)) ?? DateTimeOffset.Now.AddYears(-100);
+    public static DateTimeOffset Earliest(string? value) => Day(DatePart(value)) ?? DateTimeOffset.Now.AddYears(-100);
 
-    public static DateTimeOffset Latest(object? value) => Day(DatePart(value)) ?? DateTimeOffset.Now.AddYears(100);
+    public static DateTimeOffset Latest(string? value) => Day(DatePart(value)) ?? DateTimeOffset.Now.AddYears(100);
 
-    private static string? DatePart(object? value) => (value as string)?.Split('T')[0];
+    private static string? DatePart(string? value) => value?.Split('T')[0];
 
     /// <summary>A bound <c>href</c>. SPEC §9 Trust: only <c>http</c>, <c>https</c> and <c>mailto</c>
     /// open.</summary>
