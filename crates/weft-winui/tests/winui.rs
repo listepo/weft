@@ -10,26 +10,50 @@
 mod common;
 
 use common::{
-    COVERED, FIXTURES, NAMESPACE, controls, covered, document, here, options, screen, screens,
-    setup,
+    NAMESPACE, PENDING, controls, covered, document, here, options, screen, screens, setup,
 };
-use weft_winui::{GenerateError, GenerateOptions, Generated, generate, helpers};
+use weft_winui::{
+    GenerateError, GenerateOptions, Generated, TOKENS_FILE, generate, generate_tokens, helpers,
+};
 
 #[test]
-fn exactly_the_covered_screens_generate() {
+fn every_screen_but_the_pending_ones_generates() {
     let (catalog, tokens) = setup();
-    let mut generated = vec![];
+    let (mut generated, mut refused) = (vec![], vec![]);
     for (name, path) in screens() {
         let doc = document(&std::fs::read_to_string(path).unwrap(), &catalog, &tokens);
         match generate(&doc, &options(&catalog, &tokens, None)) {
             Ok(_) => generated.push(name),
-            Err(GenerateError::Unsupported(problems)) => assert!(!problems.is_empty(), "{name}"),
+            Err(GenerateError::Unsupported(problems)) => {
+                assert!(!problems.is_empty(), "{name}");
+                refused.push(name);
+            }
             Err(e) => panic!("{name}: {e}"),
         }
     }
-    let mut expected: Vec<&str> = COVERED.to_vec();
-    expected.extend(FIXTURES);
-    assert_eq!(generated, expected);
+    assert_eq!(refused, PENDING);
+    assert!(!generated.is_empty());
+}
+
+/// The Windows build (T105.7) compiles every `.xaml` and `.cs` file of `tests/fixtures/`, so the
+/// set must be exactly the goldens of the screens that generate and the shared files: a screen
+/// without its goldens would go unbuilt, a stale golden would be built for nothing.
+#[test]
+fn every_screen_that_generates_has_its_golden_files_and_no_other() {
+    let mut expected: Vec<String> = covered()
+        .iter()
+        .flat_map(|(_, _, generated)| generated.files().map(|(file, _)| file))
+        .chain(["Weft.cs".to_owned(), TOKENS_FILE.to_owned()])
+        .collect();
+    expected.sort();
+    let mut found: Vec<String> = std::fs::read_dir(here("tests/fixtures"))
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        // The read-back's hand-written input, not generator output; the build leaves it out.
+        .filter(|f| (f.ends_with(".xaml") || f.ends_with(".cs")) && f != "handwritten.xaml")
+        .collect();
+    found.sort();
+    assert_eq!(found, expected);
 }
 
 fn golden(file: &str, text: &str) {
@@ -41,8 +65,8 @@ fn golden(file: &str, text: &str) {
     assert_eq!(text, expected, "{file}");
 }
 
-/// Every `{` of a C# file is closed in order, outside string literals: a cheap guard until the
-/// Windows build (T105.7) compiles the goldens.
+/// Every `{` of a C# file is closed in order, outside string literals: a cheap guard where the
+/// Windows build (T105.7) cannot run.
 fn balanced(file: &str, source: &str) {
     let mut depth = 0i32;
     let mut quoted = false;
@@ -73,6 +97,8 @@ fn generated_files_match_the_golden_files() {
     let shared = helpers(NAMESPACE).unwrap();
     balanced("Weft.cs", &shared);
     golden("Weft.cs", &shared);
+    let (_, tokens) = setup();
+    golden(TOKENS_FILE, &generate_tokens(&tokens).0);
 }
 
 fn data() -> Generated {
@@ -102,9 +128,8 @@ fn paths_become_properties_objects_and_lists() {
         "public ObservableCollection<DataTodosItem> todos { get; } = new();",
         "public ObservableCollection<string> labels { get; } = new();",
         "public DataUserData user { get; } = new();",
-        // A keyword is escaped in C#, and the binding names it plain.
-        "public string @class",
-        "public DataEventData @event { get; } = new();",
+        "public string kind",
+        "public DataAlertData alert { get; } = new();",
         // Read only through `Weft.Not`, a flag.
         "public bool busy",
         "Weft.Place(user.pins, this, null, \"$.user.pins\");",
@@ -132,7 +157,7 @@ fn paths_become_properties_objects_and_lists() {
     for xaml in [
         "Text=\"{x:Bind ViewModel.todos[0].title, Mode=OneWay}\"",
         "Visibility=\"{x:Bind ViewModel.todos[0].tags[0].shown, Mode=OneWay}\"",
-        "Text=\"{x:Bind ViewModel.class, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}\"",
+        "Text=\"{x:Bind ViewModel.kind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}\"",
     ] {
         assert!(generated.xaml.contains(xaml), "{xaml}");
     }
@@ -341,17 +366,26 @@ fn value_controls_follow_the_spec() {
     );
     assert_eq!(at("size-s", "Content").as_deref(), Some("Small"));
     assert_eq!(at("size-s", "Tag").as_deref(), Some("s"));
-    // Literal bounds as SPEC §5.1 reads them; a bound `min` leaves a literal `max` alone.
+    // Literal bounds as SPEC §5.1 reads them; a bound `min` leaves a literal `max` alone. The
+    // reversed bounds are not in the fixture, which reads back to the source exactly.
+    let (catalog, tokens) = setup();
+    let reversed = screen(
+        r#"<slider id="flipped" label="F" max="5" min="10" step="0" value="7"/><stepper id="back" label="B" max="2" min="8" step="-1" value="3"/>"#,
+    );
+    let reversed = document(&reversed, &catalog, &tokens);
+    let reversed = generate(&reversed, &options(&catalog, &tokens, None)).unwrap();
+    let reversed = roxmltree::Document::parse(&reversed.xaml).unwrap();
     for (id, min, max, step) in [
         ("flipped", "10", "10", "1"),
-        ("count", "8", "8", "1"),
+        ("back", "8", "8", "1"),
         ("above", "{x:Bind ViewModel.bottom, Mode=OneWay}", "-5", ""),
     ] {
-        assert_eq!(at(id, "Minimum").as_deref(), Some(min), "{id}");
-        assert_eq!(at(id, "Maximum").as_deref(), Some(max), "{id}");
+        let xml = if id == "above" { &xml } else { &reversed };
+        let at = |attr: &str| by_id(xml, id).attribute(attr).map(str::to_owned);
+        assert_eq!(at("Minimum").as_deref(), Some(min), "{id}");
+        assert_eq!(at("Maximum").as_deref(), Some(max), "{id}");
         let step = (!step.is_empty()).then(|| step.to_owned());
-        let stride = at(id, "StepFrequency").or(at(id, "SmallChange"));
-        assert_eq!(stride, step, "{id}");
+        assert_eq!(at("StepFrequency").or(at("SmallChange")), step, "{id}");
     }
     let vm = &generated.view_model_source;
     assert!(vm.contains("public double level"), "{vm}");

@@ -214,6 +214,41 @@ const EVENTS: &[&str] = &[
     "Command",
 ];
 
+/// `(kinds, attribute, prop)`: attributes that hold a `Weft.*` token resource.
+const TOKENS: &[(&str, &str, &str)] = &[
+    ("stack", "Spacing", "gap"),
+    ("stack grid", "RowSpacing", "gap"),
+    ("stack grid", "ColumnSpacing", "gap"),
+    ("stack grid", "Padding", "padding"),
+    ("stack grid", "MaxWidth", "max-width"),
+];
+/// A native event or `Command` bound to the view model, and the Weft events it may be, in order.
+const BOUND_EVENTS: &[(&str, &[&str])] = &[
+    ("Command", &["press"]),
+    ("Click", &["press", "change"]),
+    ("ItemClick", &["press"]),
+    ("Toggled", &["change"]),
+    ("TextChanged", &["change"]),
+    ("PasswordChanged", &["change"]),
+    ("SelectionChanged", &["change"]),
+    ("ValueChanged", &["change"]),
+    ("DateChanged", &["change"]),
+    ("TimeChanged", &["change"]),
+    ("ColorChanged", &["change"]),
+    ("Closed", &["close"]),
+];
+
+pub fn token_of(kind: &str, name: &str) -> Option<&'static str> {
+    TOKENS
+        .iter()
+        .find(|(kinds, attr, _)| *attr == name && listed(kinds, kind))
+        .map(|t| t.2)
+}
+
+pub fn events_of(name: &str) -> Option<&'static [&'static str]> {
+    BOUND_EVENTS.iter().find(|e| e.0 == name).map(|e| e.1)
+}
+
 fn listed(kinds: &str, kind: &str) -> bool {
     kinds == "*" || kinds.split(' ').any(|k| k == kind)
 }

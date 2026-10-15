@@ -435,8 +435,12 @@ impl Gen<'_> {
     }
 
     fn stack(&mut self, e: &mut Element, node: &Node) {
-        let row = self.word(node, "direction") == Some("row");
-        e.attr("Orientation", if row { "Horizontal" } else { "Vertical" });
+        // A `StackPanel` is vertical by default, so only a stated `direction` is written and
+        // read back.
+        if node.props.contains_key("direction") {
+            let row = self.word(node, "direction") == Some("row");
+            e.attr("Orientation", if row { "Horizontal" } else { "Vertical" });
+        }
         match node.props.get("gap") {
             None => {}
             Some(Value::Token(path)) => {

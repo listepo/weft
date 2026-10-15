@@ -11,37 +11,44 @@ use weft_catalog::{DEFAULT_TOKENS_JSON, Token, core_catalog, load_tokens, token_
 use weft_core::{Catalog, Document, Mode, ParseOptions, has_errors, parse, parse_json};
 use weft_winui::{GenerateOptions, Generated, generate};
 
-/// The screens the generator draws so far; every other corpus screen and example is refused.
-/// T105.3–T105.5 grow this list until it holds them all.
-pub const COVERED: &[&str] = &[
+/// The screens the generator cannot draw yet: each is refused, every other corpus screen and
+/// example generates and has golden files the Windows build compiles (T105.7). T105.3–T105.5
+/// shrink this list until it is empty.
+pub const PENDING: &[&str] = &[
     "corpus-account",
-    "corpus-error-state",
-    "corpus-login",
-    "corpus-menu",
-    "corpus-profile",
-    "corpus-signup",
-    "corpus-wizard-step",
-    "example-alert",
-    "example-button",
-    "example-checkbox",
-    "example-combobox",
-    "example-field",
-    "example-form",
-    "example-heading",
-    "example-image",
-    "example-link",
-    "example-menu",
-    "example-model",
-    "example-radio-group",
-    "example-radio",
-    "example-screen",
-    "example-segment",
-    "example-segmented-control",
-    "example-select",
-    "example-slider",
-    "example-stepper",
-    "example-switch",
-    "example-text",
+    "corpus-appearance",
+    "corpus-booking",
+    "corpus-confirm-dialog",
+    "corpus-dashboard",
+    "corpus-data-table",
+    "corpus-glass",
+    "corpus-inbox",
+    "corpus-layout",
+    "corpus-leaderboard",
+    "corpus-orders",
+    "corpus-receipt",
+    "corpus-search-results",
+    "corpus-settings",
+    "corpus-showroom",
+    "corpus-tabs",
+    "corpus-tilt",
+    "corpus-todo-list",
+    "example-cell",
+    "example-color-picker",
+    "example-column",
+    "example-date-picker",
+    "example-dialog",
+    "example-grid",
+    "example-item",
+    "example-list",
+    "example-menu-item",
+    "example-option",
+    "example-row",
+    "example-section",
+    "example-stack",
+    "example-tab",
+    "example-table",
+    "example-tabs",
 ];
 /// The namespace of the goldens: the Windows build compiles them in one project (T105.7).
 pub const NAMESPACE: &str = "WeftScreens";
@@ -130,7 +137,7 @@ pub fn covered() -> Vec<(String, Document, Generated)> {
     let (catalog, tokens) = setup();
     screens()
         .into_iter()
-        .filter(|(name, _)| FIXTURES.contains(&name.as_str()) || COVERED.contains(&name.as_str()))
+        .filter(|(name, _)| !PENDING.contains(&name.as_str()))
         .map(|(name, path)| {
             let doc = document(&std::fs::read_to_string(path).unwrap(), &catalog, &tokens);
             let generated = generate(&doc, &options(&catalog, &tokens, Some(&name))).unwrap();

@@ -22,7 +22,7 @@
         <StackPanel AutomationProperties.AutomationId="signup" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Create account">
             <StackPanel AutomationProperties.AutomationId="form" AutomationProperties.LandmarkType="Form" weft:Props.State="idle" weft:On.Submit="{x:Bind ViewModel.auth_signupCommand}">
                 <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Create your account" />
-                <StackPanel AutomationProperties.AutomationId="fields" Orientation="Vertical" Spacing="{StaticResource Weft.space.md}">
+                <StackPanel AutomationProperties.AutomationId="fields" Spacing="{StaticResource Weft.space.md}">
                     <TextBox AutomationProperties.AutomationId="name" Text="{x:Bind ViewModel.name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.IsRequiredForForm="True" Header="Full name" />
                     <TextBox AutomationProperties.AutomationId="email" Text="{x:Bind ViewModel.email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="EmailSmtpAddress" AutomationProperties.IsRequiredForForm="True" Header="Email" />
                     <PasswordBox AutomationProperties.AutomationId="password" Password="{x:Bind ViewModel.password, Mode=TwoWay}" AutomationProperties.IsRequiredForForm="True" Header="Password" />

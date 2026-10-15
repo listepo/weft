@@ -50,3 +50,23 @@ jobs:
         run: moon run :test
       - name: The merge gate, runtime legs
         run: moon run root:runtimes
+
+  winui:
+    # The WinUI goldens of crates/weft-winui/tests/fixtures/ through the XAML compiler, which
+    # runs on Windows only: every x:Bind path, command and attached property against its view
+    # model (T105.7). Not a required check yet: only `pipeline / gate` is, so this job lives
+    # here and .github/infra.yml keeps pyrlyn/ci's dotnet check, which the gate would make
+    # required, off; turning that check on for this project is how it becomes required.
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.402
+      - run: dotnet build crates/weft-winui/windows/WeftScreens.csproj --configuration Release

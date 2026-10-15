@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The golden files of tests/fixtures/ built as one WinUI 3 class library by the `winui` job of
+    .github/workflows/ci.yml: the XAML compiler checks every x:Bind path, event and attached
+    property against the generated C#, which no test on macOS or Linux can. The Rust test
+    `every_screen_that_generates_has_its_golden_files_and_no_other` keeps the globs below
+    equal to the goldens of every screen that generates.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <RootNamespace>WeftScreens</RootNamespace>
+    <UseWinUI>true</UseWinUI>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Lets `dotnet build` compile the C# off Windows too; the XAML steps still need Windows. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Page Include="../tests/fixtures/*Page.xaml;../tests/fixtures/WeftTokens.xaml" Link="%(Filename)%(Extension)" />
+    <Compile Include="../tests/fixtures/*.cs" Link="%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+  </ItemGroup>
+</Project>

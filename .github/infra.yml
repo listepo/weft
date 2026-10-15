@@ -6,3 +6,9 @@ codeql:
   languages: [actions, javascript-typescript, rust]
 
 # Snyk stays off (pyrlyn/ci default).
+
+# Off: with the WinUI goldens' project in the tree it would run `dotnet test` of it on Linux, and
+# the required gate would make that build required. ci.yml's `winui` job builds it on Windows
+# instead, as an optional check (T105.7).
+dotnet:
+  enabled: false

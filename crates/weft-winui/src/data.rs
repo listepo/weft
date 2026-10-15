@@ -216,26 +216,26 @@ fn refused(segments: &[&str]) -> Option<String> {
     let member = |(i, s): (usize, &&str)| {
         s.starts_with("Weft") || MEMBERS.contains(s) || (i == 0 && ROOT_MEMBERS.contains(s))
     };
-    let (_, s) = segments.iter().enumerate().find(|p| member(*p))?;
-    Some(format!("`{s}` is the name of a generated member"))
+    if let Some((_, s)) = segments.iter().enumerate().find(|p| member(*p)) {
+        return Some(format!("`{s}` is the name of a generated member"));
+    }
+    // The XAML compiler copies a path segment into C# as it is, so `@class` in the view model
+    // is unreachable: x:Bind to `class` or `event` gives a page that does not compile (T105.7).
+    let s = segments
+        .iter()
+        .find(|s| KEYWORDS.split_whitespace().any(|k| k == **s))?;
+    Some(format!(
+        "`{s}` is a C# keyword, which an x:Bind path cannot name"
+    ))
 }
 
-/// C#'s reserved keywords: a property with such a name is written `@name`.
+/// C#'s reserved keywords.
 const KEYWORDS: &str = "abstract as base bool break byte case catch char checked class const continue decimal \
      default delegate do double else enum event explicit extern false finally fixed float for \
      foreach goto if implicit in int interface internal is lock long namespace new null object \
      operator out override params private protected public readonly ref return sbyte sealed \
      short sizeof stackalloc static string struct switch this throw true try typeof uint ulong \
      unchecked unsafe ushort using virtual void volatile while";
-
-/// A Weft name (`[A-Za-z_][A-Za-z0-9_]*`) as a C# identifier.
-pub fn identifier(name: &str) -> String {
-    if KEYWORDS.split_whitespace().any(|k| k == name) {
-        format!("@{name}")
-    } else {
-        name.to_owned()
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -329,9 +329,15 @@ mod tests {
     }
 
     #[test]
-    fn keywords_get_an_at_sign() {
-        assert_eq!(identifier("class"), "@class");
-        assert_eq!(identifier("value"), "value");
-        assert_eq!(identifier("title"), "title");
+    fn keywords_are_refused_and_contextual_ones_are_not() {
+        for bind in ["$.class", "$.user.event", "$.todos.0.new"] {
+            let problems = read(&mut Data::default(), bind, Read::Is(Leaf::Text), "text#t");
+            assert_eq!(problems.len(), 1, "{bind}");
+            assert_eq!(problems[0].path, bind);
+            assert!(problems[0].message.contains("C# keyword"), "{problems:?}");
+        }
+        for bind in ["$.value", "$.var", "$.title"] {
+            assert!(read(&mut Data::default(), bind, Read::Is(Leaf::Text), "t").is_empty());
+        }
     }
 }

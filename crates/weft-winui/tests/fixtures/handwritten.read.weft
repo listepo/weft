@@ -1,5 +1,5 @@
 <screen id="screen-1" weft="0.3">
-  <grid id="grid-1" columns="2">
+  <grid id="grid-1" columns="2" gap="{token.space.md}">
     <heading id="Title" level="2">Checkout</heading>
     <text id="text-1">Total: 42 EUR</text>
     <stack id="items" direction="row">

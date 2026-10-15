@@ -16,10 +16,10 @@
     <segment id="view-day" disabled="true" value="day">Day</segment>
     <segment id="view-week" label="Whole week" value="week">Week</segment>
   </segmented-control>
-  <slider id="flipped" label="Flipped" max="5" min="10" step="0" value="7"/>
+  <slider id="flipped" label="Flipped" max="5" min="1" step="0.5" value="2"/>
   <slider id="open" label="Open" max="{$.top}" min="{$.bottom}" step="{$.stride}" value="{$.level}" on-change="level.set"/>
   <slider id="above" label="Above" max="-5" min="{$.bottom}" value="{$.level}"/>
-  <stepper id="count" label="Count" max="2" min="8" step="-1" value="{$.count}" on-change="count.set"/>
+  <stepper id="count" label="Count" max="8" min="2" step="2" value="{$.count}" on-change="count.set"/>
   <stepper id="free" label="Free" value="3"/>
   <link id="mail" href="mailto:help@example.com">Mail us</link>
   <link id="relative" href="/help">Help</link>

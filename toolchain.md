@@ -27,6 +27,7 @@
 | codex (optional) | https://github.com/openai/codex | `plugins/xcode/scripts/xcode-agents.ts` registers the MCP server with it; its test skips without it | https://github.com/openai/codex |
 | iOS Simulator (`xcrun simctl`) | Xcode, with the iOS 27.0 runtime and an iPhone 17 simulator | `@weft/visual` builds the generated SwiftUI screens into an app and screenshots them; skipped without it | https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device |
 | Chromium for Playwright | `pnpm exec playwright install chromium` | `@weft/visual` screenshots the web targets in Vitest browser mode (skipped without it); the browser leg of `moon run root:runtimes` fails without it | https://github.com/microsoft/playwright |
+| .NET SDK 10.0.402 | `actions/setup-dotnet` in the `winui` job of `ci.yml` (Windows only for the XAML steps) | Builds the WinUI goldens (`crates/weft-winui/windows/WeftScreens.csproj`) | https://github.com/dotnet/sdk |
 
 ## mise
 
@@ -67,6 +68,10 @@
 | i-slint-core | local (dev) | https://github.com/slint-ui/slint | Sets that testing backend and pins its color scheme to light before a screenshot |
 | png | local (dev) | https://github.com/image-rs/image-png | Encodes and decodes the Slint screenshot PNGs; not the full `image` stack |
 | i-slint-compiler | local | https://github.com/slint-ui/slint | Syntax tree for the weft-slint importer (`import` feature); 1.18.1, no renderer or backend |
+| slint-bindings-ffi | local (git) | https://github.com/pyrlyn/slint-bindings | weft-studio-ffi (T69.1): the host-driven Slint surface (`SbHost`, the `sb_*` C ABI) the editor's shells draw and feed; with it come `slint-bindings-core` and the `slint-embed` and `slint-dart-interpreter` path crates of the same checkout. Not published, so a git dependency pinned by `rev`; its exact `=1.18.1` Slint pins must match this workspace (one `i-slint-core`, checked by `tests/e2e.rs`). On macOS and Windows it also builds Slint's wgpu renderer |
+| abi-drift | local (dev) | https://github.com/pyrlyn/crates-packages | weft-studio-ffi `tests/bindings.rs`: the committed C header and C# bindings against what cbindgen and csbindgen generate now (`WEFT_STUDIO_BLESS=1` rewrites them) |
+| cbindgen | local (dev) | https://github.com/mozilla/cbindgen | Generates `crates/weft-studio-ffi/include/weft_studio.h` inside that test; the library only, no default features |
+| csbindgen | local (dev) | https://github.com/Cysharp/csbindgen | Generates `crates/weft-studio-ffi/bindings/csharp/NativeMethods.g.cs`, the P/Invoke declarations of the Windows shell, inside that test |
 | insta | local (dev) | https://github.com/mitsuhiko/insta | Reviewed snapshots of every generator output per corpus screen and catalog example (weft-snapshots); `weft-snapshots::unreferenced` fails on a snapshot no test writes |
 | jsonschema | local (dev) | https://github.com/Stranger6667/jsonschema | Checks every exported A2UI message against the vendored A2UI v0.9 JSON Schemas (weft-snapshots); no network or TLS features |
 | tree-sitter | local | https://github.com/tree-sitter/tree-sitter | Parses Swift source in the weft-swiftui importer (`import` feature; C, so not in wasm32 builds) |
@@ -121,6 +126,12 @@
 | @figma/plugin-typings | local | https://github.com/figma/plugin-typings | Official Figma Plugin API types; the conversion is typed against them |
 | @penpot/plugin-types | local | https://github.com/penpot/penpot | Official Penpot plugin API types (MPL-2.0); `@weft/penpot` and the Penpot plugin are typed against them. Pinned to 1.5.0 from the `next` tag, approved by the creator: `latest` (1.4.2) has no design tokens API |
 | ses | local | https://github.com/endojs/endo | The SES library Penpot runs plugins in; the Penpot plugin's bundle test evaluates the plugin in an SES compartment |
+
+## NuGet
+
+| Package | Where | Source | Why here |
+| --- | --- | --- | --- |
+| Microsoft.WindowsAppSDK | local (`crates/weft-winui/windows/WeftScreens.csproj`) | https://github.com/microsoft/WindowsAppSDK | WinUI 3 and its XAML compiler for the Windows build of the goldens |
 
 ## Rust tests
 

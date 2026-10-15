@@ -7,6 +7,8 @@
 //! and the result is repaired until it validates in lenient mode.
 
 mod controls;
+mod layout;
+mod values;
 
 use roxmltree::{Node as Xml, ParsingOptions};
 use weft_core::{
@@ -18,12 +20,10 @@ use weft_import::{
     empty_result, limit_reached, literal, on_reader_stack, repair,
 };
 
-use crate::import::{ImportOptions, MAX_SOURCE_LENGTH, MAX_XML_NODES};
+use crate::import::{ImportOptions, MAX_SOURCE_LENGTH, MAX_XML_DEPTH, MAX_XML_NODES, nested_past};
 use controls::{Conv, PRESENTATION, XAML};
-
-/// Element nesting the parser is given: a Weft level is a few XAML levels at most (a property
-/// element, a template, a slot panel), and a debug build parses this deep within the reader stack.
-pub const MAX_XML_DEPTH: usize = MAX_DEPTH * 4;
+use indexmap::IndexMap;
+use weft_catalog::Token;
 
 /// Attributes of the design surface (`d:`, `mc:`): they never reach the running page.
 const DESIGN_TIME: &[&str] = &[
@@ -76,6 +76,8 @@ fn read(source: &str, options: &ImportOptions<'_>) -> ImportResult {
     }
     let mut reader = Reader {
         catalog: options.catalog,
+        tokens: options.tokens,
+        consumed: vec![],
         losses: Losses::default(),
         ids: IdState::default(),
         elements: 0,
@@ -107,57 +109,6 @@ fn read(source: &str, options: &ImportOptions<'_>) -> ImportResult {
     result
 }
 
-/// Whether elements nest deeper than `limit`. Where this count and the parser part, the parser
-/// stops at an error first, so it never recurses deeper than the count.
-fn nested_past(source: &str, limit: usize) -> bool {
-    let bytes = source.as_bytes();
-    let after = |from: usize, end: &[u8]| {
-        bytes[from..]
-            .windows(end.len())
-            .position(|w| w == end)
-            .map_or(bytes.len(), |at| from + at + end.len())
-    };
-    let (mut i, mut depth) = (0, 0usize);
-    while let Some(at) = bytes[i..].iter().position(|&b| b == b'<') {
-        i += at + 1;
-        let rest = &bytes[i..];
-        i = match rest.first() {
-            Some(b'/') => {
-                depth = depth.saturating_sub(1);
-                after(i, b">")
-            }
-            // Comments, CDATA, instructions and declarations hold no elements.
-            Some(b'!') if rest.starts_with(b"!--") => after(i, b"-->"),
-            Some(b'!') if rest.starts_with(b"![CDATA[") => after(i, b"]]>"),
-            Some(b'?') => after(i, b"?>"),
-            Some(b'!') => after(i, b">"),
-            _ => {
-                // An attribute value may hold `>`; a tag that ends `/>` is empty.
-                let mut quote = None;
-                let mut j = i;
-                while j < bytes.len() {
-                    match (quote, bytes[j]) {
-                        (None, b'>') => break,
-                        (None, q @ (b'"' | b'\'')) => quote = Some(q),
-                        (Some(q), b) if b == q => quote = None,
-                        _ => {}
-                    }
-                    j += 1;
-                }
-                if bytes.get(j.wrapping_sub(1)) != Some(&b'/') {
-                    depth += 1;
-                    if depth > limit {
-                        return true;
-                    }
-                }
-                j + 1
-            }
-        }
-        .min(bytes.len());
-    }
-    false
-}
-
 fn unreadable(mut diagnostics: Vec<Diagnostic>, message: &str) -> ImportResult {
     diagnostics.push(Diagnostic::new(
         Code::W601,
@@ -170,6 +121,9 @@ fn unreadable(mut diagnostics: Vec<Diagnostic>, message: &str) -> ImportResult {
 
 struct Reader<'a> {
     catalog: &'a Catalog,
+    tokens: &'a IndexMap<String, Token>,
+    /// Attributes of the current element's parent reads for its children (`align`, tracks).
+    consumed: Vec<&'static str>,
     losses: Losses,
     ids: IdState,
     elements: usize,
@@ -324,11 +278,14 @@ impl Reader<'_> {
             }
             return self.through(el, parent, parent_kind, depth, out);
         }
-        let Some((kind, structure)) = controls::kind_of(el) else {
+        let Some((mut kind, structure)) = controls::kind_of(el) else {
             let note = format!("`{tag}` is not a Weft kind; its content is read in its place");
             self.lose(LossKind::Kinds, parent, note);
             return self.through(el, parent, parent_kind, depth, out);
         };
+        if kind == "grid" && layout::stack_tracks(el).is_some() {
+            kind = "stack";
+        }
         self.elements += 1;
         let mut node = Node::new(kind);
         node.id = Some(self.id(explicit_id(el), kind, &name_hint(el), parent));
@@ -354,13 +311,20 @@ impl Reader<'_> {
         depth: usize,
         out: &mut Placed,
     ) {
+        // What the parent reads from its children is not read from what a wrapper holds.
+        let consumed = std::mem::take(&mut self.consumed);
         for child in elements(el) {
             self.element(child, parent, parent_kind, depth + 1, out);
         }
+        self.consumed = consumed;
     }
 
     fn attributes(&mut self, el: Xml<'_, '_>, node: &mut Node, here: &str) {
         let tag = el.tag_name().name();
+        // A `max-width` stretches its element, so the `Stretch` belongs to it.
+        let max_width = el
+            .attribute("MaxWidth")
+            .is_some_and(|v| v.contains(" Weft."));
         for a in el.attributes() {
             let (name, value) = (a.name(), a.value());
             let markup = value.starts_with('{') && !value.starts_with("{}");
@@ -373,19 +337,25 @@ impl Reader<'_> {
                 // `x:Name` stands in for a missing `AutomationId`; `x:Class` names the code-behind.
                 Some(XAML) if matches!(name, "Name" | "Class") => continue,
                 Some(ns) if DESIGN_TIME.contains(&ns) => continue,
-                Some(_) if helper == Some(&"Props.") && !markup => {
-                    let prop = controls::marker_prop(&name["Props.".len()..]);
-                    self.set(node, &prop, value, here, name);
+                // A marker holds its prop as written; `Choice.Value` holds a choice's `value`.
+                Some(_) if helper == Some(&"Props.") || name == "Choice.Value" => {
+                    let prop = match name.strip_prefix("Props.") {
+                        Some(marker) => controls::marker_prop(marker),
+                        None => "value".to_owned(),
+                    };
+                    match markup {
+                        false => self.set(node, &prop, value, here, name),
+                        true => self.bound(el, node, (name, &prop, &Conv::Same), value, here),
+                    }
                     continue;
                 }
-                Some(_) if helper == Some(&"Props.") => {
-                    let (kind, what) = controls::loss_of(name, value);
-                    self.lose(kind, here, format!("`{name}` on `{tag}`: {what}"));
+                Some(_) if helper == Some(&"On.") => {
+                    let event = controls::marker_prop(&name["On.".len()..]);
+                    self.event(el, node, (name, &[event.as_str()]), value, here);
                     continue;
                 }
                 Some(_) if helper.is_some() => {
                     let kind = match helper {
-                        Some(&"On.") => LossKind::Actions,
                         Some(&"Each.") => LossKind::Repetition,
                         _ => LossKind::Bindings,
                     };
@@ -399,14 +369,32 @@ impl Reader<'_> {
                 }
                 None => {}
             }
-            if name == "AutomationProperties.AutomationId" || controls::expected(&node.kind, name) {
+            if name == "AutomationProperties.AutomationId"
+                || controls::expected(&node.kind, name)
+                || self.consumed.contains(&name)
+                || (name == "HorizontalAlignment" && value == "Stretch" && max_width)
+            {
+                continue;
+            }
+            if let Some(prop) = controls::token_of(&node.kind, name)
+                && self.token(node, (name, prop), value, here)
+            {
+                continue;
+            }
+            if let Some(events) = controls::events_of(name)
+                && value.starts_with("{x:Bind")
+            {
+                self.event(el, node, (name, events), value, here);
                 continue;
             }
             // An editable ComboBox puts an item's content in its text box, so an option there
-            // shows its value and keeps its text in the tooltip.
+            // shows its value and keeps its text, if any, in the tooltip.
+            let editable = el
+                .parent_element()
+                .is_some_and(|p| p.attribute("IsEditable") == Some("True"));
             if tag == "ComboBoxItem"
                 && name == "Content"
-                && el.attribute("ToolTipService.ToolTip").is_some()
+                && (editable || el.attribute("ToolTipService.ToolTip").is_some())
             {
                 continue;
             }
@@ -423,6 +411,10 @@ impl Reader<'_> {
                 };
                 if let Some(raw) = raw {
                     self.set(node, prop, raw, here, name);
+                    continue;
+                }
+                if value.starts_with("{x:Bind") {
+                    self.bound(el, node, (name, prop, conv), value, here);
                     continue;
                 }
                 if !markup {
@@ -492,7 +484,27 @@ impl Reader<'_> {
             let mixed = matches!(content, Some(Content::Mixed));
             let kind = node.kind.clone();
             let mut placed = Placed::default();
-            for child in el.children() {
+            let tracks = (kind == "stack")
+                .then(|| layout::stack_tracks(el))
+                .flatten();
+            if let Some(t) = &tracks {
+                let direction = if t.along() == "Grid.Column" {
+                    "row"
+                } else {
+                    "column"
+                };
+                node.props
+                    .insert("direction".into(), Value::String(direction.into()));
+            }
+            let align = (kind == "stack").then(|| self.align(el, node)).flatten();
+            let consumed = align
+                .into_iter()
+                .chain(tracks.as_ref().map(layout::Tracks::along));
+            let outer = std::mem::replace(&mut self.consumed, consumed.collect());
+            if let Some(t) = &tracks {
+                self.tracks((el, t), node, here, depth, &mut placed);
+            }
+            for child in el.children().filter(|_| tracks.is_none()) {
                 if child.is_element() {
                     self.element(child, here, &kind, depth + 1, &mut placed);
                     continue;
@@ -508,6 +520,7 @@ impl Reader<'_> {
                     self.lose(LossKind::Text, here, note);
                 }
             }
+            self.consumed = outer;
             if node.kind == "grid" {
                 self.columns(el, node, here);
             }
