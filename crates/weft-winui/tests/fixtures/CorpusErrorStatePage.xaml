@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusErrorState namespace=WeftScreens
+<screen id="load-error" label="Load error" state="error" weft="0.1">
+  <alert id="alert" tone="danger">
+    <heading id="error-title" level="2">Could not load your data</heading>
+    <text id="error-message" text="{$.error.message}"/>
+  </alert>
+  <stack id="actions" direction="row" gap="{token.space.sm}">
+    <button id="retry" variant="primary" on-press="load.retry">Retry</button>
+    <link id="support" on-press="nav.support">Contact support</link>
+  </stack>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusErrorStatePage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="load-error" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Load error" weft:Props.State="error">
+            <InfoBar AutomationProperties.AutomationId="alert" IsOpen="True" IsClosable="False" Severity="Error">
+                <StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="error-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Could not load your data" />
+                    <TextBlock AutomationProperties.AutomationId="error-message" TextWrapping="Wrap" Text="{x:Bind ViewModel.error.message, Mode=OneWay}" />
+                </StackPanel>
+            </InfoBar>
+            <StackPanel AutomationProperties.AutomationId="actions" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
+                <Button AutomationProperties.AutomationId="retry" Content="Retry" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.load_retryCommand}" />
+                <HyperlinkButton AutomationProperties.AutomationId="support" Content="Contact support" weft:On.Press="{x:Bind ViewModel.nav_supportCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

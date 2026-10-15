@@ -3,12 +3,15 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.System;
 
 namespace WeftNamespace;
@@ -83,6 +86,35 @@ public static class Weft
         }
     }
 
+    /// <summary>A bound <c>href</c>. SPEC §9 Trust: only <c>http</c>, <c>https</c> and <c>mailto</c>
+    /// open.</summary>
+    public static Uri? Link(object? value) =>
+        Uri.TryCreate((value as string)?.Trim(), UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https" or "mailto"
+            ? uri
+            : null;
+
+    /// <summary>A bound <c>src</c>. SPEC §9 Trust: an <c>http</c> or <c>https</c> address, or a path
+    /// in the app package; any other scheme shows nothing.</summary>
+    public static ImageSource? Image(object? value)
+    {
+        var text = (value as string)?.Trim() ?? "";
+        var colon = text.IndexOf(':');
+        var end = text.IndexOfAny(['/', '?', '#']);
+        if (text.Length == 0)
+        {
+            return null;
+        }
+        if (colon >= 0 && (end < 0 || colon < end))
+        {
+            return Uri.TryCreate(text, UriKind.Absolute, out var web) && web.Scheme is "http" or "https"
+                ? new BitmapImage(web)
+                : null;
+        }
+        return Uri.TryCreate("ms-appx:///" + text.TrimStart('/'), UriKind.Absolute, out var local)
+            ? new BitmapImage(local)
+            : null;
+    }
+
     internal static DependencyProperty Marker(string name, Type owner) =>
         DependencyProperty.RegisterAttached(name, typeof(object), owner, new PropertyMetadata(null));
 }
@@ -95,6 +127,9 @@ public static class Props
     public static readonly DependencyProperty ErrorProperty = Weft.Marker("Error", typeof(Props));
     public static readonly DependencyProperty VariantProperty = Weft.Marker("Variant", typeof(Props));
     public static readonly DependencyProperty WrapProperty = Weft.Marker("Wrap", typeof(Props));
+    public static readonly DependencyProperty HrefProperty = Weft.Marker("Href", typeof(Props));
+    public static readonly DependencyProperty SrcProperty = Weft.Marker("Src", typeof(Props));
+    public static readonly DependencyProperty UsdzProperty = Weft.Marker("Usdz", typeof(Props));
 
     public static object? GetState(DependencyObject o) => o.GetValue(StateProperty);
     public static void SetState(DependencyObject o, object? value) => o.SetValue(StateProperty, value);
@@ -104,6 +139,104 @@ public static class Props
     public static void SetVariant(DependencyObject o, object? value) => o.SetValue(VariantProperty, value);
     public static object? GetWrap(DependencyObject o) => o.GetValue(WrapProperty);
     public static void SetWrap(DependencyObject o, object? value) => o.SetValue(WrapProperty, value);
+    public static object? GetHref(DependencyObject o) => o.GetValue(HrefProperty);
+    public static void SetHref(DependencyObject o, object? value) => o.SetValue(HrefProperty, value);
+    public static object? GetSrc(DependencyObject o) => o.GetValue(SrcProperty);
+    public static void SetSrc(DependencyObject o, object? value) => o.SetValue(SrcProperty, value);
+    public static object? GetUsdz(DependencyObject o) => o.GetValue(UsdzProperty);
+    public static void SetUsdz(DependencyObject o, object? value) => o.SetValue(UsdzProperty, value);
+}
+
+/// <summary>The text value of a control whose own property holds something else (SPEC §9, To
+/// WinUI): the <c>Tag</c> of the chosen item or the text of an editable box. The control shows the value; a choice of the user writes it back and runs the element's
+/// <c>change</c>, and a value the view model writes is never a change.</summary>
+public static class Choice
+{
+    public static readonly DependencyProperty ValueProperty = DependencyProperty.RegisterAttached(
+        "Value", typeof(string), typeof(Choice), new PropertyMetadata(null, Changed));
+
+    private static readonly DependencyProperty HookedProperty =
+        DependencyProperty.RegisterAttached("Hooked", typeof(bool), typeof(Choice), new PropertyMetadata(false));
+
+    // Set while a value is shown, so the events the control raises meanwhile are not the user's.
+    private static bool showing;
+
+    public static string? GetValue(DependencyObject o) => (string?)o.GetValue(ValueProperty);
+    public static void SetValue(DependencyObject o, string? value) => o.SetValue(ValueProperty, value);
+
+    private static void Changed(DependencyObject o, DependencyPropertyChangedEventArgs _)
+    {
+        if (o is not FrameworkElement element)
+        {
+            return;
+        }
+        if (!(bool)o.GetValue(HookedProperty))
+        {
+            o.SetValue(HookedProperty, true);
+            Hook(element);
+        }
+        Show(element);
+    }
+
+    private static void Show(FrameworkElement element)
+    {
+        var value = GetValue(element) ?? "";
+        showing = true;
+        try
+        {
+            switch (element)
+            {
+                case ComboBox { IsEditable: true } box:
+                    box.Text = value;
+                    break;
+                case ComboBox box:
+                    box.SelectedItem = Tagged(box.Items, value);
+                    break;
+                case RadioButtons radios:
+                    radios.SelectedItem = Tagged(radios.Items, value);
+                    break;
+                case SelectorBar bar:
+                    bar.SelectedItem = Tagged(bar.Items, value) as SelectorBarItem;
+                    break;
+            }
+        }
+        finally
+        {
+            showing = false;
+        }
+    }
+
+    private static object? Tagged(IEnumerable<object> items, string value) =>
+        items.FirstOrDefault(i => (i as FrameworkElement)?.Tag?.ToString() == value);
+
+    private static string? TagOf(object? item) => (item as FrameworkElement)?.Tag?.ToString();
+
+    private static void Hook(FrameworkElement element)
+    {
+        switch (element)
+        {
+            case ComboBox box:
+                box.SelectionChanged += (_, _) => Picked(box, TagOf(box.SelectedItem));
+                box.TextSubmitted += (_, e) => Picked(box, e.Text);
+                break;
+            case RadioButtons radios:
+                radios.SelectionChanged += (_, _) => Picked(radios, TagOf(radios.SelectedItem));
+                break;
+            case SelectorBar bar:
+                bar.SelectionChanged += (_, _) => Picked(bar, TagOf(bar.SelectedItem));
+                break;
+        }
+    }
+
+    private static void Picked(FrameworkElement element, string? value)
+    {
+        if (showing || value is null || value == GetValue(element))
+        {
+            return;
+        }
+        SetValue(element, value);
+        On.Changed(element);
+    }
 }
 
 /// <summary>The name of the slot an element fills, which nothing else in the XAML states.</summary>
@@ -161,6 +294,18 @@ public static class On
                     Fire(button, SubmitProperty);
                 };
                 break;
+            case Selector or RadioButtons or SelectorBar:
+                // `Choice` runs their change: only it tells a choice of the user from a value shown.
+                break;
+            case RangeBase range:
+                range.ValueChanged += (_, _) => Edited(range);
+                break;
+            case NumberBox number:
+                number.ValueChanged += (_, _) => Edited(number);
+                break;
+            case MenuFlyoutItem item:
+                item.Click += (_, _) => Fire(item, PressProperty);
+                break;
             case ToggleSwitch toggle:
                 toggle.Toggled += (_, _) => Edited(toggle);
                 break;
@@ -181,12 +326,20 @@ public static class On
         }
     }
 
-    // A value the view model writes into the control is not the user's change.
+    internal static void Changed(FrameworkElement element) => Fire(element, ChangeProperty);
+
+    // A value the view model writes into the control is not the user's change. The focus may sit in
+    // the control's template, as in a NumberBox's text box.
     private static void Edited(Control control)
     {
-        if (control.FocusState != FocusState.Unfocused)
+        var focused = control.XamlRoot is { } root ? FocusManager.GetFocusedElement(root) as DependencyObject : null;
+        for (var o = focused; o is not null; o = VisualTreeHelper.GetParent(o))
         {
-            Fire(control, ChangeProperty);
+            if (o == control)
+            {
+                Fire(control, ChangeProperty);
+                return;
+            }
         }
     }
 

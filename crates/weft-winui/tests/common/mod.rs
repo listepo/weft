@@ -14,12 +14,32 @@ use weft_winui::{GenerateOptions, Generated, generate};
 /// The screens the generator draws so far; every other corpus screen and example is refused.
 /// T105.3–T105.5 grow this list until it holds them all.
 pub const COVERED: &[&str] = &[
+    "corpus-account",
+    "corpus-error-state",
+    "corpus-login",
+    "corpus-menu",
+    "corpus-profile",
+    "corpus-signup",
+    "corpus-wizard-step",
+    "example-alert",
     "example-button",
     "example-checkbox",
+    "example-combobox",
     "example-field",
     "example-form",
     "example-heading",
+    "example-image",
+    "example-link",
+    "example-menu",
+    "example-model",
+    "example-radio-group",
+    "example-radio",
     "example-screen",
+    "example-segment",
+    "example-segmented-control",
+    "example-select",
+    "example-slider",
+    "example-stepper",
     "example-switch",
     "example-text",
 ];
@@ -63,7 +83,7 @@ fn weft_files(dir: &Path, nested: bool) -> Vec<PathBuf> {
 
 /// The fixtures of `tests/fixtures/`, each named after its file: every prop the generator draws,
 /// and the data shapes the view model holds.
-pub const FIXTURES: &[&str] = &["controls", "data"];
+pub const FIXTURES: &[&str] = &["controls", "data", "values"];
 
 /// Every corpus screen and catalog example, named `corpus-<dir>` or `example-<file>`, and the
 /// fixtures.

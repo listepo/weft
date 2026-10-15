@@ -101,7 +101,7 @@ fn generated_pages_read_back_without_their_comment() {
         shape(&result.document.root, &mut got);
         assert_eq!(got, want, "{name}");
         // Until T105.9 reads them, bindings, events and token references are the only losses,
-        // with the empty label that stands in for a bound one.
+        // with the empty label and the required value that stand in for bound ones.
         for loss in &result.losses {
             let listed = [
                 LossKind::Bindings,
@@ -109,7 +109,11 @@ fn generated_pages_read_back_without_their_comment() {
                 LossKind::Tokens,
                 LossKind::Names,
             ];
-            assert!(listed.contains(&loss.kind), "{name}: {loss:?}");
+            let stand_in = loss.kind == LossKind::Values
+                && (&result.losses)
+                    .into_iter()
+                    .any(|l| l.kind == LossKind::Bindings && l.path.starts_with(&loss.path));
+            assert!(listed.contains(&loss.kind) || stand_in, "{name}: {loss:?}");
         }
         if name == "controls" {
             golden("controls.read.weft", &serialize(&result.document));

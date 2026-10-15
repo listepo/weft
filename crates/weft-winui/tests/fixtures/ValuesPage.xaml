@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=Values namespace=WeftScreens
+<screen id="values" label="Values" weft="0.2">
+  <select id="size" disabled="{$.locked}" label="{$.sizeLabel}" value="{$.size}" on-change="size.pick">
+    <option id="size-s" label="Small size" value="s">Small</option>
+    <option id="size-m" text="{$.medium}" value="m"/>
+    <option id="size-x" hidden="{$.noLarge}" value="{$.largeCode}">{Large}</option>
+  </select>
+  <combobox id="city" label="City" placeholder="{$.cityHint}" value="{$.city}" on-change="city.edit">
+    <option id="city-lisbon" value="Lisbon">Portugal</option>
+    <option id="city-oslo" value="Oslo"/>
+  </combobox>
+  <radio-group id="plan" label="Plan" value="free">
+    <radio id="plan-free" value="free">Free</radio>
+    <radio id="plan-pro" disabled="{!$.pro}" text="{$.proText}" value="pro"/>
+  </radio-group>
+  <segmented-control id="view" label="View" value="{$.view}" on-change="view.pick">
+    <segment id="view-day" disabled="true" value="day">Day</segment>
+    <segment id="view-week" label="Whole week" value="week">Week</segment>
+  </segmented-control>
+  <slider id="flipped" label="Flipped" max="5" min="10" step="0" value="7"/>
+  <slider id="open" label="Open" max="{$.top}" min="{$.bottom}" step="{$.stride}" value="{$.level}" on-change="level.set"/>
+  <slider id="above" label="Above" max="-5" min="{$.bottom}" value="{$.level}"/>
+  <stepper id="count" label="Count" max="2" min="8" step="-1" value="{$.count}" on-change="count.set"/>
+  <stepper id="free" label="Free" value="3"/>
+  <link id="mail" href="mailto:help@\example.com">Mail us</link>
+  <link id="relative" href="/help">Help</link>
+  <link id="script" href="javascript:alert(1)" label="Unsafe link">Unsafe</link>
+  <link id="bound" href="{$.site}" text="{$.siteName}" on-press="site.open"/>
+  <image id="photo" label="A photo" src="assets/photo.png"/>
+  <image id="hostile" label="Hostile" src="javascript:alert(1)"/>
+  <image id="remote" hidden="{!$.online}" label="{$.photoLabel}" src="{$.photo}"/>
+  <model id="chair" fallback="assets/chair.png" label="A chair" src="assets/chair.glb" usdz="assets/chair.usdz"/>
+  <model id="lamp" fallback="https://example.com/lamp.png" label="A lamp" src="assets/lamp.glb"/>
+  <alert id="info" label="Notice">Plain notice</alert>
+  <alert id="ok" text="{$.okText}" tone="success"/>
+  <alert id="warn" tone="warning">
+    Check
+    <link id="warn-link" on-press="warn.check">this</link>
+    now
+  </alert>
+  <alert id="bad" state="{$.badState}" tone="danger">
+    <heading id="bad-title" level="2">Failed</heading>
+  </alert>
+  <alert id="neutral" tone="info">Info</alert>
+  <menu id="more" label="{$.moreLabel}">
+    <menu-item id="more-open" on-press="doc.open">Open</menu-item>
+    <menu-item id="more-share" disabled="{!$.canShare}" label="Share the document" text="{$.shareText}" on-press="doc.share"/>
+    <menu-item id="more-gone" disabled="true" hidden="true">Gone</menu-item>
+  </menu>
+</screen>
+-->
+<Page x:Class="WeftScreens.ValuesPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="values" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Values">
+            <ComboBox AutomationProperties.AutomationId="size" weft:Choice.Value="{x:Bind ViewModel.size, Mode=TwoWay}" IsEnabled="{x:Bind weft:Weft.Not(ViewModel.locked), Mode=OneWay}" Header="{x:Bind ViewModel.sizeLabel, Mode=OneWay}" weft:On.Change="{x:Bind ViewModel.size_pickCommand}">
+                <ComboBoxItem AutomationProperties.AutomationId="size-s" Content="Small" Tag="s" AutomationProperties.Name="Small size" />
+                <ComboBoxItem AutomationProperties.AutomationId="size-m" Content="{x:Bind ViewModel.medium, Mode=OneWay}" Tag="m" />
+                <ComboBoxItem AutomationProperties.AutomationId="size-x" Content="{}{Large}" Tag="{x:Bind ViewModel.largeCode, Mode=OneWay}" Visibility="{x:Bind weft:Weft.Hide(ViewModel.noLarge), Mode=OneWay}" />
+            </ComboBox>
+            <ComboBox AutomationProperties.AutomationId="city" IsEditable="True" PlaceholderText="{x:Bind ViewModel.cityHint, Mode=OneWay}" weft:Choice.Value="{x:Bind ViewModel.city, Mode=TwoWay}" Header="City" weft:On.Change="{x:Bind ViewModel.city_editCommand}">
+                <ComboBoxItem AutomationProperties.AutomationId="city-lisbon" Content="Lisbon" ToolTipService.ToolTip="Portugal" Tag="Lisbon" />
+                <ComboBoxItem AutomationProperties.AutomationId="city-oslo" Content="Oslo" Tag="Oslo" />
+            </ComboBox>
+            <RadioButtons AutomationProperties.AutomationId="plan" weft:Choice.Value="free" Header="Plan">
+                <RadioButton AutomationProperties.AutomationId="plan-free" Content="Free" Tag="free" />
+                <RadioButton AutomationProperties.AutomationId="plan-pro" Content="{x:Bind ViewModel.proText, Mode=OneWay}" Tag="pro" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.pro), Mode=OneWay}" />
+            </RadioButtons>
+            <SelectorBar AutomationProperties.AutomationId="view" weft:Choice.Value="{x:Bind ViewModel.view, Mode=TwoWay}" AutomationProperties.Name="View" weft:On.Change="{x:Bind ViewModel.view_pickCommand}">
+                <SelectorBarItem AutomationProperties.AutomationId="view-day" Text="Day" Tag="day" IsEnabled="False" />
+                <SelectorBarItem AutomationProperties.AutomationId="view-week" Text="Week" Tag="week" AutomationProperties.Name="Whole week" />
+            </SelectorBar>
+            <Slider AutomationProperties.AutomationId="flipped" Minimum="10" Maximum="10" StepFrequency="1" Value="7" Header="Flipped" />
+            <Slider AutomationProperties.AutomationId="open" Minimum="{x:Bind ViewModel.bottom, Mode=OneWay}" Maximum="{x:Bind ViewModel.top, Mode=OneWay}" StepFrequency="{x:Bind ViewModel.stride, Mode=OneWay}" Value="{x:Bind ViewModel.level, Mode=TwoWay}" Header="Open" weft:On.Change="{x:Bind ViewModel.level_setCommand}" />
+            <Slider AutomationProperties.AutomationId="above" Minimum="{x:Bind ViewModel.bottom, Mode=OneWay}" Maximum="-5" Value="{x:Bind ViewModel.level, Mode=TwoWay}" Header="Above" />
+            <NumberBox AutomationProperties.AutomationId="count" SpinButtonPlacementMode="Inline" Minimum="8" Maximum="8" SmallChange="1" Value="{x:Bind ViewModel.count, Mode=TwoWay}" Header="Count" weft:On.Change="{x:Bind ViewModel.count_setCommand}" />
+            <NumberBox AutomationProperties.AutomationId="free" SpinButtonPlacementMode="Inline" Value="3" Header="Free" />
+            <HyperlinkButton AutomationProperties.AutomationId="mail" Content="Mail us" NavigateUri="mailto:help@example.com" />
+            <HyperlinkButton AutomationProperties.AutomationId="relative" Content="Help" weft:Props.Href="/help" />
+            <HyperlinkButton AutomationProperties.AutomationId="script" Content="Unsafe" weft:Props.Href="javascript:alert(1)" AutomationProperties.Name="Unsafe link" />
+            <HyperlinkButton AutomationProperties.AutomationId="bound" Content="{x:Bind ViewModel.siteName, Mode=OneWay}" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.site), Mode=OneWay}" weft:On.Press="{x:Bind ViewModel.site_openCommand}" />
+            <Image AutomationProperties.AutomationId="photo" Source="assets/photo.png" AutomationProperties.Name="A photo" />
+            <Image AutomationProperties.AutomationId="hostile" weft:Props.Src="javascript:alert(1)" AutomationProperties.Name="Hostile" />
+            <Image AutomationProperties.AutomationId="remote" Source="{x:Bind weft:Weft.Image(ViewModel.photo), Mode=OneWay}" AutomationProperties.Name="{x:Bind ViewModel.photoLabel, Mode=OneWay}" Visibility="{x:Bind ViewModel.online, Mode=OneWay}" />
+            <Image AutomationProperties.AutomationId="chair" Source="assets/chair.png" weft:Props.Src="assets/chair.glb" weft:Props.Usdz="assets/chair.usdz" AutomationProperties.Name="A chair" />
+            <Image AutomationProperties.AutomationId="lamp" Source="https://example.com/lamp.png" weft:Props.Src="assets/lamp.glb" AutomationProperties.Name="A lamp" />
+            <InfoBar AutomationProperties.AutomationId="info" IsOpen="True" IsClosable="False" Message="Plain notice" AutomationProperties.Name="Notice" />
+            <InfoBar AutomationProperties.AutomationId="ok" IsOpen="True" IsClosable="False" Severity="Success" Message="{x:Bind ViewModel.okText, Mode=OneWay}" />
+            <InfoBar AutomationProperties.AutomationId="warn" IsOpen="True" IsClosable="False" Severity="Warning">
+                <StackPanel>
+                    <TextBlock TextWrapping="Wrap" Text="Check" />
+                    <HyperlinkButton AutomationProperties.AutomationId="warn-link" Content="this" weft:On.Press="{x:Bind ViewModel.warn_checkCommand}" />
+                    <TextBlock TextWrapping="Wrap" Text="now" />
+                </StackPanel>
+            </InfoBar>
+            <InfoBar AutomationProperties.AutomationId="bad" IsOpen="True" IsClosable="False" Severity="Error" weft:Props.State="{x:Bind ViewModel.badState, Mode=OneWay}">
+                <StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="bad-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Failed" />
+                </StackPanel>
+            </InfoBar>
+            <InfoBar AutomationProperties.AutomationId="neutral" IsOpen="True" IsClosable="False" Severity="Informational" Message="Info" />
+            <DropDownButton AutomationProperties.AutomationId="more" Content="{x:Bind ViewModel.moreLabel, Mode=OneWay}" AutomationProperties.Name="{x:Bind ViewModel.moreLabel, Mode=OneWay}">
+                <DropDownButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem AutomationProperties.AutomationId="more-open" Text="Open" weft:On.Press="{x:Bind ViewModel.doc_openCommand}" />
+                        <MenuFlyoutItem AutomationProperties.AutomationId="more-share" Text="{x:Bind ViewModel.shareText, Mode=OneWay}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.canShare), Mode=OneWay}" AutomationProperties.Name="Share the document" weft:On.Press="{x:Bind ViewModel.doc_shareCommand}" />
+                        <MenuFlyoutItem AutomationProperties.AutomationId="more-gone" Text="Gone" IsEnabled="False" Visibility="Collapsed" />
+                    </MenuFlyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
