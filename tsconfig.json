@@ -27,6 +27,7 @@
     "plugins/*/scripts",
     "plugins/*/src",
     "plugins/*/test",
+    "studio/macos/scripts",
     "studio/scripts",
     "studio/test"
   ]

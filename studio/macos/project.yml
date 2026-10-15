@@ -1,0 +1,68 @@
+# Generate the project with `node scripts/xcodegen.ts`, which sets SLINT_BINDINGS_DIR; the
+# .xcodeproj is not committed. Apple Silicon only, signed ad hoc and unsandboxed in M1 (T69.1,
+# decision 5). No hardened runtime: the unit tests are a bundle loaded into the app, and library
+# validation would refuse an ad hoc bundle.
+name: WeftStudio
+options:
+  bundleIdPrefix: dev.weft
+  deploymentTarget:
+    macOS: '14.0'
+packages:
+  SlintBindings:
+    path: ${SLINT_BINDINGS_DIR}/swift
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    ARCHS: arm64
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: '-'
+    DEVELOPMENT_TEAM: ''
+    ENABLE_HARDENED_RUNTIME: NO
+    # The C module over weft-studio-ffi's committed header.
+    SWIFT_INCLUDE_PATHS: $(SRCROOT)/CWeftStudio
+targets:
+  WeftStudio:
+    type: application
+    platform: macOS
+    sources: [App]
+    dependencies:
+      - package: SlintBindings
+      # Put in the products folder by the pre-build phase below.
+      - framework: libweft_studio_ffi.a
+        implicit: true
+        embed: false
+    preBuildScripts:
+      - name: Build weft-studio-ffi
+        script: |
+          "$SRCROOT/scripts/build-ffi.sh"
+        basedOnDependencyAnalysis: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.weft.studio
+        INFOPLIST_FILE: App/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        # Cargo writes into the repository's target folder.
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        # What the Rust static library links beyond the frameworks slint-bindings' package lists
+        # (`cargo rustc -- --print native-static-libs`).
+        OTHER_LDFLAGS: -liconv -lobjc -framework Metal -framework QuartzCore
+    scheme:
+      testTargets: [WeftStudioTests, WeftStudioUITests]
+  WeftStudioTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [Tests]
+    dependencies:
+      - target: WeftStudio
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  WeftStudioUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources: [UITests]
+    dependencies:
+      - target: WeftStudio
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
