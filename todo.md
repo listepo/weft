@@ -2,6 +2,7 @@
 - T14. Figma round trip and plugin
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
+- T69.1d. macOS shell
 - T106. Weft plugin for cox
 - T106.7. Design tab: cox side
 - T105. Weft to WinUI 3 and back
