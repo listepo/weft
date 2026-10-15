@@ -32,6 +32,8 @@ public sealed partial class DataViewModel : INotifyPropertyChanged
 
     public ObservableCollection<string> labels { get; } = new();
 
+    public ObservableCollection<bool> flags { get; } = new();
+
     public DataUserData user { get; } = new();
 
     public string kind

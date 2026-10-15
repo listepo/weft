@@ -15,6 +15,12 @@
         <each id="member-each" as="member" in="{$group.members}">
           <checkbox id="member-on" checked="{$member.on}" label="{$member.name}"/>
           <text id="member-group" text="{$group.title}"/>
+          <stack id="badges">
+            <each id="badge-each" as="badge" in="{$member.badges}">
+              <text id="badge-name" text="{$badge.name}"/>
+              <text id="badge-group" text="{$group.title}"/>
+            </each>
+          </stack>
         </each>
       </stack>
     </each>
@@ -84,6 +90,18 @@
                                                 <StackPanel>
                                                     <CheckBox AutomationProperties.AutomationId="member-on" IsChecked="{x:Bind on, Mode=TwoWay}" Content="{x:Bind name, Mode=OneWay}" />
                                                     <TextBlock AutomationProperties.AutomationId="member-group" TextWrapping="Wrap" Text="{x:Bind WeftParent.title, Mode=OneWay}" />
+                                                    <StackPanel AutomationProperties.AutomationId="badges">
+                                                        <ItemsRepeater ItemsSource="{x:Bind badges, Mode=OneWay}" weft:Each.Id="badge-each" weft:Each.As="badge">
+                                                            <ItemsRepeater.ItemTemplate>
+                                                                <DataTemplate x:DataType="weft:RepetitionGroupsMembersBadgesItem">
+                                                                    <StackPanel>
+                                                                        <TextBlock AutomationProperties.AutomationId="badge-name" TextWrapping="Wrap" Text="{x:Bind name, Mode=OneWay}" />
+                                                                        <TextBlock AutomationProperties.AutomationId="badge-group" TextWrapping="Wrap" Text="{x:Bind WeftParent.WeftParent.title, Mode=OneWay}" />
+                                                                    </StackPanel>
+                                                                </DataTemplate>
+                                                            </ItemsRepeater.ItemTemplate>
+                                                        </ItemsRepeater>
+                                                    </StackPanel>
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ItemsRepeater.ItemTemplate>

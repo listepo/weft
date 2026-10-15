@@ -169,6 +169,11 @@ public sealed partial class RepetitionGroupsMembersItem : INotifyPropertyChanged
     public RepetitionGroupsItem? WeftParent { get; private set; }
     public string WeftPath { get; private set; } = "";
 
+    public RepetitionGroupsMembersItem()
+    {
+        badges.CollectionChanged += (_, _) => WeftPlaceLists();
+    }
+
     public bool on
     {
         get => Weft_on;
@@ -183,10 +188,49 @@ public sealed partial class RepetitionGroupsMembersItem : INotifyPropertyChanged
     }
     private string Weft_name = "";
 
+    public ObservableCollection<RepetitionGroupsMembersBadgesItem> badges { get; } = new();
+
     void IWeftItem.WeftPlace(object root, object? parent, string path)
     {
         WeftRoot = (RepetitionViewModel)root;
         WeftParent = (RepetitionGroupsItem?)parent;
+        WeftPath = path;
+        WeftPlaceLists();
+    }
+
+    private void WeftPlaceLists()
+    {
+        if (WeftRoot is null) return;
+        Weft.Place(badges, WeftRoot, this, WeftPath + ".badges");
+    }
+
+    private void WeftSet<T>(ref T store, T value, [CallerMemberName] string name = "")
+    {
+        if (Equals(store, value)) return;
+        store = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}
+
+public sealed partial class RepetitionGroupsMembersBadgesItem : INotifyPropertyChanged, IWeftItem
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public RepetitionViewModel? WeftRoot { get; private set; }
+    public RepetitionGroupsMembersItem? WeftParent { get; private set; }
+    public string WeftPath { get; private set; } = "";
+
+    public string name
+    {
+        get => Weft_name;
+        set => WeftSet(ref Weft_name, value);
+    }
+    private string Weft_name = "";
+
+    void IWeftItem.WeftPlace(object root, object? parent, string path)
+    {
+        WeftRoot = (RepetitionViewModel)root;
+        WeftParent = (RepetitionGroupsMembersItem?)parent;
         WeftPath = path;
         WeftPlaceLists();
     }

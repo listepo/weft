@@ -4,6 +4,7 @@
   <text id="tag" hidden="{!$.todos.0.tags.0.shown}" text="{$.todos.0.tags.0.name}"/>
   <text id="owner" text="{$.todos.0.owner.name}"/>
   <text id="label" text="{$.labels.0}"/>
+  <checkbox id="first-flag" checked="{$.flags.0}" label="First"/>
   <text id="city" hidden="{$.user.away}" text="{$.user.address.city}"/>
   <text id="pinned" text="{$.user.pins.0.note}"/>
   <field id="kind" label="Class" value="{$.kind}"/>

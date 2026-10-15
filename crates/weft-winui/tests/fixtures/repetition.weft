@@ -13,6 +13,12 @@
         <each id="member-each" as="member" in="{$group.members}">
           <checkbox id="member-on" checked="{$member.on}" label="{$member.name}"/>
           <text id="member-group" text="{$group.title}"/>
+          <stack id="badges">
+            <each id="badge-each" as="badge" in="{$member.badges}">
+              <text id="badge-name" text="{$badge.name}"/>
+              <text id="badge-group" text="{$group.title}"/>
+            </each>
+          </stack>
         </each>
       </stack>
     </each>
