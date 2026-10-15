@@ -1,0 +1,13 @@
+<screen id="data" label="{$.title}" weft="0.2">
+  <text id="first" text="{$.todos.0.title}"/>
+  <checkbox id="done" checked="{$.todos.0.done}" label="Done" on-change="todo.toggle"/>
+  <text id="tag" hidden="{!$.todos.0.tags.0.shown}" text="{$.todos.0.tags.0.name}"/>
+  <text id="owner" text="{$.todos.0.owner.name}"/>
+  <text id="label" text="{$.labels.0}"/>
+  <text id="city" hidden="{$.user.away}" text="{$.user.address.city}"/>
+  <text id="pinned" text="{$.user.pins.0.note}"/>
+  <field id="kind" label="Class" value="{$.class}"/>
+  <switch id="flag" checked="{$.event.on}" label="Event"/>
+  <button id="add" disabled="{$.busy}" on-press="todo.add">Add</button>
+  <button id="again" on-press="todo.add">Again</button>
+</screen>

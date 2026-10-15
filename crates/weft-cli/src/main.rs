@@ -348,18 +348,23 @@ enum Command {
         #[arg(long)]
         force: bool,
     },
-    /// Generate `WeftTokens.xaml`, the design tokens every WinUI page of a project shares.
+    /// Generate `WeftTokens.xaml` and `Weft.cs`, the design tokens and C# helpers every WinUI page
+    /// of a project shares.
     WinuiTokens {
         /// Token JSON or a DTCG resolver; replaces the project's tokens (default: the default tokens).
         #[arg(long)]
         tokens: Option<PathBuf>,
+        /// C# namespace of the helpers (default: the project's `export.winui.namespace`, else
+        /// `WeftScreens`).
+        #[arg(long)]
+        namespace: Option<String>,
         /// Project file; without it, the nearest `weft.json` in or above the working directory.
         #[arg(long, conflicts_with = "no_project")]
         project: Option<PathBuf>,
         /// Ignore any project file.
         #[arg(long)]
         no_project: bool,
-        /// Write `WeftTokens.xaml` here instead of printing (default: the project's
+        /// Write `WeftTokens.xaml` and `Weft.cs` here instead of printing (default: the project's
         /// `export.winui.outDir`, else print).
         #[arg(long)]
         out_dir: Option<PathBuf>,
@@ -1020,6 +1025,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
         ),
         Command::WinuiTokens {
             tokens,
+            namespace,
             project,
             no_project,
             out_dir,
@@ -1027,6 +1033,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
         } => winui::export_tokens(
             winui::TokensArgs {
                 tokens,
+                namespace,
                 project: ProjectArgs {
                     project,
                     no_project,

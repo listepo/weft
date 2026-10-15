@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.2 | todo | P2 | 4 | 0% | |
 | T105.3 | todo | P2 | 4 | 0% | |
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
@@ -296,10 +295,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 **Execution plan (this round, design only).** Write `docs/winui-design.md` (mapping of every core kind and prop, tokens, layout vocabulary, bindings, events, slots, light and dark, losses, round trip, XML parser, CI job, open questions), `research.md` §23, and the sub-tasks below. The creator approved the design and accepted the recommendation of every open question in `docs/winui-design.md`, including a `roxmltree` row in the workspace `rust.md` when T105.8 adds the crate; T105.1 may start.
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
-
-### T105.2. WinUI view model, code-behind and helpers
-
-`<Name>ViewModel.cs` (properties, item classes with `WeftRoot`/`WeftParent`/`WeftPath`, `ObservableCollection<T>`, one command per action, `Perform`, `Performed`), `<Name>Page.xaml.cs`, and `Weft.cs` core (`On.*` event properties, `Not`, `Truthy`, `Hide`, `Props` markers). About 450 lines of code. Done when the goldens of T105.1 carry their C# and the type and name refusals have tests.
 
 ### T105.3. WinUI value and choice controls
 

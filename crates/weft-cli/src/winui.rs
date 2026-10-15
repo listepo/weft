@@ -9,10 +9,10 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
-use weft_catalog::PROJECT_FILE;
+use weft_catalog::{PROJECT_FILE, Project};
 use weft_winui::{
     GenerateError, GenerateOptions, ImportError, ImportOptions, TOKENS_FILE, generate,
-    generate_tokens, import_winui,
+    generate_tokens, helpers, import_winui,
 };
 
 use crate::convert::{
@@ -47,13 +47,7 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     if !keeps_context(args.context, loaded, "export", "winui", true) {
         document.context.clear();
     }
-    let namespace = args.namespace.unwrap_or_else(|| {
-        loaded
-            .and_then(|p| p.setting(&["export", "winui", "namespace"]))
-            .and_then(serde_json::Value::as_str)
-            .unwrap_or(DEFAULT_NAMESPACE)
-            .to_owned()
-    });
+    let namespace = namespace(args.namespace, loaded);
     let errors = &mut std::io::stderr();
     let generated = match generate(
         &document,
@@ -91,21 +85,41 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
     Ok(0)
 }
 
+/// `--namespace`, else `export.winui.namespace`, else `WeftScreens`.
+fn namespace(arg: Option<String>, loaded: Option<&Project>) -> String {
+    arg.unwrap_or_else(|| {
+        loaded
+            .and_then(|p| p.setting(&["export", "winui", "namespace"]))
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or(DEFAULT_NAMESPACE)
+            .to_owned()
+    })
+}
+
 pub struct TokensArgs {
     pub tokens: Option<PathBuf>,
+    pub namespace: Option<String>,
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
     pub force: bool,
 }
 
-/// Tokens WinUI has no form for are left out with a warning: only a page that uses one fails.
+/// `WeftTokens.xaml` and `Weft.cs`, the files every page of a project shares. Tokens WinUI has
+/// no form for are left out with a warning: only a page that uses one fails.
 pub fn export_tokens(args: TokensArgs, out: &mut dyn Write) -> Result<u8> {
     // The project is found as for a document in the working directory.
     let (loaded, project_dir) = project(Path::new(PROJECT_FILE), args.project)?;
     let loaded = loaded.as_ref();
     let tokens = tokens(args.tokens.as_deref(), loaded)?;
-    let (xaml, skipped) = generate_tokens(&tokens.tokens);
     let errors = &mut std::io::stderr();
+    let helpers = match helpers(&namespace(args.namespace, loaded)) {
+        Ok(helpers) => helpers,
+        Err(error) => {
+            writeln!(errors, "weft: {error}")?;
+            return Ok(DIAGNOSTICS);
+        }
+    };
+    let (xaml, skipped) = generate_tokens(&tokens.tokens);
     for p in skipped {
         writeln!(errors, "weft: token {p}; it is left out")?;
     }
@@ -116,7 +130,8 @@ pub fn export_tokens(args: TokensArgs, out: &mut dyn Write) -> Result<u8> {
         "export",
         "winui",
     );
-    emit_files(&[(TOKENS_FILE, xaml.as_str())], dir, args.force, out)?;
+    let files = [(TOKENS_FILE, xaml.as_str()), ("Weft.cs", helpers.as_str())];
+    emit_files(&files, dir, args.force, out)?;
     Ok(0)
 }
 
