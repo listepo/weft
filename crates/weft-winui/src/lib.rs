@@ -15,9 +15,9 @@ mod tokens;
 mod xaml;
 
 pub use generate::{GenerateError, GenerateOptions, Generated, generate, helpers};
-pub use import::{ImportError, ImportOptions, MAX_SOURCE_LENGTH, import_winui};
+pub use import::{ImportError, ImportOptions, MAX_SOURCE_LENGTH, MAX_XML_DEPTH, import_winui};
 #[cfg(feature = "import")]
-pub use read::{MAX_XML_DEPTH, read_winui};
+pub use read::read_winui;
 pub use tokens::{TOKENS_FILE, generate_tokens};
 #[cfg(feature = "import")]
 pub use weft_import::{ImportResult, Loss, LossKind};

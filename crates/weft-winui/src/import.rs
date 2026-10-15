@@ -6,7 +6,7 @@ use indexmap::IndexMap;
 use roxmltree::{Node, NodeType, ParsingOptions};
 use weft_catalog::{Token, token_types};
 use weft_core::{Catalog, Diagnostic, Document, Mode, ParseOptions, has_errors, parse};
-use weft_import::provenance;
+use weft_import::{on_reader_stack, provenance};
 
 use crate::generate::{GenerateOptions, TARGET, generate};
 
@@ -15,6 +15,9 @@ pub const MAX_SOURCE_LENGTH: usize = 2_000_000;
 /// A generated page has a few XML nodes per Weft element (the element, its indentation text and
 /// a wrapper at most), and a document at most `MAX_NODES` elements.
 pub(crate) const MAX_XML_NODES: u32 = weft_import::MAX_NODES as u32 * 8;
+/// Element nesting the parser is given: a Weft level is a few XAML levels at most (a property
+/// element, a template, a slot panel), and a debug build parses this deep within the reader stack.
+pub const MAX_XML_DEPTH: usize = weft_import::MAX_DEPTH * 4;
 
 pub struct ImportOptions<'a> {
     pub catalog: &'a Catalog,
@@ -49,6 +52,16 @@ pub fn import_winui(source: &str, options: &ImportOptions<'_>) -> Result<Documen
     if source.len() > MAX_SOURCE_LENGTH {
         return Err(ImportError::TooLong);
     }
+    // roxmltree parses an element within its parent's call, as in `read_winui`.
+    if nested_past(source, MAX_XML_DEPTH) {
+        let what = format!("elements nest more than {MAX_XML_DEPTH} levels deep");
+        return Err(ImportError::Xml(what));
+    }
+    on_reader_stack("weft-import-winui", || read_back(source, options))
+        .unwrap_or_else(|| Err(ImportError::Xml("the reader stopped unexpectedly".into())))
+}
+
+fn read_back(source: &str, options: &ImportOptions<'_>) -> Result<Document, ImportError> {
     let page = xml(source)?;
     // Only a comment before the root element is the page's own, as the generator writes it.
     let comment = page
@@ -126,4 +139,55 @@ fn attributes<'a>(n: Node<'a, '_>) -> Vec<(Option<&'a str>, &'a str, &'a str)> {
         .collect();
     all.sort_unstable();
     all
+}
+
+/// Whether elements nest deeper than `limit`. Where this count and the parser part, the parser
+/// stops at an error first, so it never recurses deeper than the count.
+pub(crate) fn nested_past(source: &str, limit: usize) -> bool {
+    let bytes = source.as_bytes();
+    let after = |from: usize, end: &[u8]| {
+        bytes[from..]
+            .windows(end.len())
+            .position(|w| w == end)
+            .map_or(bytes.len(), |at| from + at + end.len())
+    };
+    let (mut i, mut depth) = (0, 0usize);
+    while let Some(at) = bytes[i..].iter().position(|&b| b == b'<') {
+        i += at + 1;
+        let rest = &bytes[i..];
+        i = match rest.first() {
+            Some(b'/') => {
+                depth = depth.saturating_sub(1);
+                after(i, b">")
+            }
+            // Comments, CDATA, instructions and declarations hold no elements.
+            Some(b'!') if rest.starts_with(b"!--") => after(i, b"-->"),
+            Some(b'!') if rest.starts_with(b"![CDATA[") => after(i, b"]]>"),
+            Some(b'?') => after(i, b"?>"),
+            Some(b'!') => after(i, b">"),
+            _ => {
+                // An attribute value may hold `>`; a tag that ends `/>` is empty.
+                let mut quote = None;
+                let mut j = i;
+                while j < bytes.len() {
+                    match (quote, bytes[j]) {
+                        (None, b'>') => break,
+                        (None, q @ (b'"' | b'\'')) => quote = Some(q),
+                        (Some(q), b) if b == q => quote = None,
+                        _ => {}
+                    }
+                    j += 1;
+                }
+                if bytes.get(j.wrapping_sub(1)) != Some(&b'/') {
+                    depth += 1;
+                    if depth > limit {
+                        return true;
+                    }
+                }
+                j + 1
+            }
+        }
+        .min(bytes.len());
+    }
+    false
 }
