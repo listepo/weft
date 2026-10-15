@@ -293,12 +293,34 @@ impl Reader<'_> {
         if let Some(what) = structure {
             self.lose(LossKind::Structure, &here, format!("`{tag}`: {what}"));
         }
-        if tag == "PasswordBox" {
+        // The generator's date and time row is one date picker.
+        let row = kind == "date-picker" && tag == "StackPanel";
+        let typed = match tag {
+            "PasswordBox" => Some("password"),
+            "TimePicker" => Some("time"),
+            _ if row => Some("datetime"),
+            _ => None,
+        };
+        if let Some(typed) = typed {
             node.props
-                .insert("type".into(), Value::String("password".into()));
+                .insert("type".into(), Value::String(typed.into()));
         }
         self.attributes(el, &mut node, &here);
-        self.body(el, &mut node, &here, depth);
+        if row {
+            // The row's pickers carry its label, `disabled` and bounds; they draw its value.
+            for child in elements(el) {
+                let part = child.tag_name().name();
+                if matches!(part, "CalendarDatePicker" | "TimePicker") {
+                    self.attributes(child, &mut node, &here);
+                } else {
+                    let note = format!("`{part}` in a date and time row is not read");
+                    self.lose(LossKind::Structure, &here, note);
+                }
+            }
+        } else if kind != "color-picker" || tag != "DropDownButton" {
+            // A colour button's swatch and flyout only draw the value `Choice.Value` holds.
+            self.body(el, &mut node, &here, depth);
+        }
         out.children.push(Child::Node(Box::new(node)));
     }
 

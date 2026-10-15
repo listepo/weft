@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleDatePicker namespace=WeftScreens
+<screen id="root" label="Delivery" weft="0.1">
+  <date-picker id="day" disabled="false" label="Delivery date" max="2026-12-31" min="2026-01-01" type="date" value="{$.day}" on-change="delivery.update"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleDatePickerPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Delivery">
+            <CalendarDatePicker AutomationProperties.AutomationId="day" weft:Choice.Value="{x:Bind ViewModel.day, Mode=TwoWay}" IsEnabled="True" MinDate="{x:Bind weft:Weft.Earliest('2026-01-01')}" MaxDate="{x:Bind weft:Weft.Latest('2026-12-31')}" Header="Delivery date" weft:On.Change="{x:Bind ViewModel.delivery_updateCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

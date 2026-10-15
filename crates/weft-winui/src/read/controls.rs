@@ -118,6 +118,8 @@ pub const ATTRS: &[(&str, &str, &str, Conv)] = &[
     ),
     ("combobox", "PlaceholderText", "placeholder", Conv::Same),
     ("slider stepper", "Minimum", "min", Conv::Same),
+    ("date-picker", "MinDate", "min", Conv::Same),
+    ("date-picker", "MaxDate", "max", Conv::Same),
     ("slider stepper", "Maximum", "max", Conv::Same),
     ("slider stepper", "Value", "value", Conv::Same),
     ("slider", "StepFrequency", "step", Conv::Same),
@@ -152,6 +154,7 @@ const EXPECTED: &[(&str, &str)] = &[
     ("select combobox", "IsEditable"),
     ("select", "SelectedValuePath"),
     ("stepper", "SpinButtonPlacementMode"),
+    ("date-picker", "Orientation"),
     ("list", "SelectionMode"),
     ("tabs", "IsAddTabButtonVisible"),
     ("tab", "IsClosable"),
@@ -324,6 +327,8 @@ pub fn kind_of(el: Xml<'_, '_>) -> Option<(&'static str, Option<&'static str>)> 
         return Some((kind, None));
     }
     let kind = match tag {
+        // Only the generator's date and time row holds a choice on a panel.
+        "StackPanel" if el.attributes().any(|a| a.name() == "Choice.Value") => "date-picker",
         "StackPanel" => match at("AutomationProperties.LandmarkType") {
             Some("Form") => "form",
             Some("Custom")
@@ -370,6 +375,14 @@ pub fn kind_of(el: Xml<'_, '_>) -> Option<(&'static str, Option<&'static str>)> 
         "TabViewItem" => "tab",
         "ContentDialog" => "dialog",
         "InfoBar" => "alert",
+        // The generator's colour picker is a swatch button that opens a ColorPicker.
+        "DropDownButton"
+            if el
+                .descendants()
+                .any(|d| d.has_tag_name((PRESENTATION, "ColorPicker"))) =>
+        {
+            "color-picker"
+        }
         "DropDownButton" => "menu",
         "MenuFlyoutItem" => "menu-item",
         // A model shows its fallback picture and keeps its scene in markers; an image keeps a

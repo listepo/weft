@@ -21,6 +21,13 @@
   <slider id="above" label="Above" max="-5" min="{$.bottom}" value="{$.level}"/>
   <stepper id="count" label="Count" max="8" min="2" step="2" value="{$.count}" on-change="count.set"/>
   <stepper id="free" label="Free" value="3"/>
+  <date-picker id="day" label="Day" max="{$.lastDay}" min="2026-01-01" value="{$.day}" on-change="day.pick"/>
+  <date-picker id="bad-day" label="Bad day" max="2026-02-30" min="soon" type="date" value="tomorrow"/>
+  <date-picker id="alarm" disabled="{$.locked}" label="Alarm" max="18:00" min="{$.opens}" type="time" value="{$.alarm}"/>
+  <date-picker id="meeting" disabled="true" label="Meeting" max="2026-12-31T18:00" min="2026-01-01T09:00" type="datetime" value="2026-05-17T10:30" on-change="meeting.move"/>
+  <color-picker id="accent" label="Accent" value="{$.accent}" on-change="accent.pick"/>
+  <color-picker id="plain" label="Plain" disabled="{!$.custom}" value="#D946EF"/>
+  <color-picker id="broken" label="Broken" value="red"/>
   <link id="mail" href="mailto:help@example.com">Mail us</link>
   <link id="relative" href="/help">Help</link>
   <link id="script" href="javascript:alert(1)" label="Unsafe link">Unsafe</link>

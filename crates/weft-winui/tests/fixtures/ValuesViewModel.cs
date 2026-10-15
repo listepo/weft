@@ -20,6 +20,9 @@ public sealed partial class ValuesViewModel : INotifyPropertyChanged
         view_pickCommand = new WeftCommand("view.pick", Perform);
         level_setCommand = new WeftCommand("level.set", Perform);
         count_setCommand = new WeftCommand("count.set", Perform);
+        day_pickCommand = new WeftCommand("day.pick", Perform);
+        meeting_moveCommand = new WeftCommand("meeting.move", Perform);
+        accent_pickCommand = new WeftCommand("accent.pick", Perform);
         site_openCommand = new WeftCommand("site.open", Perform);
         warn_checkCommand = new WeftCommand("warn.check", Perform);
         doc_openCommand = new WeftCommand("doc.open", Perform);
@@ -138,6 +141,48 @@ public sealed partial class ValuesViewModel : INotifyPropertyChanged
     }
     private double Weft_count = 0;
 
+    public string day
+    {
+        get => Weft_day;
+        set => WeftSet(ref Weft_day, value);
+    }
+    private string Weft_day = "";
+
+    public string lastDay
+    {
+        get => Weft_lastDay;
+        set => WeftSet(ref Weft_lastDay, value);
+    }
+    private string Weft_lastDay = "";
+
+    public string alarm
+    {
+        get => Weft_alarm;
+        set => WeftSet(ref Weft_alarm, value);
+    }
+    private string Weft_alarm = "";
+
+    public string opens
+    {
+        get => Weft_opens;
+        set => WeftSet(ref Weft_opens, value);
+    }
+    private string Weft_opens = "";
+
+    public string accent
+    {
+        get => Weft_accent;
+        set => WeftSet(ref Weft_accent, value);
+    }
+    private string Weft_accent = "";
+
+    public bool custom
+    {
+        get => Weft_custom;
+        set => WeftSet(ref Weft_custom, value);
+    }
+    private bool Weft_custom = false;
+
     public string siteName
     {
         get => Weft_siteName;
@@ -213,6 +258,9 @@ public sealed partial class ValuesViewModel : INotifyPropertyChanged
     public ICommand view_pickCommand { get; }
     public ICommand level_setCommand { get; }
     public ICommand count_setCommand { get; }
+    public ICommand day_pickCommand { get; }
+    public ICommand meeting_moveCommand { get; }
+    public ICommand accent_pickCommand { get; }
     public ICommand site_openCommand { get; }
     public ICommand warn_checkCommand { get; }
     public ICommand doc_openCommand { get; }

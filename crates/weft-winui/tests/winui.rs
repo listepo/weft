@@ -204,6 +204,12 @@ fn helpers_take_the_namespace() {
     for function in [
         "Uri? Link(object? value)",
         "ImageSource? Image(object? value)",
+        "DateTimeOffset? Day(string? text)",
+        "string DayText(DateTimeOffset day)",
+        "TimeSpan? Clock(string? text)",
+        "string ClockText(TimeSpan time)",
+        "WinColor Color(string? text)",
+        "string Hex(WinColor color)",
         "class Choice",
         "class Dialog",
     ] {
@@ -276,7 +282,10 @@ fn refused(markup: &str) -> Vec<String> {
 #[test]
 fn what_the_slice_cannot_draw_is_refused_with_its_path() {
     let cases = [
-        (r#"<date-picker id="d" label="D"/>"#, "date-picker#d"),
+        (
+            r#"<date-picker id="d" label="D" type="{$.type}"/>"#,
+            "date-picker#d",
+        ),
         (r#"<alert id="a" tone="{$.tone}">A</alert>"#, "alert#a"),
         (
             r#"<select id="sel" label="S" value="{$.v}"><each id="e" as="o" in="{$.os}"><option id="o" value="{$o.v}">O</option></each></select>"#,
@@ -367,6 +376,9 @@ fn value_controls_follow_the_spec() {
         ("size", "ComboBox"),
         ("city", "ComboBox"),
         ("view", "SelectorBar"),
+        ("day", "CalendarDatePicker"),
+        ("alarm", "TimePicker"),
+        ("accent", "DropDownButton"),
     ] {
         assert_eq!(by_id(&xml, id).tag_name().name(), element, "{id}");
         let value = at(id, "weft:Choice.Value").unwrap();
@@ -404,6 +416,32 @@ fn value_controls_follow_the_spec() {
     let vm = &generated.view_model_source;
     assert!(vm.contains("public double level"), "{vm}");
     assert!(vm.contains("private double Weft_count = 0;"), "{vm}");
+    // Dates: a literal of the format through `Weft.Earliest`, any other bound a marker.
+    let earliest = "{x:Bind weft:Weft.Earliest('2026-01-01')}";
+    assert_eq!(at("day", "MinDate").as_deref(), Some(earliest));
+    assert_eq!(at("bad-day", "MinDate"), None);
+    assert_eq!(
+        at("bad-day", "weft:Props.Max").as_deref(),
+        Some("2026-02-30")
+    );
+    assert_eq!(at("alarm", "weft:Props.Max").as_deref(), Some("18:00"));
+    let meeting = by_id(&xml, "meeting");
+    let parts: Vec<_> = meeting
+        .children()
+        .filter(|n| n.is_element())
+        .map(|n| n.tag_name().name())
+        .collect();
+    assert_eq!(parts, ["CalendarDatePicker", "TimePicker"]);
+    // Colours: a literal swatch is lowercase `#rrggbb`, black when it is not one.
+    let swatch = |id: &str| {
+        let border = by_id(&xml, id)
+            .descendants()
+            .find(|n| n.has_tag_name("Border"))
+            .unwrap();
+        border.attribute("Background").unwrap().to_owned()
+    };
+    assert_eq!(swatch("plain"), "#d946ef");
+    assert_eq!(swatch("broken"), "#000000");
     // SPEC §9 Trust: only `http`, `https` and `mailto` open, and a hostile image loads nothing.
     assert_eq!(
         at("mail", "NavigateUri").as_deref(),

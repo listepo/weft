@@ -31,8 +31,6 @@ pub const PENDING: &[&str] = &[
     "corpus-tabs",
     "corpus-tilt",
     "corpus-todo-list",
-    "example-color-picker",
-    "example-date-picker",
     "example-grid",
     "example-list",
     "example-menu-item",
