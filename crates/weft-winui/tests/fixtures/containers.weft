@@ -1,0 +1,67 @@
+<screen id="containers" label="Containers" weft="0.2">
+  <section id="profile" hidden="{$.noProfile}" label="{$.profileLabel}">
+    <text id="bio">Designer.</text>
+    <slot name="header">
+      <heading id="profile-title" level="2">Profile</heading>
+      <button id="profile-edit" on-press="profile.edit">Edit</button>
+    </slot>
+  </section>
+  <grid id="tiles" columns="3" gap="{token.space.md}" label="Tiles">
+    <text id="tile-1">One</text>
+    <text id="tile-2">Two</text>
+    <text id="tile-3">Three</text>
+    <text id="tile-4">Four</text>
+    <button id="tile-5">Five</button>
+  </grid>
+  <grid id="single" columns="1">
+    <text id="single-1">Alone</text>
+  </grid>
+  <dialog id="ask" label="Leave?" modal="{$.blocking}" open="{$.asking}" on-close="ask.close">
+    <text id="ask-text">Unsaved changes are lost.</text>
+    <slot name="actions">
+      <button id="ask-stay" on-press="ask.close">Stay</button>
+      <button id="ask-leave" variant="primary" on-press="ask.leave">Leave</button>
+    </slot>
+  </dialog>
+  <dialog id="note" label="Note" open="true">
+    <text id="note-text">Saved.</text>
+  </dialog>
+  <list id="steps" label="Steps" ordered="true" state="ready">
+    <item id="step-1" on-press="step.open">Unpack</item>
+    <item id="step-2" text="{$.stepTwo}"/>
+    <item id="step-3">
+      Plug in
+      <button id="step-3-help" on-press="step.help">Help</button>
+    </item>
+  </list>
+  <table id="people" label="People" state="{$.peopleState}">
+    <column id="col-name" sort="ascending" on-press="people.sort">Name</column>
+    <column id="col-role" text="{$.roleHeader}"/>
+    <column id="col-age">Age</column>
+    <row id="row-ana" selected="{$.anaSelected}" on-press="people.open">
+      <cell id="ana-name">Ana</cell>
+      <cell id="ana-role" text="{$.anaRole}"/>
+      <cell id="ana-age">
+        <text id="ana-age-text">34</text>
+        <button id="ana-age-edit" on-press="age.edit">Edit</button>
+      </cell>
+    </row>
+    <row id="row-bo">
+      <cell id="bo-name">Bo</cell>
+    </row>
+  </table>
+  <tabs id="views" label="Views" selected="{$.view}" on-change="view.pick">
+    <tab id="tab-list" label="List">
+      <text id="tab-list-text">Rows.</text>
+    </tab>
+    <tab id="tab-board" label="{$.boardLabel}">
+      <text id="tab-board-text">Cards.</text>
+      <button id="tab-board-add" on-press="card.add">Add</button>
+    </tab>
+  </tabs>
+  <tabs id="fixed" selected="tab-a">
+    <tab id="tab-a" label="A">
+      <text id="tab-a-text">First.</text>
+    </tab>
+  </tabs>
+</screen>

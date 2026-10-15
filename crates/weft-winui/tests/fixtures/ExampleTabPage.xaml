@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleTab namespace=WeftScreens
+<screen id="root" label="Account" weft="0.1">
+  <tabs id="account-tabs" selected="tab-profile">
+    <tab id="tab-profile" label="Profile">
+      <field id="name" label="Display name" value="{$.name}"/>
+    </tab>
+  </tabs>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleTabPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Account">
+            <TabView AutomationProperties.AutomationId="account-tabs" IsAddTabButtonVisible="False" weft:Choice.Value="tab-profile">
+                <TabViewItem AutomationProperties.AutomationId="tab-profile" IsClosable="False" Tag="tab-profile" Header="Profile">
+                    <StackPanel>
+                        <TextBox AutomationProperties.AutomationId="name" Text="{x:Bind ViewModel.name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Display name" />
+                    </StackPanel>
+                </TabViewItem>
+            </TabView>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

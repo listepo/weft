@@ -219,19 +219,7 @@ impl Gen<'_> {
         if !node.children.iter().any(|c| matches!(c, Child::Node(_))) {
             return self.content(e, node, "Message");
         }
-        let mut body = Element::new("StackPanel");
-        for child in &node.children {
-            match child {
-                Child::Node(n) => body.children.extend(self.node(n)),
-                Child::Text(t) if t.trim().is_empty() => {}
-                Child::Text(t) => {
-                    let mut run = Element::new("TextBlock");
-                    run.attr("TextWrapping", "Wrap");
-                    run.attr("Text", literal(t));
-                    body.children.push(run);
-                }
-            }
-        }
+        let body = self.panel(&node.children);
         e.children.push(body);
     }
 }

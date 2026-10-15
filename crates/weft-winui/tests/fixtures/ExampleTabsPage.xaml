@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleTabs namespace=WeftScreens
+<screen id="root" label="Account" weft="0.1">
+  <tabs id="account-tabs" selected="{$.tab}" on-change="tabs.change">
+    <tab id="tab-profile" label="Profile">
+      <text id="profile-text">Your public details.</text>
+    </tab>
+    <tab id="tab-security" label="Security">
+      <text id="security-text">Password and sessions.</text>
+    </tab>
+  </tabs>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleTabsPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Account">
+            <TabView AutomationProperties.AutomationId="account-tabs" IsAddTabButtonVisible="False" weft:Choice.Value="{x:Bind ViewModel.tab, Mode=TwoWay}" weft:On.Change="{x:Bind ViewModel.tabs_changeCommand}">
+                <TabViewItem AutomationProperties.AutomationId="tab-profile" IsClosable="False" Tag="tab-profile" Header="Profile">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="profile-text" TextWrapping="Wrap" Text="Your public details." />
+                    </StackPanel>
+                </TabViewItem>
+                <TabViewItem AutomationProperties.AutomationId="tab-security" IsClosable="False" Tag="tab-security" Header="Security">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="security-text" TextWrapping="Wrap" Text="Password and sessions." />
+                    </StackPanel>
+                </TabViewItem>
+            </TabView>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

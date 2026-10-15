@@ -205,6 +205,7 @@ fn helpers_take_the_namespace() {
         "Uri? Link(object? value)",
         "ImageSource? Image(object? value)",
         "class Choice",
+        "class Dialog",
     ] {
         assert!(shared.contains(function), "{function}");
     }
@@ -294,6 +295,19 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
             "text#g",
         ),
         (r#"<heading id="h" level="{$.n}">A</heading>"#, "heading#h"),
+        // Each column is a `ColumnDefinition`, so their number is a bounded literal.
+        (
+            r#"<grid id="g" columns="{$.n}"><text id="a">A</text></grid>"#,
+            "grid#g",
+        ),
+        (
+            r#"<grid id="g" columns="101"><text id="a">A</text></grid>"#,
+            "grid#g",
+        ),
+        (
+            r#"<list id="l" label="L"><item id="i">A</item><slot name="empty"><text id="e">E</text></slot></list>"#,
+            "list#l",
+        ),
         (r#"<button id="b" variant="{$.v}">A</button>"#, "button#b"),
         (r#"<text id="t" tone="{$.tone}">A</text>"#, "text#t"),
         (r#"<field id="f" label="F" type="{$.type}"/>"#, "field#f"),

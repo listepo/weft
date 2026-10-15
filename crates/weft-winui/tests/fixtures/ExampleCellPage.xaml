@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleCell namespace=WeftScreens
+<screen id="root" label="Users" weft="0.1">
+  <table id="users" label="Users">
+    <column id="col-name">Name</column>
+    <row id="row-ana">
+      <cell id="cell-ana">
+        <text id="ana-name">Ana</text>
+        <link id="ana-link" on-press="users.open">View</link>
+      </cell>
+    </row>
+  </table>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleCellPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Users">
+            <StackPanel AutomationProperties.AutomationId="users" AutomationProperties.LocalizedControlType="table" AutomationProperties.Name="Users">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button AutomationProperties.AutomationId="col-name" AutomationProperties.LocalizedControlType="column header" Content="Name" />
+                </Grid>
+                <Grid AutomationProperties.AutomationId="row-ana" AutomationProperties.LocalizedControlType="row">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl AutomationProperties.AutomationId="cell-ana" AutomationProperties.LocalizedControlType="cell">
+                        <StackPanel>
+                            <TextBlock AutomationProperties.AutomationId="ana-name" TextWrapping="Wrap" Text="Ana" />
+                            <HyperlinkButton AutomationProperties.AutomationId="ana-link" Content="View" weft:On.Press="{x:Bind ViewModel.users_openCommand}" />
+                        </StackPanel>
+                    </ContentControl>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

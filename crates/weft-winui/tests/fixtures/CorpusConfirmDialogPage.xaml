@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusConfirmDialog namespace=WeftScreens
+<screen id="files" label="File" weft="0.1">
+  <heading id="title" level="1">Quarterly report</heading>
+  <button id="delete-file" variant="danger" on-press="dialog.open">Delete file</button>
+  <dialog id="confirm" label="Delete file?" open="{$.confirmOpen}" on-close="dialog.close">
+    <text id="warning">This cannot be undone.</text>
+    <text id="filename" text="{$.file.name}"/>
+    <slot name="actions">
+      <button id="cancel" on-press="dialog.close">Cancel</button>
+      <button id="confirm-delete" variant="danger" on-press="file.delete">Delete</button>
+    </slot>
+  </dialog>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusConfirmDialogPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="files" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="File">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Quarterly report" />
+            <Button AutomationProperties.AutomationId="delete-file" Content="Delete file" weft:Props.Variant="danger" weft:On.Press="{x:Bind ViewModel.dialog_openCommand}" />
+            <ContentDialog AutomationProperties.AutomationId="confirm" weft:Dialog.IsOpen="{x:Bind ViewModel.confirmOpen, Mode=TwoWay}" AutomationProperties.Name="Delete file?" weft:On.Close="{x:Bind ViewModel.dialog_closeCommand}">
+                <StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="warning" TextWrapping="Wrap" Text="This cannot be undone." />
+                    <TextBlock AutomationProperties.AutomationId="filename" TextWrapping="Wrap" Text="{x:Bind ViewModel.file.name, Mode=OneWay}" />
+                    <StackPanel Orientation="Horizontal" weft:Slot.Name="actions">
+                        <Button AutomationProperties.AutomationId="cancel" Content="Cancel" weft:On.Press="{x:Bind ViewModel.dialog_closeCommand}" />
+                        <Button AutomationProperties.AutomationId="confirm-delete" Content="Delete" weft:Props.Variant="danger" weft:On.Press="{x:Bind ViewModel.file_deleteCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </ContentDialog>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

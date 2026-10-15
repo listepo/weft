@@ -337,10 +337,16 @@ impl Reader<'_> {
                 // `x:Name` stands in for a missing `AutomationId`; `x:Class` names the code-behind.
                 Some(XAML) if matches!(name, "Name" | "Class") => continue,
                 Some(ns) if DESIGN_TIME.contains(&ns) => continue,
-                // A marker holds its prop as written; `Choice.Value` holds a choice's `value`.
-                Some(_) if helper == Some(&"Props.") || name == "Choice.Value" => {
+                // A marker holds its prop as written; `Choice.Value` holds a choice's `value` (a
+                // tab list's `selected`), and `Dialog.IsOpen` a dialog's `open`.
+                Some(_)
+                    if helper == Some(&"Props.")
+                        || matches!(name, "Choice.Value" | "Dialog.IsOpen") =>
+                {
                     let prop = match name.strip_prefix("Props.") {
                         Some(marker) => controls::marker_prop(marker),
+                        None if name == "Dialog.IsOpen" => "open".to_owned(),
+                        None if tag == "TabView" => "selected".to_owned(),
                         None => "value".to_owned(),
                     };
                     match markup {
@@ -370,7 +376,7 @@ impl Reader<'_> {
                 None => {}
             }
             if name == "AutomationProperties.AutomationId"
-                || controls::expected(&node.kind, name)
+                || controls::expected(&node.kind, name, value)
                 || self.consumed.contains(&name)
                 || (name == "HorizontalAlignment" && value == "Stretch" && max_width)
             {
@@ -497,9 +503,17 @@ impl Reader<'_> {
                     .insert("direction".into(), Value::String(direction.into()));
             }
             let align = (kind == "stack").then(|| self.align(el, node)).flatten();
+            // A filled grid's placements follow from the document order.
+            let filled = kind == "grid" && layout::filled(el);
             let consumed = align
                 .into_iter()
-                .chain(tracks.as_ref().map(layout::Tracks::along));
+                .chain(tracks.as_ref().map(layout::Tracks::along))
+                .chain(
+                    filled
+                        .then_some(["Grid.Row", "Grid.Column"])
+                        .into_iter()
+                        .flatten(),
+                );
             let outer = std::mem::replace(&mut self.consumed, consumed.collect());
             if let Some(t) = &tracks {
                 self.tracks((el, t), node, here, depth, &mut placed);
@@ -522,7 +536,7 @@ impl Reader<'_> {
             }
             self.consumed = outer;
             if node.kind == "grid" {
-                self.columns(el, node, here);
+                self.columns(el, node, here, filled);
             }
             return self.settle(node, placed, here);
         }
@@ -582,12 +596,16 @@ impl Reader<'_> {
         }
     }
 
-    /// A `Grid`'s columns are its `ColumnDefinition`s; their widths and the rows are layout.
-    fn columns(&mut self, el: Xml<'_, '_>, node: &mut Node, here: &str) {
+    /// A `Grid`'s columns are its `ColumnDefinition`s; their widths and the rows are layout,
+    /// unless they are the `filled` ones of a generated grid.
+    fn columns(&mut self, el: Xml<'_, '_>, node: &mut Node, here: &str, filled: bool) {
         let mut columns = 0;
         for tracks in elements(el).filter(|c| c.tag_name().name().starts_with("Grid.")) {
             if tracks.tag_name().name() == "Grid.ColumnDefinitions" {
                 columns += elements(tracks).count();
+            }
+            if filled {
+                continue;
             }
             let note = format!(
                 "`{}`: the track sizes are not read",
