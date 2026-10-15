@@ -365,7 +365,11 @@ impl Gen<'_> {
         }
         let password = kind == "field"
             && matches!(node.props.get("type"), Some(Value::String(s)) if s == "password");
-        let mut e = Element::new(if password { "PasswordBox" } else { control });
+        let mut e = Element::new(if password {
+            "PasswordBox"
+        } else {
+            controls::element(node, control)
+        });
         if let Some(id) = &node.id {
             e.attr("AutomationProperties.AutomationId", literal(id));
         }

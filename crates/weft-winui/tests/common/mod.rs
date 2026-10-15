@@ -25,8 +25,6 @@ pub const PENDING: &[&str] = &[
     "corpus-receipt",
     "corpus-showroom",
     "corpus-tilt",
-    "example-color-picker",
-    "example-date-picker",
     "example-grid",
     "example-menu-item",
     "example-option",

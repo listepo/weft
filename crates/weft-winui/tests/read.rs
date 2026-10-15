@@ -72,6 +72,7 @@ fn without_defaults(node: &mut Node) {
         ("tone", "default"),
         ("justify", "start"),
         ("variant", "secondary"),
+        ("type", "date"),
     ];
     node.props.retain(|prop, value| {
         !defaults
@@ -215,6 +216,42 @@ fn bindings_with_no_weft_form_are_losses() {
             "Bindings /screen#s/button#f: `IsEnabled` on `Button`: a binding with no Weft form\n",
             "Bindings /screen#s/stack#g: `Orientation` on `StackPanel`: a binding with no Weft form\n",
             "Bindings /screen#s/checkbox#h: `Props.Shade`: a `checkbox` has no `shade`\n",
+        )
+    );
+}
+
+#[test]
+fn date_and_colour_pickers_read_back() {
+    let (doc, lost) = read_body(concat!(
+        r#"<TimePicker AutomationProperties.AutomationId="t" Header="T" />"#,
+        r#"<CalendarDatePicker AutomationProperties.AutomationId="d" Header="D" MinDate="{x:Bind weft:Weft.Latest('2026-01-01')}" MaxDate="{x:Bind weft:Weft.Latest(ViewModel.end), Mode=OneWay}" />"#,
+        r#"<TextBlock AutomationProperties.AutomationId="q" Text="{x:Bind weft:Weft.Not('x')}" />"#,
+        r#"<StackPanel AutomationProperties.AutomationId="m" weft:Choice.Value="2026-05-17T10:30" Orientation="Horizontal"><CalendarDatePicker Header="M" IsEnabled="False" MinDate="{x:Bind weft:Weft.Earliest('2026-01-01T09:00')}" /><TimePicker IsEnabled="False" /><Button Content="X" /></StackPanel>"#,
+        r##"<DropDownButton AutomationProperties.AutomationId="c" AutomationProperties.Name="C" weft:Choice.Value="#112233"><DropDownButton.Flyout><Flyout><ColorPicker IsAlphaEnabled="False" /></Flyout></DropDownButton.Flyout></DropDownButton>"##,
+    ));
+    assert_eq!(
+        doc,
+        concat!(
+            r#"<date-picker id="t" label="T" type="time"/>"#,
+            "\n",
+            r#"<date-picker id="d" label="D" max="{$.end}"/>"#,
+            "\n",
+            r#"<text id="q"/>"#,
+            "\n",
+            r#"<date-picker id="m" disabled="true" label="M" min="2026-01-01T09:00" type="datetime" value="2026-05-17T10:30"/>"#,
+            "\n",
+            r##"<color-picker id="c" label="C" value="#112233"/>"##,
+            "\n",
+        )
+    );
+    // `Weft.Latest` opens a range upwards, so as a `MinDate` it is no Weft bound; only the two
+    // helpers take quoted text, and a row of pickers holds nothing else.
+    assert_eq!(
+        lost,
+        concat!(
+            "Bindings /screen#s/date-picker#d: `MinDate` on `CalendarDatePicker`: a binding with no Weft form\n",
+            "Bindings /screen#s/text#q: `Text` on `TextBlock`: `'x'` is not a path of the page's view model\n",
+            "Structure /screen#s/date-picker#m: `Button` in a date and time row is not read\n",
         )
     );
 }

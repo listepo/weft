@@ -1,9 +1,9 @@
-//! The value, choice and content controls (T105.3): every choice whose WinUI control holds its
-//! value as a selection goes through the `weft:Choice.Value` helper of `Weft.cs`, and the number
-//! literals are written as `weft_core::controls` reads them, so a literal screen shows what every
-//! other target shows.
+//! The value, choice and content controls (T105.3): every kind whose WinUI control holds its value
+//! as something other than text goes through the `weft:Choice.Value` helper of `Weft.cs`, and the
+//! number, date and colour literals are written as `weft_core::controls` reads them, so a literal
+//! screen shows what every other target shows.
 
-use weft_core::controls::{slider_span, stepper_bounds};
+use weft_core::controls::{DateType, color_value, date_text, slider_span, stepper_bounds};
 use weft_core::{Child, Node, Value, js_number, safe_absolute_url, safe_url};
 
 use super::{Gen, path_of};
@@ -21,6 +21,12 @@ pub(super) const KINDS: &[(&str, &str, &str)] = &[
     ("segment", "SelectorBarItem", "value disabled text"),
     ("slider", "Slider", "value min max step disabled"),
     ("stepper", "NumberBox", "value min max step disabled"),
+    (
+        "date-picker",
+        "CalendarDatePicker",
+        "type value min max disabled",
+    ),
+    ("color-picker", "DropDownButton", "value disabled"),
     ("link", "HyperlinkButton", "href text"),
     ("image", "Image", "src"),
     ("model", "Image", "src usdz fallback"),
@@ -29,11 +35,32 @@ pub(super) const KINDS: &[(&str, &str, &str)] = &[
     ("menu-item", "MenuFlyoutItem", "disabled text"),
 ];
 
+/// The element of a `date-picker`, which depends on its `type`.
+pub(super) fn element(node: &Node, control: &'static str) -> &'static str {
+    match (node.kind.as_str(), date_type(node)) {
+        ("date-picker", Some(DateType::Time)) => "TimePicker",
+        ("date-picker", Some(DateType::DateTime)) => "StackPanel",
+        _ => control,
+    }
+}
+
 /// The attribute that shows a caption `label`, where it is not `AutomationProperties.Name`.
 pub(super) fn caption(node: &Node) -> Option<&'static str> {
     match node.kind.as_str() {
-        "select" | "combobox" | "radio-group" | "slider" | "stepper" => Some("Header"),
+        "date-picker" if date_type(node) == Some(DateType::DateTime) => None,
+        "select" | "combobox" | "radio-group" | "slider" | "stepper" | "date-picker" => {
+            Some("Header")
+        }
         _ => None,
+    }
+}
+
+/// A literal `type`; `None` when bound, which `Gen::word` refuses.
+fn date_type(node: &Node) -> Option<DateType> {
+    match node.props.get("type") {
+        None => Some(DateType::Date),
+        Some(Value::String(t)) => Some(DateType::of(t)),
+        Some(_) => None,
     }
 }
 
@@ -79,6 +106,8 @@ impl Gen<'_> {
                 self.disabled(e, node);
             }
             "slider" | "stepper" => self.number(e, node),
+            "date-picker" => self.date(e, node),
+            "color-picker" => self.color(e, node),
             "link" => {
                 self.content(e, node, "Content");
                 self.href(e, node);
@@ -153,6 +182,92 @@ impl Gen<'_> {
             e.attr("Value", v);
         }
         self.disabled(e, node);
+    }
+
+    fn date(&mut self, e: &mut Element, node: &Node) {
+        let Some(kind) = date_type(node) else {
+            self.word(node, "type");
+            return;
+        };
+        self.choice(e, node);
+        if kind != DateType::DateTime {
+            self.disabled(e, node);
+            return self.bounds(e, node, kind);
+        }
+        e.attr("Orientation", "Horizontal");
+        let mut day = Element::new("CalendarDatePicker");
+        self.set(&mut day, node, "label", "Header", Leaf::Text);
+        self.disabled(&mut day, node);
+        self.bounds(&mut day, node, kind);
+        let mut time = Element::new("TimePicker");
+        self.disabled(&mut time, node);
+        e.children.extend([day, time]);
+    }
+
+    /// `min` and `max`: a date's bounds through `Weft.Earliest` and `Weft.Latest`; a time picker
+    /// has none, so its bounds, and a literal not of the format of `type`, are markers.
+    fn bounds(&mut self, e: &mut Element, node: &Node, kind: DateType) {
+        for (prop, xaml, function, marker) in [
+            ("min", "MinDate", "Earliest", "Min"),
+            ("max", "MaxDate", "Latest", "Max"),
+        ] {
+            let value = match (node.props.get(prop), kind) {
+                (None, _) => continue,
+                (_, DateType::Time) => None,
+                // `date_text` keeps only digits, `-`, `T` and `:`, so no quote can end the literal.
+                (Some(Value::String(s)), _) if !date_text(kind, s).is_empty() => {
+                    Some(format!("{{x:Bind weft:Weft.{function}('{s}')}}"))
+                }
+                (Some(Value::Bind { bind, not: false }), _) => {
+                    let at = path_of(node);
+                    let path =
+                        self.data
+                            .read(bind, Read::Like(Leaf::Text), &at, &mut self.problems);
+                    path.map(|p| format!("{{x:Bind weft:Weft.{function}({p}), Mode=OneWay}}"))
+                }
+                _ => None,
+            };
+            match value {
+                Some(v) => e.attr(xaml, v),
+                None => self.marker(e, node, prop, marker),
+            }
+        }
+    }
+
+    fn color(&mut self, e: &mut Element, node: &Node) {
+        self.choice(e, node);
+        self.disabled(e, node);
+        let mut swatch = Element::new("Border");
+        swatch.attr("Width", "16");
+        swatch.attr("Height", "16");
+        swatch.attr("CornerRadius", "4");
+        let fill = match node.props.get("value") {
+            Some(Value::String(s)) => Some(color_value(s)),
+            Some(Value::Bind { bind, not: false }) => {
+                let at = path_of(node);
+                let path = self
+                    .data
+                    .read(bind, Read::Like(Leaf::Text), &at, &mut self.problems);
+                path.map(|p| format!("{{x:Bind weft:Weft.Swatch({p}), Mode=OneWay}}"))
+            }
+            _ => None,
+        };
+        swatch.attr("Background", fill.unwrap_or_else(|| color_value("")));
+        let mut row = Element::new("StackPanel");
+        row.attr("Orientation", "Horizontal");
+        row.attr("Spacing", "8");
+        row.children.push(swatch);
+        if node.props.contains_key("label") {
+            let mut caption = Element::new("TextBlock");
+            self.set(&mut caption, node, "label", "Text", Leaf::Text);
+            row.children.push(caption);
+        }
+        let mut picker = Element::new("ColorPicker");
+        picker.attr("IsAlphaEnabled", "False");
+        let mut flyout = Element::new("Flyout");
+        flyout.children.push(picker);
+        e.children.push(row);
+        e.children.push(property("DropDownButton.Flyout", flyout));
     }
 
     /// SPEC §9 Trust: only `http`, `https` and `mailto` open; any other literal is kept inert.

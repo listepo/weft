@@ -17,6 +17,9 @@ enum Function {
     Hide,
     /// `Weft.Link` and `Weft.Image`, which keep only the addresses SPEC §9 Trust allows.
     Address,
+    /// `Weft.Earliest` and `Weft.Latest`: a date's `min` and `max`, open when not a date.
+    Earliest,
+    Latest,
 }
 
 /// An `{x:Bind}` value: a Weft data path, read through a helper or not.
@@ -25,6 +28,8 @@ struct Bound {
     function: Option<Function>,
     /// Without `Mode=OneWay` or `TwoWay`, x:Bind reads the value once.
     once: bool,
+    /// `path` is the quoted text a function was called with, not a data path.
+    literal: bool,
 }
 
 /// Reads `{x:Bind …}` on `el`, inside the `<each>` loops `loops` (outermost first); the error
@@ -62,15 +67,29 @@ fn x_bind(el: Xml<'_, '_>, value: &str, loops: &[String]) -> Result<Bound, Strin
                 Some("Weft.Truthy") => Function::Truthy,
                 Some("Weft.Hide") => Function::Hide,
                 Some("Weft.Link" | "Weft.Image") => Function::Address,
+                Some("Weft.Earliest") => Function::Earliest,
+                Some("Weft.Latest") => Function::Latest,
                 _ => return Err(format!("`{}` is not a `Weft` helper", callee.trim())),
             };
             (Some(function), arg.trim())
         }
     };
+    // The generator writes a literal date bound as text, so a quote can only hold a date.
+    if let Some(Function::Earliest | Function::Latest) = function
+        && let Some(text) = path.strip_prefix('\'').and_then(|p| p.strip_suffix('\''))
+    {
+        return Ok(Bound {
+            path: text.to_owned(),
+            function,
+            once,
+            literal: true,
+        });
+    }
     Ok(Bound {
         path: data_path(path, loops)?,
         function,
         once,
+        literal: false,
     })
 }
 
@@ -210,11 +229,13 @@ impl Reader<'_> {
                 );
             }
         };
-        use Function::{Address, Hide, Not, Truthy};
+        use Function::{Address, Earliest, Hide, Latest, Not, Truthy};
         // `IsEnabled` and `Visibility` say the opposite of `disabled` and `hidden`.
         let not = match (conv, bound.function) {
             (Conv::Same, None | Some(Truthy)) | (Conv::Not, Some(Not)) => false,
             (Conv::Same, Some(Address)) if matches!(attr, "NavigateUri" | "Source") => false,
+            (Conv::Same, Some(Earliest)) if attr == "MinDate" => false,
+            (Conv::Same, Some(Latest)) if attr == "MaxDate" => false,
             (Conv::Same, Some(Not)) | (Conv::Not, None | Some(Truthy)) => true,
             (Conv::Words(_), None) if prop == "hidden" => true,
             (Conv::Words(_), Some(Hide)) if prop == "hidden" => false,
@@ -223,6 +244,9 @@ impl Reader<'_> {
                 return self.lose(LossKind::Bindings, here, note);
             }
         };
+        if bound.literal {
+            return self.set(node, prop, &bound.path, here, attr);
+        }
         if bound.once {
             let note = format!(
                 "`{attr}` on `{tag}`: without `Mode=OneWay` x:Bind reads the value once; it is read as a live binding"
