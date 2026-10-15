@@ -67,7 +67,7 @@
                 <TextBlock AutomationProperties.AutomationId="apart-b" TextWrapping="Wrap" Text="Middle" VerticalAlignment="Stretch" Grid.Column="2" />
                 <TextBlock AutomationProperties.AutomationId="apart-c" TextWrapping="Wrap" Text="Right" VerticalAlignment="Stretch" Grid.Column="4" />
             </Grid>
-            <StackPanel AutomationProperties.AutomationId="alone" weft:Props.Justify="space-between" Orientation="Horizontal">
+            <StackPanel AutomationProperties.AutomationId="alone" Orientation="Horizontal" weft:Props.Justify="space-between">
                 <TextBlock AutomationProperties.AutomationId="alone-a" TextWrapping="Wrap" Text="Only" VerticalAlignment="Center" />
             </StackPanel>
             <Grid AutomationProperties.AutomationId="search" ColumnSpacing="{StaticResource Weft.space.sm}">

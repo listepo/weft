@@ -24,7 +24,7 @@
                 <RadioButton AutomationProperties.AutomationId="plan-pro" Content="Pro" Tag="pro" />
                 <RadioButton AutomationProperties.AutomationId="plan-team" Content="Team" Tag="team" />
             </RadioButtons>
-            <StackPanel AutomationProperties.AutomationId="nav" Spacing="{StaticResource Weft.space.sm}" Orientation="Horizontal">
+            <StackPanel AutomationProperties.AutomationId="nav" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
                 <Button AutomationProperties.AutomationId="back" Content="Back" weft:On.Press="{x:Bind ViewModel.wizard_backCommand}" VerticalAlignment="Center" />
                 <Button AutomationProperties.AutomationId="next" Content="Next" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.plan), Mode=OneWay}" weft:On.Press="{x:Bind ViewModel.wizard_nextCommand}" VerticalAlignment="Center" />
             </StackPanel>
