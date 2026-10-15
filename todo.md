@@ -5,7 +5,6 @@
 - T106. Weft plugin for cox
 - T106.7. Design tab: cox side
 - T105. Weft to WinUI 3 and back
-- T105.14. WinUI repetition
 - T105.5. WinUI layout vocabulary, tokens and materials
 - T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 - T105.13. WinUI date and colour pickers

@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.14 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
 | T105.13 | todo | P2 | 3 | 0% | |
@@ -293,12 +292,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 **Execution plan (this round, design only).** Write `docs/winui-design.md` (mapping of every core kind and prop, tokens, layout vocabulary, bindings, events, slots, light and dark, losses, round trip, XML parser, CI job, open questions), `research.md` §23, and the sub-tasks below. The creator approved the design and accepted the recommendation of every open question in `docs/winui-design.md`, including a `roxmltree` row in the workspace `rust.md` when T105.8 adds the crate; T105.1 may start.
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
-
-### T105.14. WinUI repetition
-
-`<each>` as an `ItemsRepeater` with a typed `DataTemplate` (loop variables in the data typing, `WeftRoot` and `WeftParent` reads, `Each.Id`/`Each.As` markers, the parent's orientation and spacing), the `empty` slots of `list` and `table` with `weft:Weft.Empty`, `<each>` in a `ListView` and in a table, and `read_winui` reading an `ItemsRepeater` with its markers back into `<each>`. Split from T105.4 at claim time. SPEC §9 rows first. Done when the `list`, `table` examples and the corpus screens with `<each>` generate, match goldens, read back through the comment and from the XAML alone with only the losses SPEC §9 lists, and build in the Windows `winui` job.
-
-**Execution plan.** (1) SPEC §9 "To WinUI" and "From WinUI": `<each>`, the list's `ItemsSource`, the `empty` slots, `Each`, `Weft.Empty`; design doc rows to match. (2) `data.rs`: loop scopes, so `$todo.title` is `title`, `$.x` inside a loop `WeftRoot.x` and an enclosing loop's item `WeftParent.…`; `in` makes a list of an item class. (3) `generate`: `<each>` as an `ItemsRepeater` with the parent panel's orientation and spacing, a `ListView` whose only child is one `<each>` of one `item` binds `ItemsSource` (the item a `ContentControl` of type `list item`), rows of a table repeat, and an `<each>` anywhere else (grid, row, tabs, menu, select) is refused; the `empty` slot is the list's `Footer` or the table's last panel, its `Visibility` through `weft:Weft.Empty`. (4) `Weft.cs`: `Each` markers, `Weft.Empty`, a press on a templated list item. (5) Reader: an `ItemsRepeater` or `ListView` with `weft:Each.As` is an `<each>`, relative paths read against the loop names. (6) Tests: goldens for the corpus screens and the `list` and `table` examples, a `repetition` fixture (nested loops, `WeftParent`, bound state with the empty slot), refusals, reader tests; `cargo test -p weft-winui --all-features`, then the Windows job. `menu-item` and `option` examples stay pending: a `MenuFlyout` and a `ComboBox` cannot hold a repeater beside static items.
 
 ### T105.5. WinUI layout vocabulary, tokens and materials
 
