@@ -11,12 +11,12 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.3 | in progress | P2 | 4 | 10% | Claude Code / claude-opus-5-5 |
 | T105.4 | todo | P2 | 4 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.7 | todo | P2 | 3 | 0% | |
 | T105.9 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
+| T105.12 | todo | P2 | 3 | 0% | |
 
 ### T8. Evaluation
 
@@ -296,12 +296,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
 
-### T105.3. WinUI value and choice controls
-
-`select`, `combobox`, `radio-group`, `segmented-control`, `slider`, `stepper`, `date-picker`, `color-picker`, `link`, `image`, `model`, `alert`, `menu`, with the `Choice` helper and the date and colour converter functions. SPEC §9 rows first. About 480 lines of code. Done when their examples and corpus screens generate, match goldens and read back through the comment.
-
-**Execution plan.** (1) SPEC §9 "To WinUI": the new kinds, `Choice.Value`, the converter functions and the new markers; `docs/winui-design.md` rows where the build differs (every choice, date and colour control shows its text value through `weft:Choice.Value`, since a static `BindBack` cannot write a view-model property). (2) `src/data.rs`/`src/csharp.rs`: a number leaf (`double`). (3) `src/controls.rs`, its own module so T105.4/T105.5 do not conflict: the kinds above, `<option>`/`<radio>`/`<segment>`/`<menu-item>` built by their parents, literal number bounds through `weft_core::controls`, literal date bounds through `date_text`. (4) `src/Weft.cs`: `Choice`, `Weft.Day/DayText/Clock/ClockText/Color/Hex/Swatch/Link/Image/Earliest/Latest`, markers `Href`, `Src`, `Usdz`, `Min`, `Max`, `On` hooks for `Slider`, `NumberBox`, `MenuFlyoutItem`; checked by compiling `Weft.cs` and the view models with `dotnet build` (macOS, `EnableWindowsTargeting`). (5) Tests: the examples without `<each>` and the corpus screens `account`, `error-state`, `login`, `menu`, `profile`, `signup`, `wizard-step` join `COVERED` (goldens, comment read-back), a fixture of every new prop, refusals. Verify with `moon run root:changed`, then the full check.
-
 ### T105.4. WinUI repetition and containers
 
 `<each>` (`ItemsRepeater` with typed templates), `list`, `table`, `tabs`, `dialog` (the `Dialog.IsOpen` helper), `section`, `grid` without `min-column-width`, and the slots. SPEC §9 rows first. About 490 lines of code; split at claim time if it grows. Done as T105.3.
@@ -321,3 +315,8 @@ A `winui` job on `windows-latest` in `.github/workflows/ci.yml`: checkout and `a
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
 SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.
+
+### T105.12. WinUI date and colour pickers
+
+Split from T105.3 to keep it under 500 lines of code. `date-picker` (`CalendarDatePicker`, `TimePicker`, and a horizontal `StackPanel` of both for `datetime`) and `color-picker` (a `DropDownButton` swatch whose `Flyout` holds a `ColorPicker` without alpha), with `Choice.Value` cases for them, the converter functions `Weft.Day/DayText/Clock/ClockText/Color/Hex/Swatch/Earliest/Latest`, the `Props.Min`/`Props.Max` markers, the SPEC §9 and `docs/winui-design.md` rows, and the hand-written reader reading the `datetime` row and the colour button back. The pre-split implementation, with goldens, tests and the reader cases, is commit `e47549f6` on branch `claude/t105-12-winui-date-colour`: rebase it onto `main` after T105.3 and keep only these parts. About 230 lines of code. Done when `example-date-picker` and `example-color-picker` join the covered screens, the `values` fixture has the pickers back, and their goldens match and read back.
+
