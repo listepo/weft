@@ -50,8 +50,12 @@ public sealed class SmokeTests
 
             // Focus the panel as a user does, so the accelerator has to get past the surface.
             var panel = window.BoundingRectangle;
+            string Uia() => Safe(() => { var f = automation.FocusedElement(); return $"{Safe(() => f.ControlType.ToString())}/{Safe(() => f.ClassName)}/{Safe(() => f.FrameworkAutomationElement.FrameworkId.ValueOrDefault)}/{Safe(() => string.Join(".", f.Properties.RuntimeId.ValueOrDefault ?? []))}"; });
+            var uiaBefore = Uia();
             Mouse.Click(new System.Drawing.Point(panel.Left + 24, menu.BoundingRectangle.Bottom + 24));
-            var focused = "not read";
+            var uiaAfter = new List<string>();
+            for (var k = 0; k < 5; k++) { uiaAfter.Add(Uia()); Thread.Sleep(100); }
+            var focused = $"uia before {uiaBefore} after {string.Join(" , ", uiaAfter)}";
             var shownToKeys = shown.ElapsedMilliseconds;
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_S);
             var ok = Retry.WhileFalse(() => window.Title == "copy.weft", TimeSpan.FromSeconds(10)).Result;
@@ -64,7 +68,7 @@ public sealed class SmokeTests
             }
             Thread.Sleep(500);
             var appLog = File.Exists(probeLog) ? File.ReadAllText(probeLog).Replace("\n", " ; ") : "no log";
-            if (ok) Assert.Fail($"PROBE PASS log: {appLog}");
+            if (ok) Assert.Fail($"PROBE PASS {focused} log: {appLog}");
             Console.WriteLine($"PROBE first {ok} shown-to-keys {shownToKeys} ms focus {focused} second {second}");
             if (!ok)
             {
