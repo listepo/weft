@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.4 | in progress | P2 | 4 | 5% | Claude Code / claude-opus-5-5 |
 | T105.14 | todo | P2 | 3 | 0% | |
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
@@ -294,12 +293,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 **Execution plan (this round, design only).** Write `docs/winui-design.md` (mapping of every core kind and prop, tokens, layout vocabulary, bindings, events, slots, light and dark, losses, round trip, XML parser, CI job, open questions), `research.md` §23, and the sub-tasks below. The creator approved the design and accepted the recommendation of every open question in `docs/winui-design.md`, including a `roxmltree` row in the workspace `rust.md` when T105.8 adds the crate; T105.1 may start.
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
-
-### T105.4. WinUI containers
-
-`list` and `item`, `table`, `column`, `row` and `cell`, `tabs` and `tab`, `dialog` (the `Dialog.IsOpen` helper), `section`, `grid` without `min-column-width`, and the `header` and `actions` slots. SPEC §9 rows first. Split at claim time: `<each>` and the `empty` slots are T105.14. Done when their examples and corpus screens that need nothing else generate, match goldens, read back through the comment and from the XAML alone through `read_winui` with only the losses SPEC §9 lists, and build in the Windows `winui` job.
-
-**Execution plan.** 1. SPEC §9 "To WinUI": the rows of these kinds. 2. `crates/weft-winui/src/generate/containers.rs` (own module beside T105.3's `controls`): `section` a card-look `StackPanel` with the `region` landmark and the `header` slot row first; `dialog` a `ContentDialog` with `weft:Dialog.IsOpen` two-way and the `actions` slot row last, `modal` a marker; `grid` a `Grid` with `columns` star columns, children placed row by row, `gap` as `RowSpacing`/`ColumnSpacing`; `list` a `ListView SelectionMode="None"` of `ListViewItem`s (`ordered` a marker, `item` `on-press` through `On.Press`); `table` a `StackPanel` of a header `Grid` of `column` buttons and one `Grid` per `row` (`sort`, `selected` markers); `tabs` a `TabView` of `TabViewItem`s with `weft:Choice.Value` (after T105.3). 3. `Weft.cs`: `Dialog.IsOpen`, the new `Props` markers, `On` hooks for `ListViewItem`, `TabView` in `Choice`. 4. Reader: the fixed attributes these kinds write, `Dialog.IsOpen`, `Choice.Value` on `TabView`, table rows and cells. 5. Goldens (`PENDING` shrinks), a `containers` fixture for what no example covers, read-back tests; `moon run root:changed`, then the full check.
 
 ### T105.14. WinUI repetition
 
