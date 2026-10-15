@@ -7,6 +7,8 @@
 //! and the result is repaired until it validates in lenient mode.
 
 mod controls;
+mod layout;
+mod values;
 
 use roxmltree::{Node as Xml, ParsingOptions};
 use weft_core::{
@@ -20,6 +22,8 @@ use weft_import::{
 
 use crate::import::{ImportOptions, MAX_SOURCE_LENGTH, MAX_XML_NODES};
 use controls::{Conv, PRESENTATION, XAML};
+use indexmap::IndexMap;
+use weft_catalog::Token;
 
 /// Element nesting the parser is given: a Weft level is a few XAML levels at most (a property
 /// element, a template, a slot panel), and a debug build parses this deep within the reader stack.
@@ -76,6 +80,8 @@ fn read(source: &str, options: &ImportOptions<'_>) -> ImportResult {
     }
     let mut reader = Reader {
         catalog: options.catalog,
+        tokens: options.tokens,
+        consumed: vec![],
         losses: Losses::default(),
         ids: IdState::default(),
         elements: 0,
@@ -170,6 +176,9 @@ fn unreadable(mut diagnostics: Vec<Diagnostic>, message: &str) -> ImportResult {
 
 struct Reader<'a> {
     catalog: &'a Catalog,
+    tokens: &'a IndexMap<String, Token>,
+    /// Attributes of the current element's parent reads for its children (`align`, tracks).
+    consumed: Vec<&'static str>,
     losses: Losses,
     ids: IdState,
     elements: usize,
@@ -308,11 +317,14 @@ impl Reader<'_> {
             }
             return self.through(el, parent, parent_kind, depth, out);
         }
-        let Some((kind, structure)) = controls::kind_of(el) else {
+        let Some((mut kind, structure)) = controls::kind_of(el) else {
             let note = format!("`{tag}` is not a Weft kind; its content is read in its place");
             self.lose(LossKind::Kinds, parent, note);
             return self.through(el, parent, parent_kind, depth, out);
         };
+        if kind == "grid" && layout::stack_tracks(el).is_some() {
+            kind = "stack";
+        }
         self.elements += 1;
         let mut node = Node::new(kind);
         node.id = Some(self.id(explicit_id(el), kind, &name_hint(el), parent));
@@ -338,13 +350,20 @@ impl Reader<'_> {
         depth: usize,
         out: &mut Placed,
     ) {
+        // What the parent reads from its children is not read from what a wrapper holds.
+        let consumed = std::mem::take(&mut self.consumed);
         for child in elements(el) {
             self.element(child, parent, parent_kind, depth + 1, out);
         }
+        self.consumed = consumed;
     }
 
     fn attributes(&mut self, el: Xml<'_, '_>, node: &mut Node, here: &str) {
         let tag = el.tag_name().name();
+        // A `max-width` stretches its element, so the `Stretch` belongs to it.
+        let max_width = el
+            .attribute("MaxWidth")
+            .is_some_and(|v| v.contains(" Weft."));
         for a in el.attributes() {
             let (name, value) = (a.name(), a.value());
             let markup = value.starts_with('{') && !value.starts_with("{}");
@@ -363,13 +382,17 @@ impl Reader<'_> {
                     continue;
                 }
                 Some(_) if helper == Some(&"Props.") => {
-                    let (kind, what) = controls::loss_of(name, value);
-                    self.lose(kind, here, format!("`{name}` on `{tag}`: {what}"));
+                    let prop = controls::marker_prop(&name["Props.".len()..]);
+                    self.bound(el, node, (name, &prop, &Conv::Same), value, here);
+                    continue;
+                }
+                Some(_) if helper == Some(&"On.") => {
+                    let event = controls::marker_prop(&name["On.".len()..]);
+                    self.event(el, node, (name, &[event.as_str()]), value, here);
                     continue;
                 }
                 Some(_) if helper.is_some() => {
                     let kind = match helper {
-                        Some(&"On.") => LossKind::Actions,
                         Some(&"Each.") => LossKind::Repetition,
                         _ => LossKind::Bindings,
                     };
@@ -383,7 +406,22 @@ impl Reader<'_> {
                 }
                 None => {}
             }
-            if name == "AutomationProperties.AutomationId" || controls::expected(&node.kind, name) {
+            if name == "AutomationProperties.AutomationId"
+                || controls::expected(&node.kind, name)
+                || self.consumed.contains(&name)
+                || (name == "HorizontalAlignment" && value == "Stretch" && max_width)
+            {
+                continue;
+            }
+            if let Some(prop) = controls::token_of(&node.kind, name)
+                && self.token(node, (name, prop), value, here)
+            {
+                continue;
+            }
+            if let Some(events) = controls::events_of(name)
+                && value.starts_with("{x:Bind")
+            {
+                self.event(el, node, (name, events), value, here);
                 continue;
             }
             if let Some((_, _, prop, conv)) = controls::attr_of(&node.kind, name) {
@@ -399,6 +437,10 @@ impl Reader<'_> {
                 };
                 if let Some(raw) = raw {
                     self.set(node, prop, raw, here, name);
+                    continue;
+                }
+                if value.starts_with("{x:Bind") {
+                    self.bound(el, node, (name, prop, conv), value, here);
                     continue;
                 }
                 if !markup {
@@ -468,7 +510,27 @@ impl Reader<'_> {
             let mixed = matches!(content, Some(Content::Mixed));
             let kind = node.kind.clone();
             let mut placed = Placed::default();
-            for child in el.children() {
+            let tracks = (kind == "stack")
+                .then(|| layout::stack_tracks(el))
+                .flatten();
+            if let Some(t) = &tracks {
+                let direction = if t.along() == "Grid.Column" {
+                    "row"
+                } else {
+                    "column"
+                };
+                node.props
+                    .insert("direction".into(), Value::String(direction.into()));
+            }
+            let align = (kind == "stack").then(|| self.align(el, node)).flatten();
+            let consumed = align
+                .into_iter()
+                .chain(tracks.as_ref().map(layout::Tracks::along));
+            let outer = std::mem::replace(&mut self.consumed, consumed.collect());
+            if let Some(t) = &tracks {
+                self.tracks((el, t), node, here, depth, &mut placed);
+            }
+            for child in el.children().filter(|_| tracks.is_none()) {
                 if child.is_element() {
                     self.element(child, here, &kind, depth + 1, &mut placed);
                     continue;
@@ -484,6 +546,7 @@ impl Reader<'_> {
                     self.lose(LossKind::Text, here, note);
                 }
             }
+            self.consumed = outer;
             if node.kind == "grid" {
                 self.columns(el, node, here);
             }
