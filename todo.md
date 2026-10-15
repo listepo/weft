@@ -1,4 +1,5 @@
 - T8. Evaluation
+- T902. Flaky studio-windows smoke test
 - T14. Figma round trip and plugin
 - T69. Figma-like desktop design editor
 - T69.1. Editor skeleton
