@@ -12,7 +12,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T105.15 | todo | P2 | 4 | 0% | |
-| T105.10 | todo | P2 | 2 | 0% | |
+| T105.10 | in progress | P2 | 2 | 5% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -299,4 +299,6 @@ Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeD
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
 SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.
+
+**Execution plan.** (1) Audit SPEC §9 "To WinUI", "From WinUI" and its losses statement by statement against `crates/weft-winui/tests` and the goldens; add a test for each statement without one, and fix SPEC where it says less or more than the code. (2) The corpus-wide round trip both ways already runs over every covered screen (`generated_xaml_reads_back_to_the_same_document` through the comment, `generated_pages_read_back_without_their_comment` from the XAML alone); keep it and check that only the screens of T105.15 and the open gaps stay pending. (3) AGENT-SPEC: WinUI in the layout rule and an edited-XAML line beside the Slint one in §5, copied to the plugin copies; `bench/test/agent-spec.test.ts` passes. (4) `crates/weft-winui/README.md` in the shape of the SwiftUI and Slint READMEs: use, library, generated files, mapping summary pointing at SPEC §9, the hand-written reader, the Windows build. (5) `cargo test -p weft-winui --all-features`, the bench test, the full check, the Windows job.
 
