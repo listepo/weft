@@ -256,6 +256,22 @@ impl Reader<'_> {
             }
             return;
         }
+        // A text run of mixed content: the generator writes it without the AutomationId every
+        // `text` of the source carries.
+        let mixed = self.catalog.components.get(parent_kind).map(|d| &d.content);
+        if tag == "TextBlock"
+            && explicit_id(el).is_none()
+            && matches!(mixed, Some(Content::Mixed))
+            && let Some(text) = el.attribute("Text")
+            && (!text.starts_with('{') || text.starts_with("{}"))
+        {
+            let text = squash(text.strip_prefix("{}").unwrap_or(text));
+            if !text.is_empty() {
+                let text = literal(&mut self.losses, parent, &text);
+                out.children.push(Child::Text(text));
+            }
+            return;
+        }
         if let Some(loss) = controls::wrapper(el) {
             if let Some((kind, what)) = loss {
                 self.lose(kind, parent, format!("`{tag}`: {what}"));
@@ -321,14 +337,16 @@ impl Reader<'_> {
                 // `x:Name` stands in for a missing `AutomationId`; `x:Class` names the code-behind.
                 Some(XAML) if matches!(name, "Name" | "Class") => continue,
                 Some(ns) if DESIGN_TIME.contains(&ns) => continue,
-                Some(_) if helper == Some(&"Props.") && !markup => {
-                    let prop = controls::marker_prop(&name["Props.".len()..]);
-                    self.set(node, &prop, value, here, name);
-                    continue;
-                }
-                Some(_) if helper == Some(&"Props.") => {
-                    let prop = controls::marker_prop(&name["Props.".len()..]);
-                    self.bound(el, node, (name, &prop, &Conv::Same), value, here);
+                // A marker holds its prop as written; `Choice.Value` holds a choice's `value`.
+                Some(_) if helper == Some(&"Props.") || name == "Choice.Value" => {
+                    let prop = match name.strip_prefix("Props.") {
+                        Some(marker) => controls::marker_prop(marker),
+                        None => "value".to_owned(),
+                    };
+                    match markup {
+                        false => self.set(node, &prop, value, here, name),
+                        true => self.bound(el, node, (name, &prop, &Conv::Same), value, here),
+                    }
                     continue;
                 }
                 Some(_) if helper == Some(&"On.") => {
@@ -367,6 +385,17 @@ impl Reader<'_> {
                 && value.starts_with("{x:Bind")
             {
                 self.event(el, node, (name, events), value, here);
+                continue;
+            }
+            // An editable ComboBox puts an item's content in its text box, so an option there
+            // shows its value and keeps its text, if any, in the tooltip.
+            let editable = el
+                .parent_element()
+                .is_some_and(|p| p.attribute("IsEditable") == Some("True"));
+            if tag == "ComboBoxItem"
+                && name == "Content"
+                && (editable || el.attribute("ToolTipService.ToolTip").is_some())
+            {
                 continue;
             }
             if let Some((_, _, prop, conv)) = controls::attr_of(&node.kind, name) {

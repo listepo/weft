@@ -15,6 +15,8 @@ use crate::csharp::{self, command};
 use crate::data::{Data, Leaf, Read};
 use crate::xaml::{Element, boolean, literal, type_name};
 
+mod controls;
+
 /// The source comment's options start with this word; `import_winui` checks it.
 pub(crate) const TARGET: &str = "winui";
 
@@ -144,6 +146,7 @@ pub fn generate(
         data: Data::default(),
         problems: vec![],
         forms: vec![],
+        editable: false,
     };
     let panel = g.node(&expanded.root);
     let mut names = vec![];
@@ -210,6 +213,8 @@ struct Gen<'a> {
     problems: Vec<Unsupported>,
     /// The enclosing forms' submit commands, innermost last.
     forms: Vec<Option<String>>,
+    /// Inside a `combobox`, whose options show their value.
+    editable: bool,
 }
 
 impl Gen<'_> {
@@ -227,6 +232,7 @@ impl Gen<'_> {
         match node.props.get(prop)? {
             Value::String(s) if leaf == Leaf::Text => Some(literal(s)),
             Value::Bool(b) if leaf == Leaf::Flag => Some(boolean(*b).to_owned()),
+            Value::Number(n) if leaf == Leaf::Number => Some(js_number(*n)),
             Value::Bind { bind, not: false } => self.bound(&at, bind, Read::Is(leaf), two_way),
             // A negated binding is never two-way (SPEC §5.1), and x:Bind has no operators.
             Value::Bind { bind, not: true } if leaf == Leaf::Flag => self.call(&at, "Not", bind),
@@ -328,7 +334,8 @@ impl Gen<'_> {
     }
 
     fn node(&mut self, node: &Node) -> Option<Element> {
-        let Some(&(kind, control, props)) = KINDS.iter().find(|k| k.0 == node.kind) else {
+        let mut all = KINDS.iter().chain(controls::KINDS);
+        let Some(&(kind, control, props)) = all.find(|k| k.0 == node.kind) else {
             self.later(node, &format!("`{}`", node.kind));
             return None;
         };
@@ -373,7 +380,7 @@ impl Gen<'_> {
             "heading" => self.heading(&mut e, node),
             "button" => self.button(&mut e, node),
             "field" => self.field(&mut e, node, password),
-            _ => {
+            "checkbox" | "switch" => {
                 if let Some(v) = self.value(node, "checked", Leaf::Flag, true) {
                     e.attr(
                         if kind == "switch" {
@@ -386,11 +393,12 @@ impl Gen<'_> {
                 }
                 self.disabled(&mut e, node);
             }
+            _ => self.control(&mut e, node),
         }
         let label = match kind {
             "field" | "switch" => "Header",
             "checkbox" => "Content",
-            _ => "AutomationProperties.Name",
+            _ => controls::caption(node).unwrap_or("AutomationProperties.Name"),
         };
         self.set(&mut e, node, "label", label, Leaf::Text);
         let visibility = match node.props.get("hidden") {
@@ -427,8 +435,12 @@ impl Gen<'_> {
     }
 
     fn stack(&mut self, e: &mut Element, node: &Node) {
-        let row = self.word(node, "direction") == Some("row");
-        e.attr("Orientation", if row { "Horizontal" } else { "Vertical" });
+        // A `StackPanel` is vertical by default, so only a stated `direction` is written and
+        // read back.
+        if node.props.contains_key("direction") {
+            let row = self.word(node, "direction") == Some("row");
+            e.attr("Orientation", if row { "Horizontal" } else { "Vertical" });
+        }
         match node.props.get("gap") {
             None => {}
             Some(Value::Token(path)) => {

@@ -15,6 +15,8 @@ enum Function {
     Not,
     Truthy,
     Hide,
+    /// `Weft.Link` and `Weft.Image`, which keep only the addresses SPEC §9 Trust allows.
+    Address,
 }
 
 /// An `{x:Bind}` value: a Weft data path, read through a helper or not.
@@ -58,6 +60,7 @@ fn x_bind(el: Xml<'_, '_>, value: &str) -> Result<Bound, String> {
                 Some("Weft.Not") => Function::Not,
                 Some("Weft.Truthy") => Function::Truthy,
                 Some("Weft.Hide") => Function::Hide,
+                Some("Weft.Link" | "Weft.Image") => Function::Address,
                 _ => return Err(format!("`{}` is not a `Weft` helper", callee.trim())),
             };
             (Some(function), arg.trim())
@@ -185,10 +188,11 @@ impl Reader<'_> {
                 );
             }
         };
-        use Function::{Hide, Not, Truthy};
+        use Function::{Address, Hide, Not, Truthy};
         // `IsEnabled` and `Visibility` say the opposite of `disabled` and `hidden`.
         let not = match (conv, bound.function) {
             (Conv::Same, None | Some(Truthy)) | (Conv::Not, Some(Not)) => false,
+            (Conv::Same, Some(Address)) if matches!(attr, "NavigateUri" | "Source") => false,
             (Conv::Same, Some(Not)) | (Conv::Not, None | Some(Truthy)) => true,
             (Conv::Words(_), None) if prop == "hidden" => true,
             (Conv::Words(_), Some(Hide)) if prop == "hidden" => false,

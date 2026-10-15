@@ -1,0 +1,45 @@
+<screen id="values" label="Values" weft="0.2">
+  <select id="size" disabled="{$.locked}" label="{$.sizeLabel}" value="{$.size}" on-change="size.pick">
+    <option id="size-s" label="Small size" value="s">Small</option>
+    <option id="size-m" text="{$.medium}" value="m"/>
+    <option id="size-x" hidden="{$.noLarge}" value="{$.largeCode}">{Large}</option>
+  </select>
+  <combobox id="city" label="City" placeholder="{$.cityHint}" value="{$.city}" on-change="city.edit">
+    <option id="city-lisbon" value="Lisbon">Portugal</option>
+    <option id="city-oslo" value="Oslo"/>
+  </combobox>
+  <radio-group id="plan" label="Plan" value="free">
+    <radio id="plan-free" value="free">Free</radio>
+    <radio id="plan-pro" disabled="{!$.pro}" text="{$.proText}" value="pro"/>
+  </radio-group>
+  <segmented-control id="view" label="View" value="{$.view}" on-change="view.pick">
+    <segment id="view-day" disabled="true" value="day">Day</segment>
+    <segment id="view-week" label="Whole week" value="week">Week</segment>
+  </segmented-control>
+  <slider id="flipped" label="Flipped" max="5" min="1" step="0.5" value="2"/>
+  <slider id="open" label="Open" max="{$.top}" min="{$.bottom}" step="{$.stride}" value="{$.level}" on-change="level.set"/>
+  <slider id="above" label="Above" max="-5" min="{$.bottom}" value="{$.level}"/>
+  <stepper id="count" label="Count" max="8" min="2" step="2" value="{$.count}" on-change="count.set"/>
+  <stepper id="free" label="Free" value="3"/>
+  <link id="mail" href="mailto:help@example.com">Mail us</link>
+  <link id="relative" href="/help">Help</link>
+  <link id="script" href="javascript:alert(1)" label="Unsafe link">Unsafe</link>
+  <link id="bound" href="{$.site}" text="{$.siteName}" on-press="site.open"/>
+  <image id="photo" label="A photo" src="assets/photo.png"/>
+  <image id="hostile" label="Hostile" src="javascript:alert(1)"/>
+  <image id="remote" label="{$.photoLabel}" hidden="{!$.online}" src="{$.photo}"/>
+  <model id="chair" fallback="assets/chair.png" label="A chair" src="assets/chair.glb" usdz="assets/chair.usdz"/>
+  <model id="lamp" fallback="https://example.com/lamp.png" label="A lamp" src="assets/lamp.glb"/>
+  <alert id="info" label="Notice">Plain notice</alert>
+  <alert id="ok" text="{$.okText}" tone="success"/>
+  <alert id="warn" tone="warning">Check <link id="warn-link" on-press="warn.check">this</link> now</alert>
+  <alert id="bad" state="{$.badState}" tone="danger">
+    <heading id="bad-title" level="2">Failed</heading>
+  </alert>
+  <alert id="neutral" tone="info">Info</alert>
+  <menu id="more" label="{$.moreLabel}">
+    <menu-item id="more-open" on-press="doc.open">Open</menu-item>
+    <menu-item id="more-share" disabled="{!$.canShare}" label="Share the document" text="{$.shareText}" on-press="doc.share"/>
+    <menu-item id="more-gone" disabled="true" hidden="true">Gone</menu-item>
+  </menu>
+</screen>

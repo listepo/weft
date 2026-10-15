@@ -11,6 +11,7 @@ use crate::Unsupported;
 pub enum Leaf {
     Text,
     Flag,
+    Number,
 }
 
 impl Leaf {
@@ -18,6 +19,7 @@ impl Leaf {
         match self {
             Leaf::Text => "text",
             Leaf::Flag => "a flag",
+            Leaf::Number => "a number",
         }
     }
 }

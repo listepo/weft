@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleSlider namespace=WeftScreens
+<screen id="root" label="Sound" weft="0.1">
+  <slider id="volume" disabled="false" label="Volume" max="100" min="0" step="5" value="{$.volume}" on-change="sound.update"/>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleSliderPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Sound">
+            <Slider AutomationProperties.AutomationId="volume" Minimum="0" Maximum="100" StepFrequency="5" Value="{x:Bind ViewModel.volume, Mode=TwoWay}" IsEnabled="True" Header="Volume" weft:On.Change="{x:Bind ViewModel.sound_updateCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -61,9 +61,9 @@ Targets: Windows App SDK 2.5.1 (stable) and .NET 10 (LTS); C# only. The XAML use
 | `section` | `Border` (card background, corner radius, padding) → `StackPanel` | `label` → `AutomationProperties.Name`, `LandmarkType="Custom"`, `LocalizedLandmarkType="region"`; the `header` slot is the first child |
 | `heading` | `TextBlock` | `level` → `Style` from the type ramp (1 `TitleLargeTextBlockStyle`, 2 `TitleTextBlockStyle`, 3 `SubtitleTextBlockStyle`, 4–6 `BodyStrongTextBlockStyle`) and `AutomationProperties.HeadingLevel="Level<n>"` |
 | `text` | `TextBlock` with `TextWrapping="Wrap"` | `tone` → `Foreground` from theme brushes (`muted` secondary text, `success`/`warning`/`danger` the system status brushes; names **unverified**) |
-| `image` | `Image` | `src` → `Source`; `label` → `AutomationProperties.Name` |
+| `image` | `Image` | `src` → `Source` (SPEC §9 Trust: a literal of another scheme is a marker; a binding goes through `Weft.Image`, which loads only `http`, `https` and package paths); `label` → `AutomationProperties.Name` |
 | `model` | `Image` of the `fallback` | `src` and `usdz` → marker (WinUI has no 3D viewer); a `kinds` loss on reading back without the comment |
-| `link` | `HyperlinkButton` | `href` → `NavigateUri` only for `https`, `http`, `mailto` (otherwise a marker); `on-press` → event |
+| `link` | `HyperlinkButton` | `href` → `NavigateUri` only for `https`, `http`, `mailto` (otherwise a marker; a binding through `Weft.Link`, which applies the same rule); `on-press` → event |
 | `button` | `Button` | `variant="primary"` → `Style="{StaticResource AccentButtonStyle}"` (**unverified** key); `danger` → marker; `disabled` → `IsEnabled` (negated); `submit` → presses the form's submit event; `state` → marker |
 | `form` | `StackPanel` | `label` → `LandmarkType="Form"`; the `footer` slot is a row `StackPanel` at the end; Enter in a field submits through the `On.Submit` helper |
 | `field` | `TextBox`; `PasswordBox` for `type="password"` | `label` → `Header`; `value` → `Text` (`Password`) two-way; `placeholder` → `PlaceholderText`; `type` → `InputScope` (`email` → `EmailSmtpAddress`, `number` → `Number`, `search` → `Search`), `multiline` → `AcceptsReturn="True"` and `TextWrapping="Wrap"`; `required` → `AutomationProperties.IsRequiredForForm`; `disabled` → `IsEnabled`; `error` → marker |
@@ -71,8 +71,8 @@ Targets: Windows App SDK 2.5.1 (stable) and .NET 10 (LTS); C# only. The XAML use
 | `switch` | `ToggleSwitch` | `label` → `Header`; `checked` → `IsOn` two-way |
 | `radio-group`, `radio` | `RadioButtons` with `RadioButton` items (`Tag` = `value`) | `label` → `Header`; `value` → `weft:Choice.Value` two-way (`RadioButtons` has no value property, only `SelectedIndex` and `SelectedItem`) |
 | `segmented-control`, `segment` | `SelectorBar` with `SelectorBarItem` items (`Tag` = `value`) | `value` → `weft:Choice.Value`; `label` → `AutomationProperties.Name` (a selector bar has no header) |
-| `select`, `option` | `ComboBox` with `ComboBoxItem` items (`Tag` = `value`, `Content` = text) | `label` → `Header`; `SelectedValuePath="Tag"`; `value` → `SelectedValue` two-way |
-| `combobox` | `ComboBox IsEditable="True"` | `label` → `Header`; `value` → `Text` two-way; `placeholder` → `PlaceholderText` |
+| `select`, `option` | `ComboBox` with `ComboBoxItem` items (`Tag` = `value`, `Content` = text) | `label` → `Header`; `value` → `weft:Choice.Value` two-way (built: `SelectedValue` cannot tell a user's choice from a value the view model writes, which SPEC §9 requires for `change`) |
+| `combobox` | `ComboBox IsEditable="True"` with `ComboBoxItem` items (`Content` and `Tag` = `value`, the text the box takes when an item is chosen; the option's text → `ToolTipService.ToolTip`) | `label` → `Header`; `value` → `weft:Choice.Value` two-way (the box's `Text`); `placeholder` → `PlaceholderText` |
 | `slider` | `Slider` | `label` → `Header`; `min`/`max` → `Minimum`/`Maximum` (a `max` below `min` written as `min`); `step` → `StepFrequency`; `value` → `Value` two-way |
 | `stepper` | `NumberBox SpinButtonPlacementMode="Inline"` | `label` → `Header`; `min`/`max` → `Minimum`/`Maximum`; `step` → `SmallChange`; `value` → `Value` two-way |
 | `date-picker` | `CalendarDatePicker` (`date`), `TimePicker` (`time`), both in a row `StackPanel` (`datetime`) | `value` → `Date` or `Time` through `Weft` converter functions with `BindBack`, so the model keeps SPEC §5.1's text; `min`/`max` → `MinDate`/`MaxDate` for dates, a marker for times |

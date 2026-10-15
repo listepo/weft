@@ -1,0 +1,244 @@
+//! The value, choice and content controls (T105.3): every choice whose WinUI control holds its
+//! value as a selection goes through the `weft:Choice.Value` helper of `Weft.cs`, and the number
+//! literals are written as `weft_core::controls` reads them, so a literal screen shows what every
+//! other target shows.
+
+use weft_core::controls::{slider_span, stepper_bounds};
+use weft_core::{Child, Node, Value, js_number, safe_absolute_url, safe_url};
+
+use super::{Gen, path_of};
+use crate::data::{Leaf, Read};
+use crate::xaml::{Element, literal};
+
+/// The kinds of this module, as `generate::KINDS`: kind, WinUI element, props besides the common.
+pub(super) const KINDS: &[(&str, &str, &str)] = &[
+    ("select", "ComboBox", "value disabled"),
+    ("combobox", "ComboBox", "value placeholder disabled"),
+    ("option", "ComboBoxItem", "value text"),
+    ("radio-group", "RadioButtons", "value"),
+    ("radio", "RadioButton", "value disabled text"),
+    ("segmented-control", "SelectorBar", "value"),
+    ("segment", "SelectorBarItem", "value disabled text"),
+    ("slider", "Slider", "value min max step disabled"),
+    ("stepper", "NumberBox", "value min max step disabled"),
+    ("link", "HyperlinkButton", "href text"),
+    ("image", "Image", "src"),
+    ("model", "Image", "src usdz fallback"),
+    ("alert", "InfoBar", "tone text"),
+    ("menu", "DropDownButton", ""),
+    ("menu-item", "MenuFlyoutItem", "disabled text"),
+];
+
+/// The attribute that shows a caption `label`, where it is not `AutomationProperties.Name`.
+pub(super) fn caption(node: &Node) -> Option<&'static str> {
+    match node.kind.as_str() {
+        "select" | "combobox" | "radio-group" | "slider" | "stepper" => Some("Header"),
+        _ => None,
+    }
+}
+
+impl Gen<'_> {
+    pub(super) fn control(&mut self, e: &mut Element, node: &Node) {
+        match node.kind.as_str() {
+            "select" | "combobox" => {
+                let editable = node.kind == "combobox";
+                if editable {
+                    e.attr("IsEditable", "True");
+                    self.set(e, node, "placeholder", "PlaceholderText", Leaf::Text);
+                }
+                self.choice(e, node);
+                self.disabled(e, node);
+                let outer = std::mem::replace(&mut self.editable, editable);
+                self.children(e, &node.children);
+                self.editable = outer;
+            }
+            "option" => {
+                // A combobox writes the chosen item's text into its box, so its item shows the
+                // value and keeps the option's own text as a tooltip.
+                let shown = if self.editable {
+                    self.set(e, node, "value", "Content", Leaf::Text);
+                    "ToolTipService.ToolTip"
+                } else {
+                    "Content"
+                };
+                self.content(e, node, shown);
+                self.set(e, node, "value", "Tag", Leaf::Text);
+            }
+            "radio-group" | "segmented-control" => {
+                self.choice(e, node);
+                self.children(e, &node.children);
+            }
+            "radio" | "segment" => {
+                let text = if node.kind == "radio" {
+                    "Content"
+                } else {
+                    "Text"
+                };
+                self.content(e, node, text);
+                self.set(e, node, "value", "Tag", Leaf::Text);
+                self.disabled(e, node);
+            }
+            "slider" | "stepper" => self.number(e, node),
+            "link" => {
+                self.content(e, node, "Content");
+                self.href(e, node);
+            }
+            "image" => self.source(e, node, "src", true),
+            "model" => {
+                self.source(e, node, "fallback", false);
+                self.marker(e, node, "src", "Src");
+                self.marker(e, node, "usdz", "Usdz");
+            }
+            "alert" => self.alert(e, node),
+            "menu" => {
+                self.set(e, node, "label", "Content", Leaf::Text);
+                let mut flyout = Element::new("MenuFlyout");
+                self.children(&mut flyout, &node.children);
+                e.children.push(property("DropDownButton.Flyout", flyout));
+            }
+            "menu-item" => {
+                self.content(e, node, "Text");
+                self.disabled(e, node);
+            }
+            _ => {}
+        }
+    }
+
+    /// `weft:Choice.Value`, two-way: the helper turns the text into the control's selection.
+    fn choice(&mut self, e: &mut Element, node: &Node) {
+        if let Some(v) = self.value(node, "value", Leaf::Text, true) {
+            e.attr("weft:Choice.Value", v);
+        }
+    }
+
+    fn number(&mut self, e: &mut Element, node: &Node) {
+        let slider = node.kind == "slider";
+        if !slider {
+            e.attr("SpinButtonPlacementMode", "Inline");
+        }
+        let lit = |p: &str| match node.props.get(p) {
+            Some(Value::Number(n)) => Some(*n),
+            _ => None,
+        };
+        let (lo, hi, step) = if slider {
+            let s = slider_span(lit("min"), lit("max"), lit("step"));
+            // A bound `min` is not known here, so a literal `max` is raised only to a literal one.
+            let bound = matches!(node.props.get("min"), Some(Value::Bind { .. }));
+            (
+                Some(s.min),
+                if bound { lit("max") } else { Some(s.max) },
+                s.step,
+            )
+        } else {
+            let b = stepper_bounds(lit("min"), lit("max"), lit("step"));
+            (b.min, b.max, b.step)
+        };
+        let step_attr = if slider {
+            "StepFrequency"
+        } else {
+            "SmallChange"
+        };
+        for (prop, xaml, fixed) in [
+            ("min", "Minimum", lo),
+            ("max", "Maximum", hi),
+            ("step", step_attr, Some(step)),
+        ] {
+            match (node.props.get(prop), fixed) {
+                (Some(Value::Number(_)), Some(n)) => e.attr(xaml, js_number(n)),
+                (Some(_), _) => self.set(e, node, prop, xaml, Leaf::Number),
+                _ => {}
+            }
+        }
+        if let Some(v) = self.value(node, "value", Leaf::Number, true) {
+            e.attr("Value", v);
+        }
+        self.disabled(e, node);
+    }
+
+    /// SPEC §9 Trust: only `http`, `https` and `mailto` open; any other literal is kept inert.
+    fn href(&mut self, e: &mut Element, node: &Node) {
+        match node.props.get("href") {
+            Some(Value::String(s)) => match safe_absolute_url(s) {
+                Some(url) => e.attr("NavigateUri", url),
+                None => self.marker(e, node, "href", "Href"),
+            },
+            Some(Value::Bind { bind, not: false }) => {
+                if let Some(p) = self.helper(node, bind) {
+                    e.attr(
+                        "NavigateUri",
+                        format!("{{x:Bind weft:Weft.Link({p}), Mode=OneWay}}"),
+                    );
+                }
+            }
+            Some(_) => self.refuse(node, "`href` has no WinUI form here"),
+            None => {}
+        }
+    }
+
+    /// An image address: a literal one only when SPEC §9 Trust allows it, a bound one through
+    /// `Weft.Image`, which applies the same rule when the app runs.
+    fn source(&mut self, e: &mut Element, node: &Node, prop: &str, bindable: bool) {
+        match node.props.get(prop) {
+            Some(Value::String(s)) => match safe_url(s) {
+                Some(url) => e.attr("Source", literal(&url)),
+                None => self.marker(e, node, prop, "Src"),
+            },
+            Some(Value::Bind { bind, not: false }) if bindable => {
+                if let Some(p) = self.helper(node, bind) {
+                    e.attr(
+                        "Source",
+                        format!("{{x:Bind weft:Weft.Image({p}), Mode=OneWay}}"),
+                    );
+                }
+            }
+            Some(_) => self.refuse(node, format!("`{prop}` has no WinUI form here")),
+            None => {}
+        }
+    }
+
+    /// A path a `Weft` function reads as text.
+    fn helper(&mut self, node: &Node, bind: &str) -> Option<String> {
+        let at = path_of(node);
+        self.data
+            .read(bind, Read::Like(Leaf::Text), &at, &mut self.problems)
+    }
+
+    fn alert(&mut self, e: &mut Element, node: &Node) {
+        e.attr("IsOpen", "True");
+        e.attr("IsClosable", "False");
+        let severity = match self.word(node, "tone") {
+            Some("success") => Some("Success"),
+            Some("warning") => Some("Warning"),
+            Some("danger") => Some("Error"),
+            Some(_) => Some("Informational"),
+            None => None,
+        };
+        if let Some(s) = severity {
+            e.attr("Severity", s);
+        }
+        if !node.children.iter().any(|c| matches!(c, Child::Node(_))) {
+            return self.content(e, node, "Message");
+        }
+        let mut body = Element::new("StackPanel");
+        for child in &node.children {
+            match child {
+                Child::Node(n) => body.children.extend(self.node(n)),
+                Child::Text(t) if t.trim().is_empty() => {}
+                Child::Text(t) => {
+                    let mut run = Element::new("TextBlock");
+                    run.attr("TextWrapping", "Wrap");
+                    run.attr("Text", literal(t));
+                    body.children.push(run);
+                }
+            }
+        }
+        e.children.push(body);
+    }
+}
+
+/// A property element, such as `<DropDownButton.Flyout>`, holding `value`.
+fn property(name: &'static str, value: Element) -> Element {
+    let mut property = Element::new(name);
+    property.children.push(value);
+    property
+}

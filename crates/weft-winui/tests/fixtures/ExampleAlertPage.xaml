@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleAlert namespace=WeftScreens
+<screen id="root" label="Payment" weft="0.1">
+  <alert id="failed" tone="danger">
+    <text id="failed-text">Your card was declined.</text>
+    <link id="retry" on-press="payment.retry">Try again</link>
+  </alert>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleAlertPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Payment">
+            <InfoBar AutomationProperties.AutomationId="failed" IsOpen="True" IsClosable="False" Severity="Error">
+                <StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="failed-text" TextWrapping="Wrap" Text="Your card was declined." />
+                    <HyperlinkButton AutomationProperties.AutomationId="retry" Content="Try again" weft:On.Press="{x:Bind ViewModel.payment_retryCommand}" />
+                </StackPanel>
+            </InfoBar>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

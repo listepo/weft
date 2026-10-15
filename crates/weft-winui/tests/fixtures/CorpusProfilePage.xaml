@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusProfile namespace=WeftScreens
+<screen id="profile" label="Profile" weft="0.1">
+  <image id="avatar" label="Profile photo" src="{$.user.avatar}"/>
+  <heading id="name" level="1" text="{$.user.name}"/>
+  <text id="bio" text="{$.user.bio}"/>
+  <heading id="links-title" level="2">Links</heading>
+  <stack id="links" direction="row" gap="{token.space.md}">
+    <link id="website" href="{$.user.website}">Website</link>
+    <link id="github" href="{$.user.github}">GitHub</link>
+  </stack>
+  <button id="edit" on-press="profile.edit">Edit profile</button>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusProfilePage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="profile" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Profile">
+            <Image AutomationProperties.AutomationId="avatar" Source="{x:Bind weft:Weft.Image(ViewModel.user.avatar), Mode=OneWay}" AutomationProperties.Name="Profile photo" />
+            <TextBlock AutomationProperties.AutomationId="name" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="{x:Bind ViewModel.user.name, Mode=OneWay}" />
+            <TextBlock AutomationProperties.AutomationId="bio" TextWrapping="Wrap" Text="{x:Bind ViewModel.user.bio, Mode=OneWay}" />
+            <TextBlock AutomationProperties.AutomationId="links-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Links" />
+            <StackPanel AutomationProperties.AutomationId="links" Orientation="Horizontal" Spacing="{StaticResource Weft.space.md}">
+                <HyperlinkButton AutomationProperties.AutomationId="website" Content="Website" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.user.website), Mode=OneWay}" />
+                <HyperlinkButton AutomationProperties.AutomationId="github" Content="GitHub" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.user.github), Mode=OneWay}" />
+            </StackPanel>
+            <Button AutomationProperties.AutomationId="edit" Content="Edit profile" weft:On.Press="{x:Bind ViewModel.profile_editCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>
