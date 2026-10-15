@@ -4,6 +4,7 @@ projects:
   - 'plugins/*'
   - 'bench'
   - 'tooling'
+  - 'studio'
   - 'moon.yml'
 
 # Matches the moon pin in mise.toml.

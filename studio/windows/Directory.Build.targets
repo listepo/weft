@@ -1,0 +1,12 @@
+<Project>
+  <!-- One Rust library carries the ws_* editor and slint-bindings' sb_* surface (T69.1); Cargo
+       builds it when the app or the tests build, so a checkout needs no separate step. -->
+  <Target Name="BuildWeftStudioFfi" BeforeTargets="BeforeBuild" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Exec Command="cargo rustc -p weft-studio-ffi --crate-type cdylib --target $(WeftTargetTriple) $(WeftCargoFlags)"
+          WorkingDirectory="$(WeftRepoRoot)" />
+  </Target>
+
+  <Target Name="CopyWeftStudioFfi" AfterTargets="Build">
+    <Copy SourceFiles="$(WeftNativeDll)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>
