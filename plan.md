@@ -13,7 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T105.5 | todo | P2 | 4 | 0% | |
 | T105.10 | todo | P2 | 2 | 0% | |
-| T105.13 | in progress | P2 | 3 | 10% | Claude Code / claude-opus-5-5 |
 
 ### T8. Evaluation
 
@@ -301,13 +300,3 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.
 
-### T105.13. WinUI date and colour pickers
-
-Split from T105.3 to keep it under 500 lines of code. `date-picker` (`CalendarDatePicker`, `TimePicker`, and a horizontal `StackPanel` of both for `datetime`) and `color-picker` (a `DropDownButton` swatch whose `Flyout` holds a `ColorPicker` without alpha), with `Choice.Value` cases for them, the converter functions `Weft.Day/DayText/Clock/ClockText/Color/Hex/Swatch/Earliest/Latest`, the `Props.Min`/`Props.Max` markers, the SPEC §9 and `docs/winui-design.md` rows, and the hand-written reader reading the `datetime` row and the colour button back. The pre-split implementation, with goldens, tests and the reader cases, is commit `e47549f6` on branch `claude/t105-13-winui-date-colour`: rebase it onto `main` after T105.3 and keep only these parts. About 230 lines of code. Done when `example-date-picker` and `example-color-picker` join the covered screens, the `values` fixture has the pickers back, and their goldens match and read back.
-
-Execution plan:
-
-1. Port the picker parts of `e47549f6` onto `main`: `KINDS` rows, `controls::element`, `caption`, `date`, `bounds` and `color` in `src/generate/controls.rs`; the element choice in `src/generate.rs`; in `src/Weft.cs` the converters `Day/DayText/Clock/ClockText/Color/Hex/Swatch/Earliest/Latest`, the `Props.Min`/`Max` markers, and the `Choice.Value` and `On` cases.
-2. Reader: the `datetime` row and the colour button read back as `date-picker` and `color-picker` (`src/read/`).
-3. Tests: `example-date-picker` and `example-color-picker` join the covered screens with their goldens; the `values` fixture gets its pickers back; `tests/winui.rs` and `tests/read.rs` cases for literal, bound and invalid values and bounds.
-4. SPEC §9 and `docs/winui-design.md` rows; `moon run root:changed`, the full check under the lock, the `winui` Windows job builds the goldens.
