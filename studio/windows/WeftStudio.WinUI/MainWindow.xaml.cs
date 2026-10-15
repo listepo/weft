@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using Microsoft.UI.Xaml.Input;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -24,6 +26,18 @@ public sealed partial class MainWindow : Window
             Surface.Child = null;
             _document.Dispose();
         };
+        if (Environment.GetEnvironmentVariable("WEFT_PROBE_LOG") is { } log)
+        {
+            Probe = m => File.AppendAllText(log, $"{DateTime.Now:HH:mm:ss.fff} {m}\n");
+            string Focused() => Content.XamlRoot is { } root ? FocusManager.GetFocusedElement(root)?.GetType().Name ?? "null" : "no root";
+            Root.AddHandler(UIElement.PreviewKeyDownEvent, new KeyEventHandler((_, e) => Probe($"PreviewKeyDown {e.Key} handled {e.Handled} src {e.OriginalSource?.GetType().Name} focus {Focused()}")), true);
+            Root.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler((_, e) => Probe($"KeyDown {e.Key} handled {e.Handled} src {e.OriginalSource?.GetType().Name} focus {Focused()}")), true);
+            Root.ProcessKeyboardAccelerators += (_, e) => Probe($"ProcessKeyboardAccelerators {e.Modifiers}+{e.Key} handled {e.Handled}");
+            Root.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler((_, e) => Probe($"PointerPressed handled {e.Handled} src {e.OriginalSource?.GetType().Name} focus {Focused()}")), true);
+            Root.GotFocus += (_, e) => Probe($"GotFocus {e.OriginalSource?.GetType().Name}");
+            Root.LostFocus += (_, e) => Probe($"LostFocus {e.OriginalSource?.GetType().Name}");
+            Activated += (_, e) => Probe($"Activated {e.WindowActivationState} focus {Focused()}");
+        }
         if (screen is not null)
             Root.Loaded += async (_, _) => await Opened(_document.Open(screen));
     }
@@ -32,7 +46,13 @@ public sealed partial class MainWindow : Window
 
     private async void OnSave(object sender, RoutedEventArgs e) => await Saved(await _document.SaveAsync());
 
-    private async void OnSaveAs(object sender, RoutedEventArgs e) => await Saved(await _document.SaveAsAsync());
+    private Action<string> Probe = _ => { };
+
+    private async void OnSaveAs(object sender, RoutedEventArgs e)
+    {
+        Probe("OnSaveAs");
+        await Saved(await _document.SaveAsAsync());
+    }
 
     private async Task Opened(bool opened)
     {

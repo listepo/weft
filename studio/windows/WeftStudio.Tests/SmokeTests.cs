@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Input;
@@ -29,6 +30,8 @@ public sealed class SmokeTests
         var screen = Paths.Corpus("login");
         var copy = scratch.File("copy.weft");
         var start = new ProcessStartInfo(Paths.App()) { ArgumentList = { screen, "--pick", copy } };
+        var probeLog = scratch.File("probe.log");
+        start.Environment["WEFT_PROBE_LOG"] = probeLog;
         using var app = FlaUI.Core.Application.Launch(start);
         using var automation = new UIA3Automation();
         try
@@ -48,17 +51,20 @@ public sealed class SmokeTests
             // Focus the panel as a user does, so the accelerator has to get past the surface.
             var panel = window.BoundingRectangle;
             Mouse.Click(new System.Drawing.Point(panel.Left + 24, menu.BoundingRectangle.Bottom + 24));
-            var focused = Safe(() => { var f = automation.FocusedElement(); return $"{f.ControlType}:{f.Name}:{f.ClassName}:{f.AutomationId}"; });
+            var focused = "not read";
             var shownToKeys = shown.ElapsedMilliseconds;
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_S);
             var ok = Retry.WhileFalse(() => window.Title == "copy.weft", TimeSpan.FromSeconds(10)).Result;
             var second = "n/a";
             if (!ok)
             {
-                var focused2 = Safe(() => { var f = automation.FocusedElement(); return $"{f.ControlType}:{f.Name}:{f.ClassName}:{f.AutomationId}"; });
+                var focused2 = "not read";
                 Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_S);
                 second = $"{Retry.WhileFalse(() => window.Title == "copy.weft", TimeSpan.FromSeconds(10)).Result} (focus then {focused2})";
             }
+            Thread.Sleep(500);
+            var appLog = File.Exists(probeLog) ? File.ReadAllText(probeLog).Replace("\n", " ; ") : "no log";
+            if (ok) Assert.Fail($"PROBE PASS log: {appLog}");
             Console.WriteLine($"PROBE first {ok} shown-to-keys {shownToKeys} ms focus {focused} second {second}");
             if (!ok)
             {
@@ -67,7 +73,7 @@ public sealed class SmokeTests
                 var windows = string.Join(" / ", app.GetAllTopLevelWindows(automation).Select(w => Safe(() => w.Title)));
                 using var shot = Capture.Element(window);
                 shot.ToFile(Path.Combine(Paths.RepoRoot, "target", "weft-studio-windows.png"));
-                Assert.Fail($"PROBE MISS shown-to-keys {shownToKeys} ms focus-before {focused} second-keystroke {second} title {window.Title} | fg {Native.Describe(Native.Foreground())} app {Native.Describe(hwnd)} focus {Native.Describe(Native.Focus(hwnd))} | copy exists {File.Exists(copy)} | windows: {windows} | tree: {texts}");
+                Assert.Fail($"PROBE MISS log: {appLog} | shown-to-keys {shownToKeys} ms focus-before {focused} second-keystroke {second} title {window.Title} | fg {Native.Describe(Native.Foreground())} app {Native.Describe(hwnd)} focus {Native.Describe(Native.Focus(hwnd))} | copy exists {File.Exists(copy)} | windows: {windows} | tree: {texts}");
             }
             CollectionAssert.AreEqual(File.ReadAllBytes(screen), File.ReadAllBytes(copy));
         }
