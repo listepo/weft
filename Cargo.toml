@@ -17,6 +17,7 @@ weft-catalog = { path = "crates/weft-catalog" }
 weft-import = { path = "crates/weft-import" }
 weft-interop = { path = "crates/weft-interop" }
 weft-slint = { path = "crates/weft-slint" }
+weft-studio = { path = "crates/weft-studio" }
 weft-swiftui = { path = "crates/weft-swiftui" }
 weft-web = { path = "crates/weft-web" }
 weft-winui = { path = "crates/weft-winui" }
@@ -70,6 +71,15 @@ png = "0.18.1"
 # weft-slint: the syntax tree for the importer (`import` feature). Same 1.18 line, no renderer
 # and no backend (the crate's default features are empty).
 i-slint-compiler = { version = "1.18.1", default-features = false }
+# weft-studio-ffi: the host-driven Slint surface and its `sb_*` C ABI (T69.1). A git dependency pinned
+# by `rev`, the only pin: slint-bindings is not published, and its Swift package and WinUI control
+# come from the checkout Cargo makes of the same commit. Its exact `=1.18.1` Slint pins must match ours.
+slint-bindings-ffi = { git = "https://github.com/pyrlyn/slint-bindings", rev = "8971685e01fee6776e5121dffb13e3eb43709437" }
+# tests: weft-studio-ffi, the committed C header and C# bindings against what cbindgen and csbindgen
+# generate. The library APIs only, the versions abi-drift uses.
+abi-drift = "0.1.0"
+cbindgen = { version = "0.29.4", default-features = false }
+csbindgen = "1.9.8"
 # weft-wasm. Exact: the generated glue only loads with the wasm-bindgen CLI of the same version,
 # which mise pins.
 wasm-bindgen = "=0.2.129"
