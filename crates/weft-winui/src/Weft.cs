@@ -178,6 +178,7 @@ public static class Props
     public static readonly DependencyProperty ErrorProperty = Weft.Marker("Error", typeof(Props));
     public static readonly DependencyProperty VariantProperty = Weft.Marker("Variant", typeof(Props));
     public static readonly DependencyProperty WrapProperty = Weft.Marker("Wrap", typeof(Props));
+    public static readonly DependencyProperty JustifyProperty = Weft.Marker("Justify", typeof(Props));
     public static readonly DependencyProperty HrefProperty = Weft.Marker("Href", typeof(Props));
     public static readonly DependencyProperty SrcProperty = Weft.Marker("Src", typeof(Props));
     public static readonly DependencyProperty UsdzProperty = Weft.Marker("Usdz", typeof(Props));
@@ -196,6 +197,8 @@ public static class Props
     public static void SetVariant(DependencyObject o, object? value) => o.SetValue(VariantProperty, value);
     public static object? GetWrap(DependencyObject o) => o.GetValue(WrapProperty);
     public static void SetWrap(DependencyObject o, object? value) => o.SetValue(WrapProperty, value);
+    public static object? GetJustify(DependencyObject o) => o.GetValue(JustifyProperty);
+    public static void SetJustify(DependencyObject o, object? value) => o.SetValue(JustifyProperty, value);
     public static object? GetHref(DependencyObject o) => o.GetValue(HrefProperty);
     public static void SetHref(DependencyObject o, object? value) => o.SetValue(HrefProperty, value);
     public static object? GetSrc(DependencyObject o) => o.GetValue(SrcProperty);
@@ -214,6 +217,78 @@ public static class Props
     public static void SetMin(DependencyObject o, object? value) => o.SetValue(MinProperty, value);
     public static object? GetMax(DependencyObject o) => o.GetValue(MaxProperty);
     public static void SetMax(DependencyObject o, object? value) => o.SetValue(MaxProperty, value);
+}
+
+/// <summary>A <c>grid</c> with <c>min-column-width</c> (SPEC §5.1): at most <c>Columns</c> equal
+/// columns, as many as fit at <c>MinColumnWidth</c> each, its children filling them row by row.
+/// No built-in panel drops columns as it narrows, so this measures them itself.</summary>
+public sealed class ColumnsPanel : Panel
+{
+    public static readonly DependencyProperty ColumnsProperty = Layout(nameof(Columns), typeof(int), 1);
+    public static readonly DependencyProperty MinColumnWidthProperty = Layout(nameof(MinColumnWidth), typeof(double), 0.0);
+    public static readonly DependencyProperty SpacingProperty = Layout(nameof(Spacing), typeof(double), 0.0);
+    public static readonly DependencyProperty PaddingProperty = Layout(nameof(Padding), typeof(Thickness), new Thickness(0));
+
+    public int Columns { get => (int)GetValue(ColumnsProperty); set => SetValue(ColumnsProperty, value); }
+    public double MinColumnWidth { get => (double)GetValue(MinColumnWidthProperty); set => SetValue(MinColumnWidthProperty, value); }
+    public double Spacing { get => (double)GetValue(SpacingProperty); set => SetValue(SpacingProperty, value); }
+    public Thickness Padding { get => (Thickness)GetValue(PaddingProperty); set => SetValue(PaddingProperty, value); }
+
+    static DependencyProperty Layout(string name, Type type, object value) =>
+        DependencyProperty.Register(name, type, typeof(ColumnsPanel),
+            new PropertyMetadata(value, (o, _) => ((ColumnsPanel)o).InvalidateMeasure()));
+
+    double width;
+    int count = 1;
+
+    protected override Windows.Foundation.Size MeasureOverride(Windows.Foundation.Size available)
+    {
+        var p = Padding;
+        var inner = available.Width - p.Left - p.Right;
+        var most = Math.Max(1, Columns);
+        // Unbounded width, as in a horizontal scroller, has room for every column.
+        count = double.IsInfinity(inner)
+            ? most
+            : Math.Clamp((int)((inner + Spacing) / (MinColumnWidth + Spacing)), 1, most);
+        width = double.IsInfinity(inner)
+            ? MinColumnWidth
+            : Math.Max(0, (inner - Spacing * (count - 1)) / count);
+        var height = 0.0;
+        var widest = 0.0;
+        foreach (var row in Rows())
+        {
+            var tallest = 0.0;
+            foreach (var child in row)
+            {
+                child.Measure(new Windows.Foundation.Size(width, double.PositiveInfinity));
+                tallest = Math.Max(tallest, child.DesiredSize.Height);
+                widest = Math.Max(widest, child.DesiredSize.Width);
+            }
+            height += tallest + (height > 0 ? Spacing : 0);
+        }
+        var across = double.IsInfinity(inner) ? count * widest + Spacing * (count - 1) : inner;
+        return new Windows.Foundation.Size(across + p.Left + p.Right, height + p.Top + p.Bottom);
+    }
+
+    protected override Windows.Foundation.Size ArrangeOverride(Windows.Foundation.Size final)
+    {
+        var p = Padding;
+        var y = p.Top;
+        foreach (var row in Rows())
+        {
+            var tallest = row.Max(c => c.DesiredSize.Height);
+            for (var i = 0; i < row.Count; i++)
+            {
+                var x = p.Left + i * (width + Spacing);
+                row[i].Arrange(new Windows.Foundation.Rect(x, y, width, tallest));
+            }
+            y += tallest + Spacing;
+        }
+        return final;
+    }
+
+    IEnumerable<List<UIElement>> Rows() =>
+        Children.Select((c, i) => (c, i)).GroupBy(t => t.i / count, t => t.c).Select(g => g.ToList());
 }
 
 /// <summary>The text value of a control whose own property holds something else (SPEC §9, To

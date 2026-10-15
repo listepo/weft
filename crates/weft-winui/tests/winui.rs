@@ -295,17 +295,23 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
             r#"<select id="sel" label="S" value="{$.v}"><each id="e" as="o" in="{$.os}"><option id="o" value="{$o.v}">O</option></each></select>"#,
             "each#e",
         ),
+        // Star columns alone are a `grid`'s tracks.
         (
-            r#"<stack id="r" justify="center"><text id="a">A</text></stack>"#,
+            r#"<stack id="r" direction="row"><text id="a" grow="true">A</text></stack>"#,
             "stack#r",
         ),
         (
-            r#"<stack id="r" padding="{token.space.md}"><text id="a">A</text></stack>"#,
+            r#"<stack id="r" material="{token.material.glass}"><text id="a">A</text></stack>"#,
             "stack#r",
         ),
         (
-            r#"<stack id="r"><text id="g" grow="true">A</text></stack>"#,
-            "text#g",
+            r#"<stack id="r"><each id="e" as="o" in="{$.os}"><text id="t" grow="true" text="{$o.v}"/></each></stack>"#,
+            "each#e",
+        ),
+        // A repeater cannot share a justified stack's tracks.
+        (
+            r#"<stack id="r" justify="end"><each id="e" as="o" in="{$.os}"><text id="t" text="{$o.v}"/></each></stack>"#,
+            "each#e",
         ),
         (r#"<heading id="h" level="{$.n}">A</heading>"#, "heading#h"),
         // Each column is a `ColumnDefinition`, so their number is a bounded literal.

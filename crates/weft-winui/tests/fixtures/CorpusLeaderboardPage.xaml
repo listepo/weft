@@ -20,9 +20,9 @@
     <ScrollViewer>
         <StackPanel AutomationProperties.AutomationId="leaderboard" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Leaderboard">
             <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Leaderboard" />
-            <StackPanel AutomationProperties.AutomationId="leader" Orientation="Horizontal" Spacing="{StaticResource Weft.space.xs}">
-                <TextBlock AutomationProperties.AutomationId="leader-label" TextWrapping="Wrap" Text="In the lead:" />
-                <TextBlock AutomationProperties.AutomationId="leader-name" TextWrapping="Wrap" Text="{x:Bind ViewModel.players[0].name, Mode=OneWay}" />
+            <StackPanel AutomationProperties.AutomationId="leader" Spacing="{StaticResource Weft.space.xs}" Orientation="Horizontal">
+                <TextBlock AutomationProperties.AutomationId="leader-label" TextWrapping="Wrap" Text="In the lead:" VerticalAlignment="Center" />
+                <TextBlock AutomationProperties.AutomationId="leader-name" TextWrapping="Wrap" Text="{x:Bind ViewModel.players[0].name, Mode=OneWay}" VerticalAlignment="Center" />
             </StackPanel>
             <ListView AutomationProperties.AutomationId="players" SelectionMode="None" weft:Props.Ordered="True" ItemsSource="{x:Bind ViewModel.players, Mode=OneWay}" weft:Each.Id="player-each" weft:Each.As="player">
                 <ListView.ItemTemplate>

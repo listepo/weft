@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleGrid namespace=WeftScreens
+<screen id="root" label="Gallery" weft="0.1">
+  <grid id="cards" columns="3" gap="{token.space.lg}" max-width="{token.size.xl}" min-column-width="{token.size.sm}">
+    <text id="card-a">Revenue</text>
+    <text id="card-b">Orders</text>
+    <text id="card-c">Visitors</text>
+  </grid>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleGridPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Gallery">
+            <weft:ColumnsPanel AutomationProperties.AutomationId="cards" MaxWidth="{StaticResource Weft.size.xl}" Columns="3" MinColumnWidth="{StaticResource Weft.size.sm}" Spacing="{StaticResource Weft.space.lg}">
+                <TextBlock AutomationProperties.AutomationId="card-a" TextWrapping="Wrap" Text="Revenue" />
+                <TextBlock AutomationProperties.AutomationId="card-b" TextWrapping="Wrap" Text="Orders" />
+                <TextBlock AutomationProperties.AutomationId="card-c" TextWrapping="Wrap" Text="Visitors" />
+            </weft:ColumnsPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

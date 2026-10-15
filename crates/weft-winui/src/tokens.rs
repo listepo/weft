@@ -1,6 +1,6 @@
 //! `WeftTokens.xaml`, the resource dictionary a project's pages share, merged into `App.xaml`.
-//! It holds the dimension tokens, the only tokens the pages reference so far (`Spacing`); the
-//! colours, materials and theme dictionaries follow (T105.5).
+//! It holds the dimension tokens, each also as a `Thickness` for `Padding`, which takes no
+//! `x:Double`; the colours, materials and theme dictionaries follow (T105.15).
 
 use indexmap::IndexMap;
 use weft_catalog::Token;
@@ -31,10 +31,9 @@ pub fn generate_tokens(tokens: &IndexMap<String, Token>) -> (String, Vec<String>
             continue;
         };
         // Token paths come from the project's files: the key is escaped as any attribute value.
+        let (key, px) = (escape_attribute(path), js_number(px));
         xaml.push_str(&format!(
-            "    <x:Double x:Key=\"Weft.{}\">{}</x:Double>\n",
-            escape_attribute(path),
-            js_number(px)
+            "    <x:Double x:Key=\"Weft.{key}\">{px}</x:Double>\n    <Thickness x:Key=\"Weft.{key}.thickness\">{px}</Thickness>\n"
         ));
     }
     xaml.push_str("</ResourceDictionary>\n");

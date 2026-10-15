@@ -24,9 +24,9 @@
         <StackPanel AutomationProperties.AutomationId="todos" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Tasks">
             <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Tasks" />
             <StackPanel AutomationProperties.AutomationId="add-form" AutomationProperties.LandmarkType="Form" weft:On.Submit="{x:Bind ViewModel.todo_addCommand}">
-                <StackPanel AutomationProperties.AutomationId="add-row" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
-                    <TextBox AutomationProperties.AutomationId="draft" Text="{x:Bind ViewModel.draft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="New task" />
-                    <Button AutomationProperties.AutomationId="add" Content="Add" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.draft), Mode=OneWay}" weft:On.Submit="{x:Bind ViewModel.todo_addCommand}" />
+                <StackPanel AutomationProperties.AutomationId="add-row" Spacing="{StaticResource Weft.space.sm}" Orientation="Horizontal">
+                    <TextBox AutomationProperties.AutomationId="draft" Text="{x:Bind ViewModel.draft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="New task" VerticalAlignment="Center" />
+                    <Button AutomationProperties.AutomationId="add" Content="Add" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.draft), Mode=OneWay}" weft:On.Submit="{x:Bind ViewModel.todo_addCommand}" VerticalAlignment="Center" />
                 </StackPanel>
             </StackPanel>
             <ListView AutomationProperties.AutomationId="list" SelectionMode="None" ItemsSource="{x:Bind ViewModel.todos, Mode=OneWay}" weft:Each.Id="todo-each" weft:Each.As="todo">

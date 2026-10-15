@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusInbox namespace=WeftScreens
+<screen id="inbox" label="Inbox" state="loading" weft="0.1">
+  <tabs id="folders" selected="{$.folder}" on-change="inbox.folder">
+    <tab id="tab-inbox" label="Inbox">
+      <list id="messages" ordered="true" state="ready">
+        <each id="message-each" as="message" in="{$.messages}">
+          <item id="message" text="{$message.subject}" on-press="inbox.open"/>
+        </each>
+        <slot name="empty">
+          <text id="no-messages">No messages.</text>
+        </slot>
+      </list>
+    </tab>
+    <tab id="tab-drafts" label="{$.labels.drafts}">
+      <list id="drafts" state="empty">
+        <slot name="empty">
+          <stack id="drafts-empty" align="center" direction="column" gap="{token.space.sm}">
+            <text id="no-drafts">No drafts.</text>
+            <text id="no-drafts-hint">Messages you start appear here.</text>
+          </stack>
+        </slot>
+      </list>
+    </tab>
+    <tab id="tab-sent" label="Sent">
+      <list id="sent" state="loading">
+        <item id="sent-loading">Loading…</item>
+      </list>
+    </tab>
+  </tabs>
+  <menu id="message-actions" label="Message actions">
+    <menu-item id="archive" text="{$.labels.archive}" on-press="inbox.archive"/>
+    <menu-item id="delete" disabled="{!$.selection}" on-press="inbox.delete">Delete</menu-item>
+  </menu>
+  <dialog id="compose" label="New message" modal="false" open="{$.composing}" on-close="inbox.closeCompose">
+    <form id="compose-form" state="submitting" on-submit="inbox.send">
+      <field id="to" label="To" type="email" value="{$.draft.to}"/>
+      <field id="body" label="Message" type="multiline" value="{$.draft.body}"/>
+    </form>
+    <slot name="actions">
+      <button id="send" variant="primary" on-press="inbox.send">Send</button>
+    </slot>
+  </dialog>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusInboxPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="inbox" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Inbox" weft:Props.State="loading">
+            <TabView AutomationProperties.AutomationId="folders" IsAddTabButtonVisible="False" weft:Choice.Value="{x:Bind ViewModel.folder, Mode=TwoWay}" weft:On.Change="{x:Bind ViewModel.inbox_folderCommand}">
+                <TabViewItem AutomationProperties.AutomationId="tab-inbox" IsClosable="False" Tag="tab-inbox" Header="Inbox">
+                    <StackPanel>
+                        <ListView AutomationProperties.AutomationId="messages" SelectionMode="None" weft:Props.Ordered="True" ItemsSource="{x:Bind ViewModel.messages, Mode=OneWay}" weft:Each.Id="message-each" weft:Each.As="message" weft:Props.State="ready">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="weft:CorpusInboxMessagesItem">
+                                    <ContentControl AutomationProperties.AutomationId="message" Content="{x:Bind subject, Mode=OneWay}" weft:On.Press="{x:Bind WeftRoot.inbox_openCommand}" AutomationProperties.LocalizedControlType="list item" />
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                            <ListView.Footer>
+                                <StackPanel weft:Slot.Name="empty" Visibility="{x:Bind weft:Weft.Empty(ViewModel.messages.Count), Mode=OneWay}">
+                                    <TextBlock AutomationProperties.AutomationId="no-messages" TextWrapping="Wrap" Text="No messages." />
+                                </StackPanel>
+                            </ListView.Footer>
+                        </ListView>
+                    </StackPanel>
+                </TabViewItem>
+                <TabViewItem AutomationProperties.AutomationId="tab-drafts" IsClosable="False" Tag="tab-drafts" Header="{x:Bind ViewModel.labels.drafts, Mode=OneWay}">
+                    <StackPanel>
+                        <ListView AutomationProperties.AutomationId="drafts" SelectionMode="None" weft:Props.State="empty">
+                            <ListView.Footer>
+                                <StackPanel weft:Slot.Name="empty">
+                                    <StackPanel AutomationProperties.AutomationId="drafts-empty" Spacing="{StaticResource Weft.space.sm}" Orientation="Vertical">
+                                        <TextBlock AutomationProperties.AutomationId="no-drafts" TextWrapping="Wrap" Text="No drafts." HorizontalAlignment="Center" />
+                                        <TextBlock AutomationProperties.AutomationId="no-drafts-hint" TextWrapping="Wrap" Text="Messages you start appear here." HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ListView.Footer>
+                        </ListView>
+                    </StackPanel>
+                </TabViewItem>
+                <TabViewItem AutomationProperties.AutomationId="tab-sent" IsClosable="False" Tag="tab-sent" Header="Sent">
+                    <StackPanel>
+                        <ListView AutomationProperties.AutomationId="sent" SelectionMode="None" weft:Props.State="loading">
+                            <ListViewItem AutomationProperties.AutomationId="sent-loading" Content="Loading…" />
+                        </ListView>
+                    </StackPanel>
+                </TabViewItem>
+            </TabView>
+            <DropDownButton AutomationProperties.AutomationId="message-actions" Content="Message actions" AutomationProperties.Name="Message actions">
+                <DropDownButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem AutomationProperties.AutomationId="archive" Text="{x:Bind ViewModel.labels.archive, Mode=OneWay}" weft:On.Press="{x:Bind ViewModel.inbox_archiveCommand}" />
+                        <MenuFlyoutItem AutomationProperties.AutomationId="delete" Text="Delete" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.selection), Mode=OneWay}" weft:On.Press="{x:Bind ViewModel.inbox_deleteCommand}" />
+                    </MenuFlyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+            <ContentDialog AutomationProperties.AutomationId="compose" weft:Dialog.IsOpen="{x:Bind ViewModel.composing, Mode=TwoWay}" weft:Props.Modal="False" AutomationProperties.Name="New message" weft:On.Close="{x:Bind ViewModel.inbox_closeComposeCommand}">
+                <StackPanel>
+                    <StackPanel AutomationProperties.AutomationId="compose-form" AutomationProperties.LandmarkType="Form" weft:Props.State="submitting" weft:On.Submit="{x:Bind ViewModel.inbox_sendCommand}">
+                        <TextBox AutomationProperties.AutomationId="to" Text="{x:Bind ViewModel.draft.to, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="EmailSmtpAddress" Header="To" />
+                        <TextBox AutomationProperties.AutomationId="body" Text="{x:Bind ViewModel.draft.body, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" Header="Message" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" weft:Slot.Name="actions">
+                        <Button AutomationProperties.AutomationId="send" Content="Send" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.inbox_sendCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </ContentDialog>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

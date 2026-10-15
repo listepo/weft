@@ -17,6 +17,7 @@ use crate::xaml::{Element, boolean, literal, type_name};
 
 pub(crate) mod containers;
 mod controls;
+mod layout;
 mod repetition;
 
 /// The source comment's options start with this word; `import_winui` checks it.
@@ -26,7 +27,11 @@ pub(crate) const TARGET: &str = "winui";
 /// kind and prop is refused, never dropped.
 const KINDS: &[(&str, &str, &str)] = &[
     ("screen", "StackPanel", ""),
-    ("stack", "StackPanel", "direction gap justify wrap"),
+    (
+        "stack",
+        "StackPanel",
+        "direction gap align justify wrap padding max-width",
+    ),
     ("form", "StackPanel", ""),
     ("text", "TextBlock", "text tone"),
     ("heading", "TextBlock", "level text"),
@@ -39,7 +44,8 @@ const KINDS: &[(&str, &str, &str)] = &[
     ("checkbox", "CheckBox", "checked disabled"),
     ("switch", "ToggleSwitch", "checked disabled"),
 ];
-const COMMON: &str = "label hidden state";
+// Validation keeps `grow` to a stack's children, whose tracks draw it.
+const COMMON: &str = "label hidden state grow";
 /// The named slots of this slice's kinds; the containers add theirs.
 const SLOTS: &[(&str, &str)] = &[("form", "footer")];
 
@@ -437,7 +443,7 @@ impl Gen<'_> {
             let root = self.data.root();
             e.attr(name, format!("{{x:Bind {root}.{}}}", command(action)));
         }
-        if matches!(kind, "screen" | "stack" | "form") {
+        if matches!(kind, "screen" | "form") {
             self.children(&mut e, &node.children);
         }
         if let Some(footer) = node.slots.get("footer").filter(|_| kind == "form") {
@@ -448,20 +454,6 @@ impl Gen<'_> {
             self.forms.pop();
         }
         Some(e)
-    }
-
-    fn stack(&mut self, e: &mut Element, node: &Node) {
-        // A `StackPanel` is vertical by default, so only a stated `direction` is written and
-        // read back.
-        if node.props.contains_key("direction") {
-            let row = self.word(node, "direction") == Some("row");
-            e.attr("Orientation", if row { "Horizontal" } else { "Vertical" });
-        }
-        self.gap(e, node, &["Spacing"]);
-        if self.word(node, "justify").is_some_and(|j| j != "start") {
-            self.later(node, "`justify` other than `start`");
-        }
-        self.marker(e, node, "wrap", "Wrap");
     }
 
     /// A `gap` token as each of the panel's spacing properties.

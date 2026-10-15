@@ -131,13 +131,13 @@ The vocabulary of `docs/layout-design.md` maps onto WinUI's panels:
 | Weft | WinUI 3 |
 | --- | --- |
 | `stack` with `justify="start"` and no `grow` child | `StackPanel` with `Orientation` and `Spacing` |
-| `justify` `center`, `end`, `space-between` | A `Grid`: one `Auto` track per child, `Spacing` as `ColumnSpacing` (`RowSpacing` for a column), and star tracks for the free space: `center` a star track at each end, `end` one at the start, `space-between` one between each pair. A single child with `space-between` sits at the start (SPEC §5.1). Spacer tracks are empty, so the gap is still the least space |
-| `grow="true"` | The child's track is `*` instead of `Auto`; with any growing child the stack has no spacer tracks (SPEC §5.1: `justify` then has no effect) |
+| `justify` `center`, `end`, `space-between` | A `Grid`: one `Auto` track per child, `Spacing` as `ColumnSpacing` (`RowSpacing` for a column), and star tracks for the free space: `center` a star track at each end, `end` one at the start, `space-between` one between each pair. A single child with `space-between` sits at the start (SPEC §5.1), so that stack stays a `StackPanel` with the `weft:Props.Justify` marker. Spacer tracks are empty, so the gap is still the least space |
+| `grow="true"` | The child's track is `*` instead of `Auto`; with any growing child the stack has no spacer tracks (SPEC §5.1: `justify` then has no effect, and is kept as the `weft:Props.Justify` marker). A row whose every child grows is refused: star columns alone read back as a `grid` |
 | `align` on a row | each child's `VerticalAlignment` (`start` → `Top`, `center`, `end` → `Bottom`, `stretch`); the default `center` is written out so the importer does not read it back as `align` |
 | `align` on a column | each child's `HorizontalAlignment` (`start` → `Left`, `center`, `end` → `Right`, `stretch`) |
 | `padding` | `Padding` (a `Thickness` token resource) on the `StackPanel` or `Grid`; inside a `material` surface it is the `Border`'s `Padding` |
-| `max-width` | `MaxWidth` (the token's `x:Double`) with `HorizontalAlignment="Stretch"`; where the element sits in a wider parent is the parent's `align`, as in SPEC |
-| `min-column-width` | `weft:ColumnsPanel` (static children) or `weft:ColumnsLayout` (one `<each>`): about 60 lines each in `Weft.cs`, showing `columns` columns while each is at least the token wide and fewer, down to one, below that, children in order |
+| `max-width` | `MaxWidth` (the token's `x:Double`), stretching below it as every panel does; where the element sits in a wider parent is the parent's `align`, as in SPEC |
+| `min-column-width` | `weft:ColumnsPanel` (static children; T105.5) or `weft:ColumnsLayout` (one `<each>`; T105.15): about 60 lines each in `Weft.cs`, showing `columns` columns while each is at least the token wide and fewer, down to one, below that, children in order |
 | `wrap` | marker |
 
 `<each>` is transparent in Weft, so its items are the parent's children. XAML panels cannot mix static children with a bound collection, so an `<each>` becomes a nested `ItemsRepeater` with the parent's orientation and spacing. That draws the same in a `start`-justified stack, a list and a table. In a `grid`, or in a stack that becomes a `Grid` (justify or grow), an `<each>` beside other children cannot share the tracks, so the generator refuses it (`Unsupported` with the path). No corpus screen does it. The same holds for any parent that is not a panel (`row`, `tabs`, `menu`, the choices) and for a list whose `<each>` sits beside static items or repeats more than one `item`: a `ListView` takes either children or an `ItemsSource`, and its template draws one item. A template is typed by the item class, so its paths are the item's members, `WeftParent` an enclosing loop's item and `WeftRoot` the view model, which every command in it is read from.
@@ -228,7 +228,8 @@ Each sub-task is at most 500 lines of code plus tests (AGENTS.md), and each upda
 | T105.3 | The value and choice controls: `select`, `combobox`, `radio-group`, `segmented-control`, `slider`, `stepper`, `date-picker`, `color-picker`, `link`, `image`, `model`, `alert`, `menu`, and their helpers | 480 |
 | T105.4 | Containers: `list`, `table`, `tabs`, `dialog`, `section`, `grid` without `min-column-width`, the `header` and `actions` slots | 250 |
 | T105.14 | Repetition: `<each>` as an `ItemsRepeater`, the `empty` slots | 240 |
-| T105.5 | Layout vocabulary (`justify`, `grow`, `align`, `padding`, `max-width`, `min-column-width` with `ColumnsPanel`/`ColumnsLayout`), tokens and `WeftTokens.xaml`, material, 3D tilt, light/dark/high contrast | 460 |
+| T105.5 | Layout vocabulary (`justify`, `grow`, `align`, `padding`, `max-width`, `min-column-width` with `ColumnsPanel`) | 230 |
+| T105.15 | Colour tokens and theme dictionaries, per-page tokens, material, 3D tilt, `ColumnsLayout` for a repeated `min-column-width` grid | 300 |
 | T105.6 | CLI `weft winui`, `weft winui-tokens`, `weft import-winui`; `weft.json` settings, SPEC §10.6 rows, schema | 250 |
 | T105.7 | The Windows CI job and build project; the golden-completeness test | 120 |
 | T105.8 | `read_winui`: kinds, ids, props, markers, structure, slots, with losses and diagnostics | 480 |

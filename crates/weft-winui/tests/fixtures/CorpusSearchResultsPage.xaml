@@ -25,9 +25,9 @@
     <ScrollViewer>
         <StackPanel AutomationProperties.AutomationId="search" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Search">
             <StackPanel AutomationProperties.AutomationId="form" AutomationProperties.LandmarkType="Form" weft:On.Submit="{x:Bind ViewModel.search_runCommand}">
-                <StackPanel AutomationProperties.AutomationId="bar" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
-                    <TextBox AutomationProperties.AutomationId="query" Text="{x:Bind ViewModel.query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="Search" Header="Search" />
-                    <Button AutomationProperties.AutomationId="go" Content="Search" Style="{StaticResource AccentButtonStyle}" weft:On.Submit="{x:Bind ViewModel.search_runCommand}" />
+                <StackPanel AutomationProperties.AutomationId="bar" Spacing="{StaticResource Weft.space.sm}" Orientation="Horizontal">
+                    <TextBox AutomationProperties.AutomationId="query" Text="{x:Bind ViewModel.query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="Search" Header="Search" VerticalAlignment="Center" />
+                    <Button AutomationProperties.AutomationId="go" Content="Search" Style="{StaticResource AccentButtonStyle}" weft:On.Submit="{x:Bind ViewModel.search_runCommand}" VerticalAlignment="Center" />
                 </StackPanel>
             </StackPanel>
             <ListView AutomationProperties.AutomationId="results" SelectionMode="None" ItemsSource="{x:Bind ViewModel.results, Mode=OneWay}" weft:Each.Id="results-each" weft:Each.As="result">

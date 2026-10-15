@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleStack namespace=WeftScreens
+<screen id="root" label="Actions" weft="0.1">
+  <stack id="actions" align="end" direction="row" gap="{token.space.md}" justify="space-between" padding="{token.space.sm}" wrap="false">
+    <button id="save" variant="primary" on-press="doc.save">Save</button>
+    <button id="discard" on-press="doc.discard">Discard</button>
+  </stack>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleStackPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Actions">
+            <Grid AutomationProperties.AutomationId="actions" ColumnSpacing="{StaticResource Weft.space.md}" Padding="{StaticResource Weft.space.sm.thickness}" weft:Props.Wrap="False">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button AutomationProperties.AutomationId="save" Content="Save" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.doc_saveCommand}" VerticalAlignment="Bottom" />
+                <Button AutomationProperties.AutomationId="discard" Content="Discard" weft:On.Press="{x:Bind ViewModel.doc_discardCommand}" VerticalAlignment="Bottom" Grid.Column="2" />
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

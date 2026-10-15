@@ -10,7 +10,11 @@ use crate::xaml::{Element, literal};
 /// The containers, in the shape of `generate::KINDS`.
 pub(super) const KINDS: &[(&str, &str, &str)] = &[
     ("section", "StackPanel", ""),
-    ("grid", "Grid", "columns gap"),
+    (
+        "grid",
+        "Grid",
+        "columns gap padding max-width min-column-width",
+    ),
     ("dialog", "ContentDialog", "open modal"),
     ("list", "ListView", "ordered"),
     ("item", "ListViewItem", "text"),
@@ -169,7 +173,7 @@ impl Gen<'_> {
     }
 
     /// The generated elements of `nodes`, each to be placed in a track.
-    fn placed<'n>(&mut self, nodes: impl Iterator<Item = &'n Node>) -> Vec<Element> {
+    pub(super) fn placed<'n>(&mut self, nodes: impl Iterator<Item = &'n Node>) -> Vec<Element> {
         nodes.filter_map(|n| self.node(n)).collect()
     }
 
@@ -186,6 +190,10 @@ impl Gen<'_> {
                 1
             }
         };
+        self.frame(e, node);
+        if node.props.contains_key("min-column-width") {
+            return self.columns_panel(e, node, columns);
+        }
         self.gap(e, node, &["RowSpacing", "ColumnSpacing"]);
         let cells = self.placed(nodes(&node.children));
         e.children.push(tracks_of("Column", "*", columns));
@@ -237,14 +245,19 @@ pub(super) fn nodes(children: &[Child]) -> impl Iterator<Item = &Node> {
 
 /// `<Grid.ColumnDefinitions>` (or rows) of `count` tracks of `size`.
 fn tracks_of(axis: &str, size: &str, count: usize) -> Element {
+    tracks(axis, &vec![size; count])
+}
+
+/// The track definitions of one axis of a `Grid`, one per size.
+pub(super) fn tracks(axis: &str, sizes: &[&str]) -> Element {
     let (list, track, attr) = match axis {
         "Column" => ("Grid.ColumnDefinitions", "ColumnDefinition", "Width"),
         _ => ("Grid.RowDefinitions", "RowDefinition", "Height"),
     };
     let mut defs = Element::new(list);
-    for _ in 0..count {
+    for size in sizes {
         let mut t = Element::new(track);
-        t.attr(attr, size);
+        t.attr(attr, *size);
         defs.children.push(t);
     }
     defs
