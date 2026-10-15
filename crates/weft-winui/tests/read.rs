@@ -110,8 +110,9 @@ fn generated_pages_read_back_without_their_comment() {
                 LossKind::Names,
             ];
             let stand_in = loss.kind == LossKind::Values
-                && (&result.losses)
-                    .into_iter()
+                && result
+                    .losses
+                    .iter()
                     .any(|l| l.kind == LossKind::Bindings && l.path.starts_with(&loss.path));
             assert!(listed.contains(&loss.kind) || stand_in, "{name}: {loss:?}");
         }
