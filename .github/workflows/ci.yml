@@ -78,6 +78,10 @@ jobs:
     # Windows runners have a desktop session). Not a required check yet, like `winui`.
     runs-on: windows-latest
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     env:
       # mise-action authenticates only its own step; the mise shims that cargo and pnpm run through
       # install the mise.toml tools it skipped, and unauthenticated that hits GitHub's 60/hour limit.
@@ -107,6 +111,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: weft-studio-windows
+          name: weft-studio-windows-${{ matrix.n }}
           path: target/weft-studio-windows.png
           if-no-files-found: ignore

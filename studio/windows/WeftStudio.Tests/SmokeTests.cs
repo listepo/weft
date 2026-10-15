@@ -23,30 +23,12 @@ public sealed class SmokeTests
     private static readonly TimeSpan Wait = TimeSpan.FromSeconds(60);
 
     [TestMethod]
-    public void Probe()
-    {
-        var lines = new List<string>();
-        for (var i = 0; i < 30; i++)
-        {
-            try { Once(lines, i); }
-            catch (Exception ex) { lines.Add($"#{i} THREW {ex.GetType().Name}: {ex.Message.Split('\n')[0]}"); }
-        }
-        var report = string.Join("\n", lines);
-        Console.WriteLine(report);
-        Assert.Fail(report);
-    }
-
-    private static bool _missed;
-
-    private static string Safe(Func<string> read) { try { return read(); } catch (Exception ex) { return ex.GetType().Name; } }
-
-    private static void Once(List<string> lines, int i)
+    public void The_app_shows_a_corpus_screen_and_saves_it_as_the_same_bytes()
     {
         using var scratch = new Scratch();
         var screen = Paths.Corpus("login");
         var copy = scratch.File("copy.weft");
         var start = new ProcessStartInfo(Paths.App()) { ArgumentList = { screen, "--pick", copy } };
-        var launched = Stopwatch.StartNew();
         using var app = FlaUI.Core.Application.Launch(start);
         using var automation = new UIA3Automation();
         try
@@ -64,29 +46,27 @@ public sealed class SmokeTests
 
             // Focus the panel as a user does, so the accelerator has to get past the surface.
             var panel = window.BoundingRectangle;
-            var hwnd = window.Properties.NativeWindowHandle.Value;
-            string State() => $"fg {Native.Describe(Native.Foreground())} (app {Native.Describe(hwnd)}) focus {Native.Describe(Native.Focus(hwnd))}";
-            var toClick = launched.ElapsedMilliseconds;
             Mouse.Click(new System.Drawing.Point(panel.Left + 24, menu.BoundingRectangle.Bottom + 24));
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_S);
-            var ok = Retry.WhileFalse(() => window.Title == "copy.weft", TimeSpan.FromSeconds(10)).Result;
-            var line = $"#{i} {(ok ? "ok" : "MISS")} launch-to-click {toClick} ms colours {colours}";
+            var ok = Retry.WhileFalse(() => window.Title == "copy.weft", TimeSpan.FromSeconds(20)).Result;
             if (!ok)
             {
-                var texts = string.Join(" / ", window.FindAllDescendants().Select(e => $"{e.ControlType}:{Safe(() => e.Name)}").Where(t => !t.EndsWith(':')).Take(25));
+                var hwnd = window.Properties.NativeWindowHandle.Value;
+                var texts = string.Join(" / ", window.FindAllDescendants().Select(e => $"{e.ControlType}:{Safe(() => e.Name)}").Where(t => !t.EndsWith(':')).Take(30));
                 var windows = string.Join(" / ", app.GetAllTopLevelWindows(automation).Select(w => Safe(() => w.Title)));
-                line += $" | {State()} | copy exists {File.Exists(copy)} | windows: {windows} | tree: {texts}";
-                _missed = true;
                 using var shot = Capture.Element(window);
                 shot.ToFile(Path.Combine(Paths.RepoRoot, "target", "weft-studio-windows.png"));
+                Assert.Fail($"PROBE MISS title {window.Title} | fg {Native.Describe(Native.Foreground())} app {Native.Describe(hwnd)} focus {Native.Describe(Native.Focus(hwnd))} | copy exists {File.Exists(copy)} | windows: {windows} | tree: {texts}");
             }
-            lines.Add(line);
+            CollectionAssert.AreEqual(File.ReadAllBytes(screen), File.ReadAllBytes(copy));
         }
         finally
         {
             app.Close();
         }
     }
+
+    private static string Safe(Func<string> read) { try { return read(); } catch (Exception ex) { return ex.GetType().Name; } }
 
     /// <summary>
     /// Distinct colours below the menu bar, sampled every 4 pixels. The capture is kept in
@@ -96,7 +76,7 @@ public sealed class SmokeTests
     {
         using var capture = Capture.Element(window);
         Directory.CreateDirectory(Path.Combine(Paths.RepoRoot, "target"));
-        if (!_missed) capture.ToFile(Path.Combine(Paths.RepoRoot, "target", "weft-studio-windows.png"));
+        capture.ToFile(Path.Combine(Paths.RepoRoot, "target", "weft-studio-windows.png"));
         var bitmap = capture.Bitmap;
         var top = menu.BoundingRectangle.Bottom - window.BoundingRectangle.Top + 8;
         var seen = new HashSet<int>();
