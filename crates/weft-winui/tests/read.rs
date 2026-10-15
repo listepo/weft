@@ -66,7 +66,8 @@ fn golden(name: &str, actual: &str) {
     assert_eq!(actual, expected, "{name}");
 }
 
-/// Removes the props the generator leaves out because they hold their default.
+/// Removes the props the generator leaves out because they hold their default, and writes a
+/// literal `text` as content.
 fn without_defaults(node: &mut Node) {
     let defaults = [
         ("tone", "default"),
@@ -79,12 +80,42 @@ fn without_defaults(node: &mut Node) {
             .iter()
             .any(|(p, d)| p == prop && *value == Value::String((*d).into()))
     });
+    // A literal `text` (a fragment parameter puts one there) is the same as content, which the
+    // reader writes.
+    if node.children.is_empty()
+        && let Some(Value::String(text)) = node.props.get("text").cloned()
+    {
+        node.props.shift_remove("text");
+        node.children.push(Child::Text(text));
+    }
     let slots = node.slots.values_mut().flatten();
     for child in node.children.iter_mut().chain(slots) {
         if let Child::Node(n) = child {
             without_defaults(n);
         }
     }
+}
+
+/// A fragment's instances expand to ids such as `total/row`, which no element id can be, so the
+/// reader generates its own (an `ids` loss, SPEC §9). Gives `got` those ids back where `want`
+/// has them and returns them.
+fn instance_ids(got: &mut Node, want: &Node) -> Vec<String> {
+    let mut ids = vec![];
+    if let Some(id) = want.id.as_ref().filter(|id| id.contains('/')) {
+        got.id = Some(id.clone());
+        ids.push(id.clone());
+    }
+    let kids = |n: &Node| -> Vec<usize> {
+        (0..n.children.len())
+            .filter(|i| matches!(n.children[*i], Child::Node(_)))
+            .collect()
+    };
+    for (g, w) in kids(got).into_iter().zip(kids(want)) {
+        if let (Child::Node(g), Child::Node(w)) = (&mut got.children[g], &want.children[w]) {
+            ids.extend(instance_ids(g, w));
+        }
+    }
+    ids
 }
 
 #[test]
@@ -97,12 +128,22 @@ fn generated_pages_read_back_without_their_comment() {
             "{name}: {:?}",
             result.diagnostics
         );
-        assert_eq!(losses(&result), "", "{name}");
         lenient(&result, &catalog);
         let mut want = weft_core::expand(&doc, &catalog).document;
         want.weft = result.document.weft.clone();
         without_defaults(&mut want.root);
-        assert_eq!(serialize(&result.document), serialize(&want), "{name}");
+        let mut got = result.document.clone();
+        let instances = instance_ids(&mut got.root, &want.root);
+        let unexpected: String = losses(&result)
+            .lines()
+            .filter(|l| {
+                !instances
+                    .iter()
+                    .any(|id| l.contains(&format!("the id \"{id}\" is not a valid Weft id")))
+            })
+            .collect();
+        assert_eq!(unexpected, "", "{name}");
+        assert_eq!(serialize(&got), serialize(&want), "{name}");
         if name == "controls" {
             golden("controls.read.weft", &serialize(&result.document));
             golden("controls.read.losses", &losses(&result));
@@ -418,7 +459,7 @@ fn grid_tracks_are_justify_and_grow() {
     let (doc, lost) = read_body(&tracks("column", &["Auto", "*"], &cells));
     assert_eq!(
         doc,
-        "<stack id=\"g\" direction=\"column\">\n  <button id=\"a\">a</button>\n  <button id=\"b\" grow=\"true\">b</button>\n</stack>\n"
+        "<stack id=\"g\">\n  <button id=\"a\">a</button>\n  <button id=\"b\" grow=\"true\">b</button>\n</stack>\n"
     );
     assert_eq!(lost, "");
     // Free space beside a growing child, or an empty `Auto` track, is no Weft layout.

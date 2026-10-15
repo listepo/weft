@@ -1,0 +1,34 @@
+<screen id="layout" label="Layout" weft="0.2">
+  <stack id="ends" direction="row" gap="{token.space.sm}" justify="end">
+    <button id="ends-a">A</button>
+    <button id="ends-b">B</button>
+  </stack>
+  <stack id="middle" direction="row" justify="center">
+    <text id="middle-a">Centred</text>
+  </stack>
+  <stack id="apart" align="stretch" direction="row" gap="{token.space.md}" justify="space-between">
+    <text id="apart-a">Left</text>
+    <text id="apart-b">Middle</text>
+    <text id="apart-c">Right</text>
+  </stack>
+  <stack id="alone" direction="row" justify="space-between">
+    <text id="alone-a">Only</text>
+  </stack>
+  <stack id="search" align="start" direction="row" gap="{token.space.sm}">
+    <field id="query" grow="true" label="Query" value="{$.query}"/>
+    <button id="go">Go</button>
+  </stack>
+  <stack id="tall" justify="end">
+    <text id="tall-a">Top</text>
+    <text id="tall-b" grow="true">Fills</text>
+  </stack>
+  <stack id="framed" align="center" max-width="{token.size.md}" padding="{token.space.lg}">
+    <heading id="framed-title" level="2">Framed</heading>
+    <text id="framed-text">Centred in a padded column.</text>
+  </stack>
+  <grid id="cards" columns="4" gap="{token.space.md}" max-width="{token.size.xl}" min-column-width="{token.size.sm}" padding="{token.space.sm}">
+    <text id="card-a">One</text>
+    <text id="card-b">Two</text>
+    <text id="card-c">Three</text>
+  </grid>
+</screen>

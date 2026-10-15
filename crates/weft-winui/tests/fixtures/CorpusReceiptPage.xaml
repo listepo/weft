@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusReceipt namespace=WeftScreens
+<screen id="receipt" label="Receipt" weft="0.2">
+  <fragment label="Price row" name="price-row">
+    <param name="label" required="true" type="string"/>
+    <param name="amount" required="true" type="string"/>
+    <stack id="row" direction="row" justify="space-between">
+      <text id="name" text="{$label}"/>
+      <text id="value" text="{$amount}"/>
+    </stack>
+  </fragment>
+  <stack id="lines">
+    <use id="subtotal" amount="{$.subtotal}" fragment="price-row" label="Subtotal"/>
+    <use id="total" amount="{$.total}" fragment="price-row" label="Total"/>
+  </stack>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusReceiptPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="receipt" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Receipt">
+            <StackPanel AutomationProperties.AutomationId="lines">
+                <Grid AutomationProperties.AutomationId="subtotal/row">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock AutomationProperties.AutomationId="subtotal/name" TextWrapping="Wrap" Text="Subtotal" VerticalAlignment="Center" />
+                    <TextBlock AutomationProperties.AutomationId="subtotal/value" TextWrapping="Wrap" Text="{x:Bind ViewModel.subtotal, Mode=OneWay}" VerticalAlignment="Center" Grid.Column="2" />
+                </Grid>
+                <Grid AutomationProperties.AutomationId="total/row">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock AutomationProperties.AutomationId="total/name" TextWrapping="Wrap" Text="Total" VerticalAlignment="Center" />
+                    <TextBlock AutomationProperties.AutomationId="total/value" TextWrapping="Wrap" Text="{x:Bind ViewModel.total, Mode=OneWay}" VerticalAlignment="Center" Grid.Column="2" />
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

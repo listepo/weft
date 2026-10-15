@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusDashboard namespace=WeftScreens
+<screen id="dashboard" label="Team dashboard" state="ready" weft="0.1">
+  <stack id="header" direction="row" gap="{token.space.md}" justify="space-between" wrap="true">
+    <heading id="title" level="1" text="{$.team.name}"/>
+    <text id="updated" text="{$.updatedAt}" tone="muted"/>
+  </stack>
+  <grid id="stats" columns="3" gap="{token.space.lg}" min-column-width="{token.size.sm}">
+    <section id="velocity" label="Velocity">
+      <text id="velocity-value" text="{$.stats.velocity}" tone="success"/>
+      <slot name="header">
+        <heading id="velocity-title" level="2">Velocity</heading>
+      </slot>
+    </section>
+    <section id="bugs" label="Open bugs">
+      <text id="bugs-value" text="{$.stats.bugs}" tone="warning"/>
+      <slot name="header">
+        <heading id="bugs-title" level="2">Open bugs</heading>
+      </slot>
+    </section>
+    <section id="incidents" label="Incidents">
+      <text id="incidents-value" text="{$.stats.incidents}" tone="danger"/>
+      <slot name="header">
+        <heading id="incidents-title" level="2">Incidents</heading>
+      </slot>
+    </section>
+  </grid>
+  <stack id="notices" direction="column" gap="{token.space.sm}" max-width="{token.size.lg}">
+    <alert id="release" tone="info">Release 2.4 ships on Friday.</alert>
+    <alert id="backup" text="{$.backupStatus}" tone="success"/>
+    <alert id="quota" tone="warning">
+      <text id="quota-text">Storage is 90% full.</text>
+      <link id="quota-link" href="https://example.com/storage">Manage storage</link>
+    </alert>
+  </stack>
+  <stack id="footer" align="end" direction="row" gap="{token.space.md}" justify="space-between" wrap="true">
+    <text id="owner" tone="default">Owned by the platform team</text>
+    <stack id="footer-links" align="start" direction="row" gap="{token.space.md}">
+      <link id="docs" href="/docs">Docs</link>
+      <link id="status" href="{$.statusUrl}">Status page</link>
+    </stack>
+  </stack>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusDashboardPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="dashboard" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Team dashboard" weft:Props.State="ready">
+            <Grid AutomationProperties.AutomationId="header" ColumnSpacing="{StaticResource Weft.space.md}" weft:Props.Wrap="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="{x:Bind ViewModel.team.name, Mode=OneWay}" VerticalAlignment="Center" />
+                <TextBlock AutomationProperties.AutomationId="updated" TextWrapping="Wrap" Text="{x:Bind ViewModel.updatedAt, Mode=OneWay}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Grid.Column="2" />
+            </Grid>
+            <weft:ColumnsPanel AutomationProperties.AutomationId="stats" Columns="3" MinColumnWidth="{StaticResource Weft.size.sm}" Spacing="{StaticResource Weft.space.lg}">
+                <StackPanel AutomationProperties.AutomationId="velocity" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Velocity">
+                    <StackPanel weft:Slot.Name="header">
+                        <TextBlock AutomationProperties.AutomationId="velocity-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Velocity" />
+                    </StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="velocity-value" TextWrapping="Wrap" Text="{x:Bind ViewModel.stats.velocity, Mode=OneWay}" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                </StackPanel>
+                <StackPanel AutomationProperties.AutomationId="bugs" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Open bugs">
+                    <StackPanel weft:Slot.Name="header">
+                        <TextBlock AutomationProperties.AutomationId="bugs-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Open bugs" />
+                    </StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="bugs-value" TextWrapping="Wrap" Text="{x:Bind ViewModel.stats.bugs, Mode=OneWay}" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                </StackPanel>
+                <StackPanel AutomationProperties.AutomationId="incidents" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Incidents">
+                    <StackPanel weft:Slot.Name="header">
+                        <TextBlock AutomationProperties.AutomationId="incidents-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Incidents" />
+                    </StackPanel>
+                    <TextBlock AutomationProperties.AutomationId="incidents-value" TextWrapping="Wrap" Text="{x:Bind ViewModel.stats.incidents, Mode=OneWay}" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+                </StackPanel>
+            </weft:ColumnsPanel>
+            <StackPanel AutomationProperties.AutomationId="notices" Spacing="{StaticResource Weft.space.sm}" MaxWidth="{StaticResource Weft.size.lg}" Orientation="Vertical">
+                <InfoBar AutomationProperties.AutomationId="release" IsOpen="True" IsClosable="False" Severity="Informational" Message="Release 2.4 ships on Friday." />
+                <InfoBar AutomationProperties.AutomationId="backup" IsOpen="True" IsClosable="False" Severity="Success" Message="{x:Bind ViewModel.backupStatus, Mode=OneWay}" />
+                <InfoBar AutomationProperties.AutomationId="quota" IsOpen="True" IsClosable="False" Severity="Warning">
+                    <StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="quota-text" TextWrapping="Wrap" Text="Storage is 90% full." />
+                        <HyperlinkButton AutomationProperties.AutomationId="quota-link" Content="Manage storage" NavigateUri="https://example.com/storage" />
+                    </StackPanel>
+                </InfoBar>
+            </StackPanel>
+            <Grid AutomationProperties.AutomationId="footer" ColumnSpacing="{StaticResource Weft.space.md}" weft:Props.Wrap="True">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock AutomationProperties.AutomationId="owner" TextWrapping="Wrap" Text="Owned by the platform team" VerticalAlignment="Bottom" />
+                <StackPanel AutomationProperties.AutomationId="footer-links" Spacing="{StaticResource Weft.space.md}" Orientation="Horizontal" VerticalAlignment="Bottom" Grid.Column="2">
+                    <HyperlinkButton AutomationProperties.AutomationId="docs" Content="Docs" weft:Props.Href="/docs" VerticalAlignment="Top" />
+                    <HyperlinkButton AutomationProperties.AutomationId="status" Content="Status page" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.statusUrl), Mode=OneWay}" VerticalAlignment="Top" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

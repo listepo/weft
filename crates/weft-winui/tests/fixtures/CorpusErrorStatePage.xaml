@@ -20,9 +20,9 @@
                     <TextBlock AutomationProperties.AutomationId="error-message" TextWrapping="Wrap" Text="{x:Bind ViewModel.error.message, Mode=OneWay}" />
                 </StackPanel>
             </InfoBar>
-            <StackPanel AutomationProperties.AutomationId="actions" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
-                <Button AutomationProperties.AutomationId="retry" Content="Retry" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.load_retryCommand}" />
-                <HyperlinkButton AutomationProperties.AutomationId="support" Content="Contact support" weft:On.Press="{x:Bind ViewModel.nav_supportCommand}" />
+            <StackPanel AutomationProperties.AutomationId="actions" Spacing="{StaticResource Weft.space.sm}" Orientation="Horizontal">
+                <Button AutomationProperties.AutomationId="retry" Content="Retry" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.load_retryCommand}" VerticalAlignment="Center" />
+                <HyperlinkButton AutomationProperties.AutomationId="support" Content="Contact support" weft:On.Press="{x:Bind ViewModel.nav_supportCommand}" VerticalAlignment="Center" />
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

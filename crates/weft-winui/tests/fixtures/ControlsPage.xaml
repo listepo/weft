@@ -48,12 +48,12 @@
             <TextBlock AutomationProperties.AutomationId="h4" Style="{StaticResource BodyStrongTextBlockStyle}" AutomationProperties.HeadingLevel="Level4" Text="Four" />
             <TextBlock AutomationProperties.AutomationId="h5" Style="{StaticResource BodyStrongTextBlockStyle}" AutomationProperties.HeadingLevel="Level5" Text="Five" />
             <TextBlock AutomationProperties.AutomationId="h6" Style="{StaticResource BodyStrongTextBlockStyle}" AutomationProperties.HeadingLevel="Level6" Text="Six" />
-            <StackPanel AutomationProperties.AutomationId="tones" Orientation="Horizontal" Spacing="{StaticResource Weft.space.md}" weft:Props.Wrap="True">
-                <TextBlock AutomationProperties.AutomationId="plain" TextWrapping="Wrap" Text="Plain" />
-                <TextBlock AutomationProperties.AutomationId="muted" TextWrapping="Wrap" Text="Muted" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                <TextBlock AutomationProperties.AutomationId="good" TextWrapping="Wrap" Text="Saved" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
-                <TextBlock AutomationProperties.AutomationId="careful" TextWrapping="Wrap" Text="Careful" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
-                <TextBlock AutomationProperties.AutomationId="bad" TextWrapping="Wrap" Text="Failed" Foreground="{ThemeResource SystemFillColorCriticalBrush}" />
+            <StackPanel AutomationProperties.AutomationId="tones" Spacing="{StaticResource Weft.space.md}" weft:Props.Wrap="True" Orientation="Horizontal">
+                <TextBlock AutomationProperties.AutomationId="plain" TextWrapping="Wrap" Text="Plain" VerticalAlignment="Center" />
+                <TextBlock AutomationProperties.AutomationId="muted" TextWrapping="Wrap" Text="Muted" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                <TextBlock AutomationProperties.AutomationId="good" TextWrapping="Wrap" Text="Saved" Foreground="{ThemeResource SystemFillColorSuccessBrush}" VerticalAlignment="Center" />
+                <TextBlock AutomationProperties.AutomationId="careful" TextWrapping="Wrap" Text="Careful" Foreground="{ThemeResource SystemFillColorCautionBrush}" VerticalAlignment="Center" />
+                <TextBlock AutomationProperties.AutomationId="bad" TextWrapping="Wrap" Text="Failed" Foreground="{ThemeResource SystemFillColorCriticalBrush}" VerticalAlignment="Center" />
             </StackPanel>
             <StackPanel AutomationProperties.AutomationId="shown" Orientation="Vertical">
                 <TextBlock AutomationProperties.AutomationId="secret" TextWrapping="Wrap" Text="Hidden" Visibility="Collapsed" />

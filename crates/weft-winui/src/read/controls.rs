@@ -44,6 +44,7 @@ pub const ATTRS: &[(&str, &str, &str, Conv)] = &[
         "hidden",
         Conv::Words(&[("Collapsed", "true"), ("Visible", "false")]),
     ),
+    ("grid", "Columns", "columns", Conv::Same),
     (
         "stack",
         "Orientation",
@@ -235,7 +236,8 @@ const EVENTS: &[&str] = &[
 
 /// `(kinds, attribute, prop)`: attributes that hold a `Weft.*` token resource.
 const TOKENS: &[(&str, &str, &str)] = &[
-    ("stack", "Spacing", "gap"),
+    ("stack grid", "Spacing", "gap"),
+    ("grid", "MinColumnWidth", "min-column-width"),
     ("stack grid", "RowSpacing", "gap"),
     ("stack grid", "ColumnSpacing", "gap"),
     ("stack grid", "Padding", "padding"),
@@ -317,6 +319,14 @@ pub fn loss_of(name: &str, value: &str) -> (LossKind, &'static str) {
 
 /// The kind of a control, and the structure loss of a panel read as the nearest kind.
 pub fn kind_of(el: Xml<'_, '_>) -> Option<(&'static str, Option<&'static str>)> {
+    let helper = el
+        .tag_name()
+        .namespace()
+        .is_some_and(|n| n.starts_with("using:"));
+    // The generator's reflowing grid is the one control of its own helpers.
+    if helper && el.tag_name().name() == "ColumnsPanel" {
+        return Some(("grid", None));
+    }
     if el.tag_name().namespace() != Some(PRESENTATION) {
         return None;
     }

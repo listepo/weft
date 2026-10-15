@@ -592,14 +592,10 @@ impl Reader<'_> {
             let tracks = (kind == "stack")
                 .then(|| layout::stack_tracks(el))
                 .flatten();
-            if let Some(t) = &tracks {
-                let direction = if t.along() == "Grid.Column" {
-                    "row"
-                } else {
-                    "column"
-                };
+            // A column is the default direction, so only a row of tracks states one.
+            if tracks.as_ref().is_some_and(|t| t.along() == "Grid.Column") {
                 node.props
-                    .insert("direction".into(), Value::String(direction.into()));
+                    .insert("direction".into(), Value::String("row".into()));
             }
             let align = (kind == "stack").then(|| self.align(el, node)).flatten();
             // A filled grid's placements follow from the document order.
@@ -634,7 +630,8 @@ impl Reader<'_> {
                 }
             }
             self.consumed = outer;
-            if node.kind == "grid" {
+            // A `ColumnsPanel` states its `Columns`; a `Grid` has them as tracks.
+            if node.kind == "grid" && is_named(el, "Grid") {
                 self.columns(el, node, here, filled);
             }
             return self.settle(node, placed, here);

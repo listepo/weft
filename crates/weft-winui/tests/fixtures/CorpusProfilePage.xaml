@@ -19,9 +19,9 @@
             <TextBlock AutomationProperties.AutomationId="name" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="{x:Bind ViewModel.user.name, Mode=OneWay}" />
             <TextBlock AutomationProperties.AutomationId="bio" TextWrapping="Wrap" Text="{x:Bind ViewModel.user.bio, Mode=OneWay}" />
             <TextBlock AutomationProperties.AutomationId="links-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Links" />
-            <StackPanel AutomationProperties.AutomationId="links" Orientation="Horizontal" Spacing="{StaticResource Weft.space.md}">
-                <HyperlinkButton AutomationProperties.AutomationId="website" Content="Website" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.user.website), Mode=OneWay}" />
-                <HyperlinkButton AutomationProperties.AutomationId="github" Content="GitHub" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.user.github), Mode=OneWay}" />
+            <StackPanel AutomationProperties.AutomationId="links" Spacing="{StaticResource Weft.space.md}" Orientation="Horizontal">
+                <HyperlinkButton AutomationProperties.AutomationId="website" Content="Website" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.user.website), Mode=OneWay}" VerticalAlignment="Center" />
+                <HyperlinkButton AutomationProperties.AutomationId="github" Content="GitHub" NavigateUri="{x:Bind weft:Weft.Link(ViewModel.user.github), Mode=OneWay}" VerticalAlignment="Center" />
             </StackPanel>
             <Button AutomationProperties.AutomationId="edit" Content="Edit profile" weft:On.Press="{x:Bind ViewModel.profile_editCommand}" />
         </StackPanel>

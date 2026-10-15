@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=Layout namespace=WeftScreens
+<screen id="layout" label="Layout" weft="0.2">
+  <stack id="ends" direction="row" gap="{token.space.sm}" justify="end">
+    <button id="ends-a">A</button>
+    <button id="ends-b">B</button>
+  </stack>
+  <stack id="middle" direction="row" justify="center">
+    <text id="middle-a">Centred</text>
+  </stack>
+  <stack id="apart" align="stretch" direction="row" gap="{token.space.md}" justify="space-between">
+    <text id="apart-a">Left</text>
+    <text id="apart-b">Middle</text>
+    <text id="apart-c">Right</text>
+  </stack>
+  <stack id="alone" direction="row" justify="space-between">
+    <text id="alone-a">Only</text>
+  </stack>
+  <stack id="search" align="start" direction="row" gap="{token.space.sm}">
+    <field id="query" grow="true" label="Query" value="{$.query}"/>
+    <button id="go">Go</button>
+  </stack>
+  <stack id="tall" justify="end">
+    <text id="tall-a">Top</text>
+    <text id="tall-b" grow="true">Fills</text>
+  </stack>
+  <stack id="framed" align="center" max-width="{token.size.md}" padding="{token.space.lg}">
+    <heading id="framed-title" level="2">Framed</heading>
+    <text id="framed-text">Centred in a padded column.</text>
+  </stack>
+  <grid id="cards" columns="4" gap="{token.space.md}" max-width="{token.size.xl}" min-column-width="{token.size.sm}" padding="{token.space.sm}">
+    <text id="card-a">One</text>
+    <text id="card-b">Two</text>
+    <text id="card-c">Three</text>
+  </grid>
+</screen>
+-->
+<Page x:Class="WeftScreens.LayoutPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="layout" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Layout">
+            <Grid AutomationProperties.AutomationId="ends" ColumnSpacing="{StaticResource Weft.space.sm}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button AutomationProperties.AutomationId="ends-a" Content="A" VerticalAlignment="Center" Grid.Column="1" />
+                <Button AutomationProperties.AutomationId="ends-b" Content="B" VerticalAlignment="Center" Grid.Column="2" />
+            </Grid>
+            <Grid AutomationProperties.AutomationId="middle">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock AutomationProperties.AutomationId="middle-a" TextWrapping="Wrap" Text="Centred" VerticalAlignment="Center" Grid.Column="1" />
+            </Grid>
+            <Grid AutomationProperties.AutomationId="apart" ColumnSpacing="{StaticResource Weft.space.md}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock AutomationProperties.AutomationId="apart-a" TextWrapping="Wrap" Text="Left" VerticalAlignment="Stretch" />
+                <TextBlock AutomationProperties.AutomationId="apart-b" TextWrapping="Wrap" Text="Middle" VerticalAlignment="Stretch" Grid.Column="2" />
+                <TextBlock AutomationProperties.AutomationId="apart-c" TextWrapping="Wrap" Text="Right" VerticalAlignment="Stretch" Grid.Column="4" />
+            </Grid>
+            <StackPanel AutomationProperties.AutomationId="alone" weft:Props.Justify="space-between" Orientation="Horizontal">
+                <TextBlock AutomationProperties.AutomationId="alone-a" TextWrapping="Wrap" Text="Only" VerticalAlignment="Center" />
+            </StackPanel>
+            <Grid AutomationProperties.AutomationId="search" ColumnSpacing="{StaticResource Weft.space.sm}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox AutomationProperties.AutomationId="query" Text="{x:Bind ViewModel.query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Query" VerticalAlignment="Top" />
+                <Button AutomationProperties.AutomationId="go" Content="Go" VerticalAlignment="Top" Grid.Column="1" />
+            </Grid>
+            <Grid AutomationProperties.AutomationId="tall" weft:Props.Justify="end">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock AutomationProperties.AutomationId="tall-a" TextWrapping="Wrap" Text="Top" />
+                <TextBlock AutomationProperties.AutomationId="tall-b" TextWrapping="Wrap" Text="Fills" Grid.Row="1" />
+            </Grid>
+            <StackPanel AutomationProperties.AutomationId="framed" Padding="{StaticResource Weft.space.lg.thickness}" MaxWidth="{StaticResource Weft.size.md}">
+                <TextBlock AutomationProperties.AutomationId="framed-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Framed" HorizontalAlignment="Center" />
+                <TextBlock AutomationProperties.AutomationId="framed-text" TextWrapping="Wrap" Text="Centred in a padded column." HorizontalAlignment="Center" />
+            </StackPanel>
+            <weft:ColumnsPanel AutomationProperties.AutomationId="cards" Padding="{StaticResource Weft.space.sm.thickness}" MaxWidth="{StaticResource Weft.size.xl}" Columns="4" MinColumnWidth="{StaticResource Weft.size.sm}" Spacing="{StaticResource Weft.space.md}">
+                <TextBlock AutomationProperties.AutomationId="card-a" TextWrapping="Wrap" Text="One" />
+                <TextBlock AutomationProperties.AutomationId="card-b" TextWrapping="Wrap" Text="Two" />
+                <TextBlock AutomationProperties.AutomationId="card-c" TextWrapping="Wrap" Text="Three" />
+            </weft:ColumnsPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

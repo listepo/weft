@@ -52,15 +52,12 @@
 <Page x:Class="WeftScreens.RepetitionPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
     <ScrollViewer>
         <StackPanel AutomationProperties.AutomationId="repetition" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Repetition">
-            <StackPanel AutomationProperties.AutomationId="tags" Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
-                <TextBlock AutomationProperties.AutomationId="tags-label" TextWrapping="Wrap" Text="Tags:" />
-                <ItemsRepeater ItemsSource="{x:Bind ViewModel.tags, Mode=OneWay}" weft:Each.Id="tag-each" weft:Each.As="tag">
-                    <ItemsRepeater.Layout>
-                        <StackLayout Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}" />
-                    </ItemsRepeater.Layout>
+            <StackPanel AutomationProperties.AutomationId="tags" Spacing="{StaticResource Weft.space.sm}" Orientation="Horizontal">
+                <TextBlock AutomationProperties.AutomationId="tags-label" TextWrapping="Wrap" Text="Tags:" VerticalAlignment="Center" />
+                <ItemsRepeater ItemsSource="{x:Bind ViewModel.tags, Mode=OneWay}" weft:Each.Id="tag-each" weft:Each.As="tag" VerticalAlignment="Center">
                     <ItemsRepeater.ItemTemplate>
                         <DataTemplate x:DataType="weft:RepetitionTagsItem">
-                            <StackPanel Orientation="Horizontal" Spacing="{StaticResource Weft.space.sm}">
+                            <StackPanel>
                                 <TextBlock AutomationProperties.AutomationId="tag-name" TextWrapping="Wrap" Text="{x:Bind name, Mode=OneWay}" />
                                 <Button AutomationProperties.AutomationId="tag-remove" Content="Remove" Visibility="{x:Bind WeftRoot.editing, Mode=OneWay}" weft:On.Press="{x:Bind WeftRoot.tag_removeCommand}" />
                             </StackPanel>

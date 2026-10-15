@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusLayout namespace=WeftScreens
+<screen id="layout" label="Layout" weft="0.1">
+  <stack id="toolbar" direction="row" gap="{token.space.sm}" justify="start">
+    <field id="search" grow="true" label="Search" type="search" value="{$.query}"/>
+    <button id="filter" on-press="list.filter">Filter</button>
+  </stack>
+  <stack id="pager" direction="row" gap="{token.space.sm}" justify="center">
+    <link id="previous" on-press="list.previous">Previous</link>
+    <link id="next" on-press="list.next">Next</link>
+  </stack>
+  <stack id="actions" direction="row" gap="{token.space.sm}" justify="end">
+    <button id="cancel" on-press="list.cancel">Cancel</button>
+    <button id="save" variant="primary" on-press="list.save">Save</button>
+  </stack>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusLayoutPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="layout" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Layout">
+            <Grid AutomationProperties.AutomationId="toolbar" ColumnSpacing="{StaticResource Weft.space.sm}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox AutomationProperties.AutomationId="search" Text="{x:Bind ViewModel.query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="Search" Header="Search" VerticalAlignment="Center" />
+                <Button AutomationProperties.AutomationId="filter" Content="Filter" weft:On.Press="{x:Bind ViewModel.list_filterCommand}" VerticalAlignment="Center" Grid.Column="1" />
+            </Grid>
+            <Grid AutomationProperties.AutomationId="pager" ColumnSpacing="{StaticResource Weft.space.sm}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <HyperlinkButton AutomationProperties.AutomationId="previous" Content="Previous" weft:On.Press="{x:Bind ViewModel.list_previousCommand}" VerticalAlignment="Center" Grid.Column="1" />
+                <HyperlinkButton AutomationProperties.AutomationId="next" Content="Next" weft:On.Press="{x:Bind ViewModel.list_nextCommand}" VerticalAlignment="Center" Grid.Column="2" />
+            </Grid>
+            <Grid AutomationProperties.AutomationId="actions" ColumnSpacing="{StaticResource Weft.space.sm}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button AutomationProperties.AutomationId="cancel" Content="Cancel" weft:On.Press="{x:Bind ViewModel.list_cancelCommand}" VerticalAlignment="Center" Grid.Column="1" />
+                <Button AutomationProperties.AutomationId="save" Content="Save" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.list_saveCommand}" VerticalAlignment="Center" Grid.Column="2" />
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
