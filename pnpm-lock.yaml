@@ -535,6 +535,8 @@ importers:
 
   plugins/xcode: {}
 
+  studio: {}
+
   tooling: {}
 
 packages:
