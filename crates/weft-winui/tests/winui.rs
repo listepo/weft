@@ -210,6 +210,10 @@ fn helpers_take_the_namespace() {
         "string ClockText(TimeSpan time)",
         "WinColor Color(string? text)",
         "string Hex(WinColor color)",
+        // x:Bind passes a quoted literal as a string and converts nothing: with an `object`
+        // parameter the XAML compiler fails (WMC9999) on `Weft.Earliest('2026-01-01')`.
+        "DateTimeOffset Earliest(string? value)",
+        "DateTimeOffset Latest(string? value)",
         "class Choice",
         "class Dialog",
     ] {
