@@ -6,4 +6,3 @@
 - T106.7. Design tab: cox side
 - T105. Weft to WinUI 3 and back
 - T105.15. WinUI tokens, materials, tilt and reflowing repeats
-- T105.10. WinUI target: SPEC, AGENT-SPEC and docs
