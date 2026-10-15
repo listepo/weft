@@ -109,6 +109,7 @@ fn type_of(data: &Data, classes: &[Class], shape: usize) -> String {
     match data.ty(shape) {
         Ty::Leaf(Leaf::Text) => "string".to_owned(),
         Ty::Leaf(Leaf::Flag) => "bool".to_owned(),
+        Ty::Leaf(Leaf::Number) => "double".to_owned(),
         Ty::Array(item) => format!("ObservableCollection<{}>", type_of(data, classes, item)),
         Ty::Object => classes
             .iter()
@@ -191,7 +192,11 @@ fn class(
                 "\n    public {ty} {id}\n    {{\n        get => Weft_{field};\n        \
                  set => WeftSet(ref Weft_{field}, value);\n    }}\n    \
                  private {ty} Weft_{field} = {};\n",
-                if leaf == Leaf::Text { "\"\"" } else { "false" }
+                match leaf {
+                    Leaf::Text => "\"\"",
+                    Leaf::Flag => "false",
+                    Leaf::Number => "0",
+                }
             ),
             _ => write!(w, "\n    public {ty} {id} {{ get; }} = new();\n"),
         };

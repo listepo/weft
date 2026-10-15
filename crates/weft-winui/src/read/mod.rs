@@ -302,6 +302,22 @@ impl Reader<'_> {
             }
             return;
         }
+        // A text run of mixed content: the generator writes it without the AutomationId every
+        // `text` of the source carries.
+        let mixed = self.catalog.components.get(parent_kind).map(|d| &d.content);
+        if tag == "TextBlock"
+            && explicit_id(el).is_none()
+            && matches!(mixed, Some(Content::Mixed))
+            && let Some(text) = el.attribute("Text")
+            && (!text.starts_with('{') || text.starts_with("{}"))
+        {
+            let text = squash(text.strip_prefix("{}").unwrap_or(text));
+            if !text.is_empty() {
+                let text = literal(&mut self.losses, parent, &text);
+                out.children.push(Child::Text(text));
+            }
+            return;
+        }
         if let Some(loss) = controls::wrapper(el) {
             if let Some((kind, what)) = loss {
                 self.lose(kind, parent, format!("`{tag}`: {what}"));
@@ -320,12 +336,23 @@ impl Reader<'_> {
         if let Some(what) = structure {
             self.lose(LossKind::Structure, &here, format!("`{tag}`: {what}"));
         }
-        if tag == "PasswordBox" {
+        // The generator's date and time row is one date picker.
+        let row = kind == "date-picker" && tag == "StackPanel";
+        let typed = match tag {
+            "PasswordBox" => Some("password"),
+            _ if row => Some("datetime"),
+            _ => None,
+        };
+        if let Some(typed) = typed {
             node.props
-                .insert("type".into(), Value::String("password".into()));
+                .insert("type".into(), Value::String(typed.into()));
         }
         self.attributes(el, &mut node, &here);
-        self.body(el, &mut node, &here, depth);
+        // The row's pickers and a colour button's swatch and flyout only draw the value, which
+        // `Choice.Value` holds.
+        if !row && (kind != "color-picker" || tag != "DropDownButton") {
+            self.body(el, &mut node, &here, depth);
+        }
         out.children.push(Child::Node(Box::new(node)));
     }
 
@@ -384,6 +411,14 @@ impl Reader<'_> {
                 None => {}
             }
             if name == "AutomationProperties.AutomationId" || controls::expected(&node.kind, name) {
+                continue;
+            }
+            // An editable ComboBox puts an item's content in its text box, so an option there
+            // shows its value and keeps its text in the tooltip.
+            if tag == "ComboBoxItem"
+                && name == "Content"
+                && el.attribute("ToolTipService.ToolTip").is_some()
+            {
                 continue;
             }
             if let Some((_, _, prop, conv)) = controls::attr_of(&node.kind, name) {

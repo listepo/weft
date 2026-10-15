@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusMenu namespace=WeftScreens
+<screen id="account-menu" label="Account menu" weft="0.1">
+  <text id="signed-in" text="{$.user.email}"/>
+  <menu id="menu" label="Account">
+    <menu-item id="item-profile" on-press="nav.profile">Profile</menu-item>
+    <menu-item id="item-settings" on-press="nav.settings">Settings</menu-item>
+    <menu-item id="item-billing" disabled="{!$.isOwner}" on-press="nav.billing">Billing</menu-item>
+    <menu-item id="item-signout" on-press="auth.signout">Sign out</menu-item>
+  </menu>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusMenuPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="account-menu" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Account menu">
+            <TextBlock AutomationProperties.AutomationId="signed-in" TextWrapping="Wrap" Text="{x:Bind ViewModel.user.email, Mode=OneWay}" />
+            <DropDownButton AutomationProperties.AutomationId="menu" Content="Account" AutomationProperties.Name="Account">
+                <DropDownButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem AutomationProperties.AutomationId="item-profile" Text="Profile" weft:On.Press="{x:Bind ViewModel.nav_profileCommand}" />
+                        <MenuFlyoutItem AutomationProperties.AutomationId="item-settings" Text="Settings" weft:On.Press="{x:Bind ViewModel.nav_settingsCommand}" />
+                        <MenuFlyoutItem AutomationProperties.AutomationId="item-billing" Text="Billing" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.isOwner), Mode=OneWay}" weft:On.Press="{x:Bind ViewModel.nav_billingCommand}" />
+                        <MenuFlyoutItem AutomationProperties.AutomationId="item-signout" Text="Sign out" weft:On.Press="{x:Bind ViewModel.auth_signoutCommand}" />
+                    </MenuFlyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

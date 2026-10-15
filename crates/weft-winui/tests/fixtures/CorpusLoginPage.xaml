@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusLogin namespace=WeftScreens
+<screen id="login" label="Sign in" weft="0.1">
+  <form id="form" state="idle" on-submit="auth.submit">
+    <heading id="title" level="1">Sign in</heading>
+    <stack id="fields" gap="{token.space.md}">
+      <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
+      <field id="password" label="Password" required="true" type="password" value="{$.password}"/>
+    </stack>
+    <button id="submit" disabled="{!$.email}" submit="true" variant="primary">Sign in</button>
+    <slot name="footer">
+      <link id="reset" on-press="nav.reset">Forgot password?</link>
+      <link id="signup" on-press="nav.signup">Create an account</link>
+    </slot>
+  </form>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusLoginPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="login" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Sign in">
+            <StackPanel AutomationProperties.AutomationId="form" AutomationProperties.LandmarkType="Form" weft:Props.State="idle" weft:On.Submit="{x:Bind ViewModel.auth_submitCommand}">
+                <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Sign in" />
+                <StackPanel AutomationProperties.AutomationId="fields" Orientation="Vertical" Spacing="{StaticResource Weft.space.md}">
+                    <TextBox AutomationProperties.AutomationId="email" Text="{x:Bind ViewModel.email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="EmailSmtpAddress" AutomationProperties.IsRequiredForForm="True" Header="Email" />
+                    <PasswordBox AutomationProperties.AutomationId="password" Password="{x:Bind ViewModel.password, Mode=TwoWay}" AutomationProperties.IsRequiredForForm="True" Header="Password" />
+                </StackPanel>
+                <Button AutomationProperties.AutomationId="submit" Content="Sign in" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.email), Mode=OneWay}" weft:On.Submit="{x:Bind ViewModel.auth_submitCommand}" />
+                <StackPanel Orientation="Horizontal" weft:Slot.Name="footer">
+                    <HyperlinkButton AutomationProperties.AutomationId="reset" Content="Forgot password?" weft:On.Press="{x:Bind ViewModel.nav_resetCommand}" />
+                    <HyperlinkButton AutomationProperties.AutomationId="signup" Content="Create an account" weft:On.Press="{x:Bind ViewModel.nav_signupCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

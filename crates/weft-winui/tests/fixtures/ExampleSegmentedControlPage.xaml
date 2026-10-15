@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleSegmentedControl namespace=WeftScreens
+<screen id="root" label="Calendar" weft="0.1">
+  <segmented-control id="view" label="View" value="{$.view}" on-change="calendar.update">
+    <segment id="view-day" value="day">Day</segment>
+    <segment id="view-week" value="week">Week</segment>
+    <segment id="view-month" value="month">Month</segment>
+  </segmented-control>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleSegmentedControlPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Calendar">
+            <SelectorBar AutomationProperties.AutomationId="view" weft:Choice.Value="{x:Bind ViewModel.view, Mode=TwoWay}" AutomationProperties.Name="View" weft:On.Change="{x:Bind ViewModel.calendar_updateCommand}">
+                <SelectorBarItem AutomationProperties.AutomationId="view-day" Text="Day" Tag="day" />
+                <SelectorBarItem AutomationProperties.AutomationId="view-week" Text="Week" Tag="week" />
+                <SelectorBarItem AutomationProperties.AutomationId="view-month" Text="Month" Tag="month" />
+            </SelectorBar>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

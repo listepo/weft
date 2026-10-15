@@ -3,13 +3,19 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Windows.Input;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.System;
+using WinColor = Windows.UI.Color;
 
 namespace WeftScreens;
 
@@ -83,6 +89,73 @@ public static class Weft
         }
     }
 
+    // The value controls' text (SPEC §5.1) and the types their WinUI controls hold. Text that is not
+    // exactly of the format is no date, no time, or black, as on every other target.
+
+    /// <summary><c>yyyy-mm-dd</c> as the local midnight of that day, which a date picker shows as
+    /// that day in every time zone.</summary>
+    public static DateTimeOffset? Day(string? text) =>
+        DateTime.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d)
+        && DayText(d) == text ? new DateTimeOffset(d) : null;
+
+    public static string DayText(DateTimeOffset day) => day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    /// <summary><c>hh:mm</c> on a 24-hour clock.</summary>
+    public static TimeSpan? Clock(string? text) =>
+        TimeSpan.TryParseExact(text, @"hh\:mm", CultureInfo.InvariantCulture, out var t)
+        && ClockText(t) == text ? t : null;
+
+    public static string ClockText(TimeSpan time) => time.ToString(@"hh\:mm", CultureInfo.InvariantCulture);
+
+    /// <summary><c>#rrggbb</c> in any case; anything else is black.</summary>
+    public static WinColor Color(string? text) =>
+        text is { Length: 7 } && text[0] == '#' && text.Skip(1).All(Uri.IsHexDigit)
+        && uint.TryParse(text.AsSpan(1), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out var n)
+            ? ColorHelper.FromArgb(255, (byte)(n >> 16), (byte)(n >> 8), (byte)n)
+            : Colors.Black;
+
+    public static string Hex(WinColor color) => $"#{color.R:x2}{color.G:x2}{color.B:x2}";
+
+    /// <summary>The swatch of a bound colour-picker.</summary>
+    public static Brush Swatch(object? value) => new SolidColorBrush(Color(value as string));
+
+    /// <summary>A date-picker's <c>min</c> and <c>max</c>, of a date or a date and time; without one,
+    /// the picker's own range of a hundred years either way.</summary>
+    public static DateTimeOffset Earliest(object? value) => Day(DatePart(value)) ?? DateTimeOffset.Now.AddYears(-100);
+
+    public static DateTimeOffset Latest(object? value) => Day(DatePart(value)) ?? DateTimeOffset.Now.AddYears(100);
+
+    private static string? DatePart(object? value) => (value as string)?.Split('T')[0];
+
+    /// <summary>A bound <c>href</c>. SPEC §9 Trust: only <c>http</c>, <c>https</c> and <c>mailto</c>
+    /// open.</summary>
+    public static Uri? Link(object? value) =>
+        Uri.TryCreate((value as string)?.Trim(), UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https" or "mailto"
+            ? uri
+            : null;
+
+    /// <summary>A bound <c>src</c>. SPEC §9 Trust: an <c>http</c> or <c>https</c> address, or a path
+    /// in the app package; any other scheme shows nothing.</summary>
+    public static ImageSource? Image(object? value)
+    {
+        var text = (value as string)?.Trim() ?? "";
+        var colon = text.IndexOf(':');
+        var end = text.IndexOfAny(['/', '?', '#']);
+        if (text.Length == 0)
+        {
+            return null;
+        }
+        if (colon >= 0 && (end < 0 || colon < end))
+        {
+            return Uri.TryCreate(text, UriKind.Absolute, out var web) && web.Scheme is "http" or "https"
+                ? new BitmapImage(web)
+                : null;
+        }
+        return Uri.TryCreate("ms-appx:///" + text.TrimStart('/'), UriKind.Absolute, out var local)
+            ? new BitmapImage(local)
+            : null;
+    }
+
     internal static DependencyProperty Marker(string name, Type owner) =>
         DependencyProperty.RegisterAttached(name, typeof(object), owner, new PropertyMetadata(null));
 }
@@ -95,6 +168,11 @@ public static class Props
     public static readonly DependencyProperty ErrorProperty = Weft.Marker("Error", typeof(Props));
     public static readonly DependencyProperty VariantProperty = Weft.Marker("Variant", typeof(Props));
     public static readonly DependencyProperty WrapProperty = Weft.Marker("Wrap", typeof(Props));
+    public static readonly DependencyProperty HrefProperty = Weft.Marker("Href", typeof(Props));
+    public static readonly DependencyProperty SrcProperty = Weft.Marker("Src", typeof(Props));
+    public static readonly DependencyProperty UsdzProperty = Weft.Marker("Usdz", typeof(Props));
+    public static readonly DependencyProperty MinProperty = Weft.Marker("Min", typeof(Props));
+    public static readonly DependencyProperty MaxProperty = Weft.Marker("Max", typeof(Props));
 
     public static object? GetState(DependencyObject o) => o.GetValue(StateProperty);
     public static void SetState(DependencyObject o, object? value) => o.SetValue(StateProperty, value);
@@ -104,6 +182,179 @@ public static class Props
     public static void SetVariant(DependencyObject o, object? value) => o.SetValue(VariantProperty, value);
     public static object? GetWrap(DependencyObject o) => o.GetValue(WrapProperty);
     public static void SetWrap(DependencyObject o, object? value) => o.SetValue(WrapProperty, value);
+    public static object? GetHref(DependencyObject o) => o.GetValue(HrefProperty);
+    public static void SetHref(DependencyObject o, object? value) => o.SetValue(HrefProperty, value);
+    public static object? GetSrc(DependencyObject o) => o.GetValue(SrcProperty);
+    public static void SetSrc(DependencyObject o, object? value) => o.SetValue(SrcProperty, value);
+    public static object? GetUsdz(DependencyObject o) => o.GetValue(UsdzProperty);
+    public static void SetUsdz(DependencyObject o, object? value) => o.SetValue(UsdzProperty, value);
+    public static object? GetMin(DependencyObject o) => o.GetValue(MinProperty);
+    public static void SetMin(DependencyObject o, object? value) => o.SetValue(MinProperty, value);
+    public static object? GetMax(DependencyObject o) => o.GetValue(MaxProperty);
+    public static void SetMax(DependencyObject o, object? value) => o.SetValue(MaxProperty, value);
+}
+
+/// <summary>The text value of a control whose own property holds something else (SPEC §9, To
+/// WinUI): the <c>Tag</c> of the chosen item, the text of an editable box, a date, a time or a
+/// colour. The control shows the value; a choice of the user writes it back and runs the element's
+/// <c>change</c>, and a value the view model writes is never a change.</summary>
+public static class Choice
+{
+    public static readonly DependencyProperty ValueProperty = DependencyProperty.RegisterAttached(
+        "Value", typeof(string), typeof(Choice), new PropertyMetadata(null, Changed));
+
+    private static readonly DependencyProperty HookedProperty =
+        DependencyProperty.RegisterAttached("Hooked", typeof(bool), typeof(Choice), new PropertyMetadata(false));
+
+    // Set while a value is shown, so the events the control raises meanwhile are not the user's.
+    private static bool showing;
+
+    public static string? GetValue(DependencyObject o) => (string?)o.GetValue(ValueProperty);
+    public static void SetValue(DependencyObject o, string? value) => o.SetValue(ValueProperty, value);
+
+    private static void Changed(DependencyObject o, DependencyPropertyChangedEventArgs _)
+    {
+        if (o is not FrameworkElement element)
+        {
+            return;
+        }
+        if (!(bool)o.GetValue(HookedProperty))
+        {
+            o.SetValue(HookedProperty, true);
+            Hook(element);
+        }
+        Show(element);
+    }
+
+    private static void Show(FrameworkElement element)
+    {
+        var value = GetValue(element) ?? "";
+        showing = true;
+        try
+        {
+            switch (element)
+            {
+                case ComboBox { IsEditable: true } box:
+                    box.Text = value;
+                    break;
+                case ComboBox box:
+                    box.SelectedItem = Tagged(box.Items, value);
+                    break;
+                case RadioButtons radios:
+                    radios.SelectedItem = Tagged(radios.Items, value);
+                    break;
+                case SelectorBar bar:
+                    bar.SelectedItem = Tagged(bar.Items, value) as SelectorBarItem;
+                    break;
+                case CalendarDatePicker day:
+                    day.Date = Weft.Day(value);
+                    break;
+                case TimePicker time:
+                    time.SelectedTime = Weft.Clock(value);
+                    break;
+                case DropDownButton { Flyout: Flyout { Content: ColorPicker picker } }:
+                    picker.Color = Weft.Color(value);
+                    break;
+                case Panel row:
+                    // A `datetime`: both halves, or neither when the text is not one.
+                    var parts = value.Split('T');
+                    var date = parts.Length == 2 ? Weft.Day(parts[0]) : null;
+                    var clock = parts.Length == 2 ? Weft.Clock(parts[1]) : null;
+                    var whole = date is not null && clock is not null;
+                    foreach (var child in row.Children)
+                    {
+                        if (child is CalendarDatePicker d)
+                        {
+                            d.Date = whole ? date : null;
+                        }
+                        else if (child is TimePicker t)
+                        {
+                            t.SelectedTime = whole ? clock : null;
+                        }
+                    }
+                    break;
+            }
+        }
+        finally
+        {
+            showing = false;
+        }
+    }
+
+    private static object? Tagged(IEnumerable<object> items, string value) =>
+        items.FirstOrDefault(i => (i as FrameworkElement)?.Tag?.ToString() == value);
+
+    private static string? TagOf(object? item) => (item as FrameworkElement)?.Tag?.ToString();
+
+    private static void Hook(FrameworkElement element)
+    {
+        switch (element)
+        {
+            case ComboBox box:
+                box.SelectionChanged += (_, _) => Picked(box, TagOf(box.SelectedItem));
+                box.TextSubmitted += (_, e) => Picked(box, e.Text);
+                break;
+            case RadioButtons radios:
+                radios.SelectionChanged += (_, _) => Picked(radios, TagOf(radios.SelectedItem));
+                break;
+            case SelectorBar bar:
+                bar.SelectionChanged += (_, _) => Picked(bar, TagOf(bar.SelectedItem));
+                break;
+            case CalendarDatePicker day:
+                day.DateChanged += (_, e) => Picked(day, e.NewDate is { } d ? Weft.DayText(d) : "");
+                break;
+            case TimePicker time:
+                time.SelectedTimeChanged += (_, e) => Picked(time, e.NewTime is { } t ? Weft.ClockText(t) : "");
+                break;
+            case DropDownButton { Flyout: Flyout { Content: ColorPicker picker } } button:
+                picker.ColorChanged += (_, e) => Picked(button, Weft.Hex(e.NewColor));
+                break;
+            case Panel row:
+                // A literal value is set before the row's pickers are added; they are there once it loads.
+                row.Loaded += (_, _) => HookRow(row);
+                HookRow(row);
+                break;
+        }
+    }
+
+    private static void HookRow(Panel row)
+    {
+        foreach (var child in row.Children)
+        {
+            if (child is not (CalendarDatePicker or TimePicker) || (bool)child.GetValue(HookedProperty))
+            {
+                continue;
+            }
+            child.SetValue(HookedProperty, true);
+            if (child is CalendarDatePicker day)
+            {
+                day.DateChanged += (_, _) => Picked(row, Joined(row));
+            }
+            else if (child is TimePicker time)
+            {
+                time.SelectedTimeChanged += (_, _) => Picked(row, Joined(row));
+            }
+        }
+        Show(row);
+    }
+
+    // A date and a time chosen apart: the half not chosen yet is today, or midnight.
+    private static string Joined(Panel row)
+    {
+        var day = row.Children.OfType<CalendarDatePicker>().FirstOrDefault()?.Date ?? DateTimeOffset.Now;
+        var time = row.Children.OfType<TimePicker>().FirstOrDefault()?.SelectedTime ?? TimeSpan.Zero;
+        return $"{Weft.DayText(day)}T{Weft.ClockText(time)}";
+    }
+
+    private static void Picked(FrameworkElement element, string? value)
+    {
+        if (showing || value is null || value == GetValue(element))
+        {
+            return;
+        }
+        SetValue(element, value);
+        On.Changed(element);
+    }
 }
 
 /// <summary>The name of the slot an element fills, which nothing else in the XAML states.</summary>
@@ -161,6 +412,18 @@ public static class On
                     Fire(button, SubmitProperty);
                 };
                 break;
+            case Selector or RadioButtons or SelectorBar or CalendarDatePicker or TimePicker:
+                // `Choice` runs their change: only it tells a choice of the user from a value shown.
+                break;
+            case RangeBase range:
+                range.ValueChanged += (_, _) => Edited(range);
+                break;
+            case NumberBox number:
+                number.ValueChanged += (_, _) => Edited(number);
+                break;
+            case MenuFlyoutItem item:
+                item.Click += (_, _) => Fire(item, PressProperty);
+                break;
             case ToggleSwitch toggle:
                 toggle.Toggled += (_, _) => Edited(toggle);
                 break;
@@ -181,12 +444,20 @@ public static class On
         }
     }
 
-    // A value the view model writes into the control is not the user's change.
+    internal static void Changed(FrameworkElement element) => Fire(element, ChangeProperty);
+
+    // A value the view model writes into the control is not the user's change. The focus may sit in
+    // the control's template, as in a NumberBox's text box.
     private static void Edited(Control control)
     {
-        if (control.FocusState != FocusState.Unfocused)
+        var focused = control.XamlRoot is { } root ? FocusManager.GetFocusedElement(root) as DependencyObject : null;
+        for (var o = focused; o is not null; o = VisualTreeHelper.GetParent(o))
         {
-            Fire(control, ChangeProperty);
+            if (o == control)
+            {
+                Fire(control, ChangeProperty);
+                return;
+            }
         }
     }
 

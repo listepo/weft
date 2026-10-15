@@ -121,7 +121,9 @@ pub const ATTRS: &[(&str, &str, &str, Conv)] = &[
     ("slider", "StepFrequency", "step", Conv::Same),
     ("stepper", "SmallChange", "step", Conv::Same),
     ("radio segment option", "Tag", "value", Conv::Same),
+    ("option", "ToolTipService.ToolTip", "", Conv::Same),
     ("image", "Source", "src", Conv::Same),
+    ("model", "Source", "fallback", Conv::Same),
     (
         "alert",
         "Severity",
@@ -134,7 +136,7 @@ pub const ATTRS: &[(&str, &str, &str, Conv)] = &[
         ]),
     ),
     ("alert menu-item", "Message", "", Conv::Same),
-    ("menu-item", "Text", "", Conv::Same),
+    ("segment menu-item", "Text", "", Conv::Same),
 ];
 
 /// Attributes the mapping writes beside the ones it reads, or that only decide the kind.
@@ -148,6 +150,7 @@ const EXPECTED: &[(&str, &str)] = &[
     ("select combobox", "IsEditable"),
     ("select", "SelectedValuePath"),
     ("stepper", "SpinButtonPlacementMode"),
+    ("date-picker", "Orientation"),
     ("list", "SelectionMode"),
     ("tabs", "IsAddTabButtonVisible"),
     ("tab", "IsClosable"),
@@ -262,6 +265,8 @@ pub fn kind_of(el: Xml<'_, '_>) -> Option<(&'static str, Option<&'static str>)> 
     }
     let at = |name: &str| el.attribute(name);
     let kind = match el.tag_name().name() {
+        // Only the generator's date and time row holds a choice on a panel.
+        "StackPanel" if el.attributes().any(|a| a.name() == "Choice.Value") => "date-picker",
         "StackPanel" => match at("AutomationProperties.LandmarkType") {
             Some("Form") => "form",
             Some("Custom")
@@ -308,8 +313,25 @@ pub fn kind_of(el: Xml<'_, '_>) -> Option<(&'static str, Option<&'static str>)> 
         "TabViewItem" => "tab",
         "ContentDialog" => "dialog",
         "InfoBar" => "alert",
+        // The generator's colour picker is a swatch button that opens a ColorPicker.
+        "DropDownButton"
+            if el
+                .descendants()
+                .any(|d| d.has_tag_name((PRESENTATION, "ColorPicker"))) =>
+        {
+            "color-picker"
+        }
         "DropDownButton" => "menu",
         "MenuFlyoutItem" => "menu-item",
+        // A model shows its fallback picture and keeps its scene in markers; an image keeps a
+        // `src` it cannot load in the marker alone.
+        "Image"
+            if el.attributes().any(|a| {
+                a.name() == "Props.Usdz" || (a.name() == "Props.Src" && at("Source").is_some())
+            }) =>
+        {
+            "model"
+        }
         "Image" => "image",
         _ => return None,
     };
@@ -323,6 +345,16 @@ pub fn wrapper(el: Xml<'_, '_>) -> Option<Option<(LossKind, &'static str)>> {
     }
     Some(match el.tag_name().name() {
         "DataTemplate" | "MenuFlyout" => None,
+        // An InfoBar takes one content element; the generator's bare panel holds an alert's
+        // several children, while a `stack` of the source always carries its AutomationId.
+        "StackPanel"
+            if el.attributes().next().is_none()
+                && el
+                    .parent_element()
+                    .is_some_and(|p| p.tag_name().name() == "InfoBar") =>
+        {
+            None
+        }
         "ScrollViewer" | "Border" | "Viewbox" => Some((
             LossKind::Layout,
             "a scrolling or framing wrapper; its content is read in its place",

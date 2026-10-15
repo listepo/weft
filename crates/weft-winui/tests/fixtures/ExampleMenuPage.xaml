@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleMenu namespace=WeftScreens
+<screen id="root" label="Document" weft="0.1">
+  <menu id="actions" label="Document actions">
+    <menu-item id="rename" on-press="doc.rename">Rename</menu-item>
+    <menu-item id="delete" on-press="doc.delete">Delete</menu-item>
+  </menu>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleMenuPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Document">
+            <DropDownButton AutomationProperties.AutomationId="actions" Content="Document actions" AutomationProperties.Name="Document actions">
+                <DropDownButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem AutomationProperties.AutomationId="rename" Text="Rename" weft:On.Press="{x:Bind ViewModel.doc_renameCommand}" />
+                        <MenuFlyoutItem AutomationProperties.AutomationId="delete" Text="Delete" weft:On.Press="{x:Bind ViewModel.doc_deleteCommand}" />
+                    </MenuFlyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

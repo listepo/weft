@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusSignup namespace=WeftScreens
+<screen id="signup" label="Create account" weft="0.1">
+  <form id="form" state="idle" on-submit="auth.signup">
+    <heading id="title" level="1">Create your account</heading>
+    <stack id="fields" gap="{token.space.md}">
+      <field id="name" label="Full name" required="true" value="{$.name}"/>
+      <field id="email" label="Email" required="true" type="email" value="{$.email}"/>
+      <field id="password" label="Password" required="true" type="password" value="{$.password}"/>
+      <field id="confirm" label="Confirm password" required="true" type="password" value="{$.confirm}"/>
+      <checkbox id="terms" checked="{$.acceptTerms}" label="I accept the terms of service"/>
+    </stack>
+    <button id="submit" disabled="{!$.acceptTerms}" submit="true" variant="primary">Create account</button>
+    <slot name="footer">
+      <link id="signin" on-press="nav.signin">Already have an account? Sign in</link>
+    </slot>
+  </form>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusSignupPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="signup" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Create account">
+            <StackPanel AutomationProperties.AutomationId="form" AutomationProperties.LandmarkType="Form" weft:Props.State="idle" weft:On.Submit="{x:Bind ViewModel.auth_signupCommand}">
+                <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Create your account" />
+                <StackPanel AutomationProperties.AutomationId="fields" Orientation="Vertical" Spacing="{StaticResource Weft.space.md}">
+                    <TextBox AutomationProperties.AutomationId="name" Text="{x:Bind ViewModel.name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.IsRequiredForForm="True" Header="Full name" />
+                    <TextBox AutomationProperties.AutomationId="email" Text="{x:Bind ViewModel.email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="EmailSmtpAddress" AutomationProperties.IsRequiredForForm="True" Header="Email" />
+                    <PasswordBox AutomationProperties.AutomationId="password" Password="{x:Bind ViewModel.password, Mode=TwoWay}" AutomationProperties.IsRequiredForForm="True" Header="Password" />
+                    <PasswordBox AutomationProperties.AutomationId="confirm" Password="{x:Bind ViewModel.confirm, Mode=TwoWay}" AutomationProperties.IsRequiredForForm="True" Header="Confirm password" />
+                    <CheckBox AutomationProperties.AutomationId="terms" IsChecked="{x:Bind ViewModel.acceptTerms, Mode=TwoWay}" Content="I accept the terms of service" />
+                </StackPanel>
+                <Button AutomationProperties.AutomationId="submit" Content="Create account" Style="{StaticResource AccentButtonStyle}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.acceptTerms), Mode=OneWay}" weft:On.Submit="{x:Bind ViewModel.auth_signupCommand}" />
+                <StackPanel Orientation="Horizontal" weft:Slot.Name="footer">
+                    <HyperlinkButton AutomationProperties.AutomationId="signin" Content="Already have an account? Sign in" weft:On.Press="{x:Bind ViewModel.nav_signinCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

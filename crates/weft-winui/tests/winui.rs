@@ -176,6 +176,17 @@ fn helpers_take_the_namespace() {
     let shared = helpers("Acme.Screens").unwrap();
     assert!(shared.contains("\nnamespace Acme.Screens;\n"));
     assert!(!shared.contains("WeftNamespace"));
+    for function in [
+        "DateTimeOffset? Day(string? text)",
+        "string DayText(DateTimeOffset day)",
+        "TimeSpan? Clock(string? text)",
+        "string ClockText(TimeSpan time)",
+        "WinColor Color(string? text)",
+        "string Hex(WinColor color)",
+        "class Choice",
+    ] {
+        assert!(shared.contains(function), "{function}");
+    }
     for name in ["Not", "Truthy", "Hide"] {
         let function = format!(" {name}(object? value) =>");
         assert!(shared.contains(&function), "{name}");
@@ -243,7 +254,15 @@ fn refused(markup: &str) -> Vec<String> {
 #[test]
 fn what_the_slice_cannot_draw_is_refused_with_its_path() {
     let cases = [
-        (r#"<link id="l" href="https://a.b">A</link>"#, "link#l"),
+        (
+            r#"<date-picker id="d" label="D" type="{$.type}"/>"#,
+            "date-picker#d",
+        ),
+        (r#"<alert id="a" tone="{$.tone}">A</alert>"#, "alert#a"),
+        (
+            r#"<select id="sel" label="S" value="{$.v}"><each id="e" as="o" in="{$.os}"><option id="o" value="{$o.v}">O</option></each></select>"#,
+            "each#e",
+        ),
         (
             r#"<stack id="r" justify="center"><text id="a">A</text></stack>"#,
             "stack#r",
@@ -282,6 +301,117 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
     let command =
         screen(r#"<button id="b" on-press="go">Go</button><text id="t" text="{$.goCommand}"/>"#);
     assert_eq!(refused(&command), ["text#t"]);
+}
+
+fn values() -> Generated {
+    let (catalog, tokens) = setup();
+    let markup = std::fs::read_to_string(here("tests/fixtures/values.weft")).unwrap();
+    let doc = document(&markup, &catalog, &tokens);
+    generate(&doc, &options(&catalog, &tokens, None)).unwrap()
+}
+
+/// The element of `xaml` whose `AutomationId` is `id`.
+fn by_id<'a>(xml: &'a roxmltree::Document<'a>, id: &str) -> roxmltree::Node<'a, 'a> {
+    xml.descendants()
+        .find(|n| n.attribute("AutomationProperties.AutomationId") == Some(id))
+        .unwrap_or_else(|| panic!("{id}"))
+}
+
+#[test]
+fn value_controls_follow_the_spec() {
+    let generated = values();
+    let xml = roxmltree::Document::parse(&generated.xaml).unwrap();
+    // `weft:` attributes are in the namespace of the page's helpers.
+    let at = |id: &str, attr: &str| {
+        let node = by_id(&xml, id);
+        match attr.strip_prefix("weft:") {
+            Some(name) => node.attribute(("using:WeftScreens", name)),
+            None => node.attribute(attr),
+        }
+        .map(str::to_owned)
+    };
+    // Every choice shows its text through `Choice.Value`, two-way when bound.
+    for (id, element) in [
+        ("size", "ComboBox"),
+        ("city", "ComboBox"),
+        ("view", "SelectorBar"),
+        ("day", "CalendarDatePicker"),
+        ("alarm", "TimePicker"),
+        ("accent", "DropDownButton"),
+    ] {
+        assert_eq!(by_id(&xml, id).tag_name().name(), element, "{id}");
+        let value = at(id, "weft:Choice.Value").unwrap();
+        assert!(value.ends_with("Mode=TwoWay}"), "{id}: {value}");
+    }
+    // A combobox's item shows the value its box takes, a select's the option's text.
+    assert_eq!(at("city-lisbon", "Content").as_deref(), Some("Lisbon"));
+    assert_eq!(
+        at("city-lisbon", "ToolTipService.ToolTip").as_deref(),
+        Some("Portugal")
+    );
+    assert_eq!(at("size-s", "Content").as_deref(), Some("Small"));
+    assert_eq!(at("size-s", "Tag").as_deref(), Some("s"));
+    // Literal bounds as SPEC §5.1 reads them; a bound `min` leaves a literal `max` alone.
+    for (id, min, max, step) in [
+        ("flipped", "10", "10", "1"),
+        ("count", "8", "8", "1"),
+        ("above", "{x:Bind ViewModel.bottom, Mode=OneWay}", "-5", ""),
+    ] {
+        assert_eq!(at(id, "Minimum").as_deref(), Some(min), "{id}");
+        assert_eq!(at(id, "Maximum").as_deref(), Some(max), "{id}");
+        let step = (!step.is_empty()).then(|| step.to_owned());
+        let stride = at(id, "StepFrequency").or(at(id, "SmallChange"));
+        assert_eq!(stride, step, "{id}");
+    }
+    let vm = &generated.view_model_source;
+    assert!(vm.contains("public double level"), "{vm}");
+    assert!(vm.contains("private double Weft_count = 0;"), "{vm}");
+    // Dates: a literal of the format through `Weft.Earliest`, any other bound a marker.
+    let earliest = "{x:Bind weft:Weft.Earliest('2026-01-01')}";
+    assert_eq!(at("day", "MinDate").as_deref(), Some(earliest));
+    assert_eq!(at("bad-day", "MinDate"), None);
+    assert_eq!(
+        at("bad-day", "weft:Props.Max").as_deref(),
+        Some("2026-02-30")
+    );
+    assert_eq!(at("alarm", "weft:Props.Max").as_deref(), Some("18:00"));
+    let meeting = by_id(&xml, "meeting");
+    let parts: Vec<_> = meeting
+        .children()
+        .filter(|n| n.is_element())
+        .map(|n| n.tag_name().name())
+        .collect();
+    assert_eq!(parts, ["CalendarDatePicker", "TimePicker"]);
+    // Colours: a literal swatch is lowercase `#rrggbb`, black when it is not one.
+    let swatch = |id: &str| {
+        let border = by_id(&xml, id)
+            .descendants()
+            .find(|n| n.has_tag_name("Border"))
+            .unwrap();
+        border.attribute("Background").unwrap().to_owned()
+    };
+    assert_eq!(swatch("plain"), "#d946ef");
+    assert_eq!(swatch("broken"), "#000000");
+    // SPEC §9 Trust: only `http`, `https` and `mailto` open, and a hostile image loads nothing.
+    assert_eq!(
+        at("mail", "NavigateUri").as_deref(),
+        Some("mailto:help@example.com")
+    );
+    for id in ["relative", "script"] {
+        assert_eq!(at(id, "NavigateUri"), None, "{id}");
+        assert!(at(id, "weft:Props.Href").is_some(), "{id}");
+    }
+    assert_eq!(at("hostile", "Source"), None);
+    assert_eq!(at("chair", "Source").as_deref(), Some("assets/chair.png"));
+    // An alert's text is its message; other content is a panel.
+    assert_eq!(at("info", "Message").as_deref(), Some("Plain notice"));
+    assert_eq!(at("info", "Severity"), None);
+    assert_eq!(at("bad", "Severity").as_deref(), Some("Error"));
+    assert!(
+        by_id(&xml, "warn")
+            .children()
+            .any(|n| n.has_tag_name("StackPanel"))
+    );
 }
 
 #[test]
