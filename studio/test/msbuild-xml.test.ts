@@ -20,18 +20,24 @@ const xmlFiles = (dir: string): string[] =>
 
 /** Comments whose body holds `--`, which XML 1.0 (§2.5) forbids. */
 const badComments = (text: string): string[] =>
-  [...text.matchAll(/<!--([\s\S]*?)-->/g)].map((m) => m[1] ?? "").filter((body) => body.includes("--"));
+  [...text.matchAll(/<!--([\s\S]*?)-->/g)]
+    .map((m) => m[1] ?? "")
+    .filter((body) => body.includes("--"));
 
 describe("studio/windows MSBuild and XAML files", () => {
   test("the check finds a double hyphen inside a comment", () => {
-    expect(badComments("<!-- run `x --msbuild` -->\n<!-- fine -->")).toEqual([" run `x --msbuild` "]);
+    expect(badComments("<!-- run `x --msbuild` -->\n<!-- fine -->")).toEqual([
+      " run `x --msbuild` ",
+    ]);
   });
 
   test("no comment holds a double hyphen", () => {
     const files = xmlFiles(windows);
     expect(files.length).toBeGreaterThan(0);
     const bad = files.flatMap((file) =>
-      badComments(readFileSync(file, "utf8")).map((body) => `${relative(repoRoot, file)}: <!--${body}-->`),
+      badComments(readFileSync(file, "utf8")).map(
+        (body) => `${relative(repoRoot, file)}: <!--${body}-->`,
+      ),
     );
     expect(bad).toEqual([]);
   });
