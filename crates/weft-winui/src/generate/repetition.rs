@@ -88,7 +88,7 @@ impl Gen<'_> {
             e.attr("ItemsSource", source);
             markers(e, each);
             if let Some(mut root) = self.node(items[0]) {
-                root.name = "ContentControl";
+                root.name = "ContentControl".into();
                 root.attr("AutomationProperties.LocalizedControlType", "list item");
                 e.children
                     .push(holder("ListView.ItemTemplate", template(&class, root)));
@@ -177,7 +177,7 @@ fn template(class: &str, root: Element) -> Element {
 }
 
 /// A property element holding `child`.
-fn holder(name: &'static str, child: Element) -> Element {
+pub(super) fn holder(name: impl Into<std::borrow::Cow<'static, str>>, child: Element) -> Element {
     let mut e = Element::new(name);
     e.children.push(child);
     e

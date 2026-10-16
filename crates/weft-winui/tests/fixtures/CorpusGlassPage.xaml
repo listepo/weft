@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusGlass namespace=WeftScreens
+<screen id="glass" label="Glass" weft="0.1">
+  <stack id="card" direction="column" gap="{token.space.md}" material="{token.material.glass}" padding="{token.space.lg}">
+    <heading id="title" level="2" text="{$.title}"/>
+    <text id="body">The panel blurs what is behind it.</text>
+    <button id="close" variant="primary" on-press="glass.close">Got it</button>
+  </stack>
+  <grid id="tiles" columns="2" gap="{token.space.sm}" material="{token.material.glass}" max-width="{token.size.md}" padding="{token.space.xl}">
+    <text id="tile-light">Light</text>
+    <text id="tile-dark">Dark</text>
+  </grid>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusGlassPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="glass" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Glass">
+            <Border Background="{ThemeResource Weft.material.glass}" Padding="{StaticResource Weft.space.lg.thickness}">
+                <StackPanel AutomationProperties.AutomationId="card" Orientation="Vertical" Spacing="{StaticResource Weft.space.md}">
+                    <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="{x:Bind ViewModel.title, Mode=OneWay}" />
+                    <TextBlock AutomationProperties.AutomationId="body" TextWrapping="Wrap" Text="The panel blurs what is behind it." />
+                    <Button AutomationProperties.AutomationId="close" Content="Got it" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.glass_closeCommand}" />
+                </StackPanel>
+            </Border>
+            <Border Background="{ThemeResource Weft.material.glass}" Padding="{StaticResource Weft.space.xl.thickness}" MaxWidth="{StaticResource Weft.size.md}">
+                <Grid AutomationProperties.AutomationId="tiles" RowSpacing="{StaticResource Weft.space.sm}" ColumnSpacing="{StaticResource Weft.space.sm}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock AutomationProperties.AutomationId="tile-light" TextWrapping="Wrap" Text="Light" />
+                    <TextBlock AutomationProperties.AutomationId="tile-dark" TextWrapping="Wrap" Text="Dark" Grid.Column="1" />
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

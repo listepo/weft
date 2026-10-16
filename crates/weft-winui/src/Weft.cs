@@ -14,6 +14,7 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Media.Media3D;
 using Windows.System;
 using WinColor = Windows.UI.Color;
 
@@ -289,6 +290,33 @@ public sealed class ColumnsPanel : Panel
 
     IEnumerable<List<UIElement>> Rows() =>
         Children.Select((c, i) => (c, i)).GroupBy(t => t.i / count, t => t.c).Select(g => g.ToList());
+}
+
+/// <summary>The centre of an element's 3D tilt (SPEC §9, To WinUI): a Weft tilt turns about the
+/// element's middle, and a <c>CompositeTransform3D</c> takes its centre in pixels, so this keeps
+/// it at half the element's size whenever the size changes.</summary>
+public static class Tilt
+{
+    public static readonly DependencyProperty CenteredProperty = DependencyProperty.RegisterAttached(
+        "Centered", typeof(bool), typeof(Tilt), new PropertyMetadata(false, Changed));
+
+    public static bool GetCentered(DependencyObject o) => (bool)o.GetValue(CenteredProperty);
+    public static void SetCentered(DependencyObject o, bool value) => o.SetValue(CenteredProperty, value);
+
+    private static void Changed(DependencyObject o, DependencyPropertyChangedEventArgs e)
+    {
+        if (o is FrameworkElement element && e.NewValue is true && e.OldValue is not true)
+        {
+            element.SizeChanged += (_, size) =>
+            {
+                if (element.Transform3D is CompositeTransform3D turn && GetCentered(element))
+                {
+                    turn.CenterX = size.NewSize.Width / 2;
+                    turn.CenterY = size.NewSize.Height / 2;
+                }
+            };
+        }
+    }
 }
 
 /// <summary>The text value of a control whose own property holds something else (SPEC §9, To

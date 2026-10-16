@@ -242,6 +242,7 @@ const TOKENS: &[(&str, &str, &str)] = &[
     ("stack grid", "ColumnSpacing", "gap"),
     ("stack grid", "Padding", "padding"),
     ("stack grid", "MaxWidth", "max-width"),
+    ("stack grid", "Background", "material"),
 ];
 /// A native event or `Command` bound to the view model, and the Weft events it may be, in order.
 const BOUND_EVENTS: &[(&str, &[&str])] = &[

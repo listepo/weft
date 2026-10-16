@@ -341,6 +341,63 @@ pub fn composite_part(value: &Json, key: &str, tokens: &IndexMap<String, Token>)
     }
 }
 
+/// `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa` as red, green and blue from 0 to 1, and the alpha.
+pub fn hex_channels(text: &str) -> Option<([f64; 3], f64)> {
+    let digits = text.strip_prefix('#')?;
+    if !digits.chars().all(|c| c.is_ascii_hexdigit()) {
+        return None;
+    }
+    let pairs: Vec<String> = match digits.len() {
+        3 | 4 => digits.chars().map(|c| format!("{c}{c}")).collect(),
+        6 | 8 => digits
+            .as_bytes()
+            .chunks(2)
+            .map(|p| String::from_utf8_lossy(p).into_owned())
+            .collect(),
+        _ => return None,
+    };
+    let values: Vec<f64> = pairs
+        .iter()
+        .map(|p| u8::from_str_radix(p, 16).map(|n| f64::from(n) / 255.0))
+        .collect::<Result<_, _>>()
+        .ok()?;
+    let alpha = values.get(3).copied().unwrap_or(1.0);
+    Some(([values[0], values[1], values[2]], alpha))
+}
+
+/// A DTCG colour value in sRGB, for a target that has no other colour space: the `srgb`
+/// components when the colour has them, else the `hex` fallback the format requires for every
+/// other space (DTCG 2025.10 Color Module), or the hex string of earlier drafts. Channels and
+/// alpha are from 0 to 1.
+pub fn srgb_channels(value: &Json) -> Option<([f64; 3], f64)> {
+    if let Some(s) = value.as_str() {
+        return hex_channels(s);
+    }
+    let alpha = match value.get("alpha") {
+        None => None,
+        Some(a) => Some(a.as_f64().filter(|a| (0.0..=1.0).contains(a))?),
+    };
+    let components = value.get("components").and_then(Json::as_array);
+    if value.get("colorSpace").and_then(Json::as_str) == Some("srgb")
+        && let Some(components) = components.filter(|c| c.len() == 3)
+    {
+        // `none` is a missing component, which reads as zero.
+        let channel = |c: &Json| match c {
+            Json::String(s) if s == "none" => Some(0.0),
+            _ => c.as_f64().filter(|n| (0.0..=1.0).contains(n)),
+        };
+        if let (Some(r), Some(g), Some(b)) = (
+            channel(&components[0]),
+            channel(&components[1]),
+            channel(&components[2]),
+        ) {
+            return Some(([r, g, b], alpha.unwrap_or(1.0)));
+        }
+    }
+    let (rgb, hex_alpha) = hex_channels(value.get("hex")?.as_str()?)?;
+    Some((rgb, alpha.unwrap_or(hex_alpha)))
+}
+
 /// A DTCG font weight, a number from 1 to 1000 or one of the names the format lists, as a number.
 pub fn font_weight(value: &Json) -> Option<f64> {
     match value {
@@ -367,6 +424,34 @@ mod tests {
     use serde_json::json;
 
     use super::*;
+
+    #[test]
+    fn colours_read_as_srgb_channels() {
+        assert_eq!(hex_channels("#f00"), Some(([1.0, 0.0, 0.0], 1.0)));
+        assert_eq!(
+            hex_channels("#00000080"),
+            Some(([0.0, 0.0, 0.0], 128.0 / 255.0))
+        );
+        assert_eq!(hex_channels("#12345"), None);
+        assert_eq!(hex_channels("red"), None);
+        let srgb = json!({ "colorSpace": "srgb", "components": [1, 0.5, "none"], "alpha": 0.25 });
+        assert_eq!(srgb_channels(&srgb), Some(([1.0, 0.5, 0.0], 0.25)));
+        // Another space falls back to its hex, keeping the stated alpha.
+        let p3 = json!({ "colorSpace": "display-p3", "components": [1, 0, 0], "alpha": 0.5, "hex": "#ff0000" });
+        assert_eq!(srgb_channels(&p3), Some(([1.0, 0.0, 0.0], 0.5)));
+        assert_eq!(
+            srgb_channels(&json!("#ffffff")),
+            Some(([1.0, 1.0, 1.0], 1.0))
+        );
+        assert_eq!(
+            srgb_channels(&json!({ "colorSpace": "oklch", "components": [0.5, 0.1, 30] })),
+            None
+        );
+        assert_eq!(
+            srgb_channels(&json!({ "colorSpace": "srgb", "components": [2, 0, 0] })),
+            None
+        );
+    }
 
     fn codes(tokens: &Tokens) -> Vec<(TokenCode, &str)> {
         tokens

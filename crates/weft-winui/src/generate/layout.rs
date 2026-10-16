@@ -81,7 +81,7 @@ impl Gen<'_> {
             e.children = children;
             return;
         }
-        e.name = "Grid";
+        e.name = "Grid".into();
         // Empty star tracks take the free space where `justify` puts it; a growing child takes
         // it all (SPEC §5.1), so then there are none.
         let spacer = |at: &str| !grow && justify == at;
@@ -145,7 +145,7 @@ impl Gen<'_> {
     /// A `grid` with `min-column-width`: a `weft:ColumnsPanel` showing at most `columns`
     /// columns, each at least the token wide, its children in order.
     pub(super) fn columns_panel(&mut self, e: &mut Element, node: &Node, columns: usize) {
-        e.name = "weft:ColumnsPanel";
+        e.name = "weft:ColumnsPanel".into();
         e.attr("Columns", columns.to_string());
         match node.props.get("min-column-width") {
             Some(Value::Token(path)) => {

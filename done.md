@@ -1597,6 +1597,21 @@ Result: https://github.com/pyrlyn/weft/pull/109. `example-date-picker` and `exam
 
 Result: https://github.com/pyrlyn/weft/pull/112. Seven more screens generate (`corpus-appearance` together with the T105.13 pickers, `corpus-dashboard`, `corpus-inbox`, `corpus-layout`, `corpus-receipt`, `example-grid`, `example-stack`), with a `layout` fixture of every `justify`, `grow`, `align`, `padding`, `max-width` and `min-column-width` case, and they read back from the XAML alone without losses. A `justify` that draws nothing is the `weft:Props.Justify` marker; `ColumnsPanel` is in `Weft.cs`.
 
+### T105.15. WinUI colour tokens, materials and tilt
+
+Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeDictionaries` for light, dark and high contrast), `material` as an `AcrylicBrush` on a `Border` (with `padding` inside it), and the 3D tilt (`perspective`, `rotate-x`, `rotate-y`, `rotate-z`). Checks the unverified resource-key and perspective facts in the Windows build. Done when the `glass`, `tilt` and `showroom` corpus screens generate, build and read back. Per-page tokens and `weft:ColumnsLayout` were split off into T105.18 when this task was claimed, since the whole card was over the 500-line budget.
+
+**Execution plan.**
+
+1. Spec first: SPEC §9 "To WinUI" and "From WinUI" (colour and material resources, the material `Border`, the tilt `Border` and `Transform3D`, `weft:Tilt.Centered`), `docs/winui-design.md` § Tokens and the tilt row, `research.md` §23 rows for the facts checked (perspective on a parent, rotation sense, theme dictionary keys).
+2. `crates/weft-catalog`: one sRGB channel reader for DTCG colours (`#rgb`…`#rrggbbaa` and `srgb` components), reused by `weft-swiftui` instead of its own hex parser and by `weft-winui`.
+3. `crates/weft-winui/src/tokens.rs`: colours as `Color` and `SolidColorBrush`, materials as `AcrylicBrush` (tint, opacity, fallback), in `Light`, `Dark` (from the appearance when the project has one) and `HighContrast` dictionaries; `weft winui-tokens` passes the appearance.
+4. Generator: `material` wraps the stack or grid in a `Border` with `Background="{ThemeResource Weft.<path>}"` holding its `Padding` and `MaxWidth`; the tilt is a `CompositeTransform3D` on the element (or its material `Border`) with `weft:Tilt.Centered`, under a `Border` with a `PerspectiveTransform3D` when `perspective` is set; layout attributes and `Visibility` go on the outermost wrapper. `Tilt` helper in `Weft.cs`.
+5. Reader: those `Border`s and `Transform3D` property elements read back into `material`, `padding`, `max-width`, `hidden`, `perspective` and the rotations.
+6. Tests: golden files for `glass`, `tilt`, `showroom` (out of `PENDING`), generator unit tests, round trips both ways, tokens golden; `moon run root:changed`, then the full check; the `winui` CI job builds the goldens.
+
+Result: PR_LINK. `corpus-glass`, `corpus-tilt` and `corpus-showroom` generate, match their goldens, build in the Windows `winui` job and read back from the XAML alone without losses. `WeftTokens.xaml` writes colours and materials in `Light`, `Dark` and `HighContrast` theme dictionaries; `weft-catalog` has one sRGB channel reader that `weft-swiftui` now shares. A tilt on a `screen` or on an item a control holds itself is refused for now.
+
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
 SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.

@@ -17,9 +17,6 @@ use weft_winui::{GenerateOptions, Generated, generate};
 pub const PENDING: &[&str] = &[
     "corpus-account",
     "corpus-booking",
-    "corpus-glass",
-    "corpus-showroom",
-    "corpus-tilt",
     "example-menu-item",
     "example-option",
 ];

@@ -15,7 +15,9 @@ use std::collections::BTreeMap;
 
 use indexmap::IndexMap;
 use serde_json::Value as Json;
-use weft_catalog::{Appearance, MATERIAL, Token, composite_part, font_weight, material_parts};
+use weft_catalog::{
+    Appearance, MATERIAL, Token, composite_part, font_weight, hex_channels, material_parts,
+};
 
 use crate::Unsupported;
 use crate::swift::{self, number_literal, string_literal};
@@ -439,7 +441,7 @@ fn channel(n: f64) -> String {
 fn color(v: &Json) -> Option<String> {
     // The string form of earlier DTCG drafts is still common (the example project uses it).
     if let Some(s) = v.as_str() {
-        let (values, alpha) = hex(s)?;
+        let (values, alpha) = hex_channels(s)?;
         return Some(rgb(".sRGB", &values, alpha));
     }
     let space = match v.get("colorSpace")?.as_str()? {
@@ -465,7 +467,7 @@ fn color(v: &Json) -> Option<String> {
             return Some(rgb(space, &values, alpha));
         }
     }
-    let (values, hex_alpha) = hex(v.get("hex")?.as_str()?)?;
+    let (values, hex_alpha) = hex_channels(v.get("hex")?.as_str()?)?;
     let alpha = if v.get("alpha").is_some() {
         alpha
     } else {
@@ -482,30 +484,6 @@ fn rgb(space: &str, c: &[f64], alpha: f64) -> String {
         channel(c[2]),
         channel(alpha)
     )
-}
-
-/// `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa` as channels from 0 to 1, and the alpha.
-fn hex(text: &str) -> Option<(Vec<f64>, f64)> {
-    let digits = text.strip_prefix('#')?;
-    if !digits.chars().all(|c| c.is_ascii_hexdigit()) {
-        return None;
-    }
-    let pairs: Vec<String> = match digits.len() {
-        3 | 4 => digits.chars().map(|c| format!("{c}{c}")).collect(),
-        6 | 8 => digits
-            .as_bytes()
-            .chunks(2)
-            .map(|p| String::from_utf8_lossy(p).into_owned())
-            .collect(),
-        _ => return None,
-    };
-    let values: Vec<f64> = pairs
-        .iter()
-        .map(|p| u8::from_str_radix(p, 16).map(|n| f64::from(n) / 255.0))
-        .collect::<Result<_, _>>()
-        .ok()?;
-    let alpha = values.get(3).copied().unwrap_or(1.0);
-    Some((values[..3].to_vec(), alpha))
 }
 
 /// A family or a list of fallbacks, as Swift string literals.
