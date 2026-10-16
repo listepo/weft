@@ -76,7 +76,7 @@ impl Gen<'_> {
                 self.choice(e, node);
                 self.disabled(e, node);
                 let outer = std::mem::replace(&mut self.editable, editable);
-                self.children(e, &node.children);
+                self.items(e, node);
                 self.editable = outer;
             }
             "option" => {
@@ -122,7 +122,7 @@ impl Gen<'_> {
             "menu" => {
                 self.set(e, node, "label", "Content", Leaf::Text);
                 let mut flyout = Element::new("MenuFlyout");
-                self.children(&mut flyout, &node.children);
+                self.items(&mut flyout, node);
                 e.children.push(property("DropDownButton.Flyout", flyout));
             }
             "menu-item" => {

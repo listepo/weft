@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleOption namespace=WeftScreens
+<screen id="root" label="Sizes" weft="0.1">
+  <select id="size" label="Size" value="{$.size}">
+    <each id="size-each" as="size" in="{$.sizes}">
+      <option id="size-option" value="{$size.code}">Size</option>
+    </each>
+    <option id="size-other" value="other">Other</option>
+  </select>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleOptionPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Sizes">
+            <ComboBox AutomationProperties.AutomationId="size" weft:Choice.Value="{x:Bind ViewModel.size, Mode=TwoWay}" weft:Each.Source="{x:Bind ViewModel.sizes, Mode=OneWay}" weft:Each.Id="size-each" weft:Each.As="size" Header="Size">
+                <weft:Each.Template>
+                    <DataTemplate x:DataType="weft:ExampleOptionSizesItem">
+                        <ComboBoxItem AutomationProperties.AutomationId="size-option" Content="Size" Tag="{x:Bind code, Mode=OneWay}" />
+                    </DataTemplate>
+                </weft:Each.Template>
+                <ComboBoxItem AutomationProperties.AutomationId="size-other" Content="Other" Tag="other" />
+            </ComboBox>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
