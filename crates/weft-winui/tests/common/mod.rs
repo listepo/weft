@@ -15,7 +15,6 @@ use weft_winui::{GenerateOptions, Generated, generate};
 /// example generates and has golden files the Windows build compiles (T105.7). T105.3–T105.5
 /// shrink this list until it is empty.
 pub const PENDING: &[&str] = &[
-    "corpus-account",
     "corpus-booking",
     "corpus-glass",
     "corpus-showroom",
@@ -125,6 +124,10 @@ pub fn covered() -> Vec<(String, Document, Generated)> {
         })
         .collect()
 }
+
+/// The body of a screen whose paths are C# keywords: a plain one, one already ending in `_`, a
+/// contextual one, and a list with a keyword member (T105.17).
+pub const KEYWORDS_BODY: &str = r#"<switch id="p" checked="{$.public}" label="P"/><text id="t" text="{$.public_}"/><text id="v" text="{$.value}"/><stack id="st"><each id="e" as="c" in="{$.class}"><text id="n" text="{$c.event}"/></each></stack>"#;
 
 /// A screen around `body`, the shape of every small test document.
 pub fn screen(body: &str) -> String {

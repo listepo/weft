@@ -8,6 +8,7 @@ use weft_import::LossKind;
 
 use super::Reader;
 use super::controls::Conv;
+use crate::data::weft_name;
 
 /// The `Weft` helper a function binding calls (`Weft.cs`).
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -93,10 +94,10 @@ fn x_bind(el: Xml<'_, '_>, value: &str, loops: &[String]) -> Result<Bound, Strin
     })
 }
 
-/// `ViewModel.todos[0].title` → `$.todos.0.title`. Inside a template `WeftRoot` is the view model,
-/// a path of its own is the innermost loop's item (`title` → `$todo.title`), and each
-/// `WeftParent.` steps out one loop. Outside the loops an `<each>` declares, an item path has no
-/// Weft form.
+/// `ViewModel.todos[0].title` → `$.todos.0.title`, each member its Weft name (`public_` →
+/// `public`). Inside a template `WeftRoot` is the view model, a path of its own is the innermost
+/// loop's item (`title` → `$todo.title`), and each `WeftParent.` steps out one loop. Outside the
+/// loops an `<each>` declares, an item path has no Weft form.
 fn data_path(p: &str, loops: &[String]) -> Result<String, String> {
     let not_ours = || format!("`{p}` is not a path of the page's view model");
     let (root, rest) = match p
@@ -120,7 +121,9 @@ fn data_path(p: &str, loops: &[String]) -> Result<String, String> {
         .split(']')
         .skip(1)
         .all(|after| after.is_empty() || after.starts_with(['.', '[']));
-    let path = format!("{root}.{}", rest.replace(']', "").replace('[', "."));
+    let rest = rest.replace(']', "").replace('[', ".");
+    let names: Vec<_> = rest.split('.').map(weft_name).collect();
+    let path = format!("{root}.{}", names.join("."));
     if closed && is_binding(&path) {
         Ok(path)
     } else {

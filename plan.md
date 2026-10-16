@@ -13,7 +13,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T105.15 | todo | P2 | 4 | 0% | |
 | T105.16 | todo | P2 | 3 | 0% | |
-| T105.17 | in progress | P2 | 2 | 0% | Claude Code / claude-opus-5-5 |
 | T903 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -301,12 +300,6 @@ Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeD
 ### T105.16. WinUI repeats inside select, combobox and menu
 
 Found when T105.10 closed: an `<each>` inside `select`, `combobox` or `menu` does not generate, so `corpus-booking`, `example-menu-item` and `example-option` stay in `PENDING` (`crates/weft-winui/tests/common/mod.rs`). Generate the repeated options or menu items from the bound collection (an `ItemsSource` with a typed template, or the pattern T105.14 uses for repetition), read them back, and add the SPEC §9 and `docs/winui-design.md` rows. The creator approved this task. Done when the three screens leave `PENDING`, their goldens build in the Windows job, and they round-trip.
-
-### T105.17. WinUI data paths named like C# keywords
-
-Found when T105.10 closed: `corpus-account` binds `$.account.public`, and the generator refuses it because `public` is a C# keyword. The first decision, the C# verbatim identifier `@public`, cannot work: in the open-source XAML compiler (microsoft/microsoft-ui-xaml `main` @ 866ba81a, checked 2026-10-17) the `'@' Identifier_or_keyword` branch of `src/XamlCompiler/BuildTasks/BindingPath/CSharpIdentifier.g4` is commented out, `BindingPath.g4` accepts no `@`, and `PropertyStepCodeGenerator` in `src/XamlCompiler/BuildTasks/CodeGenerators/BindPathStepCodeGenerators.cs` writes property names into the generated `.g.cs` unescaped (CS1055/CS0106 on `class` and `event` in T105.7's run 38656182916). The creator's new decision: a C# reserved keyword gets a `_` suffix, so the view-model property is `public_` and x:Bind reads `ViewModel.account.public_`; a Weft name that is already a keyword followed by underscores (a real `public_`) gets one more (`public__`), and the importer strips exactly one `_` from a name that is a keyword followed by one or more underscores. Data paths and the round trip stay unchanged; only the C# member changes. Contextual keywords stay ordinary names. Done when `corpus-account` leaves `PENDING`, its golden builds in the Windows job, it round-trips, and tests cover the suffix, the double suffix and the importer's stripping.
-
-**Execution plan.** (1) `crates/weft-winui/src/data.rs`: replace the keyword refusal with `member(name)` (Weft name → C# member) and `weft_name(member)` (its inverse), checked against the official reserved-keyword list; `walk` writes the member into the x:Bind path. (2) `src/csharp.rs`: properties, backing fields and the list accesses use the member; `WeftPath` keeps the Weft name. (3) `src/read/values.rs`: `data_path` maps each member back with `weft_name`. (4) Unit tests for both functions and the bijection over every keyword; a generator test for `$.public`, `$.public_` and `$.a.class` and a read-back test; `corpus-account` out of `PENDING` with its goldens. (5) SPEC §9 (to and from WinUI), `AGENT-SPEC.md` if it mentions the refusal, `docs/winui-design.md` (the rule, the keyword list with its source). Verify with `moon run root:changed`, then the full check, then the Windows `winui` job in CI.
 
 ### T903. macOS studio UI test: Save As writes nothing locally
 
