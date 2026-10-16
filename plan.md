@@ -13,7 +13,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T105.16 | todo | P2 | 3 | 0% | |
 | T105.17 | todo | P2 | 2 | 0% | |
-| T105.18 | todo | P2 | 3 | 0% | |
+| T105.18 | in progress | P2 | 3 | 5% | Claude Code / claude-opus-5-5 |
 | T903 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -297,6 +297,15 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.18. WinUI per-page tokens and reflowing repeats
 
 Split from T105.15 when it was claimed. Per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour: SPEC §10.6 row, `crates/weft-catalog/src/settings.rs`, regenerated `schemas/weft.schema.json`): with `false` the page's `Page.Resources` holds only the tokens it uses, and `import_winui` compares those entries by key and type. And `weft:ColumnsLayout` in `Weft.cs` for an `<each>` in a grid with `min-column-width`, generated and read back. Done when both are generated, read back, covered by tests and built in the Windows job.
+
+Execution plan:
+
+1. Spec first: SPEC §9 "To WinUI"/"From WinUI" (per-page `Page.Resources`, `ColumnsLayout`, the key-and-type comparison) and the §10.6 row of `export.winui.sharedTokens`; `docs/winui-design.md`; `research.md` §23 on `NonVirtualizingLayout` and page resources, with Microsoft docs URLs and dates.
+2. `crates/weft-winui/src/tokens.rs`: build the resources as `xaml::Element`s (with text content) so `WeftTokens.xaml` and a page's `Page.Resources` share one writer. `GenerateOptions` gains `shared_tokens` and `appearance`; the generator records every token it references and, with `shared_tokens: false`, writes only those into `Page.Resources` (a referenced token WinUI has no form for is refused).
+3. `import_winui`: regenerate in the mode the page shows (a `Page.Resources` element) and compare its entries by element type and `x:Key` only; `read_winui` reads the generator's `Weft.*` page resources as nothing to lose.
+4. `Weft.cs`: `ColumnsLayout`, a `NonVirtualizingLayout` sharing the column arithmetic with `ColumnsPanel`. A `grid` with `min-column-width` whose only child is an `<each>` of one element becomes an `ItemsRepeater` laid out by it; `read_winui` reads it back as the `grid` and its `<each>`.
+5. CLI: `weft winui --shared-tokens/--no-shared-tokens`, precedence flag > `export.winui.sharedTokens` > default (true in a project, false without one); `settings.rs` row, regenerated `schemas/weft.schema.json`, `docs/cli.md`, `docs/projects.md`, the crate README.
+6. Tests: a `tokens` fixture generated with per-page tokens and a repeated reflowing grid in the `repetition` fixture (goldens, both read-backs, the Windows build); unit tests for the token subset, the refusal, the loose comparison and an edited value; CLI tests for each option and the precedence. Verify with `moon run root:changed`, then the full check, and the green `winui` job.
 
 ### T105.16. WinUI repeats inside select, combobox and menu
 
