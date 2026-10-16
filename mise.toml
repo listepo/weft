@@ -1,5 +1,7 @@
 # Toolchain for weft. `mise install` then `pnpm install`; `moon ci` runs every check.
 [tools]
+"cargo:https://github.com/pyrlyn/tools" = "rev:b6c641d25b09506572f6a6b4ff7d38c9019ddf35" # `mise run sweep`, `just cache`, `just swarfr` (ptools)
+"cargo:cargo-sweep" = "0.8.0" # `mise run sweep`: drops build artifacts unused for 1 day (ptools sweep)
 mold = { version = "2.42.1", os = ["linux"] } # linker, Linux only; opt in with `cargo --config .cargo/mold.toml`
 node = "26.7.0"
 # The registry backend (aqua) ships the native binary; `npm:pnpm` 12 leaves a placeholder script.
@@ -31,3 +33,11 @@ hk = "2.5.0"
 # jactionlint checks `run:` scripts with it; without a pin the global mise shim has no version and the lint errors out.
 shellcheck = "0.11.0"
 
+
+[tasks.sweep]
+description = "Remove cargo build artifacts unused for 1 day (cargo-sweep, via ptools)"
+run = "ptools sweep --days 1"
+
+[tasks.sweep-dry]
+description = "Preview what sweep would remove; deletes nothing"
+run = "ptools sweep --days 1 --dry-run"
