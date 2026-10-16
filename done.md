@@ -1978,6 +1978,21 @@ Result: `studio/windows` holds `WeftStudio.WinUI` (WinUI 3, .NET 10, Windows App
 Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P2 · Complexity: 4
 Check: the `studio-windows` job of `.github/workflows/ci.yml`; on Windows by hand, `moon run studio:test`.
 
+### T902. Flaky studio-windows smoke test
+
+Bug. `The_app_shows_a_corpus_screen_and_saves_it_as_the_same_bytes` (`studio/windows/WeftStudio.Tests/SmokeTests.cs`) fails now and then on the `studio-windows` job: on main (run 38812071828) and on two PR runs the title stays `screen.weft` for the whole 60 s after Ctrl+Shift+S, so Save As never ran. The window capture taken before the keystroke matches a passing run. Done when the cause is found and fixed (not a longer timeout or a retry), the job passes several reruns in a row, and a failure says what was missing.
+
+Execution plan:
+
+1. Probe PR: repeat the Save As step and record the foreground window and the focus window around the click and the keystroke (`Native.cs`, `GetForegroundWindow`, `GetGUIThreadInfo`), to see which one is not ready when the keystroke is lost.
+2. Fix the test to wait, bounded, for that condition before it types, with an assertion that names the missing condition and the windows it found.
+3. Rerun the `studio-windows` job several times on the fix PR; record the runs in the PR.
+
+Result: the flake was a real bug. `SlintPanel` (slint-bindings rev 8971685) marks every Control chord handled on `PreviewKeyDown`, so XAML skipped `ProcessKeyboardAccelerators` and the File menu's shortcuts were dead while the panel had focus. The smoke test passed only when its keys overtook the click that focuses the panel; pointer input reaches the panel later than keys sent right behind it, and on a cold launch the click won about half the time (5 of 10 one-launch jobs on the probe PR). An in-app input log on the probe showed both orders. `MainWindow` now matches the menu's own `KeyboardAccelerators` on the root's tunnelling `PreviewKeyDown`, before the panel, and invokes the item. The smoke test clicks into the Email field and waits, bounded, until the panel shows that focus before it types, so it always takes the panel-focused path; without the fix it failed 5 of 5 jobs, with it the `studio-windows` job passed four runs in a row on [#115](https://github.com/pyrlyn/weft/pull/115). Follow-up for the creator: the proper fix is in slint-bindings (mark a chord handled only when Slint took it), which needs a pinned rev bump.
+
+Model: Claude Code / claude-opus-5-5 · Status: done · Priority: P1 · Complexity: 2
+Check: the `studio-windows` job of `.github/workflows/ci.yml`.
+
 ### T900. Update vulnerable dependencies
 
 The creator authorized dependency updates across the audit. Update only vulnerable dependencies and the resolver-required graph without weakening existing guards or advisory policy.
