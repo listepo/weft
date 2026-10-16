@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="WeftStudio">
     <Grid x:Name="Root" RowDefinitions="Auto,*">
-        <MenuBar x:Name="Menus" AutomationProperties.AutomationId="Menu">
+        <MenuBar AutomationProperties.AutomationId="Menu">
             <MenuBarItem Title="File">
                 <MenuFlyoutItem Text="Open…" Click="OnOpen">
                     <MenuFlyoutItem.KeyboardAccelerators>

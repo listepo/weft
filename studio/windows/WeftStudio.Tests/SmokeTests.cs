@@ -1,13 +1,13 @@
 // The built app through UI Automation (FlaUI, UIA3): a corpus screen on the command line, the
-// window title, a capture of the Slint panel, and Save As through the --pick fake picker. The
-// panel is invisible to UI Automation (slint-bindings T14), so it is checked by its pixels.
+// window title, a capture of the Slint panel, and Save As through the --pick fake picker, typed
+// while the panel has focus. The panel is invisible to UI Automation (slint-bindings T14), so it
+// is checked by its pixels.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Input;
@@ -30,14 +30,11 @@ public sealed class SmokeTests
         var screen = Paths.Corpus("login");
         var copy = scratch.File("copy.weft");
         var start = new ProcessStartInfo(Paths.App()) { ArgumentList = { screen, "--pick", copy } };
-        var probeLog = scratch.File("probe.log");
-        start.Environment["WEFT_PROBE_LOG"] = probeLog;
         using var app = FlaUI.Core.Application.Launch(start);
         using var automation = new UIA3Automation();
         try
         {
             var window = app.GetMainWindow(automation, Wait) ?? throw new AssertFailedException("no window");
-            var shown = Stopwatch.StartNew();
             Assert.IsTrue(Retry.WhileFalse(() => window.Title == "screen.weft", Wait).Result, $"title: {window.Title}");
             var menu = window.FindFirstDescendant(cf => cf.ByAutomationId("Menu"))
                 ?? throw new AssertFailedException("no menu bar");
@@ -45,40 +42,23 @@ public sealed class SmokeTests
 
             // The panel loads and draws a few frames after the window shows.
             var colours = 0;
-            Retry.WhileFalse(() => (colours = PanelColours(window, menu)) > 1, Wait);
+            Retry.WhileFalse(() => (colours = PanelPixels(window, menu).Distinct().Count()) > 1, Wait);
             Assert.IsTrue(colours > 1, "the Slint panel is one colour; see the capture");
 
-            // Focus the panel as a user does, so the accelerator has to get past the surface.
-            var panel = window.BoundingRectangle;
-            string Uia() => Safe(() => { var f = automation.FocusedElement(); return $"{Safe(() => f.ControlType.ToString())}/{Safe(() => f.ClassName)}/{Safe(() => f.FrameworkAutomationElement.FrameworkId.ValueOrDefault)}/{Safe(() => string.Join(".", f.Properties.RuntimeId.ValueOrDefault ?? []))}"; });
-            var uiaBefore = Uia();
-            Mouse.Click(new System.Drawing.Point(panel.Left + 24, menu.BoundingRectangle.Bottom + 24));
-            var uiaAfter = new List<string>();
-            for (var k = 0; k < 5; k++) { uiaAfter.Add(Uia()); Thread.Sleep(100); }
-            var focused = $"uia before {uiaBefore} after {string.Join(" , ", uiaAfter)}";
-            var shownToKeys = shown.ElapsedMilliseconds;
+            // Click into the login screen's Email field as a user does, so the panel holds keyboard
+            // focus and the accelerator has to get past it. Pointer input reaches the panel later
+            // than keys sent right behind it, so the keys wait until the field shows its focus; the
+            // pointer is moved there first so that a hover effect is not taken for that.
+            var field = new System.Drawing.Point(window.BoundingRectangle.Left + 120, menu.BoundingRectangle.Bottom + 90);
+            Mouse.MoveTo(field);
+            var unfocused = PanelPixels(window, menu);
+            Retry.WhileFalse(() => Same(ref unfocused, PanelPixels(window, menu)), Wait);
+            Mouse.Click(field);
+            Assert.IsTrue(Retry.WhileFalse(() => !PanelPixels(window, menu).SequenceEqual(unfocused), Wait).Result,
+                "the panel did not change after the click into the Email field, so it may not have focus; see the capture");
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_S);
-            var ok = Retry.WhileFalse(() => window.Title == "copy.weft", TimeSpan.FromSeconds(10)).Result;
-            var second = "n/a";
-            if (!ok)
-            {
-                var focused2 = "not read";
-                Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_S);
-                second = $"{Retry.WhileFalse(() => window.Title == "copy.weft", TimeSpan.FromSeconds(10)).Result} (focus then {focused2})";
-            }
-            Thread.Sleep(500);
-            var appLog = File.Exists(probeLog) ? File.ReadAllText(probeLog).Replace("\n", " ; ") : "no log";
-            if (ok) Assert.Fail($"PROBE PASS {focused} log: {appLog}");
-            Console.WriteLine($"PROBE first {ok} shown-to-keys {shownToKeys} ms focus {focused} second {second}");
-            if (!ok)
-            {
-                var hwnd = window.Properties.NativeWindowHandle.Value;
-                var texts = string.Join(" / ", window.FindAllDescendants().Select(e => $"{e.ControlType}:{Safe(() => e.Name)}").Where(t => !t.EndsWith(':')).Take(30));
-                var windows = string.Join(" / ", app.GetAllTopLevelWindows(automation).Select(w => Safe(() => w.Title)));
-                using var shot = Capture.Element(window);
-                shot.ToFile(Path.Combine(Paths.RepoRoot, "target", "weft-studio-windows.png"));
-                Assert.Fail($"PROBE MISS log: {appLog} | shown-to-keys {shownToKeys} ms focus-before {focused} second-keystroke {second} title {window.Title} | fg {Native.Describe(Native.Foreground())} app {Native.Describe(hwnd)} focus {Native.Describe(Native.Focus(hwnd))} | copy exists {File.Exists(copy)} | windows: {windows} | tree: {texts}");
-            }
+            Assert.IsTrue(Retry.WhileFalse(() => window.Title == "copy.weft", Wait).Result,
+                $"Ctrl+Shift+S with the panel focused did not save: title {window.Title}, {(File.Exists(copy) ? "the file was written" : "no file")}");
             CollectionAssert.AreEqual(File.ReadAllBytes(screen), File.ReadAllBytes(copy));
         }
         finally
@@ -87,23 +67,29 @@ public sealed class SmokeTests
         }
     }
 
-    private static string Safe(Func<string> read) { try { return read(); } catch (Exception ex) { return ex.GetType().Name; } }
+    /// <summary>True when two captures in a row match; keeps the latest in <paramref name="last"/>.</summary>
+    private static bool Same(ref int[] last, int[] next)
+    {
+        var same = last.SequenceEqual(next);
+        last = next;
+        return same;
+    }
 
     /// <summary>
-    /// Distinct colours below the menu bar, sampled every 4 pixels. The capture is kept in
+    /// The pixels below the menu bar, sampled every 4 pixels. The capture is kept in
     /// <c>target/weft-studio-windows.png</c> for the CI artifact.
     /// </summary>
-    private static int PanelColours(Window window, AutomationElement menu)
+    private static int[] PanelPixels(Window window, AutomationElement menu)
     {
         using var capture = Capture.Element(window);
         Directory.CreateDirectory(Path.Combine(Paths.RepoRoot, "target"));
         capture.ToFile(Path.Combine(Paths.RepoRoot, "target", "weft-studio-windows.png"));
         var bitmap = capture.Bitmap;
         var top = menu.BoundingRectangle.Bottom - window.BoundingRectangle.Top + 8;
-        var seen = new HashSet<int>();
+        var pixels = new List<int>();
         for (var y = top; y < bitmap.Height - 8; y += 4)
             for (var x = 8; x < bitmap.Width - 8; x += 4)
-                seen.Add(bitmap.GetPixel(x, y).ToArgb());
-        return seen.Count;
+                pixels.Add(bitmap.GetPixel(x, y).ToArgb());
+        return [.. pixels];
     }
 }
