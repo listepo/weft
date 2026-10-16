@@ -12,6 +12,9 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T105.15 | todo | P2 | 4 | 0% | |
+| T105.16 | todo | P2 | 3 | 0% | |
+| T105.17 | todo | P2 | 2 | 0% | |
+| T903 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
 
@@ -294,4 +297,16 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.15. WinUI tokens, materials, tilt and reflowing repeats
 
 Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeDictionaries` for light, dark and high contrast) and per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour), `material` as an `AcrylicBrush` on a `Border` (with `padding` inside it), the 3D tilt (`perspective`, `rotate-x`, `rotate-y`, `rotate-z`), and `weft:ColumnsLayout` for an `<each>` in a grid with `min-column-width`. Checks the unverified resource-key and perspective facts in the Windows build. Done when the `glass`, `tilt` and `showroom` corpus screens generate, build and read back.
+
+### T105.16. WinUI repeats inside select, combobox and menu
+
+Found when T105.10 closed: an `<each>` inside `select`, `combobox` or `menu` does not generate, so `corpus-booking`, `example-menu-item` and `example-option` stay in `PENDING` (`crates/weft-winui/tests/common/mod.rs`). Generate the repeated options or menu items from the bound collection (an `ItemsSource` with a typed template, or the pattern T105.14 uses for repetition), read them back, and add the SPEC §9 and `docs/winui-design.md` rows. The creator approved this task. Done when the three screens leave `PENDING`, their goldens build in the Windows job, and they round-trip.
+
+### T105.17. WinUI data paths named like C# keywords
+
+Found when T105.10 closed: `corpus-account` binds `$.account.public`, and the generator refuses it because `public` is a C# keyword. The creator chose the C# verbatim identifier: the view-model property is written `@public`, so the name and the data path stay unchanged and the round trip holds. Cover every C# reserved keyword, not only `public`, with the keyword list and its source in `docs/winui-design.md`. Done when `corpus-account` leaves `PENDING`, its golden builds in the Windows job, and it round-trips.
+
+### T903. macOS studio UI test: Save As writes nothing locally
+
+Seen by both loop workers: locally, the macOS `studio:test` XCUITest fails with "Save As wrote nothing", while the same test passes in CI. Find the cause (likely focus or timing around the save panel, as T902 found for Windows) and fix it, starting from a reproduction. Done when the test passes locally several runs in a row and stays green in CI. Needs a Mac with Xcode, so it cannot run in a Linux cloud session.
 
