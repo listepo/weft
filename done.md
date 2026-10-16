@@ -1610,7 +1610,7 @@ Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeD
 5. Reader: those `Border`s and `Transform3D` property elements read back into `material`, `padding`, `max-width`, `hidden`, `perspective` and the rotations.
 6. Tests: golden files for `glass`, `tilt`, `showroom` (out of `PENDING`), generator unit tests, round trips both ways, tokens golden; `moon run root:changed`, then the full check; the `winui` CI job builds the goldens.
 
-Result: PR_LINK. `corpus-glass`, `corpus-tilt` and `corpus-showroom` generate, match their goldens, build in the Windows `winui` job and read back from the XAML alone without losses. `WeftTokens.xaml` writes colours and materials in `Light`, `Dark` and `HighContrast` theme dictionaries; `weft-catalog` has one sRGB channel reader that `weft-swiftui` now shares. A tilt on a `screen` or on an item a control holds itself is refused for now.
+Result: https://github.com/pyrlyn/weft/pull/120. `corpus-glass`, `corpus-tilt` and `corpus-showroom` generate, match their goldens, build in the Windows `winui` job and read back from the XAML alone without losses. `WeftTokens.xaml` writes colours and materials in `Light`, `Dark` and `HighContrast` theme dictionaries; `weft-catalog` has one sRGB channel reader that `weft-swiftui` now shares. A tilt on a `screen` or on an item a control holds itself is refused for now.
 
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
