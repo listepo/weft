@@ -16,12 +16,9 @@ use weft_winui::{GenerateOptions, Generated, generate};
 /// shrink this list until it is empty.
 pub const PENDING: &[&str] = &[
     "corpus-account",
-    "corpus-booking",
     "corpus-glass",
     "corpus-showroom",
     "corpus-tilt",
-    "example-menu-item",
-    "example-option",
 ];
 /// The namespace of the goldens: the Windows build compiles them in one project (T105.7).
 pub const NAMESPACE: &str = "WeftScreens";
