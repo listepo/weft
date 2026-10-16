@@ -51,4 +51,9 @@
       <text id="no-scores">No scores.</text>
     </slot>
   </table>
+  <grid id="photos" label="Photos" columns="3" gap="{token.space.sm}" min-column-width="{token.size.sm}" padding="{token.space.sm}" max-width="{token.size.xl}">
+    <each id="photo-each" as="photo" in="{$.photos}">
+      <text id="photo-caption" text="{$photo.caption}"/>
+    </each>
+  </grid>
 </screen>

@@ -334,6 +334,14 @@ enum Command {
         /// `export.winui.namespace`, else `WeftScreens`).
         #[arg(long)]
         namespace: Option<String>,
+        /// Read the tokens from the shared `WeftTokens.xaml` that `weft winui-tokens` writes
+        /// (default: the project's `export.winui.sharedTokens`, which is true; without a project,
+        /// the page carries its own tokens).
+        #[arg(long, conflicts_with = "no_shared_tokens")]
+        shared_tokens: bool,
+        /// Put the tokens the page uses in its `Page.Resources`, so it builds on its own.
+        #[arg(long)]
+        no_shared_tokens: bool,
         #[command(flatten)]
         project: ProjectArgs,
         /// Write the page's files (`<Name>Page.xaml`, …) here instead of printing (default: the
@@ -1005,6 +1013,8 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
             tokens,
             name,
             namespace,
+            shared_tokens,
+            no_shared_tokens,
             project,
             out_dir,
             context,
@@ -1016,6 +1026,7 @@ fn run(command: Command, out: &mut dyn Write) -> Result<u8> {
                 tokens,
                 name,
                 namespace,
+                shared_tokens: (shared_tokens, no_shared_tokens),
                 project,
                 out_dir,
                 context: context.map(|c| c == convert::ExportContext::Keep),

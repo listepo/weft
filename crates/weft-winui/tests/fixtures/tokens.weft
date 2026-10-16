@@ -1,0 +1,9 @@
+<screen id="tokens" label="Tokens" weft="0.2">
+  <stack id="card" gap="{token.space.md}" padding="{token.space.lg}" max-width="{token.size.md}" material="{token.material.glass}">
+    <text id="card-text">Own tokens</text>
+  </stack>
+  <grid id="cells" columns="2" gap="{token.space.sm}" min-column-width="{token.size.sm}">
+    <text id="cell-a">A</text>
+    <text id="cell-b">B</text>
+  </grid>
+</screen>

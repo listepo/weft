@@ -19,6 +19,11 @@ pub(crate) const MAX_XML_NODES: u32 = weft_import::MAX_NODES as u32 * 8;
 /// element, a template, a slot panel), and a debug build parses this deep within the reader stack.
 pub const MAX_XML_DEPTH: usize = weft_import::MAX_DEPTH * 4;
 
+/// The page's own tokens (SPEC §9, To WinUI), in the presentation namespace.
+const RESOURCES: (&str, &str) = (PRESENTATION, "Page.Resources");
+const PRESENTATION: &str = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
+
 pub struct ImportOptions<'a> {
     pub catalog: &'a Catalog,
     /// The tokens the page was generated with, against which the comment is checked.
@@ -94,6 +99,11 @@ fn read_back(source: &str, options: &ImportOptions<'_>) -> Result<Document, Impo
         Some(d) if !has_errors(&parsed.diagnostics) => d,
         _ => return Err(ImportError::Invalid(parsed.diagnostics)),
     };
+    // A page that holds its own tokens was generated without the shared dictionary.
+    let own = page
+        .root_element()
+        .children()
+        .any(|c| c.has_tag_name(RESOURCES));
     let again = generate(
         &document,
         &GenerateOptions {
@@ -101,11 +111,13 @@ fn read_back(source: &str, options: &ImportOptions<'_>) -> Result<Document, Impo
             tokens: options.tokens,
             name: Some(name),
             namespace,
+            shared_tokens: !own,
+            appearance: None,
         },
     )
     .map_err(|_| ImportError::Edited)?;
     let regenerated = xml(&again.xaml)?;
-    if !same(page.root_element(), regenerated.root_element()) {
+    if !same(page.root_element(), regenerated.root_element(), false) {
         return Err(ImportError::Edited);
     }
     Ok(document)
@@ -121,21 +133,32 @@ fn meaningful<'a, 'i>(node: Node<'a, 'i>) -> impl Iterator<Item = Node<'a, 'i>> 
 }
 
 /// Equal as XML: the same expanded names, the same attributes in any order, the same non-blank
-/// text; comments, processing instructions and whitespace do not count.
-fn same(a: Node<'_, '_>, b: Node<'_, '_>) -> bool {
+/// text; comments, processing instructions and whitespace do not count. In the page's own
+/// resources only the elements and their keys count (`loose`): the values are the project's
+/// tokens, which may have changed since, not the screen.
+fn same(a: Node<'_, '_>, b: Node<'_, '_>, loose: bool) -> bool {
     if a.is_text() || b.is_text() {
-        return a.text().map(str::trim) == b.text().map(str::trim);
+        let both = a.is_text() && b.is_text();
+        return both && (loose || a.text().map(str::trim) == b.text().map(str::trim));
     }
+    let loose = loose || a.has_tag_name(RESOURCES);
     a.tag_name() == b.tag_name()
-        && attributes(a) == attributes(b)
+        && attributes(a, loose) == attributes(b, loose)
         && meaningful(a).count() == meaningful(b).count()
-        && meaningful(a).zip(meaningful(b)).all(|(x, y)| same(x, y))
+        && meaningful(a)
+            .zip(meaningful(b))
+            .all(|(x, y)| same(x, y, loose))
 }
 
-fn attributes<'a>(n: Node<'a, '_>) -> Vec<(Option<&'a str>, &'a str, &'a str)> {
+fn attributes<'a>(n: Node<'a, '_>, loose: bool) -> Vec<(Option<&'a str>, &'a str, &'a str)> {
+    let key =
+        |at: &roxmltree::Attribute<'_, '_>| (at.namespace(), at.name()) == (Some(XAML), "Key");
     let mut all: Vec<_> = n
         .attributes()
-        .map(|at| (at.namespace(), at.name(), at.value()))
+        .map(|at| {
+            let value = if loose && !key(&at) { "" } else { at.value() };
+            (at.namespace(), at.name(), value)
+        })
         .collect();
     all.sort_unstable();
     all

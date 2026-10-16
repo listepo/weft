@@ -2,7 +2,7 @@
 //! forms `read::layout` reads back: a `stack` whose `justify` leaves free space or whose child
 //! grows is a `Grid` of tracks along its direction, `align` is each child's cross-axis
 //! alignment, `padding` and `max-width` are token resources, and `min-column-width` is a
-//! `weft:ColumnsPanel`.
+//! `weft:ColumnsPanel`, or a `weft:ColumnsLayout` when the grid repeats one element.
 
 use weft_core::{Node, Value};
 
@@ -135,7 +135,8 @@ impl Gen<'_> {
             match node.props.get(prop) {
                 None => {}
                 Some(Value::Token(path)) => {
-                    e.attr(attr, format!("{{StaticResource Weft.{path}{suffix}}}"));
+                    let value = self.token(node, "StaticResource", path, suffix);
+                    e.attr(attr, value);
                 }
                 Some(_) => self.refuse(node, format!("a `{prop}` that is not a token")),
             }
@@ -143,18 +144,40 @@ impl Gen<'_> {
     }
 
     /// A `grid` with `min-column-width`: a `weft:ColumnsPanel` showing at most `columns`
-    /// columns, each at least the token wide, its children in order.
+    /// columns, each at least the token wide, its children in order. A grid whose only child is
+    /// an `<each>` is an `ItemsRepeater` whose `weft:ColumnsLayout` has the same columns.
     pub(super) fn columns_panel(&mut self, e: &mut Element, node: &Node, columns: usize) {
-        e.name = "weft:ColumnsPanel".into();
-        e.attr("Columns", columns.to_string());
+        let kids: Vec<&Node> = nodes(&node.children).collect();
+        let each = match kids[..] {
+            [each] if each.kind == "each" => Some(each),
+            _ => None,
+        };
+        let mut layout = Element::new("weft:ColumnsLayout");
+        let columned = match each {
+            Some(_) => &mut layout,
+            None => {
+                e.name = "weft:ColumnsPanel".into();
+                &mut *e
+            }
+        };
+        columned.attr("Columns", columns.to_string());
         match node.props.get("min-column-width") {
             Some(Value::Token(path)) => {
-                e.attr("MinColumnWidth", format!("{{StaticResource Weft.{path}}}"))
+                let value = self.token(node, "StaticResource", path, "");
+                columned.attr("MinColumnWidth", value);
             }
             _ => self.refuse(node, "a `min-column-width` that is not a token"),
         }
-        self.gap(e, node, &["Spacing"]);
-        let cells = self.placed(nodes(&node.children));
-        e.children.extend(cells);
+        self.gap(columned, node, &["Spacing"]);
+        let Some(each) = each else {
+            let cells = self.placed(kids.into_iter());
+            e.children.extend(cells);
+            return;
+        };
+        // An `ItemsRepeater` has no padding, so its layout keeps it around the columns.
+        if let Some(padding) = e.take("Padding") {
+            layout.attr("Padding", padding);
+        }
+        self.repeat(e, each, layout);
     }
 }

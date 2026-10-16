@@ -111,6 +111,12 @@ const WINUI_EXPORT: &[Setting] = &[
         Kind::Text,
         "\"WeftScreens\"",
     ),
+    with_default(
+        "sharedTokens",
+        "Pages read the tokens from one shared `WeftTokens.xaml` (`weft winui-tokens`, merged into `App.xaml`) instead of each holding the tokens it uses in its `Page.Resources`.",
+        Kind::Bool,
+        "true",
+    ),
     with_default("context", CONTEXT_EXPORT, KEEP_STRIP, "\"keep\""),
 ];
 const OUT_ONLY: &[Setting] = &[setting("outDir", OUT_DIR, Kind::File)];

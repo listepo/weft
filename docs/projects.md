@@ -158,6 +158,7 @@ Anything a tool lets you choose can also be set in `weft.json`, in one section p
 | `export.a2ui.outDir`, `import.a2ui.outDir` | standard output | Where `weft a2ui` writes `<screen>.a2ui.json` and `weft import-a2ui` writes `<file>.weft` (`--out-dir` overrides them). |
 | `export.slint.outDir`, `import.slint.outDir` | standard output | Where `weft slint` writes `<screen>.slint` and `weft import-slint` writes `<file>.weft` (`--out-dir` overrides them). |
 | `export.winui.outDir`, `import.winui.outDir` | standard output | Where `weft winui` writes `<Name>Page.xaml` and the page's other files, `weft winui-tokens` writes `WeftTokens.xaml` and `Weft.cs`, and `weft import-winui` writes `<file>.weft` (`--out-dir` overrides them). |
+| `export.winui.sharedTokens` | `true` | Pages read the tokens from one shared `WeftTokens.xaml`, merged into `App.xaml`, instead of each holding the tokens it uses in its `Page.Resources` (`--shared-tokens` and `--no-shared-tokens` override it). |
 | `export.winui.namespace` | `WeftScreens` | The C# namespace of the generated WinUI pages and of `Weft.cs` (`--namespace` overrides it). |
 | `export.schema.outDir` | standard output | Where `weft schema` writes `document.schema.json`, the JSON Schema of the documents the project's catalog admits (`--out-dir` overrides it). |
 | `import.cem.outDir` | standard output | Where `weft import-cem` writes `<file>.catalog.json`, the catalog imported from a Custom Elements Manifest (`--out-dir` overrides it). |

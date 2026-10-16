@@ -12,6 +12,8 @@ pub struct Element {
     pub name: Cow<'static, str>,
     attrs: Vec<(String, String)>,
     pub children: Vec<Element>,
+    /// The content of an element without children, such as a resource's value.
+    text: Option<String>,
 }
 
 impl Element {
@@ -20,7 +22,12 @@ impl Element {
             name: name.into(),
             attrs: vec![],
             children: vec![],
+            text: None,
         }
+    }
+
+    pub fn text(&mut self, text: impl Into<String>) {
+        self.text = Some(text.into());
     }
 
     pub fn attr(&mut self, name: impl Into<String>, value: impl Into<String>) {
@@ -47,6 +54,11 @@ impl Element {
         out.push_str(&self.name);
         for (name, value) in &self.attrs {
             out.push_str(&format!(" {name}=\"{}\"", escape_attribute(value)));
+        }
+        if let Some(text) = self.text.as_deref().filter(|_| self.children.is_empty()) {
+            let name = &self.name;
+            out.push_str(&format!(">{}</{name}>\n", escape_attribute(text)));
+            return;
         }
         if self.children.is_empty() {
             out.push_str(" />\n");
@@ -106,6 +118,19 @@ mod tests {
         assert_eq!(
             out,
             "<TextBlock Text=\"&quot;>&lt;x a='1'>&amp;&#10;\" />\n"
+        );
+    }
+
+    #[test]
+    fn text_content_is_escaped() {
+        let mut e = Element::new("x:Double");
+        e.attr("x:Key", "Weft.space.md");
+        e.text("<12&");
+        let mut out = String::new();
+        e.write(1, &mut out);
+        assert_eq!(
+            out,
+            "    <x:Double x:Key=\"Weft.space.md\">&lt;12&amp;</x:Double>\n"
         );
     }
 

@@ -9,7 +9,7 @@ mod common;
 use common::{controls, covered, document, options, screen, setup};
 use indexmap::IndexMap;
 use weft_catalog::Token;
-use weft_core::Catalog;
+use weft_core::{Catalog, serialize};
 use weft_winui::{
     ImportError, ImportOptions, MAX_SOURCE_LENGTH, MAX_XML_DEPTH, generate, import_winui,
 };
@@ -174,4 +174,41 @@ fn processing_instructions_are_ignored_and_xml_nodes_are_bounded() {
         import_winui(&flooded, &options),
         Err(ImportError::Xml(_))
     ));
+}
+
+#[test]
+fn a_page_with_its_own_tokens_compares_them_by_key_and_type() {
+    let (catalog, tokens) = setup();
+    let options = import(&catalog, &tokens);
+    let (_, doc, generated) = covered().into_iter().find(|(n, ..)| n == "tokens").unwrap();
+    let xaml = generated.xaml;
+    let edited = |from: &str, to: &str| {
+        assert!(xaml.contains(from), "{from}");
+        import_winui(&xaml.replacen(from, to, 1), &options)
+    };
+    // The values are the project's tokens, which may have changed since.
+    let value = edited(
+        r#"<x:Double x:Key="Weft.space.sm">8</x:Double>"#,
+        r#"<x:Double x:Key="Weft.space.sm">9</x:Double>"#,
+    );
+    assert_eq!(serialize(&value.unwrap()), serialize(&doc));
+    assert!(edited(r#"TintOpacity="0.28""#, r#"TintOpacity="0.5""#).is_ok());
+    for (from, to) in [
+        (
+            r#"<Thickness x:Key="Weft.space.sm.thickness">8</Thickness>"#,
+            r#"<x:Double x:Key="Weft.space.sm.thickness">8</x:Double>"#,
+        ),
+        (r#"x:Key="Weft.size.md""#, r#"x:Key="Weft.size.lg""#),
+        (
+            "</ResourceDictionary>\n    </Page.Resources>",
+            "<x:Double x:Key=\"Weft.extra\">1</x:Double></ResourceDictionary>\n    </Page.Resources>",
+        ),
+        // Outside the resources every value counts.
+        (
+            r#"Spacing="{StaticResource Weft.space.md}""#,
+            r#"Spacing="{StaticResource Weft.space.lg}""#,
+        ),
+    ] {
+        assert!(matches!(edited(from, to), Err(ImportError::Edited)), "{to}");
+    }
 }

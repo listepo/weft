@@ -243,6 +243,8 @@ impl Reader<'_> {
                 // The grid counts its columns itself; a repeater's stack follows its parent's.
                 "ColumnDefinitions" | "RowDefinitions" if owner == "Grid" => {}
                 "Layout" if owner == "ItemsRepeater" => {}
+                // The page's own copy of the project's tokens, which the props name.
+                "Resources" if owner == "Page" && own_tokens(el) => {}
                 // The tilt, read with the element it turns.
                 "Transform3D" => {}
                 _ => self.lose(LossKind::Props, parent, format!("`{tag}` is not read")),
@@ -285,6 +287,12 @@ impl Reader<'_> {
                 out.children.push(Child::Text(text));
             }
             return;
+        }
+        if is_named(el, "ItemsRepeater")
+            && let Some(layout) = columns_layout(el)
+            && self.repeats(el)
+        {
+            return self.repeated_grid(el, layout, parent, depth, out);
         }
         if is_named(el, "ItemsRepeater")
             && let Some(each) = self.each(el, parent, parent_kind, depth)
@@ -348,6 +356,29 @@ impl Reader<'_> {
         if tag == "ListView"
             && let Some(each) = self.each(el, &here, kind, depth)
         {
+            node.children.push(Child::Node(Box::new(each)));
+        }
+        out.children.push(Child::Node(Box::new(node)));
+    }
+
+    /// A `grid` with `min-column-width` whose only child is an `<each>`: the repeater carries
+    /// the grid's own attributes and its `weft:ColumnsLayout` the columns.
+    fn repeated_grid(
+        &mut self,
+        el: Xml<'_, '_>,
+        layout: Xml<'_, '_>,
+        parent: &str,
+        depth: usize,
+        out: &mut Placed,
+    ) {
+        self.elements += 1;
+        let mut node = Node::new("grid");
+        node.id = Some(self.id(explicit_id(el), "grid", &name_hint(el), parent));
+        let here = element_path(parent, &node);
+        self.attributes(layout, &mut node, &here);
+        self.attributes(el, &mut node, &here);
+        self.turns(el, &mut node, &here);
+        if let Some(each) = self.each(el, &here, "grid", depth) {
             node.children.push(Child::Node(Box::new(each)));
         }
         out.children.push(Child::Node(Box::new(node)));
@@ -746,6 +777,34 @@ impl Reader<'_> {
 
 fn elements<'a, 'i>(el: Xml<'a, 'i>) -> impl Iterator<Item = Xml<'a, 'i>> {
     el.children().filter(Xml::is_element)
+}
+
+/// The generator's `weft:ColumnsLayout` of an `ItemsRepeater`.
+fn columns_layout<'a, 'i>(el: Xml<'a, 'i>) -> Option<Xml<'a, 'i>> {
+    let holder = elements(el).find(|c| is_named(*c, "ItemsRepeater.Layout"))?;
+    elements(holder).find(|l| {
+        l.tag_name().name() == "ColumnsLayout"
+            && l.tag_name()
+                .namespace()
+                .is_some_and(|n| n.starts_with("using:"))
+    })
+}
+
+/// Whether a `Page.Resources` holds only `Weft.` resources, in theme dictionaries or not: the
+/// tokens a page generated with its own carries.
+fn own_tokens(el: Xml<'_, '_>) -> bool {
+    el.descendants().filter(|d| d.is_element()).all(|d| {
+        let theme = d
+            .parent_element()
+            .is_some_and(|p| p.tag_name().name() == "ResourceDictionary.ThemeDictionaries");
+        match d.attribute((XAML, "Key")) {
+            Some(key) => key.starts_with("Weft.") || theme,
+            None => matches!(
+                d.tag_name().name(),
+                "Page.Resources" | "ResourceDictionary" | "ResourceDictionary.ThemeDictionaries"
+            ),
+        }
+    })
 }
 
 fn is_named(el: Xml<'_, '_>, name: &str) -> bool {

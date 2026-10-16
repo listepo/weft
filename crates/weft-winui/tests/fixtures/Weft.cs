@@ -239,24 +239,65 @@ public sealed class ColumnsPanel : Panel
         DependencyProperty.Register(name, type, typeof(ColumnsPanel),
             new PropertyMetadata(value, (o, _) => ((ColumnsPanel)o).InvalidateMeasure()));
 
+    readonly ColumnGrid grid = new();
+
+    protected override Windows.Foundation.Size MeasureOverride(Windows.Foundation.Size available) =>
+        grid.Measure(Children, available, Columns, MinColumnWidth, Spacing, Padding);
+
+    protected override Windows.Foundation.Size ArrangeOverride(Windows.Foundation.Size final) =>
+        grid.Arrange(Children, final, Spacing, Padding);
+}
+
+/// <summary>The <c>ColumnsPanel</c> of an <c>ItemsRepeater</c>: a <c>grid</c> with
+/// <c>min-column-width</c> whose only child is an <c>&lt;each&gt;</c> (SPEC §9, To WinUI). A
+/// repeater takes a layout, not a panel, and has no padding, so the layout holds it.</summary>
+public sealed class ColumnsLayout : NonVirtualizingLayout
+{
+    public static readonly DependencyProperty ColumnsProperty = Layout(nameof(Columns), typeof(int), 1);
+    public static readonly DependencyProperty MinColumnWidthProperty = Layout(nameof(MinColumnWidth), typeof(double), 0.0);
+    public static readonly DependencyProperty SpacingProperty = Layout(nameof(Spacing), typeof(double), 0.0);
+    public static readonly DependencyProperty PaddingProperty = Layout(nameof(Padding), typeof(Thickness), new Thickness(0));
+
+    public int Columns { get => (int)GetValue(ColumnsProperty); set => SetValue(ColumnsProperty, value); }
+    public double MinColumnWidth { get => (double)GetValue(MinColumnWidthProperty); set => SetValue(MinColumnWidthProperty, value); }
+    public double Spacing { get => (double)GetValue(SpacingProperty); set => SetValue(SpacingProperty, value); }
+    public Thickness Padding { get => (Thickness)GetValue(PaddingProperty); set => SetValue(PaddingProperty, value); }
+
+    static DependencyProperty Layout(string name, Type type, object value) =>
+        DependencyProperty.Register(name, type, typeof(ColumnsLayout),
+            new PropertyMetadata(value, (o, _) => ((ColumnsLayout)o).InvalidateMeasure()));
+
+    readonly ColumnGrid grid = new();
+
+    protected override Windows.Foundation.Size MeasureOverride(NonVirtualizingLayoutContext context, Windows.Foundation.Size available) =>
+        grid.Measure(context.Children, available, Columns, MinColumnWidth, Spacing, Padding);
+
+    protected override Windows.Foundation.Size ArrangeOverride(NonVirtualizingLayoutContext context, Windows.Foundation.Size final) =>
+        grid.Arrange(context.Children, final, Spacing, Padding);
+}
+
+/// <summary>The measuring of <c>ColumnsPanel</c> and <c>ColumnsLayout</c>, which differ only in
+/// where their children come from. Arrange uses the column width the last measure found.</summary>
+sealed class ColumnGrid
+{
     double width;
     int count = 1;
 
-    protected override Windows.Foundation.Size MeasureOverride(Windows.Foundation.Size available)
+    public Windows.Foundation.Size Measure(IEnumerable<UIElement> children, Windows.Foundation.Size available,
+        int columns, double minColumnWidth, double spacing, Thickness p)
     {
-        var p = Padding;
         var inner = available.Width - p.Left - p.Right;
-        var most = Math.Max(1, Columns);
+        var most = Math.Max(1, columns);
         // Unbounded width, as in a horizontal scroller, has room for every column.
         count = double.IsInfinity(inner)
             ? most
-            : Math.Clamp((int)((inner + Spacing) / (MinColumnWidth + Spacing)), 1, most);
+            : Math.Clamp((int)((inner + spacing) / (minColumnWidth + spacing)), 1, most);
         width = double.IsInfinity(inner)
-            ? MinColumnWidth
-            : Math.Max(0, (inner - Spacing * (count - 1)) / count);
+            ? minColumnWidth
+            : Math.Max(0, (inner - spacing * (count - 1)) / count);
         var height = 0.0;
         var widest = 0.0;
-        foreach (var row in Rows())
+        foreach (var row in Rows(children))
         {
             var tallest = 0.0;
             foreach (var child in row)
@@ -265,31 +306,31 @@ public sealed class ColumnsPanel : Panel
                 tallest = Math.Max(tallest, child.DesiredSize.Height);
                 widest = Math.Max(widest, child.DesiredSize.Width);
             }
-            height += tallest + (height > 0 ? Spacing : 0);
+            height += tallest + (height > 0 ? spacing : 0);
         }
-        var across = double.IsInfinity(inner) ? count * widest + Spacing * (count - 1) : inner;
+        var across = double.IsInfinity(inner) ? count * widest + spacing * (count - 1) : inner;
         return new Windows.Foundation.Size(across + p.Left + p.Right, height + p.Top + p.Bottom);
     }
 
-    protected override Windows.Foundation.Size ArrangeOverride(Windows.Foundation.Size final)
+    public Windows.Foundation.Size Arrange(IEnumerable<UIElement> children, Windows.Foundation.Size final,
+        double spacing, Thickness p)
     {
-        var p = Padding;
         var y = p.Top;
-        foreach (var row in Rows())
+        foreach (var row in Rows(children))
         {
             var tallest = row.Max(c => c.DesiredSize.Height);
             for (var i = 0; i < row.Count; i++)
             {
-                var x = p.Left + i * (width + Spacing);
+                var x = p.Left + i * (width + spacing);
                 row[i].Arrange(new Windows.Foundation.Rect(x, y, width, tallest));
             }
-            y += tallest + Spacing;
+            y += tallest + spacing;
         }
         return final;
     }
 
-    IEnumerable<List<UIElement>> Rows() =>
-        Children.Select((c, i) => (c, i)).GroupBy(t => t.i / count, t => t.c).Select(g => g.ToList());
+    IEnumerable<List<UIElement>> Rows(IEnumerable<UIElement> children) =>
+        children.Select((c, i) => (c, i)).GroupBy(t => t.i / count, t => t.c).Select(g => g.ToList());
 }
 
 /// <summary>The centre of an element's 3D tilt (SPEC §9, To WinUI): a Weft tilt turns about the

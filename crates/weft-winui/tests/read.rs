@@ -840,3 +840,24 @@ fn a_material_border_and_a_3d_transform_read_onto_their_element() {
         )
     );
 }
+
+#[test]
+fn a_pages_own_weft_tokens_are_not_read_and_other_resources_are_lost() {
+    let (catalog, tokens) = setup();
+    let page = |resources: &str| {
+        let xaml = format!(
+            r#"<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Page.Resources><ResourceDictionary>{resources}</ResourceDictionary></Page.Resources><StackPanel AutomationProperties.AutomationId="s" /></Page>"#
+        );
+        losses(&read(&xaml, &catalog, &tokens))
+    };
+    let own = page(concat!(
+        r#"<ResourceDictionary.ThemeDictionaries><ResourceDictionary x:Key="Light">"#,
+        r##"<SolidColorBrush x:Key="Weft.color.ink" Color="#FF000000" />"##,
+        r#"</ResourceDictionary></ResourceDictionary.ThemeDictionaries>"#,
+        r#"<x:Double x:Key="Weft.space.md">16</x:Double>"#,
+    ));
+    assert_eq!(own, "");
+    let other =
+        page(r#"<x:Double x:Key="Weft.space.md">16</x:Double><x:Double x:Key="Gap">4</x:Double>"#);
+    assert_eq!(other, "Props /screen#s: `Page.Resources` is not read\n");
+}
