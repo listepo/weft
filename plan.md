@@ -12,7 +12,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T105.15 | todo | P2 | 4 | 0% | |
-| T105.16 | todo | P2 | 3 | 0% | |
+| T105.16 | in progress | P2 | 3 | 10% | Claude Code / claude-opus-5-5 |
 | T105.17 | todo | P2 | 2 | 0% | |
 | T903 | todo | P2 | 2 | 0% | |
 
@@ -301,6 +301,8 @@ Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeD
 ### T105.16. WinUI repeats inside select, combobox and menu
 
 Found when T105.10 closed: an `<each>` inside `select`, `combobox` or `menu` does not generate, so `corpus-booking`, `example-menu-item` and `example-option` stay in `PENDING` (`crates/weft-winui/tests/common/mod.rs`). Generate the repeated options or menu items from the bound collection (an `ItemsSource` with a typed template, or the pattern T105.14 uses for repetition), read them back, and add the SPEC §9 and `docs/winui-design.md` rows. The creator approved this task. Done when the three screens leave `PENDING`, their goldens build in the Windows job, and they round-trip.
+
+**Execution plan.** A `ComboBox` takes either `Items` or an `ItemsSource` (`example-option` mixes an `<each>` with a static option), and a `MenuFlyout` has only `Items`, so neither can bind the list itself. (1) SPEC §9 To and From WinUI, `docs/winui-design.md` and `research.md` §23 rows first, with sources. (2) `Weft.cs`: `Each.Source`, `Each.Template` and `Each.At` on a `ComboBox` or `MenuFlyout`: the helper loads the typed `DataTemplate` once per item of the list, sets the item as the element's `DataContext` (compiled template bindings follow the root's `DataContextChanged`), inserts it after the `At` static items, refills when the list changes, and shows the choice's value again. (3) Generator (`generate/repetition.rs`, `generate/controls.rs`): an `<each>` of one `option` or `menu-item` among a choice's options or a menu's items writes those properties, its markers and the template; a second `<each>` or one of other children stays refused. (4) Reader: a `ComboBox` or `MenuFlyout` with `Each.As` and a bound `Each.Source` reads the template's item back as an `<each>` at `At`. (5) Tests: goldens for `corpus-booking`, `example-menu-item`, `example-option` (PENDING shrinks), refusals, a reader test; `moon run root:changed`, the full check, then the Windows `winui` job.
 
 ### T105.17. WinUI data paths named like C# keywords
 
