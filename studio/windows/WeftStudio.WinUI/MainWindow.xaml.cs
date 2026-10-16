@@ -1,8 +1,14 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using SlintBindings.WinUI;
+using Windows.System;
+using Windows.UI.Core;
 using WeftStudio.Model;
 
 namespace WeftStudio.WinUI;
@@ -24,6 +30,10 @@ public sealed partial class MainWindow : Window
             Surface.Child = null;
             _document.Dispose();
         };
+        // SlintPanel marks every Control chord handled on PreviewKeyDown, which keeps XAML from
+        // processing the menu's keyboard accelerators while the panel has focus. Preview events
+        // tunnel from the root, so the menu's chords are matched here before the panel sees them.
+        Root.PreviewKeyDown += OnMenuChord;
         if (screen is not null)
             Root.Loaded += async (_, _) => await Opened(_document.Open(screen));
     }
@@ -33,6 +43,26 @@ public sealed partial class MainWindow : Window
     private async void OnSave(object sender, RoutedEventArgs e) => await Saved(await _document.SaveAsync());
 
     private async void OnSaveAs(object sender, RoutedEventArgs e) => await Saved(await _document.SaveAsAsync());
+
+    private void OnMenuChord(object sender, KeyRoutedEventArgs e)
+    {
+        var modifiers = Modifiers();
+        if (modifiers == VirtualKeyModifiers.None) return;
+        var item = Menus.Items.SelectMany(menu => menu.Items).OfType<MenuFlyoutItem>().FirstOrDefault(
+            item => item.KeyboardAccelerators.Any(a => a.Key == e.Key && a.Modifiers == modifiers));
+        if (item is null) return;
+        e.Handled = true;
+        new MenuFlyoutItemAutomationPeer(item).Invoke();
+    }
+
+    private static VirtualKeyModifiers Modifiers()
+    {
+        static bool Down(VirtualKey key) =>
+            InputKeyboardSource.GetKeyStateForCurrentThread(key).HasFlag(CoreVirtualKeyStates.Down);
+        return (Down(VirtualKey.Control) ? VirtualKeyModifiers.Control : VirtualKeyModifiers.None)
+            | (Down(VirtualKey.Shift) ? VirtualKeyModifiers.Shift : VirtualKeyModifiers.None)
+            | (Down(VirtualKey.Menu) ? VirtualKeyModifiers.Menu : VirtualKeyModifiers.None);
+    }
 
     private async Task Opened(bool opened)
     {
