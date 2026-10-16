@@ -1,11 +1,13 @@
 // The built app through UI Automation (FlaUI, UIA3): a corpus screen on the command line, the
-// window title, a capture of the Slint panel, and Save As through the --pick fake picker. The
-// panel is invisible to UI Automation (slint-bindings T14), so it is checked by its pixels.
+// window title, a capture of the Slint panel, and Save As through the --pick fake picker, typed
+// while the panel has focus. The panel is invisible to UI Automation (slint-bindings T14), so it
+// is checked by its pixels.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Capturing;
 using FlaUI.Core.Input;
@@ -40,14 +42,23 @@ public sealed class SmokeTests
 
             // The panel loads and draws a few frames after the window shows.
             var colours = 0;
-            Retry.WhileFalse(() => (colours = PanelColours(window, menu)) > 1, Wait);
+            Retry.WhileFalse(() => (colours = PanelPixels(window, menu).Distinct().Count()) > 1, Wait);
             Assert.IsTrue(colours > 1, "the Slint panel is one colour; see the capture");
 
-            // Focus the panel as a user does, so the accelerator has to get past the surface.
-            var panel = window.BoundingRectangle;
-            Mouse.Click(new System.Drawing.Point(panel.Left + 24, menu.BoundingRectangle.Bottom + 24));
+            // Click into the login screen's Email field as a user does, so the panel holds keyboard
+            // focus and the accelerator has to get past it. Pointer input reaches the panel later
+            // than keys sent right behind it, so the keys wait until the field shows its focus; the
+            // pointer is moved there first so that a hover effect is not taken for that.
+            var field = new System.Drawing.Point(window.BoundingRectangle.Left + 120, menu.BoundingRectangle.Bottom + 90);
+            Mouse.MoveTo(field);
+            var unfocused = PanelPixels(window, menu);
+            Retry.WhileFalse(() => Same(ref unfocused, PanelPixels(window, menu)), Wait);
+            Mouse.Click(field);
+            Assert.IsTrue(Retry.WhileFalse(() => !PanelPixels(window, menu).SequenceEqual(unfocused), Wait).Result,
+                "the panel did not change after the click into the Email field, so it may not have focus; see the capture");
             Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.SHIFT, VirtualKeyShort.KEY_S);
-            Assert.IsTrue(Retry.WhileFalse(() => window.Title == "copy.weft", Wait).Result, $"title: {window.Title}");
+            Assert.IsTrue(Retry.WhileFalse(() => window.Title == "copy.weft", Wait).Result,
+                $"Ctrl+Shift+S with the panel focused did not save: title {window.Title}, {(File.Exists(copy) ? "the file was written" : "no file")}");
             CollectionAssert.AreEqual(File.ReadAllBytes(screen), File.ReadAllBytes(copy));
         }
         finally
@@ -56,21 +67,29 @@ public sealed class SmokeTests
         }
     }
 
+    /// <summary>True when two captures in a row match; keeps the latest in <paramref name="last"/>.</summary>
+    private static bool Same(ref int[] last, int[] next)
+    {
+        var same = last.SequenceEqual(next);
+        last = next;
+        return same;
+    }
+
     /// <summary>
-    /// Distinct colours below the menu bar, sampled every 4 pixels. The capture is kept in
+    /// The pixels below the menu bar, sampled every 4 pixels. The capture is kept in
     /// <c>target/weft-studio-windows.png</c> for the CI artifact.
     /// </summary>
-    private static int PanelColours(Window window, AutomationElement menu)
+    private static int[] PanelPixels(Window window, AutomationElement menu)
     {
         using var capture = Capture.Element(window);
         Directory.CreateDirectory(Path.Combine(Paths.RepoRoot, "target"));
         capture.ToFile(Path.Combine(Paths.RepoRoot, "target", "weft-studio-windows.png"));
         var bitmap = capture.Bitmap;
         var top = menu.BoundingRectangle.Bottom - window.BoundingRectangle.Top + 8;
-        var seen = new HashSet<int>();
+        var pixels = new List<int>();
         for (var y = top; y < bitmap.Height - 8; y += 4)
             for (var x = 8; x < bitmap.Width - 8; x += 4)
-                seen.Add(bitmap.GetPixel(x, y).ToArgb());
-        return seen.Count;
+                pixels.Add(bitmap.GetPixel(x, y).ToArgb());
+        return [.. pixels];
     }
 }
