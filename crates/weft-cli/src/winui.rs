@@ -9,7 +9,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
-use weft_catalog::{PROJECT_FILE, Project};
+use weft_catalog::{PROJECT_FILE, Project, appearance};
 use weft_winui::{
     GenerateError, GenerateOptions, ImportError, ImportOptions, TOKENS_FILE, generate,
     generate_tokens, helpers, import_winui,
@@ -119,7 +119,7 @@ pub fn export_tokens(args: TokensArgs, out: &mut dyn Write) -> Result<u8> {
             return Ok(DIAGNOSTICS);
         }
     };
-    let (xaml, skipped) = generate_tokens(&tokens.tokens);
+    let (xaml, skipped) = generate_tokens(&tokens.tokens, appearance(&tokens.modifiers));
     for p in skipped {
         writeln!(errors, "weft: token {p}; it is left out")?;
     }

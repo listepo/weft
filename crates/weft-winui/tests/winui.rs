@@ -98,7 +98,7 @@ fn generated_files_match_the_golden_files() {
     balanced("Weft.cs", &shared);
     golden("Weft.cs", &shared);
     let (_, tokens) = setup();
-    golden(TOKENS_FILE, &generate_tokens(&tokens).0);
+    golden(TOKENS_FILE, &generate_tokens(&tokens, None).0);
 }
 
 fn data() -> Generated {
@@ -316,9 +316,10 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
             r#"<stack id="r" direction="row"><text id="a" grow="true">A</text></stack>"#,
             "stack#r",
         ),
+        // A control holds its items as its own type, so no tilt wrapper fits around one.
         (
-            r#"<stack id="r" material="{token.material.glass}"><text id="a">A</text></stack>"#,
-            "stack#r",
+            r#"<select id="se" label="S"><option id="o" value="a" rotate-y="10">A</option></select>"#,
+            "option#o",
         ),
         (
             r#"<stack id="r"><each id="e" as="o" in="{$.os}"><text id="t" grow="true" text="{$o.v}"/></each></stack>"#,
@@ -646,4 +647,48 @@ fn a_screen_strict_validation_rejects_is_not_generated() {
         matches!(result, Err(GenerateError::Invalid(_))),
         "{result:?}"
     );
+}
+
+#[test]
+fn a_material_is_a_border_and_a_tilt_turns_it_under_its_perspective() {
+    let (catalog, tokens) = setup();
+    let markup = screen(concat!(
+        r#"<stack id="card" material="{token.material.glass}" padding="{token.space.sm}" "#,
+        r#"hidden="{$.gone}" perspective="800" rotate-x="-4" rotate-y="12"><text id="t">T</text></stack>"#,
+    ));
+    let doc = document(&markup, &catalog, &tokens);
+    let generated = generate(&doc, &options(&catalog, &tokens, None)).unwrap();
+    let xml = roxmltree::Document::parse(&generated.xaml).unwrap();
+    let card = by_id(&xml, "card");
+    let surface = card.parent_element().unwrap();
+    let view = surface.parent_element().unwrap();
+    // The surface is the stack's box: its background and padding, turned as one.
+    assert_eq!(
+        surface.attribute("Background"),
+        Some("{ThemeResource Weft.material.glass}")
+    );
+    assert_eq!(
+        surface.attribute("Padding"),
+        Some("{StaticResource Weft.space.sm.thickness}")
+    );
+    assert_eq!(card.attribute("Padding"), None);
+    assert_eq!(surface.attribute("Tilt.Centered"), Some("True"));
+    let turn = surface
+        .descendants()
+        .find(|n| n.has_tag_name("CompositeTransform3D"))
+        .unwrap();
+    // CSS turns clockwise, WinUI counter-clockwise.
+    assert_eq!(turn.attribute("RotationX"), Some("4"));
+    assert_eq!(turn.attribute("RotationY"), Some("-12"));
+    assert_eq!(turn.attribute("RotationZ"), None);
+    // The perspective is an ancestor's, and the outermost wrapper hides the whole.
+    assert_eq!(view.tag_name().name(), "Border");
+    let depth = view
+        .descendants()
+        .find(|n| n.has_tag_name("PerspectiveTransform3D"))
+        .and_then(|n| n.attribute("Depth"));
+    assert_eq!(depth, Some("800"));
+    assert!(view.attribute("Visibility").is_some(), "{}", generated.xaml);
+    assert_eq!(surface.attribute("Visibility"), None);
+    assert_eq!(card.attribute("Visibility"), None);
 }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusShowroom namespace=WeftScreens
+<screen id="showroom" label="Showroom" weft="0.1">
+  <heading id="title" level="1">Showroom</heading>
+  <stack id="shelf" gap="{token.space.lg}">
+    <section id="gem-section" label="Gem">
+      <model id="gem" fallback="assets/gem.png" label="A teal gem with eight triangular faces" src="assets/gem.glb" usdz="assets/gem.usdz"/>
+      <text id="gem-caption" text="{$.caption}"/>
+      <button id="gem-pick" variant="primary" on-press="gem.pick">Choose this gem</button>
+      <slot name="header">
+        <heading id="gem-title" level="2">Gem</heading>
+      </slot>
+    </section>
+    <section id="turned-section" label="Turned gem">
+      <model id="turned" fallback="assets/gem.png" label="The same gem turned to its side" perspective="800" rotate-y="20" src="assets/gem.glb"/>
+      <text id="turned-caption">Without a USDZ file Apple platforms show the still image.</text>
+      <slot name="header">
+        <heading id="turned-title" level="2">Turned</heading>
+      </slot>
+    </section>
+  </stack>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusShowroomPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="showroom" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Showroom">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Showroom" />
+            <StackPanel AutomationProperties.AutomationId="shelf" Spacing="{StaticResource Weft.space.lg}">
+                <StackPanel AutomationProperties.AutomationId="gem-section" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Gem">
+                    <StackPanel weft:Slot.Name="header">
+                        <TextBlock AutomationProperties.AutomationId="gem-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Gem" />
+                    </StackPanel>
+                    <Image AutomationProperties.AutomationId="gem" Source="assets/gem.png" weft:Props.Src="assets/gem.glb" weft:Props.Usdz="assets/gem.usdz" AutomationProperties.Name="A teal gem with eight triangular faces" />
+                    <TextBlock AutomationProperties.AutomationId="gem-caption" TextWrapping="Wrap" Text="{x:Bind ViewModel.caption, Mode=OneWay}" />
+                    <Button AutomationProperties.AutomationId="gem-pick" Content="Choose this gem" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.gem_pickCommand}" />
+                </StackPanel>
+                <StackPanel AutomationProperties.AutomationId="turned-section" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Turned gem">
+                    <StackPanel weft:Slot.Name="header">
+                        <TextBlock AutomationProperties.AutomationId="turned-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Turned" />
+                    </StackPanel>
+                    <Border>
+                        <Border.Transform3D>
+                            <PerspectiveTransform3D Depth="800" />
+                        </Border.Transform3D>
+                        <Image AutomationProperties.AutomationId="turned" Source="assets/gem.png" weft:Props.Src="assets/gem.glb" AutomationProperties.Name="The same gem turned to its side" weft:Tilt.Centered="True">
+                            <Image.Transform3D>
+                                <CompositeTransform3D RotationY="-20" />
+                            </Image.Transform3D>
+                        </Image>
+                    </Border>
+                    <TextBlock AutomationProperties.AutomationId="turned-caption" TextWrapping="Wrap" Text="Without a USDZ file Apple platforms show the still image." />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

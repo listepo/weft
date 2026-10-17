@@ -95,7 +95,7 @@ Universal attributes:
 | `id` | `AutomationProperties.AutomationId` |
 | `hidden` | `Visibility="Collapsed"`; bound: `Visibility="{x:Bind weft:Weft.Hide(ViewModel.x), Mode=OneWay}"`, negated `{!$.x}`: `{x:Bind ViewModel.x, Mode=OneWay}` (x:Bind converts `bool` to `Visibility` itself). Collapsed elements leave the UI Automation tree, as SPEC requires |
 | `state` | marker `weft:Props.State` |
-| `rotate-x`, `rotate-y`, `rotate-z`, `perspective` | `Transform3D`: a `CompositeTransform3D` (`RotationX`, `RotationY`, `RotationZ` in degrees, centred on the element) under a `PerspectiveTransform3D` (`Depth` = `perspective`). WinUI's `Transform3D` applies one transform per element, so the generator wraps the element in a `Border` that carries the perspective (**unverified** that perspective on the parent projects the child; checked in T105.5) |
+| `rotate-x`, `rotate-y`, `rotate-z`, `perspective` | `Transform3D`: a `CompositeTransform3D` with `RotationX`, `RotationY`, `RotationZ` the negated angles (WinUI turns counter-clockwise, CSS clockwise), centred by `weft:Tilt.Centered` from `Weft.cs`, which sets `CenterX` and `CenterY` to half the element's size whenever it changes (the centre is in pixels). An element has one `Transform3D`, so a `perspective` is a `Border` around it whose `Transform3D` is a `PerspectiveTransform3D` (`Depth` = `perspective`); a perspective on a parent projects its children (research §23). The order of the three rotations inside one transform is **unverified**. A tilt on a `screen` or on an item a control holds itself (`option`, `item`, `row`, `tab`, …) has no place for a `Border` and is refused for now |
 | `grow` | star size in the stack's `Grid` (§ Layout) |
 | `on-<event>` | `weft:On.<Event>` (§ Events) |
 
@@ -138,7 +138,7 @@ The vocabulary of `docs/layout-design.md` maps onto WinUI's panels:
 | `align` on a column | each child's `HorizontalAlignment` (`start` → `Left`, `center`, `end` → `Right`, `stretch`) |
 | `padding` | `Padding` (a `Thickness` token resource) on the `StackPanel` or `Grid`; inside a `material` surface it is the `Border`'s `Padding` |
 | `max-width` | `MaxWidth` (the token's `x:Double`), stretching below it as every panel does; where the element sits in a wider parent is the parent's `align`, as in SPEC |
-| `min-column-width` | `weft:ColumnsPanel` (static children; T105.5) or `weft:ColumnsLayout` (one `<each>`; T105.15): about 60 lines each in `Weft.cs`, showing `columns` columns while each is at least the token wide and fewer, down to one, below that, children in order |
+| `min-column-width` | `weft:ColumnsPanel` (static children; T105.5) or `weft:ColumnsLayout` (one `<each>`; T105.18): about 60 lines each in `Weft.cs`, showing `columns` columns while each is at least the token wide and fewer, down to one, below that, children in order |
 | `wrap` | marker |
 
 `<each>` is transparent in Weft, so its items are the parent's children. XAML panels cannot mix static children with a bound collection, so an `<each>` becomes a nested `ItemsRepeater` with the parent's orientation and spacing. That draws the same in a `start`-justified stack, a list and a table. In a `grid`, or in a stack that becomes a `Grid` (justify or grow), an `<each>` beside other children cannot share the tracks, so the generator refuses it (`Unsupported` with the path). No corpus screen does it. The same holds for any parent that is not a panel (`row`, `tabs`, `radio-group`, `segmented-control`) and for a list whose `<each>` sits beside static items or repeats more than one `item`: a `ListView` takes either children or an `ItemsSource`, and its template draws one item. A `select`, `combobox` or `menu` cannot hold a repeater either, and a `ComboBox` takes either items or an `ItemsSource` (`example-option` mixes an `<each>` with a static option) while a `MenuFlyout` has no `ItemsSource` at all (research.md §23). So an `<each>` of one `option` or `menu-item` there keeps its typed template on the `ComboBox` or `MenuFlyout` as `weft:Each.Template`, and the `Each` helper of `Weft.cs` loads it once per item, the item as the element's `DataContext`: compiled bindings in a template update from the root's `DataContextChanged`, as in an items control. One such `<each>` per parent, of one item, is drawn; more is refused. A template is typed by the item class, so its paths are the item's members, `WeftParent` an enclosing loop's item and `WeftRoot` the view model, which every command in it is read from.
@@ -152,11 +152,11 @@ The vocabulary of `docs/layout-design.md` maps onto WinUI's panels:
 | material | `AcrylicBrush` (`TintColor`, `TintOpacity`, `FallbackColor`) in `ThemeDictionaries`; in `HighContrast` a `SolidColorBrush` of the fallback | `Background="{ThemeResource Weft.material.glass}"` on a `Border` around the stack or grid |
 | typography, duration, cubic Bézier | not written: no core prop of a WinUI control takes them | — |
 
-- Keys are `Weft.` followed by the token path. A dimension token's path cannot have children (a DTCG token is not a group), so the `.thickness` suffix cannot collide. Dots in an `x:Key` are **unverified**; T105.5 checks them in the Windows build, and if they fail the generator encodes `.` as `__` (token segments may contain `_` but not two in a row, **unverified**; else another reversible escape).
+- Keys are `Weft.` followed by the token path. A dimension token's path cannot have children (a DTCG token is not a group), so the `.thickness` suffix cannot collide. The Windows build compiles keys with dots and with the `$root` of a colour group (`Weft.color.blue.$root`).
 - Dimensions are effective pixels: `px` as is, `rem` × 16, as the other targets.
 - `{StaticResource}` for dimensions, because they do not change with the theme; `{ThemeResource}` for colours and materials, which follow the system theme at run time.
-- **Light and dark.** With an appearance (SPEC §10.3), a colour whose `dark` value differs from its `light` one gets both dictionaries; otherwise `Light` and `Dark` hold the same value. `HighContrast` uses the system's high-contrast brushes for text and the fallback colour for materials, so a screen stays readable without the app adding anything.
-- **Shared or per-page** (open question 3): with `export.winui.sharedTokens` (default `true`) a page references `WeftTokens.xaml` merged in `App.xaml`; with `false` the page's `Page.Resources` holds only the tokens it uses, so a single page builds on its own.
+- **Light and dark.** With an appearance (SPEC §10.3), a colour whose `dark` value differs from its `light` one gets both dictionaries; otherwise `Light` and `Dark` hold the same value. `HighContrast` holds the light colours and each material's fallback colour as a plain brush; the text tones use the system's brushes, so they follow the high-contrast theme.
+- **Shared or per-page** (open question 3; T105.18): with `export.winui.sharedTokens` (default `true`) a page references `WeftTokens.xaml` merged in `App.xaml`; with `false` the page's `Page.Resources` holds only the tokens it uses, so a single page builds on its own.
 - A blur radius, and the glass refraction of a material, have no `AcrylicBrush` form: a `tokens` loss. The text tones use the system's theme brushes, not tokens.
 
 ## Slots, light and dark, accessibility
@@ -230,7 +230,8 @@ Each sub-task is at most 500 lines of code plus tests (AGENTS.md), and each upda
 | T105.4 | Containers: `list`, `table`, `tabs`, `dialog`, `section`, `grid` without `min-column-width`, the `header` and `actions` slots | 250 |
 | T105.14 | Repetition: `<each>` as an `ItemsRepeater`, the `empty` slots | 240 |
 | T105.5 | Layout vocabulary (`justify`, `grow`, `align`, `padding`, `max-width`, `min-column-width` with `ColumnsPanel`) | 230 |
-| T105.15 | Colour tokens and theme dictionaries, per-page tokens, material, 3D tilt, `ColumnsLayout` for a repeated `min-column-width` grid | 300 |
+| T105.15 | Colour tokens and theme dictionaries, material, 3D tilt, and reading them back | 500 |
+| T105.18 | Per-page tokens (`export.winui.sharedTokens`), `ColumnsLayout` for a repeated `min-column-width` grid | 300 |
 | T105.6 | CLI `weft winui`, `weft winui-tokens`, `weft import-winui`; `weft.json` settings, SPEC §10.6 rows, schema | 250 |
 | T105.7 | The Windows CI job and build project; the golden-completeness test | 120 |
 | T105.8 | `read_winui`: kinds, ids, props, markers, structure, slots, with losses and diagnostics | 480 |

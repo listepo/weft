@@ -13,7 +13,7 @@ pub(super) const KINDS: &[(&str, &str, &str)] = &[
     (
         "grid",
         "Grid",
-        "columns gap padding max-width min-column-width",
+        "columns gap padding max-width min-column-width material",
     ),
     ("dialog", "ContentDialog", "open modal"),
     ("list", "ListView", "ordered"),

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusTilt namespace=WeftScreens
+<screen id="tilt" label="Card flips" weft="0.1">
+  <heading id="title" level="1">Card flips</heading>
+  <stack id="deck" gap="{token.space.lg}">
+    <section id="front" label="Front side" perspective="800" rotate-y="25">
+      <text id="front-text" text="{$.front}"/>
+      <button id="front-flip" variant="primary" on-press="card.flip">Flip</button>
+      <slot name="header">
+        <heading id="front-title" level="2">Front</heading>
+      </slot>
+    </section>
+    <section id="back" label="Back side" perspective="800" rotate-y="180">
+      <text id="back-text" text="{$.back}"/>
+      <button id="back-flip" on-press="card.flip">Flip</button>
+      <slot name="header">
+        <heading id="back-title" level="2">Back</heading>
+      </slot>
+    </section>
+    <section id="lean" label="Leaning card" perspective="600" rotate-x="20" rotate-z="-6">
+      <text id="lean-text">Tilted back and turned a little in the plane.</text>
+      <field id="lean-note" label="Note" placeholder="Add a note" value="{$.note}" on-change="note.edit"/>
+      <slot name="header">
+        <heading id="lean-title" level="2">Leaning</heading>
+      </slot>
+    </section>
+  </stack>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusTiltPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="tilt" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Card flips">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Card flips" />
+            <StackPanel AutomationProperties.AutomationId="deck" Spacing="{StaticResource Weft.space.lg}">
+                <Border>
+                    <Border.Transform3D>
+                        <PerspectiveTransform3D Depth="800" />
+                    </Border.Transform3D>
+                    <StackPanel AutomationProperties.AutomationId="front" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Front side" weft:Tilt.Centered="True">
+                        <StackPanel.Transform3D>
+                            <CompositeTransform3D RotationY="-25" />
+                        </StackPanel.Transform3D>
+                        <StackPanel weft:Slot.Name="header">
+                            <TextBlock AutomationProperties.AutomationId="front-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Front" />
+                        </StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="front-text" TextWrapping="Wrap" Text="{x:Bind ViewModel.front, Mode=OneWay}" />
+                        <Button AutomationProperties.AutomationId="front-flip" Content="Flip" Style="{StaticResource AccentButtonStyle}" weft:On.Press="{x:Bind ViewModel.card_flipCommand}" />
+                    </StackPanel>
+                </Border>
+                <Border>
+                    <Border.Transform3D>
+                        <PerspectiveTransform3D Depth="800" />
+                    </Border.Transform3D>
+                    <StackPanel AutomationProperties.AutomationId="back" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Back side" weft:Tilt.Centered="True">
+                        <StackPanel.Transform3D>
+                            <CompositeTransform3D RotationY="-180" />
+                        </StackPanel.Transform3D>
+                        <StackPanel weft:Slot.Name="header">
+                            <TextBlock AutomationProperties.AutomationId="back-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Back" />
+                        </StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="back-text" TextWrapping="Wrap" Text="{x:Bind ViewModel.back, Mode=OneWay}" />
+                        <Button AutomationProperties.AutomationId="back-flip" Content="Flip" weft:On.Press="{x:Bind ViewModel.card_flipCommand}" />
+                    </StackPanel>
+                </Border>
+                <Border>
+                    <Border.Transform3D>
+                        <PerspectiveTransform3D Depth="600" />
+                    </Border.Transform3D>
+                    <StackPanel AutomationProperties.AutomationId="lean" AutomationProperties.LandmarkType="Custom" AutomationProperties.LocalizedLandmarkType="region" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Spacing="12" AutomationProperties.Name="Leaning card" weft:Tilt.Centered="True">
+                        <StackPanel.Transform3D>
+                            <CompositeTransform3D RotationX="-20" RotationZ="6" />
+                        </StackPanel.Transform3D>
+                        <StackPanel weft:Slot.Name="header">
+                            <TextBlock AutomationProperties.AutomationId="lean-title" Style="{StaticResource TitleTextBlockStyle}" AutomationProperties.HeadingLevel="Level2" Text="Leaning" />
+                        </StackPanel>
+                        <TextBlock AutomationProperties.AutomationId="lean-text" TextWrapping="Wrap" Text="Tilted back and turned a little in the plane." />
+                        <TextBox AutomationProperties.AutomationId="lean-note" Text="{x:Bind ViewModel.note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Add a note" Header="Note" weft:On.Change="{x:Bind ViewModel.note_editCommand}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

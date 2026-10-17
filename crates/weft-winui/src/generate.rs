@@ -19,6 +19,7 @@ pub(crate) mod containers;
 mod controls;
 mod layout;
 mod repetition;
+pub(crate) mod surface;
 
 /// The source comment's options start with this word; `import_winui` checks it.
 pub(crate) const TARGET: &str = "winui";
@@ -30,7 +31,7 @@ const KINDS: &[(&str, &str, &str)] = &[
     (
         "stack",
         "StackPanel",
-        "direction gap align justify wrap padding max-width",
+        "direction gap align justify wrap padding max-width material",
     ),
     ("form", "StackPanel", ""),
     ("text", "TextBlock", "text tone"),
@@ -45,7 +46,7 @@ const KINDS: &[(&str, &str, &str)] = &[
     ("switch", "ToggleSwitch", "checked disabled"),
 ];
 // Validation keeps `grow` to a stack's children, whose tracks draw it.
-const COMMON: &str = "label hidden state grow";
+const COMMON: &str = "label hidden state grow rotate-x rotate-y rotate-z perspective";
 /// The named slots of this slice's kinds; the containers add theirs.
 const SLOTS: &[(&str, &str)] = &[("form", "footer")];
 
@@ -453,7 +454,7 @@ impl Gen<'_> {
         if kind == "form" {
             self.forms.pop();
         }
-        Some(e)
+        Some(self.surface(e, node))
     }
 
     /// A `gap` token as each of the panel's spacing properties.

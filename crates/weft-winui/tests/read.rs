@@ -874,3 +874,31 @@ fn a_user_control_or_window_reads_like_a_page() {
         assert_eq!(read_as(root), page, "{root}");
     }
 }
+
+#[test]
+fn a_material_border_and_a_3d_transform_read_onto_their_element() {
+    let (doc, lost) = read_body(concat!(
+        r#"<Border Background="{ThemeResource Weft.material.glass}" Padding="{StaticResource Weft.space.sm.thickness}">"#,
+        r#"<StackPanel AutomationProperties.AutomationId="c" /></Border>"#,
+        r#"<Border><Border.Transform3D><PerspectiveTransform3D Depth="600" OffsetX="3" /></Border.Transform3D>"#,
+        r#"<Button AutomationProperties.AutomationId="b" Content="B" weft:Tilt.Centered="True">"#,
+        r#"<Button.Transform3D><CompositeTransform3D RotationZ="10" TranslateX="5" /></Button.Transform3D>"#,
+        r#"</Button></Border>"#,
+    ));
+    assert_eq!(
+        doc,
+        concat!(
+            r#"<stack id="c" material="{token.material.glass}" padding="{token.space.sm}"/>"#,
+            "\n",
+            r#"<button id="b" perspective="600" rotate-z="-10">B</button>"#,
+            "\n",
+        )
+    );
+    assert_eq!(
+        lost,
+        concat!(
+            "Layout /screen#s/button#b: `TranslateX` of a `CompositeTransform3D` has no Weft form\n",
+            "Layout /screen#s/button#b: `OffsetX` of a `PerspectiveTransform3D` has no Weft form\n",
+        )
+    );
+}

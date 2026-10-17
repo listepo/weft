@@ -2,6 +2,53 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <AcrylicBrush x:Key="Weft.material.glass" TintColor="#FFFFFFFF" TintOpacity="0.28" FallbackColor="#47FFFFFF" />
+            <Color x:Key="Weft.color.white.color">#FFFFFFFF</Color>
+            <SolidColorBrush x:Key="Weft.color.white" Color="#FFFFFFFF" />
+            <Color x:Key="Weft.color.ink.color">#FF1A1C21</Color>
+            <SolidColorBrush x:Key="Weft.color.ink" Color="#FF1A1C21" />
+            <Color x:Key="Weft.color.blue.$root.color">#FF2663EB</Color>
+            <SolidColorBrush x:Key="Weft.color.blue.$root" Color="#FF2663EB" />
+            <Color x:Key="Weft.color.red.color">#FFDB2626</Color>
+            <SolidColorBrush x:Key="Weft.color.red" Color="#FFDB2626" />
+            <Color x:Key="Weft.color.action.primary.color">#FF2663EB</Color>
+            <SolidColorBrush x:Key="Weft.color.action.primary" Color="#FF2663EB" />
+            <Color x:Key="Weft.color.action.danger.color">#FFDB2626</Color>
+            <SolidColorBrush x:Key="Weft.color.action.danger" Color="#FFDB2626" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <AcrylicBrush x:Key="Weft.material.glass" TintColor="#FFFFFFFF" TintOpacity="0.28" FallbackColor="#47FFFFFF" />
+            <Color x:Key="Weft.color.white.color">#FFFFFFFF</Color>
+            <SolidColorBrush x:Key="Weft.color.white" Color="#FFFFFFFF" />
+            <Color x:Key="Weft.color.ink.color">#FF1A1C21</Color>
+            <SolidColorBrush x:Key="Weft.color.ink" Color="#FF1A1C21" />
+            <Color x:Key="Weft.color.blue.$root.color">#FF2663EB</Color>
+            <SolidColorBrush x:Key="Weft.color.blue.$root" Color="#FF2663EB" />
+            <Color x:Key="Weft.color.red.color">#FFDB2626</Color>
+            <SolidColorBrush x:Key="Weft.color.red" Color="#FFDB2626" />
+            <Color x:Key="Weft.color.action.primary.color">#FF2663EB</Color>
+            <SolidColorBrush x:Key="Weft.color.action.primary" Color="#FF2663EB" />
+            <Color x:Key="Weft.color.action.danger.color">#FFDB2626</Color>
+            <SolidColorBrush x:Key="Weft.color.action.danger" Color="#FFDB2626" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="HighContrast">
+            <SolidColorBrush x:Key="Weft.material.glass" Color="#47FFFFFF" />
+            <Color x:Key="Weft.color.white.color">#FFFFFFFF</Color>
+            <SolidColorBrush x:Key="Weft.color.white" Color="#FFFFFFFF" />
+            <Color x:Key="Weft.color.ink.color">#FF1A1C21</Color>
+            <SolidColorBrush x:Key="Weft.color.ink" Color="#FF1A1C21" />
+            <Color x:Key="Weft.color.blue.$root.color">#FF2663EB</Color>
+            <SolidColorBrush x:Key="Weft.color.blue.$root" Color="#FF2663EB" />
+            <Color x:Key="Weft.color.red.color">#FFDB2626</Color>
+            <SolidColorBrush x:Key="Weft.color.red" Color="#FFDB2626" />
+            <Color x:Key="Weft.color.action.primary.color">#FF2663EB</Color>
+            <SolidColorBrush x:Key="Weft.color.action.primary" Color="#FF2663EB" />
+            <Color x:Key="Weft.color.action.danger.color">#FFDB2626</Color>
+            <SolidColorBrush x:Key="Weft.color.action.danger" Color="#FFDB2626" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
     <x:Double x:Key="Weft.space.xs">4</x:Double>
     <Thickness x:Key="Weft.space.xs.thickness">4</Thickness>
     <x:Double x:Key="Weft.space.sm">8</x:Double>

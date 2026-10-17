@@ -8,6 +8,7 @@
 
 mod controls;
 mod layout;
+mod surface;
 mod values;
 
 use roxmltree::{Node as Xml, ParsingOptions};
@@ -31,7 +32,9 @@ const DESIGN_TIME: &[&str] = &[
     "http://schemas.openxmlformats.org/markup-compatibility/2006",
 ];
 /// The `Weft.cs` classes whose attached properties carry Weft meaning (design, Markers).
-const HELPERS: &[&str] = &["Props.", "On.", "Slot.", "Each.", "Choice.", "Dialog."];
+const HELPERS: &[&str] = &[
+    "Props.", "On.", "Slot.", "Each.", "Choice.", "Dialog.", "Tilt.",
+];
 
 /// Reads `source`, a XAML page, user control, window or loose panel, without its source comment.
 /// A page the generator wrote, unedited, belongs to `import_winui`.
@@ -245,6 +248,8 @@ impl Reader<'_> {
                 // The grid counts its columns itself; a repeater's stack follows its parent's.
                 "ColumnDefinitions" | "RowDefinitions" if owner == "Grid" => {}
                 "Layout" if owner == "ItemsRepeater" => {}
+                // The tilt, read with the element it turns.
+                "Transform3D" => {}
                 _ => self.lose(LossKind::Props, parent, format!("`{tag}` is not read")),
             }
             return;
@@ -305,6 +310,9 @@ impl Reader<'_> {
             }
             return;
         }
+        if self.wrapped(el, parent, parent_kind, depth, out) {
+            return;
+        }
         if let Some(loss) = controls::wrapper(el) {
             if let Some((kind, what)) = loss {
                 self.lose(kind, parent, format!("`{tag}`: {what}"));
@@ -339,6 +347,7 @@ impl Reader<'_> {
                 .insert("type".into(), Value::String(typed.into()));
         }
         self.attributes(el, &mut node, &here);
+        self.turns(el, &mut node, &here);
         if row {
             // The row's pickers carry its label, `disabled` and bounds; they draw its value.
             for child in elements(el) {
@@ -479,6 +488,8 @@ impl Reader<'_> {
                     self.event(el, node, (name, &[event.as_str()]), value, here);
                     continue;
                 }
+                // The helper only keeps the tilt's centre in the middle of the element.
+                Some(_) if name == "Tilt.Centered" => continue,
                 // `<each>` reads its markers and list itself.
                 Some(_) if helper == Some(&"Each.") && self.repeats(el) => continue,
                 Some(_) if helper.is_some() => {
@@ -703,6 +714,8 @@ impl Reader<'_> {
                     self.inline(child, kind, here, out, depth + 1);
                 }
                 "LineBreak" => out.push(' '),
+                // The tilt, read with the element it turns.
+                _ if tag.strip_suffix(".Transform3D") == Some(el.tag_name().name()) => {}
                 "Span" | "Bold" | "Italic" | "Underline" | "Hyperlink" => {
                     let note = format!("`{tag}` formatting is dropped; its text is kept");
                     self.lose(LossKind::Text, here, note);
