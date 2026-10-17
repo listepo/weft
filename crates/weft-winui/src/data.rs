@@ -1,7 +1,9 @@
 //! The data a page reads, as a tree of paths. x:Bind is compiled against the view model, so every
 //! path a property reads directly needs one C# type, and its name is the view-model member,
-//! verbatim (design, open question 2). A read through a `Weft` helper or a marker takes any value
-//! and only suggests a type.
+//! verbatim (design, open question 2) except for C# keywords (`member`). A read through a `Weft`
+//! helper or a marker takes any value and only suggests a type.
+
+use std::borrow::Cow;
 
 use indexmap::IndexMap;
 
@@ -204,7 +206,7 @@ impl Data {
                 if !xbind.is_empty() {
                     xbind.push('.');
                 }
-                xbind.push_str(segment);
+                xbind.push_str(&member(segment));
                 self.shapes[shape].fields.get(segment).copied()
             };
             shape = next.unwrap_or_else(|| self.add(shape, segment, index));
@@ -324,23 +326,42 @@ fn refused(segments: &[&str], root: bool) -> Option<String> {
         };
         return Some(format!("{what} is an object, not a list"));
     }
-    let member = |(i, s): (usize, &&str)| {
+    let generated = |(i, s): (usize, &&str)| {
         s.starts_with("Weft") || MEMBERS.contains(s) || (i == 0 && root && ROOT_MEMBERS.contains(s))
     };
-    if let Some((_, s)) = segments.iter().enumerate().find(|p| member(*p)) {
-        return Some(format!("`{s}` is the name of a generated member"));
-    }
-    // The XAML compiler copies a path segment into C# as it is, so `@class` in the view model
-    // is unreachable: x:Bind to `class` or `event` gives a page that does not compile (T105.7).
-    let s = segments
-        .iter()
-        .find(|s| KEYWORDS.split_whitespace().any(|k| k == **s))?;
-    Some(format!(
-        "`{s}` is a C# keyword, which an x:Bind path cannot name"
-    ))
+    let (_, s) = segments.iter().enumerate().find(|p| generated(*p))?;
+    Some(format!("`{s}` is the name of a generated member"))
 }
 
-/// C#'s reserved keywords.
+/// The C# member of the Weft name `name`. A C# reserved keyword followed by any number of `_`
+/// takes one more `_` (`public` → `public_`, `public_` → `public__`), so every name keeps a member
+/// of its own and `weft_name` gives it back. `@public` would be the C# way, but the XAML compiler
+/// does not parse `@` in a binding path and copies a path segment into C# as it is (T105.17).
+pub fn member(name: &str) -> Cow<'_, str> {
+    if is_keyword(name.trim_end_matches('_')) {
+        Cow::Owned(format!("{name}_"))
+    } else {
+        Cow::Borrowed(name)
+    }
+}
+
+/// The Weft name of the C# member `member`, undoing `member`: one `_` comes off a keyword followed
+/// by underscores. A bare keyword, which XAML that builds cannot hold, is read as itself.
+#[cfg(any(feature = "import", test))]
+pub fn weft_name(member: &str) -> &str {
+    match member.strip_suffix('_') {
+        Some(name) if is_keyword(name.trim_end_matches('_')) => name,
+        _ => member,
+    }
+}
+
+fn is_keyword(name: &str) -> bool {
+    KEYWORDS.split_whitespace().any(|k| k == name)
+}
+
+/// C#'s reserved keywords, the first table of
+/// <https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/> (checked
+/// 2026-10-17). Contextual keywords such as `value` are identifiers wherever a member is.
 const KEYWORDS: &str = "abstract as base bool break byte case catch char checked class const continue decimal \
      default delegate do double else enum event explicit extern false finally fixed float for \
      foreach goto if implicit in int interface internal is lock long namespace new null object \
@@ -440,15 +461,55 @@ mod tests {
     }
 
     #[test]
-    fn keywords_are_refused_and_contextual_ones_are_not() {
-        for bind in ["$.class", "$.user.event", "$.todos.0.new"] {
-            let problems = read(&mut Data::default(), bind, Read::Is(Leaf::Text), "text#t");
-            assert_eq!(problems.len(), 1, "{bind}");
-            assert_eq!(problems[0].path, bind);
-            assert!(problems[0].message.contains("C# keyword"), "{problems:?}");
+    fn a_keyword_takes_a_suffix_and_contextual_ones_do_not() {
+        for (name, member_name) in [
+            ("public", "public_"),
+            ("public_", "public__"),
+            ("public__", "public___"),
+            ("class", "class_"),
+            ("value", "value"),
+            ("var", "var"),
+            ("value_", "value_"),
+            ("publicity", "publicity"),
+            ("_", "_"),
+        ] {
+            assert_eq!(member(name), member_name, "{name}");
+            assert_eq!(weft_name(member_name), name, "{member_name}");
         }
-        for bind in ["$.value", "$.var", "$.title"] {
-            assert!(read(&mut Data::default(), bind, Read::Is(Leaf::Text), "t").is_empty());
+        // Hand-written XAML that does not build reads as it is.
+        assert_eq!(weft_name("public"), "public");
+    }
+
+    #[test]
+    fn every_keyword_and_its_suffixed_forms_map_back() {
+        let keywords: Vec<_> = KEYWORDS.split_whitespace().collect();
+        assert_eq!(keywords.len(), 77);
+        for k in keywords {
+            for name in [k.to_owned(), format!("{k}_"), format!("{k}__")] {
+                let m = member(&name);
+                assert_eq!(m, format!("{name}_"));
+                assert_eq!(weft_name(&m), name);
+            }
         }
+    }
+
+    #[test]
+    fn keyword_paths_bind_their_suffixed_members() {
+        let mut data = Data::default();
+        for (bind, xbind) in [
+            ("$.account.public", "ViewModel.account.public_"),
+            ("$.account.public_", "ViewModel.account.public__"),
+            ("$.class.0.event", "ViewModel.class_[0].event_"),
+            ("$.value", "ViewModel.value"),
+        ] {
+            let mut problems = vec![];
+            let path = data.read(bind, Read::Is(Leaf::Text), "text#t", &mut problems);
+            assert!(problems.is_empty(), "{problems:?}");
+            assert_eq!(path.as_deref(), Some(xbind));
+        }
+        // The data keeps the Weft names.
+        assert_eq!(data.shapes[1].path, "$.account");
+        assert!(data.shapes[1].fields.contains_key("public"));
+        assert!(data.shapes[1].fields.contains_key("public_"));
     }
 }

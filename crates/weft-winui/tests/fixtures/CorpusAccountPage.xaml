@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusAccount namespace=WeftScreens
+<screen id="account" label="Edit account" weft="0.1">
+  <heading id="title" level="1">Edit account</heading>
+  <form id="account-form" label="Account" state="invalid" on-submit="account.save">
+    <field id="name" label="Full name" placeholder="Ada Lovelace" state="valid" type="text" value="{$.account.name}" on-change="account.edit"/>
+    <field id="age" error="{$.errors.age}" label="Age" state="invalid" type="number" value="{$.account.age}"/>
+    <field id="handle" disabled="{$.account.locked}" label="Handle" placeholder="{{handle}" value="{$.account.handle}"/>
+    <field id="bio" label="Bio" type="multiline" value="{$.account.bio}"/>
+    <field id="email" disabled="true" label="Email" type="email" value="{$.account.email}"/>
+    <checkbox id="newsletter" checked="{$.account.newsletter}" label="Send me the newsletter" on-change="account.edit"/>
+    <checkbox id="terms" checked="true" disabled="true" label="Terms accepted"/>
+    <switch id="public" checked="{$.account.public}" disabled="{!$.account.verified}" label="Public profile" on-change="account.edit"/>
+    <radio-group id="plan" label="Plan" value="{$.account.plan}" on-change="account.edit">
+      <radio id="plan-free" value="free">Free</radio>
+      <radio id="plan-pro" text="{$.labels.pro}" value="pro"/>
+      <radio id="plan-team" disabled="true" value="team">Team</radio>
+    </radio-group>
+    <select id="language" disabled="{$.account.locked}" label="Language" value="{$.account.language}" on-change="account.edit">
+      <option id="language-en" value="en">English</option>
+      <option id="language-fr" text="{$.labels.french}" value="fr"/>
+    </select>
+    <text id="internal" hidden="true">Internal note: never shown.</text>
+    <alert id="saved" hidden="{!$.saved}" tone="success">Your changes were saved.</alert>
+    <slot name="footer">
+      <button id="save" state="busy" submit="true" variant="primary">Save</button>
+      <button id="cancel" state="idle" text="{$.labels.cancel}" variant="secondary" on-press="account.cancel"/>
+      <link id="help" href="https://example.com/help" text="{$.labels.help}"/>
+    </slot>
+  </form>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusAccountPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="account" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Edit account">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Edit account" />
+            <StackPanel AutomationProperties.AutomationId="account-form" AutomationProperties.LandmarkType="Form" AutomationProperties.Name="Account" weft:Props.State="invalid" weft:On.Submit="{x:Bind ViewModel.account_saveCommand}">
+                <TextBox AutomationProperties.AutomationId="name" Text="{x:Bind ViewModel.account.name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Ada Lovelace" Header="Full name" weft:Props.State="valid" weft:On.Change="{x:Bind ViewModel.account_editCommand}" />
+                <TextBox AutomationProperties.AutomationId="age" Text="{x:Bind ViewModel.account.age, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="Number" weft:Props.Error="{x:Bind ViewModel.errors.age, Mode=OneWay}" Header="Age" weft:Props.State="invalid" />
+                <TextBox AutomationProperties.AutomationId="handle" Text="{x:Bind ViewModel.account.handle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="{}{handle}" IsEnabled="{x:Bind weft:Weft.Not(ViewModel.account.locked), Mode=OneWay}" Header="Handle" />
+                <TextBox AutomationProperties.AutomationId="bio" Text="{x:Bind ViewModel.account.bio, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" Header="Bio" />
+                <TextBox AutomationProperties.AutomationId="email" Text="{x:Bind ViewModel.account.email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="EmailSmtpAddress" IsEnabled="False" Header="Email" />
+                <CheckBox AutomationProperties.AutomationId="newsletter" IsChecked="{x:Bind ViewModel.account.newsletter, Mode=TwoWay}" Content="Send me the newsletter" weft:On.Change="{x:Bind ViewModel.account_editCommand}" />
+                <CheckBox AutomationProperties.AutomationId="terms" IsChecked="True" IsEnabled="False" Content="Terms accepted" />
+                <ToggleSwitch AutomationProperties.AutomationId="public" IsOn="{x:Bind ViewModel.account.public_, Mode=TwoWay}" IsEnabled="{x:Bind weft:Weft.Truthy(ViewModel.account.verified), Mode=OneWay}" Header="Public profile" weft:On.Change="{x:Bind ViewModel.account_editCommand}" />
+                <RadioButtons AutomationProperties.AutomationId="plan" weft:Choice.Value="{x:Bind ViewModel.account.plan, Mode=TwoWay}" Header="Plan" weft:On.Change="{x:Bind ViewModel.account_editCommand}">
+                    <RadioButton AutomationProperties.AutomationId="plan-free" Content="Free" Tag="free" />
+                    <RadioButton AutomationProperties.AutomationId="plan-pro" Content="{x:Bind ViewModel.labels.pro, Mode=OneWay}" Tag="pro" />
+                    <RadioButton AutomationProperties.AutomationId="plan-team" Content="Team" Tag="team" IsEnabled="False" />
+                </RadioButtons>
+                <ComboBox AutomationProperties.AutomationId="language" weft:Choice.Value="{x:Bind ViewModel.account.language, Mode=TwoWay}" IsEnabled="{x:Bind weft:Weft.Not(ViewModel.account.locked), Mode=OneWay}" Header="Language" weft:On.Change="{x:Bind ViewModel.account_editCommand}">
+                    <ComboBoxItem AutomationProperties.AutomationId="language-en" Content="English" Tag="en" />
+                    <ComboBoxItem AutomationProperties.AutomationId="language-fr" Content="{x:Bind ViewModel.labels.french, Mode=OneWay}" Tag="fr" />
+                </ComboBox>
+                <TextBlock AutomationProperties.AutomationId="internal" TextWrapping="Wrap" Text="Internal note: never shown." Visibility="Collapsed" />
+                <InfoBar AutomationProperties.AutomationId="saved" IsOpen="True" IsClosable="False" Severity="Success" Message="Your changes were saved." Visibility="{x:Bind ViewModel.saved, Mode=OneWay}" />
+                <StackPanel Orientation="Horizontal" weft:Slot.Name="footer">
+                    <Button AutomationProperties.AutomationId="save" Content="Save" Style="{StaticResource AccentButtonStyle}" weft:On.Submit="{x:Bind ViewModel.account_saveCommand}" weft:Props.State="busy" />
+                    <Button AutomationProperties.AutomationId="cancel" Content="{x:Bind ViewModel.labels.cancel, Mode=OneWay}" weft:Props.State="idle" weft:On.Press="{x:Bind ViewModel.account_cancelCommand}" />
+                    <HyperlinkButton AutomationProperties.AutomationId="help" Content="{x:Bind ViewModel.labels.help, Mode=OneWay}" NavigateUri="https://example.com/help" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

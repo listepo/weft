@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.17 | todo | P2 | 2 | 0% | |
 | T105.18 | todo | P2 | 3 | 0% | |
 | T903 | todo | P2 | 2 | 0% | |
 
@@ -297,9 +296,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 Split from T105.15 when it was claimed. Per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour: SPEC §10.6 row, `crates/weft-catalog/src/settings.rs`, regenerated `schemas/weft.schema.json`): with `false` the page's `Page.Resources` holds only the tokens it uses, and `import_winui` compares those entries by key and type. And `weft:ColumnsLayout` in `Weft.cs` for an `<each>` in a grid with `min-column-width`, generated and read back. Done when both are generated, read back, covered by tests and built in the Windows job.
 
-### T105.17. WinUI data paths named like C# keywords
-
-Found when T105.10 closed: `corpus-account` binds `$.account.public`, and the generator refuses it because `public` is a C# keyword. The creator chose the C# verbatim identifier: the view-model property is written `@public`, so the name and the data path stay unchanged and the round trip holds. Cover every C# reserved keyword, not only `public`, with the keyword list and its source in `docs/winui-design.md`. Done when `corpus-account` leaves `PENDING`, its golden builds in the Windows job, and it round-trips.
 
 ### T903. macOS studio UI test: Save As writes nothing locally
 
