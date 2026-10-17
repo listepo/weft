@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.16 | todo | P2 | 3 | 0% | |
 | T105.17 | todo | P2 | 2 | 0% | |
 | T105.18 | todo | P2 | 3 | 0% | |
 | T903 | todo | P2 | 2 | 0% | |
@@ -297,10 +296,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 ### T105.18. WinUI per-page tokens and reflowing repeats
 
 Split from T105.15 when it was claimed. Per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour: SPEC §10.6 row, `crates/weft-catalog/src/settings.rs`, regenerated `schemas/weft.schema.json`): with `false` the page's `Page.Resources` holds only the tokens it uses, and `import_winui` compares those entries by key and type. And `weft:ColumnsLayout` in `Weft.cs` for an `<each>` in a grid with `min-column-width`, generated and read back. Done when both are generated, read back, covered by tests and built in the Windows job.
-
-### T105.16. WinUI repeats inside select, combobox and menu
-
-Found when T105.10 closed: an `<each>` inside `select`, `combobox` or `menu` does not generate, so `corpus-booking`, `example-menu-item` and `example-option` stay in `PENDING` (`crates/weft-winui/tests/common/mod.rs`). Generate the repeated options or menu items from the bound collection (an `ItemsSource` with a typed template, or the pattern T105.14 uses for repetition), read them back, and add the SPEC §9 and `docs/winui-design.md` rows. The creator approved this task. Done when the three screens leave `PENDING`, their goldens build in the Windows job, and they round-trip.
 
 ### T105.17. WinUI data paths named like C# keywords
 

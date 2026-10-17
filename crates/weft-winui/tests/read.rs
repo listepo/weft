@@ -780,6 +780,68 @@ fn a_marked_repeater_is_an_each_and_its_paths_are_relative() {
 }
 
 #[test]
+fn a_choice_or_menu_template_is_an_each_after_its_static_items() {
+    let (doc, lost) = read_body(concat!(
+        r#"<ComboBox AutomationProperties.AutomationId="c" Header="C" weft:Each.Source="{x:Bind ViewModel.sizes, Mode=OneWay}" weft:Each.As="size" weft:Each.At="9">"#,
+        r#"<weft:Each.Template><DataTemplate x:DataType="weft:PSizesItem">"#,
+        r#"<ComboBoxItem AutomationProperties.AutomationId="o" Content="{x:Bind name, Mode=OneWay}" Tag="{x:Bind code, Mode=OneWay}" />"#,
+        r#"</DataTemplate></weft:Each.Template>"#,
+        r#"<ComboBoxItem AutomationProperties.AutomationId="a" Content="A" Tag="a" />"#,
+        r#"</ComboBox>"#,
+        r#"<DropDownButton AutomationProperties.AutomationId="m" Content="M"><DropDownButton.Flyout>"#,
+        r#"<MenuFlyout weft:Each.Source="{x:Bind ViewModel.tools, Mode=OneWay}" weft:Each.Id="t" weft:Each.As="tool" weft:Each.At="1">"#,
+        r#"<weft:Each.Template><DataTemplate x:DataType="weft:PToolsItem">"#,
+        r#"<MenuFlyoutItem AutomationProperties.AutomationId="i" Text="{x:Bind label, Mode=OneWay}" weft:On.Press="{x:Bind WeftRoot.tool_runCommand}" />"#,
+        r#"</DataTemplate></weft:Each.Template>"#,
+        r#"<MenuFlyoutItem AutomationProperties.AutomationId="j" Text="J" />"#,
+        r#"<MenuFlyoutItem AutomationProperties.AutomationId="k" Text="K" />"#,
+        r#"</MenuFlyout></DropDownButton.Flyout></DropDownButton>"#,
+        r#"<DropDownButton AutomationProperties.AutomationId="n" Content="N"><DropDownButton.Flyout>"#,
+        r#"<MenuFlyout weft:Each.Source="{x:Bind weft:Weft.Not(ViewModel.tools), Mode=OneWay}" weft:Each.As="tool">"#,
+        r#"<weft:Each.Template><DataTemplate><MenuFlyoutItem Text="{x:Bind label, Mode=OneWay}" /></DataTemplate></weft:Each.Template>"#,
+        r#"</MenuFlyout></DropDownButton.Flyout></DropDownButton>"#,
+    ));
+    // `At` past the static items puts the repeated ones last.
+    assert_eq!(
+        doc,
+        concat!(
+            r#"<select id="c" label="C">"#,
+            "\n",
+            r#"  <option id="a" value="a">A</option>"#,
+            "\n",
+            r#"  <each id="each-size" as="size" in="{$.sizes}">"#,
+            "\n",
+            r#"    <option id="o" text="{$size.name}" value="{$size.code}"/>"#,
+            "\n",
+            "  </each>\n",
+            "</select>\n",
+            r#"<menu id="m" label="M">"#,
+            "\n",
+            r#"  <menu-item id="j">J</menu-item>"#,
+            "\n",
+            r#"  <each id="t" as="tool" in="{$.tools}">"#,
+            "\n",
+            r#"    <menu-item id="i" text="{$tool.label}" on-press="tool.run"/>"#,
+            "\n",
+            "  </each>\n",
+            r#"  <menu-item id="k">K</menu-item>"#,
+            "\n",
+            "</menu>\n",
+            r#"<menu id="n" label="N"/>"#,
+            "\n",
+        )
+    );
+    // A computed list is no `<each>`, so its template is not read.
+    assert_eq!(
+        lost,
+        concat!(
+            "Ids /screen#s/select#c/each#each-size: an id was generated\n",
+            "Repetition /screen#s/menu#n: an `Each.Template` without `Each.As` and a bound `Each.Source` is not read\n",
+        )
+    );
+}
+
+#[test]
 fn a_user_control_or_window_reads_like_a_page() {
     let (catalog, tokens) = setup();
     let ns = r#"xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation""#;

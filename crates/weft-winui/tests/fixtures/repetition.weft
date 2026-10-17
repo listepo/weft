@@ -51,4 +51,17 @@
       <text id="no-scores">No scores.</text>
     </slot>
   </table>
+  <select id="shirt" label="Shirt" value="{$.shirt}" on-change="shirt.pick">
+    <option id="shirt-none" value="none">None</option>
+    <each id="size-each" as="size" in="{$.sizes}">
+      <option id="size-option" text="{$size.name}" value="{$size.code}"/>
+    </each>
+    <option id="shirt-other" value="other">Other</option>
+  </select>
+  <menu id="tools" label="Tools">
+    <menu-item id="tools-open" on-press="tool.open">Open</menu-item>
+    <each id="tool-each" as="tool" in="{$.tools}">
+      <menu-item id="tool-run" disabled="{$.busy}" text="{$tool.label}" on-press="tool.run"/>
+    </each>
+  </menu>
 </screen>
