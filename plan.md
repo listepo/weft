@@ -11,7 +11,7 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.15 | todo | P2 | 4 | 0% | |
+| T105.18 | todo | P2 | 3 | 0% | |
 | T903 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -292,9 +292,9 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
 
-### T105.15. WinUI tokens, materials, tilt and reflowing repeats
+### T105.18. WinUI per-page tokens and reflowing repeats
 
-Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeDictionaries` for light, dark and high contrast) and per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour), `material` as an `AcrylicBrush` on a `Border` (with `padding` inside it), the 3D tilt (`perspective`, `rotate-x`, `rotate-y`, `rotate-z`), and `weft:ColumnsLayout` for an `<each>` in a grid with `min-column-width`. Checks the unverified resource-key and perspective facts in the Windows build. Done when the `glass`, `tilt` and `showroom` corpus screens generate, build and read back.
+Split from T105.15 when it was claimed. Per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour: SPEC §10.6 row, `crates/weft-catalog/src/settings.rs`, regenerated `schemas/weft.schema.json`): with `false` the page's `Page.Resources` holds only the tokens it uses, and `import_winui` compares those entries by key and type. And `weft:ColumnsLayout` in `Weft.cs` for an `<each>` in a grid with `min-column-width`, generated and read back. Done when both are generated, read back, covered by tests and built in the Windows job.
 
 
 ### T903. macOS studio UI test: Save As writes nothing locally

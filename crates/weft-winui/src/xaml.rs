@@ -2,20 +2,22 @@
 //! the trust boundary of the generator: every attribute value is escaped as XML here, and
 //! document text becomes a value only through `literal`.
 
+use std::borrow::Cow;
+
 use weft_core::escape_attribute;
 
 const INDENT: &str = "    ";
 
 pub struct Element {
-    pub name: &'static str,
+    pub name: Cow<'static, str>,
     attrs: Vec<(String, String)>,
     pub children: Vec<Element>,
 }
 
 impl Element {
-    pub fn new(name: &'static str) -> Self {
+    pub fn new(name: impl Into<Cow<'static, str>>) -> Self {
         Element {
-            name,
+            name: name.into(),
             attrs: vec![],
             children: vec![],
         }
@@ -23,6 +25,12 @@ impl Element {
 
     pub fn attr(&mut self, name: impl Into<String>, value: impl Into<String>) {
         self.attrs.push((name.into(), value.into()));
+    }
+
+    /// Removes an attribute already set and returns its value, for a wrapper to carry instead.
+    pub fn take(&mut self, name: &str) -> Option<String> {
+        let at = self.attrs.iter().position(|(n, _)| n == name)?;
+        Some(self.attrs.remove(at).1)
     }
 
     /// The value of an attribute already set.
@@ -36,7 +44,7 @@ impl Element {
     pub fn write(&self, depth: usize, out: &mut String) {
         out.push_str(&INDENT.repeat(depth));
         out.push('<');
-        out.push_str(self.name);
+        out.push_str(&self.name);
         for (name, value) in &self.attrs {
             out.push_str(&format!(" {name}=\"{}\"", escape_attribute(value)));
         }

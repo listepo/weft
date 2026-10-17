@@ -30,6 +30,7 @@ pub use resolver::{
 pub use settings::{MAX_COUNT, project_file_schema};
 pub use tokens::{
     MATERIAL, MATERIAL_EXTENSION, MAX_BLUR_PX, Token, TokenCode, TokenProblem, Tokens,
-    composite_part, font_weight, load_tokens, material_parts, token_types,
+    composite_part, font_weight, hex_channels, load_tokens, material_parts, srgb_channels,
+    token_types,
 };
 pub use version::{VersionChange, VersionCheck, VersionLevel, check_catalogs, check_documents};
