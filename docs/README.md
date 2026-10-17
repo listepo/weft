@@ -18,6 +18,7 @@ This guide is for people who use Weft: developers who wire it into an app or an 
 | [The Cursor plugin](cursor-plugin.md) | The same from Cursor: skills, a rule and the MCP server. |
 | [The Open Design plugin](open-design-plugin.md) | The same from Open Design, and design systems (`DESIGN.md`, `tokens.css`) as Weft tokens. |
 | [Weft in Xcode](xcode-plugin.md) | SwiftUI generated from `.weft` files at build time, convert commands, an Editor menu extension, and the MCP server for Xcode's agents. |
+| [Recipes](recipes.md) | Copy-paste answers: canonical files in CI, HTML and A2UI round trips, a JSON Schema for a model, version checks. |
 | [Rendering](rendering.md) | Turn a screen into an HTML page, an accessibility tree or a React tree. |
 | [Importing HTML and component libraries](importing.md) | Start a screen from an existing page, or a catalog from a web component library's Custom Elements Manifest, and see what the import lost. |
 | [Exporting to React](exporting-jsx.md) | Turn a screen into a React component. |
