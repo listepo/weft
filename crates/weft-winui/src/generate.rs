@@ -3,7 +3,7 @@
 //! "To WinUI", and `docs/winui-design.md`.
 
 use indexmap::IndexMap;
-use weft_catalog::{Token, token_types};
+use weft_catalog::{Appearance, Token, token_types};
 use weft_core::{
     Catalog, Child, Diagnostic, Document, Mode, Node, PropType, ValidateOptions, Value, has_errors,
     js_number, serialize, validate_document,
@@ -14,6 +14,7 @@ use crate::Unsupported;
 use crate::csharp::{self, command};
 use crate::data::{Data, Leaf, Read};
 use crate::xaml::{Element, boolean, literal, type_name};
+use repetition::holder;
 
 pub(crate) mod containers;
 mod controls;
@@ -58,6 +59,12 @@ pub struct GenerateOptions<'a> {
     pub name: Option<&'a str>,
     /// The C# namespace of the page and of the `Weft` helper classes, such as `Acme.Screens`.
     pub namespace: &'a str,
+    /// The page reads its tokens from the project's shared `WeftTokens.xaml` (`generate_tokens`)
+    /// instead of holding the ones it uses in its `Page.Resources`, which lets it build alone.
+    pub shared_tokens: bool,
+    /// The light and dark tokens of the project's resolver (`weft_catalog::appearance`), for the
+    /// `Dark` dictionary of a page's own tokens. The shared tokens take it in `generate_tokens`.
+    pub appearance: Option<Appearance<'a>>,
 }
 
 /// The files of one screen (`files` names them). The page binds to its view model, and the
@@ -160,12 +167,14 @@ pub fn generate(
         editable: false,
         columns: 0,
         name: name.clone(),
+        used: IndexMap::new(),
     };
     let panel = g.node(&expanded.root);
     let mut names = vec![];
     actions(&expanded.root, &mut names);
     let commands: Vec<String> = names.iter().map(|a| command(a)).collect();
     g.data.check(&commands, &mut g.problems);
+    let resources = (!options.shared_tokens).then(|| page_tokens(&mut g, options));
     if !g.problems.is_empty() {
         return Err(GenerateError::Unsupported(g.problems));
     }
@@ -180,6 +189,9 @@ pub fn generate(
     );
     root.attr("xmlns:x", "http://schemas.microsoft.com/winfx/2006/xaml");
     root.attr("xmlns:weft", format!("using:{namespace}"));
+    if let Some(resources) = resources.filter(|r| !r.children.is_empty()) {
+        root.children.push(holder("Page.Resources", resources));
+    }
     let mut scroll = Element::new("ScrollViewer");
     scroll.children.extend(panel);
     root.children.push(scroll);
@@ -196,6 +208,24 @@ pub fn generate(
         view_model: format!("{name}ViewModel"),
         view_model_source,
     })
+}
+
+/// The page's own `ResourceDictionary`: the tokens it references, in the project's order. A
+/// token WinUI has no form for would leave a reference that fails when the page loads.
+fn page_tokens(g: &mut Gen<'_>, options: &GenerateOptions<'_>) -> Element {
+    let used = options
+        .tokens
+        .iter()
+        .filter(|(path, _)| g.used.contains_key(*path));
+    let (entries, skipped) = crate::tokens::resources(used, options.appearance);
+    for (path, why) in skipped {
+        let at = g.used.get(&path).cloned().unwrap_or_default();
+        g.problems
+            .push(Unsupported::new(at, format!("token `{path}`: {why}")));
+    }
+    let mut dictionary = Element::new("ResourceDictionary");
+    dictionary.children = entries;
+    dictionary
 }
 
 fn path_of(node: &Node) -> String {
@@ -232,11 +262,22 @@ struct Gen<'a> {
     columns: usize,
     /// The page's name, which the generated classes start with.
     name: String,
+    /// The tokens the page references, each with the first element that does.
+    used: IndexMap<String, String>,
 }
 
 impl Gen<'_> {
     fn refuse(&mut self, node: &Node, message: impl Into<String>) {
         self.problems.push(Unsupported::new(path_of(node), message));
+    }
+
+    /// The markup `extension` reading a token's resource, `Weft.<path><suffix>`, noted for the
+    /// page's own tokens.
+    fn token(&mut self, node: &Node, extension: &str, path: &str, suffix: &str) -> String {
+        if !self.used.contains_key(path) {
+            self.used.insert(path.to_owned(), path_of(node));
+        }
+        format!("{{{extension} Weft.{path}{suffix}}}")
     }
 
     fn later(&mut self, node: &Node, what: &str) {
@@ -463,7 +504,8 @@ impl Gen<'_> {
             None => {}
             Some(Value::Token(path)) => {
                 for attr in attrs {
-                    e.attr(*attr, format!("{{StaticResource Weft.{path}}}"));
+                    let value = self.token(node, "StaticResource", path, "");
+                    e.attr(*attr, value);
                 }
             }
             Some(_) => self.refuse(node, "a `gap` that is not a token"),

@@ -26,6 +26,7 @@ public sealed partial class RepetitionViewModel : INotifyPropertyChanged
         scores.CollectionChanged += (_, _) => WeftPlaceLists();
         sizes.CollectionChanged += (_, _) => WeftPlaceLists();
         tools.CollectionChanged += (_, _) => WeftPlaceLists();
+        photos.CollectionChanged += (_, _) => WeftPlaceLists();
     }
 
     public ObservableCollection<RepetitionTagsItem> tags { get; } = new();
@@ -75,6 +76,8 @@ public sealed partial class RepetitionViewModel : INotifyPropertyChanged
     }
     private bool Weft_busy = false;
 
+    public ObservableCollection<RepetitionPhotosItem> photos { get; } = new();
+
     public ICommand tag_removeCommand { get; }
     public ICommand result_openCommand { get; }
     public ICommand shirt_pickCommand { get; }
@@ -99,6 +102,7 @@ public sealed partial class RepetitionViewModel : INotifyPropertyChanged
         Weft.Place(scores, this, null, "$.scores");
         Weft.Place(sizes, this, null, "$.sizes");
         Weft.Place(tools, this, null, "$.tools");
+        Weft.Place(photos, this, null, "$.photos");
     }
 
     private void WeftSet<T>(ref T store, T value, [CallerMemberName] string name = "")
@@ -405,6 +409,42 @@ public sealed partial class RepetitionToolsItem : INotifyPropertyChanged, IWeftI
         set => WeftSet(ref Weft_label, value);
     }
     private string Weft_label = "";
+
+    void IWeftItem.WeftPlace(object root, object? parent, string path)
+    {
+        WeftRoot = (RepetitionViewModel)root;
+        WeftParent = (object?)parent;
+        WeftPath = path;
+        WeftPlaceLists();
+    }
+
+    private void WeftPlaceLists()
+    {
+        if (WeftRoot is null) return;
+    }
+
+    private void WeftSet<T>(ref T store, T value, [CallerMemberName] string name = "")
+    {
+        if (Equals(store, value)) return;
+        store = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}
+
+public sealed partial class RepetitionPhotosItem : INotifyPropertyChanged, IWeftItem
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public RepetitionViewModel? WeftRoot { get; private set; }
+    public object? WeftParent { get; private set; }
+    public string WeftPath { get; private set; } = "";
+
+    public string caption
+    {
+        get => Weft_caption;
+        set => WeftSet(ref Weft_caption, value);
+    }
+    private string Weft_caption = "";
 
     void IWeftItem.WeftPlace(object root, object? parent, string path)
     {

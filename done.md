@@ -1620,6 +1620,21 @@ Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeD
 
 Result: https://github.com/pyrlyn/weft/pull/120. `corpus-glass`, `corpus-tilt` and `corpus-showroom` generate, match their goldens, build in the Windows `winui` job and read back from the XAML alone without losses. `WeftTokens.xaml` writes colours and materials in `Light`, `Dark` and `HighContrast` theme dictionaries; `weft-catalog` has one sRGB channel reader that `weft-swiftui` now shares. A tilt on a `screen` or on an item a control holds itself is refused for now.
 
+### T105.18. WinUI per-page tokens and reflowing repeats
+
+Split from T105.15 when it was claimed. Per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour: SPEC §10.6 row, `crates/weft-catalog/src/settings.rs`, regenerated `schemas/weft.schema.json`): with `false` the page's `Page.Resources` holds only the tokens it uses, and `import_winui` compares those entries by key and type. And `weft:ColumnsLayout` in `Weft.cs` for an `<each>` in a grid with `min-column-width`, generated and read back. Done when both are generated, read back, covered by tests and built in the Windows job.
+
+**Execution plan.**
+
+1. Spec first: SPEC §9 "To WinUI"/"From WinUI" (per-page `Page.Resources`, `ColumnsLayout`, the key-and-type comparison) and the §10.6 row of `export.winui.sharedTokens`; `docs/winui-design.md`; `research.md` §23 on `NonVirtualizingLayout` and page resources, with Microsoft docs URLs and dates.
+2. `crates/weft-winui/src/tokens.rs`: build the resources as `xaml::Element`s (with text content) so `WeftTokens.xaml` and a page's `Page.Resources` share one writer. `GenerateOptions` gains `shared_tokens` and `appearance`; the generator records every token it references and, with `shared_tokens: false`, writes only those into `Page.Resources` (a referenced token WinUI has no form for is refused).
+3. `import_winui`: regenerate in the mode the page shows (a `Page.Resources` element) and compare its entries by element type and `x:Key` only; `read_winui` reads the generator's `Weft.*` page resources as nothing to lose.
+4. `Weft.cs`: `ColumnsLayout`, a `NonVirtualizingLayout` sharing the column arithmetic with `ColumnsPanel`. A `grid` with `min-column-width` whose only child is an `<each>` of one element becomes an `ItemsRepeater` laid out by it; `read_winui` reads it back as the `grid` and its `<each>`.
+5. CLI: `weft winui --shared-tokens/--no-shared-tokens`, precedence flag > `export.winui.sharedTokens` > default (true in a project, false without one); `settings.rs` row, regenerated `schemas/weft.schema.json`, `docs/cli.md`, `docs/projects.md`, the crate README.
+6. Tests: a `tokens` fixture generated with per-page tokens and a repeated reflowing grid in the `repetition` fixture (goldens, both read-backs, the Windows build); unit tests for the token subset, the refusal, the loose comparison and an edited value; CLI tests for each option and the precedence. Verify with `moon run root:changed`, then the full check, and the green `winui` job.
+
+Result: https://github.com/pyrlyn/weft/pull/122. `weft winui --no-shared-tokens` (or `export.winui.sharedTokens` `false`, or no project) gives a page whose `Page.Resources` holds only the tokens it references, written as `WeftTokens.xaml` writes them; a referenced token WinUI has no form for is refused. `import_winui` regenerates in the mode the page shows and compares those resources by element and `x:Key`; `read_winui` skips a `Page.Resources` of `Weft.` entries. A `min-column-width` grid whose only child is an `<each>` of one element is an `ItemsRepeater` with a `weft:ColumnsLayout` (a `NonVirtualizingLayout` sharing `ColumnsPanel`'s arithmetic in `Weft.cs`) and reads back as the grid. The `tokens` fixture and the repetition fixture's photo grid have goldens that read back both ways and build in the Windows `winui` job.
+
 ### T105.10. WinUI target: SPEC, AGENT-SPEC and docs
 
 SPEC §9 "From WinUI" and the loss table complete, the AGENT-SPEC check, `crates/weft-winui/README.md`, and the corpus-wide round-trip test both ways. About 60 lines of code. Done when the merge gate passes and every SPEC §9 statement about WinUI has a test.

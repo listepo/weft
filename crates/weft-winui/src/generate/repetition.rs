@@ -1,6 +1,7 @@
 //! Repetition (SPEC §9, "To WinUI"): an `<each>` as an `ItemsRepeater` whose template is typed by
-//! the generated item class, a `list` of one `<each>` as a `ListView` bound to the list, an
-//! `<each>` among a choice's options or a menu's items as the `Each` helper's template, and the
+//! the generated item class, in its parent's flow or in a grid's columns, a `list` of one `<each>`
+//! as a `ListView` bound to the list, an `<each>` among a choice's options or a menu's items as the
+//! `Each` helper's template, and the
 //! `empty` slots of `list` and `table`.
 
 use weft_core::{Node, Value};
@@ -51,6 +52,27 @@ impl Gen<'_> {
             .push(holder("ItemsRepeater.ItemTemplate", template(&class, root)));
         self.data.leave();
         Some(e)
+    }
+
+    /// A grid's only `<each>` as the `ItemsRepeater` `e`, which `layout` places in columns. Each
+    /// item is one cell, so it is one element.
+    pub(super) fn repeat(&mut self, e: &mut Element, each: &Node, layout: Element) {
+        e.name = "ItemsRepeater".into();
+        let items: Vec<&Node> = nodes(&each.children).collect();
+        let [item] = items[..] else {
+            return self.later(each, "an `<each>` of other than one element in a grid");
+        };
+        let Some((source, class)) = self.enter(each) else {
+            return;
+        };
+        e.attr("ItemsSource", source);
+        markers(e, each);
+        e.children.push(holder("ItemsRepeater.Layout", layout));
+        if let Some(root) = self.node(item) {
+            e.children
+                .push(holder("ItemsRepeater.ItemTemplate", template(&class, root)));
+        }
+        self.data.leave();
     }
 
     /// The options of a choice or the items of a menu. A `ComboBox` takes either items or an

@@ -2,8 +2,10 @@
 //! tokens come from the arguments, else the project, else the core catalog and the default
 //! tokens; the output directory from `--out-dir`, else the project's `export.winui.outDir` or
 //! `import.winui.outDir`, else standard output. `--namespace`, else `export.winui.namespace`, else
-//! `WeftScreens`, is the C# namespace; `--name` the page name the generator is given. The files
-//! written are the generator's whole set, so a file it adds needs no change here.
+//! `WeftScreens`, is the C# namespace; `--name` the page name the generator is given. A page reads
+//! the shared `WeftTokens.xaml` unless `--no-shared-tokens`, `export.winui.sharedTokens` `false`
+//! or the lack of a project gives it its own. The files written are the generator's whole set, so
+//! a file it adds needs no change here.
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -16,7 +18,7 @@ use weft_winui::{
 };
 
 use crate::convert::{
-    catalog, emit, emit_files, keeps_context, out_dir, project, strict_document, tokens,
+    catalog, emit, emit_files, keeps_context, out_dir, project, strict_document, switch_or, tokens,
 };
 use crate::{DIAGNOSTICS, ProjectArgs, print, read};
 
@@ -29,6 +31,8 @@ pub struct ExportArgs {
     pub tokens: Option<PathBuf>,
     pub name: Option<String>,
     pub namespace: Option<String>,
+    /// `--shared-tokens` and `--no-shared-tokens`.
+    pub shared_tokens: (bool, bool),
     pub project: ProjectArgs,
     pub out_dir: Option<PathBuf>,
     /// `--context`: `Some(true)` keeps, `Some(false)` strips.
@@ -48,6 +52,10 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
         document.context.clear();
     }
     let namespace = namespace(args.namespace, loaded);
+    // A project's pages share one tokens file; a lone page builds on its own.
+    let (on, off) = args.shared_tokens;
+    let shared = &["export", "winui", "sharedTokens"];
+    let shared_tokens = switch_or(on, off, loaded, shared, loaded.is_some());
     let errors = &mut std::io::stderr();
     let generated = match generate(
         &document,
@@ -56,6 +64,8 @@ pub fn export(args: ExportArgs, out: &mut dyn Write) -> Result<u8> {
             tokens: &tokens.tokens,
             name: args.name.as_deref(),
             namespace: &namespace,
+            shared_tokens,
+            appearance: appearance(&tokens.modifiers),
         },
     ) {
         Ok(generated) => generated,

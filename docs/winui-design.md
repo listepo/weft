@@ -18,7 +18,7 @@ A new crate `crates/weft-winui`, shaped like `crates/weft-slint`:
 
 | Item | Form |
 | --- | --- |
-| Generator | `generate(document, &GenerateOptions { catalog, tokens, name, namespace, shared_tokens, context }) -> Result<Generated, GenerateError>`, pure Rust, no Windows dependency. `Generated` holds three files (below). `GenerateError::Unsupported` lists every path it refuses, as T67 does. |
+| Generator | `generate(document, &GenerateOptions { catalog, tokens, name, namespace, shared_tokens, appearance }) -> Result<Generated, GenerateError>`, pure Rust, no Windows dependency. `Generated` holds three files (below). `GenerateError::Unsupported` lists every path it refuses, as T67 does. |
 | Shared files | `generate_tokens(tokens, namespace)` writes `WeftTokens.xaml`; `helpers(namespace)` writes `Weft.cs`. A project writes each once. |
 | Source-comment import | `import_winui(source) -> Result<Document, ImportError>`: reads the `weft:source` comment and accepts it only if generating from it gives the same XAML (below). Always built, no extra dependency beyond the XML reader. |
 | Hand-written import | `read_winui(source, &ImportOptions { catalog, tokens }) -> ImportResult { document, losses, diagnostics }` behind the `import` feature, like `weft-slint`'s, using `weft-import` for the shared loss types and the lenient repair. |

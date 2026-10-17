@@ -337,6 +337,11 @@
               "description": "The C# namespace of the generated page classes and of the `Weft` helper classes, such as `Acme.Screens`. The CLI's `--namespace` overrides it.",
               "default": "WeftScreens"
             },
+            "sharedTokens": {
+              "type": "boolean",
+              "description": "Pages read the tokens from one shared `WeftTokens.xaml` (`weft winui-tokens`, merged into `App.xaml`) instead of each holding the tokens it uses in its `Page.Resources`.",
+              "default": true
+            },
             "context": {
               "enum": [
                 "keep",

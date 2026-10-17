@@ -61,8 +61,12 @@ pub const FIXTURES: &[&str] = &[
     "data",
     "layout",
     "repetition",
+    "tokens",
     "values",
 ];
+/// The screens generated with their own tokens in `Page.Resources` rather than the shared
+/// `WeftTokens.xaml`, so the Windows build compiles both forms.
+pub const OWN_TOKENS: &[&str] = &["tokens"];
 
 /// Every corpus screen and catalog example, named `corpus-<dir>` or `example-<file>`, and the
 /// fixtures.
@@ -95,6 +99,8 @@ pub fn options<'a>(
         tokens,
         name,
         namespace: NAMESPACE,
+        shared_tokens: true,
+        appearance: None,
     }
 }
 
@@ -112,7 +118,11 @@ pub fn covered() -> Vec<(String, Document, Generated)> {
         .filter(|(name, _)| !PENDING.contains(&name.as_str()))
         .map(|(name, path)| {
             let doc = document(&std::fs::read_to_string(path).unwrap(), &catalog, &tokens);
-            let generated = generate(&doc, &options(&catalog, &tokens, Some(&name))).unwrap();
+            let options = GenerateOptions {
+                shared_tokens: !OWN_TOKENS.contains(&name.as_str()),
+                ..options(&catalog, &tokens, Some(&name))
+            };
+            let generated = generate(&doc, &options).unwrap();
             (name, doc, generated)
         })
         .collect()

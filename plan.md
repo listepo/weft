@@ -11,7 +11,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106 | in progress | P2 | 5 | 95% | Claude Code / claude-opus-5-5 |
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
-| T105.18 | todo | P2 | 3 | 0% | |
 | T903 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -291,10 +290,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 **Execution plan (this round, design only).** Write `docs/winui-design.md` (mapping of every core kind and prop, tokens, layout vocabulary, bindings, events, slots, light and dark, losses, round trip, XML parser, CI job, open questions), `research.md` §23, and the sub-tasks below. The creator approved the design and accepted the recommendation of every open question in `docs/winui-design.md`, including a `roxmltree` row in the workspace `rust.md` when T105.8 adds the crate; T105.1 may start.
 
 **Done when** every sub-task is done: every corpus screen and catalog example generates, its golden files build in the Windows job, `import_winui(generate(x)) == x` for each, `read_winui` reads the generated XAML without its source comment with only the losses SPEC §9 lists, and SPEC §9, §10.6, AGENT-SPEC and the crate README describe the target.
-
-### T105.18. WinUI per-page tokens and reflowing repeats
-
-Split from T105.15 when it was claimed. Per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour: SPEC §10.6 row, `crates/weft-catalog/src/settings.rs`, regenerated `schemas/weft.schema.json`): with `false` the page's `Page.Resources` holds only the tokens it uses, and `import_winui` compares those entries by key and type. And `weft:ColumnsLayout` in `Weft.cs` for an `<each>` in a grid with `min-column-width`, generated and read back. Done when both are generated, read back, covered by tests and built in the Windows job.
 
 
 ### T903. macOS studio UI test: Save As writes nothing locally

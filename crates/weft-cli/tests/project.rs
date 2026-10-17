@@ -1594,6 +1594,43 @@ fn winui_writes_where_the_project_says_with_its_tokens_and_reads_back() {
 }
 
 #[test]
+fn winui_pages_share_the_tokens_in_a_project_and_hold_their_own_otherwise() {
+    let s = winui_project("winui-own");
+    let screen = s.write("screens/plain.weft", PLAIN);
+    let page = |args: &[&dyn AsRef<std::ffi::OsStr>]| {
+        let mut all: Vec<&dyn AsRef<std::ffi::OsStr>> = vec![&"winui", &screen, &"--force"];
+        all.extend_from_slice(args);
+        let r = run(&all);
+        assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+        read_back(&s, "windows/PlainPage.xaml")
+    };
+    let own = "<x:Double x:Key=\"Weft.space.sm\">12</x:Double>";
+    // The project's default is the shared file; the flag beats it.
+    assert!(!page(&[]).contains("Page.Resources"));
+    let alone = page(&[&"--no-shared-tokens"]);
+    assert!(alone.contains(own), "{alone}");
+    // A page with its own tokens still reads back.
+    let r = run(&[&"import-winui", &s.path("windows/PlainPage.xaml")]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    assert_eq!(read_back(&s, "imported/PlainPage.weft"), PLAIN);
+
+    // `export.winui.sharedTokens` beats the default, and `--shared-tokens` beats it.
+    with_settings(
+        &s,
+        serde_json::json!({
+            "export": { "winui": { "outDir": "windows", "sharedTokens": false } }
+        }),
+    );
+    assert!(page(&[]).contains(own));
+    assert!(!page(&[&"--shared-tokens"]).contains("Page.Resources"));
+
+    // A lone page, outside any project, holds its own.
+    let r = run(&[&"winui", &screen, &"--no-project"]);
+    assert_eq!((r.code, r.stderr.as_str()), (0, ""));
+    assert!(r.stdout.contains("<Page.Resources>"), "{}", r.stdout);
+}
+
+#[test]
 fn winui_arguments_override_the_project() {
     let s = winui_project("winui-args");
     let screen = s.write("screens/plain.weft", PLAIN);

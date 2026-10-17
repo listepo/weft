@@ -5,7 +5,9 @@
 
 use indexmap::IndexMap;
 use weft_catalog::{Appearance, MATERIAL, Token, material_parts, srgb_channels};
-use weft_core::{escape_attribute, js_number};
+use weft_core::js_number;
+
+use crate::xaml::Element;
 
 /// The file name `generate_tokens` is written to.
 pub const TOKENS_FILE: &str = "WeftTokens.xaml";
@@ -26,22 +28,36 @@ pub fn generate_tokens(
     let mut xaml = String::from(
         "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<ResourceDictionary\n    xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"\n    xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">\n",
     );
+    let (entries, skipped) = resources(tokens.iter(), appearance);
+    for entry in &entries {
+        entry.write(1, &mut xaml);
+    }
+    xaml.push_str("</ResourceDictionary>\n");
+    let skipped = skipped
+        .into_iter()
+        .map(|(path, why)| format!("{path}: {why}"));
+    (xaml, skipped.collect())
+}
+
+/// The entries of a dictionary holding `tokens`, `WeftTokens.xaml` or a page's own (SPEC §9,
+/// To WinUI), and the tokens left out, each with why.
+pub(crate) fn resources<'t>(
+    tokens: impl Iterator<Item = (&'t String, &'t Token)>,
+    appearance: Option<Appearance<'_>>,
+) -> (Vec<Element>, Vec<(String, String)>) {
     let mut skipped = vec![];
-    let mut dimensions = String::new();
-    let mut themes: [String; 3] = Default::default();
+    let mut dimensions = vec![];
+    let mut themes: [Vec<Element>; 3] = Default::default();
     for (path, token) in tokens {
-        // Token paths come from the project's files: the key is escaped as any attribute value.
-        let key = escape_attribute(path);
         match token.kind.as_str() {
             "dimension" => {
                 let Some(px) = pixels(token) else {
-                    skipped.push(format!("{path}: not a dimension in px or rem"));
+                    skipped.push((path.clone(), "not a dimension in px or rem".to_owned()));
                     continue;
                 };
                 let px = js_number(px);
-                dimensions.push_str(&format!(
-                    "    <x:Double x:Key=\"Weft.{key}\">{px}</x:Double>\n    <Thickness x:Key=\"Weft.{key}.thickness\">{px}</Thickness>\n"
-                ));
+                dimensions.push(entry("x:Double", format!("Weft.{path}"), &px));
+                dimensions.push(entry("Thickness", format!("Weft.{path}.thickness"), &px));
             }
             "color" | MATERIAL => {
                 let light = appearance.and_then(|a| a.light.get(path)).unwrap_or(token);
@@ -52,9 +68,8 @@ pub fn generate_tokens(
                     } else {
                         "a colour that"
                     };
-                    skipped.push(format!(
-                        "{path}: {what} has neither sRGB components nor a hex value"
-                    ));
+                    let why = format!("{what} has neither sRGB components nor a hex value");
+                    skipped.push((path.clone(), why));
                     continue;
                 };
                 let material = token.kind == MATERIAL;
@@ -65,26 +80,36 @@ pub fn generate_tokens(
                         .iter_mut()
                         .zip([(&light, false), (&dark, false), (&light, true)])
                 {
-                    out.push_str(&resource(&key, argb, material, high));
+                    out.extend(resource(path, argb, material, high));
                 }
             }
-            other => skipped.push(format!(
-                "{path}: only dimension, colour and material tokens are written, not {other}"
+            other => skipped.push((
+                path.clone(),
+                format!("only dimension, colour and material tokens are written, not {other}"),
             )),
         }
     }
+    let mut entries = vec![];
     if themes.iter().any(|t| !t.is_empty()) {
-        xaml.push_str("    <ResourceDictionary.ThemeDictionaries>\n");
-        for (name, body) in THEMES.iter().zip(&themes) {
-            xaml.push_str(&format!(
-                "        <ResourceDictionary x:Key=\"{name}\">\n{body}        </ResourceDictionary>\n"
-            ));
+        let mut holder = Element::new("ResourceDictionary.ThemeDictionaries");
+        for (name, body) in THEMES.iter().zip(themes) {
+            let mut theme = Element::new("ResourceDictionary");
+            theme.attr("x:Key", *name);
+            theme.children = body;
+            holder.children.push(theme);
         }
-        xaml.push_str("    </ResourceDictionary.ThemeDictionaries>\n");
+        entries.push(holder);
     }
-    xaml.push_str(&dimensions);
-    xaml.push_str("</ResourceDictionary>\n");
-    (xaml, skipped)
+    entries.extend(dimensions);
+    (entries, skipped)
+}
+
+/// A resource whose value is its content.
+fn entry(name: &'static str, key: String, value: &str) -> Element {
+    let mut e = Element::new(name);
+    e.attr("x:Key", key);
+    e.text(value);
+    e
 }
 
 /// A colour, or a material's tint, as XAML `#AARRGGBB`, and the opacity apart.
@@ -117,19 +142,32 @@ fn colour(token: &Token) -> Option<Argb> {
 /// One theme's resources for a colour (`Weft.<path>` the brush, `Weft.<path>.color` the colour)
 /// or a material (`Weft.<path>`, an `AcrylicBrush`; a solid brush in high contrast). A blur
 /// radius has no `AcrylicBrush` form: the system's acrylic blur is fixed.
-fn resource(key: &str, c: &Argb, material: bool, high_contrast: bool) -> String {
-    const IN: &str = "            ";
+fn resource(path: &str, c: &Argb, material: bool, high_contrast: bool) -> Vec<Element> {
     let full = &c.full;
+    let brush = |name: &'static str| {
+        let mut e = Element::new(name);
+        e.attr("x:Key", format!("Weft.{path}"));
+        e
+    };
     match (material, high_contrast) {
-        (false, _) => format!(
-            "{IN}<Color x:Key=\"Weft.{key}.color\">{full}</Color>\n{IN}<SolidColorBrush x:Key=\"Weft.{key}\" Color=\"{full}\" />\n"
-        ),
-        (true, true) => format!("{IN}<SolidColorBrush x:Key=\"Weft.{key}\" Color=\"{full}\" />\n"),
-        (true, false) => format!(
-            "{IN}<AcrylicBrush x:Key=\"Weft.{key}\" TintColor=\"{}\" TintOpacity=\"{}\" FallbackColor=\"{full}\" />\n",
-            c.opaque,
-            js_number((c.alpha * 1000.0).round() / 1000.0)
-        ),
+        (false, _) | (true, true) => {
+            let mut solid = brush("SolidColorBrush");
+            solid.attr("Color", full);
+            if material {
+                return vec![solid];
+            }
+            vec![entry("Color", format!("Weft.{path}.color"), full), solid]
+        }
+        (true, false) => {
+            let mut acrylic = brush("AcrylicBrush");
+            acrylic.attr("TintColor", &c.opaque);
+            acrylic.attr(
+                "TintOpacity",
+                js_number((c.alpha * 1000.0).round() / 1000.0),
+            );
+            acrylic.attr("FallbackColor", full);
+            vec![acrylic]
+        }
     }
 }
 

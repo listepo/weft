@@ -28,7 +28,7 @@ $ weft import-winui windows/LoginPage.xaml > login.weft
 As a library:
 
 ```rust
-let page = weft_winui::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None, namespace: "WeftScreens" })?;
+let page = weft_winui::generate(&document, &GenerateOptions { catalog: &catalog, tokens: &tokens, name: None, namespace: "WeftScreens", shared_tokens: true, appearance: None })?;
 let weft_cs = weft_winui::helpers("WeftScreens")?;
 let (weft_tokens, skipped) = weft_winui::generate_tokens(&tokens);
 let document = weft_winui::import_winui(&page.xaml, &ImportOptions { catalog: &catalog, tokens: &tokens })?;
@@ -44,8 +44,8 @@ The crate is pure Rust (XML through `roxmltree`) and builds for WebAssembly. The
 | `<Name>Page.xaml` | The source comment (`<!-- weft:source winui name=… namespace=…` and the escaped markup), then a `Page` holding a `ScrollViewer` and the screen's `StackPanel`. Ids are `AutomationProperties.AutomationId`. |
 | `<Name>Page.xaml.cs` | The page class: `ViewModel` and the constructor. |
 | `<Name>ViewModel.cs` | Plain C# with `INotifyPropertyChanged`: one property per data path, a class per object and list item, an `ICommand` per action, and `Perform`, which raises `Performed` with a `WeftEvent(Action, Id, Item)`. |
-| `Weft.cs` | Written once per namespace: the binding and converter functions, the inert `Props` markers, the `On` events, `Choice.Value`, `Dialog.IsOpen`, the `Each` and `Slot` markers, `Tilt.Centered` and `ColumnsPanel`. No NuGet package beyond the Windows App SDK. |
-| `WeftTokens.xaml` | A `ResourceDictionary` merged into `App.xaml`: the dimension tokens (`x:Double`, and `Thickness` for padding), and the colours and materials (`SolidColorBrush`, `AcrylicBrush`) in `Light`, `Dark` and `HighContrast` theme dictionaries. |
+| `Weft.cs` | Written once per namespace: the binding and converter functions, the inert `Props` markers, the `On` events, `Choice.Value`, `Dialog.IsOpen`, the `Each` and `Slot` markers, `Tilt.Centered`, `ColumnsPanel` and `ColumnsLayout`. No NuGet package beyond the Windows App SDK. |
+| `WeftTokens.xaml` | A `ResourceDictionary` merged into `App.xaml`: the dimension tokens (`x:Double`, and `Thickness` for padding), and the colours and materials (`SolidColorBrush`, `AcrylicBrush`) in `Light`, `Dark` and `HighContrast` theme dictionaries. With `shared_tokens: false` a page holds the tokens it uses in its own `Page.Resources` instead. |
 
 ## Mapping
 
@@ -55,7 +55,7 @@ SPEC §9 "To WinUI" is the full mapping and `docs/winui-design.md` the design be
 | --- | --- |
 | `screen`, `form`, `section` | `StackPanel` with a landmark; a section is drawn as a card |
 | `stack` | `StackPanel`, or a `Grid` of `Auto` and star tracks when `justify` leaves free space or a child has `grow` |
-| `grid` | `Grid` of star columns, or `weft:ColumnsPanel` with `min-column-width` |
+| `grid` | `Grid` of star columns, or `weft:ColumnsPanel` with `min-column-width`; an `ItemsRepeater` with a `weft:ColumnsLayout` when its only child is an `<each>` |
 | `text`, `heading` | `TextBlock`, a heading with its type-ramp style and `HeadingLevel` |
 | `button`, `link` | `Button`, `HyperlinkButton` |
 | `field`, `checkbox`, `switch` | `TextBox` or `PasswordBox`, `CheckBox`, `ToggleSwitch` |

@@ -63,7 +63,8 @@ impl Gen<'_> {
         }
         if let Some(path) = material {
             let mut border = Element::new("Border");
-            border.attr("Background", format!("{{ThemeResource Weft.{path}}}"));
+            let brush = self.token(node, "ThemeResource", &path, "");
+            border.attr("Background", brush);
             for attr in ["Padding", "MaxWidth", "Visibility"] {
                 if let Some(value) = e.take(attr) {
                     border.attr(attr, value);

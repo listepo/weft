@@ -726,3 +726,139 @@ fn a_material_is_a_border_and_a_tilt_turns_it_under_its_perspective() {
     assert_eq!(surface.attribute("Visibility"), None);
     assert_eq!(card.attribute("Visibility"), None);
 }
+
+/// The `x:Key`s of the page's own resources, in order, each with its element.
+fn own_keys(xaml: &str) -> Vec<String> {
+    let xml = roxmltree::Document::parse(xaml).unwrap();
+    let Some(resources) = xml.descendants().find(|n| n.has_tag_name("Page.Resources")) else {
+        return vec![];
+    };
+    let key = ("http://schemas.microsoft.com/winfx/2006/xaml", "Key");
+    resources
+        .descendants()
+        .filter_map(|n| Some(format!("{} {}", n.tag_name().name(), n.attribute(key)?)))
+        .collect()
+}
+
+#[test]
+fn a_page_with_its_own_tokens_holds_only_the_ones_it_uses() {
+    let (catalog, tokens) = setup();
+    let markup = screen(concat!(
+        r#"<stack id="card" gap="{token.space.md}" material="{token.material.glass}">"#,
+        r#"<text id="t">T</text></stack>"#,
+    ));
+    let doc = document(&markup, &catalog, &tokens);
+    let own = |appearance| GenerateOptions {
+        shared_tokens: false,
+        appearance,
+        ..options(&catalog, &tokens, None)
+    };
+    let generated = generate(&doc, &own(None)).unwrap();
+    assert_eq!(
+        own_keys(&generated.xaml),
+        [
+            "ResourceDictionary Light",
+            "AcrylicBrush Weft.material.glass",
+            "ResourceDictionary Dark",
+            "AcrylicBrush Weft.material.glass",
+            "ResourceDictionary HighContrast",
+            "SolidColorBrush Weft.material.glass",
+            "Double Weft.space.md",
+            "Thickness Weft.space.md.thickness",
+        ]
+    );
+    // The shared form references the same resources and holds none.
+    let shared = generate(&doc, &options(&catalog, &tokens, None)).unwrap();
+    assert!(own_keys(&shared.xaml).is_empty());
+    let strip = |x: &str| x.split("<Page.Resources>").next().unwrap().to_owned();
+    assert_eq!(
+        strip(&generated.xaml),
+        strip(&shared.xaml).split("<ScrollViewer>").next().unwrap()
+    );
+    // A page that uses no token needs no resources.
+    let plain = document(&screen(r#"<text id="t">T</text>"#), &catalog, &tokens);
+    let generated = generate(&plain, &own(None)).unwrap();
+    assert!(!generated.xaml.contains("Page.Resources"));
+    // The dark values of an appearance go to the `Dark` dictionary.
+    let mut dark = tokens.clone();
+    dark["material.glass"].value = weft_core::parse_json(
+        r##"{ "colorSpace": "srgb", "components": [0, 0, 0], "alpha": 0.5 }"##,
+    )
+    .unwrap();
+    let appearance = weft_catalog::Appearance {
+        modifier: "theme",
+        light_context: "light",
+        dark_context: "dark",
+        light: &tokens,
+        dark: &dark,
+    };
+    let generated = generate(&doc, &own(Some(appearance))).unwrap();
+    assert!(
+        generated.xaml.contains("TintColor=\"#FF000000\""),
+        "{}",
+        generated.xaml
+    );
+}
+
+#[test]
+fn an_own_token_with_no_winui_form_is_refused() {
+    let (catalog, mut tokens) = setup();
+    tokens["space.md"].value = weft_core::parse_json(r#"{ "value": 1, "unit": "em" }"#).unwrap();
+    let doc = document(
+        &screen(r#"<stack id="card" gap="{token.space.md}"><text id="t">T</text></stack>"#),
+        &catalog,
+        &tokens,
+    );
+    let own = GenerateOptions {
+        shared_tokens: false,
+        ..options(&catalog, &tokens, None)
+    };
+    let Err(GenerateError::Unsupported(problems)) = generate(&doc, &own) else {
+        panic!("an `em` dimension was written");
+    };
+    assert_eq!(problems.len(), 1);
+    assert_eq!(problems[0].path, "stack#card");
+    assert!(problems[0].message.contains("space.md"), "{}", problems[0]);
+    // The shared dictionary leaves it out and says so; the page only references it.
+    assert!(generate(&doc, &options(&catalog, &tokens, None)).is_ok());
+}
+
+#[test]
+fn an_each_alone_in_a_reflowing_grid_is_a_columns_layout() {
+    let (catalog, tokens) = setup();
+    let grid = |body: &str| {
+        screen(&format!(
+            r#"<grid id="g" columns="2" min-column-width="{{token.size.sm}}" padding="{{token.space.sm}}">{body}</grid>"#
+        ))
+    };
+    let one = r#"<each id="e" as="p" in="{$.photos}"><text id="c" text="{$p.caption}"/></each>"#;
+    let doc = document(&grid(one), &catalog, &tokens);
+    let generated = generate(&doc, &options(&catalog, &tokens, None)).unwrap();
+    let xml = roxmltree::Document::parse(&generated.xaml).unwrap();
+    let repeater = by_id(&xml, "g");
+    assert_eq!(repeater.tag_name().name(), "ItemsRepeater");
+    // A repeater has no padding: the layout keeps it around the columns.
+    assert_eq!(repeater.attribute("Padding"), None);
+    let layout = repeater
+        .descendants()
+        .find(|n| n.tag_name().name() == "ColumnsLayout")
+        .unwrap();
+    assert_eq!(layout.attribute("Columns"), Some("2"));
+    assert_eq!(
+        layout.attribute("Padding"),
+        Some("{StaticResource Weft.space.sm.thickness}")
+    );
+    // A cell is one element, and a repeater cannot share the columns with static cells.
+    for body in [
+        r#"<each id="e" as="p" in="{$.photos}"><text id="c" text="{$p.caption}"/><text id="d">D</text></each>"#,
+        &format!(r#"<text id="first">First</text>{one}"#),
+    ] {
+        let doc = document(&grid(body), &catalog, &tokens);
+        let Err(GenerateError::Unsupported(problems)) =
+            generate(&doc, &options(&catalog, &tokens, None))
+        else {
+            panic!("{body}");
+        };
+        assert_eq!(problems[0].path, "each#e", "{body}");
+    }
+}
