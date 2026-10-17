@@ -14,14 +14,7 @@ use weft_winui::{GenerateOptions, Generated, generate};
 /// The screens the generator cannot draw yet: each is refused, every other corpus screen and
 /// example generates and has golden files the Windows build compiles (T105.7). T105.3–T105.5
 /// shrink this list until it is empty.
-pub const PENDING: &[&str] = &[
-    "corpus-booking",
-    "corpus-glass",
-    "corpus-showroom",
-    "corpus-tilt",
-    "example-menu-item",
-    "example-option",
-];
+pub const PENDING: &[&str] = &["corpus-glass", "corpus-showroom", "corpus-tilt"];
 /// The namespace of the goldens: the Windows build compiles them in one project (T105.7).
 pub const NAMESPACE: &str = "WeftScreens";
 

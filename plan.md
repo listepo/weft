@@ -12,7 +12,6 @@ An open, agent-friendly UI description format — strict markup for models, cano
 | T106.7 | in progress | P2 | 4 | 95% | Claude Code / claude-opus-5-5 |
 | T105 | in progress | P2 | 5 | 30% | Claude Code / claude-opus-5-5 |
 | T105.15 | todo | P2 | 4 | 0% | |
-| T105.16 | todo | P2 | 3 | 0% | |
 | T903 | todo | P2 | 2 | 0% | |
 
 ### T8. Evaluation
@@ -297,9 +296,6 @@ Convert a Weft screen into a WinUI 3 page for a Windows App SDK app, and read Wi
 
 Split from T105.5. `WeftTokens.xaml` beyond the dimensions (colours with `ThemeDictionaries` for light, dark and high contrast) and per-page tokens with `export.winui.sharedTokens` and `--shared-tokens`/`--no-shared-tokens` (a key ships with its behaviour), `material` as an `AcrylicBrush` on a `Border` (with `padding` inside it), the 3D tilt (`perspective`, `rotate-x`, `rotate-y`, `rotate-z`), and `weft:ColumnsLayout` for an `<each>` in a grid with `min-column-width`. Checks the unverified resource-key and perspective facts in the Windows build. Done when the `glass`, `tilt` and `showroom` corpus screens generate, build and read back.
 
-### T105.16. WinUI repeats inside select, combobox and menu
-
-Found when T105.10 closed: an `<each>` inside `select`, `combobox` or `menu` does not generate, so `corpus-booking`, `example-menu-item` and `example-option` stay in `PENDING` (`crates/weft-winui/tests/common/mod.rs`). Generate the repeated options or menu items from the bound collection (an `ItemsSource` with a typed template, or the pattern T105.14 uses for repetition), read them back, and add the SPEC §9 and `docs/winui-design.md` rows. The creator approved this task. Done when the three screens leave `PENDING`, their goldens build in the Windows job, and they round-trip.
 
 ### T903. macOS studio UI test: Save As writes nothing locally
 

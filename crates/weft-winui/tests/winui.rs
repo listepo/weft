@@ -299,8 +299,17 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
             "date-picker#d",
         ),
         (r#"<alert id="a" tone="{$.tone}">A</alert>"#, "alert#a"),
+        // A choice or a menu holds one template, of one item.
         (
-            r#"<select id="sel" label="S" value="{$.v}"><each id="e" as="o" in="{$.os}"><option id="o" value="{$o.v}">O</option></each></select>"#,
+            r#"<select id="sel" label="S" value="{$.v}"><each id="e" as="o" in="{$.os}"><option id="o" value="{$o.v}">O</option></each><each id="f" as="p" in="{$.ps}"><option id="p" value="{$p.v}">P</option></each></select>"#,
+            "each#f",
+        ),
+        (
+            r#"<menu id="m" label="M"><each id="e" as="a" in="{$.as}"><menu-item id="i" text="{$a.t}"/><menu-item id="j" text="{$a.u}"/></each></menu>"#,
+            "each#e",
+        ),
+        (
+            r#"<radio-group id="rg" label="R"><each id="e" as="o" in="{$.os}"><radio id="o" value="{$o.v}">O</radio></each></radio-group>"#,
             "each#e",
         ),
         // Star columns alone are a `grid`'s tracks.
@@ -331,14 +340,9 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
             r#"<grid id="g" columns="101"><text id="a">A</text></grid>"#,
             "grid#g",
         ),
-        // A repeater cannot share a grid's tracks, fill a choice, or sit among static items or
-        // columns.
+        // A repeater cannot share a grid's tracks, or sit among a list's static items or columns.
         (
             r#"<grid id="g" columns="2"><each id="e" as="x" in="{$.xs}"><text id="t" text="{$x.a}"/></each></grid>"#,
-            "each#e",
-        ),
-        (
-            r#"<select id="se" label="S"><each id="e" as="x" in="{$.xs}"><option id="o" value="{$x.a}">O</option></each></select>"#,
             "each#e",
         ),
         (
