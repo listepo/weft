@@ -10,7 +10,8 @@
 mod common;
 
 use common::{
-    NAMESPACE, PENDING, controls, covered, document, here, options, screen, screens, setup,
+    KEYWORDS_BODY, NAMESPACE, PENDING, controls, covered, document, here, options, screen, screens,
+    setup,
 };
 use weft_winui::{
     GenerateError, GenerateOptions, Generated, TOKENS_FILE, generate, generate_tokens, helpers,
@@ -376,8 +377,6 @@ fn what_the_slice_cannot_draw_is_refused_with_its_path() {
             r#"<text id="t" text="{$.user.WeftPath}"/>"#,
             "$.user.WeftPath",
         ),
-        // An x:Bind path names a C# member, so a keyword cannot be one.
-        (r#"<text id="t" text="{$.class}"/>"#, "$.class"),
         (
             r#"<stack id="r" padding="{$.p}"><text id="a">A</text></stack>"#,
             "stack#r",
@@ -581,6 +580,41 @@ fn a_name_csharp_cannot_hold_is_refused() {
     ] {
         let body = format!(r#"<text id="a" text="{{$.{name}}}"/>"#);
         assert_eq!(refused(&screen(&body)), [format!("$.{name}")], "{name}");
+    }
+}
+
+#[test]
+fn a_keyword_takes_a_suffix_on_its_csharp_member() {
+    let (catalog, tokens) = setup();
+    let doc = document(&screen(KEYWORDS_BODY), &catalog, &tokens);
+    let generated = generate(&doc, &options(&catalog, &tokens, None)).unwrap();
+    let vm = &generated.view_model_source;
+    let root = class(vm, "SViewModel");
+    for line in [
+        "public bool public_\n",
+        "set => WeftSet(ref Weft_public_, value);",
+        // A name that already ends like a suffixed keyword takes one more `_`.
+        "public string public__\n",
+        "private string Weft_public__ = \"\";",
+        // A contextual keyword is an ordinary name.
+        "public string value\n",
+        "public ObservableCollection<SClassItem> class_ { get; } = new();",
+        "class_.CollectionChanged += (_, _) => WeftPlaceLists();",
+        // The item's path is the Weft path, which events report.
+        "Weft.Place(class_, this, null, \"$.class\");",
+    ] {
+        assert!(root.contains(line), "{line}\n{root}");
+    }
+    let item = class(vm, "SClassItem");
+    assert!(item.contains("public string event_\n"), "{item}");
+    for xaml in [
+        "IsOn=\"{x:Bind ViewModel.public_, Mode=TwoWay}\"",
+        "Text=\"{x:Bind ViewModel.public__, Mode=OneWay}\"",
+        "Text=\"{x:Bind ViewModel.value, Mode=OneWay}\"",
+        "ItemsSource=\"{x:Bind ViewModel.class_, Mode=OneWay}\"",
+        "Text=\"{x:Bind event_, Mode=OneWay}\"",
+    ] {
+        assert!(generated.xaml.contains(xaml), "{xaml}\n{}", generated.xaml);
     }
 }
 

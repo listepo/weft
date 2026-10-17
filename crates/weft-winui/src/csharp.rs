@@ -1,12 +1,12 @@
 //! The C# of a page: the view model its bindings compile against, and its code-behind. Neither is
 //! read back, since the XAML holds every path and action. No document text reaches them: the names
-//! are Weft names, C# identifiers once keywords are refused (`data::refused`), and action names
+//! are Weft names, C# identifiers once a keyword takes its `_` (`data::member`), and action names
 //! match `[a-z][A-Za-z0-9.]*`, so they need no escape inside a string literal.
 
 use std::fmt::Write;
 
 use crate::Unsupported;
-use crate::data::{Data, Leaf, Ty};
+use crate::data::{Data, Leaf, Ty, member};
 use crate::xaml::type_name;
 
 const HEADER: &str =
@@ -133,7 +133,7 @@ fn type_of(data: &Data, classes: &[Class], shape: usize) -> String {
 /// their own among the list items. Each is the C# access and the Weft path below the owner.
 fn lists(data: &Data, shape: usize, access: &str, path: &str, out: &mut Vec<(String, String)>) {
     for (field, &child) in &data.shapes[shape].fields {
-        let access = format!("{access}{field}");
+        let access = format!("{access}{}", member(field));
         let path = format!("{path}.{field}");
         match data.ty(child) {
             // A list of text or flags holds nothing to place.
@@ -194,7 +194,8 @@ fn class(
         }
         w.push_str("    }\n");
     }
-    for (field, &child) in &data.shapes[c.shape].fields {
+    for (name, &child) in &data.shapes[c.shape].fields {
+        let field = member(name);
         let ty = type_of(data, classes, child);
         let _ = match data.ty(child) {
             Ty::Leaf(leaf) => write!(

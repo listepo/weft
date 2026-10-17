@@ -74,6 +74,8 @@ fn without_defaults(node: &mut Node) {
         ("justify", "start"),
         ("variant", "secondary"),
         ("type", "date"),
+        // A field's default type, which `corpus-account` states.
+        ("type", "text"),
     ];
     node.props.retain(|prop, value| {
         !defaults
@@ -207,6 +209,54 @@ fn x_bind_paths_functions_and_modes_are_bindings() {
             "Bindings /screen#s/button#e: `Props.State` on `Button`: without `Mode=OneWay` x:Bind reads the value once; it is read as a live binding\n",
         )
     );
+}
+
+#[test]
+fn a_keyword_member_reads_as_its_weft_name() {
+    let (doc, lost) = read_body(concat!(
+        r#"<ToggleSwitch AutomationProperties.AutomationId="a" Header="A" IsOn="{x:Bind ViewModel.account.public_, Mode=TwoWay}" />"#,
+        r#"<TextBlock AutomationProperties.AutomationId="b" Text="{x:Bind ViewModel.public__, Mode=OneWay}" />"#,
+        r#"<TextBlock AutomationProperties.AutomationId="c" Text="{x:Bind ViewModel.class_[0].event_, Mode=OneWay}" />"#,
+        // Contextual keywords and other names keep their `_`.
+        r#"<TextBlock AutomationProperties.AutomationId="d" Text="{x:Bind ViewModel.value_.publicity_, Mode=OneWay}" />"#,
+        // A bare keyword does not build, but it reads as the name it states.
+        r#"<TextBlock AutomationProperties.AutomationId="e" Text="{x:Bind ViewModel.new, Mode=OneWay}" />"#,
+    ));
+    assert_eq!(
+        doc,
+        concat!(
+            r#"<switch id="a" checked="{$.account.public}" label="A"/>"#,
+            "\n",
+            r#"<text id="b" text="{$.public_}"/>"#,
+            "\n",
+            r#"<text id="c" text="{$.class.0.event}"/>"#,
+            "\n",
+            r#"<text id="d" text="{$.value_.publicity_}"/>"#,
+            "\n",
+            r#"<text id="e" text="{$.new}"/>"#,
+            "\n",
+        )
+    );
+    assert_eq!(lost, "");
+}
+
+#[test]
+fn keyword_members_round_trip() {
+    let (catalog, tokens) = setup();
+    let source = common::screen(common::KEYWORDS_BODY);
+    let doc = common::document(&source, &catalog, &tokens);
+    let generated = weft_winui::generate(&doc, &common::options(&catalog, &tokens, None)).unwrap();
+    let options = ImportOptions {
+        catalog: &catalog,
+        tokens: &tokens,
+    };
+    let exact = weft_winui::import_winui(&generated.xaml, &options).unwrap();
+    assert_eq!(serialize(&exact), serialize(&doc));
+    let result = read(&bare(&generated.xaml), &catalog, &tokens);
+    assert_eq!(losses(&result), "");
+    let mut want = doc.clone();
+    want.weft = result.document.weft.clone();
+    assert_eq!(serialize(&result.document), serialize(&want));
 }
 
 #[test]
