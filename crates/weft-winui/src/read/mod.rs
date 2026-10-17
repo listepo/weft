@@ -237,6 +237,11 @@ impl Reader<'_> {
             match property {
                 // A repeating list's template is its `<each>`, read with the list.
                 "ItemTemplate" if each && owner == "ListView" => {}
+                "Template" if each && owner == "Each" => {}
+                "Template" if owner == "Each" => {
+                    let note = "an `Each.Template` without `Each.As` and a bound `Each.Source` is not read";
+                    self.lose(LossKind::Repetition, parent, note);
+                }
                 "Content" | "Items" | "Flyout" | "ItemTemplate" | "Footer" => {
                     self.through(el, parent, parent_kind, depth, out);
                 }
@@ -300,6 +305,19 @@ impl Reader<'_> {
             out.children.push(Child::Node(Box::new(each)));
             return;
         }
+        // A menu's items with an `<each>` among them; the flyout itself is no element.
+        if is_named(el, "MenuFlyout") && self.repeats(el) {
+            let mut inner = Placed::default();
+            self.through(el, parent, parent_kind, depth, &mut inner);
+            if let Some(each) = self.each(el, parent, parent_kind, depth) {
+                place(&mut inner.children, el, each);
+            }
+            out.children.extend(inner.children);
+            for (name, list) in inner.slots {
+                out.slots.entry(name).or_default().extend(list);
+            }
+            return;
+        }
         if self.wrapped(el, parent, parent_kind, depth, out) {
             return;
         }
@@ -353,10 +371,10 @@ impl Reader<'_> {
             // A colour button's swatch and flyout only draw the value `Choice.Value` holds.
             self.body(el, &mut node, &here, depth);
         }
-        if tag == "ListView"
+        if matches!(tag, "ListView" | "ComboBox")
             && let Some(each) = self.each(el, &here, kind, depth)
         {
-            node.children.push(Child::Node(Box::new(each)));
+            place(&mut node.children, el, each);
         }
         out.children.push(Child::Node(Box::new(node)));
     }
@@ -386,8 +404,16 @@ impl Reader<'_> {
 
     /// Whether `el` draws an `<each>`: a loop variable and a list to repeat.
     fn repeats(&self, el: Xml<'_, '_>) -> bool {
-        let list = el.attribute("ItemsSource");
-        each_name(el).is_some() && list.and_then(|v| self.list_path(el, v)).is_some()
+        each_name(el).is_some() && self.repeated(el).is_some()
+    }
+
+    /// The path of the list `el` repeats: its `ItemsSource`, or the `Each.Source` of a choice or
+    /// a menu, which cannot bind one.
+    fn repeated(&self, el: Xml<'_, '_>) -> Option<String> {
+        let list = el
+            .attribute("ItemsSource")
+            .or_else(|| helper(el, "Each.Source"));
+        list.and_then(|v| self.list_path(el, v))
     }
 
     /// The `<each>` an `ItemsRepeater` or a `ListView` with `weft:Each.As` draws: its list from
@@ -400,15 +426,9 @@ impl Reader<'_> {
         depth: usize,
     ) -> Option<Node> {
         let name = each_name(el)?;
-        let path = self.list_path(el, el.attribute("ItemsSource")?)?;
+        let path = self.repeated(el)?;
         let mut node = Node::new("each");
-        let explicit = el
-            .attributes()
-            .find(|a| {
-                a.namespace().is_some_and(|n| n.starts_with("using:")) && a.name() == "Each.Id"
-            })
-            .map(|a| a.value());
-        node.id = Some(self.id(explicit, "each", name, parent));
+        node.id = Some(self.id(helper(el, "Each.Id"), "each", name, parent));
         node.props.insert(
             "in".into(),
             Value::Bind {
@@ -421,7 +441,10 @@ impl Reader<'_> {
         let here = element_path(parent, &node);
         self.loops.push(name.to_owned());
         let mut placed = Placed::default();
-        let templates = elements(el).filter(|t| t.tag_name().name().ends_with(".ItemTemplate"));
+        let templates = elements(el).filter(|t| {
+            let name = t.tag_name().name();
+            name.ends_with(".ItemTemplate") || name == "Each.Template"
+        });
         for root in templates.flat_map(elements).flat_map(elements) {
             // The panel the generator gives a template of several elements has the parent's flow.
             let shared = is_named(root, "StackPanel")
@@ -537,7 +560,8 @@ impl Reader<'_> {
             // An editable ComboBox puts an item's content in its text box, so an option there
             // shows its value and keeps its text, if any, in the tooltip.
             let editable = el
-                .parent_element()
+                .ancestors()
+                .find(|p| is_named(*p, "ComboBox"))
                 .is_some_and(|p| p.attribute("IsEditable") == Some("True"));
             if tag == "ComboBoxItem"
                 && name == "Content"
@@ -816,18 +840,35 @@ fn explicit_id<'a>(el: Xml<'a, '_>) -> Option<&'a str> {
         .or_else(|| el.attribute((XAML, "Name")))
 }
 
+/// The value of the attached property `name` of a `Weft.cs` class, such as `Each.As`.
+fn helper<'a>(el: Xml<'a, '_>, name: &str) -> Option<&'a str> {
+    el.attributes()
+        .find(|a| a.namespace().is_some_and(|n| n.starts_with("using:")) && a.name() == name)
+        .map(|a| a.value())
+}
+
 /// The loop variable `weft:Each.As` names, when it is one.
 fn each_name<'a>(el: Xml<'a, '_>) -> Option<&'a str> {
-    el.attributes()
-        .find(|a| a.namespace().is_some_and(|n| n.starts_with("using:")) && a.name() == "Each.As")
-        .map(|a| a.value())
-        .filter(|name| is_binding(&format!("${name}")))
+    helper(el, "Each.As").filter(|name| is_binding(&format!("${name}")))
 }
 
 fn slot_name<'a>(el: Xml<'a, '_>) -> Option<&'a str> {
-    el.attributes()
-        .find(|a| a.namespace().is_some_and(|n| n.starts_with("using:")) && a.name() == "Slot.Name")
-        .map(|a| a.value())
+    helper(el, "Slot.Name")
+}
+
+/// `each` among `children`, after the first `weft:Each.At` elements of `el` (0 when it states
+/// none, the rest when it states more).
+fn place(children: &mut Vec<Child>, el: Xml<'_, '_>, each: Node) {
+    let at = helper(el, "Each.At")
+        .and_then(|v| v.parse::<usize>().ok())
+        .unwrap_or(0);
+    let index = children
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| matches!(c, Child::Node(_)))
+        .nth(at)
+        .map_or(children.len(), |(i, _)| i);
+    children.insert(index, Child::Node(Box::new(each)));
 }
 
 /// The text a generated id is named after: the first literal name, header, content or text.

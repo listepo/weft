@@ -2,7 +2,9 @@
 // Write it once per project; generating it again overwrites any edit.
 #nullable enable
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Input;
@@ -450,6 +452,15 @@ public static class Choice
         }
     }
 
+    // Shows a value set before the items it names were there.
+    internal static void Reshow(FrameworkElement element)
+    {
+        if (GetValue(element) is not null)
+        {
+            Show(element);
+        }
+    }
+
     private static object? Tagged(IEnumerable<object> items, string value) =>
         items.FirstOrDefault(i => (i as FrameworkElement)?.Tag?.ToString() == value);
 
@@ -538,17 +549,101 @@ public static class Slot
     public static void SetName(DependencyObject o, object? value) => o.SetValue(NameProperty, value);
 }
 
-/// <summary>An <c>&lt;each&gt;</c>'s id and loop variable on the repeater or list that draws it;
-/// only the importer reads them.</summary>
+/// <summary>An <c>&lt;each&gt;</c>'s id and loop variable on the element that draws it, which only
+/// the importer reads; and an <c>&lt;each&gt;</c> among the options of a <c>ComboBox</c> or the
+/// items of a <c>MenuFlyout</c>, neither of which can bind the list itself: <c>Template</c> is
+/// loaded once per item of <c>Source</c>, with the item as its <c>DataContext</c>, and inserted
+/// after the first <c>At</c> static items.</summary>
 public static class Each
 {
     public static readonly DependencyProperty IdProperty = Weft.Marker("Id", typeof(Each));
     public static readonly DependencyProperty AsProperty = Weft.Marker("As", typeof(Each));
+    public static readonly DependencyProperty SourceProperty = Repeat("Source", typeof(object), null);
+    public static readonly DependencyProperty TemplateProperty = Repeat("Template", typeof(DataTemplate), null);
+    public static readonly DependencyProperty AtProperty = Repeat("At", typeof(int), 0);
+
+    // The elements the last fill inserted, which the next one removes.
+    private static readonly DependencyProperty MadeProperty =
+        DependencyProperty.RegisterAttached("Made", typeof(object), typeof(Each), new PropertyMetadata(null));
+
+    // The handler that refills on a change of the list, kept to unhook it when the list is replaced.
+    private static readonly DependencyProperty WatchProperty =
+        DependencyProperty.RegisterAttached("Watch", typeof(object), typeof(Each), new PropertyMetadata(null));
 
     public static object? GetId(DependencyObject o) => o.GetValue(IdProperty);
     public static void SetId(DependencyObject o, object? value) => o.SetValue(IdProperty, value);
     public static object? GetAs(DependencyObject o) => o.GetValue(AsProperty);
     public static void SetAs(DependencyObject o, object? value) => o.SetValue(AsProperty, value);
+    public static object? GetSource(DependencyObject o) => o.GetValue(SourceProperty);
+    public static void SetSource(DependencyObject o, object? value) => o.SetValue(SourceProperty, value);
+    public static DataTemplate? GetTemplate(DependencyObject o) => (DataTemplate?)o.GetValue(TemplateProperty);
+    public static void SetTemplate(DependencyObject o, DataTemplate? value) => o.SetValue(TemplateProperty, value);
+    public static int GetAt(DependencyObject o) => (int)o.GetValue(AtProperty);
+    public static void SetAt(DependencyObject o, int value) => o.SetValue(AtProperty, value);
+
+    private static DependencyProperty Repeat(string name, Type type, object? fallback) =>
+        DependencyProperty.RegisterAttached(name, type, typeof(Each), new PropertyMetadata(fallback, Changed));
+
+    private static void Changed(DependencyObject o, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.Property == SourceProperty)
+        {
+            if (e.OldValue is INotifyCollectionChanged old && o.GetValue(WatchProperty) is NotifyCollectionChangedEventHandler watch)
+            {
+                old.CollectionChanged -= watch;
+            }
+            if (e.NewValue is INotifyCollectionChanged list)
+            {
+                NotifyCollectionChangedEventHandler refill = (_, _) => Fill(o);
+                o.SetValue(WatchProperty, refill);
+                list.CollectionChanged += refill;
+            }
+        }
+        Fill(o);
+    }
+
+    private static void Fill(DependencyObject o)
+    {
+        switch (o)
+        {
+            case ItemsControl control:
+                Fill(control, control.Items);
+                // The value may name an item that was not there when it was shown.
+                Choice.Reshow(control);
+                break;
+            case MenuFlyout menu:
+                Fill(menu, menu.Items);
+                break;
+        }
+    }
+
+    private static void Fill<T>(DependencyObject o, IList<T> items) where T : class
+    {
+        if (o.GetValue(MadeProperty) is List<T> made)
+        {
+            foreach (var element in made)
+            {
+                items.Remove(element);
+            }
+        }
+        var now = new List<T>();
+        o.SetValue(MadeProperty, now);
+        if (GetTemplate(o) is not { } template || GetSource(o) is not IEnumerable list)
+        {
+            return;
+        }
+        var at = Math.Clamp(GetAt(o), 0, items.Count);
+        foreach (var item in list)
+        {
+            // A template's compiled bindings read the item from its root's DataContext.
+            if (template.LoadContent() is FrameworkElement root and T element)
+            {
+                root.DataContext = item;
+                items.Insert(at + now.Count, element);
+                now.Add(element);
+            }
+        }
+    }
 }
 
 /// <summary>A dialog's <c>open</c>, two-way: true shows the dialog, false hides it, and a

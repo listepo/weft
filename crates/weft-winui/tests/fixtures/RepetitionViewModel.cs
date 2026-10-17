@@ -17,10 +17,15 @@ public sealed partial class RepetitionViewModel : INotifyPropertyChanged
     {
         tag_removeCommand = new WeftCommand("tag.remove", Perform);
         result_openCommand = new WeftCommand("result.open", Perform);
+        shirt_pickCommand = new WeftCommand("shirt.pick", Perform);
+        tool_openCommand = new WeftCommand("tool.open", Perform);
+        tool_runCommand = new WeftCommand("tool.run", Perform);
         tags.CollectionChanged += (_, _) => WeftPlaceLists();
         groups.CollectionChanged += (_, _) => WeftPlaceLists();
         results.CollectionChanged += (_, _) => WeftPlaceLists();
         scores.CollectionChanged += (_, _) => WeftPlaceLists();
+        sizes.CollectionChanged += (_, _) => WeftPlaceLists();
+        tools.CollectionChanged += (_, _) => WeftPlaceLists();
         photos.CollectionChanged += (_, _) => WeftPlaceLists();
     }
 
@@ -53,10 +58,31 @@ public sealed partial class RepetitionViewModel : INotifyPropertyChanged
 
     public ObservableCollection<RepetitionScoresItem> scores { get; } = new();
 
+    public string shirt
+    {
+        get => Weft_shirt;
+        set => WeftSet(ref Weft_shirt, value);
+    }
+    private string Weft_shirt = "";
+
+    public ObservableCollection<RepetitionSizesItem> sizes { get; } = new();
+
+    public ObservableCollection<RepetitionToolsItem> tools { get; } = new();
+
+    public bool busy
+    {
+        get => Weft_busy;
+        set => WeftSet(ref Weft_busy, value);
+    }
+    private bool Weft_busy = false;
+
     public ObservableCollection<RepetitionPhotosItem> photos { get; } = new();
 
     public ICommand tag_removeCommand { get; }
     public ICommand result_openCommand { get; }
+    public ICommand shirt_pickCommand { get; }
+    public ICommand tool_openCommand { get; }
+    public ICommand tool_runCommand { get; }
 
     /// <summary>Hands an action to the host (SPEC §2.2): <c>OnPerformed</c>, then <c>Performed</c>.</summary>
     public void Perform(string action, string? id = null, string? item = null)
@@ -74,6 +100,8 @@ public sealed partial class RepetitionViewModel : INotifyPropertyChanged
         Weft.Place(groups, this, null, "$.groups");
         Weft.Place(results, this, null, "$.results");
         Weft.Place(scores, this, null, "$.scores");
+        Weft.Place(sizes, this, null, "$.sizes");
+        Weft.Place(tools, this, null, "$.tools");
         Weft.Place(photos, this, null, "$.photos");
     }
 
@@ -302,6 +330,85 @@ public sealed partial class RepetitionScoresItem : INotifyPropertyChanged, IWeft
         set => WeftSet(ref Weft_player, value);
     }
     private string Weft_player = "";
+
+    void IWeftItem.WeftPlace(object root, object? parent, string path)
+    {
+        WeftRoot = (RepetitionViewModel)root;
+        WeftParent = (object?)parent;
+        WeftPath = path;
+        WeftPlaceLists();
+    }
+
+    private void WeftPlaceLists()
+    {
+        if (WeftRoot is null) return;
+    }
+
+    private void WeftSet<T>(ref T store, T value, [CallerMemberName] string name = "")
+    {
+        if (Equals(store, value)) return;
+        store = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}
+
+public sealed partial class RepetitionSizesItem : INotifyPropertyChanged, IWeftItem
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public RepetitionViewModel? WeftRoot { get; private set; }
+    public object? WeftParent { get; private set; }
+    public string WeftPath { get; private set; } = "";
+
+    public string name
+    {
+        get => Weft_name;
+        set => WeftSet(ref Weft_name, value);
+    }
+    private string Weft_name = "";
+
+    public string code
+    {
+        get => Weft_code;
+        set => WeftSet(ref Weft_code, value);
+    }
+    private string Weft_code = "";
+
+    void IWeftItem.WeftPlace(object root, object? parent, string path)
+    {
+        WeftRoot = (RepetitionViewModel)root;
+        WeftParent = (object?)parent;
+        WeftPath = path;
+        WeftPlaceLists();
+    }
+
+    private void WeftPlaceLists()
+    {
+        if (WeftRoot is null) return;
+    }
+
+    private void WeftSet<T>(ref T store, T value, [CallerMemberName] string name = "")
+    {
+        if (Equals(store, value)) return;
+        store = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}
+
+public sealed partial class RepetitionToolsItem : INotifyPropertyChanged, IWeftItem
+{
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public RepetitionViewModel? WeftRoot { get; private set; }
+    public object? WeftParent { get; private set; }
+    public string WeftPath { get; private set; } = "";
+
+    public string label
+    {
+        get => Weft_label;
+        set => WeftSet(ref Weft_label, value);
+    }
+    private string Weft_label = "";
 
     void IWeftItem.WeftPlace(object root, object? parent, string path)
     {

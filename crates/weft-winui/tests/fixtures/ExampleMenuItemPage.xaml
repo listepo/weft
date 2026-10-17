@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=ExampleMenuItem namespace=WeftScreens
+<screen id="root" label="Document" weft="0.1">
+  <menu id="actions" label="Document actions">
+    <each id="action-each" as="action" in="{$.actions}">
+      <menu-item id="action-item" disabled="{!$action.enabled}" text="{$action.label}" on-press="doc.run"/>
+    </each>
+  </menu>
+</screen>
+-->
+<Page x:Class="WeftScreens.ExampleMenuItemPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="root" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Document">
+            <DropDownButton AutomationProperties.AutomationId="actions" Content="Document actions" AutomationProperties.Name="Document actions">
+                <DropDownButton.Flyout>
+                    <MenuFlyout weft:Each.Source="{x:Bind ViewModel.actions, Mode=OneWay}" weft:Each.Id="action-each" weft:Each.As="action">
+                        <weft:Each.Template>
+                            <DataTemplate x:DataType="weft:ExampleMenuItemActionsItem">
+                                <MenuFlyoutItem AutomationProperties.AutomationId="action-item" Text="{x:Bind label, Mode=OneWay}" IsEnabled="{x:Bind weft:Weft.Truthy(enabled), Mode=OneWay}" weft:On.Press="{x:Bind WeftRoot.doc_runCommand}" />
+                            </DataTemplate>
+                        </weft:Each.Template>
+                    </MenuFlyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

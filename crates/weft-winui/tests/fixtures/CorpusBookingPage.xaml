@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- weft:source winui name=CorpusBooking namespace=WeftScreens
+<screen id="booking" label="Book a trip" weft="0.1">
+  <heading id="title" level="1">Book a trip</heading>
+  <form id="trip" label="Trip" on-submit="trip.book">
+    <combobox id="city" label="Destination" placeholder="Search a city" value="{$.trip.city}" on-change="trip.edit">
+      <each id="city-each" as="city" in="{$.cities}">
+        <option id="city-option" text="{$city.name}" value="{$city.name}"/>
+      </each>
+    </combobox>
+    <date-picker id="depart" label="Departure" max="2026-12-31" min="2026-01-01" value="{$.trip.depart}" on-change="trip.edit"/>
+    <date-picker id="checkin" label="Check-in time" type="time" value="{$.trip.checkin}"/>
+    <date-picker id="reminder" label="Reminder" type="datetime" value="{$.trip.reminder}"/>
+    <stepper id="guests" label="Guests" max="8" min="1" value="{$.trip.guests}" on-change="trip.edit"/>
+    <slider id="budget" label="Budget per night" max="500" min="50" step="10" value="{$.trip.budget}" on-change="trip.edit"/>
+    <segmented-control id="cabin" label="Cabin" value="{$.trip.cabin}" on-change="trip.edit">
+      <segment id="cabin-economy" value="economy">Economy</segment>
+      <segment id="cabin-business" value="business">Business</segment>
+      <segment id="cabin-first" value="first">First</segment>
+    </segmented-control>
+    <color-picker id="tag" label="Trip colour" value="{$.trip.colour}" on-change="trip.edit"/>
+    <slot name="footer">
+      <button id="book" submit="true" variant="primary">Book</button>
+    </slot>
+  </form>
+</screen>
+-->
+<Page x:Class="WeftScreens.CorpusBookingPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:weft="using:WeftScreens">
+    <ScrollViewer>
+        <StackPanel AutomationProperties.AutomationId="booking" AutomationProperties.LandmarkType="Main" AutomationProperties.Name="Book a trip">
+            <TextBlock AutomationProperties.AutomationId="title" Style="{StaticResource TitleLargeTextBlockStyle}" AutomationProperties.HeadingLevel="Level1" Text="Book a trip" />
+            <StackPanel AutomationProperties.AutomationId="trip" AutomationProperties.LandmarkType="Form" AutomationProperties.Name="Trip" weft:On.Submit="{x:Bind ViewModel.trip_bookCommand}">
+                <ComboBox AutomationProperties.AutomationId="city" IsEditable="True" PlaceholderText="Search a city" weft:Choice.Value="{x:Bind ViewModel.trip.city, Mode=TwoWay}" weft:Each.Source="{x:Bind ViewModel.cities, Mode=OneWay}" weft:Each.Id="city-each" weft:Each.As="city" Header="Destination" weft:On.Change="{x:Bind ViewModel.trip_editCommand}">
+                    <weft:Each.Template>
+                        <DataTemplate x:DataType="weft:CorpusBookingCitiesItem">
+                            <ComboBoxItem AutomationProperties.AutomationId="city-option" Content="{x:Bind name, Mode=OneWay}" ToolTipService.ToolTip="{x:Bind name, Mode=OneWay}" Tag="{x:Bind name, Mode=OneWay}" />
+                        </DataTemplate>
+                    </weft:Each.Template>
+                </ComboBox>
+                <CalendarDatePicker AutomationProperties.AutomationId="depart" weft:Choice.Value="{x:Bind ViewModel.trip.depart, Mode=TwoWay}" MinDate="{x:Bind weft:Weft.Earliest('2026-01-01')}" MaxDate="{x:Bind weft:Weft.Latest('2026-12-31')}" Header="Departure" weft:On.Change="{x:Bind ViewModel.trip_editCommand}" />
+                <TimePicker AutomationProperties.AutomationId="checkin" weft:Choice.Value="{x:Bind ViewModel.trip.checkin, Mode=TwoWay}" Header="Check-in time" />
+                <StackPanel AutomationProperties.AutomationId="reminder" weft:Choice.Value="{x:Bind ViewModel.trip.reminder, Mode=TwoWay}" Orientation="Horizontal" AutomationProperties.Name="Reminder">
+                    <CalendarDatePicker Header="Reminder" />
+                    <TimePicker />
+                </StackPanel>
+                <NumberBox AutomationProperties.AutomationId="guests" SpinButtonPlacementMode="Inline" Minimum="1" Maximum="8" Value="{x:Bind ViewModel.trip.guests, Mode=TwoWay}" Header="Guests" weft:On.Change="{x:Bind ViewModel.trip_editCommand}" />
+                <Slider AutomationProperties.AutomationId="budget" Minimum="50" Maximum="500" StepFrequency="10" Value="{x:Bind ViewModel.trip.budget, Mode=TwoWay}" Header="Budget per night" weft:On.Change="{x:Bind ViewModel.trip_editCommand}" />
+                <SelectorBar AutomationProperties.AutomationId="cabin" weft:Choice.Value="{x:Bind ViewModel.trip.cabin, Mode=TwoWay}" AutomationProperties.Name="Cabin" weft:On.Change="{x:Bind ViewModel.trip_editCommand}">
+                    <SelectorBarItem AutomationProperties.AutomationId="cabin-economy" Text="Economy" Tag="economy" />
+                    <SelectorBarItem AutomationProperties.AutomationId="cabin-business" Text="Business" Tag="business" />
+                    <SelectorBarItem AutomationProperties.AutomationId="cabin-first" Text="First" Tag="first" />
+                </SelectorBar>
+                <DropDownButton AutomationProperties.AutomationId="tag" weft:Choice.Value="{x:Bind ViewModel.trip.colour, Mode=TwoWay}" AutomationProperties.Name="Trip colour" weft:On.Change="{x:Bind ViewModel.trip_editCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Width="16" Height="16" CornerRadius="4" Background="{x:Bind weft:Weft.Swatch(ViewModel.trip.colour), Mode=OneWay}" />
+                        <TextBlock Text="Trip colour" />
+                    </StackPanel>
+                    <DropDownButton.Flyout>
+                        <Flyout>
+                            <ColorPicker IsAlphaEnabled="False" />
+                        </Flyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+                <StackPanel Orientation="Horizontal" weft:Slot.Name="footer">
+                    <Button AutomationProperties.AutomationId="book" Content="Book" Style="{StaticResource AccentButtonStyle}" weft:On.Submit="{x:Bind ViewModel.trip_bookCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
